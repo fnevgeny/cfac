@@ -1,0 +1,16 @@
+SFAC = ../../sfac/sfac
+DIFF = diff -q -I TSess 
+
+all: $(RESULTS)
+
+test: $(RESULTS)
+	@for i in $(RESULTS); do $(DIFF) $$i ref || exit 1; done; \
+            echo " Tests passed!"
+
+clean:
+	rm -f $(RESULTS) *.b
+
+$(RESULTS): $(CONFIG) $(SFAC)
+	$(SFAC) $(CONFIG)
+
+

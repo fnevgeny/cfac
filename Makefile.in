@@ -21,7 +21,6 @@ all: lib sfac
 
 lib:
 	cd blas;     make
-	cd lapack;   make
 	cd coul;     make
 	cd ode;      make
 	cd toms;     make
@@ -58,7 +57,6 @@ install-mpy:
 clean:
 	rm -f *.so *.a *.o *~
 	rm -rf build
-	cd lapack;   make clean
 	cd blas;     make clean
 	cd coul;     make clean
 	cd ode;      make clean

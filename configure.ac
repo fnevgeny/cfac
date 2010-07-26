@@ -171,7 +171,7 @@ AC_ARG_WITH(extralib,
 	[extralib=$withval])
 
 # setup libs 
-LIBS="$LIBS -lfac"
+LIBS="$LIBS -lfac -llapack"
 fwithm=`echo "$FLIBS " | grep " -lm"`
 if test "x$fwithm" = "x"
 then
@@ -263,7 +263,6 @@ AC_CONFIG_FILES([Makefile
 		 blas/Makefile 
 		 coul/Makefile
 		 ionis/Makefile
-		 lapack/Makefile
 		 minpack/Makefile 
 		 mpfun/Makefile
 		 ode/Makefile

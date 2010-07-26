@@ -1,8 +1,9 @@
+#include "config.h"
 #include "crm.h"
 #include "grid.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: crm.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: crm.c,v 1.2 2010/07/26 14:40:29 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -4917,6 +4918,7 @@ int DumpRates(char *fn, int k, int m, int imax, int a) {
   ARRAY *rts;
   RATE *r;
   BLK_RATE *brts;
+  size_t dummy;
   
   if (k == 0) {
     f = fopen(fn, "w");
@@ -4973,10 +4975,10 @@ int DumpRates(char *fn, int k, int m, int imax, int a) {
 	  r = (RATE *) ArrayGet(brts->rates, q);
 	  if (imax < 0 || (r->i <= imax && r->f <= imax)) {
 	    if (a == 0) {
-	      fwrite(&(r->i), sizeof(int), 1, f);
-	      fwrite(&(r->f), sizeof(int), 1, f);
-	      fwrite(&(r->dir), sizeof(double), 1, f);
-	      fwrite(&(r->inv), sizeof(double), 1, f);
+	      dummy = fwrite(&(r->i), sizeof(int), 1, f);
+	      dummy = fwrite(&(r->f), sizeof(int), 1, f);
+	      dummy = fwrite(&(r->dir), sizeof(double), 1, f);
+	      dummy = fwrite(&(r->inv), sizeof(double), 1, f);
 	    } else {
 	      fprintf(f, "%7d %7d %10.3E %10.3E\n", 
 		      r->i, r->f, r->dir, r->inv);
@@ -4994,17 +4996,17 @@ int DumpRates(char *fn, int k, int m, int imax, int a) {
 	  else if (p == ion->iblock[t]->iion + 1) nele = ion->nele - 1;
 	  else nele = ion->nele + 1;
 	  if (a == 0) {
-	    fwrite(&(nele), sizeof(short), 1, f);
-	    fwrite(&t, sizeof(int), 1, f);
-	    fwrite(&(ion->iblock[t]->ib), sizeof(int), 1, f);
-	    fwrite(&q, sizeof(int), 1, f);
-	    fwrite(&(ion->j[t]), sizeof(short), 1, f);
-	    fwrite(&(ion->ibase[t]), sizeof(short), 1, f);
-	    fwrite(&(ion->vnl[t]), sizeof(short), 1, f);
-	    fwrite(&(ion->energy[t]), sizeof(double), 1, f);
-	    fwrite(&(ion->iblock[t]->n[q]), sizeof(double), 1, f);
-	    fwrite(&(ion->iblock[t]->total_rate[q]), sizeof(double), 1, f);
-	    fwrite(&(ion->iblock[t]->r[q]), sizeof(double), 1, f);
+	    dummy = fwrite(&(nele), sizeof(short), 1, f);
+	    dummy = fwrite(&t, sizeof(int), 1, f);
+	    dummy = fwrite(&(ion->iblock[t]->ib), sizeof(int), 1, f);
+	    dummy = fwrite(&q, sizeof(int), 1, f);
+	    dummy = fwrite(&(ion->j[t]), sizeof(short), 1, f);
+	    dummy = fwrite(&(ion->ibase[t]), sizeof(short), 1, f);
+	    dummy = fwrite(&(ion->vnl[t]), sizeof(short), 1, f);
+	    dummy = fwrite(&(ion->energy[t]), sizeof(double), 1, f);
+	    dummy = fwrite(&(ion->iblock[t]->n[q]), sizeof(double), 1, f);
+	    dummy = fwrite(&(ion->iblock[t]->total_rate[q]), sizeof(double), 1, f);
+	    dummy = fwrite(&(ion->iblock[t]->r[q]), sizeof(double), 1, f);
 	  } else {
 	    fprintf(f, "%2d %6d %6d %6d %2d %4d %4d %15.8E %10.3E %10.3E %10.3E\n", 
 		    nele, t, ion->iblock[t]->ib, q, ion->j[t],

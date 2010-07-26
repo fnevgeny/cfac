@@ -45,6 +45,9 @@ doc:
 demo:
 	cd demo; make
 
+test:
+	cd demo; make test
+
 install:
 	cd sfac; make install
 
@@ -67,6 +70,7 @@ clean:
 	cd ionis;    make clean
 	cd faclib;   make clean
 	cd sfac;     make clean
+	cd demo;     make clean
 
 cleanfac:
 	cd faclib;   make clean

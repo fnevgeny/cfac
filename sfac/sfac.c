@@ -1,4 +1,4 @@
-static char *rcsid="$Id: sfac.c,v 1.1 2010/07/26 08:16:16 fnevgeny Exp $";
+static char *rcsid="$Id: sfac.c,v 1.2 2010/07/26 14:09:38 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -362,7 +362,7 @@ static int PGetConfigNR(int argc, char *argv[], int argt[], ARRAY *variables) {
   for (i = 0; i < argc; i++) {
     if (argt[i] != STRING) return -1;
     strncpy(scfg, _closed_shells, MCHSHELL);
-    strncat(scfg, argv[i], MCHSHELL);
+    strncat(scfg, argv[i], MCHSHELL - 1);
     ncfg = GetConfigFromStringNR(&cfg, scfg);
     for (j = 0; j < ncfg; j++) {
       scfg[0] = '\0';
@@ -419,7 +419,7 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
     if (i == k || i == k+1) continue;
     if (argt[i] != STRING) return -1;
     strncpy(scfg, _closed_shells, MCHSHELL);
-    strncat(scfg, argv[i], MCHSHELL);
+    strncat(scfg, argv[i], MCHSHELL - 1);
     ncfg = GetConfigFromString(&cfg, scfg);
     for (j = 0; j < ncfg; j++) {
       if (Couple(cfg+j) < 0) return -1;

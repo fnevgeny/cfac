@@ -1,4 +1,4 @@
-static char *rcsid="$Id: sfac.c,v 1.2 2010/07/26 14:09:38 fnevgeny Exp $";
+static char *rcsid="$Id: sfac.c,v 1.3 2010/07/26 14:16:22 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -1017,8 +1017,7 @@ static int PPause(int argc, char *argv[], int argt[],
 
   while (1) {
     printf("Type go to continue: ");
-    scanf("%s", s);
-    if (strcmp(s, "go") == 0) break;
+    if (scanf("%s", s) == 1 && strcmp(s, "go") == 0) break;
   }
   
   return 0;
@@ -2895,17 +2894,18 @@ static int PTestMyArray(int argc, char *argv[], int argt[],
   int k[3] = {101, 2550, 333};
   int block[3] = {10, 20, 50};
   int i, j, m;
+  int dummy;
  
   ArrayInit(&a, sizeof(double), 100);
   d = 0.1;
   m = 100000;
   printf("> ");
-  scanf("%d", &i);
+  dummy = scanf("%d", &i);
   for (i = 0; i < m; i++) {
     ArraySet(&a, i, &d, InitDoubleData);
   }
   printf("> ");
-  scanf("%d", &i);
+  dummy = scanf("%d", &i);
 
   b = (double *) ArrayGet(&a, 100);
   printf("%f ", *b);
@@ -2914,7 +2914,7 @@ static int PTestMyArray(int argc, char *argv[], int argt[],
 
   ArrayFree(&a, 0);
   printf("> ");
-  scanf("%d", &i);
+  dummy = scanf("%d", &i);
 
   MultiInit(&ma, sizeof(double), 3, block);
   printf("%d %d\n", ma.esize, ma.ndim);
@@ -2930,11 +2930,11 @@ static int PTestMyArray(int argc, char *argv[], int argt[],
   }
 
   printf("> ");
-  scanf("%d", &i);
+  dummy = scanf("%d", &i);
   MultiFree(&ma, NULL);
 
   printf("> ");
-  scanf("%d", &i);
+  dummy = scanf("%d", &i);
 
   return 0;
 }

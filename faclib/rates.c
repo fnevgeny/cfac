@@ -1,8 +1,10 @@
+#include <gsl/gsl_integration.h>
+
 #include "rates.h"
 #include "interpolation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: rates.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: rates.c,v 1.2 2010/07/26 15:07:04 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -13,7 +15,7 @@ static DISTRIBUTION ele_dist[MAX_DIST];
 static int ipdist = 0;
 static DISTRIBUTION pho_dist[MAX_DIST];
 
-#define QUAD_LIMIT 64
+#define QUAD_LIMIT 1000
 static int _iwork[QUAD_LIMIT];
 static double _dwork[4*QUAD_LIMIT];
 
@@ -180,14 +182,14 @@ static void ThreeBodyDist(void) {
   }  
 }
 
-static double RateIntegrand(double *e) {
+static double RateIntegrand(double e, void *params) {
   double a, b, x;
-  double p = 1.46366E-12; /* (h^2/2m)^1.5/(4*pi) cm^3*eV^1.5 */
+  double p = 1.46366E-12; /* (h^2/2m)^1.5/(4*pi) cm^3eV^1.5 */
 
   if (rate_args.xlog) {
-    x = exp(*e);
+    x = exp(e);
   } else {
-    x = *e;
+    x = e;
   }
 
   if (rate_args.type != -RT_CI) {
@@ -215,9 +217,6 @@ static double RateIntegrand(double *e) {
   }
   return x;
 }
-
-/* provide fortran access with cfortran.h */
-FCALLSCFUN1(DOUBLE, RateIntegrand, RATEINTEGRAND, rateintegrand, PDOUBLE)
 	    
 double IntegrateRate(int idist, double eth, double bound, 
 		     int np, void *params, int i0, int f0, int type, 
@@ -226,6 +225,11 @@ double IntegrateRate(int idist, double eth, double bound,
   int neval, ier, limit, lenw, last, n, ix, iy;
   double epsabs, epsrel, abserr;
   double a, b, a0, b0, r0, *eg;
+
+  gsl_function F;
+  gsl_integration_workspace *w;
+
+  F.function = &RateIntegrand;
 
   ier = 0;
   epsabs = rate_args.epsabs;
@@ -274,6 +278,12 @@ double IntegrateRate(int idist, double eth, double bound,
   }
   if (bound > a) a = bound;
   if (b <= a) return 0.0;
+
+  w = gsl_integration_workspace_alloc(QUAD_LIMIT);
+  if (!w) {
+    return 0.0;
+  }
+
   if (idist == 0 && iedist == 0 && rate_args.xlog == 0) {
     a0 = rate_args.d->params[0];
     b0 = 5.0*a0;
@@ -281,9 +291,9 @@ double IntegrateRate(int idist, double eth, double bound,
     if (b < b0) b0 = b;
     r0 = 0.0;
     if (b0 > a0) {
-      DQAGS(C_FUNCTION(RATEINTEGRAND, rateintegrand), 
-	    a0, b0, epsabs, epsrel, &result, 
-	    &abserr, &neval, &ier, limit, lenw, &last, _iwork, _dwork);
+      gsl_integration_qags(&F, a0, b0,
+        epsabs, epsrel, QUAD_LIMIT, w, &result, &abserr);
+      
       r0 += result;
       if (abserr > epsabs && abserr > r0*epsrel) {
 	if (ier != 0 && rate_args.iprint) {
@@ -299,9 +309,9 @@ double IntegrateRate(int idist, double eth, double bound,
       b0 = a0;
     }
     if (b > b0) {
-      DQAGS(C_FUNCTION(RATEINTEGRAND, rateintegrand), 
-	    b0, b, epsabs, epsrel, &result, 
-	    &abserr, &neval, &ier, limit, lenw, &last, _iwork, _dwork);
+      gsl_integration_qags(&F, b0, b,
+        epsabs, epsrel, QUAD_LIMIT, w, &result, &abserr);
+
       r0 += result;
       if (abserr > epsabs && abserr > r0*epsrel) {
 	if (ier != 0 && rate_args.iprint) {
@@ -313,12 +323,11 @@ double IntegrateRate(int idist, double eth, double bound,
       }
     }
     if (r0 < 0.0) r0 = 0.0;
-    return r0;
   } else {
-    DQAGS(C_FUNCTION(RATEINTEGRAND, rateintegrand), 
-	  a, b, epsabs, epsrel, &result, 
-	  &abserr, &neval, &ier, limit, lenw, &last, _iwork, _dwork);
+    gsl_integration_qags(&F, a, b,
+      epsabs, epsrel, QUAD_LIMIT, w, &result, &abserr);
     r0 = result;
+
     if (abserr > epsabs && abserr > r0*epsrel) {
       if (ier != 0 && rate_args.iprint) {
 	printf("IntegrateRate Error: %d %d %10.3E %10.3E %10.3E %10.3E\n", 
@@ -329,8 +338,11 @@ double IntegrateRate(int idist, double eth, double bound,
     }
     if (r0 < 0.0) r0 = 0.0;
 
-    return r0;
   }
+  
+  gsl_integration_workspace_free(w);
+  
+  return r0;
 }
 
 double IntegrateRate2(int idist, double e, int np, 

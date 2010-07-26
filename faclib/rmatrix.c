@@ -1,7 +1,7 @@
 #include "rmatrix.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: rmatrix.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: rmatrix.c,v 1.2 2010/07/26 14:31:41 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -93,6 +93,7 @@ void RMatrixNMultipoles(int n) {
 void ReadRMatrixBasis(char *fn, RBASIS *rbs, int fmt) {
   FILE *f;
   int i, j, k, n, kappa, m, nr;
+  int dummy;
 
   f = fopen(fn, "r");
   if (fmt == 0) {
@@ -137,10 +138,10 @@ void ReadRMatrixBasis(char *fn, RBASIS *rbs, int fmt) {
       }
     }
   } else {
-    fscanf(f, "%d %lf %d %lf %lf\n",
+    dummy = fscanf(f, "%d %lf %d %lf %lf\n",
 	   &(rbs->ib0), &(rbs->rb0), &(rbs->ib1), &(rbs->rb1),
 	   &(rbs->bqp));
-    fscanf(f, "%d %d %d %d\n",
+    dummy = fscanf(f, "%d %d %d %d\n",
 	   &(rbs->kmax), &(rbs->nbk), &(rbs->nkappa), &(rbs->nbuttle));
     rbs->basis = malloc(sizeof(int *)*rbs->nkappa);
     rbs->bnode = malloc(sizeof(int *)*rbs->nkappa);
@@ -164,17 +165,17 @@ void ReadRMatrixBasis(char *fn, RBASIS *rbs, int fmt) {
     }  
     for (i = 0; i < rbs->nkappa; i++) {
       for (n = 0; n < rbs->nbk; n++) {
-	fscanf(f, "%d %d %d %lf %lf %lf\n", 
+	dummy = fscanf(f, "%d %d %d %lf %lf %lf\n", 
 	       &(rbs->basis[i][n]), &kappa, &(rbs->bnode[i][n]), &(rbs->ek[i][n]),
 	       &(rbs->w0[i][n]), &(rbs->w1[i][n]));
       }
       for (n = 0; n < rbs->nbuttle; n++) {
-	fscanf(f, "%d %lf", &kappa, &(rbs->ebuttle[i][n]));
+	dummy = fscanf(f, "%d %lf", &kappa, &(rbs->ebuttle[i][n]));
 	for (k = 0; k < NBTERMS; k++) {
-	  fscanf(f, "%lf", &(rbs->cbuttle[k][i][n]));
+	  dummy = fscanf(f, "%lf", &(rbs->cbuttle[k][i][n]));
 	}
       }
-      fscanf(f, "\n");
+      dummy = fscanf(f, "\n");
     }
   }
   fclose(f);
@@ -571,6 +572,7 @@ int ReadRMatrixSurface(FILE *f, RMATRIX *rmx, int m, int fmt) {
   int n, nchan, mchan, nchan0, ndim, i, k, t, ilam;
   int k1, k2, k3, k4, ierr;
   double a, b, z;
+  int dummy;
 
   if (fmt == 0) {
     if (m == 0) {
@@ -771,10 +773,10 @@ int ReadRMatrixSurface(FILE *f, RMATRIX *rmx, int m, int fmt) {
       rmx->aij[i] = malloc(sizeof(double)*nchan0*nchan0);
     }
     for (i = 0; i < ndim; i++) {
-      fscanf(f, "%d %lf\n", &k, &(rmx->ek[i]));
+      dummy = fscanf(f, "%d %lf\n", &k, &(rmx->ek[i]));
     }  
     for (i = 0; i < nchan0; i++) {
-      fscanf(f, "%d %d %d %d %d\n", 
+      dummy = fscanf(f, "%d %d %d %d %d\n", 
 	     &k, &k1, &k2, &k3, &k4);
       rmx->chans[i] = k;
       rmx->ilev[i] = k1;
@@ -785,7 +787,7 @@ int ReadRMatrixSurface(FILE *f, RMATRIX *rmx, int m, int fmt) {
     for (ilam = 0; ilam < rmx->nlam; ilam++) {
       for (i = 0; i < nchan0; i++) {
 	for (t = 0; t <= i; t++) {
-	  fscanf(f, "%d %d %d %d %d %d %d %lf\n",
+	  dummy = fscanf(f, "%d %d %d %d %d %d %d %lf\n",
 		 &k, &k1, &k2, &k3, &k1, &k2, &k3, &a);
 	  k = t*nchan0 + i;
 	  rmx->aij[ilam][k] = a;
@@ -796,7 +798,7 @@ int ReadRMatrixSurface(FILE *f, RMATRIX *rmx, int m, int fmt) {
     }
     for (i = 0; i < nchan0; i++) {
       for (n = 0; n < ndim; n++) {
-	fscanf(f, "%d %d %lf %lf\n", &k, &t, &a, &b);
+	dummy = fscanf(f, "%d %d %lf %lf\n", &k, &t, &a, &b);
 	rmx->w0[k][t] = a;
 	rmx->w1[k][t] = b;
       }
@@ -1079,6 +1081,7 @@ int RMatrixSurface(char *fn) {
   ORBITAL *orb;
   HAMILTON *h;
   FILE *f;
+  size_t dummy;
 
   f = fopen(fn, "w");
   if (f == NULL) return -1;
@@ -1172,8 +1175,8 @@ int RMatrixSurface(char *fn) {
   
   fseek(f, 0, SEEK_SET);
   if (fmode == 0) {
-    fwrite(&nsym, sizeof(int), 1, f);
-    fwrite(&nchm, sizeof(int), 1, f);
+    dummy = fwrite(&nsym, sizeof(int), 1, f);
+    dummy = fwrite(&nchm, sizeof(int), 1, f);
   } else {
     fprintf(f, "%3d %3d", nsym, nchm);
   }

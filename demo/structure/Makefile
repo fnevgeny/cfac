@@ -1,2 +1,4 @@
-all: fe17_structure.py
-	python fe17_structure.py
+CONFIG = fe17_structure.sf
+RESULTS = ne.lev ne.tr
+
+include ../Make.common

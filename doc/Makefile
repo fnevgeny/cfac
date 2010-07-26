@@ -1,4 +1,6 @@
-doc: manual.tex
+doc: manual.pdf
+
+manual.pdf: manual.tex
 	pdflatex manual
 	bibtex manual
 	makeindex manual
@@ -6,5 +8,5 @@ doc: manual.tex
 	pdflatex manual
 
 clean:
-	rm -rf *~ 
+	rm -rf *~ *.aux *.bbl *.blg *.idx *.log *.out *.pdf *.toc *.ilg *.ind
 

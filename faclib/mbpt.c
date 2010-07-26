@@ -1,7 +1,7 @@
 #include "mbpt.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: mbpt.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: mbpt.c,v 1.2 2010/07/26 14:28:32 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -3045,6 +3045,7 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
   double *h0, *heff, *hab1, *hba1, *dw, dt, dtt;
   clock_t tt0, tt1, tbg;
   FILE *f;
+  size_t dummy;
 					  
   ierr = 0;
   n3 = mbpt_n3;
@@ -3125,11 +3126,11 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
       free(bas);
       return -1;
     }
-    fwrite(&n, sizeof(int), 1, f);
-    fwrite(ng, sizeof(int), n, f);
-    fwrite(&n2, sizeof(int), 1, f);
-    fwrite(ng2, sizeof(int), n2, f);
-    fwrite(&n3, sizeof(int), 1, f);
+    dummy = fwrite(&n, sizeof(int), 1, f);
+    dummy = fwrite(ng, sizeof(int), n, f);
+    dummy = fwrite(&n2, sizeof(int), 1, f);
+    dummy = fwrite(ng2, sizeof(int), n2, f);
+    dummy = fwrite(&n3, sizeof(int), 1, f);
   }
 
   dw = malloc(sizeof(double)*(n+n2)*4);
@@ -3398,8 +3399,8 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
       if (meff[isym] == NULL) continue;
       if (meff[isym]->nbasis == 0) {
 	k = 0;
-	fwrite(&isym, sizeof(int), 1, f);
-	fwrite(&k, sizeof(int), 1, f);
+	dummy = fwrite(&isym, sizeof(int), 1, f);
+	dummy = fwrite(&k, sizeof(int), 1, f);
 	continue;
       }
       AllocHamMem(meff[isym]->nbasis, meff[isym]->nbasis);
@@ -3414,8 +3415,8 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
       k = ConstructHamilton(isym, nkg0, nkg, kg, 0, NULL, 1);
       h->heff = heff;
       DecodePJ(isym, &pp, &jj);
-      fwrite(&isym, sizeof(int), 1, f);
-      fwrite(&(h->dim), sizeof(int), 1, f);
+      dummy = fwrite(&isym, sizeof(int), 1, f);
+      dummy = fwrite(&(h->dim), sizeof(int), 1, f);
       fflush(f);
       printf("sym: %3d %d\n", isym, h->dim);
       fflush(stdout);
@@ -3434,11 +3435,11 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
 	    c = 0.0;
 	    q = -i-1;
 	    k = -j-1;
-	    fwrite(&q, sizeof(int), 1, f);
-	    fwrite(&k, sizeof(int), 1, f);
-	    fwrite(&a, sizeof(double), 1, f);
-	    fwrite(&b, sizeof(double), 1, f);
-	    fwrite(&c, sizeof(double), 1, f);
+	    dummy = fwrite(&q, sizeof(int), 1, f);
+	    dummy = fwrite(&k, sizeof(int), 1, f);
+	    dummy = fwrite(&a, sizeof(double), 1, f);
+	    dummy = fwrite(&b, sizeof(double), 1, f);
+	    dummy = fwrite(&c, sizeof(double), 1, f);
 	    continue;
 	  }
 	  hab1 = meff[isym]->hab1[k];
@@ -3465,21 +3466,21 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
 	  } else {
 	    c = b;
 	  }
-	  fwrite(&i, sizeof(int), 1, f);
-	  fwrite(&j, sizeof(int), 1, f);
-	  fwrite(&a, sizeof(double), 1, f);
-	  fwrite(&b, sizeof(double), 1, f);
-	  fwrite(&c, sizeof(double), 1, f);
+	  dummy = fwrite(&i, sizeof(int), 1, f);
+	  dummy = fwrite(&j, sizeof(int), 1, f);
+	  dummy = fwrite(&a, sizeof(double), 1, f);
+	  dummy = fwrite(&b, sizeof(double), 1, f);
+	  dummy = fwrite(&c, sizeof(double), 1, f);
 	  if (n3 != 2) {
-	    fwrite(hab1, sizeof(double), nhab1, f);
+	    dummy = fwrite(hab1, sizeof(double), nhab1, f);
 	    if (i != j) {
-	      fwrite(hba1, sizeof(double), nhab1, f);
+	      dummy = fwrite(hba1, sizeof(double), nhab1, f);
 	    }
 	  }
 	  if (n3 != 1) {
-	    fwrite(hab, sizeof(double), nhab, f);
+	    dummy = fwrite(hab, sizeof(double), nhab, f);
 	    if (i != j) {
-	      fwrite(hba, sizeof(double), nhab, f);
+	      dummy = fwrite(hba, sizeof(double), nhab, f);
 	    }
 	  }
 	}
@@ -3603,10 +3604,10 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
       }
     }
 
-    fwrite(&mbpt_tr.mktr, sizeof(int), 1, f);
-    fwrite(&mbpt_tr.naw, sizeof(int), 1, f);
-    fwrite(&emin, sizeof(double), 1, f);
-    fwrite(&emax, sizeof(double), 1, f);
+    dummy = fwrite(&mbpt_tr.mktr, sizeof(int), 1, f);
+    dummy = fwrite(&mbpt_tr.naw, sizeof(int), 1, f);
+    dummy = fwrite(&emin, sizeof(double), 1, f);
+    dummy = fwrite(&emax, sizeof(double), 1, f);
     k = 2*mbpt_tr.mktr*MAX_SYMMETRIES;
     for (j = 0; j < k; j++) {
       if (mtr[j].nsym1 == 0) continue;
@@ -3614,8 +3615,8 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
 	mst = mtr[j].sym0->n_states * mtr[j].sym1[m]->n_states;
 	mst *= n * mbpt_tr.naw;
 	if (mst > 0) {
-	  fwrite(mtr[j].tma[m], sizeof(double), mst, f);
-	  fwrite(mtr[j].rma[m], sizeof(double), mst, f);
+	  dummy = fwrite(mtr[j].tma[m], sizeof(double), mst, f);
+	  dummy = fwrite(mtr[j].rma[m], sizeof(double), mst, f);
 	}
       }
     }		

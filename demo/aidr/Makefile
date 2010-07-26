@@ -1,2 +1,4 @@
-all: se_ai.py
-	python se_ai.py
+CONFIG = se_ai.sf
+RESULTS = se.lev se.ai
+
+include ../Make.common

@@ -1,6 +1,6 @@
 #include "dbase.h"
 
-static char *rcsid="$Id: dbase.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: dbase.c,v 1.2 2010/07/26 14:27:36 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -4661,7 +4661,7 @@ int AppendTable(char *fn) {
   if (f == NULL) return -1;
   n = ReadFHeader(f, &fh, &swp);
   if (swp) {
-    printf("File %s is in different byte-order\n");
+    printf("File %s is in different byte-order\n", fn);
     fclose(f);
     return -1;
   }

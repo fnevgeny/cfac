@@ -3,7 +3,7 @@
 #include "structure.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: structure.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: structure.c,v 1.2 2010/07/28 11:30:12 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -4255,7 +4255,9 @@ int PackAngularZMix(int *n, ANGULAR_ZMIX **ang, int nz) {
     } else {
       p1++;
       m++;
-      memcpy(p1, p2, sizeof(ANGULAR_ZMIX));
+      if (p1 != p2) {
+        memcpy(p1, p2, sizeof(ANGULAR_ZMIX));
+      }
     }
     j++;
     p2++;

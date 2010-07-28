@@ -266,8 +266,7 @@ AC_CONFIG_FILES([Makefile
 		 minpack/Makefile 
 		 mpfun/Makefile
 		 ode/Makefile
-		 toms/Makefile
-		 quadpack/Makefile])
+		 toms/Makefile])
 
 if test -z "$PYTHON"
 then

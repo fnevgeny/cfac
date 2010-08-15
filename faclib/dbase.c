@@ -1,6 +1,7 @@
 #include "dbase.h"
+#include "structure.h"
 
-static char *rcsid="$Id: dbase.c,v 1.2 2010/07/26 14:27:36 fnevgeny Exp $";
+static char *rcsid="$Id: dbase.c,v 1.3 2010/08/15 13:54:08 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -525,6 +526,7 @@ int SwapEndianDRRecord(DR_RECORD *r) {
   SwapEndian((char *) &(r->br), sizeof(float));
   SwapEndian((char *) &(r->ai), sizeof(float));
   SwapEndian((char *) &(r->total_rate), sizeof(float));
+  return 0;
 }
 
 void CEMF2CEFHeader(CEMF_HEADER *mh, CEF_HEADER *h) {
@@ -3270,11 +3272,22 @@ int MemENTable(char *fn) {
   for (i = 0; i < fh.nblocks; i++) {
     n = ReadENHeader(f, &h, swp);
     if (n == 0) break;
+    nlevels = h.nlevels;
     if (h.length > sr) {
-      fseek(f, h.length-sr, SEEK_CUR);
+      if (fseek(f, h.length-sr, SEEK_CUR) != 0) {
+        printf("Error parsing file %s!\n", fn);
+        fclose(f);
+        return -1;
+      }
     }
     n = ReadENRecord(f, &r, swp);
     if (r.ilev >= nlevels) nlevels = r.ilev+1;
+  }
+
+  if (nlevels <= 0) {
+    printf("No levels found in the DB file %s!\n", fn);
+    fclose(f);
+    return -1;
   }
 
   mem_en_table = (EN_SRECORD *) malloc(sizeof(EN_SRECORD)*nlevels);
@@ -3335,7 +3348,7 @@ int MemENFTable(char *fn) {
   n = ReadFHeader(f, &fh, &swp);  
   if (n == 0) return 0;
 
-  sr = sizeof(ENF_RECORD);
+  sr = sizeof(r.ilev) + sizeof(r.energy) + sizeof(r.pbasis);
 
   if (mem_enf_table) free(mem_enf_table);
 
@@ -3343,11 +3356,22 @@ int MemENFTable(char *fn) {
   for (i = 0; i < fh.nblocks; i++) {
     n = ReadENFHeader(f, &h, swp);
     if (n == 0) break;
+    nlevels = h.nlevels;
     if (h.length > sr) {
-      fseek(f, h.length-sr, SEEK_CUR);
+      if (fseek(f, h.length-sr, SEEK_CUR) != 0) {
+        printf("Error parsing file %s!\n", fn);
+        fclose(f);
+        return -1;
+      }
     }
     n = ReadENFRecord(f, &r, swp);
     if (r.ilev >= nlevels) nlevels = r.ilev+1;
+  }
+  
+  if (nlevels <= 0) {
+    printf("No levels found in the DB file %s!\n", fn);
+    fclose(f);
+    return -1;
   }
   
   mem_enf_table = (EN_SRECORD *) malloc(sizeof(EN_SRECORD)*nlevels);

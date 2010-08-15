@@ -1,7 +1,7 @@
 #include "transition.h"
 #include <time.h>
 
-static char *rcsid="$Id: transition.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: transition.c,v 1.2 2010/08/15 14:00:14 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -173,6 +173,53 @@ int TRMultipoleUTA(double *strength, TR_EXTRA *rx,
   return 0;
 }
 
+typedef struct {
+  int m;
+  int valid;
+  double energy;
+  double strength;
+} TRANS_T;
+
+typedef struct {
+  unsigned int dim;
+  TRANS_T *transitions;
+} TRM_CACHE_T;
+
+static TRM_CACHE_T *trm_cache = NULL;
+
+static TRM_CACHE_T *TRMultipole_cache_new(unsigned int dim)
+{
+  TRM_CACHE_T *cache;
+  
+  cache = calloc(1, sizeof(TRM_CACHE_T));
+  if (!cache) {
+    return NULL;
+  }
+  
+  cache->transitions = calloc(dim*dim, sizeof(TRANS_T));
+  if (!cache->transitions) {
+    free(cache);
+    return NULL;
+  }
+  
+  cache->dim = dim;
+  
+  return cache;
+}
+
+static void TRMultipole_cache_free(TRM_CACHE_T *cache)
+{
+  if (!cache) {
+    return;
+  }
+  
+  if (cache->transitions) {
+    free(cache->transitions);
+  }
+  
+  free(cache);
+}
+
 int TRMultipole(double *strength, double *energy,
 		int m, int lower, int upper) {
   int m0, m1, m2;
@@ -181,7 +228,21 @@ int TRMultipole(double *strength, double *energy,
   double s, r, a, aw, *mbk, tr;
   int nz, i, nmk;
   ANGULAR_ZMIX *ang;
-
+  
+  TRANS_T *trans = NULL;
+  
+  if (trm_cache &&
+      lower >= 0 && lower < trm_cache->dim &&
+      upper >= 0 && upper < trm_cache->dim) {
+    trans = &trm_cache->transitions[trm_cache->dim*upper + lower];
+    if (trans->m == m && trans->valid) {
+      *energy   = trans->energy;
+      *strength = trans->strength;
+      
+      return 0;
+    }
+  }
+  
   lev1 = GetLevel(lower);
   if (lev1 == NULL) return -1;
   lev2 = GetLevel(upper);
@@ -288,6 +349,14 @@ int TRMultipole(double *strength, double *energy,
     }
     *strength = tr;
   }
+  
+  if (trans) {
+    trans->m        = m;
+    trans->energy   = *energy;
+    trans->strength = *strength;
+    trans->valid    = 1;
+  }
+  
   return 0;
 }
 
@@ -307,7 +376,7 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
   if (*energy <= 0.0) return -1;
   
   m2 = 2*abs(m);
-
+  
   for (q = 0; q <= m2; q++) strength[q] = 0.0;
   for (i1 = 0; i1 < lev1->n_basis; i1++) {
     if (lev1->mixing[i1] == 0) continue;
@@ -882,6 +951,8 @@ int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
 
   n = GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
   if (n == -1) return 0;
+  
+  trm_cache = TRMultipole_cache_new(GetNumEBLevels());
 
   nc = OverlapLowUp(nlow, low, nup, up);
   SaveTransitionEB0(nc, low+nlow-nc, nc, up+nup-nc, fn, m);
@@ -893,6 +964,9 @@ int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
   free(low);
   free(up);
   ReinitRadial(1);
+  
+  TRMultipole_cache_free(trm_cache);
+  trm_cache = NULL;
 
   return 0;
 }

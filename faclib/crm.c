@@ -3,7 +3,7 @@
 #include "grid.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: crm.c,v 1.2 2010/07/26 14:40:29 fnevgeny Exp $";
+static char *rcsid="$Id: crm.c,v 1.3 2010/08/15 14:37:48 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -5401,7 +5401,7 @@ void TabNLTE(char *fn1, char *fn2, char *fn3, char *fn,
 
   sprintf(buf, "%s.ions", fn);
   f = fopen(buf, "w");
-  fprintf(f, "data\t M.F. Gu, Stanford, FAC %d.%d.%d\n", 
+  fprintf(f, "data\t M.F. Gu, Stanford, cFAC %d.%d.%d\n", 
 	  fh1.version, fh1.sversion, fh1.ssversion);
   fprintf(f, "case\t %s\n", fn);
   fprintf(f, "code\t FAC\n");

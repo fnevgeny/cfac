@@ -1,4 +1,4 @@
-static char *rcsid="$Id: polarization.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: polarization.c,v 1.2 2010/08/15 14:37:48 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -1054,7 +1054,7 @@ int PopulationTable(char *fn) {
     if (c < iter_accuracy) break;
   }
 
-  fprintf(f, "# FAC %d.%d.%d\n", VERSION, SUBVERSION, SUBSUBVERSION);
+  fprintf(f, "# cFAC %d.%d.%d\n", VERSION, SUBVERSION, SUBSUBVERSION);
   fprintf(f, "# Energy  = %-12.5E\n", params.energy);
   fprintf(f, "# ESigma  = %-12.5E\n", params.esigma);
   fprintf(f, "# Density = %-12.5E\n", params.density);
@@ -1139,7 +1139,7 @@ int Orientation(char *fn, double etrans) {
   }    
 
   if (f) {
-    fprintf(f, "# FAC %d.%d.%d\n", VERSION, SUBVERSION, SUBSUBVERSION);
+    fprintf(f, "# cFAC %d.%d.%d\n", VERSION, SUBVERSION, SUBSUBVERSION);
     fprintf(f, "# Energy  = %-12.5E\n", params.energy);
     fprintf(f, "# ESigma  = %-12.5E\n", params.esigma);
     fprintf(f, "# ETrans  = %-12.5E\n", params.etrans);
@@ -1301,7 +1301,7 @@ int PolarizationTable(char *fn, char *ifn, int n, char **sc) {
     return -1;
   }
   
-  fprintf(f, "# FAC %d.%d.%d\n", VERSION, SUBVERSION, SUBSUBVERSION);
+  fprintf(f, "# cFAC %d.%d.%d\n", VERSION, SUBVERSION, SUBSUBVERSION);
   fprintf(f, "# Energy  = %-12.5E\n", params.energy);
   fprintf(f, "# ESigma  = %-12.5E\n", params.esigma);
   fprintf(f, "# ETrans  = %-12.5E\n", params.etrans);

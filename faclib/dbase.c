@@ -1,7 +1,7 @@
 #include "dbase.h"
 #include "structure.h"
 
-static char *rcsid="$Id: dbase.c,v 1.3 2010/08/15 13:54:08 fnevgeny Exp $";
+static char *rcsid="$Id: dbase.c,v 1.4 2010/08/15 14:37:48 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -2968,7 +2968,7 @@ int PrintTable(char *ifn, char *ofn, int v) {
     }
   }
 
-  fprintf(f2, "FAC %d.%d.%d\n", fh.version, fh.sversion, fh.ssversion);
+  fprintf(f2, "cFAC %d.%d.%d\n", fh.version, fh.sversion, fh.ssversion);
   fprintf(f2, "Endian\t= %d\n", (int) CheckEndian(&fh));
   fprintf(f2, "TSess\t= %lu\n", fh.tsession);
   fprintf(f2, "Type\t= %d\n", fh.type);

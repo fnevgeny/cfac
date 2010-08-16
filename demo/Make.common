@@ -1,5 +1,5 @@
 SFAC = ../../sfac/sfac
-DIFF = diff -q -I TSess 
+DIFF = diff -q -I TSess -IFAC
 
 all: $(RESULTS)
 

@@ -1,7 +1,7 @@
 #include "radial.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: radial.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: radial.c,v 1.2 2010/11/11 15:33:38 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -2312,7 +2312,7 @@ double RadialMoments(int m, int k1, int k2) {
 	if (n1 < n2) {
 	  r = HydrogenicDipole(z, n1, kl1, n2, kl2);
 	  return r;
-	} else if (n1 < n2) {
+	} else if (n2 < n1) {
 	  r = HydrogenicDipole(z, n2, kl2, n1, kl1);
 	  return r;
 	}

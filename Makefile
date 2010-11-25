@@ -4,6 +4,8 @@
 # You should not change anything here.              #
 #####################################################
 
+TOP = .
+
 include Make.conf
 
 subdirs : configure Make.conf
@@ -12,10 +14,10 @@ subdirs : configure Make.conf
 all : subdirs
 
 
-#pfac:   lib
-#	${PYTHON} setup.py build --force -extracomp="${CFLAGS}" -extralink="${LIBS}"
+pfac:   $(FACLIBS)
+	${PYTHON} setup.py build --force -extracomp="${CFLAGS}" -extralink="$(FACLIBS) ${LIBS}"
 #mpy:
-#	${PYTHON} setup.py build -mpy -extracomp="${CFLAGS}" -extralink="${LIBS}"
+#	${PYTHON} setup.py build -mpy -extracomp="${CFLAGS}" -extralink="$(FACLIBS) ${LIBS}"
 
 install : subdirs
 	@set -e; for i in $(SUBDIRS); do (cd $$i; $(MAKE) install) || exit 1; done

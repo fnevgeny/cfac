@@ -5,4 +5,5 @@ config.status
 configure
 sysdef.h
 build
+ChangeLog
 .gdb_history

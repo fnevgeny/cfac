@@ -1,7 +1,7 @@
 #include "orbital.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: orbital.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: orbital.c,v 1.3 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -283,9 +283,9 @@ static double DpDr(int kappa, int i1, double e, POTENTIAL *pot, double b) {
   
 int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {  
   double e, de, delta, emin, emax, dr, ke;
-  double *p, p1, p2, qo, qi, bqp, bqp1;
+  double *p, p1, qo, qi, bqp, bqp1;
   int n, i, k, kl, nr, nodes, niter;
-  int i2, i2m1, i2m2, i2p1, i2p2, i1;
+  int i2, i2m1, i2m2, i2p1, i2p2;
   int ib0, ib1;
 
   kl = orb->kappa;

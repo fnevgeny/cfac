@@ -1,4 +1,4 @@
-static char *rcsid="$Id: polarization.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: polarization.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -388,7 +388,7 @@ int SetMCERates(char *fn) {
   CE_HEADER h;
   CE_RECORD r;
   FILE *f;
-  int n, k, m, t, p, i, q;
+  int n, k, t, p, i, q;
   int m1, m2, j1, j2, i0;
   int swp;
   double data[2+(1+MAXNUSR)*4];
@@ -555,7 +555,7 @@ int SetMAIRates(char *fn) {
   AIM_HEADER h;
   AIM_RECORD r;
   FILE *f;
-  int n, k, m, t, p, i;
+  int n, k, t, p, i;
   int m1, m2, j1, j2;
   int swp;
   double e, v, x, pf=1.0;
@@ -665,7 +665,6 @@ static double Population(int iter) {
   int i, p, i1, i2;
   int j1, j2, m1, m2;
   int q1, q2, t, idr;
-  FILE *f;
   double *b, a, c, eden;
   int *ipiv, info;
   int nmax, nm;
@@ -1241,7 +1240,7 @@ static int GetTrans(int *trans, char *buf) {
 
 int PolarizationTable(char *fn, char *ifn, int n, char **sc) {
   int i, k, k2, t, t2;
-  int j1, j2, m1, i1, i2;
+  int j1, j2, i1, i2;
   FILE *f;
   double AL[MAXPOL+1];
   double FL[MAXPOL+1];

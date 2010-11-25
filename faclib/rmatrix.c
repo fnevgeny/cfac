@@ -1,7 +1,7 @@
 #include "rmatrix.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: rmatrix.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: rmatrix.c,v 1.4 2010/11/25 18:11:06 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -92,7 +92,7 @@ void RMatrixNMultipoles(int n) {
 
 void ReadRMatrixBasis(char *fn, RBASIS *rbs, int fmt) {
   FILE *f;
-  int i, j, k, n, kappa, m, nr;
+  int i, k, n, kappa, nr;
   int dummy;
 
   f = fopen(fn, "r");
@@ -184,7 +184,6 @@ void ReadRMatrixBasis(char *fn, RBASIS *rbs, int fmt) {
 void WriteRMatrixBasis(char *fn, int fmt) {
   FILE *f;
   int i, n, k, ka, nr;
-  ORBITAL *orb;
 
   f = fopen(fn, "w");
   if (f == NULL) return;
@@ -336,7 +335,7 @@ void ExtrapolateButtle(RBASIS *rbs, int t, int m, double *e,
 int RMatrixBasis(char *fn, int kmax, int nb) {
   int k, i, j, k2, ib0, ib1, kappa, t, in;
   int nkb0, nkb1, n, n0, nmax, kb;
-  double e0, e1, ep, a0, a1, b, rb0, rb1, bb, c0, c1;
+  double e0, e1, a0, a1, b, rb0, rb1, bb, c0, c1;
   double r01, r10, r0, r1, r2, p0, p1, q0, q1, x0, x1;
   ORBITAL *orb, orbf;
   POTENTIAL *pot;
@@ -2050,7 +2049,7 @@ int RMatrixCE(char *fn, int np, char *bfn[], char *rfn[],
   RBASIS *rbs;
   RMATRIX *rmx;
   FILE **f, *f1;
-  int i, j, k, t, p, q, h, n, i0, ns, *iwork;
+  int i, j, k, t, p, q, h, n, i0, ns;
   double *e0, *e, et, **s, ***sp = NULL, *r0, *r1, x;
   int pp, jj, its0, its1, st0, ka0, ka1, mka0, mka1, npw;
   int nke, npe;
@@ -2328,7 +2327,7 @@ void TestRMatrix(double e, int m, char *fn1, char *fn2, char *fn3) {
   RMATRIX rmx;
   RBASIS rbs;
   int i, j, p, k;
-  double ei, a1, a2;
+  double ei, a1;
 
   e /= HARTREE_EV;
   f = fopen(fn2, "r");

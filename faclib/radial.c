@@ -1,7 +1,7 @@
 #include "radial.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: radial.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: radial.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -342,7 +342,6 @@ void SetMS(int nms, int sms) {
 }
 
 int SetAWGrid(int n, double awmin, double awmax) {
-  int i;
   if (awmin < 1E-3) {
     awmin = 1E-3;
     awmax = awmax + 1E-3;
@@ -429,7 +428,7 @@ void AdjustScreeningParams(double *u) {
 }
 
 int PotentialHX(AVERAGE_CONFIG *acfg, double *u, double *v, double *w) {
-  int i, j, k1, j1, kl1, jmax, m, jm, md;
+  int i, j, k1, jmax, m, jm, md;
   ORBITAL *orb1;
   double large, small, a, b, c, d0, d1, d;
   
@@ -584,11 +583,8 @@ double SetPotential(AVERAGE_CONFIG *acfg, int iter) {
 
 int GetPotential(char *s) {
   AVERAGE_CONFIG *acfg;
-  ORBITAL *orb1, *orb2;
-  double large1, small1, large2, small2;
-  int norbs, jmax, kmin, kmax;  
   FILE *f;
-  int i, j;
+  int i;
   double *u, *v, *w;
 
   /* get the average configuration for the groups */
@@ -1831,7 +1827,7 @@ double ConfigEnergyShiftCI(int nrs0, int nrs1) {
 }
 	  
 double ConfigEnergyShift(int ns, SHELL *bra, int ia, int ib, int m2) {
-  double qa, qb, a, b, c, sd, e;
+  double qa, qb, a, b, c, e;
   int ja, jb, k, kmin, kmax;
   int k0, k1;
 
@@ -2436,8 +2432,8 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
   double q, ip, ipm, im, imm;
   int kappa1, kappa2;
   int am, t;
-  int index[4], s;
-  ORBITAL *orb1, *orb2, *orb;
+  int index[4];
+  ORBITAL *orb1, *orb2;
   double x, a, r, rp, ef, **p1;
   int jy, n, i, j, npts;
   double rcl;
@@ -2614,7 +2610,7 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
   int kappa1, kappa2;
   int am, t;
   int index[4];
-  ORBITAL *orb1, *orb2, *orb;
+  ORBITAL *orb1, *orb2;
   double x, a, r, rp, **p1, ef;
   int jy, n, i, j, npts;
   double rcl;
@@ -5002,7 +4998,7 @@ int ReinitRadial(int m) {
 int TestIntegrate(void) {
   ORBITAL *orb1, *orb2, *orb3, *orb4;
   int k1, k2, k3, k4, k, i, i0=1500;
-  double r, a, s[6];
+  double r, a;
  
   k1 = OrbitalIndex(2, -2, 0);
   k2 = OrbitalIndex(3, -1, 0);

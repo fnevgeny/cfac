@@ -2,7 +2,7 @@
 #include "time.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: recombination.c,v 1.3 2010/11/25 17:06:26 fnevgeny Exp $";
+static char *rcsid="$Id: recombination.c,v 1.4 2010/11/25 18:11:06 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -27,7 +27,6 @@ static int n_usr = 0;
 static double usr_egrid[MAXNUSR];
 static double log_usr[MAXNUSR];
 static double xusr[MAXNUSR];
-static double log_xusr[MAXNUSR];
 
 static int n_tegrid = 0;
 static double tegrid[MAXNTE];
@@ -1877,7 +1876,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   AIM_HEADER ai_hdr1;
   F_HEADER fhdr;
   double emin, emax;
-  double e, s, tai, a, s1[MAXAIM];
+  double e, s, a, s1[MAXAIM];
   float rt[MAXAIM];
   FILE *f;
   ARRAY subte;

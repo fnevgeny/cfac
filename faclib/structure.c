@@ -3,7 +3,7 @@
 #include "structure.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: structure.c,v 1.4 2010/11/25 17:06:26 fnevgeny Exp $";
+static char *rcsid="$Id: structure.c,v 1.5 2010/11/25 18:11:06 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -1299,13 +1299,12 @@ int SlaterCoeff(char *fn, int nlevs, int *ilevs,
 		int na, SHELL *sa, int nb, SHELL *sb) {
   FILE *f;
   int m, i, j, i0, i1, k0, k1, q0, q1;
-  int na2, nb2, nab2, n_shells, k, vnl;
-  double a, *coeff, *coeff1;
+  int na2, nb2, nab2, n_shells, vnl;
+  double a, *coeff;
   CONFIG *c0, *c1;
   STATE *s0, *s1;
   SYMMETRY *sym;
   LEVEL *lev;
-  ORBITAL *orb0, *orb1;
   SHELL_STATE *sbra, *sket;
   SHELL *bra;
   INTERACT_DATUM *idatum;
@@ -1732,12 +1731,9 @@ double Hamilton2E(int n_shells, SHELL_STATE *sbra, SHELL_STATE *sket,
 }
 
 int TestHamilton(void) {
-  CONFIG_GROUP *g;
-  CONFIG *c;
   SYMMETRY *sym;
-  STATE *s;
-  int i, j, k, t, p, ng;
-  double r1, r2, a, b;
+  int i, j, t;
+  double r1;
 
   for (t = 0; t < MAX_SYMMETRIES; t++) {
     sym = GetSymmetry(t);
@@ -1895,7 +1891,6 @@ int AddToLevels(int ng, int *kg) {
   STATE *s, *s1;
   CONFIG *c;
   CONFIG_GROUP *g;
-  int g0, p0;
   double *mix, a;
   
   if (IsUTA()) {
@@ -2077,9 +2072,7 @@ void CutMixing(int nlev, int *ilev, int n, int *kg, double c) {
   }
 }
   
-static int CompareBasis(double m1, double m2, SYMMETRY *sym) {
-  STATE *s1, *s2;
-  
+static int CompareBasis(double m1, double m2, SYMMETRY *sym) { 
   if (fabs(m1) > fabs(m2)) return 1;
   else if (fabs(m1) < fabs(m2)) return -1;
   else return 0;
@@ -2379,7 +2372,7 @@ int GetNumElectrons(int k) {
   SYMMETRY *sym;
   STATE *s;
   CONFIG_GROUP *g;
-  int nele, i, m;
+  int nele;
   
   lev = GetLevel(k);
   if (IsUTA()) {
@@ -2974,7 +2967,7 @@ int GetBasisTable(char *fn, int m) {
 }
 
 void StructureEB(char *fn, int n, int *ilev) {
-  int i, j, k, t;
+  int k;
   HAMILTON *h;
   
   h = &_ham;
@@ -2993,14 +2986,12 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   int kg1, kg2, kc1, kc2;
   int ns, n, p, q, nz, iz, iz1, iz2;
   int ns1, ns2, *pnz;
-  int nc1, nc2, ncfgs;
   int ks1, ks2, i1, i2, i2m;
   int n_shells, *k, nkk;
   double *r;
   int phase, im;
   int orb0, orb1;
   CONFIG *c1, *c2;
-  CONFIG_GROUP *g1, *g2;
   STATE *s1, *s2;
   INTERACT_DATUM *idatum;
   INTERACT_SHELL s[4];
@@ -3207,7 +3198,6 @@ int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   int jf, jp, tf;
   double *r, r0;
   int ns1, ns2, *pnz, iz;
-  int nc1, nc2, ncfgs;
   int ns, ks1, ks2, n;
   STATE *s1, *s2;
   INTERACT_DATUM *idatum;
@@ -3347,7 +3337,6 @@ int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   int j1, j2, i, n, nz, p;
   int jmin, jmax, jf;
   int ns1, ns2, *pnz, iz;
-  int nc1, nc2, ncfgs;
   int ns, ks1, ks2;  
   INTERACT_SHELL s[4];
   SHELL *bra;
@@ -3595,8 +3584,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
   double r0;
   int ih1, ih2;
   int ns, isz0, isz;
-  CONFIG *c1, *c2;
-  STATE *slow, *sup;
+  STATE *sup;
   SYMMETRY *sym1, *sym2;
   LEVEL *lev1, *lev2;
   ANGZ_DATUM *ad;
@@ -3722,7 +3710,6 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
   STATE *slow, *sup;
   SYMMETRY *sym1, *sym2;
   LEVEL *lev1, *lev2, *lev;
-  CONFIG *c1, *c2;
   ANGZ_DATUM *ad;
   ANGULAR_ZMIX *ang_sub;
   ANGULAR_ZFB *afb;
@@ -4035,8 +4022,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
   int kg, jf, ih1, ih2, isz0;
   int ns, isz, jmin, jmax;
   double mix1, mix2;
-  CONFIG *c1, *c2;
-  STATE *slow, *sup;
+  STATE *sup;
   SYMMETRY *sym1, *sym2;
   LEVEL *lev1, *lev2;
   ANGZ_DATUM *ad;
@@ -4652,7 +4638,7 @@ int AllocHamMem(int hdim, int nbasis) {
 }
 
 int InitStructure(void) {
-  int i, t, lwork, liwork;
+  int i;
 
   for (i = 0; i <= N_ELEMENTS; i++) {
     ArrayInit(levels_per_ion+i, sizeof(LEVEL_ION), 512);

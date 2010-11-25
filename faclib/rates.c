@@ -4,7 +4,7 @@
 #include "interpolation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: rates.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: rates.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -16,8 +16,6 @@ static int ipdist = 0;
 static DISTRIBUTION pho_dist[MAX_DIST];
 
 #define QUAD_LIMIT 1000
-static int _iwork[QUAD_LIMIT];
-static double _dwork[4*QUAD_LIMIT];
 
 #define N3BRI 2000
 static double gamma3b = 1.0;
@@ -222,7 +220,7 @@ double IntegrateRate(int idist, double eth, double bound,
 		     int np, void *params, int i0, int f0, int type, 
 		     double (*Rate1E)(double, double, int, void *)) { 
   double result;
-  int neval, ier, limit, lenw, last, n, ix, iy;
+  int neval, ier, limit, lenw, n, ix, iy;
   double epsabs, epsrel, abserr;
   double a, b, a0, b0, r0, *eg;
 

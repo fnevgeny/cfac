@@ -1,4 +1,4 @@
-static char *rcsid="$Id: sfac.c,v 1.4 2010/11/25 16:41:35 fnevgeny Exp $";
+static char *rcsid="$Id: sfac.c,v 1.5 2010/11/25 18:11:03 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -2618,7 +2618,7 @@ static int PStructureMBPT(int argc, char *argv[], int argt[],
   int i, n, *s, n1, *ng1, n2, *ng2, nk, *nkm, kmax;
   int n3, *ng3, n4, *ng4;
   char *v[MAXNARGS], *gn;
-  int t[MAXNARGS], nv;
+  int t[MAXNARGS];
   double d, c;
 
   if (argc == 1) {

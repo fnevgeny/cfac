@@ -1,7 +1,7 @@
 #include "mbpt.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: mbpt.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: mbpt.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -595,16 +595,15 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
   CONFIG *c1, *bc, *bc1;
   SYMMETRY *sym;
   STATE *st;
-  LEVEL *lev;
   HAMILTON *ha;
   int nbc, nbc1, k;
   int nele0, nele1, nk, m, t, r;
   int i, p, np, nq, inp, inq, k0, k1, q;
   int jp, jq, kap, kaq, kp, kq, kp2, kq2;
-  int ic, kgp, nb, *bk;
-  int ncc, ncc0, ncc1, ncc2;
-  int *bs1, nbs1, *bs0, nbs0, *s;
-  double a1, a2, d, a, b, *e1, *ham;
+  int kgp, nb, *bk;
+  int ncc, ncc0, ncc1;
+  int *bs1, nbs1, *bs0, nbs0;
+  double a1, a, b, *e1, *ham;
   CORR_CONFIG cc, *ccp, *ccp1;
   ARRAY ccfg;
   int *icg = NULL, ncg, icg0, icg1, rg;
@@ -919,7 +918,6 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
     fclose(f);
   }
 
- DONE:
   for (i = 0; i < nbc; i++) {
     if (bc[i].n_shells > 0) free(bc[i].shells);
   }
@@ -1124,8 +1122,10 @@ int CheckConfig(int ns, SHELL *ket, int np, int *op, int nm, int *om,
   if (k > 0) {
     qsort(c->shells, k, sizeof(SHELL), CompareShellInvert);
     if (c->shells[0].nq > 1) {
+      /* TODO: return ?! */
       if (c->shells[0].n > cs[nc]->nnrs) -1;
     } else if (c->n_shells > 1) {
+      /* TODO: return ?! */
       if (c->shells[1].n > cs[nc]->nnrs) -1;
     }
     for (i = 0; i < nc; i++) {
@@ -1267,7 +1267,7 @@ double SumInterp1D(int n, double *z, double *x, double *t, double *y) {
 double SumInterpH(int n, int *ng, int n2, int *ng2, 
 		  double *h, double *h1, double *w) {
   double r, *p, *x, *y, *z;
-  int m, i0, i1;
+  int i0, i1;
   
   i0 = n+n2;
   x = w + i0;
@@ -1326,7 +1326,7 @@ void FixTotalJ(int ns, SHELL_STATE *st, SHELL *s, CONFIG *c, int m) {
 
 void H3rd0(MBPT_EFF *meff, int ia, int ib, double de, double h, int i0, int md) {
   int i, m, j;
-  double *e0, *r0, *h0, **hab, **hba, a, c;
+  double *e0, *h0, **hab, **hba, a, c;
 
   if (mbpt_3rd == 0) return;
 
@@ -1697,7 +1697,7 @@ void TR12Term(MBPT_TR *mtr, CONFIG *c0, CONFIG *c1,
 	      INTERACT_SHELL *s, int ph, int *ks, int k0, int k1,
 	      FORMULA *fm, double **a, int md, int i0, int ng) {  
   int kk, kk2, kmin, kmax, gauge, n, p1, j0, j1;
-  int q0, q1, k, m0, m1, s0, s1, m, ms0, ms1, is0, is1, p, p0;  
+  int q0, q1, k, m0, m1, s0, s1, ms0, ms1, is0, is1, p, p0;  
   double c, *r1, sd, se, yk[MKK], d2;
   ORBITAL *orb;  
 
@@ -1949,7 +1949,7 @@ void TR11Term(MBPT_TR *mtr, CONFIG *c0, CONFIG *c1,
 	      INTERACT_SHELL *s, int ph, int k0, int k1, int k2, int k3,
 	      FORMULA *fm, double *a, int md, int i0, int ng) {
   double d2, *r1, r2, c, d;
-  int q0, q1, k, m0, m1, m, ms0, ms1, s0, s1, p, p0, n, is0, is1;
+  int q0, q1, k, m0, m1, ms0, ms1, s0, s1, p, p0, n, is0, is1;
   int gauge, p1, j0, j1;
   ORBITAL *orb;
 
@@ -2062,7 +2062,6 @@ void DeltaH22M2Loop(MBPT_EFF **meff, CONFIG *c0, CONFIG *c1, int ns,
 		    int n2, int *ng2, int ph,
 		    int ia, int ib, int ic, int id, int ik, int im,
 		    FORMULA *fm, double **a, int *j1, int *j2) {
-  double c, d1, d2;
   int ip, iq;
   int ks1[4], ks2[4];
   int i, i1, i2, md, m1, m2;
@@ -2907,7 +2906,7 @@ void DeltaH11M0(void *mptr, int ns,
 }
   
 void FreeEffMBPT(MBPT_EFF **meff) {
-  int i, j, k, m;
+  int i, k, m;
 
   for (i = 0; i < MAX_SYMMETRIES; i++) {
     if (meff[i] == NULL) continue;
@@ -3991,7 +3990,7 @@ int StructureReadMBPT(char *fn, char *fn2, int nf, char *fn1[],
   int ierr, m, i, j, k, k0, k1, nlevels, n2m;
   int isym, pp, jj, r, q, n, n0;
   int *ng = NULL, *ng0 = NULL, *n2 = NULL, **ng2 = NULL;
-  double *dw, *z1, *z2, *x, *y, *z, *t, *heff, **hab = NULL, **hba = NULL;
+  double *dw, *z1, *z2, *x, *y, *t, *heff, **hab = NULL, **hba = NULL;
   double **nab = NULL, **nba = NULL, *nab1, *nba1, *neff;
   double a, b, na, nb;
   HAMILTON *h;

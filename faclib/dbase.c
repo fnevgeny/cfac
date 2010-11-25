@@ -1,7 +1,7 @@
 #include "dbase.h"
 #include "structure.h"
 
-static char *rcsid="$Id: dbase.c,v 1.5 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: dbase.c,v 1.6 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -345,8 +345,6 @@ int SwapEndianCEMFHeader(CEMF_HEADER *h) {
 }
 
 int SwapEndianCEMFRecord(CEMF_RECORD *r) {
-  int m;
-
   SwapEndian((char *) &(r->lower), sizeof(int));
   SwapEndian((char *) &(r->upper), sizeof(int));
   return 0;
@@ -403,8 +401,6 @@ int SwapEndianAIRecord(AI_RECORD *r) {
 }
 
 int SwapEndianAIMRecord(AIM_RECORD *r) {
-  int i;
-
   SwapEndian((char *) &(r->b), sizeof(int));
   SwapEndian((char *) &(r->f), sizeof(int));
   SwapEndian((char *) &(r->nsub), sizeof(int));
@@ -3337,9 +3333,7 @@ int MemENFTable(char *fn) {
   ENF_HEADER h;
   ENF_RECORD r;
   FILE *f;
-  char *s;
   int n, i, nlevels;
-  float e0;
   int swp, sr;
 
   f = fopen(fn, "r");
@@ -3679,7 +3673,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
   CE_RECORD r;
   int n, i, t;
   int nb;
-  int m, k, p1, p2;
+  int k, p1, p2;
   float a, e = 0.0;
   double bte, bms, be;
 
@@ -3795,7 +3789,6 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
   CEF_RECORD r;
   int n, i, t;
   int nb;
-  int m;
   float a, e = 0.0;
   double bte, bms, be;
 
@@ -3881,7 +3874,7 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
   CEMF_RECORD r;
   int n, i, t;
   int nb;
-  int m, k, na, ith, iph;
+  int k, na, ith, iph;
   float a, e = 0.0;
   double bte, bms, be;
 
@@ -3986,7 +3979,7 @@ int PrintRRTable(FILE *f1, FILE *f2, int v, int swp) {
   RR_HEADER h;
   RR_RECORD r;
   int n, i, t;
-  int nb, k, m;
+  int nb;
   float e = 0.0, eph, ee, phi, rr;
 
   nb = 0;
@@ -4265,7 +4258,7 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
   CI_HEADER h;
   CI_RECORD r;
   int n, i, t;
-  int nb, m;
+  int nb;
   float e = 0.0, a;
   double bte, bms, be;
 
@@ -4360,7 +4353,7 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
   CIM_HEADER h;
   CIM_RECORD r;
   int n, i, t, q;
-  int nb, m, k;
+  int nb, k;
   float e, a;
   double bte, bms, be;
 

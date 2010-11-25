@@ -3,7 +3,7 @@
 #include "grid.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: crm.c,v 1.4 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: crm.c,v 1.5 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -1612,17 +1612,17 @@ int RateTable(char *fn, int nc, char *sc[], int md) {
   RT_RECORD rt, rt1, rt2, rt3;
   RT_HEADER rt_hdr;
   F_HEADER fhdr;
-  ION *ion, *ion1;
+  ION *ion;
   RATE *r;
-  LBLOCK *blk, *blk1, *blk2;
+  LBLOCK *blk, *blk1;
   BLK_RATE *brts;
   DISTRIBUTION *edist, *pdist;
-  int n, k, m, i, j, p, q, s, p1;
+  int n, k, m, i, j, q;
   double den;
   MULTI ce, tr, ci, rr, ai;
   MULTI cep, trp, cip, rrp, aip;
   int ablks[3] = {10, 5, 5};
-  int index[3], index1[3];
+  int index[3];
   int *ic;
   NCOMPLEX *c, *cp;
   double *d, rtmp,  e0, abt;
@@ -2835,7 +2835,7 @@ int BlockPopulation(int miter) {
   int n, m;
   int nrhs;
   int lda, ldb;
-  int i, j, p, q, ntd, nb, niter;
+  int i, j, p, q, ntd, niter;
   double ta, tb, td;
 
   n = blocks->dim;
@@ -4278,7 +4278,7 @@ int SetTRRates(int inv) {
 }
 
 int SetCIRates(int inv) { 
-  int nb, i, t;
+  int nb, i;
   int n, m, k;
   int j1, j2;
   ION *ion;
@@ -5075,7 +5075,7 @@ void TabNLTE(char *fn1, char *fn2, char *fn3, char *fn,
   double abt, *atot, *acol, *apho, *aaut;
   double pbb, pbf, pff, pfn, eint, eint1, te = 0.0, te1 = 0.0;
   double ne = 0.0, ni, gpbf, gcbf, gaut, gpbb, gcbb, rtot;
-  double zbar, m2, m3, adx, *xg, *eg, *yg[3], tmp;
+  double zbar, m2, m3, adx, *xg, *eg, *yg[3];
   int nmaxt, *nmax, i, j, t, k = 0, z, n, *ilev;
   int swp1, swp2, swp3, m, nx, nions, nlevs;
   NCOMPLEX cmpx[MAXNCOMPLEX];

@@ -1,7 +1,7 @@
 #include "interpolation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: interpolation.c,v 1.3 2010/11/25 17:15:58 fnevgeny Exp $";
+static char *rcsid="$Id: interpolation.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -14,21 +14,6 @@ static double _CNC[5][5] = {
   {1.0/3.0, 4.0/3.0, 1.0/3.0, 0, 0},
   {3.0/8, 9.0/8, 9.0/8, 3.0/8, 0},
   {14.0/45, 64.0/45, 24.0/45, 64.0/45, 14.0/45,}
-};
-
-/* open Newton-Cotes formulae coeff. */
-static double _ONC[9][9] = {
-  {0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 2.0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 1.5, 1.5, 0, 0, 0, 0, 0, 0},
-  {0, 8./3, -4./3, 8./3, 0, 0, 0, 0, 0},
-  {0, 55./24, 5./24, 5./24, 55./24, 0, 0, 0, 0},
-  {0, 33./10, -42./10, 78./10, -42./10, 33./10, 0, 0, 0},
-  {0, 4277./1440, -3171./1440, 3934./1440, 3934./440, 
-   -3171./1440, 4277./1440, 0, 0},
-  {0, 3680./945, -7632./945, 17568./945, -19672./945,
-   17568./945, -7632./945, 3680./945, 0}
 };
 
 static double gauss_xw[2][15] = {
@@ -777,7 +762,7 @@ int CEMFCross(char *ifn, char *ofn, int i0, int i1,
   CEF_RECORD r;
   CEMF_HEADER mh;
   CEMF_RECORD mr;
-  int i, t, m, ith, iph;
+  int i, t, ith, iph;
   double data[2+(1+MAXNE)*3], e, cs, a;
   double eth, a1, cs1, k2, rp, e1, e0, b0, b1;
   double bte, bms, be;
@@ -921,7 +906,7 @@ int CEFCross(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   CEF_HEADER h;
   CEF_RECORD r;
-  int i, t, m;
+  int i, t;
   double data[2+(1+MAXNE)*3], e, cs, a;
   double eth, a1, cs1, k2, rp, e1, e0, b0, b1;
   double bte, bms, be;
@@ -1062,7 +1047,7 @@ int CECross(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   CE_HEADER h;
   CE_RECORD r;
-  int i, t, m, k;
+  int i, t, k;
   double data[2+(1+MAXNUSR)*3], e, cs, a, ratio;
   double eth, a1, cs1, k2, rp, e1, e0, b0, b1;
   double bte, bms, be;
@@ -1212,7 +1197,7 @@ int CEMFMaxwell(char *ifn, char *ofn, int i0, int i1,
   CEF_RECORD r;
   CEMF_HEADER mh;
   CEMF_RECORD mr;
-  int i, t, m, p, ith, iph;
+  int i, t, p, ith, iph;
   double data[2+(1+MAXNE)*4], e, cs, a, c;
   double *xg = gauss_xw[0];  
   double *wg = gauss_xw[1];
@@ -1319,7 +1304,7 @@ int CEFMaxwell(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   CEF_HEADER h;
   CEF_RECORD r;
-  int i, t, m, p;
+  int i, t, p;
   double data[2+(1+MAXNE)*4], e, cs, a, c;
   double *xg = gauss_xw[0];  
   double *wg = gauss_xw[1];
@@ -1422,7 +1407,7 @@ int CEMaxwell(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   CE_HEADER h;
   CE_RECORD r;
-  int i, t, m, k, p;
+  int i, t, k, p;
   double data[2+(1+MAXNUSR)*4], e, cs, a, c, ratio;
   double *xg = gauss_xw[0];  
   double *wg = gauss_xw[1]; 
@@ -1572,7 +1557,7 @@ int TotalCICross(char *ifn, char *ofn, int ilev,
   int n, swp;
   CI_HEADER h;
   CI_RECORD r;
-  int i, t, nb, m;
+  int i, t, nb;
   double *c, tc, a, e, bte, bms, be;
   EN_SRECORD *mem_en_table;
   int mem_en_table_size;
@@ -1678,7 +1663,7 @@ int CICross(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   CI_HEADER h;
   CI_RECORD r;
-  int i, t, nb, m;
+  int i, t, nb;
   double tc, a, b, e, e0, bte, bms, be;
   EN_SRECORD *mem_en_table;
   int mem_en_table_size;
@@ -1796,7 +1781,7 @@ int CIMaxwell(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   CI_HEADER h;
   CI_RECORD r;
-  int i, t, nb, m, p;
+  int i, t, nb, p;
   double tc, e, e0, cs;
   double *xg = gauss_xw[0];  
   double *wg = gauss_xw[1]; 
@@ -1908,7 +1893,7 @@ int CIMCross(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   CIM_HEADER h;
   CIM_RECORD r;
-  int i, t, nb, m, k;
+  int i, t, nb, k;
   double tc, a, b, e, e0, bte, bms, be;
   EN_SRECORD *mem_en_table;
   int mem_en_table_size;
@@ -2022,7 +2007,7 @@ int TotalPICross(char *ifn, char *ofn, int ilev,
   int n, swp;
   RR_HEADER h;
   RR_RECORD r;
-  int i, t, nb, m;
+  int i, t, nb;
   float e, eph, ee, phi;
   double *xusr, *dstrength, *c, tc, emax;
   double x, y;
@@ -2155,7 +2140,7 @@ int RRCross(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   RR_HEADER h;
   RR_RECORD r;
-  int i, t, nb, m;
+  int i, t, nb;
   float e, eph, ee, phi, rr;
   double *xusr, *dstrength, tc, emax;
   double x, y;
@@ -2304,7 +2289,7 @@ int RRMaxwell(char *ifn, char *ofn, int i0, int i1,
   int n, swp;
   RR_HEADER h;
   RR_RECORD r;
-  int i, t, nb, m, p;
+  int i, t, nb, p;
   float e, eph, ee;
   double *xusr, *dstrength, tc, cs, rr, emax;
   double x, y;
@@ -2462,7 +2447,7 @@ int TotalRRCross(char *ifn, char *ofn, int ilev,
   int n, swp;
   RR_HEADER h;
   RR_RECORD r;
-  int i, t, nb, m;
+  int i, t, nb;
   float e, eph, ee, phi, rr;
   double *xusr, *dstrength, *c, tc, emax;
   double x, y;
@@ -2608,7 +2593,7 @@ double voigt(double alpha, double v) {
   double o1,o2,o3,o4,o5,o6,o7;
   double q1,q2;
   double r1,r2;
-  double H, n, w, vw, vb;
+  double H;
   int i;
 
   a[1]=122.607931777104326;

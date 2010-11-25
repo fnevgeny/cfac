@@ -8,7 +8,7 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
-static char *rcsid="$Id: coulomb.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: coulomb.c,v 1.2 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -588,9 +588,9 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 int CoulombBethe(char *s, double z, double te, double e1) {
 #define M 200
   double kl[M];
-  int i, j, k, m;
+  int i, j, m;
   FILE *f;
-  int nte, ne1, ne2, ie1, ite;
+  int nte, ne1, ne2;
   double e2, *tcb;
   
   ne2 = 1;

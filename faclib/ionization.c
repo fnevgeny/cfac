@@ -1,7 +1,7 @@
 #include "ionization.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: ionization.c,v 1.3 2010/11/25 17:06:26 fnevgeny Exp $";
+static char *rcsid="$Id: ionization.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -249,7 +249,7 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
   int kl0, kl0p, kl1, kl1p;
   int j0, j1, j1min, j1max;
   double z, z2, r, rp, sd, se, s;
-  double eps, a, b, h, jb1;
+  double jb1;
   int kl_max0, kl_max1, kl_max2, kl_min2, max0;
   int type;
   int np = 3, one = 1;
@@ -536,7 +536,7 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
 }
 
 double *CIRadialQkIntegratedTable(int kb, int kbp) {
-  int index[2], ie, ite, i, j, k, nqk, qlog;
+  int index[2], ie, ite, i, k, nqk, qlog;
   double **p, *qkc, e1, e2;
   double yint[NINT], integrand[NINT];
   double ymin, ymax, dy, y, bte, bms;
@@ -676,7 +676,7 @@ int IonizeStrengthUTA(double *qku, double *qkc, double *te,
   INTERACT_DATUM *idatum;
   LEVEL *lev1, *lev2;
   int jb, kb, qb, klb, nq, ierr;
-  double bethe, b0, c, cmax, qke[MAXNUSR], sigma[MAXNUSR];
+  double bethe, b0, qke[MAXNUSR], sigma[MAXNUSR];
   int ns, nqk, ip, i, j;
   double tol, x[MAXNE], logx[MAXNE], es;
     
@@ -1416,7 +1416,7 @@ int IonizeStrengthMSub(double *qku, double *te, int b, int f) {
   ANGULAR_ZFB *ang;
   double c, d, x[MAXNE], logx[MAXNE];
   double qkc[MAXMSUB*MAXNE], *rqk;
-  int j1, j2, m1, m2, nz, i, ip, j, ie, kb, kbp;
+  int j1, j2, m1, m2, nz, i, ip, ie, kb, kbp;
   
   lev1 = GetLevel(b);
   lev2 = GetLevel(f);

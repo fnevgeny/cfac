@@ -1,7 +1,7 @@
 #include "excitation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: excitation.c,v 1.3 2010/11/25 17:06:26 fnevgeny Exp $";
+static char *rcsid="$Id: excitation.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -41,8 +41,6 @@ static int n_phigrid = 0;
 static double phigrid[MAXNPHI];
 
 #define NKINT 256
-static double kgrid[NKINT];
-static double log_kgrid[NKINT];
 static double kint[NKINT];
 static double log_kint[NKINT];
 static double gos1[NKINT];
@@ -64,7 +62,6 @@ static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 5E-2, 0, 0, 10, {}, {}};
 
 static MULTI *pk_array;
 static MULTI *qk_array;
-static MULTI *qkm_array;
 
 static void InitCEPK(void *p, int n) {
   CEPK *d;
@@ -536,7 +533,7 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
   int j0, j1, j2, j3;
   int ko2, t, nk, ty, bnk;
   double r, c0, c1, dk;
-  double x, b, d, c, a, h, g0, b0, b1, a0 = 0.0, a1 = 0.0;
+  double x, d, c, a, h, b0, b1, a0 = 0.0, a1 = 0.0;
   double *g1, *g2, *x1, *x2;
   double bte, bms;
   FORM_FACTOR *bform;
@@ -654,7 +651,7 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   int kkp, iq, bnk;
   double xc, theta, dnu1, pqa[MAXMSUB];
   double r, c0, c1, c01, dk, a0 = 0.0, a1 = 0.0;
-  double x, b, d, c, a, h, g0, b0, b1, bte, bms;  
+  double x, d, c, a, h, b0, b1, bte, bms;  
   double *g1, *g2, *x1, *x2;
   double gosm1[MAXMSUB][NKINT];
   double gosm2[MAXMSUB][NKINT];
@@ -800,7 +797,7 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
 }
 
 double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
-  int type = 0, t, ie, ite, ipk, ipkp, nqk, nopb;
+  int type = 0, t, ie, ite, ipk, ipkp, nqk;
   int i, j, kl0, kl1, kl, nkappa, nkl, nkappap, nklp;
   CEPK *cepk, *cepkp, *tmp;
   short *kappa0, *kappa1, *kappa0p, *kappa1p;
@@ -1621,7 +1618,6 @@ int CollisionStrengthUTA(double *qkt, double *params, double *e, double *bethe,
   double fvec[MAXNE], fjac[MAXNE*NPARAMS];
   double born_egrid, born_cross, c, d, r;
   double bte, bms;
-  FORM_FACTOR *bform;
   
   lev1 = GetLevel(lower);
   if (lev1 == NULL) return -1;
@@ -1791,7 +1787,6 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
   int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k, nmk;
   ANGULAR_ZMIX *ang, *angp;
   double bte, bms;
-  FORM_FACTOR *bform;
         
   lev1 = GetEBLevel(lower);
   if (lev1 == NULL) return -1;
@@ -1898,7 +1893,7 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
 int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
 			 int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
-  double te, a, ap, c, cp, r, s[3];
+  double te, a, ap, c, cp, r;
   double rq[(MAXNE+2)*MAXMSUB];
   double d, d1, d2, rs;
   int q, nq, kkp, qb, qbp, ith, iph, m, ka, nmk;
@@ -1908,7 +1903,6 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
   int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k;
   ANGULAR_ZMIX *ang, *angp;
   double bte, bms;
-  FORM_FACTOR *bform;
       
   lev1 = GetEBLevel(lower);
   if (lev1 == NULL) return -1;
@@ -2041,7 +2035,7 @@ int CollisionStrength(double *qkt, double *params, double *e, double *bethe,
   LEVEL *lev1, *lev2;
   double te, c, r, s3j, c1, c2, *mbk, aw;
   ANGULAR_ZMIX *ang;
-  int nz, j1, j2, ie, nk, np, nq, kkp, nmk;
+  int nz, j1, j2, ie, np, nq, kkp, nmk;
   double rq[MAXMSUB*(MAXNE+1)];
   double qkc[MAXMSUB*(MAXNE+1)];
   double *rqk, *rqkt, tol;
@@ -2051,7 +2045,6 @@ int CollisionStrength(double *qkt, double *params, double *e, double *bethe,
   double fvec[MAXNE], fjac[MAXNE*NPARAMS];
   double born_egrid, born_cross, bt, ubt[MAXNUSR];
   double bte, bms;
-  FORM_FACTOR *bform;
 
   lev1 = GetLevel(lower);
   if (lev1 == NULL) return -1;
@@ -2812,7 +2805,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
 int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   int nlow, *low, nup, *up;
-  int i, j, k, n, m, ie;
+  int i, j, k, m, ie;
   CEF_RECORD r;
   CEF_HEADER ce_hdr;
   F_HEADER fhdr;
@@ -3060,7 +3053,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 
 int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   int nlow, *low, nup, *up;
-  int i, j, k, n, m, ie;
+  int i, j, k, m, ie;
   CEMF_RECORD r;
   CEMF_HEADER ce_hdr;
   F_HEADER fhdr;

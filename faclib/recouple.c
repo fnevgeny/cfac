@@ -1,7 +1,7 @@
 #include "recouple.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: recouple.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: recouple.c,v 1.2 2010/11/25 18:11:06 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -197,7 +197,7 @@ double DecoupleShell(int n_shells, SHELL_STATE *bra, SHELL_STATE *ket,
 double DecoupleShellRecursive(int n_shells, SHELL_STATE *bra, SHELL_STATE *ket, 
 			      int n_interact, int *interact, int *rank) {
   double coeff, a;
-  int Jbra, Jket, j1bra, j1ket, j2bra, j2ket, i;
+  int Jbra, Jket, j1bra, j1ket, j2bra, j2ket;
   int k1, k2, k;
 
   coeff = 0.0;
@@ -1793,7 +1793,7 @@ int CoupleSuccessive(int n, int *ik, int itr, TRIADS tr, int *i0) {
 int RecoupleTensor(int ns, INTERACT_SHELL *s, FORMULA *fm) {
   int ninter, nop;
   int *inter, *interp, *irank, *order;
-  int i, j, ij, itr, m;
+  int i, j, ij, itr;
   int ik[MAXJ], fk[MAXJ];
 
   order = fm->order;
@@ -1860,7 +1860,7 @@ int RecoupleTensor(int ns, INTERACT_SHELL *s, FORMULA *fm) {
 
 void EvaluateTensor(int nshells, SHELL_STATE *bra, SHELL_STATE *ket,
 		    INTERACT_SHELL *s, int itr, FORMULA *fm) {
-  int i, j, k, i0, j0, j1, kmin, kmax, ncp;
+  int i, k, i0, j0, j1, kmin, kmax, ncp;
   int *js, m, nop, k1, k2, ns, ninter;
   int *order, *inter, *interp, *irank;
   double a, b, a1, a2, *r;
@@ -1981,7 +1981,6 @@ void TestAngular(void) {
   SHELL_STATE *sbra, *sket;
   INTERACT_DATUM *idatum;
   INTERACT_SHELL *s;
-  INTERACT_SHELL es[4];
   char name1[LEVEL_NAME_LEN];
   char name2[LEVEL_NAME_LEN];
   int phase, q;
@@ -2119,13 +2118,9 @@ void TestAngular(void) {
 void CheckAngularConsistency(int n_shells, SHELL *bra, 
 			     SHELL_STATE *sbra, SHELL_STATE *sket,
 			     INTERACT_SHELL *ss, int phase) {
-  int nk1, *kk1, nk2, *kk2, nk3, *kk3, i, j, k, nk0, *k0;
-  int k1, k2, k3, j1, j2, j3, imin, imax, p, p2, p3, err;
-  double *ang1, *ang2, *ang3, *ang4, z0, *x, y;
-  CONFIG icfg;
+  int nk1, *kk1, *kk2, i, j, k;
+  double *ang1, y;
   INTERACT_SHELL s[4];
-  SHELL *t;
-  int maxq;
   FORMULA fm;
 
   fm.js[0] = 0;

@@ -30,8 +30,6 @@ PYINC  = `python-config --includes`
 
 RANLIB = @RANLIB@
 
-TOPDIR = @TOPDIR@
-
 CC       = @CC@
 CFLAGS   = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
@@ -47,6 +45,7 @@ INSTALLDIR = @INSTALL@ -d
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
+datarootdir = @datarootdir@
 
 BINDIR  = @bindir@
 DOCDIR  = @docdir@

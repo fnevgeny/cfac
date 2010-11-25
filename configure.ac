@@ -4,9 +4,6 @@ AC_INIT
 AC_CONFIG_HEADERS([sysdef.h:sysdef.h.in])
 AC_PREFIX_DEFAULT("/usr/local")
 
-TOPDIR=`pwd`
-AC_SUBST(TOPDIR)
-
 AC_CANONICAL_HOST
 
 # Checks for programs.
@@ -250,10 +247,6 @@ FFLAGSNO="$FFLAGS"
 AC_SUBST(FFLAGSNO)
 FFLAGS="$FFLAGS $fopt"
       
-# add include pathes.	      
-CPPFLAGS="$CPPFLAGS -I$TOPDIR -I$TOPDIR/faclib"
-LDFLAGS="$LDFLAGS"
-
 AC_CONFIG_FILES([Make.conf])
 
 if test -z "$PYTHON"

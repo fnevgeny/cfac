@@ -2,7 +2,7 @@ TOP = ..
 
 include $(TOP)/Make.conf
 
-ALL_CFLAGS = $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) $(LIBS)
+ALL_CFLAGS = $(CPPFLAGS) -I$(TOP) -I$(TOP)/faclib $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 PROGS = sfac scrm spol
 

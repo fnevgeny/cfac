@@ -15,7 +15,7 @@ OBJS = $(COBJS) $(FOBJS)
 	$(FC) -c ${FFLAGS} $<
 
 .c.o: 
-	$(CC) -c ${CPPFLAGS} ${CFLAGS} $<
+	$(CC) -c -I$(TOP) ${CPPFLAGS} ${CFLAGS} $<
 
 
 all : library

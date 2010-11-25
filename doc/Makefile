@@ -8,7 +8,10 @@ manual.pdf: manual.tex
 	pdflatex manual
 
 clean:
-	rm -rf *~ *.aux *.bbl *.blg *.idx *.log *.out *.pdf *.toc *.ilg *.ind
+	rm -f *~ *.aux *.bbl *.blg *.idx *.log *.out *.toc *.ilg *.ind
+
+devclean: clean
+	rm -f manual.pdf
 
 check: dummy
 

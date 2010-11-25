@@ -1,7 +1,7 @@
 #include "interpolation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: interpolation.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: interpolation.c,v 1.3 2010/11/25 17:15:58 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -3392,4 +3392,4 @@ void ModifyTable(char *fn, char *fn0, char *fn1, char *fnm) {
 void F77Flush(void) {
   fflush(stdout);
 }
-FCALLSCSUB0(F77Flush, F77FLUSH, f77flush);
+FCALLSCSUB0(F77Flush, F77FLUSH, f77flush)

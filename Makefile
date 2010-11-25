@@ -16,8 +16,8 @@ all : subdirs
 
 pfac:   $(FACLIBS)
 	${PYTHON} setup.py build --force -extracomp="${CFLAGS}" -extralink="$(FACLIBS) ${LIBS}"
-#mpy:
-#	${PYTHON} setup.py build -mpy -extracomp="${CFLAGS}" -extralink="$(FACLIBS) ${LIBS}"
+mpy:
+	${PYTHON} setup.py build -mpy -extracomp="${CFLAGS}" -extralink="$(FACLIBS) ${LIBS}"
 
 install : subdirs
 	@set -e; for i in $(SUBDIRS); do (cd $$i; $(MAKE) install) || exit 1; done

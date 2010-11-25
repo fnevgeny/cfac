@@ -23,6 +23,8 @@ FACLIBS = $(CFAC_FAC_LIB) $(CFAC_COUL_LIB) $(CFAC_IONIS_LIB) $(CFAC_ODE_LIB) \
 	  $(CFAC_BLAS_LIB)
 
 PYTHON = @PYTHON@
+PYLIB  = `python-config --libs`
+PYINC  = `python-config --includes`
 
 RANLIB = @RANLIB@
 
@@ -35,6 +37,5 @@ CPPFLAGS = @CPPFLAGS@
 FC       = @F77@
 FFLAGS 	 = @FFLAGS@
 FFLAGSNO = @FFLAGSNO@
-
 
 LIBS = @LDFLAGS@ @LIBS@ @FLIBS@

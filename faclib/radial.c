@@ -1,7 +1,7 @@
 #include "radial.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: radial.c,v 1.2 2010/11/11 15:33:38 fnevgeny Exp $";
+static char *rcsid="$Id: radial.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -210,7 +210,7 @@ int GetBoundary(double *rb, double *b, int *nmax, double *dr) {
 
 int SetBoundary(int nmax, double p, double bqp) {
   ORBITAL *orb;
-  int i, j, n, kl, kl2, kappa, k;
+  int i = 0, j, n, kl, kl2, kappa, k;
   double d1, d2, d;
 
   if (nmax == -100) {
@@ -1447,7 +1447,7 @@ static double GKB(int ka, int kb, int k) {
   
 static double ConfigEnergyVarianceParts0(SHELL *bra, int ia, int ib, 
 					 int m2, int p) {
-  int ja, jb, k, kp, k0, k1, kp0, kp1, ka, kb;
+  int ja, jb = 0, k, kp, k0, k1, kp0, kp1, ka, kb = 0;
   double a, b, c, d, e;
 
   ja = GetJFromKappa(bra[ia].kappa);
@@ -1521,7 +1521,8 @@ static double ConfigEnergyVarianceParts0(SHELL *bra, int ia, int ib,
     for (k = k0; k <= k1; k += 4) {
       for (kp = k0; kp <= k1; kp += 4) {
 	b = 0.0;
-	if (k = kp) b += 1.0/((k+1.0)*(jb+1.0));
+	/* TODO: should it be (k == kp) ??? */
+        if ((k = kp)) b += 1.0/((k+1.0)*(jb+1.0));
 	b -= W9j(ja, ja, k, ja, m2, jb, kp, jb, jb);
 	b -= W6j(ja, jb, m2, jb, ja, k)*W6j(ja, jb, m2, jb, ja, kp)/ja;
 	b /= ja;
@@ -3910,7 +3911,7 @@ int IntegrateSubRegion(int i0, int i1,
   ORBITAL *tmp;
   double *large1, *large2, *small1, *small2;
   double *x, *y, *r1, *x1, *x2, *y1, *y2;
-  double a, b, e1, e2, a2, r0;
+  double a, b, e1, e2, a2, r0 = 0.0;
 
   if (i1 <= i0) return 0;
   type = abs(t);
@@ -4707,8 +4708,8 @@ int IntegrateSinCos(int j, double *x, double *y,
   double si0, si1, cs0, cs1;
   double is0, is1, is2, is3;
   double ic0, ic1, ic2, ic3;
-  double his0, his1, his2, his3;
-  double hic0, hic1, hic2, hic3;
+  double his0 = 0.0, his1 = 0.0, his2 = 0.0, his3 = 0.0;
+  double hic0 = 0.0, hic1 = 0.0, hic2 = 0.0, hic3 = 0.0;
   double a0, a1, a2, a3;
   double d, p, h, dr;
   double *z, *u, *w, *u1, *w1;

@@ -198,6 +198,8 @@ int CoupleSuccessive(int n, int *ik, int itr, TRIADS tr, int *i0);
 int RecoupleTensor(int ns, INTERACT_SHELL *s, FORMULA *fm);
 void EvaluateTensor(int nshells, SHELL_STATE *bra, SHELL_STATE *ket,
 		    INTERACT_SHELL *s, int itr, FORMULA *fm);
+int ConstructLevelName(char *name, char *sname, char *nc, 
+		       int *vnl, STATE *basis);
 #endif
 
 

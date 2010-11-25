@@ -64,6 +64,7 @@ int SetPotentialUehling(POTENTIAL *pot, int vp);
 int SetPotentialVc(POTENTIAL *pot);
 int SetPotentialU(POTENTIAL *pot, int n, double *u);
 int SetPotentialW (POTENTIAL *pot, double e, int kappa);
+int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot);
 
 #endif
 

@@ -1,7 +1,7 @@
 #include "orbital.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: orbital.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: orbital.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -256,7 +256,7 @@ void Differential(double *p, double *dp, int i1, int i2) {
 }    
 
 static double DpDr(int kappa, int i1, double e, POTENTIAL *pot, double b) {
-  double *p, bqp, p1, p2;
+  double *p, bqp, p1, p2 = 0.0;
   int k;
   
   p = _dwork;
@@ -484,7 +484,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
 
 int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   double z, z0, e, de, ep, delta, emin, emax;
-  double *p, norm2, fact, p1, p2, qo, qi, bqp;
+  double *p, norm2, fact, p1, p2 = 0.0, qo, qi, bqp;
   int i, k, kl, nr, nodes, niter;
   int i2, i2m1, i2m2, i2p1, i2p2, i1;
   
@@ -867,7 +867,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
 int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   double z, z0, e, de, ep, delta, emin, emax;
   double *p, norm2, fact, p1, p2, qo, qi;
-  int i, kl, nr, nodes, niter;
+  int i, kl, nr, nodes = 0, niter;
   int i2, i2m1, i2m2, i2p1, i2p2;
   
   kl = orb->kappa;
@@ -1891,7 +1891,7 @@ double InnerProduct(int i1, int n, double *p1, double *p2, POTENTIAL *pot) {
 int SetOrbitalRGrid(POTENTIAL *pot) {
   int i;  
   double z0, z, d1, d2, del, gratio, gasymp;
-  double a, b, c, r1, rmin, rmax;
+  double a = 0.0, b, c = 0.0, r1, rmin, rmax = 0.0;
 
   gratio = pot->ratio;
   gasymp = pot->asymp;

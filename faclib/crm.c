@@ -3,7 +3,7 @@
 #include "grid.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: crm.c,v 1.3 2010/08/15 14:37:48 fnevgeny Exp $";
+static char *rcsid="$Id: crm.c,v 1.4 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -459,14 +459,14 @@ void ExtrapolateEN(int iion, ION *ion) {
 void ExtrapolateTR(ION *ion, int inv) {
   RECOMBINED *rec;
   RATE *r, *rp, r0;
-  ARRAY *rates, *rates0;
+  ARRAY *rates, *rates0 = NULL;
   LBLOCK *blk, *blk0;
   BLK_RATE *brts, *brts0;
   int nr;
   int n0, n1, n;
   int i, j, t, k, p, q, s;
   int imin, imax, iuta;
-  double a, b, c, h;
+  double a, b, c, h = 0.0;
 
   iuta = IsUTA();
   for (i = 0; i < ion->recombined->dim; i++) {
@@ -556,7 +556,7 @@ void ExtrapolateTR(ION *ion, int inv) {
 void ExtrapolateRR(ION *ion, int inv) {
   RECOMBINED *rec;
   RATE *r, *rp, r0;
-  ARRAY *rates, *rates0;
+  ARRAY *rates, *rates0 = NULL;
   LBLOCK *blk0;
   BLK_RATE *brts, *brts0;
   DISTRIBUTION *dist;
@@ -715,12 +715,12 @@ int SetBlocks(double ni, char *ifn) {
   ION *ion, *ion1 = NULL;
   F_HEADER fh;
   EN_HEADER h;
-  EN_RECORD r, *r0, *r1;
+  EN_RECORD r, *r0, *r1 = NULL;
   EN_RECORD *rionized;
   LBLOCK blk, *blkp;
   RECOMBINED *rec, rec0;
   NCOMPLEX ncomplex[MAXNCOMPLEX];
-  int bmin, bmax, imin, imax, t, nrec;
+  int bmin = 0, bmax, imin = 0, imax, t, nrec;
   int ibase, tbase;
   FILE *f;
   int n, i, k, nb, nb0, nlevels;
@@ -1427,6 +1427,10 @@ int TransitionType(NCOMPLEX *ic, NCOMPLEX *fc) {
   } else {
     return k1*100+k2;
   }
+  
+  /* should never be reached */
+  printf("Error in TransitionType, aborting\n");
+  exit(1);
 }
 
 int SetAbund(int nele, double abund) {
@@ -2648,7 +2652,7 @@ int BlockMatrix(void) {
   RATE *r;
   LBLOCK *blk1, *blk2;
   BLK_RATE *brts;
-  int n, k, m, i, j, t, p, q;
+  int n, k, m, i, j, t, p = 0, q;
   double a, den;
   
   n = blocks->dim;
@@ -3389,7 +3393,7 @@ int SpecTable(char *fn, int rrc, double strength_threshold) {
   ION *ion;
   RATE *rt, *dev;
   LBLOCK *blk, *iblk, *fblk;
-  BLK_RATE *brts, *brdev;
+  BLK_RATE *brts, *brdev = NULL;
   int k, m, j;
   FILE *f;
   double e, a, e0;
@@ -3585,7 +3589,7 @@ int SelectLines(char *ifn, char *ofn, int nele, int type,
   int n, nb, i;
   int t, t0, t1, t2;
   int r0, r1;
-  int low, up;
+  int low = 0, up = 0;
   double e, a, smax;
   int swp;  
   
@@ -3933,8 +3937,8 @@ int PlotSpec(char *ifn, char *ofn, int nele, int type,
 
 int AddRate(ION *ion, ARRAY *rts, RATE *r, int m) {
   LBLOCK *ib, *fb;
-  BLK_RATE *brt, brt0;
-  RATE *r0;
+  BLK_RATE *brt = NULL, brt0;
+  RATE *r0 = NULL;
   int i;
   
   ib = ion->iblock[r->i];
@@ -4493,7 +4497,7 @@ int SetAIRates(int inv) {
   int nb, i, ib;
   int n, k;
   int j1, j2;
-  ION *ion, *ion1;
+  ION *ion, *ion1 = NULL;
   RATE rt;
   F_HEADER fh;
   AI_HEADER h;
@@ -5069,10 +5073,10 @@ void TabNLTE(char *fn1, char *fn2, char *fn3, char *fn,
   char buf[1000];
   double *ab, *stot, *scol, *spho, *saut;
   double abt, *atot, *acol, *apho, *aaut;
-  double pbb, pbf, pff, pfn, eint, eint1, te, te1;
-  double ne, ni, gpbf, gcbf, gaut, gpbb, gcbb, rtot;
+  double pbb, pbf, pff, pfn, eint, eint1, te = 0.0, te1 = 0.0;
+  double ne = 0.0, ni, gpbf, gcbf, gaut, gpbb, gcbb, rtot;
   double zbar, m2, m3, adx, *xg, *eg, *yg[3], tmp;
-  int nmaxt, *nmax, i, j, t, k, z, n, *ilev;
+  int nmaxt, *nmax, i, j, t, k = 0, z, n, *ilev;
   int swp1, swp2, swp3, m, nx, nions, nlevs;
   NCOMPLEX cmpx[MAXNCOMPLEX];
   F_HEADER fh1, fh2, fh3;

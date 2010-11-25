@@ -1,7 +1,7 @@
 #include "interpolation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: interpolation.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: interpolation.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -2466,7 +2466,7 @@ int TotalRRCross(char *ifn, char *ofn, int ilev,
   float e, eph, ee, phi, rr;
   double *xusr, *dstrength, *c, tc, emax;
   double x, y;
-  int np=3, one=1, nele;
+  int np=3, one=1, nele = 0;
   EN_SRECORD *mem_en_table;
   int mem_en_table_size;
 
@@ -3295,7 +3295,7 @@ void ModifyTable(char *fn, char *fn0, char *fn1, char *fnm) {
   TR_RECORD *tr;
   CE_HEADER *ch;  
   CE_RECORD *cr;
-  void *hp, *rp;
+  void *hp = NULL, *rp = NULL;
   
   f0 = fopen(fn0, "r");
   if (f0 == NULL) {

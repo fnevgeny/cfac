@@ -1,7 +1,7 @@
 #include "dbase.h"
 #include "structure.h"
 
-static char *rcsid="$Id: dbase.c,v 1.4 2010/08/15 14:37:48 fnevgeny Exp $";
+static char *rcsid="$Id: dbase.c,v 1.5 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -3680,7 +3680,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t;
   int nb;
   int m, k, p1, p2;
-  float a, e;
+  float a, e = 0.0;
   double bte, bms, be;
 
   nb = 0;
@@ -3796,7 +3796,7 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t;
   int nb;
   int m;
-  float a, e;
+  float a, e = 0.0;
   double bte, bms, be;
 
   nb = 0;
@@ -3882,7 +3882,7 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t;
   int nb;
   int m, k, na, ith, iph;
-  float a, e;
+  float a, e = 0.0;
   double bte, bms, be;
 
   nb = 0;
@@ -3987,7 +3987,7 @@ int PrintRRTable(FILE *f1, FILE *f2, int v, int swp) {
   RR_RECORD r;
   int n, i, t;
   int nb, k, m;
-  float e, eph, ee, phi, rr;
+  float e = 0.0, eph, ee, phi, rr;
 
   nb = 0;
   while (1) {
@@ -4266,7 +4266,7 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
   CI_RECORD r;
   int n, i, t;
   int nb, m;
-  float e, a;
+  float e = 0.0, a;
   double bte, bms, be;
 
   nb = 0;
@@ -4780,7 +4780,7 @@ int ISearch(int i, int n, int *ia) {
 
 int AdjustEnergy(int nlevs, int *ilevs, double *e, 
 		 char *efn0, char *efn1, char *afn0, char *afn1) {
-  int i, k, k0, k1, n, ig, swp, nb;
+  int i, k, k0, k1, n, ig = 0, swp, nb;
   double ae0, ae1, e0, e1;
   FILE *f0, *f1;
   F_HEADER efh, afh;

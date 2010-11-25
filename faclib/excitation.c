@@ -1,7 +1,7 @@
 #include "excitation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: excitation.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: excitation.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -293,7 +293,7 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
   int j0, j1, kl_max, j1min, j1max;
   ORBITAL *orb0, *orb1;
   int index[3];
-  double te, e0, e1, sd, se;
+  double te, e0 = 0.0, e1, sd, se;
   double a, tdi[MAXNTE], tex[MAXNTE];
   int js1, js3, js[4], ks[4];
   int nkappa, noex[MAXNTE];
@@ -536,7 +536,7 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
   int j0, j1, j2, j3;
   int ko2, t, nk, ty, bnk;
   double r, c0, c1, dk;
-  double x, b, d, c, a, h, g0, b0, b1, a0, a1;
+  double x, b, d, c, a, h, g0, b0, b1, a0 = 0.0, a1 = 0.0;
   double *g1, *g2, *x1, *x2;
   double bte, bms;
   FORM_FACTOR *bform;
@@ -653,7 +653,7 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   int nudiff, mu1, mu2, ierr, ipqa[MAXMSUB];
   int kkp, iq, bnk;
   double xc, theta, dnu1, pqa[MAXMSUB];
-  double r, c0, c1, c01, dk, a0, a1;
+  double r, c0, c1, c01, dk, a0 = 0.0, a1 = 0.0;
   double x, b, d, c, a, h, g0, b0, b1, bte, bms;  
   double *g1, *g2, *x1, *x2;
   double gosm1[MAXMSUB][NKINT];
@@ -800,7 +800,7 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
 }
 
 double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
-  int type, t, ie, ite, ipk, ipkp, nqk, nopb;
+  int type = 0, t, ie, ite, ipk, ipkp, nqk, nopb;
   int i, j, kl0, kl1, kl, nkappa, nkl, nkappap, nklp;
   CEPK *cepk, *cepkp, *tmp;
   short *kappa0, *kappa1, *kappa0p, *kappa1p;
@@ -1070,7 +1070,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
 }
 
 double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
-  int type1, type2, kl, nqk;
+  int type1 = 0, type2 = 0, kl, nqk;
   int i, j, kl0, klp0, kl0_2, klp0_2, kl1;
   CEPK *cepk, *cepkp;
   int nkappa, nkappap, nkl, nklp;

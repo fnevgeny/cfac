@@ -1,7 +1,7 @@
 #include "angular.h"
 #include "rcfp.h"
 
-static char *rcsid="$Id: rcfp.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: rcfp.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -82,11 +82,11 @@ static RCFP_TERM terms_jj[63] = {
 /* Set-up the reduced coefficients of fractional parentage (rcfp) */
 /* j = 1/2  */
 static REDUCED_COEFF rcfp_one_half[1][1] = {                            
-  reduced_coeff(-1,      4,     1) };
+  {reduced_coeff(-1,      4,     1)} };
 
 /* j = 3/2 */            
 static REDUCED_COEFF rcfp_three_half[2][1] = {                           
-  reduced_coeff(-1,     12,     1), reduced_coeff(-1,     20,     1)};
+  {reduced_coeff(-1,     12,     1)}, {reduced_coeff(-1,     20,     1)}};
 
 /* j = 5/2 */         
 static REDUCED_COEFF rcfp_five_half[3][3] = {
@@ -415,7 +415,7 @@ static REDUCED_COEFF W_01_seven_half[14] = {
     
   
 static REDUCED_COEFF W_12_three_half_odd[1][1] = {
-  reduced_coeff( 1,    60,     1)                   };
+  {reduced_coeff( 1,    60,     1)}                   };
     
    
 static REDUCED_COEFF W_12_three_half_even[2][2] = {
@@ -477,7 +477,7 @@ static REDUCED_COEFF W_12_seven_half_even[36] = {
 
  
 static REDUCED_COEFF W_03_three_half_odd[1][1] = {
-  reduced_coeff(-1,    28,     1)                   };
+  {reduced_coeff(-1,    28,     1)}                   };
     
    
 static REDUCED_COEFF W_03_three_half_even[2][2] = {
@@ -761,7 +761,7 @@ static int rcfp_max_even[63] = {
 */
 double ReducedCFP(int no_bra, int no_ket) {
   double coeff;
-  int no_a, no_b, phase, nom, denom;
+  int no_a, no_b, phase = 0, nom = 0, denom = 0;
 
   coeff = 0.0;
 
@@ -1085,7 +1085,7 @@ double CompleteReducedWAll(REDUCED_COEFF *w1, REDUCED_COEFF *w3,
 			   REDUCED_COEFF *w5, REDUCED_COEFF *w7,
 			   int no_bra, int no_ket) {
   double coeff;
-  int phase, nom, denom;
+  int phase = 0, nom = 0, denom = 0;
   
   coeff = 0.0;
   

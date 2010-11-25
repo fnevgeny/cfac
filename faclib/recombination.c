@@ -2,7 +2,7 @@
 #include "time.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: recombination.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: recombination.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -976,11 +976,11 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   ANGULAR_ZFB *ang;
   ORBITAL *orb;
   int nz, ie, k;
-  double a, b, d, amax, eb0, z;
+  double a, b, d, amax, eb0 = 0.0, z;
   double rq[MAXNE], tq[MAXNE];
   int i, j, c;
   int gauge, mode;
-  int nkl, nq;
+  int nkl, nq = 0;
   int kb, kbp, jb, klb, jbp;
 
   lev1 = GetLevel(rec);

@@ -1,7 +1,7 @@
 #include "mbpt.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: mbpt.c,v 1.2 2010/07/26 14:28:32 fnevgeny Exp $";
+static char *rcsid="$Id: mbpt.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -250,7 +250,7 @@ void RemoveEmpty(CONFIG *c) {
 void BaseConfig(int n, int *kg, int n3, int *n3g, int n4, int *n4g,
 		int n1, int *n1g, int n2, int *n2g, int *nbc, CONFIG **bc, 
 		int *nbc1, CONFIG **bc1, int *nb, int **bk, FILE *f) {
-  int nmax, nsm, ncs, i, j, km, k, t, m, p, jp, nq;
+  int nmax, nsm, ncs, i, j, km, k, t, m, p, jp, nq = 0;
   int mcs, m1e, m2e, mpe, mcs1, *ik, em[2], t1, t2;
   CONFIG *c, *c1, **c0;
   CONFIG_GROUP *g;
@@ -607,7 +607,7 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
   double a1, a2, d, a, b, *e1, *ham;
   CORR_CONFIG cc, *ccp, *ccp1;
   ARRAY ccfg;
-  int *icg, ncg, icg0, icg1, rg;
+  int *icg = NULL, ncg, icg0, icg1, rg;
   typedef struct _MBPT_BASE_ {
     int isym;
     int nbasis, nb2, bmax;
@@ -1097,7 +1097,7 @@ int CheckInteraction(int ns, SHELL *bra, SHELL *ket,
 int CheckConfig(int ns, SHELL *ket, int np, int *op, int nm, int *om,
 		int nc, CONFIG **cs) {
   int i, k, m, nq;
-  CONFIG *c;
+  CONFIG *c = NULL;
 
   k = 0;
   if (nc > 0) {
@@ -1853,7 +1853,7 @@ void H11Term(MBPT_EFF **meff, CONFIG *c0, CONFIG *c1,
 	     int mst, int *bst, int *kst,
 	     INTERACT_SHELL *s, int ph, int k0, int k1, int k2, int k3,
 	     FORMULA *fm, double *a, int md, int i0) {
-  double y, d1, d2, r1, r2, *h1, *h2;
+  double y, d1, d2 = 0.0, r1, r2, *h1, *h2;
   int q0, q1, k, m0, m1, m, ms0, ms1, s0, s1, ng;
   ORBITAL *orb;
 
@@ -3027,7 +3027,7 @@ void FreeTransitionMBPT(MBPT_TR *mtr) {
 */
 int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm, 
 		   int n, int *ng, int n2, int *ng2, int nkg0) {
-  int *bas, *bas0, *bas1, *bas2, nlevels, nb, n3, q, nhab, nhab1;
+  int *bas, *bas0, *bas1, *bas2, nlevels, nb, n3, q, nhab = 0, nhab1 = 0;
   int i, j, k, i0, i1, n0, n1, isym, ierr, nc, m, mks, *ks;
   int pp, jj, nmax, na, *ga, k0, k1, m0, m1, nmax1, mst;
   int p0, p1, j0, j1, q0, q1, ms0, ms1, *bst, *kst, *bst0, *kst0;
@@ -3044,7 +3044,7 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
   double a, b, c, *mix, *hab, *hba, emin, emax;
   double *h0, *heff, *hab1, *hba1, *dw, dt, dtt;
   clock_t tt0, tt1, tbg;
-  FILE *f;
+  FILE *f = NULL;
   size_t dummy;
 					  
   ierr = 0;
@@ -3989,9 +3989,10 @@ void SaveTransitionMBPT(MBPT_TR *mtr) {
 int StructureReadMBPT(char *fn, char *fn2, int nf, char *fn1[],
 		      int nkg, int *kg, int nkg0) {
   int ierr, m, i, j, k, k0, k1, nlevels, n2m;
-  int isym, pp, jj, r, q, n, *ng, n0, *ng0, *n2, **ng2;
-  double *dw, *z1, *z2, *x, *y, *z, *t, *heff, **hab, **hba;
-  double **nab, **nba, *nab1, *nba1, *neff;
+  int isym, pp, jj, r, q, n, n0;
+  int *ng = NULL, *ng0 = NULL, *n2 = NULL, **ng2 = NULL;
+  double *dw, *z1, *z2, *x, *y, *z, *t, *heff, **hab = NULL, **hba = NULL;
+  double **nab = NULL, **nba = NULL, *nab1, *nba1, *neff;
   double a, b, na, nb;
   HAMILTON *h;
   SYMMETRY *sym;

@@ -3,7 +3,7 @@
 #include "structure.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: structure.c,v 1.2 2010/07/28 11:30:12 fnevgeny Exp $";
+static char *rcsid="$Id: structure.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -194,6 +194,7 @@ static void InitLevelData(void *p, int n) {
 
 int SetCILevel(m) {
   ci_level = m;
+  return 0;
 }
 
 int SetAngZCut(double cut) {
@@ -509,7 +510,7 @@ int ConstructHamiltonEB(int n, int *ilev) {
 }
 
 int ConstructHamilton(int isym, int k0, int k, int *kg, int kp, int *kgp, int md) {
-  int i, j, j0, t, jp, m1, m2, m3;
+  int i, j, j0, t, jp = 0, m1, m2, m3;
   HAMILTON *h;
   SHAMILTON *hs;
   ARRAY *st;
@@ -941,7 +942,7 @@ double HamiltonElementFB(int isym, int isi, int isj) {
   STATE *si, *sj;
   double r, sd, se, a;
   int i, ti, tj, ji, jj, j0, k0, k1, nz1, nz2;
-  int kz, ks[4];
+  int kz = 0, ks[4];
   ORBITAL *orb0, *orb1;
   ANGULAR_ZFB *a1;
   ANGULAR_ZxZMIX *a2;
@@ -2207,7 +2208,7 @@ int GetNumLevels(void) {
 }
 
 int GetPrincipleBasis(double *mix, int d, int *kpb) {
-  int i, k, t, q, iskpb;
+  int i, k = 0, t, q, iskpb;
   double c;
   double fm;
 
@@ -2774,7 +2775,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
   char jsym;
   char ashell[16];
   CONFIG *c;
-  SHELL_STATE *s;
+  SHELL_STATE *s = NULL;
   ORBITAL *orb;
   LEVEL *lev;
   SYMMETRY *sym;
@@ -3493,7 +3494,7 @@ int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
 
 int PrepAngular(int n1, int *is1, int n2, int *is2) {
   int i1, i2, ih1, ih2, ns1, ns2, ne1, ne2;
-  int iz, is, i, nz, ns;
+  int iz, is, i, nz, ns = 0;
   SYMMETRY *sym1, *sym2;
   STATE *s1, *s2;
   LEVEL *lev1, *lev2;
@@ -3714,8 +3715,8 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
   int kg1, kg2, kc1, kc2;
   int ih1, ih2, isz0, isz;
   int jlow, jup, kb1, kb2;
-  int nz, n, ns, im, nk, naw;
-  double r0, *awgrid, *rg, aw;
+  int nz, n, ns, im, nk, naw = 0;
+  double r0, *awgrid, *rg, aw = 0.0;
   int ik, kmin, kmax, m, nmax;
   int nz_sub, nfb;
   STATE *slow, *sup;

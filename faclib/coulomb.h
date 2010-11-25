@@ -48,6 +48,7 @@
 ** NOTE:        
 */
 
+#include "config.h"
 #include "global.h"
 #include "array.h"
 #include "angular.h"

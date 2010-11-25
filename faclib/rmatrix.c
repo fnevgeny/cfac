@@ -1,7 +1,7 @@
 #include "rmatrix.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: rmatrix.c,v 1.2 2010/07/26 14:31:41 fnevgeny Exp $";
+static char *rcsid="$Id: rmatrix.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -2051,7 +2051,7 @@ int RMatrixCE(char *fn, int np, char *bfn[], char *rfn[],
   RMATRIX *rmx;
   FILE **f, *f1;
   int i, j, k, t, p, q, h, n, i0, ns, *iwork;
-  double *e0, *e, et, **s, ***sp, *r0, *r1, x;
+  double *e0, *e, et, **s, ***sp = NULL, *r0, *r1, x;
   int pp, jj, its0, its1, st0, ka0, ka1, mka0, mka1, npw;
   int nke, npe;
 
@@ -2318,6 +2318,9 @@ int RMatrixConvert(char *ifn, char *ofn, int m) {
     fclose(f1);
     return 0;
   }
+  /* should never be reached */
+  printf("Error in RMatrixConvert\n");
+  exit(1);
 }
 
 void TestRMatrix(double e, int m, char *fn1, char *fn2, char *fn3) {

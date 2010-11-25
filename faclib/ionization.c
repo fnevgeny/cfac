@@ -1,7 +1,7 @@
 #include "ionization.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: ionization.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: ionization.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -807,7 +807,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
   ORBITAL *orb;
   ANGULAR_ZFB *ang;
   double bethe, b0, c, c0, cmax, qke[MAXNUSR], sigma[MAXNUSR];
-  int nz, j0, j0p, kl0, kl, kb, kbp, nq, nqk, kb0;
+  int nz, j0, j0p, kl0 = 0, kl, kb, kbp, nq, nqk, kb0;
   double tol, x[MAXNE], logx[MAXNE], es;
 
   cmax = 0.0;

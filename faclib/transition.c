@@ -1,7 +1,7 @@
 #include "transition.h"
 #include <time.h>
 
-static char *rcsid="$Id: transition.c,v 1.2 2010/08/15 14:00:14 fnevgeny Exp $";
+static char *rcsid="$Id: transition.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -878,7 +878,7 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
   
 int SaveTransition(int nlow, int *low, int nup, int *up,
 		   char *fn, int m) {
-  int n, *alev, i, nc;
+  int n, *alev = NULL, i, nc;
   
   n = 0;
   if (nlow == 0 || nup == 0) {
@@ -972,7 +972,7 @@ int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
 }
 
 int PolarizeCoeff(char *ifn, char *ofn, int i0, int i1) {
-  FILE *f1, *f2;
+  FILE *f1, *f2 = NULL;
   int n, i, t, tp, k, q, s, sp, m, mp, m2;
   double a, c, e;
   F_HEADER fh;

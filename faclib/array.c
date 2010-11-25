@@ -1,6 +1,6 @@
 #include "array.h"
 
-static char *rcsid="$Id: array.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
+static char *rcsid="$Id: array.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -616,10 +616,10 @@ void *NMultiGet(MULTI *ma, int *k) {
 void *NMultiSet(MULTI *ma, int *k, void *d, 
 		void (*InitData)(void *, int),
 		void (*FreeElem)(void *)) {
-  int i, j, m, h;
-  MDATA *pt;
+  int i, j, m = 0, h;
+  MDATA *pt = NULL;
   ARRAY *a;
-  DATA *p, *p0;
+  DATA *p, *p0 = NULL;
 
   if (ma->maxelem > 0 && ma->numelem >= ma->maxelem) {
     NMultiFreeData(ma, FreeElem);

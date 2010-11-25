@@ -1,4 +1,4 @@
-static char *rcsid="$Id: polarization.c,v 1.2 2010/08/15 14:37:48 fnevgeny Exp $";
+static char *rcsid="$Id: polarization.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -1247,7 +1247,7 @@ int PolarizationTable(char *fn, char *ifn, int n, char **sc) {
   double FL[MAXPOL+1];
   double a, b, tem, e;
   char buf[128], *s;
-  int *trans, *tp, ns;
+  int *trans = NULL, *tp, ns;
 
   ns = 0;
   if (ifn) {

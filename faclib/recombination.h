@@ -64,5 +64,7 @@ int AIRadialPk(double **pk, int k0, int k1, int kb, int kappaf, int k);
 int AutoionizeRateUTA(double *rate, double *e, int rec, int f);
 int AutoionizeRate(double *rate, double *e, int rec, int f, int msub);
 int DROpen(int n, int *nlev, int **ops);
- 
+int BoundFreeOSUTA(double *rqu, double *rqc, double *eb, 
+		   int rec, int f, int m);
+
 #endif

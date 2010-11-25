@@ -4,7 +4,7 @@
 #include "interpolation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: rates.c,v 1.2 2010/07/26 15:07:04 fnevgeny Exp $";
+static char *rcsid="$Id: rates.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -1299,7 +1299,7 @@ static double PowerLaw(double e, double *p) {
 
 static double IncompleteGamma(double a, double x) {
   double gold=0.0, fac=1.0, b1=1.0, b0=0.0, a0=1.0;
-  double a1, an, ana, anf, g, ap, del, sum, y;
+  double a1, an, ana, anf, g = 0.0, ap, del, sum, y;
   int n;
 
   if (x < 0.0 || a <= 0.0) return 0.0;
@@ -1476,6 +1476,8 @@ int EleDist(char *fn, int n) {
   }
   
   fclose(f);
+  
+  return 0;
 }
 
 int SetEleDist(int i, int np, double *p0) {
@@ -1634,6 +1636,8 @@ int PhoDist(char *fn, int n) {
   }
   
   fclose(f);
+  
+  return 0;
 }
 
 int SetPhoDist(int i, int np, double *p) {

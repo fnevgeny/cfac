@@ -1,4 +1,4 @@
-static char *rcsid="$Id: scrm.c,v 1.1 2010/07/26 08:16:16 fnevgeny Exp $";
+static char *rcsid="$Id: scrm.c,v 1.2 2010/11/25 16:41:35 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -582,7 +582,7 @@ static int PModifyRates(int argc, char *argv[], int argt[],
  
 static int PSetUTA(int argc, char *argv[], int argt[], 
 		   ARRAY *variables) {
-  int m, mci;
+  int m = 0, mci = 0;
 
   if (argc == 1) {
     if (argt[0] != NUMBER) return -1;

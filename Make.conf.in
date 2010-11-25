@@ -2,6 +2,8 @@
 ## This is the top-level Make.conf.in.                        
 #############################################################
 
+PACKAGE=cfac
+
 @SET_MAKE@
 
 SHELL = /bin/sh
@@ -39,3 +41,12 @@ FFLAGS 	 = @FFLAGS@
 FFLAGSNO = @FFLAGSNO@
 
 LIBS = @LDFLAGS@ @LIBS@ @FLIBS@
+
+INSTALL = @INSTALL@
+INSTALLDIR = @INSTALL@ -d
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+BINDIR  = @bindir@
+DOCDIR  = @docdir@

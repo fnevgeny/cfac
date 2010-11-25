@@ -24,7 +24,7 @@ spol : 	spol.c stoken.c $(FACLIBS)
 	$(CC) -o spol spol.c stoken.c $(FACLIBS) $(ALL_CFLAGS)
 
 install :
-	$(INSTALL) -d $(BINDIR)
+	$(INSTALLDIR) $(BINDIR)
 	$(INSTALL) $(PROGS) $(BINDIR)
 
 clean :

@@ -21,3 +21,5 @@ clean:
 	cd pirr; make clean
 	cd aidr; make clean
 	cd ionization; make clean
+
+install : 

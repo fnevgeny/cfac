@@ -38,18 +38,18 @@ AC_MSG_RESULT([$FLIBS])
 
 #get optimization option for C and f77 compilers
 AC_ARG_ENABLE(copt,
-	[ --enable-copt=opt	optimization option for C compiler],
+	[  --enable-copt=opt       optimization option for C compiler],
 	[copt="$enableval"])
 AC_ARG_ENABLE(fopt,
-	[ --enable-fopt=opt	optimization option for F77 Compiler],
+	[  --enable-fopt=opt       optimization option for F77 Compiler],
 	[fopt="$enableval"])
 
 # get position independent code option for C and f77 compilers
 AC_ARG_ENABLE(cpic,
-	[ --enable-cpic=opt	PIC option for C compiler],
+	[  --enable-cpic=opt       PIC option for C compiler],
 	[cpic="$enableval"])
 AC_ARG_ENABLE(fpic,
-	[ --enable-fpic=opt	PIC option for F77 Compiler],
+	[  --enable-fpic=opt       PIC option for F77 Compiler],
 	[fpic="$enableval"])
 
 # override the default CFLAGS and FFLAGS for GCC and G77
@@ -80,14 +80,14 @@ FFLAGS="$fpic"
 
 # Debugging option
 AC_ARG_ENABLE(cdebug,
-	[  --enable-cdebug=opt    Debugging option for C],
+	[  --enable-cdebug=opt     Debugging option for C],
 	[cdebug_opt=$enableval])
 if test -n "$cdebug_opt"
 then
   CFLAGS="$CFLAGS $cdebug_opt"
 fi
 AC_ARG_ENABLE(fdebug,
-	[  --enable-fdebug=opt    Debugging option for F77],
+	[  --enable-fdebug=opt     Debugging option for F77],
 	[fdebug_opt=$enableval])
 if test -n "$fdebug_opt"
 then
@@ -96,7 +96,7 @@ fi
   
 # gcc warnings
 AC_ARG_ENABLE(warnings, 
-	[  --enable-warnings	GCC warnings],
+	[  --enable-warnings       GCC warnings],
 	[gcc_warnings=$enableval])
 if test -n "$GCC"
 then
@@ -154,19 +154,19 @@ AC_DEFINE_UNQUOTED([$xxFortran])
 
 # MPI
 AC_ARG_WITH(mpi,
-	[ --with-mpi		Use MPI],
+	[  --with-mpi              Use MPI],
 	[use_mpi=$withval])
 AC_ARG_WITH(mpicompile,
-	[ --with-mpicompile	MPI compile flags],
+	[  --with-mpicompile       MPI compile flags],
 	[mpicompile=$withval])
 AC_ARG_WITH(mpilink,
-	[ --with-mpilink	MPI link flags],
+	[  --with-mpilink          MPI link flags],
 	[mpilink=$withval])
 AC_ARG_WITH(extrainc,
-	[ --with-extrainc	Extra compile flags],
+	[  --with-extrainc         Extra compile flags],
 	[extrainc=$withval])
 AC_ARG_WITH(extralib,
-	[ --with-extralib	Extra Libs],
+	[  --with-extralib         Extra Libs],
 	[extralib=$withval])
 
 # setup libs 

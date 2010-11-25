@@ -1,11 +1,3 @@
-#include "angular.h"
-
-static char *rcsid="$Id: angular.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 /************************************************************
   Implementation of module "angular".
 
@@ -14,6 +6,8 @@ USE (rcsid);
 
   Author: M. F. Gu, mfgu@stanford.edu
 *************************************************************/
+
+#include "angular.h"
 
 double ln_factorial[MAX_FACTORIAL];
 double ln_integer[MAX_FACTORIAL];

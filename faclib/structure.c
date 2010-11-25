@@ -3,12 +3,6 @@
 #include "structure.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: structure.c,v 1.5 2010/11/25 18:11:06 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 #if (FAC_DEBUG >= DEBUG_STRUCTURE)
 #define debug_integral(s, ne, r) \
         {int ks; \

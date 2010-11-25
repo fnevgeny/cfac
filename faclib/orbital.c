@@ -1,12 +1,6 @@
 #include "orbital.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: orbital.c,v 1.3 2010/11/25 18:11:05 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 /* the following arrays provide storage space in the calculation */
 static double _veff[MAXRP];
 static double ABAND[4*MAXRP];

@@ -1,12 +1,6 @@
 #include "mbpt.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: mbpt.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 static int mbpt_extra = 0;
 static int mbpt_nlev = 0;
 static int *mbpt_ilev = NULL;

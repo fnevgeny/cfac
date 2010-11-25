@@ -1,11 +1,3 @@
-#include "array.h"
-
-static char *rcsid="$Id: array.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 /*************************************************************
   Implementation of module "array"
   
@@ -14,6 +6,8 @@ USE (rcsid);
 
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
+
+#include "array.h"
 
 void InitIntData(void *p, int n) {
   int *d;

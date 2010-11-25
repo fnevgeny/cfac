@@ -1,6 +1,3 @@
-#include "coulomb.h"
-#include "cf77.h"
-
 /*************************************************************
   Implementation for module "coulomb". 
   This module calculates quatities related to the H-like ions.
@@ -8,11 +5,8 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
-static char *rcsid="$Id: coulomb.c,v 1.2 2010/11/25 18:11:05 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
+#include "coulomb.h"
+#include "cf77.h"
 
 static int n_hydrogenic;
 static int kl_hydrogenic;

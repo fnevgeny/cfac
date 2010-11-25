@@ -1,11 +1,3 @@
-#include "config.h"
-
-static char *rcsid="$Id: config.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 /*************************************************************
   Implementation of module "config".
 
@@ -14,6 +6,8 @@ USE (rcsid);
 
   Author: M. F. Gu, mfgu@space.mit.edu
 **************************************************************/
+
+#include "config.h"
 
 /*
 ** VARIABLE:    cfg_groups

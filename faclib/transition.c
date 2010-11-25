@@ -1,12 +1,6 @@
 #include "transition.h"
 #include <time.h>
 
-static char *rcsid="$Id: transition.c,v 1.4 2010/11/25 18:11:06 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 /* the following options controll the computation methods of OS.
    gauge = 1 coulomb gauge (velocity form)
          = 2 babushkin gauge (length form)

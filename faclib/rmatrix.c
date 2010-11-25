@@ -1,12 +1,6 @@
 #include "rmatrix.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: rmatrix.c,v 1.4 2010/11/25 18:11:06 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 static RBASIS rbasis;
 static int ntg, *tg, nts, *ts;
 static int ncg, *cg, ncs, *cs;

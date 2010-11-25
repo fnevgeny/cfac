@@ -1,9 +1,3 @@
-static char *rcsid="$Id: polarization.c,v 1.4 2010/11/25 18:11:05 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 #include "angular.h"
 #include "dbase.h"
 #include "parser.h"

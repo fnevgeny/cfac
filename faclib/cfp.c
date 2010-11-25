@@ -1,11 +1,3 @@
-#include "cfp.h"
-
-static char *rcsid="$Id: cfp.c,v 1.1 2010/07/26 08:16:15 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 /*************************************************************
   Implementation of "cfp". 
   calculates the coefficients of fractional parentage in 
@@ -13,6 +5,8 @@ USE (rcsid);
 
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
+
+#include "cfp.h"
 
 
 /*

@@ -3,12 +3,6 @@
 #include "grid.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: crm.c,v 1.5 2010/11/25 18:11:05 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 static IONIZED ion0;
 static ARRAY *ions;
 static ARRAY *blocks;

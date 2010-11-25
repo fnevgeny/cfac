@@ -1,12 +1,6 @@
 #include "dbase.h"
 #include "structure.h"
 
-static char *rcsid="$Id: dbase.c,v 1.6 2010/11/25 18:11:05 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 static int version_read[NDB];
 static F_HEADER fheader[NDB];
 static EN_HEADER en_header;

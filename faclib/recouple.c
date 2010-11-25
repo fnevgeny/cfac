@@ -1,12 +1,3 @@
-#include "recouple.h"
-#include "cf77.h"
-
-static char *rcsid="$Id: recouple.c,v 1.2 2010/11/25 18:11:06 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 /*************************************************************
   Implementation of the module "recouple".
   This module calculates the recoupling coefficients. 
@@ -17,6 +8,9 @@ USE (rcsid);
 
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
+
+#include "recouple.h"
+#include "cf77.h"
 
 /*
 ** VARIABLE:    max_rank

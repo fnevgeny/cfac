@@ -27,6 +27,7 @@ check : subdirs
 
 clean :
 	@set -e; for i in $(SUBDIRS); do (cd $$i; $(MAKE) clean) || exit 1; done
+	$(RM) -r build
 
 distclean : clean
 	$(RM) config.log config.status config.cache include/config.h Make.conf

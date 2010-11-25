@@ -1,9 +1,3 @@
-static char *rcsid="$Id: stoken.c,v 1.1 2010/07/26 08:16:16 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 #include "stoken.h"
 
 static char _mod_name0[128];
@@ -164,7 +158,6 @@ int TokenizeLine(int nline, char *line, METHOD *methods,
   int i, r, n;
   char token[MAXLINELENGTH];
   char *t;
-  char nmod0[128], nmod1[128];
   int brkpos;
   int quotepos;
   int next;

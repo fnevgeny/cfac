@@ -1,9 +1,3 @@
-static char *rcsid="$Id: sfac.c,v 1.5 2010/11/25 18:11:03 fnevgeny Exp $";
-#if __GNUC__ == 2
-#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
-USE (rcsid);
-#endif
-
 #include "init.h"
 #include "stoken.h"
 

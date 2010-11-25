@@ -1,7 +1,7 @@
 #include "excitation.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: excitation.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: excitation.c,v 1.3 2010/11/25 17:06:26 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -60,7 +60,7 @@ static FILE *fpw=NULL;
 static EXCIT_TIMING timing = {0, 0, 0};
 #endif
 
-static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 5E-2, 0, 0, 10};
+static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 5E-2, 0, 0, 10, {}, {}};
 
 static MULTI *pk_array;
 static MULTI *qk_array;

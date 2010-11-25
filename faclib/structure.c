@@ -3,7 +3,7 @@
 #include "structure.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: structure.c,v 1.3 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: structure.c,v 1.4 2010/11/25 17:06:26 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -192,7 +192,7 @@ static void InitLevelData(void *p, int n) {
   }
 }
 
-int SetCILevel(m) {
+int SetCILevel(int m) {
   ci_level = m;
   return 0;
 }

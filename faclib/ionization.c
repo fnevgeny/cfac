@@ -1,7 +1,7 @@
 #include "ionization.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: ionization.c,v 1.2 2010/11/25 16:41:39 fnevgeny Exp $";
+static char *rcsid="$Id: ionization.c,v 1.3 2010/11/25 17:06:26 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -95,7 +95,7 @@ static struct {
   double kl[MAXNKL+1];
   double log_kl[MAXNKL];
 } pw_scratch = {IONMAXK, IONLQR, IONLMAX, IONLEJEC, 
-		IONLCB, IONTOL, 0, 0};
+		IONLCB, IONTOL, 0, 0, 0, {}, {}};
 
 static MULTI *qk_array;
 

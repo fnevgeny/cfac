@@ -110,7 +110,6 @@ then
 fi
 if test -n "$G77"
 then
-  FFLAGS="$FFLAGS -ff2c"
   if test -n "$gcc_warnings"
   then
     FFLAGS="$FFLAGS -Wall"

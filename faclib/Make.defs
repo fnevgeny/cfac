@@ -1,0 +1,33 @@
+##################################################
+#     System-independent Make.defs file for      #
+#            a cFAC auxiliary library            #
+##################################################
+
+LIB  = $(CFAC_FAC_LIB)
+
+CSRCS = angular.c \
+	array.c \
+	cfp.c \
+	config.c \
+	coulomb.c \
+	crm.c \
+	dbase.c \
+	excitation.c \
+	grid.c \
+	init.c \
+	interpolation.c \
+	ionization.c \
+	mbpt.c \
+	nucleus.c \
+	orbital.c \
+	parser.c \
+	pmalloc.c \
+	polarization.c \
+	radial.c \
+	rates.c \
+	rcfp.c \
+	recombination.c \
+	recouple.c \
+	rmatrix.c \
+	structure.c \
+	transition.c

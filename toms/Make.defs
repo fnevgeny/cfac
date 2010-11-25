@@ -1,0 +1,26 @@
+##################################################
+#     System-independent Make.defs file for      #
+#            a cFAC auxiliary library            #
+##################################################
+
+LIB  = $(CFAC_TOMS_LIB)
+
+FSRCS = calcc.f \
+	dist.f \
+	evalf.f \
+	fstats.f \
+	newpt.f \
+	order.f \
+	partx.f \
+	rgbi3p.f \
+	sdbi3p.f \
+	setstp.f \
+	simplx.f \
+	sortd.f \
+	start.f \
+	subopt.f \
+	subplx.f \
+	tn.f \
+	tripack.f \
+	uvip3c.f \
+	uvip3p.f

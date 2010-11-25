@@ -1,0 +1,24 @@
+##################################################
+#     System-independent Make.defs file for      #
+#            a cFAC auxiliary library            #
+##################################################
+
+LIB  = $(CFAC_COUL_LIB)
+
+FSRCS = clogam.f \
+	f11.f \
+	coulcc.f \
+	y5n.f \
+	cphamp.f \
+	dlogam.f \
+	argam.f \
+	besljn.f \
+	beslik.f \
+	coulrad.f \
+	dcoul.f \
+	njsym.f \
+	njintr.f \
+	cmultip.f
+
+d1mach.o :
+	$(FC) -c ${FFLAGSNO} d1mach.f

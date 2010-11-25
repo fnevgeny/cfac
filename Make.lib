@@ -1,0 +1,58 @@
+##############################################
+# Universal Makefile stub for cFAC libraries #
+##############################################
+
+.SUFFIXES : .c $(O)
+
+include $(TOP)/Make.conf
+
+COBJS = ${CSRCS:.c=.o}
+FOBJS = ${FSRCS:.f=.o}
+
+OBJS = $(COBJS) $(FOBJS)
+
+.f.o: 
+	$(FC) -c ${FFLAGS} $<
+
+.c.o: 
+	$(CC) -c ${CPPFLAGS} ${CFLAGS} $<
+
+
+all : library
+
+include Make.defs
+
+library : $(LIB)
+
+$(COBJS) : $(TOP)/sysdef.h
+include Make.dep
+
+Make.dep : $(CSRCS)
+	@echo -n "Generating dependencies... "
+	@echo "# Generated automatically by \`make depend'" > Make.dep
+	@$(CC) $(CFLAGS) -MM $(SRCS) | sed 's/\.o:/\$$(O)\ :/g' >> Make.dep
+	@echo "done"
+
+$(LIB) : $(OBJS)
+	$(AR) cr $(LIB) $(OBJS)
+	$(RANLIB) $(LIB)
+
+install : $(LIB)
+
+check : dummy
+
+clean :
+	$(RM) $(LIB) $(OBJS)
+
+distclean : clean
+	$(RM) $(GSRCS) *.orig
+
+devclean : distclean
+	$(RM) Make.dep
+
+depend : Make.dep
+
+tags : $(SRCS)
+	ctags $(SRCS)
+
+dummy :

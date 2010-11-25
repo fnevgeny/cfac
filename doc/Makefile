@@ -10,3 +10,6 @@ manual.pdf: manual.tex
 clean:
 	rm -rf *~ *.aux *.bbl *.blg *.idx *.log *.out *.pdf *.toc *.ilg *.ind
 
+check: dummy
+
+dummy : 

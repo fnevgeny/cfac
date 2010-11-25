@@ -6,13 +6,13 @@ all:
 	cd aidr; make
 	cd ionization; make
 
-test: 
-	cd structure; make test
-	cd excitation; make test
-	cd excitationM; make test
-	cd pirr; make test
-	cd aidr; make test
-	cd ionization; make test
+check: 
+	cd structure; make check
+	cd excitation; make check
+	cd excitationM; make check
+	cd pirr; make check
+	cd aidr; make check
+	cd ionization; make check
 
 clean: 
 	cd structure; make clean

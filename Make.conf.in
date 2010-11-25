@@ -1,0 +1,38 @@
+#############################################################
+## This is the top-level Make.conf.in.                        
+#############################################################
+
+@SET_MAKE@
+
+SHELL = /bin/sh
+
+LIBDIRS = blas coul ode toms mpfun minpack ionis faclib
+SUBDIRS = $(LIBDIRS) sfac doc demo
+
+CFAC_BLAS_LIB    = $(TOP)/blas/cfac_blas.a
+CFAC_COUL_LIB    = $(TOP)/coul/cfac_coul.a
+CFAC_ODE_LIB     = $(TOP)/ode/cfac_ode.a
+CFAC_TOMS_LIB    = $(TOP)/toms/cfac_toms.a
+CFAC_MPFUN_LIB   = $(TOP)/mpfun/cfac_mpfun.a
+CFAC_MINPACK_LIB = $(TOP)/minpack/cfac_minpack.a
+CFAC_IONIS_LIB   = $(TOP)/ionis/cfac_ionis.a
+CFAC_FAC_LIB     = $(TOP)/faclib/cfac_faclib.a
+
+FACLIBS = $(CFAC_FAC_LIB) $(CFAC_COUL_LIB) $(CFAC_IONIS_LIB) $(CFAC_ODE_LIB) \
+	  $(CFAC_TOMS_LIB) $(CFAC_MPFUN_LIB) $(CFAC_MINPACK_LIB) \
+	  $(CFAC_BLAS_LIB)
+
+PYTHON = @PYTHON@
+
+RANLIB = @RANLIB@
+
+TOPDIR = @TOPDIR@
+
+CFLAGS = @CPPFLAGS@ @CFLAGS@
+
+FC       = @F77@
+FFLAGS 	 = @FFLAGS@
+FFLAGSNO = @FFLAGSNO@
+
+
+LIBS = @LDFLAGS@ @LIBS@ @FLIBS@

@@ -1,0 +1,20 @@
+##################################################
+#     System-independent Make.defs file for      #
+#            a cFAC auxiliary library            #
+##################################################
+
+LIB  = $(CFAC_ODE_LIB)
+
+FSRCS = cfode.f \
+	dgbfa.f \
+	dgbsl.f \
+	dgefa.f \
+	dgesl.f \
+	ewset.f \
+	intdy.f \
+	lsode.f \
+	prepj.f \
+	solsy.f \
+	stode.f \
+	vnorm.f \
+	xerrwv.f

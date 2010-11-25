@@ -1,0 +1,11 @@
+##################################################
+#     System-independent Make.defs file for      #
+#            a cFAC auxiliary library            #
+##################################################
+
+LIB  = $(CFAC_BLAS_LIB)
+
+FSRCS = d1mach.f
+
+d1mach.o :
+	$(FC) -c ${FFLAGSNO} d1mach.f

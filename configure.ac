@@ -171,7 +171,7 @@ AC_ARG_WITH(extralib,
 	[extralib=$withval])
 
 # setup libs 
-LIBS="$LIBS -lfac -lgsl -lgslcblas -llapack -lblas"
+LIBS="$LIBS -lgsl -lgslcblas -llapack -lblas"
 fwithm=`echo "$FLIBS " | grep " -lm"`
 if test "x$fwithm" = "x"
 then
@@ -252,21 +252,10 @@ AC_SUBST(FFLAGSNO)
 FFLAGS="$FFLAGS $fopt"
       
 # add include pathes.	      
-CPPFLAGS="$CPPFLAGS -I$TOPDIR"
-CPPFLAGS="$CPPFLAGS -I$TOPDIR/faclib"
-LDFLAGS="$LDFLAGS -L$TOPDIR"
+CPPFLAGS="$CPPFLAGS -I$TOPDIR -I$TOPDIR/faclib"
+LDFLAGS="$LDFLAGS"
 
-AC_CONFIG_FILES([Makefile 
-		 sfac/Makefile
-		 python/Makefile
-		 faclib/Makefile 
-		 blas/Makefile 
-		 coul/Makefile
-		 ionis/Makefile
-		 minpack/Makefile 
-		 mpfun/Makefile
-		 ode/Makefile
-		 toms/Makefile])
+AC_CONFIG_FILES([Make.conf])
 
 if test -z "$PYTHON"
 then

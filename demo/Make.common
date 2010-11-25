@@ -1,9 +1,9 @@
 SFAC = ../../sfac/sfac
 DIFF = diff -q -I TSess -IFAC
 
-all: $(RESULTS)
+all: 
 
-test: $(RESULTS)
+check: $(RESULTS)
 	@for i in $(RESULTS); do $(DIFF) $$i ref || exit 1; done; \
             echo " Tests passed!"
 

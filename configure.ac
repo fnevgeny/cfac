@@ -87,11 +87,11 @@ fi
 # gcc warnings
 if test -n "$GCC"
 then
-    CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wno-sign-compare -Wno-unused"
+    CFLAGS="$CFLAGS -fno-common -Wall -Wextra -pedantic -Wno-sign-compare -Wno-unused"
 fi
 if test -n "$G77"
 then
-    FFLAGS="$FFLAGS -Wall"
+    FFLAGS="$FFLAGS -fno-common -Wall"
     FFLAGS=`echo $FFLAGS`
 fi
 
@@ -200,28 +200,6 @@ if test "x$extralib" != "x"
 then
   LDFLAGS="$LDFLAGS $extralib"
 fi
-
-# special flags for some OS
-case "$host_os" in
-  *darwin*)
-    if test -n "$GCC"
-    then 
-      CFLAGS="$CFLAGS -fno-common"
-# darwin needs cc_dynamic lib. if gcc version 3 is used.
-      gccv=[`gcc --version | grep "(GCC)" | sed -n -e "s/.* (GCC) *\([0-9]\).*/\1/p"`]
-      if test "$gccv" != "4"
-    then
-      LIBS="$LIBS -lcc_dynamic"
-    fi
-    fi
-    if test -n "$G77"
-    then 
-      FFLAGS="$FFLAGS -fno-common"
-    fi
-  ;;
-  *)
-  ;;
-esac 
 
 # add fopt
 FFLAGSNO="$FFLAGS"

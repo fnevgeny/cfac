@@ -91,7 +91,7 @@ then
 fi
 if test -n "$G77"
 then
-    FFLAGS="$FFLAGS -fno-common -Wall"
+    FFLAGS="$FFLAGS -fno-common -Wall -Wno-unused"
     FFLAGS=`echo $FFLAGS`
 fi
 

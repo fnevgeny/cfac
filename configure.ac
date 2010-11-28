@@ -8,6 +8,9 @@ AC_CANONICAL_HOST
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_F77(gfortran g77 f77 fort77 xlf f90 xlf90)
+AC_F77_LIBRARY_LDFLAGS
+
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
@@ -22,16 +25,6 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
 AC_HEADER_STDC
-
-AC_PROG_F77
-AC_F77_LIBRARY_LDFLAGS
-
-# some F77 LDFLAGS have a -lcrt1.o which causes trouble.
-# actually any crtn.o may cause trouble, we don't need that.
-AC_MSG_CHECKING([for -lcrtn.o in FLIBS])
-FLIBS=[`echo $FLIBS | sed 's/-lcrt.*\.o//g'`]
-FLIBS=[`echo $FLIBS | sed 's/  */ /g'`]
-AC_MSG_RESULT([$FLIBS])
 
 #get optimization option for C and f77 compilers
 AC_ARG_ENABLE(copt,
@@ -98,11 +91,8 @@ then
 fi
 if test -n "$G77"
 then
-  if test -n "$gcc_warnings"
-  then
     FFLAGS="$FFLAGS -Wall"
     FFLAGS=`echo $FFLAGS`
-  fi
 fi
 
 # which F77 known by cfortran.h is used

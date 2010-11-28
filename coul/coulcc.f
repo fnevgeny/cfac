@@ -139,6 +139,22 @@ C
       IFCP = MOD(MODE,2).EQ.1
       PR = IFAIL.NE.0
       IFAIL = -2
+
+      KASE   = 0
+      NOCF2  = .FALSE.
+      OMEGA  = 0.0
+      PACCQ  = 0.0
+      SFSH   = 0.0
+      CLL    = ZERO
+      F20V   = ZERO
+      FIRST  = ZERO
+      HCL    = ZERO
+      HPL    = ZERO
+      PQ1    = ZERO
+      PQ2    = ZERO
+      Q      = ZERO
+      THETAM = ZERO
+
       N11   = 0
       NFP   = 0
       KAS(1)   = 0
@@ -774,6 +790,8 @@ C ***    Evaluate CF1  =  F   =  F'(ZL,ETA,X)/F(ZL,ETA,X)
 C
 C        using complex arithmetic
 C
+      CF1C = 0.0
+      SL = 0.0
       FCL = ONE
       XI = ONE/X
       PK  = ZL + ONE
@@ -901,6 +919,8 @@ C ***    Evaluate CF1  =  F   =  F'(ZL,ETA,X)/F(ZL,ETA,X)
 C
 C        using real arithmetic
 C
+      CF1R = 0.0
+      SL  = 0.0
       FCL = ONE
       XI = ONE/X
       PK  = ZL + ONE
@@ -985,6 +1005,7 @@ C
       ABSC(W) = ABS(DBLE(W)) + ABS(IMAG(W))
       NINTC(W) = NINT(REAL(REAL(W)))
 C
+      AT = 0.0
       RE = 0.0
       X(1,1) = ONE
       SUM = X(1,1)
@@ -1188,6 +1209,7 @@ C
       LOGICAL EVEN
       REAL*8 EPS
       COMMON /RCFCM2/ X1,M2M1,MP12,EVEN,M
+      X0 = 0.0
 C     ibn = ibeg + inum - 1
       IBN = INUM
 C                             B(IBN) is last value set on this call

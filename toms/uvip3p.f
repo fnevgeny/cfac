@@ -58,6 +58,34 @@ C
 C Specification statement
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
       DIMENSION   XD(*),YD(*),XI(*), YI(*)
+
+      NP0    = 0
+      IINTPV = 0
+      RENNM2 = 0.0
+      RENPM1 = 0.0
+      A0     = 0.0
+      A1     = 0.0
+      A2     = 0.0
+      A3     = 0.0
+      AA0    = 0.0
+      AA1    = 0.0
+      A11    = 0.0
+      A22    = 0.0
+      DX     = 0.0
+      DY     = 0.0
+      ID1    = 0
+      ID2    = 0
+      ID3    = 0
+      X0     = 0.0
+      X00    = 0.0
+      X2     = 0.0
+      X3     = 0.0
+      Y0     = 0.0
+      Y00    = 0.0
+      Y2     = 0.0
+      Y3     = 0.0
+      YP0    = 0.0
+
 C Error check
    10 IF (ND.LE.1)   GO TO 90
       IF (NI.LE.0)   GO TO 91

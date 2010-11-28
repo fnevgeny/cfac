@@ -14,9 +14,11 @@
       REAL*8 TI2(MPDIM), MPTMP(MPDIM), ZI(MPDIM), ZR(MPDIM)
 
       DATA ZERO,ONE,TWO / 0D+0, 1D+0, 2D+0 /, CI / (0D+0, 1D+0) /
-
+      
       ABSC(AA) = ABS(DBLE(AA)) + ABS(IMAG(AA))
       NINTC(AA) = NINT(REAL(REAL(AA)))
+
+      F11 = ZERO
 C
 C *** evaluate the HYPERGEOMETRIC FUNCTION 1F1
 C                                        i

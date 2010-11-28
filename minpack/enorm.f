@@ -42,6 +42,7 @@ c     **********
       double precision agiant,floatn,one,rdwarf,rgiant,s1,s2,s3,xabs,
      *                 x1max,x3max,zero
       data one,zero,rdwarf,rgiant /1.0d0,0.0d0,3.834d-20,1.304d19/
+      enorm = zero
       s1 = zero
       s2 = zero
       s3 = zero

@@ -245,6 +245,9 @@
 *            Save factorials and exponentials
 *
       SAVE FAL,ALO
+      
+      AI = 0.0
+      EU = 0.0
 *
 *            Initialise arrays of factorials and exponentials
 *

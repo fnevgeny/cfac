@@ -122,6 +122,8 @@ C
 C      initialisation call for calculations to accuracy 'ACC'
 C
       
+      CLOGAM = ZERO
+      
       IF (ABS(ACC-ACCUR) .LE. ACC*1D-2) RETURN
 
       NX0 = 6

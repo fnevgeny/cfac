@@ -4,6 +4,16 @@
 C Specification statement
       IMPLICIT DOUBLE PRECISION(A-H, O-Z)
       DIMENSION   XD(*),YD(*),C1(*),C2(*),C3(*)
+
+      X2  = 0.0
+      Y2  = 0.0
+      X3  = 0.0
+      Y3  = 0.0
+      YP0 = 0.0
+      ID1 = 0
+      ID2 = 0
+      ID3 = 0
+
 C Error check
 C 10   IF (ND.LE.1)   GO TO 90
 C      DO 11  ID=2,ND

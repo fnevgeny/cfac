@@ -430,6 +430,25 @@
 *     ..
 * Calculation
 * Initial setting of some local variables
+      X2 = 0.0
+      X3 = 0.0
+      Y2 = 0.0
+      Y3 = 0.0
+      Z02 = 0.0
+      Z03 = 0.0
+      Z11 = 0.0
+      Z12 = 0.0
+      Z13 = 0.0
+      Z20 = 0.0
+      Z21 = 0.0
+      Z22 = 0.0
+      Z23 = 0.0
+      Z30 = 0.0
+      Z31 = 0.0
+      Z32 = 0.0
+      Z33 = 0.0
+
+
       NX0 = MAX(4,NXD)
       NY0 = MAX(4,NYD)
 * Double DO-loop with respect to the input grid points
@@ -890,6 +909,8 @@
       DOUBLE PRECISION XII,YII
       INTEGER          IIP,IMD,IMN,IMX,IXD,IYD,NINTX,NINTY
 *     ..
+      IXD = 0
+      IYD = 0
 * DO-loop with respect to IIP, which is the point number of the
 * output point
       DO 30 IIP = 1,NIP
@@ -1049,6 +1070,33 @@
 *     .. Intrinsic Functions ..
       INTRINSIC        MAX
 *     ..
+      IXD0  = 0
+      IXDI  = 0
+      IYD0  = 0
+      IYDI  = 0
+      P00   = 0.0
+      P01   = 0.0
+      P02   = 0.0
+      P03   = 0.0
+      P10   = 0.0
+      P11   = 0.0
+      P12   = 0.0
+      P13   = 0.0
+      P20   = 0.0
+      P21   = 0.0
+      P22   = 0.0
+      P23   = 0.0
+      P30   = 0.0
+      P31   = 0.0
+      P32   = 0.0
+      P33   = 0.0
+      X0    = 0.0
+      Y0    = 0.0
+      Z00   = 0.0
+      ZII   = 0.0
+      ZX00  = 0.0
+      ZXY00 = 0.0
+      ZY00  = 0.0
 * Calculation
 * Outermost DO-loop with respect to the output point
       DO 10 IIP = 1,NIP

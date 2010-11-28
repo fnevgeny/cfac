@@ -1121,8 +1121,8 @@ C PROCESSUS DIT 'REDA' .(LA GATTUTA ET HAHN)
       IF(Z.EQ.26.AND.ION.EQ.16) THEN   
          CALL REDAN(AKTEV,REDAC)
          AUTO=AUTO+REDAC
-	else
-	redac=0.  
+      else
+         redac=0.  
       ENDIF
 C------------------------------ 
  70   RION=DIR+AUTO

@@ -1,10 +1,10 @@
       subroutine ecolfit(iz, in, is, e)
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     return the ionization threshold of the shell is.
-c     Input parameters:  
-c     iz - atomic number 
-c     in - number of electrons from 1 to iz 
-c     is - shell number 
+c     Input parameters:
+c     iz - atomic number
+c     in - number of electrons from 1 to iz
+c     is - shell number
 c     output:
 c     e, ionization threshold in eV.
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -26,7 +26,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &ismax=ismin+1
       if((in.eq.19.and.iz.gt.18.and.iz.lt.21).or.(in.eq.20.
      &and.iz.eq.20))ismax=ismin+3
-      
+
       if (is .eq. 0) then
          e = clion(1, iz, in, ismax)
          return
@@ -39,30 +39,30 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       subroutine colfit(iz,in,is,t,ca,c)
 * Version 4.
 * January 8, 1997. Minor modification (exp are calculated with
-* double precision) which improves accuracy of very low rates 
+* double precision) which improves accuracy of very low rates
 * (less than 10**(-20)) to avoid negative Na+ rates at logT < 4.2
 * November 12, 1996. Improved presentation for the first exponential integral
 ******************************************************************************
 *** This subroutine calculates partial or total rates of direct collisional
-*** ionization, including excitation-autoionization contribution, for all 
+*** ionization, including excitation-autoionization contribution, for all
 *** ionization stages of all elements from H to Zn (Z=30)
 *** in the range 10^4 - 10^9 K by use of the fits from
-*** M. Arnaud and J. Raymond, 1992, ApJ 398, 394 for Fe, from 
+*** M. Arnaud and J. Raymond, 1992, ApJ 398, 394 for Fe, from
 *** M. Arnaud and R. Rothenflug, 1985, A&AS 60, 425 for H, He, C, N, O, Ne,
 *** Na, Mg, Al, Si, S, Ar, Ca, Ni (with some corrections described in
-*** Verner & Yakovlev, 1990, ApSS, 165, 27), and from 
+*** Verner & Yakovlev, 1990, ApSS, 165, 27), and from
 *** interpolation/extrapolation for other elements.
-*** Input parameters:  iz - atomic number 
-***                    in - number of electrons from 1 to iz 
-***                    is - shell number 
+*** Input parameters:  iz - atomic number
+***                    in - number of electrons from 1 to iz
+***                    is - shell number
 ***                    t  - temperature, K
 *** Output parameter:  c  - rate coefficient, cm^3 s^(-1)
 *** If the input parameter is=0, the subroutine calculates total rate,
 *** otherwise the subroutine calculates partial rate for the corresponding
 *** shell: 1 - 1s, 2 - 2s, 3 - 2p, 4 - 3s, 5 - 3p, 6 - 3d, 7 - 4s.
 *** Autoionization contribution is added to the rate for the outermost shell.
-*** Fits are available for 3 (or less) outer shells. In other cases, 
-*** the subroutine returns c=0. 
+*** Fits are available for 3 (or less) outer shells. In other cases,
+*** the subroutine returns c=0.
 ******************************************************************************
       common/clion/clion(5,30,30,7)
       common/eafe/eafe(6,26)
@@ -70,6 +70,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer iz, in, is
       c=0.0
       ca = 0.0
+      ea = 0.0
       if(iz.lt.1.or.iz.gt.30)return
       if(in.lt.1.or.in.gt.iz)return
       if(in.lt.5)ismin=1
@@ -138,7 +139,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             y=ea/tk
             if(y.lt.50.0)ca=1.3e-14/(iz-10)**3.73*ct*ea*dexp(-y)
      &*(1.0-0.5*(y-y*y+y**3*fcl1(y)))
-         endif          
+         endif
       endif
       if(in.gt.11.and.in.lt.17) then
          if(in.eq.12)ea=10.3*(iz-10)**1.52
@@ -173,30 +174,30 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 * This calculates the cross section.
 * Version 4.
 * January 8, 1997. Minor modification (exp are calculated with
-* double precision) which improves accuracy of very low rates 
+* double precision) which improves accuracy of very low rates
 * (less than 10**(-20)) to avoid negative Na+ rates at logT < 4.2
 * November 12, 1996. Improved presentation for the first exponential integral
 ******************************************************************************
 *** This subroutine calculates partial or total rates of direct collisional
-*** ionization, including excitation-autoionization contribution, for all 
+*** ionization, including excitation-autoionization contribution, for all
 *** ionization stages of all elements from H to Zn (Z=30)
 *** in the range 10^4 - 10^9 K by use of the fits from
-*** M. Arnaud and J. Raymond, 1992, ApJ 398, 394 for Fe, from 
+*** M. Arnaud and J. Raymond, 1992, ApJ 398, 394 for Fe, from
 *** M. Arnaud and R. Rothenflug, 1985, A&AS 60, 425 for H, He, C, N, O, Ne,
 *** Na, Mg, Al, Si, S, Ar, Ca, Ni (with some corrections described in
-*** Verner & Yakovlev, 1990, ApSS, 165, 27), and from 
+*** Verner & Yakovlev, 1990, ApSS, 165, 27), and from
 *** interpolation/extrapolation for other elements.
-*** Input parameters:  iz - atomic number 
-***                    in - number of electrons from 1 to iz 
-***                    is - shell number 
+*** Input parameters:  iz - atomic number
+***                    in - number of electrons from 1 to iz
+***                    is - shell number
 ***                    t  - temperature, K
 *** Output parameter:  c  - rate coefficient, cm^3 s^(-1)
 *** If the input parameter is=0, the subroutine calculates total rate,
 *** otherwise the subroutine calculates partial rate for the corresponding
 *** shell: 1 - 1s, 2 - 2s, 3 - 2p, 4 - 3s, 5 - 3p, 6 - 3d, 7 - 4s.
 *** Autoionization contribution is added to the rate for the outermost shell.
-*** Fits are available for 3 (or less) outer shells. In other cases, 
-*** the subroutine returns c=0. 
+*** Fits are available for 3 (or less) outer shells. In other cases,
+*** the subroutine returns c=0.
 ******************************************************************************
       common/clion/clion(5,30,30,7)
       common/eafe/eafe(6,26)
@@ -254,7 +255,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
             endif
          endif
       endif
-      
+
       return
       end
       double precision function fcl1(x)
@@ -273,19 +274,19 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      &b(6)*x**2+b(7)*x+b(8))/x
          else
             aa=1.0/x
-         endif   
+         endif
       endif
       fcl1=aa
-      return 
+      return
       end
       double precision function fcl2(x)
       real*8 x
       dimension pa(15),qa(15)
-      data pa/1.0000e+00,2.1658e+02,2.0336e+04,1.0911e+06,3.7114e+07, 
-     &8.3963e+08,1.2889e+10,1.3449e+11,9.4002e+11,4.2571e+12,1.1743e+13, 
+      data pa/1.0000e+00,2.1658e+02,2.0336e+04,1.0911e+06,3.7114e+07,
+     &8.3963e+08,1.2889e+10,1.3449e+11,9.4002e+11,4.2571e+12,1.1743e+13,
      &1.7549e+13,1.0806e+13,4.9776e+11,0.0000e+00 /
-      data qa/1.0000e+00,2.1958e+02,2.0984e+04,1.1517e+06,4.0349e+07, 
-     &9.4900e+08,1.5345e+10,1.7182e+11,1.3249e+12,6.9071e+12,2.3531e+13, 
+      data qa/1.0000e+00,2.1958e+02,2.0984e+04,1.1517e+06,4.0349e+07,
+     &9.4900e+08,1.5345e+10,1.7182e+11,1.3249e+12,6.9071e+12,2.3531e+13,
      &4.9432e+13,5.7760e+13,3.0225e+13,3.3641e+12 /
       if(x.gt.0.27)then
         p=0.0
@@ -295,32 +296,32 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
           q=q+(qa(i)/(x**(i-1)))
           fcl2=((p/q)/x)/x
         enddo
-      else 
+      else
         fcl2=(((dlog(x)**2)/2.0)+(0.57722*dlog(x)))+1.0
       endif
-      return 
+      return
       end
 *********************************************
       block data exaife
       common/eafe/eafe(6,26)
-      data(eafe(i, 3),i=1,6)/6592.0,0.0164,0.00176,-0.0117,0.00,0.0216/       
-      data(eafe(i,11),i=1,6)/ 704.0,0.0000,0.00000, 0.0000,2.95,0.0000/       
-      data(eafe(i,12),i=1,6)/ 700.0,0.0000,0.00000, 0.0000,4.81,0.0000/       
-      data(eafe(i,13),i=1,6)/ 671.0,0.0000,0.00000, 0.0000,5.92,0.0000/       
-      data(eafe(i,14),i=1,6)/ 670.0,0.0000,0.00000, 0.0000,4.10,0.0000/       
-      data(eafe(i,15),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,3.89,0.0000/       
-      data(eafe(i,16),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,3.21,0.0000/       
-      data(eafe(i,17),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,1.96,0.0000/       
-      data(eafe(i,18),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,1.87,0.0000/       
-      data(eafe(i,19),i=1,6)/ 160.0,5.0000,43.0000,-72.600,42.9,0.0000/       
-      data(eafe(i,20),i=1,6)/ 125.0,0.0000,0.00000,-48.100,42.5,16.300/       
-      data(eafe(i,21),i=1,6)/  95.0,0.0000,0.00000,-5.8300,12.3,8.8500/       
-      data(eafe(i,22),i=1,6)/  81.0,0.0000,0.28000,-16.200,35.5,0.0000/       
-      data(eafe(i,23),i=1,6)/  60.0,3.0200,67.5000,-59.800,46.0,0.0000/       
-      data(eafe(i,24),i=1,6)/  57.3,0.8780,0.00000,-115.00,71.2,47.900/       
+      data(eafe(i, 3),i=1,6)/6592.0,0.0164,0.00176,-0.0117,0.00,0.0216/
+      data(eafe(i,11),i=1,6)/ 704.0,0.0000,0.00000, 0.0000,2.95,0.0000/
+      data(eafe(i,12),i=1,6)/ 700.0,0.0000,0.00000, 0.0000,4.81,0.0000/
+      data(eafe(i,13),i=1,6)/ 671.0,0.0000,0.00000, 0.0000,5.92,0.0000/
+      data(eafe(i,14),i=1,6)/ 670.0,0.0000,0.00000, 0.0000,4.10,0.0000/
+      data(eafe(i,15),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,3.89,0.0000/
+      data(eafe(i,16),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,3.21,0.0000/
+      data(eafe(i,17),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,1.96,0.0000/
+      data(eafe(i,18),i=1,6)/ 650.0,0.0000,0.00000, 0.0000,1.87,0.0000/
+      data(eafe(i,19),i=1,6)/ 160.0,5.0000,43.0000,-72.600,42.9,0.0000/
+      data(eafe(i,20),i=1,6)/ 125.0,0.0000,0.00000,-48.100,42.5,16.300/
+      data(eafe(i,21),i=1,6)/  95.0,0.0000,0.00000,-5.8300,12.3,8.8500/
+      data(eafe(i,22),i=1,6)/  81.0,0.0000,0.28000,-16.200,35.5,0.0000/
+      data(eafe(i,23),i=1,6)/  60.0,3.0200,67.5000,-59.800,46.0,0.0000/
+      data(eafe(i,24),i=1,6)/  57.3,0.8780,0.00000,-115.00,71.2,47.900/
       end
 *********************************************
-      block data collis 
+      block data collis
       common/clion/clion(5,30,30,7)
       data(clion(i, 1, 1,1),i=1,5)/   13.60, 22.8,-12.000, 1.90, -22.60/
       data(clion(i, 2, 1,1),i=1,5)/   54.42, 14.4, -5.600, 1.90, -13.30/
@@ -1314,4 +1315,3 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       data(clion(i,30,30,6),i=1,5)/   17.30, 12.6,  -4.00, 0.40,  -6.10/
       data(clion(i,30,30,5),i=1,5)/   97.00, 69.9, -23.70, 9.50, -51.70/
       end
-

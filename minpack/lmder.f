@@ -195,6 +195,8 @@ c     epsmch is the machine precision.
 c
       epsmch = dpmpar(1)
 c
+      temp = zero
+      xnorm = zero
       info = 0
       iflag = 0
       nfev = 0

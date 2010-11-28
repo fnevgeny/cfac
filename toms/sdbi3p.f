@@ -1971,6 +1971,35 @@
 *     .. Intrinsic Functions ..
       INTRINSIC        MOD
 *     ..
+      AP    = 0.0
+      BP    = 0.0
+      CP    = 0.0
+      DP    = 0.0
+      X0    = 0.0
+      Y0    = 0.0
+      ZII1  = 0.0
+      WT2   = 0.0
+      P00   = 0.0
+      P01   = 0.0
+      P02   = 0.0
+      P03   = 0.0
+      P04   = 0.0
+      P05   = 0.0
+      P10   = 0.0
+      P11   = 0.0
+      P12   = 0.0
+      P13   = 0.0
+      P14   = 0.0
+      P20   = 0.0
+      P21   = 0.0
+      P22   = 0.0
+      P23   = 0.0
+      P30   = 0.0
+      P31   = 0.0
+      P32   = 0.0
+      P40   = 0.0
+      P41   = 0.0
+      P50   = 0.0
 * Outermost DO-loop with respect to the output point
       DO 120 IIP = 1,NIP
           XII = XI(IIP)
@@ -2523,6 +2552,8 @@ C
 *               entering into the least squares fit
 * XK,YK,ZK =  Coordinates and data value associated with K
 *
+      RS = 0.0
+
       KK = K
 *
 * Test for errors and initialize LMIN and LMAX.

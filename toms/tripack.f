@@ -2206,6 +2206,8 @@ C
 C Store parameters in local variables and test for errors.
 C   LCC1 indexes the first constraint node.
 C
+      NL = 0
+      ILAST = 0
       IER = -1
       NN = N
       LCC1 = NN+1
@@ -4320,6 +4322,7 @@ C
 C Test for invalid input parameters and store the index
 C   LCC1 of the first constraint node (if any).
 C
+      L = 0
       NN = N
       IF (NCC .LT. 0  .OR.  (NROW .NE. 6  .AND.
      .    NROW .NE. 9)) GO TO 12

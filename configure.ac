@@ -92,18 +92,9 @@ then
 fi
   
 # gcc warnings
-AC_ARG_ENABLE(warnings, 
-	[  --enable-warnings       GCC warnings],
-	[gcc_warnings=$enableval])
 if test -n "$GCC"
 then
-  CFLAGS="$CFLAGS"
-  if test -n "$gcc_warnings"
-  then
-    CFLAGS="$CFLAGS -Wall -W -pedantic -Winline -Wmissing-prototypes \
- -Wnested-externs -Wpointer-arith -Wcast-align -Wshadow -Wstrict-prototypes"
-    CFLAGS=`echo $CFLAGS`
-  fi
+    CFLAGS="$CFLAGS -Wall -Wextra -pedantic -Wno-sign-compare -Wno-unused"
 fi
 if test -n "$G77"
 then

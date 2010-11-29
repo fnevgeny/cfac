@@ -1477,24 +1477,24 @@ int IntegrateExternal(RMATRIX *rmx, double r1, double r0) {
 
   dcfg.rmx = rmx;
   y = dcfg.p;
+  neq = 2*rmx->nchan0;
+  rwork = dcfg.rwork;
+  iwork = dcfg.iwork;
+  itol = 1;
+  rtol = EPS10;
+  atol = EPS10;
+  itask = 1;
+  istate = 1;
+  iopt = 0;
+  mf = 10;
+  lrw = dcfg.lrw;
+  liw = dcfg.liw;
   for (i = 0; i < dcfg.nop; i++) {
     for (j = 0; j < rmx->nchan0; j++) {
       k = i*rmx->nchan0 + j;
       y[j] = dcfg.fs[k];
       y[j+rmx->nchan0] = dcfg.gs[k];
     }
-    neq = 2*rmx->nchan0;
-    rwork = dcfg.rwork;
-    iwork = dcfg.iwork;
-    itol = 1;
-    rtol = EPS10;
-    atol = EPS10;
-    itask = 1;
-    istate = 1;
-    iopt = 0;
-    mf = 10;
-    lrw = dcfg.lrw;
-    liw = dcfg.liw;
     rs = r0;
     while (rs != r1) {
       LSODE(C_FUNCTION(EXTDPQ, extdpq), neq, y, &rs, r1,
@@ -1518,18 +1518,6 @@ int IntegrateExternal(RMATRIX *rmx, double r1, double r0) {
       y[j] = dcfg.fc[k];
       y[j+rmx->nchan0] = dcfg.gc[k];
     }
-    neq = 2*rmx->nchan0;
-    rwork = dcfg.rwork;
-    iwork = dcfg.iwork;
-    itol = 1;
-    rtol = EPS10;
-    atol = EPS10;
-    itask = 1;
-    istate = 1;
-    iopt = 0;
-    mf = 10;
-    lrw = dcfg.lrw;
-    liw = dcfg.liw;
     rs = r0;
     while (rs != r1) {
       LSODE(C_FUNCTION(EXTDPQ, extdpq), neq, y, &rs, r1,

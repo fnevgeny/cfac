@@ -2321,7 +2321,7 @@ void TestRMatrix(double e, int m, char *fn1, char *fn2, char *fn3) {
   RMATRIX rmx;
   RBASIS rbs;
   int i, j, p, k;
-  double ei, a1;
+  double ei, a1 = 0.0;
 
   e /= HARTREE_EV;
   f = fopen(fn2, "r");

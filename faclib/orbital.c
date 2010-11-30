@@ -1556,7 +1556,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   double z, dk, r0, r1, r, w, v1;
   
   int neq, itol, itask, istate, iopt, lrw, iwork[22], liw, mf;
-  double y[6], rtol, atol[2], *rwork;
+  double y[6], rtol, atol, *rwork;
 
   n = pot->maxrp-1;
   z = pot->Z[n] - pot->N + 1.0;
@@ -1595,10 +1595,9 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   lrw = pot->maxrp;
   liw = 22;
   neq = 2;
-  itol = 2;
-  rtol = EPS4;
-  atol[0] = 0.0;
-  atol[1] = EPS6;
+  itol = 1;
+  rtol = EPS6;
+  atol = 0.0;
   itask = 1;
   istate = 1;
   iopt = 0;
@@ -1612,7 +1611,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
     y[4] = (_dwork1[i]*r - y[3])/(r - r0);
     y[5] = e;
     while (r0 != r) {
-      LSODE(C_FUNCTION(DERIVODE, derivode), neq, y, &r0, r, itol, rtol, atol, 
+      LSODE(C_FUNCTION(DERIVODE, derivode), neq, y, &r0, r, itol, rtol, &atol, 
 	    itask, &istate, iopt, rwork, lrw, iwork, liw, NULL, mf);
       if (istate == -1) istate = 2;
       else if (istate < 0) {
@@ -1630,7 +1629,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
     y[4] = (_veff[i]*r - y[3])/(r - r0);
     y[5] = e;
     while (r0 != r) {
-      LSODE(C_FUNCTION(DERIVODE, derivode), neq, y, &r0, r, itol, rtol, atol,
+      LSODE(C_FUNCTION(DERIVODE, derivode), neq, y, &r0, r, itol, rtol, &atol,
 	    itask, &istate, iopt, rwork, lrw, iwork, liw, NULL, mf);
       if (istate == -1) istate = 2;
       else if (istate < 0) {

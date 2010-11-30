@@ -2,33 +2,36 @@ TOP = ..
 
 include $(TOP)/Make.conf
 
-ALL_CFLAGS = $(CPPFLAGS) -I$(TOP) -I$(TOP)/faclib $(CFLAGS) $(LDFLAGS) $(LIBS)
+ALL_CFLAGS = $(CPPFLAGS) -I$(TOP) -I$(TOP)/faclib $(CFLAGS)
+
+.c.o: 
+	$(CC) -c $(ALL_CFLAGS) $<
 
 PROGS = sfac scrm spol
 
-include Make.dep
+SRCS = stoken.c sfac.c scrm.c spol.c
 
 all : $(PROGS)
 
+include Make.dep
+
 Make.dep : $(SRCS)
 	echo "# Generated automatically by \`make depend'" > $@
-	$(CC) $(ALL_CFLAGS) -MM $(SRCS) \
-		| sed 's/\.o:/\$$(O)\ :/g' >> $@
+	$(CC) $(ALL_CFLAGS) -MM $(SRCS) >> $@
 
-
-sfac : 	sfac.c stoken.c $(FACLIBS)
-	$(CC) -o sfac sfac.c stoken.c $(FACLIBS) $(ALL_CFLAGS)
-scrm : 	scrm.c stoken.c $(FACLIBS)
-	$(CC) -o scrm scrm.c stoken.c $(FACLIBS) $(ALL_CFLAGS)
-spol : 	spol.c stoken.c $(FACLIBS)
-	$(CC) -o spol spol.c stoken.c $(FACLIBS) $(ALL_CFLAGS)
+sfac : 	sfac.o stoken.o $(FACLIBS)
+	$(CC) -o sfac sfac.o stoken.o $(FACLIBS) $(LDFLAGS) $(LIBS)
+scrm : 	scrm.o stoken.o $(FACLIBS)
+	$(CC) -o scrm scrm.o stoken.o $(FACLIBS) $(LDFLAGS) $(LIBS)
+spol : 	spol.o stoken.o $(FACLIBS)
+	$(CC) -o spol spol.o stoken.o $(FACLIBS) $(LDFLAGS) $(LIBS)
 
 install :
 	$(INSTALLDIR) $(BINDIR)
 	$(INSTALL) $(PROGS) $(BINDIR)
 
 clean :
-	rm -f *.o *~ $(PROGS)
+	$(RM) *.o *~ $(PROGS)
 
 check : dummy
 

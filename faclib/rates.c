@@ -214,7 +214,7 @@ double IntegrateRate(int idist, double eth, double bound,
 		     int np, void *params, int i0, int f0, int type, 
 		     double (*Rate1E)(double, double, int, void *)) { 
   double result;
-  int neval, ier, limit, lenw, n, ix, iy;
+  int neval = 0, ier, limit, lenw, n, ix, iy;
   double epsabs, epsrel, abserr;
   double a, b, a0, b0, r0, *eg;
 

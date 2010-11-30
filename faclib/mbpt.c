@@ -611,7 +611,7 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
   ARRAY base;
   char cname[2000];
   FILE *f;
-  double t0, t1, t2;
+  double t0, t1, t2 = 0.0;
   int sr, nr;
 #ifdef USE_MPI
   int *ics0, *ics1;

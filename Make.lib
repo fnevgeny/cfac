@@ -30,7 +30,7 @@ include Make.dep
 Make.dep : $(CSRCS)
 	@echo -n "Generating dependencies... "
 	@echo "# Generated automatically by \`make depend'" > Make.dep
-	@$(CC) -I$(TOP) ${CPPFLAGS} $(CFLAGS) -MM $(CSRCS) | sed 's/\.o:/\$$(O)\ :/g' >> Make.dep
+	@$(CC) -I$(TOP) ${CPPFLAGS} $(CFLAGS) -MM $(CSRCS) >> Make.dep
 	@echo "done"
 
 $(LIB) : $(OBJS)

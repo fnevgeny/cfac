@@ -1,3 +1,5 @@
+#include <gsl/gsl_sf_legendre.h>
+
 #include "recombination.h"
 #include "time.h"
 #include "cf77.h"
@@ -2200,8 +2202,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
   int kappa, n, jj, kl, k0;
   double **b, e0, e, emin, emax, a, phi;
   double phi90, phi1, phi2, bphi;
-  double *pqa, *pqa2, nu1, theta;
-  int *ipqa, ierr, nudiff, mu1;
+  double *pqa, *pqa2;
   FILE *f;
   
   ns = StrSplit(s, ' ');
@@ -2211,16 +2212,9 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
   m = 2*mlam+1;
   pqa = malloc(sizeof(double)*m);
   pqa2 = malloc(sizeof(double)*m);
-  ipqa = malloc(sizeof(int)*m);
-  theta = acos(0.0);
-  nu1 = 0;
-  nudiff = mlam*2;
-  mu1 = 0;
-  DXLEGF(nu1, nudiff, mu1, mu1, theta, 3, pqa, ipqa, &ierr);
-  nu1 = 2;
-  nudiff = mlam*2-2;
-  mu1 = 2;
-  DXLEGF(nu1, nudiff, mu1, mu1, theta, 3, pqa2, ipqa, &ierr);
+  
+  gsl_sf_legendre_Plm_array(mlam*2, 0, 0.0, pqa);
+  gsl_sf_legendre_Plm_array(mlam*2, 2, 0.0, pqa2);
   
   p = s;
   f = fopen(fn, "a");
@@ -2323,7 +2317,6 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
   free(b);
   free(pqa);
   free(pqa2);
-  free(ipqa);
   
   ReinitRadial(1);
   ReinitRecombination(1);

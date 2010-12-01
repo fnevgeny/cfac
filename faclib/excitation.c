@@ -1,3 +1,5 @@
+#include <gsl/gsl_sf_legendre.h>
+
 #include "excitation.h"
 #include "cf77.h"
 
@@ -641,9 +643,8 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   int m0, m1, m2, m3;
   int j0, j1, j2, j3;
   int ko2, ko2p, t, nk;
-  int nudiff, mu1, mu2, ierr, ipqa[MAXMSUB];
   int kkp, iq, bnk;
-  double xc, theta, dnu1, pqa[MAXMSUB];
+  double xc;
   double r, c0, c1, c01, dk, a0 = 0.0, a1 = 0.0;
   double x, d, c, a, h, b0, b1, bte, bms;  
   double *g1, *g2, *x1, *x2;
@@ -750,26 +751,18 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
     }
   }
 
-  nudiff = 0;
-  mu1 = 0;
-  mu2 = q[nq-1]/2;
   for (t = 0; t < nk; t++) {
     xc = (c01+kint[t]*kint[t])/(2.0*c0*kint[t]);
     if (xc < 0.0) xc = 0.0;
     if (xc > 1.0) xc = 1.0;
-    theta = acos(xc);
-    if (theta < EPS10) theta = EPS10;
-    dnu1 = ko2;
-    DXLEGF(dnu1, nudiff, mu1, mu2, theta, 3, pqa, ipqa, &ierr);
+    
     for (iq = 0; iq < nq; iq++) {
-      gosm1[iq][t] = pqa[iq]*	
+      gosm1[iq][t] = gsl_sf_legendre_Plm(ko2, iq, xc)*
 	  exp(0.5*(LnFactorial(ko2-q[iq]/2)-LnFactorial(ko2+q[iq]/2)));
     }
     if (kp != k) {
-      dnu1 = ko2p;
-      DXLEGF(dnu1, nudiff, mu1, mu2, theta, 3, pqa, ipqa, &ierr);
       for (iq = 0; iq < nq; iq++) {
-	gosm2[iq][t] = pqa[iq]*	
+	gosm2[iq][t] = gsl_sf_legendre_Plm(ko2p, iq, xc)*	
 	  exp(0.5*(LnFactorial(ko2p-q[iq]/2)-LnFactorial(ko2p+q[iq]/2)));
       }
     } else {

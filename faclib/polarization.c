@@ -1,3 +1,5 @@
+#include <gsl/gsl_sf_legendre.h>
+
 #include "angular.h"
 #include "dbase.h"
 #include "parser.h"
@@ -39,9 +41,6 @@ static struct {
 int InitPolarization(void) {
   int k;
   double pqa[MAXPOL*2+1];
-  int ipqa[MAXPOL*2+1], ierr;
-  double nu1, theta;
-  int nudiff, mu1;
 
   InitDBase();
   InitAngular();
@@ -56,18 +55,13 @@ int InitPolarization(void) {
   params.ndr = 0;
   params.pdr = NULL;
 
-  theta = acos(0.0);
-  nu1 = 0;
-  nudiff = MAXPOL*2;
-  mu1 = 0;
-  DXLEGF(nu1, nudiff, mu1, mu1, theta, 3, pqa, ipqa, &ierr);
+  gsl_sf_legendre_Plm_array(MAXPOL*2, 0, 0.0, pqa);
+  
   for (k = 0; k <= MAXPOL; k++) {
     PL[k] = pqa[k*2];
   }
-  nu1 = 2;
-  nudiff = MAXPOL*2-2;
-  mu1 = 2;
-  DXLEGF(nu1, nudiff, mu1, mu1, theta, 3, pqa, ipqa, &ierr);
+
+  gsl_sf_legendre_Plm_array(MAXPOL*2, 2, 0.0, pqa);
   PL2[0] = 0.0;
   for (k = 1; k <= MAXPOL; k++) {
     PL2[k] = pqa[k*2-2];
@@ -1100,11 +1094,7 @@ int Orientation(char *fn, double etrans) {
     x = 1.0-EPS10;
   }
   if (x > EPS10) {
-    theta = asin(x);  
-    nu1 = 0;
-    nudiff = MAXPOL*2;
-    mu1 = 0;
-    DXLEGF(nu1, nudiff, mu1, mu1, theta, 3, pqa, ipqa, &ierr);
+    gsl_sf_legendre_Plm_array(MAXPOL*2, 0, M_PI/2 - x, pqa);
   }
 
   for (i = 0; i < nlevels; i++) {

@@ -20,7 +20,6 @@
 #include "excitation.h"
 #include "recombination.h"
 #include "ionization.h"
-#include "rmatrix.h"
 
 int Info(void);
 int InitFac(void);

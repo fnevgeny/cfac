@@ -5,7 +5,7 @@
 #include "init.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: fac.c,v 1.2 2010/12/01 11:16:31 fnevgeny Exp $";
+static char *rcsid="$Id: fac.c,v 1.3 2010/12/01 15:51:53 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -4536,22 +4536,6 @@ static PyObject *PSetSlaterCut(PyObject *self, PyObject *args) {
   return Py_None;
 }  
 
-static PyObject *PPropogateDirection(PyObject *self, PyObject *args) {
-  int m;
-
-  if (sfac_file) {
-    SFACStatement("PropogateDirection", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-  if (!PyArg_ParseTuple(args, "i", &m)) return NULL;
-  
-  PropogateDirection(m);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
 static PyObject *PSetCEPWFile(PyObject *self, PyObject *args) {
   char *fn;
 
@@ -4737,7 +4721,6 @@ static PyObject *PGeneralizedMoment(PyObject *self, PyObject *args) {
 static struct PyMethodDef fac_methods[] = {
   {"GeneralizedMoment", PGeneralizedMoment, METH_VARARGS},
   {"SlaterCoeff", PSlaterCoeff, METH_VARARGS},
-  {"PropogateDirection", PPropogateDirection, METH_VARARGS}, 
   {"SetUTA", PSetUTA, METH_VARARGS}, 
   {"SetTRF", PSetTRF, METH_VARARGS}, 
   {"SetCEPWFile", PSetCEPWFile, METH_VARARGS}, 

@@ -28,6 +28,5 @@ CSRCS = angular.c \
 	rcfp.c \
 	recombination.c \
 	recouple.c \
-	rmatrix.c \
 	structure.c \
 	transition.c

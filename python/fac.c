@@ -5,7 +5,7 @@
 #include "init.h"
 #include "cf77.h"
 
-static char *rcsid="$Id: fac.c,v 1.1 2010/07/26 08:16:16 fnevgeny Exp $";
+static char *rcsid="$Id: fac.c,v 1.2 2010/12/01 11:16:31 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -4518,196 +4518,6 @@ static PyObject *PRadialOverlaps(PyObject *self, PyObject *args) {
   return Py_None;
 }
 
-static PyObject *PRMatrixExpansion(PyObject *self, PyObject *args) {
-  int m;
-  double d, a, r;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixExpansion", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  d = 1E-3;
-  a = 1E-4;
-  r = 0.0;
-  if (!PyArg_ParseTuple(args, "i|ddd", &m, &r, &d, &a)) return NULL;
-  RMatrixExpansion(m, d, a, r);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}  
-
-static PyObject *PRMatrixNBatch(PyObject *self, PyObject *args) {
-  int m;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixNBatch", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  if (!PyArg_ParseTuple(args, "i", &m)) return NULL;
-  RMatrixNBatch(m);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}  
-  
-static PyObject *PRMatrixNMultipoles(PyObject *self, PyObject *args) {
-  int m;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixNMultipoles", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  if (!PyArg_ParseTuple(args, "i", &m)) return NULL;
-  RMatrixNMultipoles(m);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}  
-  
-static PyObject *PRMatrixBoundary(PyObject *self, PyObject *args) {
-  double r0, r1, b;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixBoundary", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  if (!PyArg_ParseTuple(args, "ddd", &r0, &r1, &b)) return NULL;
-  RMatrixBoundary(r0, r1, b);
-  
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-  
-static PyObject *PRMatrixBasis(PyObject *self, PyObject *args) {
-  int kmax, nb;
-  char *fn;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixBasis", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  if (!PyArg_ParseTuple(args, "sii", &fn, &kmax, &nb)) return NULL;
-  
-  RMatrixBasis(fn, kmax, nb);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
-static PyObject *PRMatrixTargets(PyObject *self, PyObject *args) {
-  PyObject *p, *q;
-  int nt, *kt, nc, *kc;
-  
-  if (sfac_file) {
-    SFACStatement("RMatrixTargets", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-  
-  nt = 0;
-  nc = 0;
-  q = NULL;
-  if (!PyArg_ParseTuple(args, "O|O", &p, &q)) return NULL;
-  
-  if (PyTuple_Check(p) || PyList_Check(p)) {
-    nt = DecodeGroupArgs(p, &kt);
-    if (nt == 0) return NULL;
-  }
-  if (q) {
-    if (PyTuple_Check(q) || PyList_Check(q)) {
-      nc = DecodeGroupArgs(q, &kc);
-    } else {
-      nc = 0;
-      kc = NULL;
-    }
-  }
-
-  RMatrixTargets(nt, kt, nc, kc);
-
-  if (nt > 0) free(kt);
-  if (nc > 0) free(kc);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
-static PyObject *PRMatrixSurface(PyObject *self, PyObject *args) {
-  char *fn;
-  
-  if (sfac_file) {
-    SFACStatement("RMatrixSurface", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-  
-  if (!PyArg_ParseTuple(args, "s", &fn)) return NULL;
-  RMatrixSurface(fn);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
-static PyObject *PRMatrixConvert(PyObject *self, PyObject *args) {
-  char *ifn, *ofn;
-  int m;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixConvert", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-  
-  if (!PyArg_ParseTuple(args, "ssi", &ifn, &ofn, &m)) return NULL;
-  RMatrixConvert(ifn, ofn, m);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
-static PyObject *PRMatrixFMode(PyObject *self, PyObject *args) {
-  int m;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixFMode", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-  
-  if (!PyArg_ParseTuple(args, "i", &m)) return NULL;
-  RMatrixFMode(m);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
-static PyObject *PTestRMatrix(PyObject *self, PyObject *args) {
-  char *fn1, *fn2, *fn3;
-  double e;
-  int m;
-  
-  if (sfac_file) {
-    SFACStatement("TestRMatrix", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  if (!PyArg_ParseTuple(args, "disss", &e, &m, &fn1, &fn2, &fn3)) return NULL;
-  
-  TestRMatrix(e, m, fn1, fn2, fn3);
-  
-  Py_INCREF(Py_None);
-  return Py_None;
-}
   
 static PyObject *PSetSlaterCut(PyObject *self, PyObject *args) {
   int k0, k1;
@@ -4741,42 +4551,6 @@ static PyObject *PPropogateDirection(PyObject *self, PyObject *args) {
   Py_INCREF(Py_None);
   return Py_None;
 }
-
-static PyObject *PRMatrixCE(PyObject *self, PyObject *args) {
-  PyObject *p, *q;
-  char **f1, **f2, *fn;
-  double emin, emax, de;
-  int i, np, m, mb;
-
-  if (sfac_file) {
-    SFACStatement("RMatrixCE", args, NULL);
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-
-  m = 0;
-  mb = 1;
-  if (!PyArg_ParseTuple(args, "sOOddd|ii", 
-			&fn, &p, &q, &emin, &emax, &de, &m, &mb)) return NULL;
-  
-  if (!PyList_Check(p)) return NULL;
-  if (!PyList_Check(q)) return NULL;
-  np = PyList_Size(p);
-  if (PyList_Size(q) != np) return NULL;
-  f1 = malloc(sizeof(char *)*np);
-  f2 = malloc(sizeof(char *)*np);
-  for (i = 0; i < np; i++) {
-    f1[i] = PyString_AsString(PyList_GetItem(p, i));
-    f2[i] = PyString_AsString(PyList_GetItem(q, i));
-  }
-  RMatrixCE(fn, np, f1, f2, emin, emax, de, m, mb);
-  
-  free(f1);
-  free(f2);
-
-  Py_INCREF(Py_None);
-  return Py_None;
-}    
 
 static PyObject *PSetCEPWFile(PyObject *self, PyObject *args) {
   char *fn;
@@ -4971,18 +4745,7 @@ static struct PyMethodDef fac_methods[] = {
   {"JoinTable", PJoinTable, METH_VARARGS}, 
   {"ModifyTable", PModifyTable, METH_VARARGS},
   {"LimitArray", PLimitArray, METH_VARARGS},
-  {"RMatrixExpansion", PRMatrixExpansion, METH_VARARGS}, 
-  {"RMatrixNBatch", PRMatrixNBatch, METH_VARARGS}, 
-  {"RMatrixFMode", PRMatrixFMode, METH_VARARGS}, 
-  {"RMatrixConvert", PRMatrixConvert, METH_VARARGS}, 
-  {"RMatrixNMultipoles", PRMatrixNMultipoles, METH_VARARGS}, 
-  {"RMatrixCE", PRMatrixCE, METH_VARARGS}, 
-  {"TestRMatrix", PTestRMatrix, METH_VARARGS}, 
   {"SetSlaterCut", PSetSlaterCut, METH_VARARGS}, 
-  {"RMatrixBoundary", PRMatrixBoundary, METH_VARARGS}, 
-  {"RMatrixTargets", PRMatrixTargets, METH_VARARGS}, 
-  {"RMatrixBasis", PRMatrixBasis, METH_VARARGS}, 
-  {"RMatrixSurface", PRMatrixSurface, METH_VARARGS}, 
   {"Print", PPrint, METH_VARARGS},
   {"Asymmetry", PAsymmetry, METH_VARARGS},
   {"Config", (PyCFunction) PConfig, METH_VARARGS|METH_KEYWORDS},

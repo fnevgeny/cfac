@@ -3290,137 +3290,6 @@ static int PSetBoundary(int argc, char *argv[], int argt[],
   return SetBoundary(nmax, p, bqp);
 }
 
-static int PRMatrixExpansion(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
-  int m;
-  double d, a, r;
-
-  if (argc < 1) return -1;
-  
-  m = atoi(argv[0]);
-  d = 1E-3;
-  a = 1E-4;
-  r = 0.0;
-  if (argc > 1) {
-    r = atof(argv[1]);
-    if (argc > 2) {
-      d = atof(argv[2]);
-      if (argc > 3) {
-	a = atof(argv[3]);
-      }
-    }
-  }
-
-  RMatrixExpansion(m, d, a, r);
-
-  return 0;
-}
-
-static int PRMatrixNBatch(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
-  int m;
-
-  if (argc != 1) return -1;
-  m = atoi(argv[0]);
-  RMatrixNBatch(m);
-  
-  return 0;
-}
-
-static int PRMatrixFMode(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-  int m;
-
-  if (argc != 1) return -1;
-  m = atoi(argv[0]);
-  RMatrixFMode(m);
-  
-  return 0;
-}
-
-static int PRMatrixConvert(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-  int m;
-
-  if (argc != 3) return -1;
-  m = atoi(argv[2]);
-  
-  RMatrixConvert(argv[0], argv[1], m);
-  
-  return 0;
-}
-
-static int PRMatrixNMultipoles(int argc, char *argv[], int argt[], 
-			       ARRAY *variables) {
-  int m;
-
-  if (argc != 1) return -1;
-  m = atoi(argv[0]);
-  RMatrixNMultipoles(m);
-  
-  return 0;
-}
-
-static int PRMatrixBoundary(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
-  double r0, r1, b;
-  
-  if (argc != 3) return -1;
-  r0 = atof(argv[0]);
-  r1 = atof(argv[1]);
-  b = atof(argv[2]);
-  
-  RMatrixBoundary(r0, r1, b);
-  
-  return 0;
-}
-
-static int PRMatrixBasis(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-  int kmax, nb;
-
-  if (argc != 3) return -1;
-  kmax = atoi(argv[1]);
-  nb = atoi(argv[2]);
-  
-  RMatrixBasis(argv[0], kmax, nb);
-  
-  return 0;
-}
-
-static int PRMatrixTargets(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
-  int nt, *kt, nc, *kc;
-  
-  if (argc < 1 || argc > 2) return -1;
-  if (argt[0] != LIST && argt[0] != TUPLE) return -1;
-  
-  nt = DecodeGroupArgs(&kt, 1, &(argv[0]), &(argt[0]), variables);
-  if (nt < 0) return -1;
-  nc = 0;
-  kc = NULL;
-  if (argc == 2) {
-    nc = DecodeGroupArgs(&kc, 1, &(argv[1]), &(argt[1]), variables);
-    if (nc < 0) nc = 0;
-  }
-    
-  RMatrixTargets(nt, kt, nc, kc);
-
-  if (nt > 0) free(kt);
-  if (nc > 0) free(kc);
-
-  return 0;
-}
-
-static int PRMatrixSurface(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
-  if (argc != 1) return -1;
-  if (argt[0] != STRING) return -1;
-
-  RMatrixSurface(argv[0]);
-  
-  return 0;
-}
 
 static int PSetSlaterCut(int argc, char *argv[], int argt[], 
 			 ARRAY *variables) {
@@ -3436,53 +3305,6 @@ static int PSetSlaterCut(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PTestRMatrix(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
-  int m;
-  double e;
-
-  if (argc != 5) return -1;
-  e = atof(argv[0]);
-  m = atoi(argv[1]);
-  
-  TestRMatrix(e, m, argv[2], argv[3], argv[4]);
-  
-  return 0;
-}
-
-static int PRMatrixCE(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
-  double emin, emax, de;
-  int np, m, i, mb;
-  char *v0[MAXNARGS], *v1[MAXNARGS];
-  int t0[MAXNARGS], t1[MAXNARGS];
-  
-  if (argc < 6 || argc > 8) return -1;
-  emin = atof(argv[3]);
-  emax = atof(argv[4]);
-  de = atof(argv[5]);
-  m= 0;
-  mb = 1;
-  if (argc >= 7) {
-    m = atoi(argv[6]);
-    if (argc > 7) {
-      mb = atoi(argv[7]);
-    }
-  }
-
-  np = DecodeArgs(argv[1], v0, t0, variables);
-  if (DecodeArgs(argv[2], v1, t1, variables) != np) {
-    return -1;
-  }
-  
-  RMatrixCE(argv[0], np, v0, v1, emin, emax, de, m, mb);
-
-  for (i = 0; i < np; i++) {
-    free(v0[i]);
-    free(v1[i]);
-  }
-  return 0;
-}
 
 static int PSetCEPWFile(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
@@ -3493,18 +3315,6 @@ static int PSetCEPWFile(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PPropogateDirection(int argc, char *argv[], int argt[], 
-			       ARRAY *variables) {
-  int m;
-
-  if (argc != 1) return -1;
-  m = atoi(argv[0]);
-
-  PropogateDirection(m);
-
-  return 0;
-}
-  
 static int PAppendTable(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {  
   if (argc != 1) return -1;
@@ -3745,7 +3555,6 @@ static int PGeneralizedMoment(int argc, char *argv[], int argt[],
 static METHOD methods[] = {
   {"GeneralizedMoment", PGeneralizedMoment, METH_VARARGS},
   {"SlaterCoeff", PSlaterCoeff, METH_VARARGS},
-  {"PropogateDirection", PPropogateDirection, METH_VARARGS}, 
   {"SetUTA", PSetUTA, METH_VARARGS}, 
   {"SetTRF", PSetTRF, METH_VARARGS}, 
   {"SetCEPWFile", PSetCEPWFile, METH_VARARGS}, 
@@ -3753,18 +3562,7 @@ static METHOD methods[] = {
   {"JoinTable", PJoinTable, METH_VARARGS}, 
   {"ModifyTable", PModifyTable, METH_VARARGS},
   {"LimitArray", PLimitArray, METH_VARARGS},
-  {"RMatrixExpansion", PRMatrixExpansion, METH_VARARGS}, 
-  {"RMatrixNBatch", PRMatrixNMultipoles, METH_VARARGS}, 
-  {"RMatrixFMode", PRMatrixFMode, METH_VARARGS}, 
-  {"RMatrixConvert", PRMatrixConvert, METH_VARARGS}, 
-  {"RMatrixNMultipoles", PRMatrixNMultipoles, METH_VARARGS}, 
-  {"TestRMatrix", PTestRMatrix, METH_VARARGS}, 
-  {"RMatrixCE", PRMatrixCE, METH_VARARGS}, 
   {"SetSlaterCut", PSetSlaterCut, METH_VARARGS}, 
-  {"RMatrixBoundary", PRMatrixBoundary, METH_VARARGS}, 
-  {"RMatrixBasis", PRMatrixBasis, METH_VARARGS}, 
-  {"RMatrixTargets", PRMatrixTargets, METH_VARARGS}, 
-  {"RMatrixSurface", PRMatrixSurface, METH_VARARGS}, 
   {"Print", PPrint, METH_VARARGS},
   {"AddConfig", PAddConfig, METH_VARARGS},
   {"AITable", PAITable, METH_VARARGS},

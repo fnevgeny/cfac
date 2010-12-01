@@ -50,7 +50,6 @@ int InitFac(void) {
   InitExcitation();
   InitRecombination();
   InitIonization();
-  InitRMatrix();
   InitMBPT();
 
   return 0;

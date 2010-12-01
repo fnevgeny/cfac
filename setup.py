@@ -10,7 +10,7 @@ libs = []
 extralink = []
 extracomp = []
 bsfac = ''
-version = "1.1.1"
+version = "1.2.0"
 
 no_setup = 0
 x = sys.argv[2:]

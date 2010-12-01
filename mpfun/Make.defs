@@ -5,25 +5,4 @@
 
 LIB  = $(CFAC_MPFUN_LIB)
 
-FSRCS = dxadd.f \
-	dxadj.f \
-	dxlegf.f \
-	dxpmu.f \
-	dxpmup.f \
-	dxpnrm.f \
-	dxpqnu.f \
-	dxpsi.f \
-	dxqmu.f \
-	dxqnu.f \
-	dxred.f \
-	dxset.f \
-	fdump.f \
-	i1mach.f \
-	j4save.f \
-	mpfun.f \
-	xercnt.f \
-	xerhlt.f \
-	xermsg.f \
-	xerprn.f \
-	xersve.f \
-	xgetua.f
+FSRCS = mpfun.f

@@ -1,6 +1,10 @@
 #include "orbital.h"
 #include "cf77.h"
 
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv2.h>
+
 /* the following arrays provide storage space in the calculation */
 static double _veff[MAXRP];
 static double ABAND[4*MAXRP];
@@ -1531,114 +1535,119 @@ int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2) {
   return 0;
 }
 
-void DerivODE(int *neq, double *t, double *y, double *ydot) {
-  double w0, w;
-  double t0, s, e;
+typedef struct {
+    double t0;
+    double w0;
+    double s;
+    double e;
+} ode_amp_params;
 
-  t0 = y[2];
-  w0 = y[3];
-  s = y[4];
-  e = y[5];
 
-  w = w0 + (*t - t0)*s;
-  w = 2.0*(e - w/(*t));
+static int ode_func(double t, const double y[], double ydot[], void *params)
+{
+  ode_amp_params *p = params;
+
+  double w = 2.0*(p->e - (p->w0 + (t - p->t0)*p->s)/t);
   
   ydot[0] = y[1];
   ydot[1] = 1.0/(y[0]*y[0]*y[0]) - y[0]*w;
+  
+  return GSL_SUCCESS;
 }
 
-/* provide fortran access with cfortran.h */
-FCALLSCSUB4(DerivODE, DERIVODE, derivode, PINT, PDOUBLE, DOUBLEV, DOUBLEV)
-  
 double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   int i, n, kl1;
   double a, b, xi, r2, r3;
-  double z, dk, r0, r1, r, w, v1;
+  double z, dk, r0, *r_o = _dwork, *v_o = _dwork1, w, v1;
   
-  int neq, itol, itask, istate, iopt, lrw, iwork[22], liw, mf;
-  double y[6], rtol, atol, *rwork;
+  double y[2], rtol = EPS6, atol = 0.0, h0 = -0.01;
 
+  gsl_odeiv2_system ode_sys;
+  gsl_odeiv2_driver *ode_drv;
+  int gsl_status;
+  ode_amp_params params;
+  
+  ode_sys.function  = ode_func;
+  ode_sys.jacobian  = NULL;
+  ode_sys.dimension = 2;
+  ode_sys.params    = &params;
+
+  ode_drv = gsl_odeiv2_driver_alloc_y_new(&ode_sys, gsl_odeiv2_step_rk8pd,
+                                          h0, atol, rtol);
+  
   n = pot->maxrp-1;
   z = pot->Z[n] - pot->N + 1.0;
   kl1 = ka*(ka+1);
-  r1 = pot->rad[n];
-  _dwork[0] = r1;
-  _dwork1[0] = _veff[n];
+
   dk = sqrt(2.0*e*(1.0+0.5*FINE_STRUCTURE_CONST2*e));
   dk = EPS5*e*dk;
+
+  /* calculate (r & v) grids for the outer region */
+  r_o[0] = pot->rad[n];
+  v_o[0] = _veff[n];
   for (i = 1; i < pot->maxrp; i++) {
-    r = _dwork[i-1]*1.05;
-    _dwork[i] = r;
-    r2 = r*r;
-    r3 = r2*r;
-    a = -z/r;
+    r_o[i] = r_o[i-1]*1.05;
+    r2 = r_o[i]*r_o[i];
+    r3 = r2*r_o[i];
+    a = -z/r_o[i];
     b = e - a;
     xi = sqrt(1.0 + 0.5*FINE_STRUCTURE_CONST2*b);
     xi = xi*xi;
     b = b*b;
     v1 = z/r2;
-    w = (-2.0*v1/r + 0.75*FINE_STRUCTURE_CONST2*v1*v1/xi - 2*ka*v1/r);
+    w = (-2.0*v1/r_o[i] + 0.75*FINE_STRUCTURE_CONST2*v1*v1/xi - 2*ka*v1/r_o[i]);
     w /= 4.0*xi;
-    _dwork1[i] = a + 0.5*kl1/r2 - 0.5*FINE_STRUCTURE_CONST2*(b - w);
+    v_o[i] = a + 0.5*kl1/r2 - 0.5*FINE_STRUCTURE_CONST2*(b - w);
+    
     a = z/r2;
     b = kl1/r3;
-    if (a < dk && b < dk) break;
-  }
-  r0 = r;
-  w = 2.0*(e - _dwork1[i]);
-  y[0] = pow(w, -0.25);
-  a = FINE_STRUCTURE_CONST2*e;
-  b = FINE_STRUCTURE_CONST*z;
-  y[1] = 0.5*(y[0]/w)*(z*(1+a)/r2-(kl1-b*b)/r3);
-
-  rwork = _dwork2;
-  lrw = pot->maxrp;
-  liw = 22;
-  neq = 2;
-  itol = 1;
-  rtol = EPS6;
-  atol = 0.0;
-  itask = 1;
-  istate = 1;
-  iopt = 0;
-  mf = 10;
-
-  i--;
-  for (; i >= 0; i--) {
-    r = _dwork[i];
-    y[2] = r0;
-    y[3] = _dwork1[i+1]*r0;
-    y[4] = (_dwork1[i]*r - y[3])/(r - r0);
-    y[5] = e;
-    while (r0 != r) {
-      LSODE(C_FUNCTION(DERIVODE, derivode), neq, y, &r0, r, itol, rtol, &atol, 
-	    itask, &istate, iopt, rwork, lrw, iwork, liw, NULL, mf);
-      if (istate == -1) istate = 2;
-      else if (istate < 0) {
-	printf("LSODE Error %d\n", istate);
-	exit(1);
-      }
+    if (a < dk && b < dk) {
+      break;
     }
   }
 
+  a = FINE_STRUCTURE_CONST2*e;
+  b = FINE_STRUCTURE_CONST*z;
+  w = 2.0*(e - v_o[i]);
+
+  /* initial values */
+  r0   = r_o[i];
+  y[0] = pow(w, -0.25);
+  y[1] = 0.5*(y[0]/w)*(z*(1+a)/r2-(kl1-b*b)/r3);
+
+  /* integration over the outer region */
+  i--;
+  for (; i >= 0; i--) {
+    params.t0 = r0;
+    params.w0 = v_o[i+1]*r0;
+    params.s  = (v_o[i]*r_o[i] - params.w0)/(r_o[i] - r0);
+    params.e  = e;
+
+    gsl_status = gsl_odeiv2_driver_apply(ode_drv, &r0, r_o[i], y);
+    if (gsl_status != GSL_SUCCESS) {
+       printf ("ODE error %d\n", gsl_status);
+       exit(1);
+    }
+  }
   p[n] = y[0];
+  
+  /* integration over the inner region */
   for (i = n-1; i >= i0; i--) {
-    r = pot->rad[i];
-    y[2] = r0;
-    y[3] = _veff[i+1]*r0;
-    y[4] = (_veff[i]*r - y[3])/(r - r0);
-    y[5] = e;
-    while (r0 != r) {
-      LSODE(C_FUNCTION(DERIVODE, derivode), neq, y, &r0, r, itol, rtol, &atol,
-	    itask, &istate, iopt, rwork, lrw, iwork, liw, NULL, mf);
-      if (istate == -1) istate = 2;
-      else if (istate < 0) {
-	printf("LSODE Error %d\n", istate);
-	exit(1);
-      }
+    double r = pot->rad[i];
+    params.t0 = r0;
+    params.w0 = _veff[i+1]*r0;
+    params.s  = (_veff[i]*r - params.w0)/(r - r0);
+    params.e  = e;
+
+    gsl_status = gsl_odeiv2_driver_apply(ode_drv, &r0, r, y);
+    if (gsl_status != GSL_SUCCESS) {
+       printf ("ODE error %d\n", gsl_status);
+       exit(1);
     }
     p[i] = y[0];
   }
+
+  gsl_odeiv2_driver_free(ode_drv);
 
   return y[1];
 }    

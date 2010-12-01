@@ -1,4 +1,4 @@
-static char *rcsid="$Id: util.c,v 1.1 2010/07/26 08:16:16 fnevgeny Exp $";
+static char *rcsid="$Id: util.c,v 1.2 2010/12/01 16:13:53 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -126,27 +126,10 @@ static PyObject *PUVIP3P(PyObject *self, PyObject *args) {
   return py0;
 }
 
-static PyObject *PDXLEGF(PyObject *self, PyObject *args) {
-  double dnu;
-  int mu, id;
-  double theta;
-  double pqa[1];
-  int ipqa[1], ierr;
-
-  id = 3;
-  if (!PyArg_ParseTuple(args, "did|i", &dnu, &mu, &theta, &id)) 
-    return NULL;
-  theta = acos(theta);
-  DXLEGF(dnu, 0, mu, mu, theta, id, pqa, ipqa, &ierr);
-  
-  return Py_BuildValue("d", pqa[0]);
-}
-
 static struct PyMethodDef util_methods[] = {
   {"Spline", PSpline, METH_VARARGS},
   {"Splint", PSplint, METH_VARARGS},
   {"UVIP3P", PUVIP3P, METH_VARARGS},
-  {"DXLEGF", PDXLEGF, METH_VARARGS},
   {NULL, NULL}
 };
 

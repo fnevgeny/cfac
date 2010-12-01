@@ -1,8 +1,0 @@
-##################################################
-#     System-independent Make.defs file for      #
-#            a cFAC auxiliary library            #
-##################################################
-
-LIB  = $(CFAC_MPFUN_LIB)
-
-FSRCS = mpfun.f

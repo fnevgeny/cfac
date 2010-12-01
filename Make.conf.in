@@ -8,10 +8,9 @@ PACKAGE=cfac
 
 SHELL = /bin/sh
 
-LIBDIRS = blas coul toms minpack ionis faclib
+LIBDIRS = coul toms minpack ionis faclib
 SUBDIRS = $(LIBDIRS) sfac doc demo
 
-CFAC_BLAS_LIB    = $(TOP)/blas/cfac_blas.a
 CFAC_COUL_LIB    = $(TOP)/coul/cfac_coul.a
 CFAC_TOMS_LIB    = $(TOP)/toms/cfac_toms.a
 CFAC_MINPACK_LIB = $(TOP)/minpack/cfac_minpack.a
@@ -19,8 +18,7 @@ CFAC_IONIS_LIB   = $(TOP)/ionis/cfac_ionis.a
 CFAC_FAC_LIB     = $(TOP)/faclib/cfac_faclib.a
 
 FACLIBS = $(CFAC_FAC_LIB) $(CFAC_COUL_LIB) $(CFAC_IONIS_LIB) \
-	  $(CFAC_TOMS_LIB) $(CFAC_MINPACK_LIB) \
-	  $(CFAC_BLAS_LIB)
+	  $(CFAC_TOMS_LIB) $(CFAC_MINPACK_LIB)
 
 PYTHON = @PYTHON@
 PYLIB  = `python-config --libs`

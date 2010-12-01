@@ -19,7 +19,8 @@ FSRCS = clogam.f \
 	dcoul.f \
 	njsym.f \
 	njintr.f \
-	cmultip.f
+	cmultip.f \
+	d1mach.f
 
 d1mach.o :
 	$(FC) -c ${FFLAGSNO} d1mach.f

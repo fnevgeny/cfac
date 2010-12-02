@@ -17,16 +17,6 @@ typedef struct _MOD_RECORD_ {
   void *r, *h;
 } MOD_RECORD;
 
-void spline_work(double *x, double *y, int n, 
-		 double yp1, double ypn, double *y2, double *work);
-void spline(double *x, double *y, int n, 
-	    double yp1, double ypn, double *y2);
-int splint(double *xa, double *ya, double *y2a, 
-	   int n, double x, double *y);
-void splie2(double *x1a, double *x2a, double **ya, 
-	    int m, int n, double **y2a);
-void splin2(double *x1a, double *x2a, double **ya, double **y2a,
-	   int m, int n, double x1, double x2, double *y);
 void PolyBasis(int n, double *c, double x, double logx);
 void PolyFit(int n, double *c, int nd, double *x, double *y);
 void SVDFit(int np, double *coeff, double *chisq, double tol,

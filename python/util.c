@@ -1,4 +1,4 @@
-static char *rcsid="$Id: util.c,v 1.2 2010/12/01 16:13:53 fnevgeny Exp $";
+static char *rcsid="$Id: util.c,v 1.3 2010/12/02 07:05:25 fnevgeny Exp $";
 #if __GNUC__ == 2
 #define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
 USE (rcsid);
@@ -12,68 +12,6 @@ USE (rcsid);
 
 static PyObject *ErrorObject;
 #define onError(message) {PyErr_SetString(ErrorObject, message);}
-
-static PyObject *PSpline(PyObject *self, PyObject *args) {
-  PyObject *px, *py, *py2;
-  double *x, *y, *y2, dy1, dy2;
-  int n, i;
-
-  dy1 = 1E30;
-  dy2 = 1E30;
-  if (!PyArg_ParseTuple(args, "OO|dd", &px, &py, &dy1, &dy2)) return NULL;
-  if (!PyList_Check(px) || !PyList_Check(py)) return NULL;
-  n = PyList_Size(px);
-  if (PyList_Size(py) != n) return NULL;
-  if (n == 0) return NULL;
-
-  x = malloc(sizeof(double)*n);
-  y = malloc(sizeof(double)*n);
-  y2 = malloc(sizeof(double)*n);
-  
-  for (i = 0; i < n; i++) {
-    x[i] = PyFloat_AsDouble(PyList_GetItem(px, i));
-    y[i] = PyFloat_AsDouble(PyList_GetItem(py, i));
-  }
-
-  spline(x, y, n, dy1, dy2, y2);
-  py2 = Py_BuildValue("[]");
-  for (i = 0; i < n; i++) {
-    PyList_Append(py2, Py_BuildValue("d", y2[i]));
-  }
-  free(x);
-  free(y);
-  free(y2);
-  
-  return py2;
-}
-
-static PyObject *PSplint(PyObject *self, PyObject *args) {  
-  PyObject *px, *py, *py2;
-  double *x, *y, *y2, x0, y0;
-  int n, i;  
-
-  if (!PyArg_ParseTuple(args, "OOOd", &px, &py, &py2, &x0)) return NULL;
-  if (!PyList_Check(px) || !PyList_Check(py)) return NULL;
-  n = PyList_Size(px);
-  if (PyList_Size(py) != n) return NULL;
-  if (PyList_Size(py2) != n) return NULL;
-  x = malloc(sizeof(double)*n);
-  y = malloc(sizeof(double)*n);
-  y2 = malloc(sizeof(double)*n);  
-  for (i = 0; i < n; i++) {
-    x[i] = PyFloat_AsDouble(PyList_GetItem(px, i));
-    y[i] = PyFloat_AsDouble(PyList_GetItem(py, i));
-    y2[i] = PyFloat_AsDouble(PyList_GetItem(py2, i));
-  }
-
-  splint(x, y, y2, n, x0, &y0);
-
-  free(x);
-  free(y);
-  free(y2);
-  
-  return Py_BuildValue("d", y0);
-}  
 
 static PyObject *PUVIP3P(PyObject *self, PyObject *args) {
   PyObject *px, *py, *px0, *py0;
@@ -127,8 +65,6 @@ static PyObject *PUVIP3P(PyObject *self, PyObject *args) {
 }
 
 static struct PyMethodDef util_methods[] = {
-  {"Spline", PSpline, METH_VARARGS},
-  {"Splint", PSplint, METH_VARARGS},
   {"UVIP3P", PUVIP3P, METH_VARARGS},
   {NULL, NULL}
 };

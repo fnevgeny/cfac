@@ -14,8 +14,6 @@ AC_F77_LIBRARY_LDFLAGS
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
-AC_CHECK_PROG([PYTHON], [python], [python])
-AC_SUBST(PYTHON)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -207,13 +205,5 @@ AC_SUBST(FFLAGSNO)
 FFLAGS="$FFLAGS $fopt"
       
 AC_CONFIG_FILES([Make.conf])
-
-if test -z "$PYTHON"
-then
-  echo "WARNING: NO PYTHON DETECTED ON THIS SYSTEM."
-  echo "To install PFAC interface,"
-  echo "download and install Python 2.0 or later"
-  echo "You may still procede to install SFAC interface, though."
-fi
 
 AC_OUTPUT

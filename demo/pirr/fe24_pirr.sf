@@ -20,6 +20,8 @@ Structure('li.lev.b', ['rn2'])
 MemENTable('li.lev.b')
 PrintTable('li.lev.b', 'li.lev', 1)
 
+# calculate asymmetry
+#Asymmetry('li.asym', '1s2', 10)
+
 RRTable('li.rr.b', ['rn2'], ['n1'])
 PrintTable('li.rr.b', 'li.rr', 1)
-

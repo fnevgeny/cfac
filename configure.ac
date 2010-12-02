@@ -146,7 +146,7 @@ AC_ARG_WITH(extralib,
 	[extralib=$withval])
 
 # setup libs 
-LIBS="$LIBS -lgsl -lgslcblas -llapack -lblas"
+LIBS="$LIBS -lgslodeiv2 -lgsl -lgslcblas -llapack -lblas"
 fwithm=`echo "$FLIBS " | grep " -lm"`
 if test "x$fwithm" = "x"
 then

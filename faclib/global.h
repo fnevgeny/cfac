@@ -14,10 +14,6 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef PMALLOC_CHECK
-#include "pmalloc.h"
-#endif
-
 #include "sysdef.h"
 
 #ifdef USE_MPI

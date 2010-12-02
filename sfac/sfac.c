@@ -3715,10 +3715,6 @@ int main(int argc, char *argv[]) {
   MPI_Init(&argc, &argv);
 #endif
 
-#ifdef PMALLOC_CHECK
-  pmalloc_open();
-#endif
-  
   if (InitFac() < 0) {
     printf("initialization failed\n");
     exit(1);
@@ -3738,10 +3734,6 @@ int main(int argc, char *argv[]) {
       EvalFile(f, 0, methods);
     }
   }
-
-#ifdef PMALLOC_CHECK
-  pmalloc_check();
-#endif
 
 #ifdef USE_MPI
   MPI_Finalize();

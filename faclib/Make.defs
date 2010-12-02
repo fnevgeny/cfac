@@ -20,7 +20,6 @@ CSRCS = angular.c \
 	nucleus.c \
 	orbital.c \
 	parser.c \
-	pmalloc.c \
 	radial.c \
 	rcfp.c \
 	recombination.c \

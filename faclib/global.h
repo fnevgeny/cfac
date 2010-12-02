@@ -16,10 +16,6 @@
 
 #include "sysdef.h"
 
-#ifdef USE_MPI
-#include <mpi.h>
-#endif
-
 /* define constants */
 #include "consts.h"
 

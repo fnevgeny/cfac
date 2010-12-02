@@ -128,16 +128,6 @@ then
 fi
 AC_DEFINE_UNQUOTED([$xxFortran])
 
-# MPI
-AC_ARG_WITH(mpi,
-	[  --with-mpi              Use MPI],
-	[use_mpi=$withval])
-AC_ARG_WITH(mpicompile,
-	[  --with-mpicompile       MPI compile flags],
-	[mpicompile=$withval])
-AC_ARG_WITH(mpilink,
-	[  --with-mpilink          MPI link flags],
-	[mpilink=$withval])
 AC_ARG_WITH(extrainc,
 	[  --with-extrainc         Extra compile flags],
 	[extrainc=$withval])
@@ -151,43 +141,6 @@ fwithm=`echo "$FLIBS " | grep " -lm"`
 if test "x$fwithm" = "x"
 then
   LIBS="$LIBS -lm"
-fi
-
-if test "x$use_mpi" != "x"
-then
-  AC_DEFINE_UNQUOTED([USE_MPI])
-  if test "x$mpicompile" = "x"
-  then 
-    case "$use_mpi" in
-      lam*)
-        mpicompile=`mpicc -showme`
-	mpicompile=[`echo $mpicompile | sed 's/^ *//'`]	
-	mpicompile=[`echo $mpicompile | sed 's/^[^ ]* *//'`]
-	mpicompile=[`echo $mpicompile | sed 's/-[Ll][^ ]*//g'`]
-	mpicompile=[`echo $mpicompile | sed 's/ *$//'`]
-      ;;
-      *)
-	echo "Supply MPI compile flags using --with-mpicompile"
-      ;;
-    esac
-  fi
-  if test "x$mpilink" = "x"
-  then 
-    case "$use_mpi" in
-      lam*)
-        mpilink=`mpicc -showme`
-	mpilink=[`echo $mpilink | sed 's/^ *//'`]
-	mpilink=[`echo $mpilink | sed 's/^[^ ]* *//'`]
-	mpilink=[`echo $mpilink | sed 's/-[^Ll][^ ]*//g'`]
-	mpilink=[`echo $mpilink | sed 's/ *$//'`]
-      ;;
-      *)
-	echo "Supply MPI link flags using --with-mpilink"
-      ;;
-    esac
-  fi
-  CPPFLAGS="$CPPFLAGS $mpicompile"
-  LIBS="$LIBS $mpilink"
 fi
 
 if test "x$extrainc" != "x"

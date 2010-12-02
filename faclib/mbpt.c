@@ -613,15 +613,8 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
   FILE *f;
   double t0, t1, t2 = 0.0;
   int sr, nr;
-#ifdef USE_MPI
-  int *ics0, *ics1;
-  MPI_Comm_rank(MPI_COMM_WORLD, &sr);
-  MPI_Comm_size(MPI_COMM_WORLD, &nr);
-  printf("RANK: %2d, TOTAL: %2d\n", sr, nr);
-#else
   sr = 0;
   nr = 1;
-#endif
   
   t0 = clock();
   t0 /= CLOCKS_PER_SEC;
@@ -862,35 +855,6 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
       }
     }
   }
-#ifdef USE_MPI
-  ncc1 = 0;
-  for (p = 0; p < ccfg.dim; p++) {
-    ccp = ArrayGet(&ccfg, p);
-    if (ccp->ncs) ncc1++;
-  }
-  MPI_Allreduce(&ncc1, &ncc0, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-  if (ncc0 > 0) {
-    ics1 = malloc(sizeof(int)*ncs0);
-    ics0 = malloc(sizeof(int)*ncs0*nr);
-  }
-  for (i = 0; i < ncc0; i++) ics1[i] = -1;
-  i = 0;
-  for (p = 0; p < ccfg.dim; p++) {
-    ccp = ArrayGet(&ccfg, p);
-    if (ccp->ncs) ics1[i++] = p;
-  }
-  MPI_Allgather(ics1, ncc0, MPI_INT, ics0, ncc0, MPI_INT, MPI_COMM_WORLD);
-  for (p = 0; p < ncc0*nr; p++) {
-    if (ics0[p] >= 0) {
-      ccp = ArrayGet(&ccfg, ics0[p]);
-      ccp->ncs = 1;
-    }
-  }
-  if (ncc0) {
-    free(ics0);
-    free(ics1);
-  }
-#endif
 
  ADDCFG:  
   if (sr == 0) {

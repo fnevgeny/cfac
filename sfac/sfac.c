@@ -3711,10 +3711,6 @@ int main(int argc, char *argv[]) {
   int i;
   FILE *f;
 
-#ifdef USE_MPI
-  MPI_Init(&argc, &argv);
-#endif
-
   if (InitFac() < 0) {
     printf("initialization failed\n");
     exit(1);
@@ -3734,10 +3730,6 @@ int main(int argc, char *argv[]) {
       EvalFile(f, 0, methods);
     }
   }
-
-#ifdef USE_MPI
-  MPI_Finalize();
-#endif
 
   return 0;
 }

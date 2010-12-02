@@ -160,7 +160,7 @@
 #define CPYDAT(A1,A2,A3)\
      CCALLSFSUB3(CPYDAT, cpydat, INT, INTV, INT, A1,A2,A3)
      
-     PROTOCCALLSFSUB0(CPYDAT, cpydat)
+     PROTOCCALLSFSUB0(FACTT, factt)
 #define FACTT()        \
      CCALLSFSUB0(FACTT, factt)
 

@@ -10,7 +10,6 @@ CSRCS = angular.c \
 	cfp.c \
 	config.c \
 	coulomb.c \
-	crm.c \
 	dbase.c \
 	excitation.c \
 	grid.c \
@@ -22,9 +21,7 @@ CSRCS = angular.c \
 	orbital.c \
 	parser.c \
 	pmalloc.c \
-	polarization.c \
 	radial.c \
-	rates.c \
 	rcfp.c \
 	recombination.c \
 	recouple.c \

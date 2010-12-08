@@ -8,7 +8,6 @@ int StoreENTable(sqlite3 *db, FILE *fp, int swp)
 {
     EN_HEADER h;
     EN_RECORD r;
-    int nb = 0;
     int i, n;
     int p, vnl, vn, vl, g, ibase;
     double e;
@@ -24,7 +23,6 @@ int StoreENTable(sqlite3 *db, FILE *fp, int swp)
           " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-
 
     while (1) {
         n = ReadENHeader(fp, &h, swp);
@@ -76,9 +74,62 @@ int StoreENTable(sqlite3 *db, FILE *fp, int swp)
             }
             sqlite3_reset(stmt);
         }
-        nb += 1;
     }
     
+    sqlite3_finalize(stmt);
+
+    return retval;
+}
+
+
+int StoreTRTable(sqlite3 *db, FILE *fp, int swp) {
+    TR_HEADER h;
+    TR_RECORD r;
+    TR_EXTRA rx;
+    int n, i;
+
+    int retval = 0;
+    int rc;
+    sqlite3_stmt *stmt;
+    
+    char *sql;
+
+    sql = "INSERT INTO transitions" \
+          " (ini_id, fin_id, mpole, me, mode)" \
+          " VALUES (?, ?, ?, ?, ?)";
+    
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+    while (1) {
+        n = ReadTRHeader(fp, &h, swp);
+        if (n == 0) {
+            break;
+        }
+
+        // fprintf(f2, "GAUGE\t= %d\n", (int)h.gauge);
+
+        for (i = 0; i < h.ntransitions; i++) {
+            n = ReadTRRecord(fp, &r, &rx, swp);
+            if (n == 0) {
+                break;
+            }
+            
+            sqlite3_bind_int   (stmt,  1, r.upper);
+            sqlite3_bind_int   (stmt,  2, r.lower);
+            sqlite3_bind_int   (stmt,  3, h.multipole);
+            sqlite3_bind_double(stmt,  4, r.strength);
+            sqlite3_bind_int   (stmt,  5, h.mode);
+
+            rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE) {
+                fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                retval = -1;
+                break;
+            }
+            sqlite3_reset(stmt);
+        }
+    }
+
     sqlite3_finalize(stmt);
 
     return retval;

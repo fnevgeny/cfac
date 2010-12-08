@@ -4319,6 +4319,9 @@ int StoreTable(const char *ifn, const char *ofn) {
     case DB_EN:
         n = StoreENTable(db, fp, swp);
         break;
+    case DB_TR:
+        n = StoreTRTable(db, fp, swp);
+        break;
     default:
         break;
     }

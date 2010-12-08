@@ -563,6 +563,7 @@ double BornMass(void);
 
 int StoreTable(const char *ifn, const char *ofn);
 int StoreENTable(sqlite3 *db, FILE *fp, int swp);
+int StoreTRTable(sqlite3 *db, FILE *fp, int swp);
 
 #endif
 

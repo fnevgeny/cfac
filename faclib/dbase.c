@@ -2872,12 +2872,7 @@ double OscillatorStrength(int m, double e, double s, double *ga) {
   aw = FINE_STRUCTURE_CONST * e;
   if (itrf == 0 && m != 0) {
     m2 = 2*abs(m);
-    x = s*s/(m2+1.0);
-    x *= e;
-    m2 -= 2;
-    if (m2) {
-      x *= pow(aw, m2);
-    }
+    x = s*s*e*pow(aw, m2 - 2)/(m2 + 1);
   } else {
     x = s;
   }

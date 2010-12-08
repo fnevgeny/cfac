@@ -4881,3 +4881,44 @@ int AdjustEnergy(int nlevs, int *ilevs, double *e,
 
   return 0;
 }
+
+int StoreTable(const char *ifn, const char *ofn) {
+    F_HEADER fh;
+    FILE *fp;
+    int n, swp;
+    sqlite3 *db;
+    int rc;
+
+    fp = fopen(ifn, "r");
+    if (fp == NULL) {
+        return -1;
+    }
+
+    rc = sqlite3_open(ofn, &db);
+    if (rc) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        fclose(fp);
+        return -1;
+    }
+
+    n = ReadFHeader(fp, &fh, &swp);
+    if (n == 0) {
+        sqlite3_close(db);
+        fclose(fp);
+        return -1;
+    }
+
+    switch (fh.type) {
+    case DB_EN:
+        n = StoreENTable(db, fp, swp);
+        break;
+    default:
+        break;
+    }
+
+    sqlite3_close(db);
+    fclose(fp);
+    
+    return 0;
+}

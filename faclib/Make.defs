@@ -11,6 +11,7 @@ CSRCS = angular.c \
 	config.c \
 	coulomb.c \
 	dbase.c \
+	dbase_sql.c \
 	excitation.c \
 	grid.c \
 	init.c \

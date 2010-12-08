@@ -4,6 +4,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
+
+#include <sqlite3.h>
+
 #include "consts.h"
 
 #define DB_EN 1
@@ -556,6 +559,10 @@ int BornFormFactorTE(double *te);
 FORM_FACTOR *BornFormFactor(void);
 void SetBornMass(double m);
 double BornMass(void);
+
+
+int StoreTable(const char *ifn, const char *ofn);
+int StoreENTable(sqlite3 *db, FILE *fp, int swp);
 
 #endif
 

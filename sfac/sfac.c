@@ -1043,6 +1043,15 @@ static int PPrintTable(int argc, char *argv[], int argt[],
   return 0;
 }
 
+static int PStoreTable(int argc, char *argv[], int argt[], 
+		       ARRAY *variables) {
+  if (argc != 2) return -1;
+  if (argt[0] != STRING || argt[1] != STRING) return -1;
+  
+  StoreTable(argv[0], argv[1]);
+  return 0;
+}
+
 static int PRecStates(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
   int ng, *kg, n;
@@ -3673,6 +3682,7 @@ static METHOD methods[] = {
   {"SetUsrPEGridType", PSetUsrPEGridType, METH_VARARGS},
   {"SolveBound", PSolveBound, METH_VARARGS},
   {"SortLevels", PSortLevels, METH_VARARGS},
+  {"StoreTable", PStoreTable, METH_VARARGS},
   {"Structure", PStructure, METH_VARARGS},
   {"CoulombBethe", PCoulombBethe, METH_VARARGS}, 
   {"TestAngular", PTestAngular, METH_VARARGS}, 

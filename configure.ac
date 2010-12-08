@@ -136,7 +136,7 @@ AC_ARG_WITH(extralib,
 	[extralib=$withval])
 
 # setup libs 
-LIBS="$LIBS -lgslodeiv2 -lgsl -lgslcblas -llapack -lblas"
+LIBS="$LIBS -lgslodeiv2 -lgsl -lgslcblas -llapack -lblas -lsqlite3"
 fwithm=`echo "$FLIBS " | grep " -lm"`
 if test "x$fwithm" = "x"
 then

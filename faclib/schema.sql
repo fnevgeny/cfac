@@ -15,6 +15,7 @@ CREATE TABLE species (
 CREATE TABLE levels (
     sid      INTEGER NOT NULL REFERENCES sessions(sid) ON DELETE CASCADE,
     id       INTEGER NOT NULL,
+    nele     INTEGER NOT NULL,
     name     TEXT    NOT NULL,
     e        REAL    NOT NULL,
     g        INTEGER NOT NULL,

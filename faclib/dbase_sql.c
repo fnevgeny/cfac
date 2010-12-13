@@ -127,11 +127,13 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     char *sql;
 
     sql = "INSERT INTO levels" \
-          " (sid, id, name, e, g, vn, vl, p, ibase, ncomplex, sname)" \
-          " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+          " (sid, id, nele, name, e, g, vn, vl, p, ibase, ncomplex, sname)" \
+          " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
+    sqlite3_bind_int(stmt,  1, sid);
+    
     while (retval == 0) {
         EN_HEADER h;
         int i, n;
@@ -140,6 +142,8 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         if (n == 0) {
             break;
         }
+        
+        sqlite3_bind_int(stmt,  3, h.nele);
 
         for (i = 0; i < h.nlevels; i++) {
             EN_RECORD r;
@@ -164,21 +168,20 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             
             ibase = IBaseFromENRecord(&r);
     
-            sqlite3_bind_int   (stmt,  1, sid);
             sqlite3_bind_int   (stmt,  2, r.ilev);
-            SQLITE3_BIND_STR   (stmt,  3, r.name);
-            sqlite3_bind_double(stmt,  4, r.energy);
-            sqlite3_bind_int   (stmt,  5, g);
-            sqlite3_bind_int   (stmt,  6, vn);
-            sqlite3_bind_int   (stmt,  7, vl);
-            sqlite3_bind_int   (stmt,  8, p);
+            SQLITE3_BIND_STR   (stmt,  4, r.name);
+            sqlite3_bind_double(stmt,  5, r.energy);
+            sqlite3_bind_int   (stmt,  6, g);
+            sqlite3_bind_int   (stmt,  7, vn);
+            sqlite3_bind_int   (stmt,  8, vl);
+            sqlite3_bind_int   (stmt,  9, p);
             if (ibase >= 0) {
-                sqlite3_bind_int (stmt, 9, ibase);
+                sqlite3_bind_int (stmt, 10, ibase);
             } else {
-                sqlite3_bind_null(stmt, 9);
+                sqlite3_bind_null(stmt, 10);
             }
-            SQLITE3_BIND_STR   (stmt, 10, r.ncomplex);
-            SQLITE3_BIND_STR   (stmt, 11, r.sname);
+            SQLITE3_BIND_STR   (stmt, 11, r.ncomplex);
+            SQLITE3_BIND_STR   (stmt, 12, r.sname);
 
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {

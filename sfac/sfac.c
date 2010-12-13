@@ -3018,7 +3018,7 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
   nup = 0;
   low = NULL;
   up = NULL;
-  m = 0;
+  m = -1;
 
   if (argc < 1) {
     return -1;

@@ -3020,38 +3020,45 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
   up = NULL;
   m = 0;
 
-  n = argc;
-
-  if (n == 1) {
-    if (argt[0] != STRING) return -1;
-    SaveTransition(nlow, low, nup, up, argv[0], m);
-  } else if (n == 2) {
-    if (argt[0] != STRING || argt[1] != NUMBER) return -1;
-    m = atoi(argv[1]);
-    SaveTransition(nlow, low, nup, up, argv[0], m);
-  } else if (n == 3) {
-    if (argt[0] != STRING) return -1;
-    nlow = SelectLevels(&low, argv[1], argt[1], variables);
-    if (nlow <= 0) return -1;
-    nup = SelectLevels(&up, argv[2], argt[2], variables);
-    if (nup <= 0) return -1;
-    SaveTransition(nlow, low, nup, up, argv[0], m);
-    free(low);
-    free(up);
-  } else if (n == 4) {
-    if (argt[0] != STRING || argt[3] != NUMBER) return -1;
-    nlow = SelectLevels(&low, argv[1], argt[1], variables);
-    if (nlow <= 0) return -1;
-    nup = SelectLevels(&up, argv[2], argt[2], variables);
-    if (nup <= 0) return -1;
-    m = atoi(argv[3]);
-    SaveTransition(nlow, low, nup, up, argv[0], m);
-    free(low);
-    free(up);
-  } else {
+  if (argc < 1) {
     return -1;
   }
+  
+  if (argt[0] != STRING) {
+    return -1;
+  }
+  
+  switch (argc) {
+  case 2:
+    if (argt[1] != NUMBER) {
+      return -1;
+    } else {
+      m = atoi(argv[1]);
+    }
+    break;
+  case 4:
+    if (argt[3] != NUMBER) {
+      return -1;
+    }
+    m = atoi(argv[3]);
+  case 3:
+    nlow = SelectLevels(&low, argv[1], argt[1], variables);
+    nup  = SelectLevels(&up, argv[2], argt[2], variables);
+    if (nlow <= 0 || nup <= 0) {
+      return -1;
+    }
+    break;
+  }
     
+  SaveTransition(nlow, low, nup, up, argv[0], m);
+  
+  if (low) {
+    free(low);
+  }
+  if (up) {
+    free(up);
+  }
+  
   return 0;
 }
 

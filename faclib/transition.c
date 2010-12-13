@@ -214,6 +214,7 @@ static void TRMultipole_cache_free(TRM_CACHE_T *cache)
   free(cache);
 }
 
+/* energy is ALSO INPUT if > 0 !!! */
 int TRMultipole(double *strength, double *energy,
 		int m, int lower, int upper) {
   int m0, m1, m2;
@@ -236,11 +237,9 @@ int TRMultipole(double *strength, double *energy,
       return 0;
     }
   }
-
-  if (GetNumElectrons(lower) != GetNumElectrons(upper)) {
-    return -1;
-  }
   
+  *strength = 0.0;
+
   lev1 = GetLevel(lower);
   if (lev1 == NULL) return -1;
   lev2 = GetLevel(upper);
@@ -250,8 +249,11 @@ int TRMultipole(double *strength, double *energy,
   }
   if (*energy <= 0.0) return -1;
   aw = FINE_STRUCTURE_CONST * (*energy);
-  if (aw < 0.0) return -1;
 
+  if (GetNumElectrons(lower) != GetNumElectrons(upper)) {
+    return -1;
+  }
+  
   DecodePJ(lev1->pj, &p1, &j1);
   DecodePJ(lev2->pj, &p2, &j2);
   if (j1 == 0 && j2 == 0) return -1;

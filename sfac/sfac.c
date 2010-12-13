@@ -2418,7 +2418,7 @@ static int PSetScreening(int argc, char *argv[], int argt[],
 
 static int PSetTransitionCut(int argc, char *argv[], int argt[], 
 			     ARRAY *variables) {
-  int c0, c;
+  double c0, c;
 
   if (argc < 1) return -1;
   c = -1;

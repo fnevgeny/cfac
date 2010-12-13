@@ -30,6 +30,10 @@
 #define LSNAME      24
 #define LNAME       56
 
+#define DB_SQL_CS_CE    1
+#define DB_SQL_CS_CI    2
+#define DB_SQL_CS_RR    3
+
 typedef struct _FORM_FACTOR_ {  
   double te;
   int nk;
@@ -560,10 +564,14 @@ FORM_FACTOR *BornFormFactor(void);
 void SetBornMass(double m);
 double BornMass(void);
 
-
-int StoreTable(const char *ifn, const char *ofn);
-int StoreENTable(sqlite3 *db, FILE *fp, int swp);
-int StoreTRTable(sqlite3 *db, FILE *fp, int swp);
+int StoreInit(const char *fn, int reset, sqlite3 **db, unsigned long *sid);
+int StoreTable(sqlite3 *db, unsigned long int sid, const char *ifn);
+int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreClose(sqlite3 *db);
 
 #endif
-

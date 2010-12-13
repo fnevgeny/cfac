@@ -1043,12 +1043,55 @@ static int PPrintTable(int argc, char *argv[], int argt[],
   return 0;
 }
 
+static long unsigned int sid = 0;
+static sqlite3 *db = NULL;
+
+static int PStoreInit(int argc, char *argv[], int argt[], 
+		       ARRAY *variables) {
+  int reset = 0;
+  if (argc != 1 && argc != 2) return -1;
+
+  if (sid) {
+    printf("Store has already been initialized\n");
+    return -1;
+  }
+
+  if (argc == 2) {
+    if (argt[1] != NUMBER) {
+      return -1;
+    } else {
+      reset = atoi(argv[1]);
+    }
+  }
+  
+  return StoreInit(argv[0], reset, &db, &sid);
+}
+
 static int PStoreTable(int argc, char *argv[], int argt[], 
 		       ARRAY *variables) {
-  if (argc != 2) return -1;
-  if (argt[0] != STRING || argt[1] != STRING) return -1;
+  if (argc != 1) return -1;
+  if (argt[0] != STRING) return -1;
   
-  StoreTable(argv[0], argv[1]);
+  if (!sid) {
+    printf("Store has not been initialized yet\n");
+    return -1;
+  }
+
+  return StoreTable(db, sid, argv[0]);
+}
+
+static int PStoreClose(int argc, char *argv[], int argt[], 
+		       ARRAY *variables) {
+  if (argc != 0) return -1;
+  
+  if (!sid) {
+    printf("Store has not been initialized yet\n");
+    return -1;
+  }
+
+  sid = 0;
+  StoreClose(db);
+  
   return 0;
 }
 
@@ -3682,6 +3725,8 @@ static METHOD methods[] = {
   {"SetUsrPEGridType", PSetUsrPEGridType, METH_VARARGS},
   {"SolveBound", PSolveBound, METH_VARARGS},
   {"SortLevels", PSortLevels, METH_VARARGS},
+  {"StoreClose", PStoreClose, METH_VARARGS},
+  {"StoreInit", PStoreInit, METH_VARARGS},
   {"StoreTable", PStoreTable, METH_VARARGS},
   {"Structure", PStructure, METH_VARARGS},
   {"CoulombBethe", PCoulombBethe, METH_VARARGS}, 

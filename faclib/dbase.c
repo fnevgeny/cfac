@@ -4283,46 +4283,50 @@ int AdjustEnergy(int nlevs, int *ilevs, double *e,
   return 0;
 }
 
-int StoreTable(const char *ifn, const char *ofn) {
+int StoreTable(sqlite3 *db, unsigned long int sid, const char *ifn)
+{
     F_HEADER fh;
     FILE *fp;
     int n, swp;
-    sqlite3 *db;
     int rc;
+    char *errmsg;
+    int retval = 0;
 
     fp = fopen(ifn, "r");
     if (fp == NULL) {
         return -1;
     }
 
-    rc = sqlite3_open(ofn, &db);
-    if (rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        fclose(fp);
-        return -1;
-    }
-
     n = ReadFHeader(fp, &fh, &swp);
     if (n == 0) {
-        sqlite3_close(db);
         fclose(fp);
         return -1;
     }
 
     switch (fh.type) {
     case DB_EN:
-        n = StoreENTable(db, fp, swp);
+        retval = StoreENTable(db, sid, fp, swp);
         break;
     case DB_TR:
-        n = StoreTRTable(db, fp, swp);
+        retval = StoreTRTable(db, sid, fp, swp);
+        break;
+    case DB_CE:
+        retval = StoreCETable(db, sid, fp, swp);
+        break;
+    case DB_RR:
+        retval = StoreRRTable(db, sid, fp, swp);
+        break;
+    case DB_AI:
+        retval = StoreAITable(db, sid, fp, swp);
+        break;
+    case DB_CI:
+        retval = StoreCITable(db, sid, fp, swp);
         break;
     default:
         break;
     }
 
-    sqlite3_close(db);
     fclose(fp);
     
-    return 0;
+    return retval;
 }

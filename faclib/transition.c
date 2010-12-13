@@ -236,6 +236,10 @@ int TRMultipole(double *strength, double *energy,
       return 0;
     }
   }
+
+  if (GetNumElectrons(lower) != GetNumElectrons(upper)) {
+    return -1;
+  }
   
   lev1 = GetLevel(lower);
   if (lev1 == NULL) return -1;

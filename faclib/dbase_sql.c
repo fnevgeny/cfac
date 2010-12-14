@@ -59,7 +59,7 @@ int StoreInit(const char *fn, int reset, sqlite3 **db, unsigned long *sid)
     rc = sqlite3_exec(*db, "PRAGMA foreign_keys = ON", NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
-        free(errmsg);
+        sqlite3_free(errmsg);
         sqlite3_close(*db);
         return -1;
     }
@@ -71,7 +71,7 @@ int StoreInit(const char *fn, int reset, sqlite3 **db, unsigned long *sid)
             rc = sqlite3_exec(*db, sql, NULL, NULL, &errmsg);
             if (rc != SQLITE_OK) {
                 fprintf(stderr, "SQL error: %s\n", errmsg);
-                free(errmsg);
+                sqlite3_free(errmsg);
                 sqlite3_close(*db);
                 retval = -1;
                 break;
@@ -364,7 +364,7 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
     rc = sqlite3_exec(db, sql, StoreCTransitionCB, cid, &errmsg);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
-        free(errmsg);
+        sqlite3_free(errmsg);
         retval = -1;
     }
 

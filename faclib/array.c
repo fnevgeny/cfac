@@ -10,44 +10,19 @@
 #include "array.h"
 
 void InitIntData(void *p, int n) {
-  int *d;
-  int i;
-  
-  d = (int *) p;
-  for (i = 0; i < n; i++) {
-    d[i] = 0;
-  }
+  memset(p, 0, sizeof(int)*n);
 }
 
 void InitDoubleData(void *p, int n) {
-  double *d;
-  int i;
-  
-  d = (double *) p;
-  for (i = 0; i < n; i++) {
-    d[i] = 0;
-  }
+  memset(p, 0, sizeof(double)*n);
 }
 
 void InitPointerData(void *p, int n) {
-  void **d;
-  int i;
-
-  d = (void **) p;
-  for (i = 0; i < n; i++) {
-    d[i] = NULL;
-  }
+  memset(p, 0, sizeof(void *)*n);
 }
 
 void InitArrayData(void *p, int n) {
-  ARRAY *d;
-  int i;
-
-  d = (ARRAY *) p;
-  for (i = 0; i < n; i++) {
-    d[i].dim = 0;
-    d[i].esize = 0;
-  }
+  memset(p, 0, sizeof(ARRAY)*n);
 }
 
 /* 

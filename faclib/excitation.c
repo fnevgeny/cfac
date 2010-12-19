@@ -2402,7 +2402,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   ARRAY subte;
   int isub, n_tegrid0, n_egrid0, n_usr0;
   int te_set, e_set, usr_set, iuta;
-  double emin, emax, ebuf, eavg, c;
+  double emin, emax, ebuf, eavg;
   double te0, ei;
   double rmin, rmax;
   int nc, ilow, iup;
@@ -2488,12 +2488,11 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   ArrayInit(&subte, sizeof(double), 128);
   ebuf = 0.999*emin;
   ArrayAppend(&subte, &ebuf, NULL);
-  c = TE_MAX_MIN;
   if (!e_set || !te_set) {
-    double e = c*emin;
+    double e = TE_MAX_MIN*emin;
     while (e < emax) {
       ArrayAppend(&subte, &e, NULL);
-      e *= c;
+      e *= TE_MAX_MIN;
     }
   }
   ebuf = 1.001*emax;
@@ -2559,7 +2558,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   for (isub = 0; isub < subte.dim - 1; isub++) {
     CE_HEADER ce_hdr;
     CE_RECORD r;
-    double e0, e1;
+    double e0, e1, c;
     int ie;
     
     e0 = *((double *) ArrayGet(&subte, isub));
@@ -2705,6 +2704,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     m = ce_hdr.n_usr * nsub;
     r.strength = (float *) malloc(sizeof(float)*m);
     
+    /* real CE calculations begin here */
     for (i = 0; i < nlow; i++) {
       lev1 = GetLevel(low[i]);
       for (j = 0; j < nup; j++) {
@@ -2726,6 +2726,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	  }
 	}	    
 	if (e < e0 || e >= e1) continue;
+
 	if (iuta) {
 	  k = CollisionStrengthUTA(qkc, params, &e, bethe, ilow, iup);
 	} else {
@@ -2768,15 +2769,19 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	    ip++;
 	  }
 	}
-	if (iempty == 0) {
+        
+	/* write record to file */
+        if (iempty == 0) {
 	  WriteCERecord(f, &r);
 	}
       }
     }
+    
     if (msub || qk_mode == QK_FIT) free(r.params);
     free(r.strength);
     DeinitFile(f, &fhdr);
     FreeExcitationQk();
+    
     ReinitRadial(2);
   }
 
@@ -2784,6 +2789,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
   ArrayFree(&subte, NULL);
   if (alev) free(alev);
+  
   CloseFile(f, &fhdr);
 
   if (fpw) {

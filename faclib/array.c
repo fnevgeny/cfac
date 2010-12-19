@@ -95,7 +95,7 @@ void *ArrayGet(ARRAY *a, int i) {
 **              i-th element. if the element does not exist,
 **              an empty one is created.
 */
-void *ArraySet(ARRAY *a, int i, void *d, 
+void *ArraySet(ARRAY *a, int i, const void *d, 
 	       void (*InitData)(void *, int)) {
   void *pt;
   char *ct;
@@ -181,7 +181,7 @@ void *ArrayContiguous(ARRAY *a) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-void *ArrayAppend(ARRAY *a, void *d, 
+void *ArrayAppend(ARRAY *a, const void *d, 
 		  void (*InitData)(void *, int)) {
   int i;  
   i = a->dim;

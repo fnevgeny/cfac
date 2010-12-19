@@ -2393,25 +2393,18 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   RECOUPLE_TIMING recouplet;
   RAD_TIMING radt;
 #endif
-  SYMMETRY *sym;
-  STATE *st;
-  CONFIG *cfg;
-  int i, j, k, n, m, ie, ip;
+  int i, j, m;
   FILE *f;
-  double qkc[MAXMSUB*MAXNUSR];
-  double params[MAXMSUB*NPARAMS];
   int *alev;
   int nsub;
   LEVEL *lev1, *lev2;
-  CE_RECORD r;
-  CE_HEADER ce_hdr;
   F_HEADER fhdr;
   ARRAY subte;
   int isub, n_tegrid0, n_egrid0, n_usr0;
-  int te_set, e_set, usr_set, iempty, iuta;
-  double emin, emax, e, c;
-  double e0, e1, te0, ei;
-  double rmin, rmax, bethe[3];
+  int te_set, e_set, usr_set, iuta;
+  double emin, emax, ebuf, eavg, c;
+  double te0, ei;
+  double rmin, rmax;
   int nc, ilow, iup;
 
   iuta = IsUTA();
@@ -2419,10 +2412,11 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     printf("cannot call CETableMSub in UTA mode\n");
     return -1;
   }
-  n = 0;
+
+  /* if low or up not given, assume all levels */
   alev = NULL;
   if (nlow == 0 || nup == 0) {
-    n = GetNumLevels();
+    int n = GetNumLevels();
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;
@@ -2441,16 +2435,22 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
   nc = OverlapLowUp(nlow, low, nup, up);
 
-  emin = 1E10;
-  emax = 1E-10;
+  /* get min/max energies of the transition set */
+  emin = 0.0;
+  emax = 0.0;
   m = 0;
   for (i = 0; i < nlow; i++) {
     lev1 = GetLevel(low[i]);
     for (j = 0; j < nup; j++) {
+      double e;
       lev2 = GetLevel(up[j]);
       e = lev2->energy - lev1->energy;
       if (i < nlow-nc || j < nup-nc) e = fabs(e);
       if (e > 0) m++;
+      if (m == 1) {
+        emin = e;
+        emax = e;
+      }
       if (e < emin && e > 0) emin = e;
       if (e > emax) emax = e;
     }
@@ -2459,30 +2459,10 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     return 0;
   }
 
-  ei = 1E31;
-  if (iuta) {
-    for (j = 0; j < nup; j++) {
-      lev2 = GetLevel(up[j]);
-      cfg = GetConfigFromGroup(lev2->iham, lev2->pb);
-      k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-      e = -(GetOrbital(k)->energy);
-      if (e < ei) ei = e;
-    }
-  } else {
-    for (j = 0; j < nup; j++) {
-      lev2 = GetLevel(up[j]);
-      sym = GetSymmetry(lev2->pj);
-      st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
-      if (st->kgroup < 0) {
-	k = st->kcfg;
-      } else {
-	cfg = GetConfig(st);
-	k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-      }
-      e = -(GetOrbital(k)->energy);
-      if (e < ei) ei = e;
-    }
-  }
+  te0 = emax;
+  
+  eavg = (emin + emax)/2;
+
   if (tegrid[0] < 0) {
     te_set = 0;
   } else {
@@ -2502,17 +2482,22 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   n_egrid0 = n_egrid;
   n_usr0 = n_usr;
 
+  /* Build subte grid array {emin, 5*emin, ..., emax}             */
+  /* (with some margins for the first & last elements).           */
+  /* The grid is used to split the whole set into several blocks. */
   ArrayInit(&subte, sizeof(double), 128);
-  ArrayAppend(&subte, &emin, NULL);
+  ebuf = 0.999*emin;
+  ArrayAppend(&subte, &ebuf, NULL);
   c = 1.0/TE_MIN_MAX;
   if (!e_set || !te_set) {
-    e = c*emin;
+    double e = c*emin;
     while (e < emax) {
       ArrayAppend(&subte, &e, NULL);
       e *= c;
     }
   }
-  ArrayAppend(&subte, &emax, NULL);
+  ebuf = 1.001*emax;
+  ArrayAppend(&subte, &ebuf, NULL);
  
   if (msub) {
     pw_type = 1;
@@ -2526,31 +2511,70 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     SetCEPWGrid(0, NULL, NULL);
   }
 
-  e = (emin + emax)*0.5;
   if (egrid_limits_type == 0) {
     rmin = egrid_min;
     rmax = egrid_max;
   } else {
-    rmin = egrid_min/e;
-    rmax = egrid_max/e;
+    rmin = egrid_min/eavg;
+    rmax = egrid_max/eavg;
   }
-  te0 = emax;
 
-  e0 = emin*0.999;
+  /* get min of ei (ionization energy?) of the upper states */
+  ei = 0.0;
+  m = 0;
+  for (j = 0; j < nup; j++) {
+    int k;
+    double e;
+    CONFIG *cfg;
+
+    lev2 = GetLevel(up[j]);
+    if (iuta) {
+      cfg = GetConfigFromGroup(lev2->iham, lev2->pb);
+      k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+    } else {
+      SYMMETRY *sym = GetSymmetry(lev2->pj);
+      STATE *st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
+      if (st->kgroup < 0) {
+	k = st->kcfg;
+      } else {
+	cfg = GetConfig(st);
+	k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+      }
+    }
+    e = -(GetOrbital(k)->energy);
+    if (m == 0) {
+      ei = e;
+    } else
+    if (e < ei) {
+      ei = e;
+    }
+    m++;
+  }
+
   fhdr.type = DB_CE;
   strcpy(fhdr.symbol, GetAtomicSymbol());
   fhdr.atom = GetAtomicNumber();
   f = OpenFile(fn, &fhdr);
-  for (isub = 1; isub < subte.dim; isub++) {
-    e1 = *((double *) ArrayGet(&subte, isub));
-    if (isub == subte.dim-1) e1 = e1*1.001;
+
+  for (isub = 0; isub < subte.dim - 1; isub++) {
+    CE_HEADER ce_hdr;
+    CE_RECORD r;
+    double e0, e1;
+    int ie;
+    
+    e0 = *((double *) ArrayGet(&subte, isub));
+    e1 = *((double *) ArrayGet(&subte, isub + 1));
+
+    /* filter only transitions in the current energy range [e0 ... e1]
+       and obtain their min/max range */
     emin = e1;
     emax = e0;
     m = 0;
     for (i = 0; i < nlow; i++) {
       lev1 = GetLevel(low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetLevel(up[j]);
+	double e;
+        lev2 = GetLevel(up[j]);
 	e = lev2->energy - lev1->energy;
 	if (i < nlow-nc || j < nup-nc) e = fabs(e);
 	if (e < e0 || e >= e1) continue;
@@ -2560,53 +2584,60 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       }
     }
     if (m == 0) {
-      e0 = e1;
       continue;
     }
+    
+    eavg = (emin + emax)/2;
+    
     if (!te_set) {
-      e = emax/emin;  
-      if (e < 1.001) {
-	SetCETEGrid(1, 0.5*(emax+emin), emax);
-      } else if (e < 1.5) {
-	SetCETEGrid(2, emin, emax);
-      } else if (e < 5.0) {
-	if (m == 2) n_tegrid = 2; 
-	else if (n_tegrid0 == 0) n_tegrid = 3;
-	SetCETEGrid(n_tegrid, emin, emax);
-      } else {
-	if (m == 2) n_tegrid = 2;
-	else if (n_tegrid0 == 0) n_tegrid = 4;
-	SetCETEGrid(n_tegrid, emin, emax);
+      double e_ratio = emax/emin;
+      
+      if (e_ratio < 1.001) {
+	/* just a single point */
+        SetCETEGrid(1, eavg, emax);
+      } else
+      if (e_ratio < 1.5 || m == 2) {
+        n_tegrid = 2;
+      } else
+      if (e_ratio < 5.0) {
+	if (n_tegrid0 == 0) {
+          n_tegrid = 3;
+        }
+      } else
+      if (n_tegrid0 == 0) {
+        n_tegrid = 4;
       }
+      
+      SetCETEGrid(n_tegrid, emin, emax);
     }
 
-    e = 0.5*(emin + emax);
-    emin = rmin*e;
-    if (te0 > ei) {
-      emax = rmax*te0;
-      ce_hdr.te0 = te0;
-    } else {
-      emax = rmax*te0*3.0;
-      ce_hdr.te0 = te0;
+    emin = rmin*eavg;
+    emax = rmax*te0;
+    if (te0 <= ei) {
+      /* WHY?! */
+      emax *= 3.0;
     }
     
+    /* build energy grid */
     if (n_egrid0 == 0) {
       n_egrid = 6;
     }
     if (!e_set) {
-      SetCEEGrid(n_egrid, emin, emax, ce_hdr.te0);
+      SetCEEGrid(n_egrid, emin, emax, te0);
     }
     if (n_usr0 <= 0) {
       SetUsrCEEGridDetail(n_egrid, egrid);
       usr_egrid_type = 1;
     } else if (!usr_set) {
-      SetUsrCEEGrid(n_usr, emin, emax, ce_hdr.te0);
+      SetUsrCEEGrid(n_usr, emin, emax, te0);
       usr_egrid_type = 1;
     }
     if (n_egrid > MAXNE) {
       printf("n_egrid exceeded MAXNE=%d\n", MAXNE);
       return -1;
     }
+
+    /* add last point (at which the Born asymptote is calculated) */
     n_egrid1 = n_egrid + 1;
     ie = n_egrid;
     if (eborn > 0.0) {
@@ -2614,36 +2645,44 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     } else {
       egrid[ie] = -eborn;
     }
-    if (egrid[ie] < 2*egrid[ie-1]) egrid[ie] = 2*egrid[ie-1];
+    /* make sure it's at least twice as high as the "real" last point */
+    if (egrid[ie] < 2*egrid[ie-1]) {
+      egrid[ie] = 2*egrid[ie-1];
+    }
+    
     if (qk_mode == QK_FIT && n_egrid <= NPARAMS) {
       printf("n_egrid must > %d to use QK_FIT mode\n", NPARAMS);
       return -1;
     }
+    
     if (qk_mode == QK_INTERPOLATE) {
       for (i = 0; i < n_egrid; i++) {
 	log_egrid[i] = egrid[i];
-	if (egrid_type == 1) log_egrid[i] += ce_hdr.te0;
+	if (egrid_type == 1) log_egrid[i] += te0;
 	log_egrid[i] = log(log_egrid[i]);
       }
       for (i = 0; i < n_egrid; i++) {
 	log_usr[i] = usr_egrid[i];
-	if (usr_egrid_type == 1) log_usr[i] += ce_hdr.te0;
+	if (usr_egrid_type == 1) log_usr[i] += te0;
 	log_usr[i] = log(log_usr[i]);
       }
     }
 
-    e = 0.0;
+    ebuf = 0.0;
     c = GetResidualZ();
     if (xborn+1.0 != 1.0) {
-      PrepCoulombBethe(1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
+      PrepCoulombBethe(1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
 		       pw_scratch.nkl, pw_scratch.kl, msub);
     }
+
     ce_hdr.nele = GetNumElectrons(low[0]);
     ce_hdr.qk_mode = qk_mode;
     if (qk_mode == QK_FIT) 
       ce_hdr.nparams = NPARAMS;
     else
       ce_hdr.nparams = 0;
+
+    ce_hdr.te0 = te0;
     ce_hdr.pw_type = pw_type;
     ce_hdr.n_tegrid = n_tegrid;
     ce_hdr.n_egrid = n_egrid;
@@ -2669,7 +2708,13 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     for (i = 0; i < nlow; i++) {
       lev1 = GetLevel(low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetLevel(up[j]);
+        double qkc[MAXMSUB*MAXNUSR];
+        double params[MAXMSUB*NPARAMS];
+	double e;
+        int k, ip, iempty;
+        double bethe[3];
+             
+        lev2 = GetLevel(up[j]);
 	e = lev2->energy - lev1->energy;	
 	ilow = low[i];
 	iup = up[j];
@@ -2731,7 +2776,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     if (msub || qk_mode == QK_FIT) free(r.params);
     free(r.strength);
     DeinitFile(f, &fhdr);
-    e0 = e1;
     FreeExcitationQk();
     ReinitRadial(2);
   }

@@ -1022,7 +1022,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
 
   ArrayInit(&subte, sizeof(double), 128);
   ArrayAppend(&subte, &emin, NULL);
-  c = 1.0/TE_MIN_MAX;
+  c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {

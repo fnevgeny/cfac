@@ -1542,7 +1542,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
   }
   ArrayInit(&subte, sizeof(double), 128);
   ArrayAppend(&subte, &emin, NULL);
-  c = 1.0/TE_MIN_MAX;
+  c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
@@ -1704,7 +1704,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   }
   ArrayInit(&subte, sizeof(double), 128);
   ArrayAppend(&subte, &emin, NULL);
-  c = 1.0/TE_MIN_MAX;
+  c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
@@ -1917,7 +1917,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 
   ArrayInit(&subte, sizeof(double), 128);
   ArrayAppend(&subte, &emin, NULL);
-  c = 1.0/TE_MIN_MAX;
+  c = TE_MAX_MIN;
   if (!e_set) {
     b = c*emin;
     while (b < emax) {

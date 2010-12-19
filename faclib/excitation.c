@@ -2488,7 +2488,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   ArrayInit(&subte, sizeof(double), 128);
   ebuf = 0.999*emin;
   ArrayAppend(&subte, &ebuf, NULL);
-  c = 1.0/TE_MIN_MAX;
+  c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     double e = c*emin;
     while (e < emax) {
@@ -2908,7 +2908,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 
   ArrayInit(&subte, sizeof(double), 128);
   ArrayAppend(&subte, &emin, NULL);
-  c = 1.0/TE_MIN_MAX;
+  c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
@@ -3157,7 +3157,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 
   ArrayInit(&subte, sizeof(double), 128);
   ArrayAppend(&subte, &emin, NULL);
-  c = 1.0/TE_MIN_MAX;
+  c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {

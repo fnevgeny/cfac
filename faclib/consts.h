@@ -237,7 +237,7 @@
 #define MAXNTE             6
 #define MAXNTHETA          30
 #define MAXNPHI            60
-#define TE_MIN_MAX         (1.0/5.0)
+#define TE_MAX_MIN         5.0
 
 /* excitation */
 #define NGOSK              256

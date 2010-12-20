@@ -2522,7 +2522,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   for (isub = 0; isub < subte.dim - 1; isub++) {
     CE_HEADER ce_hdr;
     CE_RECORD r;
-    double e0, e1, eavg, te0, ei, g_emin, g_emax;
+    double e0, e1, te0, ei, g_emin, g_emax;
     double c, rmin, rmax;
     int ie;
     
@@ -2582,10 +2582,8 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       continue;
     }
     
-    eavg = (emin + emax)/2;
-    
     /* characteristic transition energy */
-    te0 = emax;
+    te0 = (emin + emax)/2;
     
     if (!te_set) {
       double e_ratio = emax/emin;
@@ -2613,17 +2611,13 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       rmin = egrid_min;
       rmax = egrid_max;
     } else {
-      rmin = egrid_min/eavg;
-      rmax = egrid_max/eavg;
+      rmin = egrid_min/te0;
+      rmax = egrid_max/te0;
     }
 
     /* min/max of the collision energy grid */
-    g_emin = rmin*eavg;
+    g_emin = rmin*te0;
     g_emax = rmax*te0;
-    if (te0 <= ei) {
-      /* WHY?! */
-      g_emax *= 3.0;
-    }
     
     /* build collision energy grid */
     if (n_egrid0 == 0) {

@@ -101,6 +101,14 @@ typedef struct _ECORRECTION_ {
   STATE *s;
 } ECORRECTION;
 
+typedef struct _TRANSITION_ {
+    int nup;
+    int nlo;
+    LEVEL *lup;
+    LEVEL *llo;
+    double e;
+} TRANSITION;
+
 #ifdef PERFORM_STATISTICS
 typedef struct _STRUCT_TIMING_ {
   double angz_mix;
@@ -187,6 +195,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper);
 int GetBasisTable(char *fn, int m);
 int ConstructLevelName(char *name, char *sname, char *nc, 
 		       int *vnl, STATE *basis);
+int GetTransition(int nlo, int nup, TRANSITION *tr, int *swapped);
 int SaveLevels(char *fn, int m, int n);
 int SaveEBLevels(char *fn, int m, int n);
 int SetAngZOptions(int n, double mc, double c);

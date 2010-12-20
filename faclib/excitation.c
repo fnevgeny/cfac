@@ -320,10 +320,10 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
   }
 
   nkappa = (MAXNKL)*(GetMaxRank()+1)*4;
-  kappa0 = (short *) malloc(sizeof(short)*nkappa);
-  kappa1 = (short *) malloc(sizeof(short)*nkappa);
-  pkd = (double *) malloc(sizeof(double)*(nkappa*n_tegrid));
-  pke = (double *) malloc(sizeof(double)*(nkappa*n_tegrid));
+  kappa0 = malloc(sizeof(short)*nkappa);
+  kappa1 = malloc(sizeof(short)*nkappa);
+  pkd = malloc(sizeof(double)*(nkappa*n_tegrid));
+  pke = malloc(sizeof(double)*(nkappa*n_tegrid));
 
   e1 = egrid[ie];
   if (type > 0 && type <= CBMULT) {
@@ -1023,7 +1023,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
     mk = GetMaxKMBPT();
     if (k/2 <= mk) t = nqk*2 + 1;
   }
-  *p = (double *) malloc(sizeof(double)*t);
+  *p = malloc(sizeof(double)*t);
   rqc = *p;
 
   ptr = rqc;
@@ -1096,7 +1096,7 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
     q[iq] = q[iq-1] + 2;
   }  
   nqk = nq*n_tegrid*n_egrid1;
-  *p = (double *) malloc(sizeof(double)*(nqk+1));
+  *p = malloc(sizeof(double)*(nqk+1));
   rqc = *p;
   if (xborn == 0) {
     for (ie = 0; ie < n_egrid1; ie++) {
@@ -3024,7 +3024,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     GetFields(&ce_hdr.bfield, &ce_hdr.efield, &ce_hdr.fangle);
     InitFile(f, &fhdr, &ce_hdr);  
     m = ce_hdr.n_egrid;
-    r.strength = (float *) malloc(sizeof(float)*m);
+    r.strength = malloc(sizeof(float)*m);
     
     for (i = 0; i < nlow; i++) {
       lev1 = GetEBLevel(low[i]);
@@ -3187,9 +3187,9 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   te0 = emax;
   
   m = n_thetagrid*n_phigrid;
-  qkc = (double *) malloc(sizeof(double)*(MAXNE+2)*m);
-  bethe = (double *) malloc(sizeof(double)*m);
-  born = (double *) malloc(sizeof(double)*(m+1));
+  qkc = malloc(sizeof(double)*(MAXNE+2)*m);
+  bethe = malloc(sizeof(double)*m);
+  born = malloc(sizeof(double)*(m+1));
   e0 = emin*0.999;
   fhdr.type = DB_CEMF;
   strcpy(fhdr.symbol, GetAtomicSymbol());
@@ -3282,9 +3282,9 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     GetFields(&ce_hdr.bfield, &ce_hdr.efield, &ce_hdr.fangle);
     InitFile(f, &fhdr, &ce_hdr);  
     m = n_thetagrid*n_phigrid;
-    r.strength = (float *) malloc(sizeof(float)*m*n_egrid);
-    r.born = (float *) malloc(sizeof(float)*m);
-    r.bethe = (float *) malloc(sizeof(float)*(m+1));
+    r.strength = malloc(sizeof(float)*m*n_egrid);
+    r.born = malloc(sizeof(float)*m);
+    r.bethe = malloc(sizeof(float)*(m+1));
     
     for (i = 0; i < nlow; i++) {
       lev1 = GetEBLevel(low[i]);
@@ -3366,11 +3366,11 @@ int InitExcitation(void) {
   int ndim;
 
   ndim = 3;
-  pk_array = (MULTI *) malloc(sizeof(MULTI));
+  pk_array = malloc(sizeof(MULTI));
   MultiInit(pk_array, sizeof(CEPK), ndim, blocks1);
 
   ndim = 5;
-  qk_array = (MULTI *) malloc(sizeof(MULTI));
+  qk_array = malloc(sizeof(MULTI));
   MultiInit(qk_array, sizeof(double *), ndim, blocks2);
 
   if (fpw) {

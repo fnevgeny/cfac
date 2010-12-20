@@ -27,3 +27,5 @@ CSRCS = angular.c \
 	recouple.c \
 	structure.c \
 	transition.c
+
+GENINCS = schema.i

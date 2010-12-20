@@ -2410,8 +2410,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   ARRAY subte;
   int isub, n_tegrid0, n_egrid0, n_usr0;
   int te_set, e_set, usr_set, iuta;
-  double emin, emax, ebuf, eavg;
-  double rmin, rmax;
+  double emin, emax, ebuf;
   int nc;
 
   iuta = IsUTA();
@@ -2468,8 +2467,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     return 0;
   }
 
-  eavg = (emin + emax)/2;
-
   if (tegrid[0] < 0) {
     te_set = 0;
   } else {
@@ -2517,14 +2514,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     SetCEPWGrid(0, NULL, NULL);
   }
 
-  if (egrid_limits_type == 0) {
-    rmin = egrid_min;
-    rmax = egrid_max;
-  } else {
-    rmin = egrid_min/eavg;
-    rmax = egrid_max/eavg;
-  }
-
   fhdr.type = DB_CE;
   strcpy(fhdr.symbol, GetAtomicSymbol());
   fhdr.atom = GetAtomicNumber();
@@ -2533,7 +2522,8 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   for (isub = 0; isub < subte.dim - 1; isub++) {
     CE_HEADER ce_hdr;
     CE_RECORD r;
-    double e0, e1, c, te0, ei;
+    double e0, e1, eavg, te0, ei, g_emin, g_emax;
+    double c, rmin, rmax;
     int ie;
     
     e0 = *((double *) ArrayGet(&subte, isub));
@@ -2592,10 +2582,10 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       continue;
     }
     
+    eavg = (emin + emax)/2;
+    
     /* characteristic transition energy */
     te0 = emax;
-    
-    eavg = (emin + emax)/2;
     
     if (!te_set) {
       double e_ratio = emax/emin;
@@ -2619,25 +2609,34 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       SetCETEGrid(n_tegrid, emin, emax);
     }
 
-    emin = rmin*eavg;
-    emax = rmax*te0;
+    if (egrid_limits_type == 0) {
+      rmin = egrid_min;
+      rmax = egrid_max;
+    } else {
+      rmin = egrid_min/eavg;
+      rmax = egrid_max/eavg;
+    }
+
+    /* min/max of the collision energy grid */
+    g_emin = rmin*eavg;
+    g_emax = rmax*te0;
     if (te0 <= ei) {
       /* WHY?! */
-      emax *= 3.0;
+      g_emax *= 3.0;
     }
     
-    /* build energy grid */
+    /* build collision energy grid */
     if (n_egrid0 == 0) {
       n_egrid = 6;
     }
     if (!e_set) {
-      SetCEEGrid(n_egrid, emin, emax, te0);
+      SetCEEGrid(n_egrid, g_emin, g_emax, te0);
     }
     if (n_usr0 <= 0) {
       SetUsrCEEGridDetail(n_egrid, egrid);
       usr_egrid_type = 1;
     } else if (!usr_set) {
-      SetUsrCEEGrid(n_usr, emin, emax, te0);
+      SetUsrCEEGrid(n_usr, g_emin, g_emax, te0);
       usr_egrid_type = 1;
     }
     if (n_egrid > MAXNE) {

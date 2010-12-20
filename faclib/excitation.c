@@ -2016,6 +2016,17 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
   return r;
 }
 
+/*
+ * Calculate CS for excitation from lower to upper state, optionally with
+ * magnetic sublevel resolution.
+ * IN:  lower, upper - level indices
+ * IN:  msub - whether m-sublevel fractions are desired
+ * OUT: qkt[n_egrid1*MAXMSUB] - array of CS values
+ * OUT: params[NPARAMS*MAXMSUB] - array of fit parameters
+ * OUT: bethe[3] - Bethe/Born asymptote parameters
+ * OUT: e - transition energy (who needs it?!)
+ * GLOBALS: FACin' lot...
+ */
 int CollisionStrength(double *qkt, double *params, double *e, double *bethe,
 		      int lower, int upper, int msub) {
   int i, j, t, h, p, m, type, ty, p1, p2, gauge;  
@@ -2403,7 +2414,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   int isub, n_tegrid0, n_egrid0, n_usr0;
   int te_set, e_set, usr_set, iuta;
   double emin, emax, ebuf, eavg;
-  double te0, ei;
   double rmin, rmax;
   int nc, ilow, iup;
 
@@ -2459,8 +2469,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     return 0;
   }
 
-  te0 = emax;
-  
   eavg = (emin + emax)/2;
 
   if (tegrid[0] < 0) {
@@ -2518,38 +2526,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     rmax = egrid_max/eavg;
   }
 
-  /* get min of ei (ionization energy?) of the upper states */
-  ei = 0.0;
-  m = 0;
-  for (j = 0; j < nup; j++) {
-    int k;
-    double e;
-    CONFIG *cfg;
-
-    lev2 = GetLevel(up[j]);
-    if (iuta) {
-      cfg = GetConfigFromGroup(lev2->iham, lev2->pb);
-      k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-    } else {
-      SYMMETRY *sym = GetSymmetry(lev2->pj);
-      STATE *st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
-      if (st->kgroup < 0) {
-	k = st->kcfg;
-      } else {
-	cfg = GetConfig(st);
-	k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-      }
-    }
-    e = -(GetOrbital(k)->energy);
-    if (m == 0) {
-      ei = e;
-    } else
-    if (e < ei) {
-      ei = e;
-    }
-    m++;
-  }
-
   fhdr.type = DB_CE;
   strcpy(fhdr.symbol, GetAtomicSymbol());
   fhdr.atom = GetAtomicNumber();
@@ -2558,33 +2534,65 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   for (isub = 0; isub < subte.dim - 1; isub++) {
     CE_HEADER ce_hdr;
     CE_RECORD r;
-    double e0, e1, c;
+    double e0, e1, c, te0, ei;
     int ie;
     
     e0 = *((double *) ArrayGet(&subte, isub));
     e1 = *((double *) ArrayGet(&subte, isub + 1));
 
     /* filter only transitions in the current energy range [e0 ... e1]
-       and obtain their min/max range */
+       and obtain their min/max range and
+       min of ei (ionization energy?) of the upper states */
+
     emin = e1;
     emax = e0;
+    ei = 0.0;
     m = 0;
     for (i = 0; i < nlow; i++) {
       lev1 = GetLevel(low[i]);
       for (j = 0; j < nup; j++) {
+        int k;
 	double e;
+        CONFIG *cfg;
+        
         lev2 = GetLevel(up[j]);
 	e = lev2->energy - lev1->energy;
 	if (i < nlow-nc || j < nup-nc) e = fabs(e);
 	if (e < e0 || e >= e1) continue;
 	if (e < emin) emin = e;
 	if (e > emax) emax = e;
+
+        /* ionization potential */
+        if (iuta) {
+          cfg = GetConfigFromGroup(lev2->iham, lev2->pb);
+          k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+        } else {
+          SYMMETRY *sym = GetSymmetry(lev2->pj);
+          STATE *st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
+          if (st->kgroup < 0) {
+	    k = st->kcfg;
+          } else {
+	    cfg = GetConfig(st);
+	    k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+          }
+        }
+        e = -(GetOrbital(k)->energy);
+        if (m == 0) {
+          ei = e;
+        } else
+        if (e < ei) {
+          ei = e;
+        }
+
 	m++;
       }
     }
     if (m == 0) {
       continue;
     }
+    
+    /* characteristic transition energy */
+    te0 = emax;
     
     eavg = (emin + emax)/2;
     
@@ -2696,13 +2704,13 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     InitFile(f, &fhdr, &ce_hdr);  
     nsub = 1;
     if (msub) {
-      r.params = (float *) malloc(sizeof(float)*nsub);
+      r.params = malloc(sizeof(float)*nsub);
     } else if (qk_mode == QK_FIT) {
       m = ce_hdr.nparams * nsub;
-      r.params = (float *) malloc(sizeof(float)*m);
+      r.params = malloc(sizeof(float)*m);
     }
     m = ce_hdr.n_usr * nsub;
-    r.strength = (float *) malloc(sizeof(float)*m);
+    r.strength = malloc(sizeof(float)*m);
     
     /* real CE calculations begin here */
     for (i = 0; i < nlow; i++) {
@@ -2740,9 +2748,9 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	r.upper = iup;
 	r.nsub = k;
 	if (r.nsub > nsub) {
-	  r.params = (float *) realloc(r.params, sizeof(float)*r.nsub);
+	  r.params = realloc(r.params, sizeof(float)*r.nsub);
 	  m = ce_hdr.n_usr * r.nsub;
-	  r.strength = (float *) realloc(r.strength, sizeof(float)*m);
+	  r.strength = realloc(r.strength, sizeof(float)*m);
 	  nsub = r.nsub;
 	}
 

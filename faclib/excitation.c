@@ -2016,14 +2016,14 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
 }
 
 /*
- * Calculate CS for excitation from lower to upper state, optionally with
+ * Calculate CS of excitation for a given transition, optionally with
  * magnetic sublevel resolution.
- * IN:  lower, upper - level indices
+ * IN:  tr - transition
  * IN:  msub - whether m-sublevel fractions are desired
  * OUT: qkt[n_egrid1*MAXMSUB] - array of CS values
  * OUT: params[NPARAMS*MAXMSUB] - array of fit parameters
  * OUT: bethe[3] - Bethe/Born asymptote parameters
- * OUT: e - transition energy (who needs it?!)
+ * RETURN: 1 (or number of CS if msub is set) on success; -1 if fails
  * GLOBALS: FACin' lot...
  */
 int CollisionStrength(const TRANSITION *tr, int msub,

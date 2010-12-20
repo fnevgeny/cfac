@@ -2592,7 +2592,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       
       if (e_ratio < 1.001) {
 	/* just a single point */
-        SetCETEGrid(1, eavg, emax);
+        n_tegrid = 1;
       } else
       if (e_ratio < 1.5 || m == 2) {
         n_tegrid = 2;
@@ -2973,7 +2973,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     if (!te_set) {
       e = emax/emin;  
       if (e < 1.001) {
-	SetCETEGrid(1, 0.5*(emax+emin), emax);
+	SetCETEGrid(1, emin, emax);
       } else if (e < 1.5) {
 	SetCETEGrid(2, emin, emax);
       } else if (e < 5.0) {
@@ -3226,7 +3226,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     if (!te_set) {
       e = emax/emin;  
       if (e < 1.001) {
-	SetCETEGrid(1, 0.5*(emax+emin), emax);
+	SetCETEGrid(1, emin, emax);
       } else if (e < 1.5) {
 	SetCETEGrid(2, emin, emax);
       } else if (e < 5.0) {

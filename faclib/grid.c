@@ -81,8 +81,8 @@ int SetTEGrid(double *te, double *logte, int n, double emin, double emax) {
   }
 
   if (n == 1) {
-    te[0] = emin;
-    if (logte) logte[0] = log(emin);
+    te[0] = (emin + emax)/2;
+    if (logte) logte[0] = log(te[0]);
     return n;
   }
 

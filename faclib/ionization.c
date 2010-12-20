@@ -1073,7 +1073,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
     }
 
     if (qk_mode == QK_CB) {
-      SetIEGrid(1, 0.5*(emin+emax), emax);
+      SetIEGrid(1, emin, emax);
     } else {
       if (n_tegrid0 == 0) {
 	n_tegrid = 3;
@@ -1081,7 +1081,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
       if (!te_set) {
 	e = 2.0*(emax-emin)/(emax+emin);
 	if (e < EPS3) {
-	  SetIEGrid(1, 0.5*(emin+emax), emax);
+	  SetIEGrid(1, emin, emax);
 	} else if (e < 0.5) {
 	  SetIEGrid(2, emin, emax);
 	} else {

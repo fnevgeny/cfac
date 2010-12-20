@@ -1581,7 +1581,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
       e = (emax - emin)/(0.5*(emin+emax));
       if (!te_set) {
 	if (e < 0.1) {
-	  SetRRTEGrid(1, 0.5*(emin+emax), emax);
+	  SetRRTEGrid(1, emin, emax);
 	} else if (e < 0.5) {
 	  SetRRTEGrid(2, emin, emax);
 	} else {
@@ -1601,7 +1601,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
 	SetAWGrid(3, awmin, awmax);
       }
     } else {
-      SetRRTEGrid(1, 0.5*(emin+emax), emax);
+      SetRRTEGrid(1, emin, emax);
     }
     
     n_egrid = n_egrid0;
@@ -1758,7 +1758,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
       e = (emax - emin)/(0.5*(emin+emax));
       if (!te_set) {
 	if (e < EPS3) {
-	  SetRRTEGrid(1, 0.5*(emin+emax), emax);
+	  SetRRTEGrid(1, emin, emax);
 	} else if (e < 0.5) {
 	  SetRRTEGrid(2, emin, emax);
 	} else {
@@ -1778,7 +1778,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
 	SetAWGrid(3, awmin, awmax);
       }
     } else {
-      SetRRTEGrid(1, 0.5*(emin+emax), emax);
+      SetRRTEGrid(1, emin, emax);
     }
     
     n_egrid = n_egrid0;

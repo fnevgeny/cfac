@@ -3396,18 +3396,19 @@ int InitExcitation(void) {
 int ReinitExcitation(int m) {
   
   if (m < 0) return 0;
-  FreeExcitationQk();  
+  
+  FreeExcitationQk(); 
+   
   if (fpw) {
     fclose(fpw);
     fpw = NULL;
   }
-  n_egrid = 0;
+  
   n_tegrid = 0;
-  n_usr = 0;
   egrid[0] = -1.0;
-  SetCEEGridLimits(0.05, 8.0, 0);
   usr_egrid[0] = -1.0;
   tegrid[0] = -1.0;  
+
   SetCEQkMode(QK_DEFAULT, 1E-3);
   SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB, EXCTOL);
 

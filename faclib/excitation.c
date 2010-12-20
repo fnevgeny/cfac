@@ -1591,10 +1591,9 @@ void RelativisticCorrection(int m, double *s, double *p, double te, double b) {
   }
 }
 
-int CollisionStrengthUTA(double *qkt, double *params, double *e, double *bethe,
-			 int lower, int upper) {  
+int CollisionStrengthUTA(const TRANSITION *tr,
+                         double *qkt, double *params, double *bethe) {
   INTERACT_DATUM *idatum;
-  LEVEL *lev1, *lev2;
   int p1, p2, j1, j2, k0, k1, type, ty;
   int ns, q1, q2, ie, kmin, kmax, k, np;
   double te, *rqk, tol;
@@ -1605,16 +1604,16 @@ int CollisionStrengthUTA(double *qkt, double *params, double *e, double *bethe,
   double fvec[MAXNE], fjac[MAXNE*NPARAMS];
   double born_egrid, born_cross, c, d, r;
   double bte, bms;
+
+  if (!tr) {
+    return -1;
+  }
   
-  lev1 = GetLevel(lower);
-  if (lev1 == NULL) return -1;
-  lev2 = GetLevel(upper);
-  if (lev2 == NULL) return -1;
-  te = lev2->energy - lev1->energy;
+  te = tr->e;
   if (te <= 0) return -1;
-  *e = te;
-  p1 = lev1->pj;
-  p2 = lev2->pj;
+  
+  p1 = tr->llo->pj;
+  p2 = tr->lup->pj;
 
   rqk = qkc;
   for (ie = 0; ie < n_egrid1; ie++) {
@@ -1622,8 +1621,8 @@ int CollisionStrengthUTA(double *qkt, double *params, double *e, double *bethe,
   }
 
   idatum = NULL;
-  ns = GetInteract(&idatum, NULL, NULL, lev1->iham, lev2->iham,
-		   lev1->pb, lev2->pb, 0, 0, 0);
+  ns = GetInteract(&idatum, NULL, NULL, tr->llo->iham, tr->lup->iham,
+		   tr->llo->pb, tr->lup->pb, 0, 0, 0);
   if (ns <= 0) return -1;
   if (idatum->s[0].index < 0 || idatum->s[3].index >= 0) {
     free(idatum->bra);
@@ -1657,7 +1656,7 @@ int CollisionStrengthUTA(double *qkt, double *params, double *e, double *bethe,
     }
   }
 
-  d = (lev1->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0));
+  d = (tr->llo->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0));
   for (ie = 0; ie < n_egrid1; ie++) {
     qkc[ie] *= d;
   }
@@ -2027,10 +2026,9 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
  * OUT: e - transition energy (who needs it?!)
  * GLOBALS: FACin' lot...
  */
-int CollisionStrength(double *qkt, double *params, double *e, double *bethe,
-		      int lower, int upper, int msub) {
+int CollisionStrength(const TRANSITION *tr, int msub,
+                      double *qkt, double *params, double *bethe) {
   int i, j, t, h, p, m, type, ty, p1, p2, gauge;  
-  LEVEL *lev1, *lev2;
   double te, c, r, s3j, c1, c2, *mbk, aw;
   ANGULAR_ZMIX *ang;
   int nz, j1, j2, ie, np, nq, kkp, nmk;
@@ -2044,17 +2042,17 @@ int CollisionStrength(double *qkt, double *params, double *e, double *bethe,
   double born_egrid, born_cross, bt, ubt[MAXNUSR];
   double bte, bms;
 
-  lev1 = GetLevel(lower);
-  if (lev1 == NULL) return -1;
-  lev2 = GetLevel(upper);
-  if (lev2 == NULL) return -1;
-  te = lev2->energy - lev1->energy;
+  if (!tr) {
+    return -1;
+  }
+  
+  te = tr->e;
   if (te <= 0) return -1;
-  *e = te;
+  
   aw = te*FINE_STRUCTURE_CONST;
 
-  j1 = lev1->pj;
-  j2 = lev2->pj;
+  j1 = tr->llo->pj;
+  j2 = tr->lup->pj;
   DecodePJ(j1, &p1, &j1);
   DecodePJ(j2, &p2, &j2);
 
@@ -2076,7 +2074,7 @@ int CollisionStrength(double *qkt, double *params, double *e, double *bethe,
     }    
   }
   gauge = GetTransitionGauge();
-  nz = AngularZMix(&ang, lower, upper, -1, -1, &nmk, &mbk);
+  nz = AngularZMix(&ang, tr->nlo, tr->nup, -1, -1, &nmk, &mbk);
   if (nz <= 0) {
     if (nmk > 0) free(mbk);
     return -1;
@@ -2093,7 +2091,7 @@ int CollisionStrength(double *qkt, double *params, double *e, double *bethe,
 	c /= ang[i].k + 1.0;
 	if (fpw) {
 	  fprintf(fpw, "# %3d %3d %12.5E %12.5E %2d %2d %2d\n", 
-		  lower, upper, te*HARTREE_EV, 8.0*c, ang[i].k, n_tegrid, n_egrid);
+		  tr->nlo, tr->nup, te*HARTREE_EV, 8.0*c, ang[i].k, n_tegrid, n_egrid);
 	}
 	ty = CERadialQk(rq, te, ang[i].k0, ang[i].k1,
 			ang[j].k0, ang[j].k1, ang[i].k);
@@ -2408,14 +2406,13 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   FILE *f;
   int *alev;
   int nsub;
-  LEVEL *lev1, *lev2;
   F_HEADER fhdr;
   ARRAY subte;
   int isub, n_tegrid0, n_egrid0, n_usr0;
   int te_set, e_set, usr_set, iuta;
   double emin, emax, ebuf, eavg;
   double rmin, rmax;
-  int nc, ilow, iup;
+  int nc;
 
   iuta = IsUTA();
   if (iuta && msub) {
@@ -2450,19 +2447,21 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   emax = 0.0;
   m = 0;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetLevel(low[i]);
     for (j = 0; j < nup; j++) {
-      double e;
-      lev2 = GetLevel(up[j]);
-      e = lev2->energy - lev1->energy;
-      if (i < nlow-nc || j < nup-nc) e = fabs(e);
-      if (e > 0) m++;
-      if (m == 1) {
-        emin = e;
-        emax = e;
+      TRANSITION tr;
+      int swapped;
+      
+      if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
+        return -1;
       }
-      if (e < emin && e > 0) emin = e;
-      if (e > emax) emax = e;
+      
+      if (tr.e > 0.0) m++;
+      if (m == 1) {
+        emin = tr.e;
+        emax = tr.e;
+      }
+      if (tr.e < emin && tr.e > 0) emin = tr.e;
+      if (tr.e > emax) emax = tr.e;
     }
   }
   if (m == 0) {
@@ -2549,26 +2548,28 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     ei = 0.0;
     m = 0;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetLevel(low[i]);
       for (j = 0; j < nup; j++) {
         int k;
-	double e;
+        TRANSITION tr;
+        int swapped;
         CONFIG *cfg;
+        double e;
+
+        if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
+          return -1;
+        }
         
-        lev2 = GetLevel(up[j]);
-	e = lev2->energy - lev1->energy;
-	if (i < nlow-nc || j < nup-nc) e = fabs(e);
-	if (e < e0 || e >= e1) continue;
-	if (e < emin) emin = e;
-	if (e > emax) emax = e;
+	if (tr.e < e0 || tr.e >= e1) continue;
+	if (tr.e < emin) emin = tr.e;
+	if (tr.e > emax) emax = tr.e;
 
         /* ionization potential */
         if (iuta) {
-          cfg = GetConfigFromGroup(lev2->iham, lev2->pb);
+          cfg = GetConfigFromGroup(tr.lup->iham, tr.lup->pb);
           k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
         } else {
-          SYMMETRY *sym = GetSymmetry(lev2->pj);
-          STATE *st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
+          SYMMETRY *sym = GetSymmetry(tr.lup->pj);
+          STATE *st = (STATE *) ArrayGet(&(sym->states), tr.lup->pb);
           if (st->kgroup < 0) {
 	    k = st->kcfg;
           } else {
@@ -2714,38 +2715,31 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     
     /* real CE calculations begin here */
     for (i = 0; i < nlow; i++) {
-      lev1 = GetLevel(low[i]);
       for (j = 0; j < nup; j++) {
         double qkc[MAXMSUB*MAXNUSR];
         double params[MAXMSUB*NPARAMS];
-	double e;
         int k, ip, iempty;
         double bethe[3];
-             
-        lev2 = GetLevel(up[j]);
-	e = lev2->energy - lev1->energy;	
-	ilow = low[i];
-	iup = up[j];
-	if (i < nlow-nc || j < nup-nc) {
-	  if (e < 0) {
-	    ilow = up[j];
-	    iup = low[i];
-	    e = -e;
-	  }
-	}	    
-	if (e < e0 || e >= e1) continue;
+        TRANSITION tr;
+        int swapped;
+
+        if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
+          return -1;
+        }
+        
+	if (tr.e < e0 || tr.e >= e1) continue;
 
 	if (iuta) {
-	  k = CollisionStrengthUTA(qkc, params, &e, bethe, ilow, iup);
+	  k = CollisionStrengthUTA(&tr, qkc, params, bethe);
 	} else {
-	  k = CollisionStrength(qkc, params, &e, bethe, ilow, iup, msub); 
+	  k = CollisionStrength(&tr, msub, qkc, params, bethe); 
 	}
 	if (k < 0) continue;
 	r.bethe = bethe[0];
 	r.born[0] = bethe[1];
 	r.born[1] = bethe[2];
-	r.lower = ilow;
-	r.upper = iup;
+	r.lower = tr.nlo;
+	r.upper = tr.nup;
 	r.nsub = k;
 	if (r.nsub > nsub) {
 	  r.params = realloc(r.params, sizeof(float)*r.nsub);

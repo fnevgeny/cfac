@@ -27,7 +27,7 @@ library : $(LIB)
 $(COBJS) : $(TOP)/sysdef.h
 include Make.dep
 
-Make.dep : $(CSRCS) Make.defs
+Make.dep : $(CSRCS) Make.defs $(GENINCS)
 	@echo -n "Generating dependencies... "
 	@echo "# Generated automatically by \`make depend'" > Make.dep
 	-@$(CC) -I$(TOP) ${CPPFLAGS} $(CFLAGS) -MM $(CSRCS) >> Make.dep

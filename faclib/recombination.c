@@ -1594,7 +1594,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
       awmin = emin * FINE_STRUCTURE_CONST;
       awmax = emax * FINE_STRUCTURE_CONST;
       if (e < 0.3) {
-	SetAWGrid(1, 0.5*(awmin+awmax), awmax);
+	SetAWGrid(1, awmin, awmax);
       } else if (e < 1.0) {
 	SetAWGrid(2, awmin, awmax);
       } else {
@@ -1771,7 +1771,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
       awmin = emin * FINE_STRUCTURE_CONST;
       awmax = emax * FINE_STRUCTURE_CONST;
       if (e < 0.3) {
-	SetAWGrid(1, 0.5*(awmin+awmax), awmax);
+	SetAWGrid(1, awmin, awmax);
       } else if (e < 1.0) {
 	SetAWGrid(2, awmin, awmax);
       } else {
@@ -2244,7 +2244,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
       k0 = OrbitalIndex(n, kappa, 0);
       orb0 = GetOrbital(k0);
       e0 = -(orb0->energy);
-      SetAWGrid(1, e0*FINE_STRUCTURE_CONST, e0);
+      SetAWGrid(1, e0*FINE_STRUCTURE_CONST, e0*FINE_STRUCTURE_CONST);
       if (usr_egrid[0] < 0) {
 	if (egrid[0] > 0) {
 	  SetUsrPEGridDetail(n_egrid, egrid);

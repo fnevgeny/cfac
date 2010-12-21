@@ -483,7 +483,7 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
     
     FreeMultipoleArray();
     if (e0 < EPS3) {
-      SetAWGrid(1, 0.5*(emin+emax), emax);
+      SetAWGrid(1, emin, emax);
     } else if (e0 < 1.0) {
       SetAWGrid(2, emin, emax);
     } else {
@@ -582,7 +582,7 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
     
   FreeMultipoleArray();
   if (e0 < EPS3) {
-    SetAWGrid(1, 0.5*(emin+emax), emax);
+    SetAWGrid(1, emin, emax);
   } else if (e0 < 1.0) {
     SetAWGrid(2, emin, emax);
   } else {

@@ -563,8 +563,13 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
             /* TODO: full fit ? */
             
-            ap0 = r.params[0]*pow(1.0 + r.params[2], r.params[1]);
-            ap1 = double) r.kl;
+            if (h.qk_mode == QK_FIT) {
+              ap0 = r.params[0]*pow(1.0 + r.params[2], r.params[1]);
+            } else {
+              ap0 = r.strength[h.n_usr - 1]*
+                    pow(h.usr_egrid[h.n_usr - 1], 3.5 + r.kl);
+            }
+            ap1 = (double) r.kl;
 
             retval = StoreCTransition(db, sid,
                 DB_SQL_CS_RR, h.qk_mode, r.b, r.f,

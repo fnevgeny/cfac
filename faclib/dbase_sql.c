@@ -554,6 +554,7 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             RR_RECORD r;
             unsigned long int cid;
             int k, t;
+            double ap0, ap1;
             
             n = ReadRRRecord(fp, &r, swp, &h);
             if (n == 0) {
@@ -561,10 +562,13 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             }
 
             /* TODO: full fit ? */
+            
+            ap0 = r.params[0]*pow(1.0 + r.params[2], r.params[1]);
+            ap1 = double) r.kl;
 
             retval = StoreCTransition(db, sid,
                 DB_SQL_CS_RR, h.qk_mode, r.b, r.f,
-                r.params[0], (double) r.kl, 0.0,
+                ap0, ap1, 0.0,
                 &cid);
             if (retval != 0) {
                 break;

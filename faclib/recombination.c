@@ -447,40 +447,28 @@ void RRRadialQkHydrogenicParams(int np, double *p,
 void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx, 
 		       double *y, double *dy, int ndy, void *extra) {
   int kl, i, k;
-  double a, b, c, d, e, f, g, h;
+  double t, s;
 
   kl = *((int *) extra);
   if (ndy <= 0) {
     for (i = 0; i < n; i++) {
-      a = 4.5 + kl;
-      b = 0.5*p[1];
-      c = sqrt(x[i]);
-      d = p[2] + c;
-      e = p[2] + 1;
-      f = logx[i]*(b-a);
-      h = log(e/d);
-      g = h*p[1];
-      y[i] = p[0] * exp(f+g);
+      t = (1 + p[2])/(sqrt(x[i]) + p[2]);
+      s = pow(x[i], p[1]/2 - 4.5 - kl)*pow(t, p[1]);
+      y[i] = p[0]*s;
     }
   } else {
     for (i = 0; i < n; i++) {
+      t = (1 + p[2])/(sqrt(x[i]) + p[2]);
+      s = pow(x[i], p[1]/2 - 4.5 - kl)*pow(t, p[1]);
+
       k = i;
-      a = 4.5 + kl;
-      b = 0.5*p[1];
-      c = sqrt(x[i]);
-      d = p[2] + c;
-      e = p[2] + 1;
-      f = logx[i]*(b-a);
-      h = log(e/d);
-      g = h*p[1];
-      a = exp(f+g);
-      dy[k] = a;
+      dy[k] = s;
+
       k += ndy;
-      a = p[0]*a;
-      dy[k] = 0.5*a*logx[i] + a*h;
+      dy[k] = p[0]*s*(logx[i]/2 + log(t));
       if (np == 3) {
 	k += ndy;
-	dy[k] = a*p[1]*(1.0/e - 1.0/d);
+	dy[k] = p[0]*s*p[1]*(sqrt(x[i]) - 1)/((1 + p[2])*(sqrt(x[i]) + p[2]));
       }
     }
   }

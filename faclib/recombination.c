@@ -963,7 +963,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   double rq[MAXNE], tq[MAXNE];
   int i, j, c;
   int gauge, mode;
-  int nkl, nq = 0;
+  int nkl = 0, nq = 0;
   int kb, kbp, jb, klb, jbp;
 
   lev1 = GetLevel(rec);

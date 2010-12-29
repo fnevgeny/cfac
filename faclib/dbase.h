@@ -15,16 +15,13 @@
 #define DB_RR 4
 #define DB_AI 5
 #define DB_CI 6
-#define DB_SP 7
-#define DB_RT 8
-#define DB_DR 9
-#define DB_AIM 10
-#define DB_CIM 11
-#define DB_ENF 12
-#define DB_TRF 13
-#define DB_CEF 14
-#define DB_CEMF 15
-#define NDB   15
+#define DB_AIM 7
+#define DB_CIM 8
+#define DB_ENF 9
+#define DB_TRF 10
+#define DB_CEF 11
+#define DB_CEMF 12
+#define NDB   12
 
 #define LNCOMPLEX   32
 #define LSNAME      24
@@ -321,83 +318,6 @@ typedef struct _CIM_RECORD_ {
   float *strength;
 } CIM_RECORD;
 
-typedef struct _SP_HEADER_ { 
-  long int position;
-  long int length;
-  int nele;
-  int ntransitions;
-  int iblock;
-  int fblock;
-  char icomplex[LNCOMPLEX];
-  char fcomplex[LNCOMPLEX];
-  int type;
-} SP_HEADER;
-
-typedef struct _SP_RECORD_ {
-  int lower;
-  int upper;
-  float energy;
-  float strength;
-  float rrate;
-  float trate;
-} SP_RECORD;
-#define SIZE_SP_RECORD (sizeof(int)+sizeof(int)+sizeof(float)*4)
-
-typedef struct _SP_EXTRA_ {
-  float sdev;
-} SP_EXTRA;
-
-typedef struct _RT_HEADER_ { 
-  long int position;
-  long int length;
-  int ntransitions;
-  int iedist;
-  int np_edist;
-  double *p_edist;
-  float eden;
-  int ipdist;
-  int np_pdist;
-  double *p_pdist;
-  float pden;
-} RT_HEADER;
-
-typedef struct _RT_RECORD_ {
-  int dir;
-  int iblock;
-  float nb;
-  float tr;
-  float ce;
-  float rr;
-  float ai;
-  float ci;
-  char icomplex[LNCOMPLEX];
-} RT_RECORD;
-
-typedef struct _DR_HEADER_ {
-  long int position;
-  long int length;
-  int nele;
-  int ilev;
-  int ntransitions;
-  int vn;
-  int j;
-  float energy;
-} DR_HEADER;
-
-typedef struct _DR_RECORD_ {
-  int ilev;
-  int flev;
-  int ibase;
-  int fbase;
-  int vl;
-  int j;
-  float energy;
-  float etrans;
-  float br;
-  float ai;
-  float total_rate;
-} DR_RECORD;  
-
 /* these read functions interface with the binary data files.
  * they can be used in custom c/c++ codes to read the binary 
  * files directly. to do so, copy consts.h, dbase.h, and dbase.c
@@ -429,12 +349,6 @@ int ReadCIHeader(FILE *f, CI_HEADER *h, int swp);
 int ReadCIMHeader(FILE *f, CIM_HEADER *h, int swp);
 int ReadCIRecord(FILE *f, CI_RECORD *r, int swp, CI_HEADER *h);
 int ReadCIMRecord(FILE *f, CIM_RECORD *r, int swp, CIM_HEADER *h);
-int ReadSPHeader(FILE *f, SP_HEADER *h, int swp);
-int ReadSPRecord(FILE *f, SP_RECORD *r, SP_EXTRA *rx, int swp);
-int ReadRTHeader(FILE *f, RT_HEADER *h, int swp);
-int ReadRTRecord(FILE *f, RT_RECORD *r, int swp);
-int ReadDRHeader(FILE *f, DR_HEADER *h, int swp);
-int ReadDRRecord(FILE *f, DR_RECORD *r, int swp);
 
 void CEMF2CEFHeader(CEMF_HEADER *mh, CEF_HEADER *h);
 void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh, 
@@ -463,9 +377,6 @@ int WriteAIHeader(FILE *f, AI_HEADER *h);
 int WriteAIMHeader(FILE *f, AIM_HEADER *h);
 int WriteCIHeader(FILE *f, CI_HEADER *h);
 int WriteCIMHeader(FILE *f, CIM_HEADER *h);
-int WriteSPHeader(FILE *f, SP_HEADER *h);
-int WriteRTHeader(FILE *f, RT_HEADER *h);
-int WriteDRHeader(FILE *f, DR_HEADER *h);
 
 int CheckEndian(F_HEADER *fh);
 void SwapEndian(char *p, int size);
@@ -531,20 +442,6 @@ int WriteCIMRecord(FILE *f, CIM_RECORD *r);
 int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp);
 int SwapEndianCIMHeader(CIM_HEADER *h);
 int SwapEndianCIMRecord(CIM_RECORD *r);
-int WriteSPRecord(FILE *f, SP_RECORD *r, SP_EXTRA *rx);
-int PrintSPTable(FILE *f1, FILE *f2, int v, int swp);
-int SwapEndianSPHeader(SP_HEADER *h);
-int SwapEndianSPRecord(SP_RECORD *r, SP_EXTRA *rx);
-int WriteRTRecord(FILE *f, RT_RECORD *r);
-int PrintRTTable(FILE *f1, FILE *f2, int v, int swp);
-int SwapEndianRTHeader(RT_HEADER *h);
-int SwapEndianRTRecord(RT_RECORD *r);
-int WriteDRRecord(FILE *f, DR_RECORD *r);
-int PrintDRTable(FILE *f1, FILE *f2, int v, int swp);
-int SwapEndianDRHeader(DR_HEADER *h);
-int SwapEndianDRRecord(DR_RECORD *r);
-double IonDensity(char *fn, int k);
-double IonRadiation(char *fn, int k, int m);
 void SetUTA(int m, int mci);
 int IsUTA(void);
 void SetTRF(int m);

@@ -1,3 +1,4 @@
+#include "global.h"
 #include "interpolation.h"
 #include "cf77.h"
 

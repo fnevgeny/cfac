@@ -1,13 +1,6 @@
 #ifndef _INTERPOLATION_H_
 #define _INTERPOLATION_H_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "config.h"
-#include "global.h"
-#include "dbase.h"
-
 void PolyBasis(int n, double *c, double x, double logx);
 void PolyFit(int n, double *c, int nd, double *x, double *y);
 void SVDFit(int np, double *coeff, double *chisq, double tol,

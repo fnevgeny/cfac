@@ -2270,6 +2270,10 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         return -1;
       }
       
+      if (swapped && i >= nlow-nc && j >= nup-nc) {
+        continue;
+      }
+      
       if (tr.e > 0.0) m++;
       if (m == 1) {
         emin = tr.e;
@@ -2362,6 +2366,10 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
         if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
           return -1;
+        }
+
+        if (swapped && i >= nlow-nc && j >= nup-nc) {
+          continue;
         }
         
 	if (tr.e < e0 || tr.e >= e1) continue;
@@ -2508,6 +2516,10 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
         if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
           return -1;
+        }
+        
+        if (swapped && i >= nlow-nc && j >= nup-nc) {
+          continue;
         }
         
 	if (tr.e < e0 || tr.e >= e1) continue;

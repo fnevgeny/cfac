@@ -13,8 +13,6 @@ static int pw_type = -1;
 static int n_usr = 0;
 static double usr_egrid[MAXNUSR];
 static double log_usr[MAXNUSR];
-static double xusr[MAXNUSR];
-static double log_xusr[MAXNUSR];
 
 static int n_egrid = 0;
 static int n_egrid1 = 0;
@@ -1585,13 +1583,9 @@ int CollisionStrengthUTA(const TRANSITION *tr,
                          double *qkt, double *params, double *bethe) {
   INTERACT_DATUM *idatum;
   int p1, p2, j1, j2, k0, k1, type, ty;
-  int ns, q1, q2, ie, kmin, kmax, k, np;
-  double te, *rqk, tol;
+  int ns, q1, q2, ie, kmin, kmax, k;
+  double te, *rqk;
   double rq[MAXMSUB*(MAXNE+1)], qkc[MAXMSUB*(MAXNE+1)];
-  int ierr, ipvt[NPARAMS];
-  int lwa=5*NPARAMS+MAXNE;
-  double wa[5*NPARAMS+MAXNE];
-  double fvec[MAXNE], fjac[MAXNE*NPARAMS];
   double born_egrid, born_cross, c, d, r;
   double bte, bms;
 
@@ -1963,14 +1957,10 @@ int CollisionStrength(const TRANSITION *tr, int msub,
   int i, j, t, h, p, m, type, ty, p1, p2, gauge;  
   double te, c, r, s3j, c1, c2, *mbk, aw;
   ANGULAR_ZMIX *ang;
-  int nz, j1, j2, ie, np, nq, kkp, nmk;
+  int nz, j1, j2, ie, nq, kkp, nmk;
   double rq[MAXMSUB*(MAXNE+1)];
   double qkc[MAXMSUB*(MAXNE+1)];
-  double *rqk, *rqkt, tol;
-  int ierr, ipvt[NPARAMS];
-  int lwa=5*NPARAMS+MAXNE;
-  double wa[5*NPARAMS+MAXNE];
-  double fvec[MAXNE], fjac[MAXNE*NPARAMS];
+  double *rqk, *rqkt;
   double born_egrid, born_cross, bt, ubt[MAXNUSR];
   double bte, bms;
 

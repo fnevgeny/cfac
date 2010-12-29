@@ -8,15 +8,6 @@
 #include "global.h"
 #include "dbase.h"
 
-typedef struct _MOD_RECORD_ {
-  int m;
-  int i0;
-  int i1;
-  int op;
-  double c;
-  void *r, *h;
-} MOD_RECORD;
-
 void PolyBasis(int n, double *c, double x, double logx);
 void PolyFit(int n, double *c, int nd, double *x, double *y);
 void SVDFit(int np, double *coeff, double *chisq, double tol,
@@ -30,52 +21,5 @@ int NLSQFit(int np, double *p, double tol, int *ipvt,
 	    void *extra);
 double Simpson(double *y, int ia, int ib);
 int NewtonCotes(double *r, double *x, int i0, int i1, int m, int id);
-
-double RRCrossHn(double z, double e, int n);
-int PrintRRTable(FILE *f1, FILE *f2, int v, int swp);
-void PrepCECrossHeader(CE_HEADER *h, double *data);
-void PrepCECrossRecord(int k, CE_RECORD *r, CE_HEADER *h,
-		       double *data);
-double InterpolateCECross(double e, CE_RECORD *r, CE_HEADER *h,
-			  double *data, double *ratio);
-int CECross(char *ifn, char *ofn, int i0, int i1, 
-	    int negy, double *egy, int mp);
-int CEMaxwell(char *ifn, char *ofn, int i0, int i1, 
-	      int nt, double *temp);
-void PrepCEFCrossHeader(CEF_HEADER *h, double *data);
-void PrepCEFCrossRecord(CEF_RECORD *r, CEF_HEADER *h,
-			double *data);
-double InterpolateCEFCross(double e, CEF_RECORD *r, CEF_HEADER *h,
-			   double *data);
-int CEFCross(char *ifn, char *ofn, int i0, int i1, 
-	     int negy, double *egy, int mp);
-int CEFMaxwell(char *ifn, char *ofn, int i0, int i1, 
-	       int nt, double *temp);
-double InterpolateCICross(double e, double eth, CI_RECORD *r, CI_HEADER *h);
-double InterpolateCIMCross(double e, double eth, CIM_RECORD *r, CIM_HEADER *h, 
-			   int q);
-int TotalCICross(char *ifn, char *ofn, int ilev, 
-		 int negy, double *egy, int imin, int imax);
-int TotalPICross(char *ifn, char *ofn, int ilev, 
-		 int negy, double *egy, int imin, int imax);
-int TotalRRCross(char *ifn, char *ofn, int ilev, 
-		 int negy, double *egy, int n0, int n1, 
-		 int nmax, int imin, int imax);
-int CICross(char *ifn, char *ofn, int i0, int i1, 
-	    int negy, double *egy, int mp);
-int CIMCross(char *ifn, char *ofn, int i0, int i1, 
-	     int negy, double *egy, int mp);
-int CIMaxwell(char *ifn, char *ofn, int i0, int i1, 
-	      int nt, double *temp);
-int RRCross(char *ifn, char *ofn, int i0, int i1, 
-	    int negy, double *egy, int mp);
-int RRMaxwell(char *ifn, char *ofn, int i0, int i1, 
-	      int nt, double *temp);
-int InterpCross(char *ifn, char *ofn, int i0, int i1, 
-		int negy, double *egy, int mp);
-int MaxwellRate(char *ifn, char *ofn, int i0, int i1, 
-		int nt, double *temp);
-double voigt(double a, double v);
-void ModifyTable(char *fh, char *fn0, char *fn1, char *fnm);
 
 #endif

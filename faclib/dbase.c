@@ -270,7 +270,6 @@ int SwapEndianCEHeader(CE_HEADER *h) {
   SwapEndian((char *) &(h->length), sizeof(long int));
   SwapEndian((char *) &(h->nele), sizeof(int));
   SwapEndian((char *) &(h->ntransitions), sizeof(int));
-  SwapEndian((char *) &(h->qk_mode), sizeof(int));
   SwapEndian((char *) &(h->n_tegrid), sizeof(int));
   SwapEndian((char *) &(h->n_egrid), sizeof(int));
   SwapEndian((char *) &(h->egrid_type), sizeof(int));
@@ -710,7 +709,6 @@ int WriteCEHeader(FILE *f, CE_HEADER *h) {
   WSF0(h->length);
   WSF0(h->nele);
   WSF0(h->ntransitions);
-  WSF0(h->qk_mode);
   WSF0(h->n_tegrid);
   WSF0(h->n_egrid);
   WSF0(h->egrid_type);
@@ -1031,8 +1029,6 @@ int WriteCERecord(FILE *f, CE_RECORD *r) {
 
   if (ce_header.msub) {
     m0 = r->nsub;
-  } else if (ce_header.qk_mode == QK_FIT) {
-    m0 = ce_header.nparams * r->nsub;
   } else m0 = 0;
   if (m0) {
     WSF1(r->params, sizeof(float), m0);
@@ -1423,7 +1419,6 @@ int ReadCEHeader(FILE *f, CE_HEADER *h, int swp) {
   RSF0(h->length);
   RSF0(h->nele);
   RSF0(h->ntransitions);
-  RSF0(h->qk_mode);
   RSF0(h->n_tegrid);
   RSF0(h->n_egrid);
   RSF0(h->egrid_type);
@@ -1555,8 +1550,6 @@ int ReadCERecord(FILE *f, CE_RECORD *r, int swp, CE_HEADER *h) {
   
   if (h->msub) {
     m0 = r->nsub;
-  }  else if (h->qk_mode == QK_FIT) {
-    m0 = h->nparams * r->nsub;
   } else m0 = 0;
   r->params = NULL;
   if (m0) {
@@ -3082,7 +3075,6 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "\n");
     fprintf(f2, "NELE\t= %d\n", h.nele);
     fprintf(f2, "NTRANS\t= %d\n", h.ntransitions);
-    fprintf(f2, "QKMODE\t= %d\n", h.qk_mode);
     fprintf(f2, "NPARAMS\t= %d\n", h.nparams);
     fprintf(f2, "MSUB\t= %d\n", h.msub);
     fprintf(f2, "PWTYPE\t= %d\n", h.pw_type);
@@ -3139,12 +3131,6 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
       for (k = 0; k < r.nsub; k++) {
 	if (h.msub) {
 	  fprintf(f2, "%11.4E\n", r.params[k]);
-	} else if (h.qk_mode == QK_FIT) {
-	  for (t = 0; t < h.nparams; t++) {
-	    fprintf(f2, "%11.4E ", r.params[p1]);
-	    p1++;
-	  }
-	  fprintf(f2, "\n");
 	}
 	for (t = 0; t < h.n_usr; t++) {
 	  if (v) {
@@ -3167,7 +3153,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
 	}
       }      
       fflush(f2);
-      if (h.msub || h.qk_mode == QK_FIT) free(r.params);
+      if (h.msub) free(r.params);
       free(r.strength);
     }
     free(h.tegrid);

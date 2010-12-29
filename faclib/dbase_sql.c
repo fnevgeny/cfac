@@ -405,7 +405,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             }
 
             retval = StoreCTransition(db, sid,
-                DB_SQL_CS_CE, h.qk_mode, r.lower, r.upper,
+                DB_SQL_CS_CE, QK_EXACT, r.lower, r.upper,
                 r.bethe, r.born[0], r.born[1],
                 &cid);
             if (retval != 0) {
@@ -434,7 +434,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 	        }
             }
                   
-            if (h.msub || h.qk_mode == QK_FIT) {
+            if (h.msub) {
                 free(r.params);
             }
             free(r.strength);

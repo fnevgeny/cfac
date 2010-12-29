@@ -6,9 +6,6 @@
 #define MAXMSUB  32
 #define NPARAMS  4
 
-static int qk_mode;
-static double qk_fit_tolerance;
-
 static int egrid_type = -1;
 static int usr_egrid_type = -1;
 static int pw_type = -1;
@@ -96,13 +93,6 @@ CEPW_SCRATCH *GetCEPWScratch(void) {
 
 int SetCEPWFile(char *fn) {
   fpw = fopen(fn, "w");
-  return 0;
-}
-
-int SetCEQkMode(int m, double tol) {
-  if (m == QK_DEFAULT) qk_mode = QK_EXACT;
-  else qk_mode = m;
-  if (tol > 0.0) qk_fit_tolerance = tol;
   return 0;
 }
 
@@ -1693,69 +1683,11 @@ int CollisionStrengthUTA(const TRANSITION *tr,
     bethe[1] = 0.0;
     bethe[2] = 0.0;
   }
-  if (qk_mode == QK_FIT) {
-    for (ie = 0; ie < n_egrid; ie++) {
-      qkc[ie] = 8.0*qkc[ie];
-      qkt[ie] = qkc[ie];
-      xusr[ie] = egrid[ie]/te;
-      if (egrid_type == 1) xusr[ie] += 1.0;
-      log_xusr[ie] = log(xusr[ie]);
-    }	
-    if (qkt[0] < EPS16 && qkt[n_egrid-1] < EPS16) {
-      params[0] = 0.0;
-      params[1] = 0.0;
-      params[2] = 0.0;
-      params[3] = 0.0;
-    } else {
-      tol = qk_fit_tolerance;
-      if (bethe[0] < 0.0) {
-	params[0] = qkc[0];
-	params[1] = 0.0;
-	params[2] = 0.0;
-	params[3] = 0.0;
-      } else {
-	for (ie = 0; ie < n_egrid; ie++) {
-	  qkc[ie] -= (*bethe)*log_xusr[ie];
-	  xusr[ie] = 1.0/xusr[ie];
-	  log_xusr[ie] = -log_xusr[ie];
-	}
-	params[0] = qkc[0];
-	params[1] = 1.0;
-	params[2] = qkc[n_egrid-1];
-	params[3] = 0.1;
-      }
-      np = NPARAMS;
-      ierr = NLSQFit(np, params, tol, ipvt, fvec, fjac, MAXNE, wa, lwa,
-		     n_egrid, xusr, log_xusr, qkc, qkt, 
-		     CERadialQkFromFit, (void *) bethe);
-      if (ierr > 3) params[0] = ierr*1E30;
-      if (*bethe >= 0.0) {
-	params[1] *= params[1];
-	params[3] *= params[3];
-      }
-    }
-  } else if (qk_mode == QK_INTERPOLATE) {
-    np = 3;
-    if (type != 1) {
-      for (ie = 0; ie < n_egrid; ie++) {
-	qkc[ie] *= 8.0;
-	qkc[ie] = log(qkc[ie]);
-      }
-      UVIP3P(np, n_egrid, log_egrid, qkc, n_usr, log_usr, qkt);
-      for (ie = 0; ie < n_usr; ie++) {
-	qkt[ie] = exp(qkt[ie]);
-      }
-    } else {
-      for (ie = 0; ie < n_egrid; ie++) {
-	qkc[ie] *= 8.0;
-      }
-      UVIP3P(np, n_egrid, log_egrid, qkc, n_usr, log_usr, qkt);
-    }
-  } else if (qk_mode == QK_EXACT) {
-    for (ie = 0; ie < n_usr; ie++) {
-      qkt[ie] = 8.0*qkc[ie];
-    }
+  
+  for (ie = 0; ie < n_usr; ie++) {
+    qkt[ie] = 8.0*qkc[ie];
   }
+  
   RelativisticCorrection(0, qkt, params, bte, bethe[0]);
   free(idatum->bra);
   free(idatum);
@@ -2251,132 +2183,26 @@ int CollisionStrength(const TRANSITION *tr, int msub,
   /* there is a factor of 4 coming from normalization and the 2 
      from the formula */
   if (!msub) {
-    if (qk_mode == QK_FIT) {
-      for (ie = 0; ie < n_egrid; ie++) {
-	qkc[ie] = 8.0*qkc[ie];
-	qkt[ie] = qkc[ie];
-	xusr[ie] = egrid[ie]/te;
-	if (egrid_type == 1) xusr[ie] += 1.0;
-	log_xusr[ie] = log(xusr[ie]);
-      }	
-      if (qkt[0] < EPS16 && qkt[n_egrid-1] < EPS16) {
-	params[0] = 0.0;
-	params[1] = 0.0;
-	params[2] = 0.0;
-	params[3] = 0.0;
-      } else {
-	tol = qk_fit_tolerance;
-	if (bethe[0] < 0.0) {
-	  params[0] = qkc[0];
-	  params[1] = 0.0;
-	  params[2] = 0.0;
-	  params[3] = 0.0;
-	} else {
-	  for (ie = 0; ie < n_egrid; ie++) {
-	    qkc[ie] -= (*bethe)*log_xusr[ie];
-	    xusr[ie] = 1.0/xusr[ie];
-	    log_xusr[ie] = -log_xusr[ie];
-	  }
-	  params[0] = qkc[0];
-	  params[1] = 1.0;
-	  params[2] = qkc[n_egrid-1];
-	  params[3] = 0.1;
-	}
-	np = NPARAMS;
-	ierr = NLSQFit(np, params, tol, ipvt, fvec, fjac, MAXNE, wa, lwa,
-		       n_egrid, xusr, log_xusr, qkc, qkt, 
-		       CERadialQkFromFit, (void *) bethe);
-	if (ierr > 3) params[0] = ierr*1E30;
-	if (*bethe >= 0.0) {
-	  params[1] *= params[1];
-	  params[3] *= params[3];
-	}
-      }
-    } else if (qk_mode == QK_INTERPOLATE) {
-      np = 3;
-      if (type != 1) {
-	for (ie = 0; ie < n_egrid; ie++) {
-	  qkc[ie] *= 8.0;
-	  qkc[ie] = log(qkc[ie]);
-	}
-	UVIP3P(np, n_egrid, log_egrid, qkc, n_usr, log_usr, qkt);
-	for (ie = 0; ie < n_usr; ie++) {
-	  qkt[ie] = exp(qkt[ie]);
-	}
-      } else {
-	for (ie = 0; ie < n_egrid; ie++) {
-	  qkc[ie] *= 8.0;
-	}
-	UVIP3P(np, n_egrid, log_egrid, qkc, n_usr, log_usr, qkt);
-      }
-    } else if (qk_mode == QK_EXACT) {
-      for (ie = 0; ie < n_usr; ie++) {
-	qkt[ie] = 8.0*qkc[ie];
-      }
+    for (ie = 0; ie < n_usr; ie++) {
+      qkt[ie] = 8.0*qkc[ie];
     }
+    
     RelativisticCorrection(0, qkt, NULL, bte, bethe[0]);
     return 1;
   } else {
     rqk = qkc;
     rqkt = qkt;
     p = 0;
-    if (qk_mode == QK_FIT) {
-      for (t = -j1; t <= 0; t += 2) {
-	for (h = -j2; h <= j2; h += 2) {
-	  for (ie = 0; ie < n_egrid; ie++) {
-	    rqkt[ie] = 8.0*rqk[ie];
-	  }	
-	  if (rqkt[0] < EPS10 && rqkt[n_egrid-1] < EPS10) {
-	    continue;
-	  }
-	  p++;
-	  rqk += n_egrid1;
-	  rqkt += n_usr;
+    for (t = -j1; t <= 0; t += 2) {
+      for (h = -j2; h <= j2; h += 2) {	
+	for (ie = 0; ie < n_egrid; ie++) {
+	  rqkt[ie] = 8.0*rqk[ie];
 	}
+	p++;
+	rqk += n_egrid1;
+	rqkt += n_usr;
       }
-    } else if (qk_mode == QK_INTERPOLATE) {
-      np = 3;
-      if (type != 1) {	
-	for (t = -j1; t <= 0; t += 2) {
-	  for (h = -j2; h <= j2; h += 2) {
-	    for (ie = 0; ie < n_egrid; ie++) {
-	      rqk[ie] *= 8.0;
-	      rqk[ie] = log(rqk[ie]);
-	    }
-	    UVIP3P(np, n_egrid, log_egrid, rqk, n_usr, log_usr, rqkt);
-	    for (ie = 0; ie < n_usr; ie++) {
-	      rqkt[ie] = exp(rqkt[ie]);
-	    }
-	    p++;
-	    rqk += n_egrid1;
-	    rqkt += n_usr;
-	  }
-	} 
-      } else {
-	for (t = -j1; t <= 0; t += 2) {
-	  for (h = -j2; h <= j2; h += 2) {
-	    for (ie = 0; ie < n_egrid; ie++) {
-	      rqk[ie] *= 8.0;
-	    }
-	    UVIP3P(np, n_egrid, log_egrid, rqk, n_usr, log_usr, rqkt);
-	    p++;
-	    rqk += n_egrid1;
-	    rqkt += n_usr;
-	  }
-	}
-      }
-    } else if (qk_mode == QK_EXACT) {
-      for (t = -j1; t <= 0; t += 2) {
-	for (h = -j2; h <= j2; h += 2) {	
-	  for (ie = 0; ie < n_egrid; ie++) {
-	    rqkt[ie] = 8.0*rqk[ie];
-	  }
-	  p++;
-	  rqk += n_egrid1;
-	  rqkt += n_usr;
-	}
-      }
-    }  
+    }
     for (ie = 0; ie < n_usr; ie++) {
       ubt[ie] = 0.0;
     }
@@ -2504,7 +2330,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
  
   if (msub) {
     pw_type = 1;
-    qk_mode = QK_EXACT;
   } else {
     pw_type = 0;
   }
@@ -2651,24 +2476,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       egrid[ie] = 2*egrid[ie-1];
     }
     
-    if (qk_mode == QK_FIT && n_egrid <= NPARAMS) {
-      printf("n_egrid must > %d to use QK_FIT mode\n", NPARAMS);
-      return -1;
-    }
-    
-    if (qk_mode == QK_INTERPOLATE) {
-      for (i = 0; i < n_egrid; i++) {
-	log_egrid[i] = egrid[i];
-	if (egrid_type == 1) log_egrid[i] += te0;
-	log_egrid[i] = log(log_egrid[i]);
-      }
-      for (i = 0; i < n_egrid; i++) {
-	log_usr[i] = usr_egrid[i];
-	if (usr_egrid_type == 1) log_usr[i] += te0;
-	log_usr[i] = log(log_usr[i]);
-      }
-    }
-
     ebuf = 0.0;
     c = GetResidualZ();
     if (xborn+1.0 != 1.0) {
@@ -2677,11 +2484,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     }
 
     ce_hdr.nele = GetNumElectrons(low[0]);
-    ce_hdr.qk_mode = qk_mode;
-    if (qk_mode == QK_FIT) 
-      ce_hdr.nparams = NPARAMS;
-    else
-      ce_hdr.nparams = 0;
+    ce_hdr.nparams = 0;
 
     ce_hdr.te0 = te0;
     ce_hdr.pw_type = pw_type;
@@ -2699,9 +2502,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     nsub = 1;
     if (msub) {
       r.params = malloc(sizeof(float)*nsub);
-    } else if (qk_mode == QK_FIT) {
-      m = ce_hdr.nparams * nsub;
-      r.params = malloc(sizeof(float)*m);
     }
     m = ce_hdr.n_usr * nsub;
     r.strength = malloc(sizeof(float)*m);
@@ -2745,14 +2545,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	  for (m = 0; m < r.nsub; m++) {
 	    r.params[m] = (float) params[m];
 	  }
-	} else if (qk_mode == QK_FIT) {
-	  ip = 0;
-	  for (m = 0; m < r.nsub; m++) {
-	    for (ie = 0; ie < ce_hdr.nparams; ie++) {
-	      r.params[ip] = (float) params[ip];
-	      ip++;
-	    }
-	  }
 	}
       
 	ip = 0;
@@ -2772,7 +2564,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       }
     }
     
-    if (msub || qk_mode == QK_FIT) free(r.params);
+    if (msub) free(r.params);
     free(r.strength);
     DeinitFile(f, &fhdr);
     FreeExcitationQk();
@@ -2919,7 +2711,6 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   }
   ArrayAppend(&subte, &emax, NULL);
  
-  qk_mode = QK_EXACT;
   pw_type = 0;
   egrid_type = 1;
 
@@ -3168,7 +2959,6 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   }
   ArrayAppend(&subte, &emax, NULL);
  
-  qk_mode = QK_EXACT;
   pw_type = 1;
   egrid_type = 1;
 
@@ -3384,7 +3174,6 @@ int InitExcitation(void) {
   SetCEEGridLimits(0.05, 8.0, 0);
   usr_egrid[0] = -1.0;
   tegrid[0] = -1.0;  
-  SetCEQkMode(QK_DEFAULT, 1E-3);
   SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB, EXCTOL);
 
   SetAngleGrid(0, 10, 0.0, PI);
@@ -3409,7 +3198,6 @@ int ReinitExcitation(int m) {
   usr_egrid[0] = -1.0;
   tegrid[0] = -1.0;  
 
-  SetCEQkMode(QK_DEFAULT, 1E-3);
   SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB, EXCTOL);
 
   return 0;

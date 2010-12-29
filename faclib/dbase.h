@@ -142,7 +142,6 @@ typedef struct _CE_HEADER_ {
   long int length;
   int nele;
   int ntransitions;
-  int qk_mode;
   int n_tegrid;
   int n_egrid;
   int egrid_type;

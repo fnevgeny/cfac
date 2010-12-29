@@ -51,7 +51,6 @@ void SetCETol(double t);
 int SetCEPWOptions(int qr, int max, int kl_cb, double tol);
 int AddCEPW(int n, int step);
 int SetCEFormat(int m);
-int SetCEQkMode(int m, double tol);
 int SetCEPWGrid(int ns, int *n, int *step);
 int SetCEEGridLimits(double min, double max, int type);
 int SetCEEGridType(int type);

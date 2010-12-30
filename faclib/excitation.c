@@ -2474,11 +2474,16 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       egrid[ie] = 2*egrid[ie-1];
     }
     
-    ebuf = 0.0;
     c = GetResidualZ();
     if (xborn+1.0 != 1.0) {
-      PrepCoulombBethe(1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
-		       pw_scratch.nkl, pw_scratch.kl, msub);
+      ebuf = 0.0;
+      if (PrepCoulombBethe(1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
+		       pw_scratch.nkl, pw_scratch.kl, msub) != 0) {
+        printf("PrepCoulombBethe() failed, skipping CE transitions" \
+               " in energy block %g - %g eV (ei = %g eV)\n",
+               e0*HARTREE_EV, e1*HARTREE_EV, ei*HARTREE_EV);
+        continue;
+      }
     }
 
     ce_hdr.nele = GetNumElectrons(low[0]);

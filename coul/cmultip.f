@@ -59,7 +59,13 @@ C
      2            DMINT,DSINT,DA   ,DB   ,DAL  ,LXMLN,LXLNM2,
      3            FC   ,FDC  ,GC   ,GDC  ,SIGMA,IEXP ,
      4            DFI1 ,DGI1 ,DFF1 ,DGF1 ,
-     5            DFI2 ,DGI2 ,DFF2 ,DGF2 ,LXCN              )
+     5            DFI2 ,DGI2 ,DFF2 ,DGF2 ,LXCN ,IERR2       )
+      
+      IF (IERR2 .NE. 0) THEN
+         IERR = 3
+         RETURN
+      ENDIF
+
       CALL RECLIP(DRM1 ,DRM2 ,DETI ,DWNI ,DETF ,DWNF ,LAMB  ,
      1            LMIN ,LMAX ,LXMLN,LAP1 ,
      2            FFINT,FGINT,GFINT,GGINT,DMINT,DSINT,
@@ -97,7 +103,7 @@ C
      2                  DMINT ,DSINT ,DA    ,DB    ,DAL   ,LXLN ,LXLNM2,
      3                  FC    ,FDC   ,GC    ,GDC   ,SIGMA ,IEXP  ,
      4                  DFI1  ,DGI1  ,DFF1  ,DGF1  ,
-     5                  DFI2  ,DGI2  ,DFF2  ,DGF2  ,LXCN               )
+     5                  DFI2  ,DGI2  ,DFF2  ,DGF2  ,LXCN  ,IERR        )
       IMPLICIT DOUBLE PRECISION (A,D,F,G)
       DIMENSION         DMINT(LXLN,  4),DSINT(LXLN,  4),
      1                  DA  (5, LXLNM2),DB  (LXLNM2, 8),DAL  (2,LXLNM2),
@@ -108,6 +114,8 @@ C
      1                  ALF1(4),ALF2(4),ALF3(4),ALF4(4)
       LOGICAL           CONV
       COMMON /PRINT/    KTINPL,KTMISI,KTFCGC,MTINPL,MTMISI,MTFCGC
+C
+      IERR = 0
 C
       DRLA2 = 0.0
 
@@ -584,8 +592,12 @@ C
   375 CONTINUE
 C
       RETURN
+
  9980 WRITE(6,9981)
- 9981 FORMAT(18H0NO CONV IN CLMINT///)
+ 9981 FORMAT(18H0NO CONV IN CLMINT)
+      IERR = 1
+      RETURN
+      
  9991 FORMAT(40H0ERROR FOR THE RECURRENCE OF I(L,LA,L+1) ,
      1       20HIN F01LBF;   IFAIL =,I2)
  9992 FORMAT(40H0ERROR FOR THE RECURRENCE OF I(L,LA,L+1) ,

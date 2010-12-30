@@ -450,6 +450,10 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 	    CMULTIP(r0, r1, z, k1, k0, i1, q0, q1, 
 		    r[i], 1, &ierr);
 	  }
+          if (ierr != 0) {
+            printf("error in CMULTIP: %d\n", ierr);
+            return -1;
+          }
 	  for (k = q0; k <= q1; k++) {
 	    ik = k - q0;
 	    ik2 = ik*(i+2);

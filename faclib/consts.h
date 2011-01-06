@@ -85,14 +85,12 @@
 #define HARTREE_EV 27.2113962 
 
 /*
-** VARIABLE:    RATE_AU, RATE_AU10, RATE_AU12
+** VARIABLE:    RATE_AU
 ** TYPE:        macro constants.
-** PURPOSE:     atomic units of rate in 1/s, 10^10 1/s, 10^12 1/s
+** PURPOSE:     atomic units of rate in 1/s
 ** NOTE:        
 */
 #define RATE_AU    4.13413733E16
-#define RATE_AU10  4.13413733E06
-#define RATE_AU12  4.13413733E04
 
 /*
 ** VARIABLE:    AREA_AU20

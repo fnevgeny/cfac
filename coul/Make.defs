@@ -12,7 +12,6 @@ FSRCS = clogam.f \
 	y5n.f \
 	cphamp.f \
 	besljn.f \
-	beslik.f \
 	coulrad.f \
 	dcoul.f \
 	njsym.f \

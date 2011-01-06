@@ -1,3 +1,5 @@
+#include <gsl/gsl_sf_bessel.h>
+
 #include "radial.h"
 #include "cf77.h"
 
@@ -2428,7 +2430,7 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
   int index[4];
   ORBITAL *orb1, *orb2;
   double x, a, r, rp, ef, **p1;
-  int jy, n, i, j, npts;
+  int n, i, j, npts;
   double rcl;
 
 #ifdef PERFORM_STATISTICS 
@@ -2476,7 +2478,6 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
   if (orb1->n > 0) npts = Min(npts, orb1->ilast);
   if (orb2->n > 0) npts = Min(npts, orb2->ilast);
   r = 0.0;
-  jy = 1;
 
   for (i = 0; i < n_awgrid; i++) {
     r = 0.0;
@@ -2489,7 +2490,7 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
 	for (j = 0; j <= npts; j++) {
 	  x = a*potential->rad[j];
 	  n = m;
-	  _yk[j] = BESLJN(jy, n, x);
+	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	Integrate(_yk, orb1, orb2, 4, &r, 0);
 	r *= t;
@@ -2504,9 +2505,9 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
 	for (j = 0; j <= npts; j++) {
 	  x = a*potential->rad[j];
 	  n = am+1;
-	  _yk[j] = BESLJN(jy, n, x);
+	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	  n = am-1;
-	  _zk[j] = BESLJN(jy, n, x);
+	  _zk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	r = 0.0;
 	rp = 0.0;
@@ -2528,9 +2529,9 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
 	for (j = 0; j < npts; j++) {
 	  x = a*potential->rad[j];
 	  n = am+1;
-	  _yk[j] = BESLJN(jy, n, x);
+	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	  n = am;
-	  _zk[j] = BESLJN(jy, n, x);
+	  _zk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	if (t) {
 	  Integrate(_yk, orb1, orb2, 4, &ip, 0);
@@ -2605,7 +2606,7 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
   int index[4];
   ORBITAL *orb1, *orb2;
   double x, a, r, rp, **p1, ef;
-  int jy, n, i, j, npts;
+  int n, i, j, npts;
   double rcl;
 
 #ifdef PERFORM_STATISTICS 
@@ -2665,7 +2666,6 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
   if (orb1->n > 0) npts = Min(npts, orb1->ilast);
   if (orb2->n > 0) npts = Min(npts, orb2->ilast);
   r = 0.0;
-  jy = 1;
 
   for (i = 0; i < n_awgrid; i++) {
     r = 0.0;
@@ -2678,7 +2678,7 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
 	for (j = 0; j <= npts; j++) {
 	  x = a*potential->rad[j];
 	  n = m;
-	  _yk[j] = BESLJN(jy, n, x);
+	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	Integrate(_yk, orb1, orb2, 4, &r, 0);
 	r *= t;
@@ -2693,9 +2693,9 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
 	for (j = 0; j <= npts; j++) {
 	  x = a*potential->rad[j];
 	  n = am+1;
-	  _yk[j] = BESLJN(jy, n, x);
+	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	  n = am-1;
-	  _zk[j] = BESLJN(jy, n, x);
+	  _zk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	r = 0.0;
 	rp = 0.0;
@@ -2717,9 +2717,9 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
 	for (j = 0; j < npts; j++) {
 	  x = a*potential->rad[j];
 	  n = am+1;
-	  _yk[j] = BESLJN(jy, n, x);
+	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	  n = am;
-	  _zk[j] = BESLJN(jy, n, x);
+	  _zk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	if (t) {
 	  Integrate(_yk, orb1, orb2, 4, &ip, 0);
@@ -2754,7 +2754,7 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
 
 double *GeneralizedMoments(int k1, int k2, int m) {
   ORBITAL *orb1, *orb2;
-  int n1, i, jy, nk;
+  int n1, i, nk;
   double x, r, r0;
   double *p1, *p2, *q1, *q2;
   int index[3], t;
@@ -2792,7 +2792,6 @@ double *GeneralizedMoments(int k1, int k2, int m) {
     return *p;
   }
   
-  jy = 1;
   p1 = Large(orb1);
   p2 = Large(orb2);
   q1 = Small(orb1);
@@ -2839,7 +2838,7 @@ double *GeneralizedMoments(int k1, int k2, int m) {
       k = exp(kg[t]);
       for (i = 0; i <= n1; i++) {
 	x = k * potential->rad[i];
-	_dphase[i] = BESLJN(jy, m, x);
+	_dphase[i] = gsl_sf_bessel_jl(m, x);
 	_dphase[i] *= _phase[i];
       }
       r = Simpson(_dphase, 0, n1);
@@ -2853,7 +2852,7 @@ double *GeneralizedMoments(int k1, int k2, int m) {
       k = exp(kg[t]);      
       for (i = 0; i <= n1; i++) {
 	x = k * potential->rad[i];
-	_yk[i] = BESLJN(jy, m, x);
+	_yk[i] = gsl_sf_bessel_jl(m, x);
       }
       Integrate(_yk, orb1, orb2, 1, &r, 0);
       (*p)[t] = r/k;

@@ -25,11 +25,6 @@
 		  INTV, DOUBLEV, INTV, INTV,\
 		  A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)
 
-     /* utility routines */
-     PROTOCCALLSFFUN3(DOUBLE, BESLJN, besljn, INT, INT, DOUBLE)
-#define BESLJN(A1,A2,A3)\
-     CCALLSFFUN3(BESLJN, besljn, INT, INT, DOUBLE, A1,A2,A3)
-
      /* dirac coulomb function */
      PROTOCCALLSFSUB9(DCOUL, dcoul, DOUBLE, DOUBLE, INT, DOUBLE, DOUBLEV,\
 		      DOUBLEV, DOUBLEV, DOUBLEV, INTV)

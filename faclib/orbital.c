@@ -2,6 +2,7 @@
 #include "cf77.h"
 
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
 
@@ -71,9 +72,9 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
   for (i = 1; i <= nr; i++) nrfac += log(i);
   
   argr = twogp1 + nr;
-  rgamm1 = DLOGAM(argr);
+  rgamm1 = gsl_sf_lngamma(argr);
   argr = twogp1;
-  rgamm2 = DLOGAM(argr);
+  rgamm2 = gsl_sf_lngamma(argr);
 
   /*
   fac = - sqrt(rgamm1) / (rgamm2*sqrt((double)nrfac)) *

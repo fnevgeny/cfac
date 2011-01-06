@@ -11,8 +11,6 @@ FSRCS = clogam.f \
 	coulcc.f \
 	y5n.f \
 	cphamp.f \
-	dlogam.f \
-	argam.f \
 	besljn.f \
 	beslik.f \
 	coulrad.f \

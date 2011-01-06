@@ -5,6 +5,8 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
+#include <gsl/gsl_sf_gamma.h>
+
 #include "coulomb.h"
 #include "cf77.h"
 
@@ -234,6 +236,7 @@ double HydrogenicSelfEnergy(double z, int n, int k) {
 
 double CoulombPhaseShift(double z, double e, int kappa) {
   double phase, r, y, ke, a, b1, b2;
+  gsl_sf_result dummy, arg;
 
   a = FINE_STRUCTURE_CONST2 * e;
   ke = sqrt(2.0*e*(1.0 + 0.5*a));
@@ -251,7 +254,9 @@ double CoulombPhaseShift(double z, double e, int kappa) {
     phase = -0.5*(atan(b1) + atan(b2) + PI);
   }
 
-  phase -= ARGAM(r, y);
+  gsl_sf_lngamma_complex_e(r, y, &dummy, &arg);
+  phase = arg.val + PI;
+  
   phase += (1.0 - r)*0.5*PI;
 
   return phase;

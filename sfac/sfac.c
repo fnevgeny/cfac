@@ -1562,7 +1562,7 @@ static int PSetAngleGrid(int argc, char *argv[], int argt[],
       ng = atoi(argv[1]);
       if (m == 0) {
 	emin = 0.0;
-	emax = PI;
+	emax = M_PI;
       } else {
 	emin = 0.0;
 	emax = TWO_PI;
@@ -1584,8 +1584,8 @@ static int PSetAngleGrid(int argc, char *argv[], int argt[],
     ng = atoi(argv[1]);
     emin = atof(argv[2]);
     emax = atof(argv[3]);
-    emin *= PI/180.0;
-    emax *= PI/180.0;
+    emin *= M_PI/180.0;
+    emax *= M_PI/180.0;
     err = SetAngleGrid(m, ng, emin, emax);
   } else {
     return -1;
@@ -1810,36 +1810,6 @@ static int PSetBornMass(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetCEQkMode(int argc, char *argv[], int argt[],
-			ARRAY *variables) {
-  int m;
-  double tol;
-  
-  m = QK_DEFAULT;
-  tol = -1;
-  
-  if (argc > 2) return -1;
-  if (argc > 0) {
-    if (argt[0] == STRING) {
-      if (strcasecmp(argv[0], "exact") == 0) m = QK_EXACT;
-      else if (strcasecmp(argv[0], "interpolate") == 0) m = QK_INTERPOLATE;
-      else if (strcasecmp(argv[0], "fit") == 0) m = QK_FIT;
-      else return -1;
-    } else if (argt[0] == NUMBER) {
-      m = atoi(argv[0]);
-      if (m >= QK_CB) return -1;
-    }
-    if (argc > 1) {
-      if (argt[1] != NUMBER) return -1;
-      tol = atof(argv[1]);
-    }
-  }
-
-  SetCEQkMode(m, tol);
-  
-  return 0;
-}
-    
 static int PSetCIEGrid(int argc, char *argv[], int argt[], 
 		       ARRAY *variables) {  int n, ng, i, err;
   double xg[MAXNE];
@@ -3391,20 +3361,6 @@ static int PJoinTable(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PModifyTable(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
-  
-  if (argc == 3) {  
-    ModifyTable(argv[0], argv[1], argv[2], NULL);
-  } else if (argc == 4) {
-    ModifyTable(argv[0], argv[1], argv[2], argv[3]);
-  } else {
-    return -1;
-  }
-  
-  return 0;
-}
-
 static int PLimitArray(int argc, char *argv[], int argt[], 
 		       ARRAY *variables) {
   int m;
@@ -3619,7 +3575,6 @@ static METHOD methods[] = {
   {"SetCEPWFile", PSetCEPWFile, METH_VARARGS}, 
   {"AppendTable", PAppendTable, METH_VARARGS}, 
   {"JoinTable", PJoinTable, METH_VARARGS}, 
-  {"ModifyTable", PModifyTable, METH_VARARGS},
   {"LimitArray", PLimitArray, METH_VARARGS},
   {"SetSlaterCut", PSetSlaterCut, METH_VARARGS}, 
   {"Print", PPrint, METH_VARARGS},
@@ -3695,7 +3650,6 @@ static METHOD methods[] = {
   {"SetBornMass", PSetBornMass, METH_VARARGS},
   {"SetCEPWOptions", PSetCEPWOptions, METH_VARARGS},
   {"SetCEPWGrid", PSetCEPWGrid, METH_VARARGS},
-  {"SetCEQkMode", PSetCEQkMode, METH_VARARGS},
   {"SetCIEGrid", PSetCIEGrid, METH_VARARGS},
   {"SetCIEGridLimits", PSetCIEGridLimits, METH_VARARGS},
   {"SetIEGrid", PSetIEGrid, METH_VARARGS},

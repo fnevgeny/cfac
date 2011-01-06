@@ -16,7 +16,7 @@ C     ierr error code returned by coulcc
       double precision z, e, r, p, q, p1, q1, c, ki, zp, gam
       double precision lambda, y, qi, x0, b1, b2, np
       complex*16 x, eta, zlmin, omega, a, pp, qq, mu, nu, IONE
-      complex*16 fc(1), gc(1), fcp(1), gcp(1), sig(1), clgam, lam0
+      complex*16 fc(1), gc(1), fcp(1), gcp(1), sig(1), clogam, lam0
       double precision SL, SL2, TSL2, ALPHA
       PARAMETER (SL=137.036D0,SL2=SL*SL,TSL2=SL2+SL2,ALPHA=1.0D0/SL)
       real*8 HALFPI
@@ -61,9 +61,9 @@ C     ierr error code returned by coulcc
             np = y - gam
             b1 = sqrt(z*c*(z/ki-k))*ki/z
             lam0 = np+1.0
-            b2 = dble(clgam(lam0))
+            b2 = dble(clogam(lam0))
             lam0 = np + 1.0 + 2.0*gam
-            b2 = b2 + dble(clgam(lam0))
+            b2 = b2 + dble(clogam(lam0))
             b2 = -0.5*b2
             omega = omega + b2
             a = exp(omega)*b1
@@ -124,7 +124,7 @@ C     RADIAL FUNCTIONS ARE NORMALIZED SO THAT, FOR LARGE R, THE
 C  UPPER COMPONENT OSCILLATES WITH UNIT AMPLITUDE.
 C
 C     OTHER SUBPROGRAMS REQUIRED: SUBROUTINES FCOUL AND SUM2F0,
-C                                 AND FUNCTION CLGAM.
+C                                 AND FUNCTION CLOGAM.
 C
       IMPLICIT DOUBLE PRECISION (A-B,D-H,O-Z), COMPLEX*16 (C)
       PARAMETER (PI=3.1415926535897933D0,PIH=0.5D0*PI,TPI=PI+PI,
@@ -271,7 +271,7 @@ C                THE MAXIMUM ACCURACY ATTAINABLE WITH DOUBLE
 C                PRECISION ARITHMETIC IS ABOUT 1.0D-15.
 C
 C     OTHER SUBPROGRAMS REQUIRED: SUBROUTINE SUM2F0 AND
-C                                 FUNCTIONS DELTAC AND CLGAM.
+C                                 FUNCTIONS DELTAC AND CLOGAM.
 C
       IMPLICIT DOUBLE PRECISION (A-B,D-H,O-Z), COMPLEX*16 (C)
       PARAMETER (PI=3.1415926535897932D0,PIH=0.5D0*PI,TPI=PI+PI,
@@ -612,65 +612,11 @@ C
       PARAMETER (PI=3.1415926535897932D0,TPI=PI+PI)
       CI=DCMPLX(0.0D0,1.0D0)
 C  ****  COULOMB PHASE-SHIFT.
-      DELTAC=-CI*CLGAM(RLAMB+1.0D0+CI*ETA)
+      DELTAC=-CI*CLOGAM(RLAMB+1.0D0+CI*ETA)
       IF(DELTAC.GE.0.0D0) THEN
         DELTAC=DMOD(DELTAC,TPI)
       ELSE
         DELTAC=-DMOD(-DELTAC,TPI)
       ENDIF
-      RETURN
-      END
-C  **************************************************************
-C                       FUNCTION CLGAM
-C  **************************************************************
-      FUNCTION CLGAM(CZ)
-C
-C     THIS FUNCTION GIVES LOG(GAMMA(CZ)) FOR COMPLEX ARGUMENTS.
-C
-C   REF.: M. ABRAMOWITZ AND I.A. STEGUN, 'HANDBOOK OF MATHEMATI-
-C         CAL FUNCTIONS'. DOVER, NEW YORK (1974). PP 255-257.
-C
-      IMPLICIT DOUBLE PRECISION (A-B,D-H,O-Z), COMPLEX*16 (C)
-      PARAMETER (PI=3.1415926535897932D0)
-      CZA=CZ
-      ICONJ=0
-      AR=CZA
-      CLGAM=36.84136149D0
-      IF(CDABS(CZA).LT.1.0D-16) RETURN
-C
-      AI=CZA*DCMPLX(0.0D0,-1.0D0)
-      IF(AI.GT.0.0D0) THEN
-        ICONJ=0
-      ELSE
-        ICONJ=1
-        CZA=DCONJG(CZA)
-      ENDIF
-C
-      CZFAC=1.0D0
-      CZFL=0.0D0
-    1 CZFAC=CZFAC/CZA
-      IF(CDABS(CZFAC).GT.1.0D8) THEN
-        CZFL=CZFL+CDLOG(CZFAC)
-        CZFAC=1.0D0
-      ENDIF
-      CZA=CZA+1.0D0
-      AR=CZA
-      IF(CDABS(CZA).LT.1.0D-16) RETURN
-      IF(CDABS(CZA).GT.15.0D0.AND.AR.GT.0.0D0) GO TO 2
-      GO TO 1
-C  ****  STIRLING'S EXPANSION OF CDLOG(GAMMA(CZA)).
-    2 CZI2=1.0D0/(CZA*CZA)
-      CZS=(43867.0D0/244188.0D0)*CZI2
-      CZS=(CZS-3617.0D0/122400.0D0)*CZI2
-      CZS=(CZS+1.0D0/156.0D0)*CZI2
-      CZS=(CZS-691.0D0/360360.0D0)*CZI2
-      CZS=(CZS+1.0D0/1188.0D0)*CZI2
-      CZS=(CZS-1.0D0/1680.0D0)*CZI2
-      CZS=(CZS+1.0D0/1260.0D0)*CZI2
-      CZS=(CZS-1.0D0/360.0D0)*CZI2
-      CZS=(CZS+1.0D0/12.0D0)/CZA
-      CLGAM=(CZA-0.5D0)*CDLOG(CZA)-CZA+9.1893853320467274D-1+CZS
-     1     +CZFL+CDLOG(CZFAC)
-      IF(ICONJ.EQ.1) CLGAM=DCONJG(CLGAM)
       RETURN
       END

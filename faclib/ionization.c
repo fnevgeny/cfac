@@ -701,7 +701,7 @@ int IonizeStrengthUTA(double *qku, double *qkc, double *te,
     }
     ip = (nq - 1)*nq/2;
     for (j = 0; j < nqk; j++) {
-      qkc[j] = (cbo_params[ip+klb][j]/(*te)) * (PI/2.0);
+      qkc[j] = (cbo_params[ip+klb][j]/(*te)) * (M_PI/2.0);
       qkc[j] *= qb*(lev1->ilev+1.0);
     }
     for (i = 0; i < n_usr; i++) {
@@ -725,7 +725,7 @@ int IonizeStrengthUTA(double *qku, double *qkc, double *te,
     if (qk_mode == QK_BED) {
       kb = OrbitalIndex(idatum->s[1].n, idatum->s[1].kappa, 0.0);
       es = BEScale(kb, *te);
-      b0 = ((4.0*PI)/(*te))*qb*(lev1->ilev+1.0) - b0;      
+      b0 = ((4.0*M_PI)/(*te))*qb*(lev1->ilev+1.0) - b0;      
       for (j = 0; j < n_egrid; j++) {
 	qku[j] = qku[j]*logx[j] + 
 	  b0*(1.0-1.0/x[j]-logx[j]/(1.0+x[j]));
@@ -837,7 +837,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       }
       ip = (orb->n - 1)*orb->n/2;
       for (j = 0; j < nqk; j++) {
-	qke[j] = (cbo_params[ip+kl][j]/(*te)) * (PI/2.0);
+	qke[j] = (cbo_params[ip+kl][j]/(*te)) * (M_PI/2.0);
 	qkc[j] += c*qke[j];
       }
     }
@@ -876,7 +876,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
 	}
       }
       es = BEScale(kb0, *te);
-      b0 = ((4.0*PI)/(*te))*cmax - b0;
+      b0 = ((4.0*M_PI)/(*te))*cmax - b0;
       for (j = 0; j < n_egrid; j++) {
 	c = b0*(1.0-1.0/x[j]-logx[j]/(1.0+x[j]));
 	qku[j] = qku[j]*logx[j] + c;

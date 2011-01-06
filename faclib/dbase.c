@@ -2739,7 +2739,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
 	    a = h.usr_egrid[t];
 	    if (h.usr_egrid_type == 1) a += be;
 	    a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
-	    a = PI * AREA_AU20/a;
+	    a = M_PI * AREA_AU20/a;
 	    if (!h.msub) a /= (mem_en_table[r.lower].j+1.0);
 	    a *= r.strength[p2];
 	    fprintf(f2, "%11.4E %11.4E %11.4E\n",
@@ -2833,7 +2833,7 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
 	  a = h.egrid[t];
 	  a += be;
 	  a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
-	  a = PI * AREA_AU20/a;
+	  a = M_PI * AREA_AU20/a;
 	  a *= r.strength[t];
 	    fprintf(f2, "%11.4E %11.4E %11.4E\n",
 		    h.egrid[t]*HARTREE_EV,
@@ -2918,7 +2918,7 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
 		    r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
 		    e*HARTREE_EV);
 	    fprintf(f2, "%11.4E %11.4E %11.4E %11.4E %11.4E\n", 
-		    h.thetagrid[ith]*180.0/PI, h.phigrid[iph]*180.0/PI,
+		    h.thetagrid[ith]*180.0/M_PI, h.phigrid[iph]*180.0/M_PI,
 		    r.bethe[k], r.born[k], r.born[na]*HARTREE_EV);
 	  } else {
 	    fprintf(f2, "%6d %6d\n", 
@@ -2932,7 +2932,7 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
 	      a = h.egrid[t];
 	      a += be;
 	      a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
-	      a = PI * AREA_AU20/a;
+	      a = M_PI * AREA_AU20/a;
 	      a *= r.strength[t+h.n_egrid*k];
 	      fprintf(f2, "%11.4E %11.4E %11.4E\n",
 		      h.egrid[t]*HARTREE_EV,
@@ -3039,7 +3039,7 @@ int PrintRRTable(FILE *f1, FILE *f2, int v, int swp) {
 	    eph = ee + e;
 	  }
 	  phi = FINE_STRUCTURE_CONST2*ee;
-	  phi = 2.0*PI*FINE_STRUCTURE_CONST*r.strength[t]*AREA_AU20;
+	  phi = 2.0*M_PI*FINE_STRUCTURE_CONST*r.strength[t]*AREA_AU20;
 	  rr = phi * pow(FINE_STRUCTURE_CONST*eph, 2) / (2.0*ee);
 	  rr /= 1.0+0.5*FINE_STRUCTURE_CONST2*ee;
 	  phi /= (mem_en_table[r.b].j + 1.0);
@@ -3098,7 +3098,7 @@ int PrintAITable(FILE *f1, FILE *f2, int v, int swp) {
 	if (e < 0) er = e - h.emin;
 	else er = e;
 	sdr = 0.5*(mem_en_table[r.b].j + 1.0);
-	sdr *= PI*PI*r.rate/(er*(mem_en_table[r.f].j + 1.0));
+	sdr *= M_PI*M_PI*r.rate/(er*(mem_en_table[r.f].j + 1.0));
 	sdr *= AREA_AU20*HARTREE_EV;
 	fprintf(f2, "%6d %2d %6d %2d %11.4E %11.4E %11.4E\n",
 		r.b, mem_en_table[r.b].j,

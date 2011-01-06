@@ -86,7 +86,7 @@ void SetFields(double b, double e, double a, int m) {
   BINP = b;
   AINP = a;
   a = fabs(a);
-  a *= PI/180.0;
+  a *= M_PI/180.0;
   if (AINP >= 0) {
     B1[0] = B1[2] = 0.0;
     B1[1] = b;

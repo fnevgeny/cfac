@@ -1383,7 +1383,7 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
   if (phase0 < 0) phase0 += TWO_PI;
     
   if (IsOdd(nodes)) {
-    phase0 = (phase0 < PI)?(phase0 + PI):(phase0-PI);
+    phase0 = (phase0 < M_PI)?(phase0 + M_PI):(phase0-M_PI);
     dfact = -dfact;
   }
   Phase(p, pot, i2, phase0);
@@ -1906,7 +1906,7 @@ int SetOrbitalRGrid(POTENTIAL *pot) {
   rmin = pot->rmin/z0;
 
   if (gasymp > 0 && gratio > 0) {
-    a = gasymp*sqrt(2.0*z)/PI;
+    a = gasymp*sqrt(2.0*z)/M_PI;
     c = 1.0/log(gratio);
     d2 = pot->maxrp-10.0 + a*sqrt(rmin) + c*log(rmin);
     rmax = d2/a;
@@ -1926,7 +1926,7 @@ int SetOrbitalRGrid(POTENTIAL *pot) {
     a /= sqrt(rmax) - sqrt(rmin);
   } else if (gasymp > 0) {
     rmax = -gratio;
-    a = gasymp*sqrt(2.0*z)/PI;
+    a = gasymp*sqrt(2.0*z)/M_PI;
     c = pot->maxrp-15.0 + a*(sqrt(rmin)-sqrt(rmax));
     c /= log(rmax) - log(rmin);
   }     
@@ -2254,8 +2254,8 @@ int SetPotentialUehling(POTENTIAL *pot, int vp) {
   if (vp <= 0) return 0;
 
   r0 = 3.86159E-3/RBOHR;
-  a = -2.0*pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST/(3.0*PI);
-  b = -pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST2/(PI*PI);
+  a = -2.0*pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST/(3.0*M_PI);
+  b = -pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST2/(M_PI*M_PI);
   
   for (i = 0; i < pot->maxrp-1; i++) {
     r = pot->rad[i]*2.0/r0;
@@ -2270,8 +2270,8 @@ int SetPotentialUehling(POTENTIAL *pot, int vp) {
 
   if (rn) {
     a = -2.0*r0*FINE_STRUCTURE_CONST/3.0;
-    b = -r0*FINE_STRUCTURE_CONST2/PI;
-    v = 4.0*PI*rn*rn*rn/3.0;
+    b = -r0*FINE_STRUCTURE_CONST2/M_PI;
+    v = 4.0*M_PI*rn*rn*rn/3.0;
     d = pot->Z[pot->maxrp-1]/v;
     for (i = 0; i < pot->maxrp-1; i++) {
       if (pot->rad[i] > rn) break;

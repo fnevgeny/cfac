@@ -474,7 +474,7 @@ void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx,
   }
 }
 
-double PICrossH(double z, int n0, int kl0, double e, int os) {
+double M_PICrossH(double z, int n0, int kl0, double e, int os) {
   double hp[NPARAMS], eth;
   double x, logx, r;
 
@@ -487,7 +487,7 @@ double PICrossH(double z, int n0, int kl0, double e, int os) {
   r *= x;
   if (os) return r;
   else {
-    r *= 2.0*PI*FINE_STRUCTURE_CONST*AREA_AU20;
+    r *= 2.0*M_PI*FINE_STRUCTURE_CONST*AREA_AU20;
     return r;
   }
 }
@@ -502,7 +502,7 @@ double RRCrossH(double z, int n0, int kl0, double e) {
   logx = log(x);
   RRRadialQkFromFit(NPARAMS, hp, 1, &x, &logx, &r, NULL, 0, &kl0);
   r *= x;
-  r *= 2.0*PI*FINE_STRUCTURE_CONST*AREA_AU20;
+  r *= 2.0*M_PI*FINE_STRUCTURE_CONST*AREA_AU20;
   r *= 2.0*(2.0*kl0 + 1.0);
   x = FINE_STRUCTURE_CONST*(e+eth);
   x = x*x;
@@ -1350,7 +1350,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
 	  }
 	}
 	rate[k] *= 4.0;
-	rate[k+1] *= 2.0*PI*PI/(*e);
+	rate[k+1] *= 2.0*M_PI*M_PI/(*e);
 	k += 2;
       }
     }
@@ -2071,7 +2071,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   return 0;
 }
 
-int AsymmetryPI(int k0, double e, int mx, int m, double *b) {
+int AsymmetryM_PI(int k0, double e, int mx, int m, double *b) {
   ORBITAL *orb0;
   double **ak;
   int *nak, **kak, gauge;
@@ -2169,7 +2169,7 @@ int AsymmetryPI(int k0, double e, int mx, int m, double *b) {
   }
   c = FINE_STRUCTURE_CONST2*e;
   c = (1.0+c)/(1.0+0.5*c);
-  c *= 2.0*PI/(j0+1.0);
+  c *= 2.0*M_PI/(j0+1.0);
   b[0] *= c;
   for (i = 0; i < mx; i++) {
     free(ak[i]);
@@ -2262,7 +2262,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
 	      n, sp, js, n, kl, jj, e0, n_usr, mx);
       for (i = 0; i < n_usr; i++) {
 	e = usr_egrid[i];
-	AsymmetryPI(k0, e, mx, m, b[i]);
+	AsymmetryM_PI(k0, e, mx, m, b[i]);
       }
     
       for (i = 0; i < n_usr; i++) {
@@ -2281,7 +2281,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
 	  phi1 -= bphi; /* parallel, Phi=0 */
 	  phi2 += bphi; /* perpendicular Phi=90 */
 	}
-	phi90 *= phi/(4.0*PI);	
+	phi90 *= phi/(4.0*M_PI);	
 	fprintf(f, "%12.5E %12.5E %10.3E %10.3E %10.3E %10.3E %10.3E\n",
 		e, e+e0, phi, phi90, a*phi, a*phi90, phi2/phi1);
       }      

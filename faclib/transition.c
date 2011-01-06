@@ -1023,7 +1023,7 @@ int PolarizeCoeff(char *ifn, char *ofn, int i0, int i1) {
 	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
 	e = FINE_STRUCTURE_CONST*e;
 	e = e*e*e;
-	e *= RATE_AU/(4.0*PI);
+	e *= RATE_AU/(4.0*M_PI);
 	for (t = -1; t <= 1; t += 2) {
 	  for (tp = -1; tp <= 1; tp += 2) {
 	    for (k = 0; k <= m2; k++) {

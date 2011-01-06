@@ -228,7 +228,7 @@ double HydrogenicSelfEnergy(double z, int n, int k) {
   
   c = FINE_STRUCTURE_CONST*z;
   c = c*c*c*c;
-  c /= PI*n*n*n*FINE_STRUCTURE_CONST;
+  c /= M_PI*n*n*n*FINE_STRUCTURE_CONST;
   r *= c;
   
   return r;
@@ -251,13 +251,13 @@ double CoulombPhaseShift(double z, double e, int kappa) {
   if (kappa < 0) {
     phase = 0.5*(atan(b1) - atan(b2));
   } else {
-    phase = -0.5*(atan(b1) + atan(b2) + PI);
+    phase = -0.5*(atan(b1) + atan(b2) + M_PI);
   }
 
   gsl_sf_lngamma_complex_e(r, y, &dummy, &arg);
-  phase = arg.val + PI;
+  phase = arg.val + M_PI;
   
-  phase += (1.0 - r)*0.5*PI;
+  phase += (1.0 - r)*0.5*M_PI;
 
   return phase;
 }

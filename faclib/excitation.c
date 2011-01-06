@@ -3183,7 +3183,7 @@ int InitExcitation(void) {
   tegrid[0] = -1.0;  
   SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB, EXCTOL);
 
-  SetAngleGrid(0, 10, 0.0, PI);
+  SetAngleGrid(0, 10, 0.0, M_PI);
   SetAngleGrid(1, 20, 0.0, TWO_PI);
   
   return 0;

@@ -1,10 +1,6 @@
 #ifndef _CONSTS_H_
 #define _CONSTS_H_ 1
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
 #include <math.h>
 
 /*
@@ -73,20 +69,12 @@
 #define EPS1  1E-01
 
 /*
-** VARIABLE:    PI, TWO_PI
+** VARIABLE:    TWO_PI
 ** TYPE:        macro constants, double
-** PURPOSE:     PI, and 2*PI
+** PURPOSE:     2*PI
 ** NOTE:        
 */
-#define PI         3.14159265359
-#define TWO_PI     6.28318530718
-/*
-** VARIABLE:    SQRT2
-** TYPE:        macro constant, double
-** PURPOSE:     sqrt(2)
-** NOTE:        
-*/
-#define SQRT2      1.41421356237
+#define TWO_PI     (2*M_PI)
 
 /*
 ** VARIABLE:    HARTREE_EV

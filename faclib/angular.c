@@ -6,6 +6,7 @@
 
   Author: M. F. Gu, mfgu@stanford.edu
 *************************************************************/
+#include <gsl/gsl_sf_coupling.h>
 
 #include "angular.h"
 
@@ -89,199 +90,45 @@ int Triangle(int j1, int j2, int j3) {
 
 /* 
 ** calculate the Wigner 3j symbols.
-** maximum summation terms of 512 should allow 
-** the angular momentum up to about 500.
-*/
-#define MAXTERM 512
-static double _sumk[MAXTERM];
-/* 
-** FUNCTION:    W3j.
-** PURPOSE:     calculate the Wigner 3j symbol.
-** INPUT:       {int j1},
-**              angular momentum.
-**              {int j2},
-**              angular momentum.
-**              {int j3},
-**              angular momentum.
-**              {int m1},
-**              projection of j1.
-**              {int m2},
-**              projection of j2.
-**              {int m3},
-**              projection of j3.
-** RETURN:      {double},
-**              3j coefficients.
-** SIDE EFFECT: 
-** NOTE:        the _sumk array is used to store all 
-**              summation terms to avoid overflow. 
-**              the predefined MAXTERM=512 allows the 
-**              maximum angular momentum of about 500.
-**              if this limit is exceeded, the routine
-**              issues a warning.
 */
 double W3j(int j1, int j2, int j3, int m1, int m2, int m3) {
-  int i, k, kmin, kmax, ik[14];
-  double delta, qsum, a, b;
-
+  double r;
+  
 #ifdef PERFORM_STATISTICS
-  clock_t start, stop; 
+  clock_t start, stop;  
   start = clock();
 #endif
 
-  if (m1 + m2 + m3) return 0.0;
-  if (!Triangle(j1, j2, j3)) return 0.0;
-  if (abs(m1) > j1) return 0.0;
-  if (abs(m2) > j2) return 0.0;
-  if (abs(m3) > j3) return 0.0;
-
-  ik[0] = j1 + j2 - j3;
-  ik[1] = j1 - j2 + j3;
-  ik[2] = -j1 + j2 + j3;
-  ik[3] = j1 + j2 + j3 + 2;
-  ik[4] = j1 - m1;
-  ik[5] = j1 + m1;
-  ik[6] = j2 - m2;
-  ik[7] = j2 + m2;
-  ik[8] = j3 - m3;
-  ik[9] = j3 + m3;
-  ik[10] = j2 - j3 - m1;
-  ik[11] = j1 - j3 + m2;
-  ik[12] = j3 - j2 + m1;
-  ik[13] = j1 - j2 - m3;
-  
-  for (i = 0; i < 14; i++) {
-    ik[i] = ik[i] / 2;
-  }
-
-  delta = - LnFactorial(ik[3]);
-  for (i = 0; i < 3; i++) delta += LnFactorial(ik[i]);
-  for (i = 4; i < 10; i++) delta += LnFactorial(ik[i]);
-
-  kmin = Max(0, ik[10]);
-  kmin = Max(kmin, ik[11]);
-  kmax = Min(ik[0], ik[4]);
-  kmax = Min(kmax, ik[7]);
-  
-  qsum = 0.0;
-  a = 1E30;
-  for (k = kmin, i = 0; k <= kmax && i < MAXTERM; k++, i++) {
-    _sumk[i] = LnFactorial(k) +
-      LnFactorial(ik[0]-k) +
-      LnFactorial(ik[4]-k) +
-      LnFactorial(ik[7]-k) +
-      LnFactorial(ik[12]+k) +
-      LnFactorial(k-ik[11]);
-    if (_sumk[i] < a) a = _sumk[i];
-  }
-  if (i == MAXTERM) {
-    printf("Maximum terms in the 3j symbol sum reached\n");
-    printf("Results may be inaccurate\n");
-  }
-  for (k = kmin, i = 0; k <= kmax; k++, i++) {
-    b = exp(-(_sumk[i]-a));    
-    if (IsOdd(k)) b = -b;    
-    qsum += b;
-  }
-
-  if (IsOdd(ik[13])) qsum = -qsum;
-  
-  b = exp(0.5*delta-a);
-  b *= qsum; 
+  r = gsl_sf_coupling_3j(j1, j2, j3, m1, m2, m3);
 
 #ifdef PERFORM_STATISTICS
   stop = clock();
-  timing.w3j += stop -start;
+  timing.w3j += stop - start;
 #endif
 
-  return b;
+  return r;
 }
 
 /* 
 ** FUNCTION:    W6j.
 ** PURPOSE:     calculate the 6j symbol.
-** INPUT:       {int j1},
-**              angular momentum.
-**              {int j2},
-**              angular momentum.
-**              {int j3},
-**              angular momentum.
-**              {int i1},
-**              angular momentum.
-**              {int i2},
-**              angular momentum.
-**              {int i3},
-**              angular momentum.
-** RETURN:      {double},
-**              6j symbol.
-** SIDE EFFECT: 
-** NOTE:        
 */
 double W6j(int j1, int j2, int j3, int i1, int i2, int i3) {
-  int n1, n2, n3, n4, n5, n6, n7, k, kmin, kmax, ic, ki;
-  double r, a;
-
+  double r;
+  
 #ifdef PERFORM_STATISTICS
-  clock_t start, stop;
+  clock_t start, stop;  
   start = clock();
 #endif
 
-  if (!(Triangle(j1, j2, j3) &&
-	Triangle(j1, i2, i3) &&
-	Triangle(i1, j2, i3) &&
-	Triangle(i1, i2, j3)))
-    return 0.0;
-
-  n1 = (j1 + j2 + j3) / 2;
-  n2 = (i2 + i1 + j3) / 2;
-  n3 = (j1 + i2 + i3) / 2;
-  n4 = (j2 + i1 + i3) / 2;
-  n5 = (j1 + j2 + i2 + i1) / 2;
-  n6 = (j1 + i1 + j3 + i3) / 2;
-  n7 = (j2 + i2 + j3 + i3) / 2;
-  
-  kmin = Max(n1, n2);
-  kmin = Max(kmin, n3);
-  kmin = Max(kmin, n4) + 1;
-  kmax = Min(n5, n6);
-  kmax = Min(kmax, n7) + 1;
-
-  r = 1.0;
-  ic = 0;
-  for (k = kmin + 1; k <= kmax; k++) {
-    ki = kmax -ic;
-    r = 1.0 - (r * ki * (n5-ki+2.0) * (n6-ki+2.0) * (n7-ki+2.0))/
-      ((ki-1.0-n1) * (ki-1.0-n2) * (ki-1.0-n3) * (ki - 1.0 - n4));
-    ic++;
-  }
-
-  a = (LnFactorial(kmin) -
-       LnFactorial(kmin-n1-1) -
-       LnFactorial(kmin-n2-1) -
-       LnFactorial(kmin-n3-1) -
-       LnFactorial(kmin-n4-1) -
-       LnFactorial(n5+1-kmin) -
-       LnFactorial(n6+1-kmin) -
-       LnFactorial(n7+1-kmin)) +
-    ((LnFactorial(n1-j1) + LnFactorial(n1-j2) +
-      LnFactorial(n1-j3) - LnFactorial(n1+1) +
-      LnFactorial(n2-i2) + LnFactorial(n2-i1) +
-      LnFactorial(n2-j3) - LnFactorial(n2+1) +
-      LnFactorial(n3-j1) + LnFactorial(n3-i2) +
-      LnFactorial(n3-i3) - LnFactorial(n3+1) +
-      LnFactorial(n4-j2) + LnFactorial(n4-i1) +
-      LnFactorial(n4-i3) - LnFactorial(n4+1))/2.0);
-
-  r = r * exp(a);
-  
-  if (IsEven(n5+kmin)) r = -r;
-  if (IsOdd(((j1+j2+i1+i2)/2))) r = -r;
+  r = gsl_sf_coupling_6j(j1, j2, j3, i1, i2, i3);
 
 #ifdef PERFORM_STATISTICS
   stop = clock();
   timing.w6j += stop - start;
 #endif
-  return r;
 
+  return r;
 }
 
 /* 
@@ -316,62 +163,18 @@ int W6jTriangle(int j1, int j2, int j3, int i1, int i2, int i3) {
 /* 
 ** FUNCTION:    W9j.
 ** PURPOSE:     calculate the 9j symbol.
-** INPUT:       {int j1},
-**              angular momentum.
-**              {int j2},
-**              angular momentum.
-**              {int j3},
-**              angular momentum.
-**              {int i1},
-**              angular momentum.
-**              {int i2},
-**              angular momentum.
-**              {int i3},
-**              angular momentum.
-**              {int k1},
-**              angular momentum.
-**              {int k2},
-**              angular momentum.
-**              {int k3},
-**              angular momentum.
-** RETURN:      {double},
-**              9j symbol.
-** SIDE EFFECT: 
-** NOTE:        
 */     
 double W9j(int j1, int j2, int j3,
 	   int i1, int i2, int i3,
 	   int k1, int k2, int k3) {
-  int j, jmin, jmax;
   double r;
-
+  
 #ifdef PERFORM_STATISTICS
   clock_t start, stop;  
   start = clock();
 #endif
 
-  if (!Triangle(j1, j2, j3) ||
-      !Triangle(i1, i2, i3) ||
-      !Triangle(k1, k2, k3) ||
-      !Triangle(j1, i1, k1) ||
-      !Triangle(j2, i2, k2) ||
-      !Triangle(j3, i3, k3))
-    return 0.0;
-
-  jmin = Max(abs(j1-k3), abs(j2-i3));
-  jmin = Max(jmin, abs(k2-i1));
-  jmax = Min(j1+k3, j2+i3);
-  jmax = Min(jmax, k2+i1);
-
-  r = 0.0;
-  for (j = jmin; j <= jmax; j += 2) {
-    r = r + ((j+1.0) * 
-	     W6j(j1, i1, k1, k2, k3, j) *
-	     W6j(j2, i2, k2, i1, j, i3) *
-	     W6j(j3, i3, k3, j, j1, j2));
-  }
-
-  if (IsOdd(jmin)) r = -r;
+  r = gsl_sf_coupling_9j(j1, j2, j3, i1, i2, i3, k1, k2, k3);
 
 #ifdef PERFORM_STATISTICS
   stop = clock();

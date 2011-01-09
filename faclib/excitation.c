@@ -1,7 +1,6 @@
 #include <gsl/gsl_sf_legendre.h>
 
 #include "excitation.h"
-#include "cf77.h"
 
 #define MAXMSUB  32
 #define NPARAMS  4

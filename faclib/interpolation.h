@@ -15,4 +15,8 @@ int NLSQFit(int np, double *p, double tol, int *ipvt,
 double Simpson(double *y, int ia, int ib);
 int NewtonCotes(double *r, double *x, int i0, int i1, int m, int id);
 
+#define UVIP3P uvip3p
+void uvip3p(int np, int nd, double *xd, double *yd,
+		 int ni, double *xi, double *yi);
+
 #endif

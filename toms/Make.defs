@@ -22,5 +22,4 @@ FSRCS = calcc.f \
 	subplx.f \
 	tn.f \
 	tripack.f \
-	uvip3c.f \
-	uvip3p.f
+	uvip3c.f

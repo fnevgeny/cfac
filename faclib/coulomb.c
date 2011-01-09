@@ -8,6 +8,7 @@
 #include <gsl/gsl_sf_gamma.h>
 
 #include "coulomb.h"
+#include "interpolation.h"
 #include "cf77.h"
 
 static int n_hydrogenic;

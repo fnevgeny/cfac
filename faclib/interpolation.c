@@ -1,3 +1,5 @@
+#include <gsl/gsl_spline.h>
+
 #include "global.h"
 #include "interpolation.h"
 #include "cf77.h"
@@ -322,4 +324,42 @@ int NewtonCotes(double *r, double *x, int i0, int i1, int m, int id) {
   }
 
   return 0;
+}
+
+/* Imitate F77 UVIP3P by Hiroshi Akima */
+void uvip3p(int np, int nd, double *xd, double *yd,
+		 int ni, double *xi, double *yi)
+{
+    int i;
+    const gsl_interp_type *type;
+    gsl_interp_accel *acc;
+    gsl_spline *spline;
+    
+    if (np != 3) {
+        printf("np != 3 not supported in UVIP3P (%d)\n", np);
+        abort();
+    }
+    
+    if (nd == 2) {
+        type = gsl_interp_linear;
+    } else
+    if (nd == 3 || nd == 4) {
+        type = gsl_interp_cspline;
+    } else {
+        type = gsl_interp_akima;
+    }
+    
+    acc = gsl_interp_accel_alloc();
+    spline = gsl_spline_alloc(type, nd);
+
+    gsl_spline_init(spline, xd, yd, nd);
+
+    for (i = 0; i < ni; i++) {
+        yi[i] = gsl_spline_eval(spline, xi[i], acc);
+    }
+    
+    gsl_spline_free(spline);
+    gsl_interp_accel_free(acc);
+
+    return;
 }

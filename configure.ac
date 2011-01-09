@@ -32,24 +32,12 @@ AC_ARG_ENABLE(fopt,
 	[  --enable-fopt=opt       optimization option for F77 Compiler],
 	[fopt="$enableval"])
 
-# get position independent code option for C and f77 compilers
-AC_ARG_ENABLE(cpic,
-	[  --enable-cpic=opt       PIC option for C compiler],
-	[cpic="$enableval"])
-AC_ARG_ENABLE(fpic,
-	[  --enable-fpic=opt       PIC option for F77 Compiler],
-	[fpic="$enableval"])
-
 # override the default CFLAGS and FFLAGS for GCC and G77
 if test -n "$GCC"
 then
   if test -z "$copt"
   then 
     copt="-O2"
-  fi
-  if test -z "$cpic"
-  then 
-    cpic="-fPIC"
   fi
 fi
 if test -n "$G77"
@@ -58,13 +46,9 @@ then
   then 
     fopt="-O2"
   fi
-  if test -z "$fpic"
-  then
-    fpic="-fPIC"
-  fi
 fi
-CFLAGS="$copt $cpic"
-FFLAGS="$fpic"
+CFLAGS="$copt"
+FFLAGS=""
 
 # Debugging option
 AC_ARG_ENABLE(cdebug,

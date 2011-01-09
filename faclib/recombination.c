@@ -1,7 +1,7 @@
+#include <time.h>
 #include <gsl/gsl_sf_legendre.h>
 
 #include "recombination.h"
-#include "time.h"
 #include "cf77.h"
 
 static int qk_mode;

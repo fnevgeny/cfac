@@ -246,7 +246,7 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
   double jb1;
   int kl_max0, kl_max1, kl_max2, kl_min2, max0;
   int type;
-  int np = 3, one = 1;
+  int one = 1;
   double logj;
 
   ko2 = k/2;
@@ -404,7 +404,7 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
 	kl1 = pw_scratch.kl[j];
 	for (kl = kl0+1; kl < kl1; kl++) {
 	  logj = LnInteger(kl);
-	  UVIP3P(np, t, pw_scratch.log_kl, pk[i], one, &logj, &s);
+	  UVIP3P(t, pw_scratch.log_kl, pk[i], one, &logj, &s);
 	  r += s;
 	}
       } 
@@ -462,7 +462,7 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
   double integrand[NINT];
   double x[NINT], y[NINT], t[NINT], s[NINT], d;
   double x0[MAXNUSR];
-  int i, j, n, np, n1;
+  int i, j, n, n1;
   
   for (i = 0; i < NINT; i++) {
     x[i] = 1.0/(2.0*yegrid0[i]);
@@ -488,9 +488,8 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
   }
   if (i < NINT) {
     n = NINT-i;
-    np = 3;
     n1 = n_egrid;
-    UVIP3P(np, n1, logxe, q, n, &(t[i]), &(integrand[i]));
+    UVIP3P(n1, logxe, q, n, &(t[i]), &(integrand[i]));
     for (; i < NINT; i++) {
       integrand[i] = exp(integrand[i]);
     }
@@ -524,7 +523,7 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
     for (i = 0; i < n_egrid; i++) {
       x0[i] = 1.0/xusr[i];
     }
-    UVIP3P(np, n, t, y, n_egrid, x0, dp);
+    UVIP3P(n, t, y, n_egrid, x0, dp);
   }
   return 0;
 }
@@ -602,7 +601,7 @@ double *CIRadialQkIntegratedTable(int kb, int kbp) {
 	  qt[ite][i] = log(qt[ite][i]);
 	}
       }
-      UVIP3P(3, NINT0, yegrid, qt[ite], NINT, yint, integrand);
+      UVIP3P(NINT0, yegrid, qt[ite], NINT, yint, integrand);
       if (qlog) {
 	for (i = 0; i < NINT; i++) {
 	  integrand[i] = exp(integrand[i]);
@@ -620,7 +619,7 @@ double *CIRadialQkIntegratedTable(int kb, int kbp) {
 }
 
 int CIRadialQkIntegrated(double *qke, double te, int kb, int kbp) {
-  int np, i, j, k, nd, nq;
+  int i, j, k, nd, nq;
   double *qk, qkc[MAXNTE];
 
   qk = CIRadialQkIntegratedTable(kb, kbp);
@@ -631,14 +630,13 @@ int CIRadialQkIntegrated(double *qke, double te, int kb, int kbp) {
   nq = n_egrid;
   if (n_tegrid > 1) {
     nd = 1;
-    np = 3;
     for (i = 0; i < nq; i++) {
       k = i;
       for (j = 0; j < n_tegrid; j++) {
 	qkc[j] = qk[k];
 	k += n_egrid;
       }
-      UVIP3P(np, n_tegrid, tegrid, qkc, nd, &te, &qke[i]);
+      UVIP3P(n_tegrid, tegrid, qkc, nd, &te, &qke[i]);
     }
   } else {
     for (i = 0; i < nq; i++) {
@@ -1334,7 +1332,7 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
     kl1 = pw_scratch.kl[t];
     for (kl2 = kl0+1; kl2 < kl1; kl2++) {
       rp = LnInteger(kl2); 
-      UVIP3P(3, pw_scratch.nkl, pw_scratch.log_kl, y, 1, &rp, &d);
+      UVIP3P(pw_scratch.nkl, pw_scratch.log_kl, y, 1, &rp, &d);
       r += d;
     }
   }
@@ -1392,7 +1390,7 @@ double CIRadialQkIntegratedMSub(int j1, int m1, int j2, int m2,
       y[i] = log(y[i]);
     }
   }
-  UVIP3P(3, NINT0, x, y, NINT, xi, yi);
+  UVIP3P(NINT0, x, y, NINT, xi, yi);
   if (qlog) {
     for (i = 0; i < NINT; i++) {
       yi[i] = exp(yi[i]);
@@ -1473,7 +1471,7 @@ int IonizeStrengthMSub(double *qku, double *te, int b, int f) {
   for (m1 = -j1; m1 <= 0; m1 += 2) {
     for (m2 = -j2; m2 <= j2; m2 += 2) {
       if (n_egrid > 1) {
-	UVIP3P(3, n_egrid, logx, rqk, n_usr, log_xusr, qku);
+	UVIP3P(n_egrid, logx, rqk, n_usr, log_xusr, qku);
       } else {
 	for (ie = 0; ie < n_usr; ie++) {
 	  qku[ie] = rqk[0];

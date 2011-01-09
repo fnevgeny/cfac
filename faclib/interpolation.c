@@ -326,27 +326,26 @@ int NewtonCotes(double *r, double *x, int i0, int i1, int m, int id) {
   return 0;
 }
 
-/* Imitate F77 UVIP3P by Hiroshi Akima */
-void uvip3p(int np, int nd, double *xd, double *yd,
-		 int ni, double *xi, double *yi)
+/* Imitate F77 UVIP3P by Hiroshi Akima (NP=3) */
+void uvip3p(int nd, const double *xd, const double *yd,
+		 int ni, const double *xi, double *yi)
 {
     int i;
     const gsl_interp_type *type;
     gsl_interp_accel *acc;
     gsl_spline *spline;
     
-    if (np != 3) {
-        printf("np != 3 not supported in UVIP3P (%d)\n", np);
-        abort();
-    }
-    
-    if (nd == 2) {
+    switch (nd) {
+    case 2:
         type = gsl_interp_linear;
-    } else
-    if (nd == 3 || nd == 4) {
+        break;
+    case 3:
+    case 4:
         type = gsl_interp_cspline;
-    } else {
+        break;
+    default:
         type = gsl_interp_akima;
+        break;
     }
     
     acc = gsl_interp_accel_alloc();

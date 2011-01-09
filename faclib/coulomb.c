@@ -200,7 +200,7 @@ double HydrogenicSelfEnergy(double z, int n, int k) {
 			-0.0356, -0.0331,  -0.0297,  -0.0252,
 			-0.0190, -0.0108,   0.0001,   0.0145}};
   int nd[5] = {0, 1, 4, 8, 12};
-  int id, np = 3, nx = 12, m = 1;
+  int id, nx = 12, m = 1;
   double c;
   double r;
 
@@ -225,7 +225,7 @@ double HydrogenicSelfEnergy(double z, int n, int k) {
     return 0.0;
   }
 
-  UVIP3P(np, nx, zd, sd[id], m, &z, &r);
+  UVIP3P(nx, zd, sd[id], m, &z, &r);
   
   c = FINE_STRUCTURE_CONST*z;
   c = c*c*c*c;

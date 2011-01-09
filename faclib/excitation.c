@@ -468,7 +468,7 @@ static void InterpolateGOS(int n, double *x, double *g,
 			   int ni, double *xi, double *gi) {
   int t;
 
-  UVIP3P(3, n, x, g, ni, xi, gi);
+  UVIP3P(n, x, g, ni, xi, gi);
   for (t = 0; t < ni; t++) {
     if (xi[t] < x[0]) {
       gi[t] = g[0];
@@ -502,7 +502,7 @@ double BornFormFactorK(double q, FORM_FACTOR *bform) {
     else if (q >= bform->k[bform->nk-1]) r = bform->fk[bform->nk-1];
     else {   
       q = log(q);
-      UVIP3P(3, bform->nk, bform->logk, bform->fk, 1, &q, &r);
+      UVIP3P(bform->nk, bform->logk, bform->fk, 1, &q, &r);
     }
   }
 
@@ -781,7 +781,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
   double rq[MAXNTE][MAXNE+1], e1, te, te0;
   double drq[MAXNTE][MAXNE+1], *rqc, **p, *ptr;
   int index[5], mb, mk;
-  int np = 3, one = 1, ieb[MAXNTE];
+  int one = 1, ieb[MAXNTE];
   double logj, xb;
 
 #ifdef PERFORM_STATISTICS
@@ -931,10 +931,10 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
 	  kl1 = pw_scratch.kl[i];
 	  for (j = kl0+1; j < kl1; j++) {
 	    logj = LnInteger(j);
-	    UVIP3P(np, nkl, pw_scratch.log_kl, qk, 
+	    UVIP3P(nkl, pw_scratch.log_kl, qk, 
 		   one, &logj, &s);
 	    r += s;
-	    UVIP3P(np, nkl, pw_scratch.log_kl, dqk, 
+	    UVIP3P(nkl, pw_scratch.log_kl, dqk, 
 		   one, &logj, &s);
 	    rd += s;
 	  }
@@ -1058,7 +1058,7 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
   double rqt[MAXMSUB];
   double *rqc, **p;
   int index[5], mb;
-  int np = 3, one = 1;
+  int one = 1;
   double logj;
 #ifdef PERFORM_STATISTICS
   clock_t start, stop;
@@ -1246,10 +1246,10 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
 	    kl1 = pw_scratch.kl[i]; 
 	    for (j = kl0+1; j < kl1; j++) {       
 	      logj = LnInteger(j);
-	      UVIP3P(np, nkl, pw_scratch.log_kl, qk[iq],
+	      UVIP3P(nkl, pw_scratch.log_kl, qk[iq],
 		     one, &logj, &s);
 	      r += s;
-	      UVIP3P(np, nkl, pw_scratch.log_kl, dqk[iq],
+	      UVIP3P(nkl, pw_scratch.log_kl, dqk[iq],
 		     one, &logj, &s);
 	      rd += s;
 	    }      
@@ -1350,7 +1350,7 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
 } 	
   
 int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
-  int i, np, nd, type;
+  int i, nd, type;
   int j, m, mk;
   double *rqe, rq[MAXNTE];
   double *xte, x0;
@@ -1362,7 +1362,6 @@ int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
     }
     type = rqe[i];
   } else {
-    np = 3;
     nd = 1;
     type = rqe[n_tegrid*n_egrid1];
     if (type == 0 || type == 1) {
@@ -1378,7 +1377,7 @@ int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
 	rq[m] = rqe[j];
 	j += n_egrid1;
       }
-      UVIP3P(np, n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+      UVIP3P(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
     }
   }
 
@@ -1392,7 +1391,6 @@ int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
 	  rqc[i] = rqe[i];
 	}
       } else {
-	np = 3;
 	nd = 1;
 	if (type == 0 || type == 1) {
 	  xte = log_te;
@@ -1407,7 +1405,7 @@ int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
 	    rq[m] = rqe[j];
 	    j += n_egrid1;
 	  }
-	  UVIP3P(np, n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+	  UVIP3P(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
 	}
       }
     }
@@ -1418,7 +1416,7 @@ int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
 
 int CERadialQkMSub(double *rqc, double te, int k0, int k1, int k2, int k3, 
 		   int k, int kp) {
-  int i, np, nd, iq, n;
+  int i, nd, iq, n;
   int j, m, type, nq;
   double *rqe, rq[MAXNTE];
   double *xte, x0;
@@ -1436,7 +1434,6 @@ int CERadialQkMSub(double *rqc, double te, int k0, int k1, int k2, int k3,
     }
     type = rqe[0];
   } else {
-    np = 3;
     nd = 1;
     n = n_tegrid*n_egrid1;
     type = rqe[nq*n];
@@ -1454,7 +1451,7 @@ int CERadialQkMSub(double *rqc, double te, int k0, int k1, int k2, int k3,
 	  rq[m] = rqe[j];
 	  j += n_egrid1;
 	}
-	UVIP3P(np, n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+	UVIP3P(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
       }
       rqe += n;
       rqc += n_egrid1;

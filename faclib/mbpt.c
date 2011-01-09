@@ -1142,7 +1142,7 @@ double SumInterp1D(int n, double *z, double *x, double *t, double *y) {
   for (i = k0; i < k1; i++) {    
     for (a = x[i]+1; a < x[i+1]; a += 1.0) {      
       d = log(a);
-      UVIP3P(3, nk, t+k0, z+k0, 1, &d, &b);
+      UVIP3P(nk, t+k0, z+k0, 1, &d, &b);
       r += b;
     }
   }
@@ -1153,7 +1153,7 @@ double SumInterp1D(int n, double *z, double *x, double *t, double *y) {
   for (i = k1+1; i < n; i++) {
     for (a = x[i-1]+1; a < x[i]; a += 1.0) {     
       d = log(a);
-      UVIP3P(3, nk, t+k1, y+k1, 1, &d, &b);
+      UVIP3P(nk, t+k1, y+k1, 1, &d, &b);
       b = exp(b);
       if (z[n-1] < 0) b = -b;
       r += b;

@@ -16,7 +16,7 @@ double Simpson(double *y, int ia, int ib);
 int NewtonCotes(double *r, double *x, int i0, int i1, int m, int id);
 
 #define UVIP3P uvip3p
-void uvip3p(int np, int nd, double *xd, double *yd,
-		 int ni, double *xi, double *yi);
+void uvip3p(int nd, const double *xd, const double *yd,
+		 int ni, const double *xi, double *yi);
 
 #endif

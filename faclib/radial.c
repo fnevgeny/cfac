@@ -839,7 +839,7 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
     emin = 1e10;
     smin = 0.0;
     while (a <= hxs[NXS-1]) {
-      UVIP3P(2, NXS, hxs, ehx, 1, &a, &c);
+      UVIP3P(NXS, hxs, ehx, 1, &a, &c);
       if (c < emin) {
 	emin = c;
 	smin = a;
@@ -2885,14 +2885,13 @@ void PrintGeneralizedMoments(char *fn, int m, int n0, int k0,
   
 double InterpolateMultipole(double aw, int n, double *x, double *y) {
   double r;
-  int np, nd;
+  int nd;
 
   if (n == 1) {
     r = y[0];
   } else {
-    np = 3;
     nd = 1;
-    UVIP3P(np, n, x, y, nd, &aw, &r);
+    UVIP3P(n, x, y, nd, &aw, &r);
   }
 
   return r;
@@ -4744,15 +4743,15 @@ int IntegrateSinCos(int j, double *x, double *y,
     if (i1 > i) {
       u[i] = potential->rad[n];
     }
-    UVIP3P(3, i1, u, phase, i, w, w1);
+    UVIP3P(i1, u, phase, i, w, w1);
     if (x) {
-      UVIP3P(3, i1, u, x, i, w, u1);
+      UVIP3P(i1, u, x, i, w, u1);
       for (m = 0, n = i0+1; m < i; m++, n += 2) {
         z[n] += u1[m]*sin(w1[m]);
       }
     }
     if (y) {
-      UVIP3P(3, i1, u, y, i, w, u1);
+      UVIP3P(i1, u, y, i, w, u1);
       for (m = 0, n = i0+1; m < i; m++, n += 2) {
         z[n] += u1[m]*cos(w1[m]);
       }
@@ -4781,7 +4780,7 @@ int IntegrateSinCos(int j, double *x, double *y,
       u[n] = potential->rad[s];
       z[n] = potential->rad[s+1];
     }
-    UVIP3P(3, j-i1, u+i1, phase+i1, m, z+q, w+q);
+    UVIP3P(j-i1, u+i1, phase+i1, m, z+q, w+q);
   }
 
   if (x != NULL) {

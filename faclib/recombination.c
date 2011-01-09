@@ -703,7 +703,7 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
 }
   
 int RRRadialMultipole(double *rqc, double te, int k0, int k1, int m) {
-  int i, j, np, nd, k;
+  int i, j, nd, k;
   double rq[MAXNTE];
   double x0, rqe[MAXNTE*MAXNE];
 
@@ -716,7 +716,6 @@ int RRRadialMultipole(double *rqc, double te, int k0, int k1, int m) {
     }
   } else {
     nd = 1;
-    np = 3;
     x0 = te;
     for (i = 0; i < n_egrid; i++) {
       j = i;
@@ -724,14 +723,14 @@ int RRRadialMultipole(double *rqc, double te, int k0, int k1, int m) {
 	rq[k] = rqe[j];
 	j += n_egrid;
       }
-      UVIP3P(np, n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
+      UVIP3P(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
     }
   }
   return 0;
 }
   
 int RRRadialQk(double *rqc, double te, int k0, int k1, int m) {
-  int i, j, np, nd, k;
+  int i, j, nd, k;
   double rq[MAXNTE];
   double x0, rqe[MAXNTE*MAXNE];
 
@@ -744,7 +743,6 @@ int RRRadialQk(double *rqc, double te, int k0, int k1, int m) {
     }
   } else {
     nd = 1;
-    np = 3;
     x0 = te;
     for (i = 0; i < n_egrid; i++) {
       j = i;
@@ -752,7 +750,7 @@ int RRRadialQk(double *rqc, double te, int k0, int k1, int m) {
 	rq[k] = rqe[j];
 	j += n_egrid;
       }
-      UVIP3P(np, n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
+      UVIP3P(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
     }
   }
   return 0;
@@ -930,8 +928,7 @@ int BoundFreeOSUTA(double *rqu, double *rqc, double *eb,
       for (ie = 0; ie < n_egrid; ie++) {
 	tq[ie] = log(tq[ie]);
       }
-      k = 3;
-      UVIP3P(k, n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
+      UVIP3P(n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
       for (ie = 0; ie < n_usr; ie++) {
 	rqu[ie] = exp(rqu[ie]);
       }
@@ -1058,8 +1055,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
       for (ie = 0; ie < n_egrid; ie++) {
 	tq[ie] = log(tq[ie]);
       }
-      k = 3;
-      UVIP3P(k, n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
+      UVIP3P(n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
       for (ie = 0; ie < n_usr; ie++) {
 	rqu[ie] = exp(rqu[ie]);
       }
@@ -1080,7 +1076,7 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
   LEVEL *lev1, *lev2;
   int j0, j1, jb, ns, q0, q1, qb;
   int k0, k1, kb, kmin, kmax, jmin, jmax;
-  int jf, ik, klf, kappaf, k, np, nt, j, jm;
+  int jf, ik, klf, kappaf, k, nt, j, jm;
   double a, b, r, s, log_e, *ai_pk;
   
   *rate = 0.0;
@@ -1114,7 +1110,6 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
     kmax = j0 + j1;
     jmin = 1;
     jmax = j1+j0+jb;
-    np = 3;
     nt = 1;
     r = 0.0;
     for (jf = jmin; jf <= jmax; jf += 2) {
@@ -1125,7 +1120,7 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
 	  if (!Triangle(j0, j1, k) || !Triangle(jb, jf, k)) continue;
 	  AIRadialPk(&ai_pk, k0, k1, kb, kappaf, k);
 	  if (n_egrid > 1) {
-	    UVIP3P(np, n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	    UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	  } else {
 	    s = ai_pk[0];
 	  }
@@ -1138,7 +1133,6 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
   } else {
     jm = 2*j1;
     r = 0.0;
-    np = 3;
     nt = 1;
     for (j = 0; j <= jm; j += 4) {
       jmin = abs(j-j0);
@@ -1156,7 +1150,7 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
 	    if (fabs(b) < EPS30) continue;
 	    AIRadialPk(&ai_pk, k0, k1, kb, kappaf, k);
 	    if (n_egrid > 1) {
-	      UVIP3P(np, n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	      UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	    } else {
 	      s = ai_pk[0];
 	    } 
@@ -1185,7 +1179,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   int jf, k0, k1, kb, njf, nkappaf, klf, jmin, jmax;
   double *p, r, s, log_e, a;
   double *ai_pk, ai_pk0[MAXNE];
-  int np, nt, m1, m2, m;
+  int nt, m1, m2, m;
   int kappafp, jfp, klfp, dkl;
 
   *rate = 0.0;
@@ -1220,7 +1214,6 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   for (ip = 0; ip < nkappaf; ip++) p[ip] = 0.0;
 
   nz = AngularZxZFreeBound(&ang, f, rec);
-  np = 3;
   nt = 1;
   if (nz > 0) {
     for (i = 0; i < nz; i++) {
@@ -1241,7 +1234,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
 	kappaf = GetKappaFromJL(jf, klf);
 	AIRadialPk(&ai_pk, k0, k1, kb, kappaf, ang[i].k);
 	if (n_egrid > 1) {
-	  UVIP3P(np, n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	  UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	} else {
 	  s = ai_pk[0];
 	}
@@ -1262,7 +1255,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
       ik = klf - jf;
       AIRadial1E(ai_pk0, kb, kappaf);
       if (n_egrid > 1) {
-	UVIP3P(np, n_egrid, log_egrid, ai_pk0, nt, &log_e, &s);
+	UVIP3P(n_egrid, log_egrid, ai_pk0, nt, &log_e, &s);
       } else {
 	s = ai_pk0[0];
       }
@@ -1333,7 +1326,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
 		ai_pk0[ik] -= GetPhaseShift(k1);
 	      }	      
 	      if (n_egrid > 1) {
-		UVIP3P(np, n_egrid, log_egrid, ai_pk0, nt, &log_e, &a);
+		UVIP3P(n_egrid, log_egrid, ai_pk0, nt, &log_e, &a);
 	      } else {
 		a = ai_pk0[0];
 	      }

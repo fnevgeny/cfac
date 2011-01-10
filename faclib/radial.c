@@ -3791,9 +3791,9 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 /* type = 4:    P1*Q2 + Q1*P2 */
 /* type = 5:    P1*Q2 - Q1*P2 */
 /* type = 6:    P1*Q2 */
-/* if type is positive, only the end point is returned, */
-/* otherwise, the whole function is returned */
-/* id indicate whether integrate inward (-1) or outward (0) */
+/* if t (type) is positive, only the end point is returned, */
+/* otherwise, the whole function is returned (in x) */
+/* id indicates whether integrate inward (-1) or outward (0) */
 int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2, 
 	      int t, double *x, int id) {
   int i1, i2, ilast;
@@ -3815,9 +3815,9 @@ int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2,
   ext = 0.0;
   ilast = Min(orb1->ilast, orb2->ilast);
   if (id >= 0) {
-    IntegrateSubRegion(0, ilast, f, orb1, orb2, t, r, 0, NULL);
+    IntegrateSubRegion(0, ilast, f, orb1, orb2, t, r, 0);
   } else {
-    IntegrateSubRegion(0, ilast, f, orb1, orb2, t, r, -1, NULL);
+    IntegrateSubRegion(0, ilast, f, orb1, orb2, t, r, -1);
   }
   i2 = ilast;
   if (orb1->ilast == ilast && orb1->n == 0) {
@@ -3827,34 +3827,34 @@ int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2,
       if (type == 6) {
 	i = 7;
 	if (t < 0) i = -i;
-	IntegrateSubRegion(i1, i2, f, orb2, orb1, i, r, 1, NULL);
+	IntegrateSubRegion(i1, i2, f, orb2, orb1, i, r, 1);
       } else {
-	IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 2, NULL);
+	IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 2);
       }
       i2--;
     }
     if (orb2->n == 0) {
       i1 = orb2->ilast + 1;
       i2 = potential->maxrp - 1;
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 3, &ext);
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 3);
       i2--;
     }
   } else if (orb2->ilast == ilast && orb2->n == 0) {
     i1 = ilast + 1;
     i2 = orb1->ilast;
     if (i2 > i1) {
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 1, NULL);
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 1);
       i2--;
     }
     if (orb1->n == 0) {
       i1 = orb1->ilast + 1;
       i2 = potential->maxrp - 1;
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 3, &ext);
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 3);
       i2--;
     }
   }
   if (t >= 0) {
-    *x = r[i2] + ext;
+    *x = r[i2];
   } else {
     if (id >= 0) {
       for (i = i2+1; i < potential->maxrp; i++) {
@@ -3891,11 +3891,16 @@ void AddEvenPoints(double *r, double *r1, int i0, int i1, int t) {
   }
 }
 
+/* Radial integral (orb1|f|orb2) over subregion
+   between points with indices i0 and i1.
+   t - type (as in Integrate) 
+   r - ...
+   m - ??? */
 int IntegrateSubRegion(int i0, int i1, 
-		       double *f, ORBITAL *orb1, ORBITAL *orb2,
-		       int t, double *r, int m, double *ext) {
+		       const double *f,
+                       const ORBITAL *orb1, const ORBITAL *orb2,
+		       int t, double *r, int m) {
   int i, j, ip, i2, type;
-  ORBITAL *tmp;
   double *large1, *large2, *small1, *small2;
   double *x, *y, *r1, *x1, *x2, *y1, *y2;
   double a, b, e1, e2, a2, r0 = 0.0;
@@ -4236,7 +4241,7 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
     } else if (type == 7) {
@@ -4272,14 +4277,14 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
-      IntegrateSinCos(j, x, NULL, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, NULL, _phase, _dphase, i0, r, t);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
     }
   case 2: /* m = 1, 2 are essentially the same */
     /* type 6 is treated in m = 1 */
     if (m == 2) {
-      tmp = orb1;
+      const ORBITAL *tmp = orb1;
       orb1 = orb2;
       orb2 = tmp;
     }
@@ -4322,7 +4327,7 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
     case 2: /* type = 2 */
@@ -4350,7 +4355,7 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
-      IntegrateSinCos(j, x, NULL, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, NULL, _phase, _dphase, i0, r, t);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
     case 3: /* type = 3 */
@@ -4381,7 +4386,7 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;  
     case 4: /* type = 4 */
@@ -4415,7 +4420,7 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
     case 5: /* type = 5 */
@@ -4453,7 +4458,7 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       if (m == 2) {
 	if (t < 0) {
 	  for (i = i0; i <= i2; i++) {
@@ -4503,7 +4508,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_dphasep[j] = a - b;
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4514,7 +4519,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_phase[j] = large1[ip] - large2[ip];
 	j++;
       }
-      IntegrateSinCos(j, NULL, y, _phase, _dphasep, i0, r1, t, NULL);
+      IntegrateSinCos(j, NULL, y, _phase, _dphasep, i0, r1, t);
       AddEvenPoints(r, r1, i0, i1, t);
       break;	
     case 2: /* type = 2 */
@@ -4533,7 +4538,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_dphasep[j] = a - b;
 	j++;
       } 
-      IntegrateSinCos(j, NULL, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, NULL, y, _phase, _dphase, i0, r, t);
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4541,7 +4546,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_phase[j] = large1[ip] - large2[ip];
 	j++;
       }
-      IntegrateSinCos(j, NULL, y, _phase, _dphasep, i0, r1, t, NULL);
+      IntegrateSinCos(j, NULL, y, _phase, _dphasep, i0, r1, t);
       AddEvenPoints(r, r1, i0, i1, t);
       break;
     case 3: /* type = 3 */
@@ -4565,7 +4570,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_dphasep[j] = a - b;
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4576,7 +4581,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_phase[j] = large1[ip] - large2[ip];
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t, NULL);
+      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t);
       AddEvenPoints(r, r1, i0, i1, t);
       break;
     case 4: /* type = 4 */
@@ -4600,7 +4605,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_dphasep[j] = a - b;
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4610,7 +4615,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_phase[j] = large1[ip] - large2[ip];
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t, NULL);
+      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t);
       AddEvenPoints(r, r1, i0, i1, t);
       break;
     case 5: /* type = 5 */
@@ -4634,7 +4639,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_dphasep[j] = a - b;
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4644,7 +4649,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_phase[j] = large1[ip] - large2[ip];
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t, NULL);
+      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t);
       AddEvenPoints(r, r1, i0, i1, t);
       break;
     case 6: /* type = 6 */
@@ -4666,7 +4671,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_dphasep[j] = a - b;
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t, ext);
+      IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4675,7 +4680,7 @@ int IntegrateSubRegion(int i0, int i1,
 	_phase[j] = large1[ip] - large2[ip];
 	j++;
       }
-      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t, NULL);
+      IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, t);
       AddEvenPoints(r, r1, i0, i1, t);
       break;
     default:
@@ -4690,7 +4695,7 @@ int IntegrateSubRegion(int i0, int i1,
 
 int IntegrateSinCos(int j, double *x, double *y, 
 		    double *phase, double *dphase, 
-		    int i0, double *r, int t, double *ext) {
+		    int i0, double *r, int t) {
   int i, k, m, n, q, s, i1;
   double si0, si1, cs0, cs1;
   double is0, is1, is2, is3;
@@ -4698,21 +4703,26 @@ int IntegrateSinCos(int j, double *x, double *y,
   double his0 = 0.0, his1 = 0.0, his2 = 0.0, his3 = 0.0;
   double hic0 = 0.0, hic1 = 0.0, hic2 = 0.0, hic3 = 0.0;
   double a0, a1, a2, a3;
-  double d, p, h, dr;
+  double d, p, dr;
   double *z, *u, *w, *u1, *w1;
+  double xa1[MAXRP], xa2[MAXRP], xa3[MAXRP];
+  double ya1[MAXRP], ya2[MAXRP], ya3[MAXRP];
 
   w = _dwork2;
   z = _dwork10;
   u = _dwork11;
+  
   if (phase[j-1] < 0) {
     for (i = 0; i < j; i++) {
       phase[i] = -phase[i];
       dphase[i] = -dphase[i];
       if (x) x[i] = -x[i];
+      /* no need to invert y since cosine is an even function */
     }
   }
+  
   for (i = 1, k = i0+2; i < j; i++, k += 2) {
-    h = phase[i] - phase[i-1];
+    double h = phase[i] - phase[i-1];
     z[k] = 0.0;
     if (x != NULL) z[k] += x[i]*sin(phase[i]);
     if (y != NULL) z[k] += y[i]*cos(phase[i]);
@@ -4723,6 +4733,7 @@ int IntegrateSinCos(int j, double *x, double *y,
       if (h > 0.4) break;
     }
   }
+  
   if (i > 1) {
     z[i0] = 0.0;
     if (x != NULL) z[i0] += x[0]*sin(phase[0]);
@@ -4783,22 +4794,25 @@ int IntegrateSinCos(int j, double *x, double *y,
     UVIP3P(j-i1, u+i1, phase+i1, m, z+q, w+q);
   }
 
+  /* interpolate (calculate spline coefficients of) x & y on the phase axis */
   if (x != NULL) {
     for (n = i1; n < j; n++) {
       x[n] /= dphase[n];
     }
-    UVIP3C(3, j-i1, phase+i1, x+i1, z+i1, z+j+i1, x+j+i1);
+    UVIP3C(3, j-i1, phase+i1, x+i1, xa1, xa2, xa3);
   }
   if (y != NULL) {
     for (n = i1; n < j; n++) {
       y[n] /= dphase[n];
     }
-    UVIP3C(3, j-i1, phase+i1, y+i1, u+i1, u+j+i1, y+j+i1);
+    UVIP3C(3, j-i1, phase+i1, y+i1, ya1, ya2, ya3);
   }
 
+  /* analytic piecewise integration of cubic spline with sin or cos */
   si0 = sin(phase[i-1]);
   cs0 = cos(phase[i-1]);
   for (; i < j; i++, k += 2) {
+    double h;
     if (t < 0) {
       dr = w[i-1] - phase[i-1];
       si1 = sin(w[i-1]);
@@ -4816,26 +4830,28 @@ int IntegrateSinCos(int j, double *x, double *y,
       hic3 = p * si1 - 3.0*his2;
       r[k-1] = r[k-2];
     }
-    d = phase[i] - phase[i-1];
-    si1 = sin(phase[i]);
-    cs1 = cos(phase[i]);
-    is0 = -(cs1 - cs0);
-    ic0 = si1 - si0;
-    p = d;
-    is1 = -p * cs1 + ic0;
-    ic1 = p * si1 - is0;
-    p *= d;
-    is2 = -p * cs1 + 2.0*ic1;
-    ic2 = p * si1 - 2.0*is1; 
-    p *= d;
-    is3 = -p * cs1 + 3.0*ic2;
-    ic3 = p * si1 - 3.0*is2;
+    if (x != NULL || y != NULL) {
+        d = phase[i] - phase[i-1];
+        si1 = sin(phase[i]);
+        cs1 = cos(phase[i]);
+        is0 = -(cs1 - cs0);
+        ic0 = si1 - si0;
+        p = d;
+        is1 = -p * cs1 + ic0;
+        ic1 = p * si1 - is0;
+        p *= d;
+        is2 = -p * cs1 + 2.0*ic1;
+        ic2 = p * si1 - 2.0*is1; 
+        p *= d;
+        is3 = -p * cs1 + 3.0*ic2;
+        ic3 = p * si1 - 3.0*is2;
+    }
     r[k] = r[k-2];
     if (x != NULL) {
-      a0 = x[i-1];
-      a1 = z[i-1]; 
-      a2 = z[j+i-1];
-      a3 = x[j+i-1];
+      a0 =   x[i-1];
+      a1 = xa1[i-1-i1]; 
+      a2 = xa2[i-1-i1];
+      a3 = xa3[i-1-i1];
       h = a0*is0 + a1*is1 + a2*is2 + a3*is3;
       r[k] += h;
       if (t < 0) {
@@ -4844,10 +4860,10 @@ int IntegrateSinCos(int j, double *x, double *y,
       }
     }
     if (y != NULL) {
-      a0 = y[i-1];
-      a1 = u[i-1];
-      a2 = u[j+i-1];
-      a3 = y[j+i-1];
+      a0 =   y[i-1];
+      a1 = ya1[i-1-i1];
+      a2 = ya2[i-1-i1];
+      a3 = ya3[i-1-i1];
       h = a0*ic0 + a1*ic1 + a2*ic2 + a3*ic3;
       r[k] += h;
       if (t < 0) {

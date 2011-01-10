@@ -11,7 +11,6 @@ static ARRAY *orbitals;
 static int n_orbitals;
 static int n_continua;
  
-static double _dwork[MAXRP];
 static double _dwork1[MAXRP];
 static double _dwork2[MAXRP];
 static double _dwork3[MAXRP];
@@ -88,7 +87,7 @@ static void InitOrbitalData(void *p, int n) {
   d = (ORBITAL *) p;
   for (i = 0; i < n; i++) {
     d[i].wfun = NULL;
-    d[i].phase = NULL;
+    d[i].phase = 0.0;
     d[i].ilast = -1;
   }
 }
@@ -1041,7 +1040,7 @@ double GetPhaseShift(int k) {
   orb = GetOrbitalSolved(k);
   if (orb->n > 0) return 0.0;
 
-  if (orb->phase) return *(orb->phase);
+  if (orb->phase) return orb->phase;
 
   z = GetResidualZ();
   e = orb->energy;
@@ -1059,8 +1058,7 @@ double GetPhaseShift(int k) {
   b1 = PhaseRDependent(a, y, b1);
   phase1 = phase1 - b1;
   
-  orb->phase = malloc(sizeof(double));
-  *(orb->phase) = phase1;
+  orb->phase = phase1;
 
   return phase1;  
 }
@@ -1200,9 +1198,8 @@ void FreeOrbitalData(void *p) {
 
   orb = (ORBITAL *) p;
   if (orb->wfun) free(orb->wfun);
-  if (orb->phase) free(orb->phase);
   orb->wfun = NULL;
-  orb->phase = NULL;
+  orb->phase = 0.0;
   orb->ilast = -1;
 }
 
@@ -3791,86 +3788,110 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 /* type = 4:    P1*Q2 + Q1*P2 */
 /* type = 5:    P1*Q2 - Q1*P2 */
 /* type = 6:    P1*Q2 */
-/* if t (type) is positive, only the end point is returned, */
-/* otherwise, the whole function is returned (in x) */
+/* if type is positive, only the end point is returned in x, */
+/* otherwise, the whole function is returned (in x[]) */
 /* id indicates whether integrate inward (-1) or outward (0) */
 int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2, 
-	      int t, double *x, int id) {
+	      int type, double *x, int id) {
   int i1, i2, ilast;
-  int i, type;
-  double *r, ext;
+  int m;
+  double *r, _dwork[MAXRP], ext;
 
-  if (t == 0) t = 1;
-  if (t < 0) {
+  if (type == 0) type = 1;
+  
+  if (type < 0) {
     r = x;
-    type = -t;
   } else {
     r = _dwork;
-    type = t;
   }
-  for (i = 0; i < potential->maxrp; i++) {
-    r[i] = 0.0;
-  }
+  
+  /* zero-fill r */
+  memset(r, 0, potential->maxrp*sizeof(double));
 
-  ext = 0.0;
+  /* first, the overlapping region */
   ilast = Min(orb1->ilast, orb2->ilast);
   if (id >= 0) {
-    IntegrateSubRegion(0, ilast, f, orb1, orb2, t, r, 0);
+    m = 0;
   } else {
-    IntegrateSubRegion(0, ilast, f, orb1, orb2, t, r, -1);
+    m = -1;
   }
-  i2 = ilast;
+  IntegrateSubRegion(0, ilast, f, orb1, orb2, type, r, m);
+  
   if (orb1->ilast == ilast && orb1->n == 0) {
+    /* orb2 extends beyond orb1 AND orb1 belongs to a free electron */
     i1 = ilast + 1;
     i2 = orb2->ilast;
     if (i2 > i1) {
-      if (type == 6) {
-	i = 7;
-	if (t < 0) i = -i;
-	IntegrateSubRegion(i1, i2, f, orb2, orb1, i, r, 1);
+      if (abs(type) == 6) {
+	int new_type = 7;
+	if (type < 0) new_type = -new_type;
+	m = 1;
+        IntegrateSubRegion(i1, i2, f, orb2, orb1, new_type, r, m);
       } else {
-	IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 2);
+	m = 2;
+	IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
       }
       i2--;
     }
+    
+    /* if orb2 is a free orbital, continue till the last point of potential */
     if (orb2->n == 0) {
       i1 = orb2->ilast + 1;
       i2 = potential->maxrp - 1;
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 3);
+      m = 3;
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
       i2--;
     }
-  } else if (orb2->ilast == ilast && orb2->n == 0) {
+  } else
+  if (orb2->ilast == ilast && orb2->n == 0) {
+    /* orb1 extends beyond orb2 AND orb2 belongs to a free electron */
     i1 = ilast + 1;
     i2 = orb1->ilast;
     if (i2 > i1) {
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 1);
+      /* TODO: why no type6/7 here??? */
+      m = 1;
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
       i2--;
     }
+    /* if orb1 is a free orbital, continue till the last point of potential */
     if (orb1->n == 0) {
       i1 = orb1->ilast + 1;
       i2 = potential->maxrp - 1;
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, t, r, 3);
+      m = 3;
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
       i2--;
     }
-  }
-  if (t >= 0) {
-    *x = r[i2];
   } else {
+    i2 = ilast;
+  }
+  
+  ext = r[i2];
+  
+  /* finally, extend till the last point of the potential if t < 0
+     (and if not there already) */
+  if (type >= 0) {
+    *x = ext;
+  } else {
+    int i;
+    
     if (id >= 0) {
+      /* constant, no longer varying */
       for (i = i2+1; i < potential->maxrp; i++) {
-	r[i] = r[i2];
+	r[i] = ext;
       }
     } else {
       if (i2 > ilast) {
-	ext += r[i2];
+	/* the outermost part is zero (inward integration!) */
+        for (i = i2+1; i < potential->maxrp; i++) {
+	  r[i] = 0.0;
+	}
 	for (i = ilast + 1; i <= i2; i++) {
 	  r[i] = ext - r[i];
 	}
-	for (i = i2+1; i < potential->maxrp; i++) {
-	  r[i] = 0.0;
-	}
 	for (i = 0; i <= ilast; i++) {
-	  r[i] = r[ilast+1] + r[i];
+	  /* in the overlap region the inward integration is taken care
+             by IntegrateSubRegion(), hence, + r[i] contrary to above */
+          r[i] = r[ilast+1] + r[i];
 	}
       }
     }
@@ -3893,8 +3914,8 @@ void AddEvenPoints(double *r, double *r1, int i0, int i1, int t) {
 
 /* Radial integral (orb1|f|orb2) over subregion
    between points with indices i0 and i1.
-   t - type (as in Integrate) 
-   r - ...
+   t - type (as in Integrate(), plus 7 - ???) 
+   r - the integral array
    m - ??? */
 int IntegrateSubRegion(int i0, int i1, 
 		       const double *f,

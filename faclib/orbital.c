@@ -30,18 +30,14 @@ int GetNMax(void) {
   return nmax;
 }
  
-double EnergyH(double z, double n, int ka) {
+double EnergyH(double z, double n, int ka)
+{
   double a, np;
-
-  ka = abs(ka);
   a = FINE_STRUCTURE_CONST*z;
   
-  np = n + sqrt(ka*ka - a*a) - ka;
-  a = a/np;
-  a = (1.0/sqrt(1.0 + a*a)) - 1.0;
-  a /= FINE_STRUCTURE_CONST2;
-  
-  return a;
+  np = n + sqrt(ka*ka - a*a) - abs(ka);
+
+  return (1.0/sqrt(1.0 + a*a/(np*np)) - 1.0)/FINE_STRUCTURE_CONST2;
 }
     
 double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
@@ -1320,7 +1316,7 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
   }
   orb->ilast = i2;
   orb->wfun = p;
-  orb->phase = NULL;
+  orb->phase = 0.0;
   
   orb->qr_norm = 1.0;
   
@@ -1395,7 +1391,7 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
     
   orb->ilast = i2p;
   orb->wfun = p;
-  orb->phase = NULL;
+  orb->phase = 0.0;
 
   orb->qr_norm = 1.0;
   

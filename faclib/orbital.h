@@ -34,12 +34,12 @@ typedef struct _POTENTIAL_ {
 } POTENTIAL;
 
 typedef struct _ORBITAL_ {
-  int n;
-  int kappa;
+  int n;          /* PQN; 0 => free; <0 => BasisOuter                */
+  int kappa;      /* relativistic angular QN (l - j)*(2*j + 1)       */
   double energy;
   double qr_norm;
-  double *phase;
-  double *wfun;
+  double phase;
+  double *wfun;   /* radial wave-function, wfun[0] ... wfun[ilast-1] */
   int ilast;
 } ORBITAL;
 

@@ -18,20 +18,6 @@ static ARRAY *orbitals;
 static int n_orbitals;
 static int n_continua;
  
-static double _dwork1[MAXRP];
-static double _dwork2[MAXRP];
-static double _dwork3[MAXRP];
-static double _dwork4[MAXRP];
-static double _dwork5[MAXRP];
-static double _dwork6[MAXRP];
-static double _dwork7[MAXRP];
-static double _dwork8[MAXRP];
-static double _dwork9[MAXRP];
-static double _dwork10[MAXRP];
-static double _dwork11[MAXRP];
-static double _phase[MAXRP];
-static double _dphase[MAXRP];
-static double _dphasep[MAXRP];
 static double _yk[MAXRP];
 static double _zk[MAXRP];
 static double _xk[MAXRP];
@@ -515,10 +501,11 @@ int PotentialHX(AVERAGE_CONFIG *acfg, double *u, double *v, double *w) {
 double SetPotential(AVERAGE_CONFIG *acfg, int iter) {
   int jmax, i, j, k;
   double *u, *w, *v, a, b, c, r;
+  double _dwork[MAXRP];
 
   u = potential->U;
   w = potential->W;
-  v = _dwork2;
+  v = _dwork;
 
   jmax = PotentialHX(acfg, u, NULL, w);
 
@@ -888,6 +875,7 @@ int RefineRadial(int maxfun, int msglvl) {
   int n, ierr, mode, nfe, lw[4];
   double xtol, scale[2];
   double f0, f, x[2];
+  static double _dwork[MAXRP];
   
   if (maxfun <= 0) maxfun = 250;
   xtol = EPS3;
@@ -905,7 +893,7 @@ int RefineRadial(int maxfun, int msglvl) {
   nfe = 0;
   ierr = 0;
   SUBPLX(EnergyFunc, n, xtol, maxfun, mode, scale, x,
-	 &f, &nfe, _dwork11, lw, &ierr);
+	 &f, &nfe, _dwork, lw, &ierr);
   if (msglvl > 0) {
     printf("%10.3E %10.3E %15.8E %d\n", x[0], x[1], f, nfe);
   }
@@ -2764,6 +2752,8 @@ double *GeneralizedMoments(int k1, int k2, int m) {
   int index[3], t;
   double **p, k, *kg;
   double amin, amax, kmin, kmax;
+  double _phase[MAXRP];
+  double _dphase[MAXRP];
   
   index[0] = m;
   if (k1 > k2) {
@@ -3331,6 +3321,7 @@ double BreitS(int k0, int k1, int k2, int k3, int k) {
   ORBITAL *orb0, *orb1, *orb2, *orb3;
   int index[5], i;
   double *p, r;
+  double _dwork[MAXRP];
   
   index[0] = k0;
   index[1] = k1;
@@ -3349,13 +3340,13 @@ double BreitS(int k0, int k1, int k2, int k3, int k) {
     if (!orb0 || !orb1 || !orb2 || !orb3) return 0.0;
     
     for (i = 0; i < potential->maxrp; i++) {
-      _dwork1[i] = pow(potential->rad[i], k);
+      _dwork[i] = pow(potential->rad[i], k);
     }
     
-    IntegrateF(_dwork1, orb0, orb1, INT_P1Q2, _zk, 0);
+    IntegrateF(_dwork, orb0, orb1, INT_P1Q2, _zk, 0);
     
     for (i = 0; i < potential->maxrp; i++) {
-      _zk[i] /= _dwork1[i]*potential->rad[i];
+      _zk[i] /= _dwork[i]*potential->rad[i];
     }
 
     IntegrateS(_zk, orb2, orb3, INT_P1Q2, &r, 0);
@@ -3616,25 +3607,26 @@ void PrepSlater(int ib0, int iu0, int ib1, int iu1,
 static int GetYk1(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, int type) {
   int i, ilast;
   double r0, a;
+  double _dwork[MAXRP];
   
   ilast = Min(orb1->ilast, orb2->ilast);
   r0 = sqrt(potential->rad[0]*potential->rad[ilast]);  
   for (i = 0; i < potential->maxrp; i++) {
-    _dwork1[i] = pow(potential->rad[i]/r0, k);
+    _dwork[i] = pow(potential->rad[i]/r0, k);
   }
-  IntegrateF(_dwork1, orb1, orb2, type, _zk, 0);
+  IntegrateF(_dwork, orb1, orb2, type, _zk, 0);
   a = pow(r0, k);
   for (i = 0; i < potential->maxrp; i++) {
-    _zk[i] /= _dwork1[i];
+    _zk[i] /= _dwork[i];
     yk[i] = _zk[i];
-    _zk[i] = _dwork1[i]*a;
+    _zk[i] = _dwork[i]*a;
   }  
   for (i = 0; i < potential->maxrp; i++) {
-    _dwork1[i] = (r0/potential->rad[i])/_dwork1[i];
+    _dwork[i] = (r0/potential->rad[i])/_dwork[i];
   }
-  IntegrateF(_dwork1, orb1, orb2, type, _xk, -1);
+  IntegrateF(_dwork, orb1, orb2, type, _xk, -1);
   for (i = 0; i < potential->maxrp; i++) {
-    yk[i] += _xk[i]/_dwork1[i];
+    yk[i] += _xk[i]/_dwork[i];
   }
       
   return 0;
@@ -3646,6 +3638,7 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
   double a, b, a2, b2, max, max1;
   int index[3];
   SLATER_YK *syk;
+  double _dwork[MAXRP];
 
   if (k1 <= k2) {
     index[0] = k1;
@@ -3723,13 +3716,13 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
     } 
   } else {
     for (i = syk->npts-1; i < potential->maxrp; i++) {
-      _dwork1[i] = pow(potential->rad[i], k);
+      _dwork[i] = pow(potential->rad[i], k);
     }
     for (i = 0; i < syk->npts; i++) {
       yk[i] = syk->yk[i];
     }
     i0 = syk->npts-1;
-    a = syk->yk[i0]*_dwork1[i0];
+    a = syk->yk[i0]*_dwork[i0];
     for (i = syk->npts; i < potential->maxrp; i++) {
       b = potential->rad[i] - potential->rad[i0];
       b = syk->coeff[1]*b;
@@ -3739,7 +3732,7 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 	yk[i] = (a - syk->coeff[0])*exp(b);
 	yk[i] += syk->coeff[0];
       }
-      yk[i] /= _dwork1[i];
+      yk[i] /= _dwork[i];
     }    
   }
       
@@ -3911,16 +3904,26 @@ int IntegrateSubRegion(int i0, int i1,
   double *large1, *large2, *small1, *small2;
   double *x, *y, *r1, *x1, *x2, *y1, *y2;
   double a, b, e1, e2, a2, r0 = 0.0;
+  double _dwork1[MAXRP];
+  double _dwork2[MAXRP];
+  double _dwork3[MAXRP];
+  double _dwork4[MAXRP];
+  double _dwork5[MAXRP];
+  double _dwork6[MAXRP];
+  double _dwork7[MAXRP];
+  double _phase[MAXRP];
+  double _dphase[MAXRP];
+  double _dphasep[MAXRP];
 
   if (i1 <= i0) return 0;
 
-  x = _dwork3;
-  y = _dwork4;
-  x1 = _dwork5;
-  x2 = _dwork6;
-  y1 = _dwork7;
-  y2 = _dwork8;
-  r1 = _dwork9;
+  x  = _dwork1;
+  y  = _dwork2;
+  x1 = _dwork3;
+  x2 = _dwork4;
+  y1 = _dwork5;
+  y2 = _dwork6;
+  r1 = _dwork7;
   i2 = i1;
 
   if (mode == -1) {
@@ -4719,10 +4722,11 @@ int IntegrateSinCos(int j, double *x, double *y,
   double *z, *u, *w, *u1, *w1;
   double xa1[MAXRP], xa2[MAXRP], xa3[MAXRP];
   double ya1[MAXRP], ya2[MAXRP], ya3[MAXRP];
+  double _dwork1[MAXRP], _dwork2[MAXRP], _dwork3[MAXRP];
 
-  w = _dwork2;
-  z = _dwork10;
-  u = _dwork11;
+  w = _dwork1;
+  z = _dwork2;
+  u = _dwork3;
   
   if (phase[j-1] < 0) {
     for (i = 0; i < j; i++) {

@@ -250,13 +250,21 @@ double Simpson(double *x, int i0, int i1) {
   return b;
 }
 
-/* integration by newton-cotes formula */
-int NewtonCotes(double *r, double *x, int i0, int i1, int m, int id) {
+/*
+ * Integration by Newton-Cotes formula
+ * input: x[]
+ * limits (indices): i0 .. i1
+ * output: r[]
+ * last_only: only the finite integral is needed
+ * id - direction (<0 => inward)
+ */
+int NewtonCotes(double r[], const double x[], int i0, int i1,
+                int last_only, int id) {
   int i, k;
   double a;
 
   if (id >= 0) {
-    if (m >= 0) {
+    if (last_only) {
       r[i1] = x[i0];
       a = 0.0;
       for (i = i0+1; i < i1; i += 2) {
@@ -289,7 +297,7 @@ int NewtonCotes(double *r, double *x, int i0, int i1, int m, int id) {
       }
     }
   } else {
-    if (m >= 0) {
+    if (last_only) {
       r[i1] = x[i1];
       a = 0.0;
       for (i = i1-1; i > i0; i -= 2) {

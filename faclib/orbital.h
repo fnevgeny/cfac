@@ -1,10 +1,7 @@
 #ifndef _ORBITAL_H_
 #define _ORBITAL_H_
 
-#include "global.h"
-#include "nucleus.h"
-#include "coulomb.h"
-#include "interpolation.h"
+#include "consts.h"
 
 typedef struct _POTENTIAL_ {
   int mode;

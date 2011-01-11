@@ -1,6 +1,13 @@
+#include <math.h>
 #include <gsl/gsl_sf_bessel.h>
 
+#include "nucleus.h"
+#include "coulomb.h"
 #include "radial.h"
+#include "recouple.h"
+#include "angular.h"
+#include "grid.h"
+#include "interpolation.h"
 #include "cf77.h"
 
 static POTENTIAL *potential;

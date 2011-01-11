@@ -1,3 +1,15 @@
+#include <stdio.h>
+
+#include "consts.h"
+#include "coulomb.h"
+#include "recouple.h"
+#include "angular.h"
+#include "radial.h"
+#include "mbpt.h"
+#include "excitation.h"
+#include "ionization.h"
+#include "recombination.h"
+#include "dbase.h"
 #include "init.h"
 
 #if FAC_DEBUG

@@ -1,13 +1,8 @@
 #ifndef _DBASE_H_
 #define _DBASE_H_ 1
 
-#include <time.h>
 #include <stdio.h>
-#include <math.h>
-
 #include <sqlite3.h>
-
-#include "consts.h"
 
 #define DB_EN 1
 #define DB_TR 2

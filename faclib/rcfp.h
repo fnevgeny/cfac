@@ -53,10 +53,6 @@
 ** NOTE:        
 */
 
-#include "global.h"
-#include "angular.h"
-
-
 /*
 ** STRUCT:      RCFP_STATE
 ** PURPOSE:     specify a jj coupled subshell state.

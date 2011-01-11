@@ -1,9 +1,8 @@
 #ifndef _EXCITATION_H_
 #define _EXCITATION_H_
 
-#include "coulomb.h"
+#include "consts.h"
 #include "structure.h"
-#include "transition.h"
 
 typedef struct _CEPW_SCRATCH_ {
   int qr;

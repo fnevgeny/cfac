@@ -1,10 +1,6 @@
 #ifndef _IONIZATION_H_
 #define _IONIZATION_H_
 
-#include "structure.h"
-#include "excitation.h"
-#include "recombination.h"
-
 int FreeIonizationQk(void);
 int InitIonization(void);
 int ReinitIonization(int m);

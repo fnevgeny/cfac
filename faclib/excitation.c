@@ -1,5 +1,17 @@
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include <gsl/gsl_sf_legendre.h>
 
+#include "nucleus.h"
+#include "angular.h"
+#include "radial.h"
+#include "structure.h"
+#include "coulomb.h"
+#include "grid.h"
+#include "interpolation.h"
+#include "transition.h"
+#include "dbase.h"
 #include "excitation.h"
 
 #define MAXMSUB  32

@@ -6,8 +6,12 @@
 
   Author: M. F. Gu, mfgu@stanford.edu
 *************************************************************/
+
+#include <stdlib.h>
+#include <math.h>
 #include <gsl/gsl_sf_coupling.h>
 
+#include "consts.h"
 #include "angular.h"
 
 double ln_factorial[MAX_FACTORIAL];

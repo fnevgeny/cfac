@@ -1,6 +1,7 @@
 #ifndef _CF77_H_
 #define _CF77_H_ 1
 
+#include "sysdef.h"
 #include "cfortran.h"
 
      /* interpolation from TOMS */

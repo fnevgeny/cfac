@@ -1,5 +1,17 @@
-#include "mbpt.h"
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+
+#include "nucleus.h"
+#include "structure.h"
+#include "radial.h"
+#include "angular.h"
+#include "interpolation.h"
+#include "transition.h"
+#include "dbase.h"
 #include "cf77.h"
+#include "mbpt.h"
 
 static int mbpt_extra = 0;
 static int mbpt_nlev = 0;

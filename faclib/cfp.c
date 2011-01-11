@@ -6,6 +6,10 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
+#include <stdlib.h>
+#include <math.h>
+
+#include "consts.h"
 #include "cfp.h"
 
 

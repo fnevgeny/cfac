@@ -8,18 +8,6 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <math.h>
-
-#include "sysdef.h"
-
-/* define constants */
-#include "consts.h"
-
-
 /*
 ** VARIABLE:    DEBUG_RECOUPLE, DEBUG_STRUCTURE, FAC_DEBUG
 ** TYPE:        macro constants

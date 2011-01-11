@@ -1,11 +1,6 @@
 #ifndef _PARSER_H_
 #define _PARSER_H_ 1
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-
 char StrTrim(char *s, char c);
 int QuotedStrSplit(char *s, char sep, char qb, char qe);
 int StrSplit(char *s, char sep);

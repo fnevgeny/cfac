@@ -7,7 +7,16 @@
   Author: M. F. Gu, mfgu@space.mit.edu
 **************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <math.h>
+
 #include "config.h"
+#include "array.h"
+#include "parser.h"
+#include "dbase.h"
 
 /*
 ** VARIABLE:    cfg_groups

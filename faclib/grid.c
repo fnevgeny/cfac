@@ -1,3 +1,9 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "consts.h"
+#include "global.h"
 #include "grid.h"
 
 int AddPW(int *nkl0, double *kl, double *logkl, 

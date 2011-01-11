@@ -1,5 +1,6 @@
 #include <gsl/gsl_spline.h>
 
+#include "consts.h"
 #include "global.h"
 #include "interpolation.h"
 #include "cf77.h"

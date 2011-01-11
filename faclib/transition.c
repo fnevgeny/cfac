@@ -1,5 +1,16 @@
-#include "transition.h"
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#include <math.h>
+
+#include "global.h"
+#include "consts.h"
+#include "nucleus.h"
+#include "radial.h"
+#include "angular.h"
+#include "structure.h"
+#include "dbase.h"
+#include "transition.h"
 
 /* the following options controll the computation methods of OS.
    gauge = 1 coulomb gauge (velocity form)

@@ -58,10 +58,6 @@
 ** NOTE:        
 */
 
-#include <stdio.h>
-#include <math.h>
-#include "global.h"
-
 /*
 ** public functions provided by "cfp"
 */

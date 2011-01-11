@@ -49,11 +49,8 @@
 ** NOTE:        
 */
 
+#include "consts.h"
 #include "array.h"
-#include "global.h"
-#include "parser.h"
-#include "nucleus.h"
-#include "dbase.h"
 
 /*
 ** STRUCT:      SHELL

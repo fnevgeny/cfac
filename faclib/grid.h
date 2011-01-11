@@ -1,8 +1,6 @@
 #ifndef _GRID_H_
 #define _GRID_H_ 1
 
-#include "global.h"
-
 int AddPW(int *nkl0, double *kl, double *logkl, 
 	  int maxkl, int n, int step);
 int SetPWGrid(int *nkl0, double *kl, double *logkl, 

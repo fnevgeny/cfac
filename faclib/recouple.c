@@ -9,8 +9,13 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
-#include "recouple.h"
+#include <math.h>
+
+#include "global.h"
+#include "angular.h"
+#include "rcfp.h"
 #include "cf77.h"
+#include "recouple.h"
 
 /*
 ** VARIABLE:    max_rank

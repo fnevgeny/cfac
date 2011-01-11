@@ -50,12 +50,6 @@
 ** NOTE:        
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stddef.h>
-#include <time.h>
-
 #define USE_NMULTI 1
 /* choose MULTI implementation */
 #ifdef USE_NMULTI

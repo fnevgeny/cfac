@@ -1,15 +1,8 @@
 #ifndef _STRUCTURE_H_
 #define _STRUCTURE_H_
 
-#include "global.h"
-#include "config.h"
-#include "nucleus.h"
-#include "radial.h"
-#include "angular.h"
-#include "dbase.h"
-#include "rcfp.h"
 #include "recouple.h"
-#include <time.h>
+#include "config.h"
 
 typedef struct _HAMILTON_ {
   int pj;

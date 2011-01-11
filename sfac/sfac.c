@@ -1,3 +1,17 @@
+#include <math.h>
+
+#include "nucleus.h"
+#include "radial.h"
+#include "angular.h"
+#include "coulomb.h"
+#include "mbpt.h"
+#include "grid.h"
+#include "structure.h"
+#include "transition.h"
+#include "excitation.h"
+#include "ionization.h"
+#include "recombination.h"
+#include "dbase.h"
 #include "init.h"
 #include "stoken.h"
 

@@ -1,10 +1,19 @@
-#include "orbital.h"
-#include "cf77.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+
+#include "nucleus.h"
+#include "config.h"
+#include "coulomb.h"
+#include "orbital.h"
+#include "interpolation.h"
+#include "cf77.h"
 
 /* the following arrays provide storage space in the calculation */
 static double _veff[MAXRP];

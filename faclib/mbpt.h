@@ -1,9 +1,7 @@
 #ifndef _MBPT_H_
 #define _MBPT_H_
 
-#include "dbase.h"
-#include "structure.h"
-#include "transition.h"
+#include "config.h"
 
 typedef struct _TR_OPT_{
   int mktr;

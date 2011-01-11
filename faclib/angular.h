@@ -54,12 +54,6 @@
 ** NOTE:        
 */
 
-#include <math.h>
-#include <stdio.h>
-#include <time.h>
-
-#include "global.h"
-
 /*
 ** VARIABLE:    MAX_FACTORIAL = 1000
 ** TYPE:        macro constant.

@@ -1,8 +1,6 @@
 #ifndef _NUCLEUS_H_
 #define _NUCLEUS_H_
 
-#include "global.h"
-
 typedef struct _NUCLEUS_ {
   char symbol[5];
   double atomic_number;

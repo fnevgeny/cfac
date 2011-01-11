@@ -48,12 +48,6 @@
 ** NOTE:        
 */
 
-#include "config.h"
-#include "global.h"
-#include "array.h"
-#include "angular.h"
-#include "grid.h"
-
 void    SetHydrogenicNL(int n, int kl, int nm, int klm);
 void    GetHydrogenicNL(int *n, int *kl, int *nm, int *klm);
 double  HydrogenicDipole(double z, int n0, int kl0, 

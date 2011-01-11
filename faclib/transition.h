@@ -1,12 +1,6 @@
 #ifndef _TRANSITION_H_
 #define _TRANSITION_H_
 
-#include "global.h"
-#include "nucleus.h"
-#include "angular.h"
-#include "config.h"
-#include "structure.h"
-
 int SetTransitionCut(double c0, double c);
 double GetTransitionCut(void);
 void SetTransitionMode(int m);

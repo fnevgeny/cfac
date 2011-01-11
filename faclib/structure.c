@@ -1,7 +1,13 @@
 #include <time.h>
+#include <math.h>
 
-#include "structure.h"
+#include "global.h"
+#include "nucleus.h"
+#include "radial.h"
+#include "angular.h"
+#include "dbase.h"
 #include "cf77.h"
+#include "structure.h"
 
 #if (FAC_DEBUG >= DEBUG_STRUCTURE)
 #define debug_integral(s, ne, r) \

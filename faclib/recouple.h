@@ -53,9 +53,6 @@
 */
 
 #include "config.h"
-#include "angular.h"
-#include "rcfp.h"
-#include <time.h>
 
 /*
 ** STRUCT:      INTERACT_SHELL

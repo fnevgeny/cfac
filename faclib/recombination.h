@@ -1,14 +1,7 @@
 #ifndef _RECOMBINATION_H_
 #define _RECOMBINATION_H_
 
-#include "global.h"
-#include "nucleus.h"
-#include "angular.h"
-#include "config.h"
-#include "structure.h"
-#include "excitation.h"
-#include "transition.h"
-#include "coulomb.h"
+#include <stdio.h>
 
 #define MAX_COMPLEX 512
 typedef struct _REC_COMPLEX_ {

@@ -1,3 +1,9 @@
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+
+#include "consts.h"
 #include "dbase.h"
 #include "structure.h"
 

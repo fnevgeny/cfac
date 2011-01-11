@@ -1,5 +1,19 @@
-#include "ionization.h"
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#include "nucleus.h"
+#include "angular.h"
+#include "radial.h"
+#include "structure.h"
+#include "grid.h"
+#include "interpolation.h"
+#include "transition.h"
+#include "excitation.h"
+#include "recombination.h"
+#include "dbase.h"
 #include "cf77.h"
+#include "ionization.h"
 
 #define MAXMSUB 32
 #define NINT0 12

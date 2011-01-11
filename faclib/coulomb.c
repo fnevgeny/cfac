@@ -5,8 +5,13 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
+#include <math.h>
 #include <gsl/gsl_sf_gamma.h>
 
+#include "consts.h"
+#include "array.h"
+#include "angular.h"
+#include "config.h"
 #include "coulomb.h"
 #include "interpolation.h"
 #include "cf77.h"

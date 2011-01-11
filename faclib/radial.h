@@ -1,18 +1,8 @@
 #ifndef _RADIAL_H_
 #define _RADIAL_H_
 
-#include <time.h>
-#include <math.h>
-
-#include "global.h"
-#include "nucleus.h"
-#include "interpolation.h"
-#include "grid.h"
-#include "coulomb.h"
-#include "orbital.h"
 #include "config.h"
-#include "angular.h"
-#include "recouple.h"
+#include "orbital.h"
 
 typedef enum {
     INT_P1P2pQ1Q2 = 1,    /* P1*P2 + Q1*Q2 */

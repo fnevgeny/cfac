@@ -7,6 +7,9 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "array.h"
 
 void InitIntData(void *p, int n) {

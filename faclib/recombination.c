@@ -1,6 +1,18 @@
 #include <time.h>
+#include <math.h>
 #include <gsl/gsl_sf_legendre.h>
 
+#include "consts.h"
+#include "parser.h"
+#include "nucleus.h"
+#include "coulomb.h"
+#include "structure.h"
+#include "radial.h"
+#include "angular.h"
+#include "grid.h"
+#include "interpolation.h"
+#include "transition.h"
+#include "dbase.h"
 #include "recombination.h"
 #include "cf77.h"
 

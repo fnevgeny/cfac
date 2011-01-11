@@ -1,3 +1,9 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "consts.h"
 #include "nucleus.h"
 
 static NUCLEUS atom;

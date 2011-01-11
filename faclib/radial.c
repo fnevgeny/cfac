@@ -3794,7 +3794,7 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2, 
 	      int type, double *x, int id) {
   int i1, i2, ilast;
-  int m;
+  int mode;
   double *r, _dwork[MAXRP], ext;
 
   if (type == 0) type = 1;
@@ -3811,11 +3811,11 @@ int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2,
   /* first, the overlapping region */
   ilast = Min(orb1->ilast, orb2->ilast);
   if (id >= 0) {
-    m = 0;
+    mode = 0;
   } else {
-    m = -1;
+    mode = -1;
   }
-  IntegrateSubRegion(0, ilast, f, orb1, orb2, type, r, m);
+  IntegrateSubRegion(0, ilast, f, orb1, orb2, type, r, mode);
   
   if (orb1->ilast == ilast && orb1->n == 0) {
     /* orb2 extends beyond orb1 AND orb1 belongs to a free electron */
@@ -3825,11 +3825,11 @@ int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2,
       if (abs(type) == 6) {
 	int new_type = 7;
 	if (type < 0) new_type = -new_type;
-	m = 1;
-        IntegrateSubRegion(i1, i2, f, orb2, orb1, new_type, r, m);
+	mode = 1;
+        IntegrateSubRegion(i1, i2, f, orb2, orb1, new_type, r, mode);
       } else {
-	m = 2;
-	IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
+	mode = 2;
+	IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, mode);
       }
       i2--;
     }
@@ -3838,8 +3838,8 @@ int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2,
     if (orb2->n == 0) {
       i1 = orb2->ilast + 1;
       i2 = potential->maxrp - 1;
-      m = 3;
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
+      mode = 3;
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, mode);
       i2--;
     }
   } else
@@ -3849,16 +3849,16 @@ int Integrate(double *f, ORBITAL *orb1, ORBITAL *orb2,
     i2 = orb1->ilast;
     if (i2 > i1) {
       /* TODO: why no type6/7 here??? */
-      m = 1;
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
+      mode = 1;
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, mode);
       i2--;
     }
     /* if orb1 is a free orbital, continue till the last point of potential */
     if (orb1->n == 0) {
       i1 = orb1->ilast + 1;
       i2 = potential->maxrp - 1;
-      m = 3;
-      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, m);
+      mode = 3;
+      IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, mode);
       i2--;
     }
   } else {
@@ -3912,16 +3912,23 @@ void AddEvenPoints(double *r, double *r1, int i0, int i1, int t) {
   }
 }
 
-/* Radial integral (orb1|f|orb2) over subregion
-   between points with indices i0 and i1.
-   t - type (as in Integrate(), plus 7 - ???) 
-   r - the integral array
-   m - ??? */
+/*
+ * Radial integral (orb1|f|orb2) over subregion
+ * between points with indices i0 and i1.
+ * t - type (as in Integrate(), plus 7 - Q1*P2)
+ * r - the integral array
+ * mode of integration:
+ * mode = -1: same as 0 but inward integration
+ * mode =  0: overlap region
+ * mode =  1:
+ * mode =  2: same as 1 but orb1 and orb2 swapped AND ???
+ * mode =  3:
+ */
 int IntegrateSubRegion(int i0, int i1, 
 		       const double *f,
                        const ORBITAL *orb1, const ORBITAL *orb2,
-		       int t, double *r, int m) {
-  int i, j, ip, i2, type;
+		       int t, double *r, int mode) {
+  int i, j, ip, i2, type, id;
   double *large1, *large2, *small1, *small2;
   double *x, *y, *r1, *x1, *x2, *y1, *y2;
   double a, b, e1, e2, a2, r0 = 0.0;
@@ -3938,9 +3945,15 @@ int IntegrateSubRegion(int i0, int i1,
   r1 = _dwork9;
   i2 = i1;
 
-  switch (m) {
-  case -1: /* m = -1 same as m = 0 but integrate inward */
-  case 0:  /* m = 0 */
+  if (mode == -1) {
+      mode = 0;
+      id = -1;
+  } else {
+      id = 0;
+  }
+
+  switch (mode) {
+  case 0:  /* mode =  0 */
     large1 = Large(orb1);
     large2 = Large(orb2);
     small1 = Small(orb1);
@@ -4222,10 +4235,10 @@ int IntegrateSubRegion(int i0, int i1,
     default: /* error */
       return -1;
     }      
-    NewtonCotes(r, x, i0, i2, t, m);
+    NewtonCotes(r, x, i0, i2, t, id);
     break;
 
-  case 1: /* m = 1 */
+  case 1: /* mode = 1 */
     if (type == 6) { /* type 6 needs special treatments */
       large1 = Large(orb1);
       large2 = Large(orb2);
@@ -4302,9 +4315,9 @@ int IntegrateSubRegion(int i0, int i1,
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
     }
-  case 2: /* m = 1, 2 are essentially the same */
-    /* type 6 is treated in m = 1 */
-    if (m == 2) {
+  case 2: /* mode = 2 */
+    /* type 6/7 is treated in mode = 1 */
+    if (mode == 2) {
       const ORBITAL *tmp = orb1;
       orb1 = orb2;
       orb2 = tmp;
@@ -4446,10 +4459,6 @@ int IntegrateSubRegion(int i0, int i1,
       break;
     case 5: /* type = 5 */
       j = 0;
-      if (m == 2) {
-	r0 = r[i0];
-	r[i0] = 0.0;
-      }
       for (i = i0; i <= i1; i+= 2) {
 	ip = i+1;
 	x[j] = large1[i] * small2[ip];
@@ -4479,8 +4488,12 @@ int IntegrateSubRegion(int i0, int i1,
 	  i2 = i;
 	}
       }
+      if (mode == 2) {
+	r0 = r[i0];
+	r[i0] = 0.0;
+      }
       IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, t);
-      if (m == 2) {
+      if (mode == 2) {
 	if (t < 0) {
 	  for (i = i0; i <= i2; i++) {
 	    r[i] = r0 - r[i];
@@ -4497,7 +4510,7 @@ int IntegrateSubRegion(int i0, int i1,
     }
     break;
 
-  case 3: /* m = 3 */
+  case 3: /* mode = 3 */
     large1 = Large(orb1);
     large2 = Large(orb2);
     small1 = Small(orb1);

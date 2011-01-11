@@ -4712,9 +4712,9 @@ int IntegrateSinCos(int j, double *x, double *y,
 		    double *phase, double *dphase, 
 		    int i0, double *r, int last_only) {
   int i, k, m, n, q, s, i1;
-  double si0, si1, cs0, cs1;
-  double is0, is1, is2, is3;
-  double ic0, ic1, ic2, ic3;
+  double si0, si1 = 0.0, cs0, cs1 = 0.0;
+  double is0 = 0.0, is1 = 0.0, is2 = 0.0, is3 = 0.0;
+  double ic0 = 0.0, ic1 = 0.0, ic2 = 0.0, ic3 = 0.0;
   double his0 = 0.0, his1 = 0.0, his2 = 0.0, his3 = 0.0;
   double hic0 = 0.0, hic1 = 0.0, hic2 = 0.0, hic3 = 0.0;
   double a0, a1, a2, a3;

@@ -308,7 +308,7 @@ int RadialOverlaps(char *fn, int kappa) {
     for (j = 0; j <= i; j++) {
       orb2 = GetOrbital(j);
       if (orb2->kappa != kappa) continue;
-      IntegrateS(_yk, orb1, orb2, 1, &r, 0);
+      IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &r, 0);
       fprintf(f, "%2d %2d %10.3E  %2d %2d %10.3E  %12.5E\n", 
 	      orb1->n, orb1->kappa, orb1->energy, 
 	      orb2->n, orb2->kappa, orb2->energy, r);
@@ -2220,7 +2220,7 @@ int ResidualPotential(double *s, int k0, int k1) {
       z += potential->Vc[i];
       _yk[i] = -(potential->Z[i]/potential->rad[i]) - z;
     }
-    IntegrateS(_yk, orb1, orb2, 1, s, -1);
+    IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, s, -1);
   }
   *p = *s;
   return 0;
@@ -2257,7 +2257,7 @@ double MeanPotential(int k0, int k1) {
       z += potential->Vc[i];
       _yk[i] = z;
     }
-    IntegrateS(_yk, orb1, orb2, 1, &z, -1);
+    IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &z, -1);
   }
 
   return z;
@@ -2359,7 +2359,7 @@ double RadialMoments(int m, int k1, int k2) {
       _yk[i] = pow(potential->rad[i], m);
     }
     r = 0.0;
-    IntegrateS(_yk, orb1, orb2, 1, &r, m);
+    IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &r, m);
     *q = r;
   }
   return r;
@@ -2489,7 +2489,7 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
 	  n = m;
 	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	}
-	IntegrateS(_yk, orb1, orb2, 4, &r, 0);
+	IntegrateS(_yk, orb1, orb2, INT_P1Q2pQ1P2, &r, 0);
 	r *= t;
 	r *= (2*m + 1.0)/sqrt(m*(m+1.0));
 	r /= pow(a, m);
@@ -2509,13 +2509,13 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
 	r = 0.0;
 	rp = 0.0;
 	if (t) {
-	  IntegrateS(_yk, orb1, orb2, 4, &ip, 0);
-	  IntegrateS(_zk, orb1, orb2, 4, &ipm, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
+	  IntegrateS(_zk, orb1, orb2, INT_P1Q2pQ1P2, &ipm, 0);
 	  r = t*ip*q - t*ipm/q;
 	}
 	if (k1 != k2) {
-	  IntegrateS(_yk, orb1, orb2, 5, &im, 0);
-	  IntegrateS(_zk, orb1, orb2, 5, &imm, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
+	  IntegrateS(_zk, orb1, orb2, INT_P1Q2mQ1P2, &imm, 0);
 	  rp = (am + 1.0)*im*q + am*imm/q;
 	}
 	r += rp;
@@ -2531,15 +2531,15 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
 	  _zk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	if (t) {
-	  IntegrateS(_yk, orb1, orb2, 4, &ip, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
 	  r = t*ip;
 	}
 	if (k1 != k2) {
-	  IntegrateS(_yk, orb1, orb2, 5, &im, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
 	} else {
 	  im = 0.0;
 	}
-	IntegrateS(_zk, orb1, orb2, 1, &imm, 0);
+	IntegrateS(_zk, orb1, orb2, INT_P1P2pQ1Q2, &imm, 0);
 	rp = (am + 1.0) * (imm + im);
 	q = (2*am + 1.0)/sqrt(am*(am+1.0));
 	q /= pow(a, am);
@@ -2677,7 +2677,7 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
 	  n = m;
 	  _yk[j] = gsl_sf_bessel_jl(n, x);
 	}
-	IntegrateS(_yk, orb1, orb2, 4, &r, 0);
+	IntegrateS(_yk, orb1, orb2, INT_P1Q2pQ1P2, &r, 0);
 	r *= t;
 	r *= (2*m + 1.0)/sqrt(m*(m+1.0));
 	r /= pow(a, m);
@@ -2697,13 +2697,13 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
 	r = 0.0;
 	rp = 0.0;
 	if (t) {
-	  IntegrateS(_yk, orb1, orb2, 4, &ip, 0);
-	  IntegrateS(_zk, orb1, orb2, 4, &ipm, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
+	  IntegrateS(_zk, orb1, orb2, INT_P1Q2pQ1P2, &ipm, 0);
 	  r = t*ip*q - t*ipm/q;
 	}
 	if (k1 != k2) {
-	  IntegrateS(_yk, orb1, orb2, 5, &im, 0);
-	  IntegrateS(_zk, orb1, orb2, 5, &imm, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
+	  IntegrateS(_zk, orb1, orb2, INT_P1Q2mQ1P2, &imm, 0);
 	  rp = (am + 1.0)*im*q + am*imm/q;
 	}
 	r += rp;
@@ -2719,15 +2719,15 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
 	  _zk[j] = gsl_sf_bessel_jl(n, x);
 	}
 	if (t) {
-	  IntegrateS(_yk, orb1, orb2, 4, &ip, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
 	  r = t*ip;
 	}
 	if (k1 != k2) {
-	  IntegrateS(_yk, orb1, orb2, 5, &im, 0);
+	  IntegrateS(_yk, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
 	} else {
 	  im = 0.0;
 	}
-	IntegrateS(_zk, orb1, orb2, 1, &imm, 0);
+	IntegrateS(_zk, orb1, orb2, INT_P1P2pQ1Q2, &imm, 0);
 	rp = (am + 1.0) * (imm + im);
 	q = (2*am + 1.0)/sqrt(am*(am+1.0));
 	q /= pow(a, am);
@@ -2851,7 +2851,7 @@ double *GeneralizedMoments(int k1, int k2, int m) {
 	x = k * potential->rad[i];
 	_yk[i] = gsl_sf_bessel_jl(m, x);
       }
-      IntegrateS(_yk, orb1, orb2, 1, &r, 0);
+      IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &r, 0);
       (*p)[t] = r/k;
     }
   }
@@ -3149,7 +3149,7 @@ double QED1E(int k0, int k1) {
       _yk[i] = potential->U[i] + potential->Vc[i];
     }
     a = 0.0;
-    IntegrateS(_yk, orb1, orb2, 1, &a, -1);
+    IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
     a = -a;
     if (k0 == k1) a += orb1->energy;
     a /= (AMU * GetAtomicMass());
@@ -3158,14 +3158,14 @@ double QED1E(int k0, int k1) {
       _yk[i] = orb1->energy - (potential->U[i] + potential->Vc[i]);
       _yk[i] *= orb2->energy - (potential->U[i] + potential->Vc[i]);
     }
-    IntegrateS(_yk, orb1, orb2, 1, &a, -1);
+    IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
     a *= FINE_STRUCTURE_CONST2/(2.0 * AMU * GetAtomicMass());
     r += a;
   }
 
   if (qed.vp > 0) {
     a = 0.0;
-    IntegrateS(potential->uehling, orb1, orb2, 1, &a, 0);
+    IntegrateS(potential->uehling, orb1, orb2, INT_P1P2pQ1Q2, &a, 0);
     r += a;
   }
 
@@ -3345,13 +3345,13 @@ double BreitS(int k0, int k1, int k2, int k3, int k) {
       _dwork1[i] = pow(potential->rad[i], k);
     }
     
-    IntegrateF(_dwork1, orb0, orb1, 6, _zk, 0);
+    IntegrateF(_dwork1, orb0, orb1, INT_P1Q2, _zk, 0);
     
     for (i = 0; i < potential->maxrp; i++) {
       _zk[i] /= _dwork1[i]*potential->rad[i];
     }
 
-    IntegrateS(_zk, orb2, orb3, 6, &r, 0);
+    IntegrateS(_zk, orb2, orb3, INT_P1Q2, &r, 0);
     *p = r;
   }
 
@@ -3459,7 +3459,7 @@ int Slater(double *s, int k0, int k1, int k2, int k3, int k, int mode) {
       for (i = 0; i <= ilast; i++) {
 	_yk[i] = (_yk[i]/potential->rad[i]);
       }
-      IntegrateS(_yk, orb1, orb3, 1, s, 0);
+      IntegrateS(_yk, orb1, orb3, INT_P1P2pQ1Q2, s, 0);
       break;
     
     case -1: /* quasi relativistic with distorted free orbitals */
@@ -3470,7 +3470,7 @@ int Slater(double *s, int k0, int k1, int k2, int k3, int k, int mode) {
       for (i = 0; i <= ilast; i++) {
 	_yk[i] /= potential->rad[i];
       }
-      IntegrateS(_yk, orb1, orb3, 2, s, 0);
+      IntegrateS(_yk, orb1, orb3, INT_P1P2, s, 0);
 
       norm  = orb0->qr_norm;
       norm *= orb1->qr_norm;
@@ -3592,7 +3592,7 @@ void PrepSlater(int ib0, int iu0, int ib1, int iu1,
 	    dp = MultiSet(slater_array, index, NULL, InitDoubleData, NULL);
 	    c++;
 	    if (*dp == 0) {
-	      IntegrateS(_yk, orb1, orb3, 1, dp, 0);
+	      IntegrateS(_yk, orb1, orb3, INT_P1P2pQ1Q2, dp, 0);
 	    }
 	  }
 	}
@@ -3634,7 +3634,7 @@ static int GetYk1(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, int type) {
 }
       
 int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 
-	  int k1, int k2, int type) {
+	  int k1, int k2, RadIntType type) {
   int i, i0, i1, n;
   double a, b, a2, b2, max, max1;
   int index[3];
@@ -3739,25 +3739,20 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
   return 0;
 }  
 
-/* integrate a function given by f with two orbitals. */
-/* type indicates the type of integral */
-/* type = 1,    P1*P2 + Q1*Q2 */
-/* type = 2,    P1*P2 */
-/* type = 3,    Q1*Q2 */ 
-/* type = 4:    P1*Q2 + Q1*P2 */
-/* type = 5:    P1*Q2 - Q1*P2 */
-/* type = 6:    P1*Q2 */
-/* if type is positive, only the end point is returned in x, */
-/* otherwise, the whole function is returned (in x[]) */
-/* id indicates whether integrate inward (-1) or outward (0) */
-static int _Integrate(const double *f, const ORBITAL *orb1, const ORBITAL *orb2, 
-	      int type, double *x, int id, int last_only) {
+/*
+ * integrate a function given by f with two orbitals.
+ * type indicates the type of integral
+ * id indicates whether integrate inward (-1) or outward (0)
+ * if last_only is set, only the end point is returned in x,
+ * otherwise, the whole function is returned (in x[])
+ */
+static int _Integrate(const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
+	              RadIntType type, double *x, int id, int last_only)
+{
   int i1, i2, ilast;
   int mode;
   double *r, _dwork[MAXRP], ext;
 
-  if (type == 0) type = 1;
-  
   if (last_only) {
     r = _dwork;
   } else {
@@ -3781,10 +3776,10 @@ static int _Integrate(const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     i1 = ilast + 1;
     i2 = orb2->ilast;
     if (i2 > i1) {
-      if (type == 6) {
-	int new_type = 7;
+      if (type == INT_P1Q2) {
+	type = INT_Q1P2;
 	mode = 1;
-        IntegrateSubRegion(i1, i2, f, orb2, orb1, new_type, r, mode, last_only);
+        IntegrateSubRegion(i1, i2, f, orb2, orb1, type, r, mode, last_only);
       } else {
 	mode = 2;
 	IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, mode, last_only);
@@ -3806,7 +3801,7 @@ static int _Integrate(const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     i1 = ilast + 1;
     i2 = orb1->ilast;
     if (i2 > i1) {
-      /* TODO: why no type6/7 here??? */
+      /* TODO: why no INT_P1Q2/INT_Q1P2 here??? */
       mode = 1;
       IntegrateSubRegion(i1, i2, f, orb1, orb2, type, r, mode, last_only);
       i2--;
@@ -3863,14 +3858,14 @@ static int _Integrate(const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
 
 /* Integrate and return a single (last) point */
 int IntegrateS(const double *f, const ORBITAL *orb1, const ORBITAL *orb2, 
-	      int type, double *r, int id)
+	      RadIntType type, double *r, int id)
 {
     return _Integrate(f, orb1, orb2, type, r, id, 1);
 }
 
 /* Integrate and return the whole anti-derivative array */
 int IntegrateF(const double *f, const ORBITAL *orb1, const ORBITAL *orb2, 
-	      int type, double x[], int id)
+	      RadIntType type, double x[], int id)
 {
     return _Integrate(f, orb1, orb2, type, x, id, 0);
 }
@@ -3903,7 +3898,8 @@ static void AddEvenPoints(double *r, double *r1, int i0, int i1, int last_only) 
 int IntegrateSubRegion(int i0, int i1, 
 		       const double *f,
                        const ORBITAL *orb1, const ORBITAL *orb2,
-		       int type, double *r, int mode, int last_only) {
+		       RadIntType type, double *r,
+                       int mode, int last_only) {
   int i, j, ip, i2, id;
   double *large1, *large2, *small1, *small2;
   double *x, *y, *r1, *x1, *x2, *y1, *y2;
@@ -3934,7 +3930,7 @@ int IntegrateSubRegion(int i0, int i1,
     small1 = Small(orb1);
     small2 = Small(orb2);
     switch (type) {
-    case 1: /* type = 1 */
+    case INT_P1P2pQ1Q2:
       for (i = i0; i <= i1; i++) {
 	x[i] = large1[i] * large2[i];
 	x[i] += small1[i] * small2[i];
@@ -3982,7 +3978,7 @@ int IntegrateSubRegion(int i0, int i1,
 	}
       }
       break;
-    case 2: /* type = 2 */
+    case INT_P1P2:
       for (i = i0; i <= i1; i++) {
 	x[i] = large1[i] * large2[i];
 	x[i] *= f[i]*potential->dr_drho[i];
@@ -4025,7 +4021,7 @@ int IntegrateSubRegion(int i0, int i1,
 	}
       }
       break;
-    case 3: /*type = 3 */
+    case INT_Q1Q2:
       for (i = i0; i <= i1; i++) {
 	x[i] = small1[i] * small2[i];
 	x[i] *= f[i]*potential->dr_drho[i];
@@ -4068,7 +4064,7 @@ int IntegrateSubRegion(int i0, int i1,
 	}
       }
       break;
-    case 4: /*type = 4 */
+    case INT_P1Q2pQ1P2:
       for (i = i0; i <= i1; i++) {
 	x[i] = large1[i] * small2[i];
 	x[i] += small1[i] * large2[i];
@@ -4116,7 +4112,7 @@ int IntegrateSubRegion(int i0, int i1,
 	}
       }
       break;
-    case 5: /* type = 5 */
+    case INT_P1Q2mQ1P2:
       for (i = i0; i <= i1; i++) {
 	x[i] = large1[i] * small2[i];
 	x[i] -= small1[i] * large2[i];
@@ -4164,7 +4160,7 @@ int IntegrateSubRegion(int i0, int i1,
 	}
       }
       break;
-    case 6: /* type = 6 */
+    case INT_P1Q2:
       for (i = i0; i <= i1; i++) {
 	x[i] = large1[i] * small2[i];
 	x[i] *= f[i]*potential->dr_drho[i];
@@ -4214,7 +4210,7 @@ int IntegrateSubRegion(int i0, int i1,
     break;
 
   case 1: /* mode = 1 */
-    if (type == 6) { /* type 6 needs special treatments */
+    if (type == INT_P1Q2) { /* type INT_P1Q2 needs special treatments */
       large1 = Large(orb1);
       large2 = Large(orb2);
       small1 = Small(orb1);
@@ -4253,7 +4249,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, last_only);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
-    } else if (type == 7) {
+    } else if (type == INT_Q1P2) {
       large1 = Large(orb1);
       large2 = Large(orb2);
       small1 = Small(orb1);
@@ -4291,7 +4287,7 @@ int IntegrateSubRegion(int i0, int i1,
       break;
     }
   case 2: /* mode = 2 */
-    /* type 6/7 is treated in mode = 1 */
+    /* type INT_P1Q2/INT_Q1P2 is treated in mode = 1 */
     if (mode == 2) {
       const ORBITAL *tmp = orb1;
       orb1 = orb2;
@@ -4305,7 +4301,7 @@ int IntegrateSubRegion(int i0, int i1,
     e2 = orb2->energy;
     a2 = 0.5*FINE_STRUCTURE_CONST2;
     switch (type) {
-    case 1: /* type = 1 */
+    case INT_P1P2pQ1Q2:
       j = 0;
       for (i = i0; i <= i1; i+= 2) {
 	ip = i+1;
@@ -4339,7 +4335,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, last_only);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
-    case 2: /* type = 2 */
+    case INT_P1P2:
       j = 0;
       for (i = i0; i <= i1; i+= 2) {
 	ip = i+1;
@@ -4367,7 +4363,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, NULL, _phase, _dphase, i0, r, last_only);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
-    case 3: /* type = 3 */
+    case INT_Q1Q2:
       j = 0;
       for (i = i0; i <= i1; i+= 2) {
 	ip = i+1;
@@ -4398,7 +4394,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, last_only);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;  
-    case 4: /* type = 4 */
+    case INT_P1Q2pQ1P2:
       j = 0;
       for (i = i0; i <= i1; i+= 2) {
 	ip = i+1;
@@ -4432,7 +4428,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, y, _phase, _dphase, i0, r, last_only);
       if (IsOdd(i2)) r[i2] = r[i2-1];
       break;
-    case 5: /* type = 5 */
+    case INT_P1Q2mQ1P2:
       j = 0;
       for (i = i0; i <= i1; i+= 2) {
 	ip = i+1;
@@ -4495,7 +4491,7 @@ int IntegrateSubRegion(int i0, int i1,
     a2 = 0.5*FINE_STRUCTURE_CONST2;
     r1[i0] = 0.0;
     switch (type) {
-    case 1: /* type = 1 */
+    case INT_P1P2pQ1Q2:
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;	
@@ -4531,7 +4527,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, NULL, y, _phase, _dphasep, i0, r1, last_only);
       AddEvenPoints(r, r1, i0, i1, last_only);
       break;	
-    case 2: /* type = 2 */
+    case INT_P1P2:
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4558,7 +4554,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, NULL, y, _phase, _dphasep, i0, r1, last_only);
       AddEvenPoints(r, r1, i0, i1, last_only);
       break;
-    case 3: /* type = 3 */
+    case INT_Q1Q2:
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4593,7 +4589,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, last_only);
       AddEvenPoints(r, r1, i0, i1, last_only);
       break;
-    case 4: /* type = 4 */
+    case INT_P1Q2pQ1P2:
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4627,7 +4623,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, last_only);
       AddEvenPoints(r, r1, i0, i1, last_only);
       break;
-    case 5: /* type = 5 */
+    case INT_P1Q2mQ1P2:
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -4661,7 +4657,7 @@ int IntegrateSubRegion(int i0, int i1,
       IntegrateSinCos(j, x, y, _phase, _dphasep, i0, r1, last_only);
       AddEvenPoints(r, r1, i0, i1, last_only);
       break;
-    case 6: /* type = 6 */
+    case INT_P1Q2:
       j = 0;
       for (i = i0; i <= i1; i += 2) {
 	ip = i+1;
@@ -5031,14 +5027,14 @@ int TestIntegrate(void) {
       _yk[i] = pow(potential->rad[i],k);
       _yk[i+i0] = 1.0/_yk[i];
     }
-    IntegrateF(_yk+i0, orb3, orb4, 1, _zk, 0);
-    IntegrateF(_yk+i0, orb3, orb4, 1, _zk+i0, -1);
+    IntegrateF(_yk+i0, orb3, orb4, INT_P1P2pQ1Q2, _zk, 0);
+    IntegrateF(_yk+i0, orb3, orb4, INT_P1P2pQ1Q2, _zk+i0, -1);
     for (i = 0; i < potential->maxrp; i++) {
       printf("%d %4d %15.8E %15.8E %15.8E %15.8E %15.8E\n", 
 	     k, i, potential->rad[i], _yk[i], _zk[i], _yk[i+i0], _zk[i+i0]);
     }
-    IntegrateS(_yk+i0, orb3, orb4, 1, &r, 0);
-    IntegrateS(_yk+i0, orb3, orb4, 1, &a, -1);
+    IntegrateS(_yk+i0, orb3, orb4, INT_P1P2pQ1Q2, &r, 0);
+    IntegrateS(_yk+i0, orb3, orb4, INT_P1P2pQ1Q2, &a, -1);
     printf("# %15.8E %15.8E\n", r, a);
     printf("\n\n");
   }

@@ -14,6 +14,16 @@
 #include "angular.h"
 #include "recouple.h"
 
+typedef enum {
+    INT_P1P2pQ1Q2 = 1,    /* P1*P2 + Q1*Q2 */
+    INT_P1P2      = 2,    /* P1*P2         */
+    INT_Q1Q2      = 3,    /* Q1*Q2         */ 
+    INT_P1Q2pQ1P2 = 4,    /* P1*Q2 + Q1*P2 */
+    INT_P1Q2mQ1P2 = 5,    /* P1*Q2 - Q1*P2 */
+    INT_P1Q2      = 6,    /* P1*Q2         */
+    INT_Q1P2      = 7     /* P1*Q2         */
+} RadIntType;
+
 typedef struct _SLATER_YK_ {
   short npts;
   float *yk;
@@ -95,15 +105,15 @@ void DiExAvgConfig(AVERAGE_CONFIG *cfg, double *d0, double *d1);
 
 /* routines for radial integral calculations */
 int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 
-	  int k1, int k2, int type);
+	  int k1, int k2, RadIntType type);
 int IntegrateF(const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
-    int type, double x[], int id);
+    RadIntType type, double x[], int id);
 int IntegrateS(const double *f, const ORBITAL *orb1, const ORBITAL *orb2, 
-	      int type, double *r, int id);
+    RadIntType type, double *r, int id);
 int IntegrateSubRegion(int i0, int i1, 
 		       const double *f,
                        const ORBITAL *orb1, const ORBITAL *orb2,
-		       int type, double *r, int m, int last_only);
+		       RadIntType type, double *r, int m, int last_only);
 int IntegrateSinCos(int j, double *x, double *y, 
 		    double *phase, double *dphase, 
 		    int i0, double *r, int last_only);

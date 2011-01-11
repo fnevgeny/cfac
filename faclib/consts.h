@@ -3,15 +3,8 @@
 
 #include <math.h>
 
-/*
-** VARIABLE:    VERSION, SUBVERSION, SUBSUBVERSION.
-** TYPE:        macro constants.
-** PURPOSE:     tracking the version.
-** NOTE:        
-*/
-#define VERSION        1
-#define SUBVERSION     2
-#define SUBSUBVERSION  1
+#include "version.h"
+
 #define VersionGE(h, a, b, c)    (((h)->version >= (a)) &&\
                                   ((h)->sversion >= (b)) &&\
                                   ((h)->ssversion >= (c)))

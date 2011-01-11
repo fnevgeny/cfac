@@ -31,7 +31,7 @@ Make.dep : $(CSRCS) Make.defs $(GENINCS)
 	@echo -n "Generating dependencies... "
 	@echo "# Generated automatically by \`make depend'" > Make.dep
 	@(test -n "$(CSRCS)" && \
-	 $(CC) -I$(TOP) ${CPPFLAGS} $(CFLAGS) -MM $(CSRCS)) || true >> Make.dep
+	 $(CC) -I$(TOP) ${CPPFLAGS} $(CFLAGS) -MM $(CSRCS)) >> Make.dep || true
 	@echo "done"
 
 $(LIB) : $(OBJS) Make.defs

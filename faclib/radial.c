@@ -4213,7 +4213,7 @@ int IntegrateSubRegion(int i0, int i1,
     default: /* error */
       return -1;
     }      
-    NewtonCotes(r, x, i0, i2, last_only, id);
+    NewtonCotes(r+i0, x+i0, i2-i0, last_only, id);
     break;
 
   case 1: /* mode = 1 */
@@ -4782,7 +4782,7 @@ int IntegrateSinCos(int j, double *x, double *y,
     for (m = 0, n = i0+1; m < i; m++, n += 2) {
       z[n] *= potential->dr_drho[n];
     }
-    NewtonCotes(r, z, i0, k-2, last_only, 0);
+    NewtonCotes(r+i0, z+i0, k-2-i0, last_only, 0);
   }
 
   q = i-1;

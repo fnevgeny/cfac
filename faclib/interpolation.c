@@ -254,80 +254,80 @@ double Simpson(double *x, int i0, int i1) {
 /*
  * Integration by Newton-Cotes formula
  * input: x[]
- * limits (indices): i0 .. i1
+ * limits (indices): 0 .. ilast
  * output: r[]
  * last_only: only the finite integral is needed
  * id - direction (<0 => inward)
  */
-int NewtonCotes(double r[], const double x[], int i0, int i1,
+int NewtonCotes(double r[], const double x[], int ilast,
                 int last_only, int id) {
   int i, k;
   double a;
 
   if (id >= 0) {
     if (last_only) {
-      r[i1] = x[i0];
+      r[ilast] = x[0];
       a = 0.0;
-      for (i = i0+1; i < i1; i += 2) {
+      for (i = 1; i < ilast; i += 2) {
 	a += x[i];
       }
-      r[i1] += 4.0*a;
+      r[ilast] += 4.0*a;
       a = 0.0;
-      k = i1-1;
-      for (i = i0+2; i < k; i += 2) {
+      k = ilast-1;
+      for (i = 2; i < k; i += 2) {
 	a += x[i];
       }
-      r[i1] += 2.0*a;
-      if (i == i1) {
-	r[i1] += x[i1];
-	r[i1] /= 3.0;
+      r[ilast] += 2.0*a;
+      if (i == ilast) {
+	r[ilast] += x[ilast];
+	r[ilast] /= 3.0;
       } else {
-	r[i1] += x[k];
-	r[i1] /= 3.0;
-	r[i1] += 0.5*(x[k] + x[i1]);
+	r[ilast] += x[k];
+	r[ilast] /= 3.0;
+	r[ilast] += 0.5*(x[k] + x[ilast]);
       }
-      r[i1] += r[i0];
+      r[ilast] += r[0];
     } else {
-      for (i = i0+2; i <= i1; i += 2) {
+      for (i = 2; i <= ilast; i += 2) {
 	r[i] = r[i-2] + _CNC[2][0]*(x[i-2]+x[i]) + _CNC[2][1]*x[i-1];
 	r[i-1] = r[i-2] + 0.5*(x[i-2] + x[i-1]);
       }
-      if (i == i1+1) {
-	k = i1-1;
-	r[i1] = r[k] + 0.5*(x[k]+x[i1]);
+      if (i == ilast+1) {
+	k = ilast-1;
+	r[ilast] = r[k] + 0.5*(x[k]+x[ilast]);
       }
     }
   } else {
     if (last_only) {
-      r[i1] = x[i1];
+      r[ilast] = x[ilast];
       a = 0.0;
-      for (i = i1-1; i > i0; i -= 2) {
+      for (i = ilast-1; i > 0; i -= 2) {
 	a += x[i];
       }
-      r[i1] += 4.0*a;
+      r[ilast] += 4.0*a;
       a = 0.0;
-      k = i0+1;
-      for (i = i1-2; i > k; i -= 2) {
+      k = 1;
+      for (i = ilast-2; i > k; i -= 2) {
 	a += x[i];
       }
-      r[i1] += 2.0*a;
-      if (i == i0) {
-	r[i1] += x[i0];
-	r[i1] /= 3.0;
+      r[ilast] += 2.0*a;
+      if (i == 0) {
+	r[ilast] += x[0];
+	r[ilast] /= 3.0;
       } else {
-	r[i1] += x[k];
-	r[i1] /= 3.0;
-	r[i1] += 0.5*(x[k] + x[i0]);
+	r[ilast] += x[k];
+	r[ilast] /= 3.0;
+	r[ilast] += 0.5*(x[k] + x[0]);
       }
-      r[i1] += r[i0];
+      r[ilast] += r[0];
     } else {
-      for (i = i1-2; i >= i0; i -= 2) {
+      for (i = ilast-2; i >= 0; i -= 2) {
 	r[i] = r[i+2] + _CNC[2][0]*(x[i+2]+x[i]) + _CNC[2][1]*x[i+1];
 	r[i+1] = r[i+2] + 0.5*(x[i+2] + x[i+1]);
       }
-      if (i == i0-1) {
-	k = i0+1;
-	r[i0] = r[k] + 0.5*(x[k]+x[i0]);
+      if (i == -1) {
+	k = 1;
+	r[0] = r[k] + 0.5*(x[k]+x[0]);
       }
     }
   }

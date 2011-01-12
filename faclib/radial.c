@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include <gsl/gsl_sf_bessel.h>
 
@@ -4815,13 +4817,13 @@ int IntegrateSinCos(int j, double *x, double *y,
     for (n = i1; n < j; n++) {
       x[n] /= dphase[n];
     }
-    UVIP3C(3, j-i1, phase+i1, x+i1, xa1, xa2, xa3);
+    UVIP3C(j-i1, phase+i1, x+i1, xa1, xa2, xa3);
   }
   if (y != NULL) {
     for (n = i1; n < j; n++) {
       y[n] /= dphase[n];
     }
-    UVIP3C(3, j-i1, phase+i1, y+i1, ya1, ya2, ya3);
+    UVIP3C(j-i1, phase+i1, y+i1, ya1, ya2, ya3);
   }
 
   /* analytic piecewise integration of cubic spline with sin or cos */

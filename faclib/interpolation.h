@@ -20,4 +20,8 @@ int NewtonCotes(double r[], const double x[], int ilast,
 void uvip3p(int nd, const double *xd, const double *yd,
 		 int ni, const double *xi, double *yi);
 
+#define UVIP3C uvip3c
+void uvip3c(int nd, const double xd[], const double yd[],
+		 double c1[], double c2[], double c3[]);
+
 #endif

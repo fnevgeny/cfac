@@ -4,13 +4,6 @@
 #include "sysdef.h"
 #include "cfortran.h"
 
-     /* interpolation from TOMS */
-     PROTOCCALLSFSUB7(UVIP3C, uvip3c, INT, INT, DOUBLEV, DOUBLEV,\
-		      DOUBLEV, DOUBLEV, DOUBLEV)
-#define UVIP3C(A1,A2,A3,A4,A5,A6,A7)\
-     CCALLSFSUB7(UVIP3C, uvip3c, INT, INT, DOUBLEV, DOUBLEV,\
-		 DOUBLEV, DOUBLEV, DOUBLEV, A1,A2,A3,A4,A5,A6,A7)
-
      PROTOCCALLSFSUB12(SUBPLX, subplx, ROUTINE, INT, DOUBLE,\
 		       INT, INT, DOUBLEV, DOUBLEV, DOUBLEV,\
 		       INTV, DOUBLEV, INTV, INTV)

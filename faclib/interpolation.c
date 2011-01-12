@@ -371,3 +371,81 @@ void uvip3p(int nd, const double *xd, const double *yd,
 
     return;
 }
+
+/* private GSL structures... */
+typedef struct
+{
+  double * c;
+  double * g;
+  double * diag;
+  double * offdiag;
+} cspline_state_t;
+
+typedef struct
+{
+  double * b;
+  double * c;
+  double * d;
+  double * _m;
+} akima_state_t;
+
+static inline void
+coeff_calc (const double c_array[], double dy, double dx, size_t index,  
+            double * b, double * c, double * d)
+{
+  const double c_i = c_array[index];
+  const double c_ip1 = c_array[index + 1];
+  *b = (dy / dx) - dx * (c_ip1 + 2.0 * c_i) / 3.0;
+  *c = c_i;
+  *d = (c_ip1 - c_i) / (3.0 * dx);
+}
+
+/* Imitate F77 UVIP3C (NP=3) */
+void uvip3c(int nd, const double xd[], const double yd[],
+		 double c1[], double c2[], double c3[])
+{
+    int i;
+    const gsl_interp_type *type;
+    gsl_interp_accel *acc;
+    gsl_spline *spline;
+    gsl_interp *interp;
+    
+    
+    if (nd > 4) {
+        type = gsl_interp_akima;
+    } else
+    if (nd > 2) {
+        type = gsl_interp_cspline;
+    } else {
+        fprintf(stderr, "uvip3c() called with nd = %d\n", nd);
+        abort();
+    }
+    
+    acc = gsl_interp_accel_alloc();
+    spline = gsl_spline_alloc(type, nd);
+
+    gsl_spline_init(spline, xd, yd, nd);
+    
+    interp = spline->interp;
+    
+    if (nd < 5) {
+        const cspline_state_t* cs = (cspline_state_t *) interp->state;
+        for (i = 0; i < nd - 1; i++) {
+            double dx = xd[i + 1] - xd[i];
+            double dy = yd[i + 1] - yd[i];
+            
+            coeff_calc(cs->c, dy, dx, i, &c1[i], &c2[i], &c3[i]);
+        }
+        
+    } else {
+        const akima_state_t* as = (akima_state_t *) interp->state;
+        memcpy(c1, as->b, sizeof(double)*(nd - 1));
+        memcpy(c2, as->c, sizeof(double)*(nd - 1));
+        memcpy(c3, as->d, sizeof(double)*(nd - 1));
+    }
+
+    gsl_spline_free(spline);
+    gsl_interp_accel_free(acc);
+
+    return;
+}

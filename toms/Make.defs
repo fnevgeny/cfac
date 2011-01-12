@@ -17,5 +17,4 @@ FSRCS = calcc.f \
 	sortd.f \
 	start.f \
 	subopt.f \
-	subplx.f \
-	uvip3c.f
+	subplx.f

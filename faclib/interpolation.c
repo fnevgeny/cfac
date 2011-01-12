@@ -74,6 +74,11 @@ void SVDFit(int np, double *coeff, double *chisq, double tol,
 
   DGESDD(jobz, nd, np, u, nd, w, u, nd, v, np,
 	  dwork, lwork, iwork, &infor);
+   
+  if (infor != 0) {
+    fprintf(stderr, "DGESDD() failed with %d\n", infor);
+    abort();
+  }
     
   wmax = w[0];
   thresh = tol*wmax;

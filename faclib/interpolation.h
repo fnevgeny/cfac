@@ -1,8 +1,6 @@
 #ifndef _INTERPOLATION_H_
 #define _INTERPOLATION_H_
 
-void PolyBasis(int n, double *c, double x, double logx);
-void PolyFit(int n, double *c, int nd, double *x, double *y);
 void SVDFit(int np, double *coeff, double *chisq, double tol,
 	    int nd, double *x, double *logx, double *y, double *sig,
 	    void Basis(int, double *, double, double));

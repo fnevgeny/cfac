@@ -25,21 +25,6 @@ static struct {
 } minpack_params;
 
 
-void PolyBasis(int n, double *y, double x, double logx) {
-  int i;
-  double t;
-  
-  t = 1.0;
-  for (i = 0; i < n; i++) {
-    y[i] = t;
-    t *= x;
-  }
-}
-
-void PolyFit(int n, double *c, int nd, double *x, double *y) {
-  SVDFit(n, c, NULL, EPS6, nd, x, NULL, y, NULL, PolyBasis);
-}
-
 void SVDFit(int np, double *coeff, double *chisq, double tol,
 	    int nd, double *x, double *logx, double *y, double *sig,
 	    void Basis(int, double *, double, double)) {

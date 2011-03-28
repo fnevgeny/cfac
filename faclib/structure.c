@@ -335,9 +335,8 @@ int IsClosedShell(int ih, int k) {
   return (hams[ih].closed[i] & (1 << j));
 }
 
-int ConstructHamiltonDiagonal(int isym, int k, int *kg, int m) {
+int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
   int i, j, t;
-  HAMILTON *h;
   SHAMILTON *hs;
   ARRAY *st;
   STATE *s;
@@ -366,7 +365,6 @@ int ConstructHamiltonDiagonal(int isym, int k, int *kg, int m) {
   }
   if (j == 0) return -1;
 
-  h = &_ham;
   h->pj = isym;
 
   h->dim = j;
@@ -461,14 +459,12 @@ void DecodeBasisEB(int k, int *s, int *m) {
   if (k < 0) *m = -(*m);
 }
 
-int ConstructHamiltonEB(int n, int *ilev) {
+int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev) {
   int i, j, p, k, t, m;
   double r;
   LEVEL *lev;
-  HAMILTON *h;
   int n_basis;
 
-  h = &_ham;
   h->pj = -1;
   ClearAngularFrozen();
   AngularFrozen(n, ilev, 0, NULL);
@@ -480,7 +476,7 @@ int ConstructHamiltonEB(int n, int *ilev) {
     n_basis += j+1;
   }
 
-  if (AllocHamMem(n_basis, n_basis) == -1) goto ERROR;
+  if (AllocHamMem(h, n_basis, n_basis) == -1) goto ERROR;
   k = 0;
   for (i = 0; i < n; i++) {
     lev = GetLevel(ilev[i]);
@@ -509,9 +505,9 @@ int ConstructHamiltonEB(int n, int *ilev) {
   return -1;
 }
 
-int ConstructHamilton(int isym, int k0, int k, int *kg, int kp, int *kgp, int md) {
+int ConstructHamilton(HAMILTON *h,
+    int isym, int k0, int k, int *kg, int kp, int *kgp, int md) {
   int i, j, j0, t, jp = 0, m1, m2, m3;
-  HAMILTON *h;
   SHAMILTON *hs;
   ARRAY *st;
   STATE *s;
@@ -539,13 +535,12 @@ int ConstructHamilton(int isym, int k0, int k, int *kg, int kp, int *kgp, int md
   m3 = t%10;
   sym = GetSymmetry(isym);
   if (sym == NULL) return -1;
-  h = &_ham;
   h->pj = isym;
 
   if (m1) {
     if (k <= 0) return -1;
     if (ci_level == -1) {
-      return ConstructHamiltonDiagonal(isym, k, kg, 1);
+      return ConstructHamiltonDiagonal(h, isym, k, kg, 1);
     }
     st = &(sym->states);
     j = 0;
@@ -565,7 +560,7 @@ int ConstructHamilton(int isym, int k0, int k, int *kg, int kp, int *kgp, int md
       }
     }    
 
-    if (AllocHamMem(j, jp+j) == -1) goto ERROR;
+    if (AllocHamMem(h, j, jp+j) == -1) goto ERROR;
     
     j = 0;  
     for (t = 0; t < sym->n_states; t++) {
@@ -686,9 +681,9 @@ int ValidBasis(STATE *s, int k, int *kg, int n) {
   }
 }
 
-int ConstructHamiltonFrozen(int isym, int k, int *kg, int n, int nc, int *kc) {
+int ConstructHamiltonFrozen(HAMILTON *h,
+    int isym, int k, int *kg, int n, int nc, int *kc) {
   int i, j, t, ncs;
-  HAMILTON *h;
   LEVEL *lev;
   ARRAY *st;
   STATE *s;
@@ -721,10 +716,9 @@ int ConstructHamiltonFrozen(int isym, int k, int *kg, int n, int nc, int *kc) {
   
   if (j == ncs) return -1;
 
-  h = &_ham;
   h->pj = isym;
 
-  if (AllocHamMem(j, j) == -1) goto ERROR;
+  if (AllocHamMem(h, j, j) == -1) goto ERROR;
       
   j = 0;
   if (ncs > 0) {
@@ -1751,7 +1745,7 @@ int TestHamilton(void) {
 ** be careful that the h->hamilton or h->heff is overwritten
 ** after the DiagnolizeHamilton call
 */
-int DiagnolizeHamilton(void) {
+int DiagnolizeHamilton(HAMILTON *h) {
   double *ap;
   double *w, *wi;
   double *z, *x, *y, *b, *d, *ep;
@@ -1764,7 +1758,6 @@ int DiagnolizeHamilton(void) {
   int lwork;
   int liwork;
   int info;
-  HAMILTON *h;
   int i, j, t, t0, k, one;
   double d_one, d_zero, a;
 #ifdef PERFORM_STATISTICS
@@ -1772,7 +1765,6 @@ int DiagnolizeHamilton(void) {
   start = clock();
 #endif
 
-  h = &_ham;
   n = h->dim;
   m = h->n_basis;
   ldz = n;
@@ -1883,9 +1875,8 @@ int DiagnolizeHamilton(void) {
   return -1;
 }
 
-int AddToLevels(int ng, int *kg) {
+int AddToLevels(HAMILTON *h, int ng, int *kg) {
   int i, d, j, k, t, m;
-  HAMILTON *h;
   LEVEL lev;
   SYMMETRY *sym;
   STATE *s, *s1;
@@ -1931,7 +1922,6 @@ int AddToLevels(int ng, int *kg) {
     return 0;
   }
 
-  h = &_ham;
   if (h->basis == NULL ||
       h->mixing == NULL) return -1;
   d = h->dim;
@@ -3002,18 +2992,15 @@ int GetBasisTable(char *fn, int m) {
   return 0;
 }
 
-void StructureEB(char *fn, int n, int *ilev) {
+void StructureEB(HAMILTON *h, char *fn, int n, int *ilev) {
   int k;
-  HAMILTON *h;
   
-  h = &_ham;
+  ConstructHamiltonEB(h, n, ilev);
 
-  ConstructHamiltonEB(n, ilev);
-
-  DiagnolizeHamilton();
+  DiagnolizeHamilton(h);
   
   k = n_eblevels;
-  AddToLevels(0, NULL);
+  AddToLevels(h, 0, NULL);
   SortLevels(k, -1, 1);
   SaveEBLevels(fn, k, -1);
 }
@@ -4614,11 +4601,9 @@ void ClearRMatrixLevels(int n) {
   }
 }
 
-int AllocHamMem(int hdim, int nbasis) {
+int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
   int jp, t;
-  HAMILTON *h;
 
-  h = &_ham;
   jp = nbasis - hdim;
   h->dim = hdim;
   h->n_basis = nbasis;
@@ -4708,7 +4693,7 @@ int InitStructure(void) {
   ArrayInit(ecorrections, sizeof(ECORRECTION), 512);
   ncorrections = 0;
 
-  AllocHamMem(1000, 1000);
+  AllocHamMem(&_ham, 1000, 1000);
   return 0;
 }
 

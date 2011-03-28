@@ -126,10 +126,12 @@ void SetMaxKMBPT(int m);
 int GetMaxKMBPT(void);
 int SortUnique(int n, int *a);
 int CompareInt(const void *a1, const void *a2);
-int ConstructHamilton(int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
-int ConstructHamiltonDiagonal(int isym, int k, int *kg, int m);
+int ConstructHamilton(HAMILTON *h,
+    int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
+int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m);
 int ValidBasis(STATE *s, int k, int *kg, int n);
-int ConstructHamiltonFrozen(int isym, int k, int *kg, int n, int nc, int *kc);
+int ConstructHamiltonFrozen(HAMILTON *h,
+    int isym, int k, int *kg, int n, int nc, int *kc);
 void HamiltonElement1E2E(int isym, int isi, int isj, double *r1, double *r2);
 double HamiltonElement(int isym, int isi, int isj);
 double HamiltonElementFrozen(int isym, int isi, int isj);
@@ -144,8 +146,8 @@ double Hamilton1E(int n_shells, SHELL_STATE *sbra,
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 HAMILTON *GetHamilton(void);
 SHAMILTON *GetSHamilton(int *n);
-int DiagnolizeHamilton(void);
-int AddToLevels(int ng, int *kg);
+int DiagnolizeHamilton(HAMILTON *h);
+int AddToLevels(HAMILTON *h, int ng, int *kg);
 int AddECorrection(int kref, int k, double e, int nmin);
 LEVEL *GetLevel(int k);
 LEVEL *GetEBLevel(int k);
@@ -209,13 +211,13 @@ int ZerothEnergyConfigSym(int n, int *s0, double **e);
 void CutMixing(int nlev, int *ilev, int n, int *kg, double c);
 void FlagClosed(SHAMILTON *h);
 int IsClosedShell(int ih, int p);
-int AllocHamMem(int hdim, int nbasis);
+int AllocHamMem(HAMILTON *h, int hdim, int nbasis);
 void SetFields(double b, double e, double a, int m);
 void GetFields(double *b, double *e, double *a);
 int CodeBasisEB(int s, int m);
 void DecodeBasisEB(int k, int *s, int *m);
-int ConstructHamiltonEB(int n, int *ilev);
-void StructureEB(char *fn, int n, int *ilev);
+int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev);
+void StructureEB(HAMILTON *h, char *fn, int n, int *ilev);
 double HamiltonElementEB(int i, int j);
 
 int SlaterCoeff(char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 

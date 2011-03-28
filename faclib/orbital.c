@@ -2257,7 +2257,7 @@ int SetPotentialUehling(POTENTIAL *pot, int vp) {
 
   if (vp <= 0) return 0;
 
-  r0 = 3.86159E-3/RBOHR;
+  r0 = 3.86159E-11/RBOHR;
   a = -2.0*pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST/(3.0*M_PI);
   b = -pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST2/(M_PI*M_PI);
   

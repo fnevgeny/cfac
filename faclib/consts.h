@@ -96,15 +96,15 @@
 /*
 ** VARIABLE:    RBOHR
 ** TYPE:        macro constant.
-** PURPOSE:     Bohr radius in Angstrom.
+** PURPOSE:     Bohr radius in cm.
 ** NOTE:        
 */
-#define RBOHR      0.529177249
+#define RBOHR      5.29177249e-9
 
 /*
 ** VARIABLE:    MBOHR
 ** TYPE:        macro constant.
-** PURPOSE:     Bohr magenton in eV/Gauss.
+** PURPOSE:     Bohr magneton in eV/Gauss.
 ** NOTE:        
 */
 #define MBOHR      5.78838263E-9

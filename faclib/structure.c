@@ -152,7 +152,7 @@ void SetFields(double b, double e, double a, int m) {
   }
 
   for (i = 0; i < 3; i++) {
-    E1[i] *= RBOHR*1e-8/HARTREE_EV;
+    E1[i] *= RBOHR/HARTREE_EV;
   }
   /*
   printf("EB: %10.3E %10.3E %10.3E %10.3E %10.3E %10.3E\n", 

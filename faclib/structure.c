@@ -466,21 +466,21 @@ int ConstructHamiltonEB(int n, int *ilev) {
   double r;
   LEVEL *lev;
   HAMILTON *h;
+  int n_basis;
 
   h = &_ham;
   h->pj = -1;
   ClearAngularFrozen();
   AngularFrozen(n, ilev, 0, NULL);
 
-  h->n_basis = 0;
+  n_basis = 0;
   for (i = 0; i < n; i++) {
     lev = GetLevel(ilev[i]);    
     DecodePJ(lev->pj, &p, &j);
-    h->n_basis += j+1;
+    n_basis += j+1;
   }
 
-  h->dim = h->n_basis;
-  if (AllocHamMem(h->dim, h->n_basis) == -1) goto ERROR;
+  if (AllocHamMem(n_basis, n_basis) == -1) goto ERROR;
   k = 0;
   for (i = 0; i < n; i++) {
     lev = GetLevel(ilev[i]);

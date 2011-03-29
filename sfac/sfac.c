@@ -3035,6 +3035,11 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
     break;
   }
     
+  if (m == 0) {
+    printf("m cannot be zero\n");
+    return -1;
+  }
+
   SaveTransition(nlow, low, nup, up, argv[0], m);
   
   if (low) {
@@ -3435,6 +3440,11 @@ static int PTransitionTableEB(int argc, char *argv[], int argt[],
   
   if (argc == 4) m = atoi(argv[3]);
   else m = -1;
+  
+  if (m == 0) {
+    printf("m cannot be zero\n");
+    return -1;
+  }
   
   nlow = SelectLevels(&low, argv[1], argt[1], variables);
   if (nlow <= 0) {  

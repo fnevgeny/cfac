@@ -208,97 +208,49 @@ static int _TRMultipole(double *strength, double *energy,
   DecodePJ(lev2->pj, &p2, &j2);
   if (j1 == 0 && j2 == 0) return -1;
 
-  if (m != 0) {
-    m2 = 2*abs(m);    
-    if (!Triangle(j1, j2, m2)) return -1;
-    if (m > 0 && IsEven(p1+p2+m)) return -1;
-    if (m < 0 && IsOdd(p1+p2-m)) return -1;    
-    
-    s = 0.0;
-    
-    nz = AngularZMix(&ang, lower, upper, m2, m2, &nmk, &mbk);
-    if (nz <= 0 && nmk < m2/2) {
-      if (nmk > 0) free(mbk);
-      return -1;
-    }
-    
-    for (i = 0; i < nz; i++) {
-      if (ang[i].k != m2) continue;
-      if (transition_option.mode == M_NR && m != 1) {
-	r = MultipoleRadialNR(m, ang[i].k0, ang[i].k1, 
-			      transition_option.gauge);
-      } else {
-	r = MultipoleRadialFR(aw, m, ang[i].k0, ang[i].k1,
-			      transition_option.gauge);
-      }
-      s += r * ang[i].coeff;
-    }
-    if (nmk >= m2/2) {
-      r = mbk[m2/2-1];
-      if (transition_option.gauge == G_COULOMB && m < 0) {
-	r /= aw;
-      }
-      a = r/s;
-      a *= a;
-      if (a < 0.75) {
-	s += r;
-      }
-    }
-    if (nz > 0) {
-      free(ang);	
-    }  
-    if (nmk > 0) {
-      free(mbk);
-    }
+  m2 = 2*abs(m);    
+  if (!Triangle(j1, j2, m2)) return -1;
+  if (m > 0 && IsEven(p1+p2+m)) return -1;
+  if (m < 0 && IsOdd(p1+p2-m)) return -1;    
 
-    *strength = s;
-  } else {
-    m0 = abs(j1-j2);
-    if (m0 == 0) m0 += 2;
-    m1 = (j1+j2);
-    if (m0 > transition_option.max_m && m0 > transition_option.max_e) {
-      return -1;
-    }
-    tr = 0.0;
-    nz = AngularZMix(&ang, lower, upper, m0, m1, &nmk, &mbk);
-    for (m2 = m0; m2 <= m1; m2 += 2) {      
-      m = m2/2;
-      if (IsEven(p1+p2+m)) m = -m;
-      s = 0.0;
-      for (i = 0; i < nz; i++) {
-	if (ang[i].k != m2) continue;
-	if (transition_option.mode == M_NR && m != 1) {
-	  r = MultipoleRadialNR(m, ang[i].k0, ang[i].k1,
-				transition_option.gauge);
-	} else {
-	  r = MultipoleRadialFR(aw, m, ang[i].k0, ang[i].k1,
-				transition_option.gauge);
-	}
-	s += r * ang[i].coeff;
-      }
-      if (nmk >= m2/2) {
-	r = mbk[m2/2-1];
-	if (transition_option.gauge == G_COULOMB && m < 0) {
-	  r /= aw;
-	}
-	a = r/s;
-	a *= a;
-	if (a < 0.75) {
-	  s += r;
-	}
-      }
-      r = OscillatorStrength(m, *energy, s, &a);
-      tr += r;
-      if (tr > 0 && r/tr < transition_option.eps0) break;
-    }
-    if (nz > 0) {
-      free(ang);
-    }
-    if (nmk > 0) {
-      free(mbk);
-    }
-    *strength = tr;
+  s = 0.0;
+
+  nz = AngularZMix(&ang, lower, upper, m2, m2, &nmk, &mbk);
+  if (nz <= 0 && nmk < m2/2) {
+    if (nmk > 0) free(mbk);
+    return -1;
   }
+
+  for (i = 0; i < nz; i++) {
+    if (ang[i].k != m2) continue;
+    if (transition_option.mode == M_NR && m != 1) {
+      r = MultipoleRadialNR(m, ang[i].k0, ang[i].k1, 
+			    transition_option.gauge);
+    } else {
+      r = MultipoleRadialFR(aw, m, ang[i].k0, ang[i].k1,
+			    transition_option.gauge);
+    }
+    s += r * ang[i].coeff;
+  }
+  if (nmk >= m2/2) {
+    r = mbk[m2/2-1];
+    if (transition_option.gauge == G_COULOMB && m < 0) {
+      r /= aw;
+    }
+    a = r/s;
+    a *= a;
+    if (a < 0.75) {
+      s += r;
+    }
+  }
+  if (nz > 0) {
+    free(ang);	
+  }  
+  if (nmk > 0) {
+    free(mbk);
+  }
+
+  *strength = s;
   
   return 0;
 }

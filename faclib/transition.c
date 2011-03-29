@@ -373,10 +373,7 @@ int TRMultipole(double *strength, double *energy,
 
 int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper) {
   LEVEL *lev1, *lev2;
-  LEVEL *plev1, *plev2;
-  int i1, i2, j1, j2, p1, p2, k, m2;
-  int ilev1, ilev2, mlev1, mlev2, q;
-  double r, a, c;
+  int i1, m2, q;
 
   lev1 = GetEBLevel(lower);
   if (lev1 == NULL) return -1;
@@ -389,23 +386,38 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
   m2 = 2*abs(m);
   
   for (q = 0; q <= m2; q++) strength[q] = 0.0;
+
   for (i1 = 0; i1 < lev1->n_basis; i1++) {
+    LEVEL *plev1;
+    int ilev1, mlev1, j1, p1;
+    int i2;
+
     if (lev1->mixing[i1] == 0) continue;
+
     DecodeBasisEB(lev1->basis[i1], &ilev1, &mlev1);
     plev1 = GetLevel(ilev1);
     DecodePJ(plev1->pj, &p1, &j1);
+    
     for (i2 = 0; i2 < lev2->n_basis; i2++) {
+      LEVEL *plev2;
+      int ilev2, mlev2, j2, p2;
+      double r, a, c;
+
       if (lev2->mixing[i2] == 0) continue;
+
       c = lev1->mixing[i1]*lev2->mixing[i2];
       DecodeBasisEB(lev2->basis[i2], &ilev2, &mlev2);
       plev2 = GetLevel(ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
-      k = TRMultipole(&r, energy, m, ilev1, ilev2);
-      if (k != 0) continue;
+      
+      if (TRMultipole(&r, energy, m, ilev1, ilev2) != 0) {
+        continue;
+      }
+      
       a = W3j(j1, m2, j2, -mlev1, mlev1-mlev2, mlev2);
-      q = (mlev1-mlev2)/2+abs(m);
-      if (a == 0) continue;
       if (IsOdd((j1-mlev1)/2)) a = -a;
+     
+      q = (mlev1-mlev2)/2+abs(m);
       strength[q] += c*r*a;
       /*
       printf("%d %d %d %d %2d %2d %2d %10.3E %10.3E %10.3E %10.3E %10.3E\n",

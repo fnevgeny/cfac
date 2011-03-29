@@ -178,55 +178,8 @@ int TRMultipoleUTA(double *strength, TR_EXTRA *rx,
   return 0;
 }
 
-typedef struct {
-  int m;
-  int valid;
-  double energy;
-  double strength;
-} TRANS_T;
-
-typedef struct {
-  unsigned int dim;
-  TRANS_T *transitions;
-} TRM_CACHE_T;
-
-static TRM_CACHE_T *trm_cache = NULL;
-
-static TRM_CACHE_T *TRMultipole_cache_new(unsigned int dim)
-{
-  TRM_CACHE_T *cache;
-  
-  cache = calloc(1, sizeof(TRM_CACHE_T));
-  if (!cache) {
-    return NULL;
-  }
-  
-  cache->transitions = calloc(dim*dim, sizeof(TRANS_T));
-  if (!cache->transitions) {
-    free(cache);
-    return NULL;
-  }
-  
-  cache->dim = dim;
-  
-  return cache;
-}
-
-static void TRMultipole_cache_free(TRM_CACHE_T *cache)
-{
-  if (!cache) {
-    return;
-  }
-  
-  if (cache->transitions) {
-    free(cache->transitions);
-  }
-  
-  free(cache);
-}
-
 /* energy is ALSO INPUT if > 0 !!! */
-int TRMultipole(double *strength, double *energy,
+static int _TRMultipole(double *strength, double *energy,
 		int m, int lower, int upper) {
   int m0, m1, m2;
   int p1, p2, j1, j2;
@@ -234,20 +187,6 @@ int TRMultipole(double *strength, double *energy,
   double s, r, a, aw, *mbk, tr;
   int nz, i, nmk;
   ANGULAR_ZMIX *ang;
-  
-  TRANS_T *trans = NULL;
-  
-  if (trm_cache &&
-      lower >= 0 && lower < trm_cache->dim &&
-      upper >= 0 && upper < trm_cache->dim) {
-    trans = &trm_cache->transitions[trm_cache->dim*upper + lower];
-    if (trans->m == m && trans->valid) {
-      *energy   = trans->energy;
-      *strength = trans->strength;
-      
-      return 0;
-    }
-  }
   
   *strength = 0.0;
 
@@ -361,6 +300,84 @@ int TRMultipole(double *strength, double *energy,
     *strength = tr;
   }
   
+  return 0;
+}
+
+typedef struct {
+  int m;
+  int valid;
+  double energy;
+  double strength;
+} TRANS_T;
+
+typedef struct {
+  unsigned int dim;
+  TRANS_T *transitions;
+} TRM_CACHE_T;
+
+static TRM_CACHE_T *trm_cache = NULL;
+
+static TRM_CACHE_T *TRMultipole_cache_new(unsigned int dim)
+{
+  TRM_CACHE_T *cache;
+  
+  cache = calloc(1, sizeof(TRM_CACHE_T));
+  if (!cache) {
+    return NULL;
+  }
+  
+  cache->transitions = calloc(dim*dim, sizeof(TRANS_T));
+  if (!cache->transitions) {
+    free(cache);
+    return NULL;
+  }
+  
+  cache->dim = dim;
+  
+  return cache;
+}
+
+static void TRMultipole_cache_free(TRM_CACHE_T *cache)
+{
+  if (!cache) {
+    return;
+  }
+  
+  if (cache->transitions) {
+    free(cache->transitions);
+  }
+  
+  free(cache);
+}
+
+/* energy is ALSO INPUT if > 0 !!! */
+int TRMultipole(double *strength, double *energy,
+		int m, int lower, int upper) {
+  int m0, m1, m2;
+  int p1, p2, j1, j2;
+  LEVEL *lev1, *lev2;
+  double s, r, a, aw, *mbk, tr;
+  int nz, i, nmk;
+  ANGULAR_ZMIX *ang;
+  
+  TRANS_T *trans = NULL;
+  
+  int res;
+  
+  if (trm_cache &&
+      lower >= 0 && lower < trm_cache->dim &&
+      upper >= 0 && upper < trm_cache->dim) {
+    trans = &trm_cache->transitions[trm_cache->dim*upper + lower];
+    if (trans->m == m && trans->valid) {
+      *energy   = trans->energy;
+      *strength = trans->strength;
+      
+      return 0;
+    }
+  }
+  
+  res = _TRMultipole(strength, energy, m, lower, upper);
+  
   if (trans) {
     trans->m        = m;
     trans->energy   = *energy;
@@ -368,8 +385,8 @@ int TRMultipole(double *strength, double *energy,
     trans->valid    = 1;
   }
   
-  return 0;
-}
+  return res;
+}  
 
 int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper) {
   LEVEL *lev1, *lev2;

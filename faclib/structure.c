@@ -853,7 +853,7 @@ double HamiltonElementEB(int ib, int jb) {
 	orb1 = GetOrbital(ang[i].k1);
 	GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
 	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
-        if (korb0 == korb1) {
+        if (orb0->n == orb1->n && korb0 == korb1) {
 	  for (m = 0; m < 3; m++) {
 	    if (B1[m] == 0) continue;
 	    

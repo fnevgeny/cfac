@@ -1099,59 +1099,6 @@ double HamiltonElementFrozen(int isym, int isi, int isj) {
   return r;
 } 
 
-double MultipoleCoeff(int isym, int ilev1, int ka1, 
-		      int ilev2, int ka2, int k) {
-  int k2, ti, tj, kz, nz, i, ji1, ji2, jj1, jj2, ki2, kj2;
-  int j0, j1, kl0, kl1, j;
-  double a, b, r0;
-  ORBITAL *orb0, *orb1;
-  LEVEL *lev1, *lev2;
-  ANGULAR_ZMIX *ang;
-
-  k2 = k*2;
-  lev1 = GetLevel(ilev1);
-  lev2 = GetLevel(ilev2);
-  DecodePJ(lev1->pj, NULL, &ji1);
-  DecodePJ(lev2->pj, NULL, &jj1);
-  GetJLFromKappa(ka1, &ji2, &ki2);
-  GetJLFromKappa(ka2, &jj2, &kj2);
-  if (IsOdd((ki2+kj2)/2+k)) return 0.0;
-  if (!Triangle(ji2, jj2, k2)) return 0.0;
-  DecodePJ(isym, NULL, &j);
-  if (ang_frozen.nts > 0) {
-    ti = IBisect(ilev1, ang_frozen.nts, ang_frozen.ts);
-    tj = IBisect(ilev2, ang_frozen.nts, ang_frozen.ts);
-    kz = tj*ang_frozen.nts + ti;
-    nz = ang_frozen.nz[kz];
-    ang = ang_frozen.z[kz];
-  } else {
-    nz = AngularZMix(&ang, ilev1, ilev2, k2, k2, NULL, NULL);
-  }
-  
-  a = 0.0;
-  for (i = 0; i < nz; i++) {
-    if (ang[i].k != k2) continue;
-    r0 = W6j(ji1, ji2, j, jj2, jj1, k2);
-    if (fabs(r0) < EPS30) continue;
-    orb0 = GetOrbital(ang[i].k0);
-    orb1 = GetOrbital(ang[i].k1);
-    GetJLFromKappa(orb0->kappa, &j0, &kl0);
-    GetJLFromKappa(orb1->kappa, &j1, &kl1);
-    if (IsOdd((kl0+kl1)/2+k)) continue;    
-    if (!Triangle(j0, j1, k2)) continue;
-    b = RadialMoments(k, ang[i].k0, ang[i].k1);
-    b *= ReducedCL(j0, k2, j1);
-    b *= ReducedCL(ji2, k2, jj2);
-    b *= ang[i].coeff*r0;
-    a += b;
-  }
-  if (IsOdd((ji2 + jj1 + j)/2)) a = -a;
-
-  if (nz > 0 && ang_frozen.nts == 0) free(ang);
-
-  return a;
-}
-
 double HamiltonElement(int isym, int isi, int isj) {
   double r1, r2;
   

@@ -135,8 +135,6 @@ int ConstructHamiltonFrozen(HAMILTON *h,
 void HamiltonElement1E2E(int isym, int isi, int isj, double *r1, double *r2);
 double HamiltonElement(int isym, int isi, int isj);
 double HamiltonElementFrozen(int isym, int isi, int isj);
-double MultipoleCoeff(int isym, int ilev1, int ka1,
-		      int ilev2, int ka2, int k);
 double HamiltonElementFB(int isym, int isi, int isj);
 double Hamilton2E2(int n_shells, SHELL_STATE *sbra, 
 		   SHELL_STATE *sket,INTERACT_SHELL *s);

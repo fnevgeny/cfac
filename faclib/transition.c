@@ -178,9 +178,9 @@ int TRMultipoleUTA(double *strength, TR_EXTRA *rx,
   return 0;
 }
 
-/* energy is ALSO INPUT if > 0 !!! */
+/* If strict flag is set, calculate only if energy > 0 */
 static int _TRMultipole(double *strength, double *energy,
-		int m, int lower, int upper) {
+		int m, int lower, int upper, int strict) {
   int m0, m1, m2;
   int p1, p2, j1, j2;
   LEVEL *lev1, *lev2;
@@ -194,24 +194,27 @@ static int _TRMultipole(double *strength, double *energy,
   if (lev1 == NULL) return -1;
   lev2 = GetLevel(upper);
   if (lev2 == NULL) return -1;
-  if (*energy <= 0.0) {
-    *energy = lev2->energy - lev1->energy;
-  }
-  if (*energy <= 0.0) return -1;
-  aw = FINE_STRUCTURE_CONST * (*energy);
-
+  
+  *energy = lev2->energy - lev1->energy;
+  
   if (GetNumElectrons(lower) != GetNumElectrons(upper)) {
     return -1;
   }
   
+  if (strict && *energy <= 0.0) {
+    return -1;
+  }
+    
+  aw = FINE_STRUCTURE_CONST*fabs(*energy);
+
   DecodePJ(lev1->pj, &p1, &j1);
   DecodePJ(lev2->pj, &p2, &j2);
-  if (j1 == 0 && j2 == 0) return -1;
+  if (j1 == 0 && j2 == 0) return 0;
 
   m2 = 2*abs(m);    
-  if (!Triangle(j1, j2, m2)) return -1;
-  if (m > 0 && IsEven(p1+p2+m)) return -1;
-  if (m < 0 && IsOdd(p1+p2-m)) return -1;    
+  if (!Triangle(j1, j2, m2)) return 0;
+  if (m > 0 && IsEven(p1+p2+m)) return 0;
+  if (m < 0 && IsOdd(p1+p2-m)) return 0;    
 
   s = 0.0;
 
@@ -302,13 +305,14 @@ static void TRMultipole_cache_free(TRM_CACHE_T *cache)
   free(cache);
 }
 
-/* energy is ALSO INPUT if > 0 !!! */
+/* If energy is not NULL, it is assigned trans. energy;
+   if strict flag is set, calculate only if *energy > 0 */
 int TRMultipole(double *strength, double *energy,
-		int m, int lower, int upper) {
+		int m, int lower, int upper, int strict) {
   int m0, m1, m2;
   int p1, p2, j1, j2;
   LEVEL *lev1, *lev2;
-  double s, r, a, aw, *mbk, tr;
+  double s, r, a, aw, *mbk, tr, dE;
   int nz, i, nmk;
   ANGULAR_ZMIX *ang;
   
@@ -321,18 +325,23 @@ int TRMultipole(double *strength, double *energy,
       upper >= 0 && upper < trm_cache->dim) {
     trans = &trm_cache->transitions[trm_cache->dim*upper + lower];
     if (trans->m == m && trans->valid) {
-      *energy   = trans->energy;
+      if (energy) {
+        *energy = trans->energy;
+      }
       *strength = trans->strength;
       
       return 0;
     }
   }
   
-  res = _TRMultipole(strength, energy, m, lower, upper);
+  res = _TRMultipole(strength, &dE, m, lower, upper, strict);
+  if (energy) {
+    *energy = dE;
+  }
   
   if (trans) {
     trans->m        = m;
-    trans->energy   = *energy;
+    trans->energy   = dE;
     trans->strength = *strength;
     trans->valid    = 1;
   }
@@ -379,7 +388,7 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
       plev2 = GetLevel(ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
       
-      if (TRMultipole(&r, energy, m, ilev1, ilev2) != 0) {
+      if (TRMultipole(&r, NULL, m, ilev1, ilev2, 0) != 0) {
         continue;
       }
       
@@ -747,8 +756,7 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
       trd = 0.0;
       for (i = 0; i < nlow; i++) {
 	a[i] = 0.0;
-	et[i] = 0.0;
-	k = TRMultipole(s+i, et+i, m, low[i], up[j]);
+	k = TRMultipole(s+i, et+i, m, low[i], up[j], 1);
 	if (k != 0) continue;
 	gf = OscillatorStrength(m, et[i], s[i], &(a[i]));
 	a[i] /= jup+1.0;

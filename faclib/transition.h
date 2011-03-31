@@ -11,7 +11,7 @@ void SetTransitionOptions(int gauge, int mode, int max_e, int max_m);
 int GetTransitionGauge(void);
 int GetTransitionMode(void);
 int TRMultipole(double *strength, double *energy,
-		int m, int low, int up);
+		int m, int low, int up, int strict);
 int OverlapLowUp(int nlow, int *low, int nup, int *up);
 int SaveTransition(int nlow, int *low, int nup, int *up,
 		   char *fn, int multipole);

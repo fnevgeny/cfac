@@ -3888,10 +3888,9 @@ void SaveTransitionMBPT(MBPT_TR *mtr) {
 	  k = InGroups(st->kgroup, mbpt_tr.nlow, mbpt_tr.low);
 	  if (k == 0) continue;
 	  DecodePJ(lev1->pj, &p1, &j1);
-	  e = 0.0;
-	  k = TRMultipole(&s0, &e, m, i, j);
+	  k = TRMultipole(&s0, &e, m, i, j, 1);
 	  e *= FINE_STRUCTURE_CONST;
-	  if (k != 0) continue;
+	  if (k != 0 || e <= 0.0) continue;
 	  s = 0;
 	  i0 = lev1->pj*2*mbpt_tr.mktr + 2*(t-1);
 	  if (q > 0) i0++;

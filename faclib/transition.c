@@ -951,7 +951,7 @@ int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
   n = GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
   if (n == -1) return 0;
   
-  trm_cache = TRMultipole_cache_new(GetNumEBLevels());
+  trm_cache = TRMultipole_cache_new(GetNumLevels());
 
   nc = OverlapLowUp(nlow, low, nup, up);
   SaveTransitionEB0(nc, low+nlow-nc, nc, up+nup-nc, fn, m);

@@ -3,6 +3,7 @@
 #include <math.h>
 #include <gsl/gsl_sf_bessel.h>
 
+#include "global.h"
 #include "nucleus.h"
 #include "coulomb.h"
 #include "radial.h"

@@ -490,7 +490,7 @@ int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev) {
   for (j = 0; j < h->dim; j++) {
     t = j*(j+1)/2;
     for (i = 0; i <= j; i++) {
-      r = HamiltonElementEB(h->basis[i], h->basis[j]);
+      r = HamiltonElementEB(h, i, j);
       /*
       printf("HAM: %8d %8d %15.8E\n", h->basis[i], h->basis[j], r);
       */
@@ -822,13 +822,17 @@ void AngularFrozen(int nts, int *ts, int ncs, int *cs) {
   }
 }
 
-double HamiltonElementEB(int ib, int jb) {
+double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
+  int ib, jb;
   int si, sj, mi, mj, pi, pj, ji, jj, ti, tj, kz, nz;
   int i, m, q, q2, jorb0, korb0, jorb1, korb1;
   double r, a, b, c;
   ANGULAR_ZMIX *ang;
   LEVEL *levi, *levj;
   ORBITAL *orb0, *orb1;
+  
+  ib = h->basis[i0];
+  jb = h->basis[j0];
 
   DecodeBasisEB(ib, &si, &mi);
   DecodeBasisEB(jb, &sj, &mj);
@@ -891,16 +895,18 @@ double HamiltonElementEB(int ib, int jb) {
 	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
 	if (IsOdd((korb0+korb1)/2)) {
 	  for (m = 0; m < 3; m++) {
-	    if (E1[m] == 0) continue;
+	    double rvme;
+            if (E1[m] == 0) continue;
 	    q = m-1;
 	    q2 = 2*q;
 	    a = W3j(ji, 2, jj, -mi, -q2, mj);
 	    if (a == 0.0) continue;
-	    a *= E1[m]*ang[i].coeff;
+	    a *= ang[i].coeff;
 	    if (IsOdd(abs(ji-mi+q2)/2)) a = -a;
 	    b = ReducedCL(jorb0, 2, jorb1);
 	    c = RadialMoments(1, ang[i].k0, ang[i].k1);
-	    r += a*b*c;
+	    rvme = a*b*c;
+            r += E1[m]*rvme;
 	  }
 	}    
       }

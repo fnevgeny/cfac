@@ -216,7 +216,7 @@ int CodeBasisEB(int s, int m);
 void DecodeBasisEB(int k, int *s, int *m);
 int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev);
 void StructureEB(HAMILTON *h, char *fn, int n, int *ilev);
-double HamiltonElementEB(int i, int j);
+double HamiltonElementEB(HAMILTON *h, int i, int j);
 
 int SlaterCoeff(char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 
 		int nb, SHELL *sb);

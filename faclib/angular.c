@@ -11,6 +11,7 @@
 #include <math.h>
 #include <gsl/gsl_sf_coupling.h>
 
+#include "global.h"
 #include "consts.h"
 #include "angular.h"
 

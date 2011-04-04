@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "global.h"
 #include "consts.h"
 #include "coulomb.h"
 #include "recouple.h"

@@ -138,41 +138,6 @@ void *ArraySet(ARRAY *a, int i, const void *d,
 }
 
 /* 
-** FUNCTION:    ArrayContiguous
-** PURPOSE:     Return a 1-d standard c-array contiguous in memory.
-** INPUT:       {ARRAY *a},
-**              pointer to the array.
-** RETURN:      {void *},
-**              pointer to the resulting array.
-** SIDE EFFECT: 
-*/
-void *ArrayContiguous(ARRAY *a) {
-  void *r, *rp;
-  DATA *p;
-  int i, m;
-
-  if (a->dim == 0) return NULL;
-  m = a->esize*a->block;
-  r = malloc(a->esize*a->dim);
-  p = a->data;
-  i = a->dim;
-  rp = r;
-  while (1) {
-    if (i <= a->block) {
-      memcpy(rp, p->dptr, i*a->esize);
-      break;
-    } else {
-      memcpy(rp, p->dptr, m);
-      rp = ((char *)rp) + m;
-      i -= a->block;
-    }
-    p = p->next;
-  }
-  
-  return r;
-}
-  
-/* 
 ** FUNCTION:    ArrayAppend
 ** PURPOSE:     append an element to the array
 ** INPUT:       {ARRAY *a},

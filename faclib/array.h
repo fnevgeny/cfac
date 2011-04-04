@@ -127,7 +127,6 @@ int   ArrayInit(ARRAY *a, int esize, int block);
 void *ArrayGet(ARRAY *a, int i);
 void *ArraySet(ARRAY *a, int i, const void *d, 
 	       void (*InitData)(void *, int));
-void *ArrayContiguous(ARRAY *a);
 void *ArrayAppend(ARRAY *a, const void *d, 
 		  void (*InitData)(void *, int));
 int   ArrayTrim(ARRAY *a, int n, 

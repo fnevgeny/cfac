@@ -35,8 +35,11 @@ extern FILE *debug_log;
 ** NOTE:        normally, should be commented out.
 */
 
-/*#define PERFORM_STATISTICS 1*/
+/* #define PERFORM_STATISTICS 1 */
+
 #ifdef PERFORM_STATISTICS
+# include <stdio.h>
+# include <time.h>
 extern FILE *perform_log;
 #endif
 

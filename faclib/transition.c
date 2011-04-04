@@ -788,7 +788,7 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
 	  ((double) (structt.angzxz_fb))/CLOCKS_PER_SEC,
 	  ((double) (structt.set_ham))/CLOCKS_PER_SEC,
 	  ((double) (structt.diag_ham))/CLOCKS_PER_SEC);
-  fprintf(perform_log, "AngZS: %7d %7d %6.1E, %6.1E, AngZFBS: %6.1E, AngZxZFBS: %6.1E, AddZ: %6.1E, AddZxZ: %6.1E\n",
+  fprintf(perform_log, "AngZS: %ld %ld %6.1E, %6.1E, AngZFBS: %6.1E, AngZxZFBS: %6.1E, AddZ: %6.1E, AddZxZ: %6.1E\n",
 	  structt.n_angz_states, structt.n_angz_states_load,
 	  ((double) (structt.angz_states))/CLOCKS_PER_SEC, 
 	  ((double) (structt.angz_states_load))/CLOCKS_PER_SEC,

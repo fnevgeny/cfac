@@ -1563,8 +1563,7 @@ int GetInteract(INTERACT_DATUM **idatum,
       index[2] = kci;
       index[3] = kcj;
       (*idatum) = (INTERACT_DATUM *) MultiSet(interact_shells, index, 
-					      NULL, InitInteractDatum, 
-					      FreeInteractDatum);
+					      NULL);
     }
     if ((*idatum)->n_shells < 0) return -1;
   } else {
@@ -2398,7 +2397,8 @@ int InitRecouple(void) {
   
   FACTT();
   interact_shells = (MULTI *) malloc(sizeof(MULTI));
-  return MultiInit(interact_shells, sizeof(INTERACT_DATUM), ndim, blocks);
+  return MultiInit(interact_shells, sizeof(INTERACT_DATUM), ndim, blocks,
+    FreeInteractDatum, InitInteractDatum);
 }
 
 /* 
@@ -2413,7 +2413,7 @@ int InitRecouple(void) {
 */
 int ReinitRecouple(int m) {
   if (m < 0) return 0;
-  MultiFreeData(interact_shells, FreeInteractDatum);  
+  MultiFreeData(interact_shells);  
   return 0;
 }
   

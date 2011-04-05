@@ -179,7 +179,7 @@ int TokenizeLine(int nline, char *line, METHOD *methods,
   }
   i = MethodIndex(t, methods);
   if (i >= 0) {
-    fs = (STATEMENT *) ArraySet(statements, statements->dim, NULL, NULL);
+    fs = (STATEMENT *) ArraySet(statements, statements->dim, NULL);
     fs->nline = nline;
     fs->imethod = i;
     r = Parse(token, MAXLINELENGTH, line, &next, &brkpos, &quotepos);
@@ -199,7 +199,7 @@ int TokenizeLine(int nline, char *line, METHOD *methods,
     if (v) {
       free(v->value);
     } else {
-      v = (VARIABLE *) ArraySet(variables, variables->dim, NULL, NULL);
+      v = (VARIABLE *) ArraySet(variables, variables->dim, NULL);
       n = strlen(token);
       v->name = (char *) malloc(n+1);
       strcpy(v->name, token);
@@ -261,8 +261,8 @@ int EvalFile(FILE *f, int exebyline, METHOD *methods) {
   int i, nlines;
   int ierr;
 
-  ArrayInit(&statements, sizeof(STATEMENT), 1024);
-  ArrayInit(&variables, sizeof(VARIABLE), 1024);
+  ArrayInit(&statements, sizeof(STATEMENT), 1024, FreeStatementData, NULL);
+  ArrayInit(&variables, sizeof(VARIABLE), 1024, FreeVariableData, NULL);
 
   nlines = 0;
   while (1) {
@@ -294,8 +294,8 @@ int EvalFile(FILE *f, int exebyline, METHOD *methods) {
     }
   }
   
-  ArrayFree(&statements, FreeStatementData);
-  ArrayFree(&variables, FreeVariableData);
+  ArrayFree(&statements);
+  ArrayFree(&variables);
   
   return 0;
 }

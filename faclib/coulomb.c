@@ -63,7 +63,7 @@ double HydrogenicDipole(double z, int n0, int kl0, int n1, int kl1) {
   if (kl1 != kl0 + 1 && kl1 != kl0 - 1) {
     return 0.0;
   }
-  qk = (double **) ArraySet(dipole_array, n1, NULL, InitPointerData);
+  qk = (double **) ArraySet(dipole_array, n1, NULL);
   if (*qk == NULL) {
     *qk = (double *) malloc(sizeof(double)*n1*(n1-1));
     t = *qk;
@@ -685,7 +685,8 @@ int InitCoulomb(void) {
   SetHydrogenicNL(-1, -1, -1, -1);
 
   dipole_array = (ARRAY *) malloc(sizeof(ARRAY));
-  ArrayInit(dipole_array, sizeof(double *), DIPOLE_BLOCK);
+  ArrayInit(dipole_array, sizeof(double *), DIPOLE_BLOCK,
+    NULL, InitPointerData);
 
   return 0;
 }

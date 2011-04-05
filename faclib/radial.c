@@ -100,7 +100,7 @@ static void InitYkData(void *p, int n) {
 }
 
 int FreeSimpleArray(MULTI *ma) {
-  MultiFreeData(ma, NULL);
+  MultiFreeData(ma);
   return 0;
 }
 
@@ -127,22 +127,22 @@ static void FreeYkData(void *p) {
 }
 
 int FreeMultipoleArray(void) {
-  MultiFreeData(multipole_array, FreeMultipole);
+  MultiFreeData(multipole_array);
   return 0;
 }
 
 int FreeMomentsArray(void) {
-  MultiFreeData(moments_array, NULL);
+  MultiFreeData(moments_array);
   return 0;
 }
 
 int FreeGOSArray(void) {
-  MultiFreeData(gos_array, FreeMultipole);
+  MultiFreeData(gos_array);
   return 0;
 }
 
 int FreeYkArray(void) {
-  MultiFreeData(yk_array, FreeYkData);
+  MultiFreeData(yk_array);
   return 0;
 }
   
@@ -1146,7 +1146,7 @@ int AddOrbital(ORBITAL *orb) {
 
   if (orb == NULL) return -1;
 
-  orb = (ORBITAL *) ArrayAppend(orbitals, orb, InitOrbitalData);
+  orb = (ORBITAL *) ArrayAppend(orbitals, orb);
   if (!orb) {
     printf("Not enough memory for orbitals array\n");
     exit(1);
@@ -1181,7 +1181,7 @@ ORBITAL *GetOrbitalSolved(int k) {
 ORBITAL *GetNewOrbital(void) {
   ORBITAL *orb;
 
-  orb = (ORBITAL *) ArrayAppend(orbitals, NULL, InitOrbitalData);
+  orb = (ORBITAL *) ArrayAppend(orbitals, NULL);
   if (!orb) {
     printf("Not enough memory for orbitals array\n");
     exit(1);
@@ -1208,7 +1208,7 @@ int ClearOrbitalTable(int m) {
   if (m == 0) {
     n_orbitals = 0;
     n_continua = 0;
-    ArrayFree(orbitals, FreeOrbitalData);
+    ArrayFree(orbitals);
     SetBoundary(0, 1.0, 0.0);
   } else {
     for (i = n_orbitals-1; i >= 0; i--) {
@@ -1218,7 +1218,7 @@ int ClearOrbitalTable(int m) {
       }
       if (orb->n > 0) {
 	n_orbitals = i+1;
-	ArrayTrim(orbitals, i+1, FreeOrbitalData);
+	ArrayTrim(orbitals, i+1);
 	break;
       }
     }
@@ -2191,7 +2191,7 @@ int ResidualPotential(double *s, int k0, int k1) {
     index[1] = k1;
   }
   
-  p = (double *) MultiSet(residual_array, index, NULL, InitDoubleData, NULL);
+  p = (double *) MultiSet(residual_array, index, NULL);
   if (p && *p) {
     *s = *p;
     return 0;
@@ -2328,7 +2328,7 @@ double RadialMoments(int m, int k1, int k2) {
     index[2] = k1;
   }
   
-  q = (double *) MultiSet(moments_array, index, NULL, InitDoubleData, NULL);
+  q = (double *) MultiSet(moments_array, index, NULL);
  
   if (*q) {
     return *q;
@@ -2445,8 +2445,7 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
   index[1] = k1;
   index[2] = k2;
 
-  p1 = (double **) MultiSet(multipole_array, index, NULL, 
-			    InitPointerData, FreeMultipole);
+  p1 = (double **) MultiSet(multipole_array, index, NULL);
   if (*p1) {
     *p0 = *p1;
     return n_awgrid;
@@ -2647,8 +2646,7 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
     if (ef > 0) aw += ef;
   }
 
-  p1 = (double **) MultiSet(multipole_array, index, NULL, 
-			    InitPointerData, FreeMultipole);
+  p1 = (double **) MultiSet(multipole_array, index, NULL);
   if (*p1) {
     r = InterpolateMultipole(aw, n_awgrid, awgrid, *p1);
     if (gauge == G_COULOMB && m < 0) r /= aw;
@@ -2771,8 +2769,7 @@ double *GeneralizedMoments(int k1, int k2, int m) {
     orb2 = GetOrbitalSolved(k2);
   }
 
-  p = (double **) MultiSet(gos_array, index, NULL, 
-			   InitPointerData, FreeMultipole);
+  p = (double **) MultiSet(gos_array, index, NULL);
   if (*p) {
     return *p;
   }
@@ -3137,7 +3134,7 @@ double QED1E(int k0, int k1) {
     index[1] = k1;
   }
   
-  p = (double *) MultiSet(qed1e_array, index, NULL, InitDoubleData, NULL);
+  p = (double *) MultiSet(qed1e_array, index, NULL);
   if (p && *p) {
     return *p;
   }
@@ -3204,7 +3201,7 @@ double Vinti(int k0, int k1) {
   index[0] = k0;
   index[1] = k1;
   
-  p = (double *) MultiSet(vinti_array, index, NULL, InitDoubleData, NULL);
+  p = (double *) MultiSet(vinti_array, index, NULL);
   if (p && *p) {
     return *p;
   }
@@ -3332,7 +3329,7 @@ double BreitS(int k0, int k1, int k2, int k3, int k) {
   index[3] = k3;
   index[4] = k;
 
-  p = (double *) MultiSet(breit_array, index, NULL, InitDoubleData, NULL);
+  p = (double *) MultiSet(breit_array, index, NULL);
   if (p && *p) {
     r = *p;
   } else {
@@ -3435,7 +3432,7 @@ int Slater(double *s, int k0, int k1, int k2, int k3, int k, int mode) {
 
   if (abs(mode) < 2) {
     SortSlaterKey(index);
-    p = (double *) MultiSet(slater_array, index, NULL, InitDoubleData, NULL);
+    p = (double *) MultiSet(slater_array, index, NULL);
   } else {
     p = NULL;
   }
@@ -3590,7 +3587,7 @@ void PrepSlater(int ib0, int iu0, int ib1, int iu1,
 	    index[3] = q;
 	    index[4] = k;
 	    index[5] = 0;
-	    dp = MultiSet(slater_array, index, NULL, InitDoubleData, NULL);
+	    dp = MultiSet(slater_array, index, NULL);
 	    c++;
 	    if (*dp == 0) {
 	      IntegrateS(_yk, orb1, orb3, INT_P1P2pQ1Q2, dp, 0);
@@ -3652,7 +3649,7 @@ int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
   }
   index[2] = k;
 
-  syk = (SLATER_YK *) MultiSet(yk_array, index, NULL, InitYkData, FreeYkData);
+  syk = (SLATER_YK *) MultiSet(yk_array, index, NULL);
   if (syk->npts < 0) {
     GetYk1(k, yk, orb1, orb2, type);
     max = 0;
@@ -4946,43 +4943,46 @@ int InitRadial(void) {
   
   orbitals = malloc(sizeof(ARRAY));
   if (!orbitals) return -1;
-  if (ArrayInit(orbitals, sizeof(ORBITAL), ORBITALS_BLOCK) < 0) return -1;
+  if (ArrayInit(orbitals, sizeof(ORBITAL), ORBITALS_BLOCK,
+    FreeOrbitalData, InitOrbitalData) < 0) return -1;
 
   ndim = 5;
   slater_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(slater_array, sizeof(double), ndim, blocks);
+  MultiInit(slater_array, sizeof(double), ndim, blocks, NULL, InitDoubleData);
 
   ndim = 5;
   for (i = 0; i < ndim; i++) blocks[i] = MULTI_BLOCK5;
   breit_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(breit_array, sizeof(double), ndim, blocks);
+  MultiInit(breit_array, sizeof(double), ndim, blocks, NULL, InitDoubleData);
   
   ndim = 2;
   for (i = 0; i < ndim; i++) blocks[i] = MULTI_BLOCK2;
   residual_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(residual_array, sizeof(double), ndim, blocks);
+  MultiInit(residual_array, sizeof(double), ndim, blocks, NULL, InitDoubleData);
 
   vinti_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(vinti_array, sizeof(double), ndim, blocks);
+  MultiInit(vinti_array, sizeof(double), ndim, blocks, NULL, InitDoubleData);
 
   qed1e_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(qed1e_array, sizeof(double), ndim, blocks);
+  MultiInit(qed1e_array, sizeof(double), ndim, blocks, NULL, InitDoubleData);
   
   ndim = 3;
   for (i = 0; i < ndim; i++) blocks[i] = MULTI_BLOCK4;
   multipole_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(multipole_array, sizeof(double *), ndim, blocks);
+  MultiInit(multipole_array, sizeof(double *), ndim, blocks, 
+			    FreeMultipole, InitPointerData);
 
   ndim = 3;
   for (i = 0; i < ndim; i++) blocks[i] = MULTI_BLOCK3;
   moments_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(moments_array, sizeof(double), ndim, blocks);
+  MultiInit(moments_array, sizeof(double), ndim, blocks, NULL, InitDoubleData);
 
   gos_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(gos_array, sizeof(double *), ndim, blocks);
+  MultiInit(gos_array, sizeof(double *), ndim, blocks, 
+			   FreeMultipole, InitPointerData);
 
   yk_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(yk_array, sizeof(SLATER_YK), ndim, blocks);
+  MultiInit(yk_array, sizeof(SLATER_YK), ndim, blocks, FreeYkData, InitYkData);
 
   n_awgrid = 1;
   awgrid[0]= EPS3;

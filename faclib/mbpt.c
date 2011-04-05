@@ -674,8 +674,8 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
     }
   }
 
-  ArrayInit(&ccfg, sizeof(CORR_CONFIG), 10000);
-  ArrayInit(&base, sizeof(MBPT_BASE), MAX_SYMMETRIES);
+  ArrayInit(&ccfg, sizeof(CORR_CONFIG), 10000, NULL, NULL);
+  ArrayInit(&base, sizeof(MBPT_BASE), MAX_SYMMETRIES, NULL, NULL);
   ncc = ZerothEnergyConfigSym(n, s0, &e1);
   if (ncc == 0) goto ADDCFG;
   de /= HARTREE_EV;
@@ -701,7 +701,7 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
     a = ZerothEnergyConfig(c1);
     r = ConfigParity(c1);
     if (StrongInteractConfig(ncc, e1, &cc, r, a, de)) {
-      ccp = ArrayAppend(&ccfg, &cc, NULL);
+      ccp = ArrayAppend(&ccfg, &cc);
     }
   } 
   icg[t++] = ccfg.dim;
@@ -731,7 +731,7 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
 	    if (k1 >= 0) continue;
 	    cc.kq = 0;
 	    if (StrongInteractConfig(ncc, e1, &cc, r, a, de)) {
-	      ccp = ArrayAppend(&ccfg, &cc, NULL);
+	      ccp = ArrayAppend(&ccfg, &cc);
 	    }
 	  }
 	}
@@ -771,7 +771,7 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
 		  cc.kp = kap;
 		  cc.kq = kaq;
 		  if (StrongInteractConfig(ncc, e1, &cc, r, a, de)) {
-		    ccp = ArrayAppend(&ccfg, &cc, NULL);
+		    ccp = ArrayAppend(&ccfg, &cc);
 		  }
 		}
 	      }
@@ -804,7 +804,7 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
     memcpy(mb.basis, ha->basis, sizeof(int)*mb.nbasis);
     memcpy(mb.ene, ha->hamilton, sizeof(double)*mb.nbasis);
     mb.bmax = mb.basis[mb.nbasis-1];
-    ArrayAppend(&base, &mb, NULL);
+    ArrayAppend(&base, &mb);
   }
   ncc1 = 0;  
   for (rg = icg0; rg < icg1; rg++) {
@@ -904,13 +904,13 @@ int StructureMBPT0(char *fn, double de, double ccut, int n, int *s0, int kmax,
     free(bk);
   }
   free(icg);
-  ArrayFree(&ccfg, NULL);
+  ArrayFree(&ccfg);
   for (i = 0; i < base.dim; i++) {
     mbp = ArrayGet(&base, i);
     free(mbp->basis);
     free(mbp->ene);
   }
-  ArrayFree(&base, NULL);
+  ArrayFree(&base);
 
   return 0;
 }

@@ -2927,13 +2927,13 @@ static int PTestMyArray(int argc, char *argv[], int argt[],
   int i, j, m;
   int dummy;
  
-  ArrayInit(&a, sizeof(double), 100);
+  ArrayInit(&a, sizeof(double), 100, NULL, InitDoubleData);
   d = 0.1;
   m = 100000;
   printf("> ");
   dummy = scanf("%d", &i);
   for (i = 0; i < m; i++) {
-    ArraySet(&a, i, &d, InitDoubleData);
+    ArraySet(&a, i, &d);
   }
   printf("> ");
   dummy = scanf("%d", &i);
@@ -2943,18 +2943,18 @@ static int PTestMyArray(int argc, char *argv[], int argt[],
   b = (double *) ArrayGet(&a, 200);
   printf("%f \n", *b);
 
-  ArrayFree(&a, 0);
+  ArrayFree(&a);
   printf("> ");
   dummy = scanf("%d", &i);
 
-  MultiInit(&ma, sizeof(double), 3, block);
+  MultiInit(&ma, sizeof(double), 3, block, NULL, InitDoubleData);
   printf("%d %d\n", ma.esize, ma.ndim);
   for (i = 9; i < 15; i++) {
     for (j = 0; j < m; j++) {
       k[0] = i;
       k[1] = j;
       k[2] = 20;	
-      b = (double *) MultiSet(&ma, k, NULL, InitDoubleData, NULL);
+      b = (double *) MultiSet(&ma, k, NULL);
       *b = 0.2;
       b = (double *) MultiGet(&ma, k);
     }
@@ -2962,7 +2962,7 @@ static int PTestMyArray(int argc, char *argv[], int argt[],
 
   printf("> ");
   dummy = scanf("%d", &i);
-  MultiFree(&ma, NULL);
+  MultiFree(&ma);
 
   printf("> ");
   dummy = scanf("%d", &i);

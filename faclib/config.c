@@ -1775,7 +1775,7 @@ int AddConfigToList(int k, CONFIG *cfg) {
   if (cfg->n_csfs > 0) {
     cfg->symstate = malloc(sizeof(int)*cfg->n_csfs);
   }
-  if (ArrayAppend(clist, cfg, InitConfigData) == NULL) return -1;
+  if (ArrayAppend(clist, cfg) == NULL) return -1;
   if (cfg->n_csfs > 0) {    
     AddConfigToSymmetry(k, cfg_groups[k].n_cfgs, cfg); 
   }
@@ -1813,7 +1813,7 @@ int AddStateToSymmetry(int kg, int kc, int kstate, int parity, int j) {
   s.kcfg = kc;
   s.kstate = kstate;
   st = &(symmetry_list[k].states);
-  if (ArrayAppend(st, &s, NULL) == NULL) return -1;
+  if (ArrayAppend(st, &s) == NULL) return -1;
   symmetry_list[k].n_states++;
   return 0;
 }
@@ -1876,7 +1876,7 @@ int AddConfigToSymmetry(int kg, int kc, CONFIG *cfg) {
     s.kstate = i;
     cfg->symstate[m] = PackSymState(k, symmetry_list[k].n_states);
     st = &(symmetry_list[k].states);
-    if (ArrayAppend(st, &s, NULL) == NULL) return -1;
+    if (ArrayAppend(st, &s) == NULL) return -1;
     symmetry_list[k].n_states++;
   }
   return 0;
@@ -2263,34 +2263,6 @@ int CompareShellInvert(const void *ts1, const void *ts2) {
 }
 
 /* 
-** FUNCTION:    InitConfig
-** PURPOSE:     initialize the module "config".
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
-*/
-int InitConfig(void) {
-  int i;
-
-  n_groups = 0;
-  cfg_groups = malloc(MAX_GROUPS*sizeof(CONFIG_GROUP));
-  for (i = 0; i < MAX_GROUPS; i++) {
-    strcpy(cfg_groups[i].name, "_all_");
-    cfg_groups[i].n_cfgs = 0;
-    ArrayInit(&(cfg_groups[i].cfg_list), sizeof(CONFIG), CONFIGS_BLOCK);
-  }
-
-  symmetry_list = malloc(MAX_SYMMETRIES*sizeof(SYMMETRY));
-  for (i = 0; i < MAX_SYMMETRIES; i++) {
-    symmetry_list[i].n_states = 0;
-    ArrayInit(&(symmetry_list[i].states), sizeof(STATE), STATES_BLOCK);
-  }
-  
-  return 0; 
-}
-
-/* 
 ** FUNCTION:    FreeConfigData
 ** PURPOSE:     free the memory in a CONFIG struct.
 ** INPUT:       {void *},
@@ -2318,6 +2290,36 @@ static void FreeConfigData(void *p) {
   }
 }
 
+/* 
+** FUNCTION:    InitConfig
+** PURPOSE:     initialize the module "config".
+** INPUT:       
+** RETURN:      
+** SIDE EFFECT: 
+** NOTE:        
+*/
+int InitConfig(void) {
+  int i;
+
+  n_groups = 0;
+  cfg_groups = malloc(MAX_GROUPS*sizeof(CONFIG_GROUP));
+  for (i = 0; i < MAX_GROUPS; i++) {
+    strcpy(cfg_groups[i].name, "_all_");
+    cfg_groups[i].n_cfgs = 0;
+    ArrayInit(&(cfg_groups[i].cfg_list), sizeof(CONFIG), CONFIGS_BLOCK,
+        FreeConfigData, NULL);
+  }
+
+  symmetry_list = malloc(MAX_SYMMETRIES*sizeof(SYMMETRY));
+  for (i = 0; i < MAX_SYMMETRIES; i++) {
+    symmetry_list[i].n_states = 0;
+    ArrayInit(&(symmetry_list[i].states), sizeof(STATE), STATES_BLOCK,
+        NULL, NULL);
+  }
+  
+  return 0; 
+}
+
 int RemoveGroup(int k) {
   SYMMETRY *sym;
   STATE *s;
@@ -2327,7 +2329,7 @@ int RemoveGroup(int k) {
     printf("only the last group can be removed\n");
     return -1;
   }
-  ArrayFree(&(cfg_groups[k].cfg_list), FreeConfigData);
+  ArrayFree(&(cfg_groups[k].cfg_list));
   cfg_groups[k].n_cfgs = 0;
   strcpy(cfg_groups[k].name, "_all_");
   n_groups--;
@@ -2337,7 +2339,7 @@ int RemoveGroup(int k) {
     for (m = 0; m < sym->n_states; m++) {
       s = ArrayGet(&(sym->states), m);
       if (s->kgroup == k) {
-	ArrayTrim(&(sym->states), m, NULL);
+	ArrayTrim(&(sym->states), m);
 	sym->n_states = m;
 	break;
       }
@@ -2363,7 +2365,7 @@ int ReinitConfig(int m) {
   if (m) return 0;
 
   for (i = 0; i < n_groups; i++) {
-    ArrayFree(&(cfg_groups[i].cfg_list), FreeConfigData);
+    ArrayFree(&(cfg_groups[i].cfg_list));
     cfg_groups[i].n_cfgs = 0;
     strcpy(cfg_groups[i].name, "_all_");
   }
@@ -2371,7 +2373,7 @@ int ReinitConfig(int m) {
 
   for (i = 0; i < MAX_SYMMETRIES; i++) {
     if (symmetry_list[i].n_states > 0) {
-      ArrayFree(&(symmetry_list[i].states), NULL);
+      ArrayFree(&(symmetry_list[i].states));
       symmetry_list[i].n_states = 0;
     }
   }

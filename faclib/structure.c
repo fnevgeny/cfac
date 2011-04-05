@@ -1881,7 +1881,7 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
 	  c->energy = AverageEnergyConfig(c);
 	}
 	lev.energy = c->energy;
-	if (ArrayAppend(levels, &lev, InitLevelData) == NULL) {
+	if (ArrayAppend(levels, &lev) == NULL) {
 	  printf("Not enough memory for levels array\n");
 	  exit(1);
 	}    
@@ -1919,7 +1919,7 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
       SortMixing(0, m, &lev, NULL);
       GetPrincipleBasis(lev.mixing, m, lev.kpb);      
     
-      if (ArrayAppend(eblevels, &lev, InitLevelData) == NULL) {
+      if (ArrayAppend(eblevels, &lev) == NULL) {
 	printf("Not enough memory for levels array\n");
 	exit(1);
       }
@@ -1988,7 +1988,7 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
       lev.iham = -1;
     }
 
-    if (ArrayAppend(levels, &lev, InitLevelData) == NULL) {
+    if (ArrayAppend(levels, &lev) == NULL) {
       printf("Not enough memory for levels array\n");
       exit(1);
     }
@@ -2131,7 +2131,7 @@ int AddECorrection(int iref, int ilev, double e, int nmin) {
   c.ilev = ilev;
   c.e = e;
   c.nmin = nmin;
-  ArrayAppend(ecorrections, &c, NULL);
+  ArrayAppend(ecorrections, &c);
   ncorrections += 1;
 
   return 0;
@@ -2505,7 +2505,7 @@ int SaveLevels(char *fn, int m, int n) {
 	  if (q == 0) {
 	    gion1.imin = n0;
 	    gion1.imax = i-1;
-	    ArrayAppend(levels_per_ion+nk, &gion1, NULL);
+	    ArrayAppend(levels_per_ion+nk, &gion1);
 	  }
 	}
 	n0 = i;
@@ -2533,7 +2533,7 @@ int SaveLevels(char *fn, int m, int n) {
       if (q == 0 && n_levels > n0) {
 	gion1.imin = n0;
 	gion1.imax = n_levels-1;
-	ArrayAppend(levels_per_ion+nk, &gion1, NULL);
+	ArrayAppend(levels_per_ion+nk, &gion1);
       }
     }
     
@@ -2686,7 +2686,7 @@ int SaveLevels(char *fn, int m, int n) {
 	if (q == 0) {
 	  gion1.imin = n0;
 	  gion1.imax = i-1;
-	  ArrayAppend(levels_per_ion+nk, &gion1, NULL);
+	  ArrayAppend(levels_per_ion+nk, &gion1);
 	}
       }
       n0 = i;
@@ -2714,7 +2714,7 @@ int SaveLevels(char *fn, int m, int n) {
     if (q == 0 && n_levels > n0) {
       gion1.imin = n0;
       gion1.imax = n_levels-1;
-      ArrayAppend(levels_per_ion+nk, &gion1, NULL);
+      ArrayAppend(levels_per_ion+nk, &gion1);
     }
   }
 #ifdef PERFORM_STATISTICS
@@ -4526,9 +4526,9 @@ int ClearLevelTable(void) {
   int ng, i, k;
 
   n_levels = 0;
-  ArrayFree(levels, FreeLevelData);
+  ArrayFree(levels);
   n_eblevels = 0;
-  ArrayFree(eblevels, FreeLevelData);
+  ArrayFree(eblevels);
 
   ng = GetNumGroups();
   for (k = 0; k < ng; k++) {
@@ -4541,11 +4541,11 @@ int ClearLevelTable(void) {
   }
   
   for (k = 0; k <= N_ELEMENTS; k++) {
-    ArrayFree(levels_per_ion+k, NULL);
+    ArrayFree(levels_per_ion+k);
   }
 
   ncorrections = 0;
-  ArrayFree(ecorrections, NULL);
+  ArrayFree(ecorrections);
 
   ClearAngularFrozen();
   return 0;
@@ -4556,14 +4556,14 @@ void ClearRMatrixLevels(int n) {
   SYMMETRY *sym;
   STATE *s;
 
-  ArrayTrim(levels, n, FreeLevelData);
+  ArrayTrim(levels, n);
   n_levels = n;
   for (i = 0; i < MAX_SYMMETRIES; i++) {
     sym = GetSymmetry(i);
     for (m = 0; m < sym->n_states; m++) {
       s = ArrayGet(&(sym->states), m);
       if (s->kgroup < 0) {
-	ArrayTrim(&(sym->states), m, NULL);
+	ArrayTrim(&(sym->states), m);
 	sym->n_states = m;
 	break;
       }
@@ -4632,7 +4632,7 @@ int InitStructure(void) {
   int i;
 
   for (i = 0; i <= N_ELEMENTS; i++) {
-    ArrayInit(levels_per_ion+i, sizeof(LEVEL_ION), 512);
+    ArrayInit(levels_per_ion+i, sizeof(LEVEL_ION), 512, NULL, NULL);
   }
 
   InitAngZArray();
@@ -4641,12 +4641,14 @@ int InitStructure(void) {
   n_levels = 0;
   levels = malloc(sizeof(ARRAY));
   if (!levels) return -1;
-  ArrayInit(levels, sizeof(LEVEL), LEVELS_BLOCK);
+  ArrayInit(levels, sizeof(LEVEL), LEVELS_BLOCK,
+    FreeLevelData, InitLevelData);
 
   n_eblevels = 0;
   eblevels = malloc(sizeof(ARRAY));
   if (!eblevels) return -1;
-  ArrayInit(eblevels, sizeof(LEVEL), LEVELS_BLOCK);
+  ArrayInit(eblevels, sizeof(LEVEL), LEVELS_BLOCK,
+    FreeLevelData, InitLevelData);
 
   ang_frozen.nts = 0;
   ang_frozen.ncs = 0;
@@ -4660,7 +4662,7 @@ int InitStructure(void) {
   ang_frozen.zxzfb = NULL;
   
   ecorrections = malloc(sizeof(ARRAY));
-  ArrayInit(ecorrections, sizeof(ECORRECTION), 512);
+  ArrayInit(ecorrections, sizeof(ECORRECTION), 512, NULL, NULL);
   ncorrections = 0;
 
   AllocHamMem(&_ham, 1000, 1000);

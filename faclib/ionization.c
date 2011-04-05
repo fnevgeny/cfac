@@ -552,8 +552,7 @@ double *CIRadialQkIntegratedTable(int kb, int kbp) {
   index[0] = kb;
   index[1] = kbp;
   
-  p = (double **) MultiSet(qk_array, index, NULL, 
-			   InitPointerData, FreeIonizationQkData);
+  p = (double **) MultiSet(qk_array, index, NULL);
   if (*p) {
     return (*p);
   } 
@@ -1032,17 +1031,17 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
     emax0 = egrid_max;
   }
 
-  ArrayInit(&subte, sizeof(double), 128);
-  ArrayAppend(&subte, &emin, NULL);
+  ArrayInit(&subte, sizeof(double), 128, NULL, NULL);
+  ArrayAppend(&subte, &emin);
   c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
-      ArrayAppend(&subte, &e, NULL);
+      ArrayAppend(&subte, &e);
       e *= c;
     }
   }
-  ArrayAppend(&subte, &emax, NULL);
+  ArrayAppend(&subte, &emax);
 
   egrid_type = 1;
   pw_type = 0;
@@ -1223,7 +1222,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
   ReinitRecombination(1);
   ReinitIonization(1);
 
-  ArrayFree(&subte, NULL);
+  ArrayFree(&subte);
   CloseFile(file, &fhdr);
 
   return 0;
@@ -1615,7 +1614,7 @@ int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
 }
 
 int FreeIonizationQk(void) {
-  MultiFreeData(qk_array, FreeIonizationQkData);
+  MultiFreeData(qk_array);
   return 0;
 }
 
@@ -1624,7 +1623,8 @@ int InitIonization(void) {
   int ndim = 2;
   
   qk_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(qk_array, sizeof(double *), ndim, blocks);
+  MultiInit(qk_array, sizeof(double *), ndim, blocks, 
+			    FreeIonizationQkData, InitPointerData);
   
   SetCIMaxK(IONMAXK);
   n_egrid = 0;

@@ -247,7 +247,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
       printf("Can not add more Groups\n");
       exit(1);
     }
-    ArrayAppend(rec_complex[n_complex].rg, kg+i, NULL);
+    ArrayAppend(rec_complex[n_complex].rg, kg+i);
     clist = &(g->cfg_list);
     for (t = 0; t < g->n_cfgs; t++) {
       c = (CONFIG *) ArrayGet(clist, t);
@@ -405,7 +405,7 @@ void RRRadialQkHydrogenicParams(int np, double *p,
   double tol;
   int i, j, k, ne;
 
-  qk = (double **) ArraySet(hyd_qk_array, n, NULL, InitPointerData);
+  qk = (double **) ArraySet(hyd_qk_array, n, NULL);
   if (*qk == NULL) {
     tol = 1E-4;
     *qk = (double *) malloc(sizeof(double)*n*np);
@@ -552,8 +552,7 @@ int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
   }
 
   nqk = n_tegrid*n_egrid;
-  p = (double **) MultiSet(qk_array, index, NULL, 
-			   InitPointerData, FreeRecPkData);
+  p = (double **) MultiSet(qk_array, index, NULL);
   if (*p) {
     for (i = 0; i < nqk; i++) {
       qr[i] = (*p)[i];
@@ -647,8 +646,7 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   }
 
   nqk = n_tegrid*n_egrid;
-  p = (double **) MultiSet(qk_array, index, NULL, 
-			   InitPointerData, FreeRecPkData);
+  p = (double **) MultiSet(qk_array, index, NULL);
   if (*p) {
     for (i = 0; i < nqk; i++) {
       qr[i] = (*p)[i];
@@ -1394,8 +1392,7 @@ int AIRadialPk(double **ai_pk, int k0, int k1, int kb, int kappaf, int k) {
   index[3] = k1;
   index[4] = k/2;
 
-  p = (double **) MultiSet(pk_array, index, NULL, 
-			   InitPointerData, FreeRecPkData);
+  p = (double **) MultiSet(pk_array, index, NULL);
   if (*p) {
     *ai_pk = *p;
     return 0;
@@ -1535,17 +1532,17 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
   } else {
     emax0 = egrid_max;
   }
-  ArrayInit(&subte, sizeof(double), 128);
-  ArrayAppend(&subte, &emin, NULL);
+  ArrayInit(&subte, sizeof(double), 128, NULL, NULL);
+  ArrayAppend(&subte, &emin);
   c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
-      ArrayAppend(&subte, &e, NULL);
+      ArrayAppend(&subte, &e);
       e *= c;
     }
   }
-  ArrayAppend(&subte, &emax, NULL);
+  ArrayAppend(&subte, &emax);
 
     
   e0 = emin;
@@ -1624,7 +1621,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
   }
   
   fclose(f);
-  ArrayFree(&subte, NULL);
+  ArrayFree(&subte);
   ReinitRecombination(1);
 
   return 0;
@@ -1697,17 +1694,17 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   } else {
     emax0 = egrid_max;
   }
-  ArrayInit(&subte, sizeof(double), 128);
-  ArrayAppend(&subte, &emin, NULL);
+  ArrayInit(&subte, sizeof(double), 128, NULL, NULL);
+  ArrayAppend(&subte, &emin);
   c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
-      ArrayAppend(&subte, &e, NULL);
+      ArrayAppend(&subte, &e);
       e *= c;
     }
   }
-  ArrayAppend(&subte, &emax, NULL);
+  ArrayAppend(&subte, &emax);
 
   if (qk_mode == QK_FIT) {
     nqk = NPARAMS+1;
@@ -1845,7 +1842,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
       
   ReinitRecombination(1);
 
-  ArrayFree(&subte, NULL);
+  ArrayFree(&subte);
   CloseFile(f, &fhdr);
 
   return 0;
@@ -1910,17 +1907,17 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 
   n_egrid0 = n_egrid;
 
-  ArrayInit(&subte, sizeof(double), 128);
-  ArrayAppend(&subte, &emin, NULL);
+  ArrayInit(&subte, sizeof(double), 128, NULL, NULL);
+  ArrayAppend(&subte, &emin);
   c = TE_MAX_MIN;
   if (!e_set) {
     b = c*emin;
     while (b < emax) {
-      ArrayAppend(&subte, &b, NULL);
+      ArrayAppend(&subte, &b);
       b *= c;
     }
   }
-  ArrayAppend(&subte, &emax, NULL);
+  ArrayAppend(&subte, &emax);
   
   if (!msub) {
     fhdr.type = DB_AI;
@@ -2036,7 +2033,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 
   ReinitRecombination(1);
   
-  ArrayFree(&subte, NULL);
+  ArrayFree(&subte);
   CloseFile(f, &fhdr);
 
 #ifdef PERFORM_STATISTICS
@@ -2347,13 +2344,13 @@ int DROpen(int n, int *nlev, int **ops) {
 }
 
 int FreeRecPk(void) {
-  MultiFreeData(pk_array, FreeRecPkData);
+  MultiFreeData(pk_array);
   return 0;
 }
 
 int FreeRecQk(void) {
   if (qk_array->array == NULL) return 0;
-  MultiFreeData(qk_array, FreeRecPkData);
+  MultiFreeData(qk_array);
   return 0;
 }
 
@@ -2365,7 +2362,8 @@ int InitRecombination(void) {
   ndim = 5;
   for (i = 0; i < ndim; i++) blocks[i] = MULTI_BLOCK5;
   pk_array = (MULTI *) malloc(sizeof(MULTI));
-  MultiInit(pk_array, sizeof(double *), ndim, blocks);
+  MultiInit(pk_array, sizeof(double *), ndim, blocks, 
+			   FreeRecPkData, InitPointerData);
   
   ndim = 3;
   for (i = 0; i < ndim; i++) blocks[i] = MULTI_BLOCK3;
@@ -2373,15 +2371,16 @@ int InitRecombination(void) {
   blocks[0] = 10;
   blocks[1] = 10;
   blocks[2] = 4;
-  MultiInit(qk_array, sizeof(double *), ndim, blocks);  
+  MultiInit(qk_array, sizeof(double *), ndim, blocks,
+    FreeRecPkData, InitPointerData);  
   
   hyd_qk_array = (ARRAY *) malloc(sizeof(ARRAY));
-  ArrayInit(hyd_qk_array, sizeof(double *), 32);
+  ArrayInit(hyd_qk_array, sizeof(double *), 32, NULL, InitPointerData);
   
   n_complex = 0;
   for (i = 0; i < MAX_COMPLEX; i++) {
     rec_complex[i].rg = (ARRAY *) malloc(sizeof(ARRAY));
-    ArrayInit(rec_complex[i].rg, sizeof(int), 64);
+    ArrayInit(rec_complex[i].rg, sizeof(int), 64, NULL, NULL);
   }
   n_egrid = 0;
   egrid[0] = -1.0;
@@ -2420,7 +2419,7 @@ int ReinitRecombination(int m) {
   if (m > 0) return 0;
 
   for (i = 0; i < n_complex; i++) {
-    ArrayFree(rec_complex[i].rg, NULL);
+    ArrayFree(rec_complex[i].rg);
   }
   n_complex = 0;
   

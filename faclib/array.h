@@ -50,21 +50,11 @@
 ** NOTE:        
 */
 
-#define USE_NMULTI 1
-/* choose MULTI implementation */
-#ifdef USE_NMULTI
 #define MultiInit NMultiInit
 #define MultiGet NMultiGet
 #define MultiSet NMultiSet
 #define MultiFreeData NMultiFreeData
 #define MultiFree NMultiFree
-#else
-#define MultiInit SMultiInit
-#define MultiGet SMultiGet
-#define MultiSet SMultiSet
-#define MultiFreeData SMultiFreeData
-#define MultiFree SMultiFree
-#endif /*USE_NMULTI*/
 
 
 /*
@@ -92,13 +82,22 @@ typedef struct _DATA_ {
 **              the size of the array.
 ** NOTE:        
 */
-typedef struct _ARRAY_ {
+
+typedef struct _ARRAY_ ARRAY;
+
+typedef void (*ARRAY_ELEM_FREE)(void *elem);
+typedef void (*ARRAY_DATA_INIT)(void *elem, int);
+
+struct _ARRAY_ {
   unsigned short esize;
   unsigned short block;
   int bsize;
   int dim;
   DATA  *data;
-} ARRAY;
+  
+  ARRAY_ELEM_FREE FreeElem;
+  ARRAY_DATA_INIT InitData;
+};
 
 /*
 ** STRUCT:      MULTI
@@ -123,40 +122,26 @@ typedef struct _MULTI_ {
   ARRAY *array;
 } MULTI;
 
-int   ArrayInit(ARRAY *a, int esize, int block);
+int   ArrayInit(ARRAY *a, int esize, int block,
+    ARRAY_ELEM_FREE FreeElem, ARRAY_DATA_INIT InitData);
 void *ArrayGet(ARRAY *a, int i);
-void *ArraySet(ARRAY *a, int i, const void *d, 
-	       void (*InitData)(void *, int));
-void *ArrayAppend(ARRAY *a, const void *d, 
-		  void (*InitData)(void *, int));
-int   ArrayTrim(ARRAY *a, int n, 
-		void(*FreeElem)(void *));
-int   ArrayFree(ARRAY *a, void (*FreeElem)(void *));
-int   ArrayFreeData(DATA *p, int esize, int block, 
-		    void (*FreeElem)(void *));
-
-int   SMultiInit(MULTI *ma, int esize, int ndim, int *block);
-void *SMultiGet(MULTI *ma, int *k);
-void *SMultiSet(MULTI *ma, int *k, void *d, 
-		void (*InitData)(void *, int),
-		void (*FreeElem)(void *));
-int   SMultiFree(MULTI *ma, void (*FreeElem)(void *));
-int   SMultiFreeDataOnly(ARRAY *a, int d, void (*FreeElem)(void *));
-int   SMultiFreeData(MULTI *ma, void (*FreeElem)(void *));
+void *ArraySet(ARRAY *a, int i, const void *d);
+void *ArrayAppend(ARRAY *a, const void *d);
+int   ArrayTrim(ARRAY *a, int n);
+int   ArrayFree(ARRAY *a);
+int   ArrayFreeData(ARRAY *a, DATA *p, int esize, int block);
 
 /*
 ** the following set of funcitons are a different implementation
 ** for the MULTI array,
 */
-int   NMultiInit(MULTI *ma, int esize, int ndim, int *block);
+int   NMultiInit(MULTI *ma, int esize, int ndim, int *block,
+    ARRAY_ELEM_FREE FreeElem, ARRAY_DATA_INIT InitData);
 void *NMultiGet(MULTI *ma, int *k);
-void *NMultiSet(MULTI *ma, int *k, void *d, 
-		void (*InitData)(void *, int),
-		void (*FreeElem)(void *));
-int   NMultiFree(MULTI *ma, 
-		 void (*FreeElem)(void *));
-int   NMultiFreeDataOnly(ARRAY *a, void (*FreeElem)(void *));
-int   NMultiFreeData(MULTI *ma, void (*FreeElem)(void *));
+void *NMultiSet(MULTI *ma, int *k, void *d);
+int   NMultiFree(MULTI *ma);
+int   NMultiFreeDataOnly(ARRAY *a);
+int   NMultiFreeData(MULTI *ma);
 
 void  InitIntData(void *p, int n);
 void  InitDoubleData(void *p, int n);

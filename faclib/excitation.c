@@ -313,7 +313,7 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
     type = ko2;
   }
 
-  *pk = (CEPK *) MultiSet(pk_array, index, NULL, InitCEPK, FreeExcitationPkData);
+  *pk = (CEPK *) MultiSet(pk_array, index, NULL);
   if ((*pk)->nkl >= 0) {
     return type;
   }
@@ -806,8 +806,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
   index[2] = k1;
   index[3] = k2;
   index[4] = k3;
-  p = (double **) MultiSet(qk_array, index, NULL, 
-			   InitPointerData, FreeExcitationQkData);
+  p = (double **) MultiSet(qk_array, index, NULL);
   if (*p) {
     return *p;
   }   
@@ -1083,8 +1082,7 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
   index[3] = k2;
   index[4] = k3;
 
-  p = (double **) MultiSet(qk_array, index, NULL, 
-			   InitPointerData, FreeExcitationQkData);
+  p = (double **) MultiSet(qk_array, index, NULL);
   if (*p) {
     return *p;
   }
@@ -2317,18 +2315,18 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   /* Build subte grid array {emin, 5*emin, ..., emax}             */
   /* (with some margins for the first & last elements).           */
   /* The grid is used to split the whole set into several blocks. */
-  ArrayInit(&subte, sizeof(double), 128);
+  ArrayInit(&subte, sizeof(double), 128, NULL, NULL);
   ebuf = 0.999*emin;
-  ArrayAppend(&subte, &ebuf, NULL);
+  ArrayAppend(&subte, &ebuf);
   if (!e_set || !te_set) {
     double e = TE_MAX_MIN*emin;
     while (e < emax) {
-      ArrayAppend(&subte, &e, NULL);
+      ArrayAppend(&subte, &e);
       e *= TE_MAX_MIN;
     }
   }
   ebuf = 1.001*emax;
-  ArrayAppend(&subte, &ebuf, NULL);
+  ArrayAppend(&subte, &ebuf);
  
   if (msub) {
     pw_type = 1;
@@ -2589,7 +2587,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
   ReinitExcitation(1);
 
-  ArrayFree(&subte, NULL);
+  ArrayFree(&subte);
   if (alev) free(alev);
   
   CloseFile(f, &fhdr);
@@ -2714,17 +2712,17 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   n_tegrid0 = n_tegrid;
   n_egrid0 = n_egrid;
 
-  ArrayInit(&subte, sizeof(double), 128);
-  ArrayAppend(&subte, &emin, NULL);
+  ArrayInit(&subte, sizeof(double), 128, NULL, NULL);
+  ArrayAppend(&subte, &emin);
   c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
-      ArrayAppend(&subte, &e, NULL);
+      ArrayAppend(&subte, &e);
       e *= c;
     }
   }
-  ArrayAppend(&subte, &emax, NULL);
+  ArrayAppend(&subte, &emax);
  
   pw_type = 0;
   egrid_type = 1;
@@ -2875,7 +2873,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 
   ReinitExcitation(1);
 
-  ArrayFree(&subte, NULL);
+  ArrayFree(&subte);
   free(low);
   free(up);
 
@@ -2962,17 +2960,17 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   n_tegrid0 = n_tegrid;
   n_egrid0 = n_egrid;
 
-  ArrayInit(&subte, sizeof(double), 128);
-  ArrayAppend(&subte, &emin, NULL);
+  ArrayInit(&subte, sizeof(double), 128, NULL, NULL);
+  ArrayAppend(&subte, &emin);
   c = TE_MAX_MIN;
   if (!e_set || !te_set) {
     e = c*emin;
     while (e < emax) {
-      ArrayAppend(&subte, &e, NULL);
+      ArrayAppend(&subte, &e);
       e *= c;
     }
   }
-  ArrayAppend(&subte, &emax, NULL);
+  ArrayAppend(&subte, &emax);
  
   pw_type = 1;
   egrid_type = 1;
@@ -3143,7 +3141,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   free(qkc);
   ReinitExcitation(1);
 
-  ArrayFree(&subte, NULL);
+  ArrayFree(&subte);
   free(low);
   free(up);
 
@@ -3158,8 +3156,8 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 }
 
 int FreeExcitationQk(void) {
-  MultiFreeData(qk_array, FreeExcitationQkData);
-  MultiFreeData(pk_array, FreeExcitationPkData);
+  MultiFreeData(qk_array);
+  MultiFreeData(pk_array);
   return 0;
 }
 
@@ -3172,11 +3170,13 @@ int InitExcitation(void) {
 
   ndim = 3;
   pk_array = malloc(sizeof(MULTI));
-  MultiInit(pk_array, sizeof(CEPK), ndim, blocks1);
+  MultiInit(pk_array, sizeof(CEPK), ndim, blocks1,
+    FreeExcitationPkData, InitCEPK);
 
   ndim = 5;
   qk_array = malloc(sizeof(MULTI));
-  MultiInit(qk_array, sizeof(double *), ndim, blocks2);
+  MultiInit(qk_array, sizeof(double *), ndim, blocks2, 
+    FreeExcitationQkData, InitPointerData);
 
   if (fpw) {
     fclose(fpw);

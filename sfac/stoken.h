@@ -26,14 +26,12 @@
 #define LIST    (3)
 #define KEYWORD (4)
 
-#define METH_VARARGS  0
 #define COMMENT       ('#')
 #define CONTINUE      ('\\')
 
 typedef struct _METHOD_ {
   char name[MAXMETHODNAME];
   int (*func)(int argc, char *argv[], int argt[], ARRAY *variables);
-  int arg_style;
 } METHOD;
 
 typedef struct _VARIABLE_ {

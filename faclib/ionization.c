@@ -12,7 +12,6 @@
 #include "excitation.h"
 #include "recombination.h"
 #include "dbase.h"
-#include "cf77.h"
 #include "ionization.h"
 
 #define MAXMSUB 32

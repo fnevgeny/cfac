@@ -10,7 +10,6 @@
 #include "interpolation.h"
 #include "transition.h"
 #include "dbase.h"
-#include "cf77.h"
 #include "mbpt.h"
 
 static int mbpt_extra = 0;

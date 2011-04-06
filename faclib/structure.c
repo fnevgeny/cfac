@@ -1,3 +1,4 @@
+#include <string.h>
 #include <time.h>
 #include <math.h>
 
@@ -10,7 +11,6 @@
 #include "radial.h"
 #include "angular.h"
 #include "dbase.h"
-#include "cf77.h"
 #include "structure.h"
 
 #if (FAC_DEBUG >= DEBUG_STRUCTURE)
@@ -37,7 +37,6 @@ static int n_levels = 0;
 static ARRAY *eblevels;
 static int n_eblevels;
 
-static int mbpt_mk = 0;
 static int angz_dim, angz_dim2;
 static ANGZ_DATUM *angz_array;
 static ANGZ_DATUM *angzxz_array;
@@ -66,16 +65,6 @@ int GetStructTiming(STRUCT_TIMING *t) {
   return 0;
 }
 #endif
-
-extern int GetAWGridMBPT(double **);
-
-void SetMaxKMBPT(int m) {
-  mbpt_mk = m;
-}
-
-int GetMaxKMBPT(void) {
-  return mbpt_mk;
-}
 
 void GetFields(double *b, double *e, double *a) {
   *b = BINP;
@@ -806,7 +795,7 @@ void AngularFrozen(int nts, int *ts, int ncs, int *cs) {
     for (j = 0; j < nts; j++) {
       kz = j*nts + i;
       ang_frozen.nz[kz] = AngularZMix(&(ang_frozen.z[kz]), 
-				      ts[i], ts[j], -1, -1, NULL, NULL);
+				      ts[i], ts[j], -1, -1);
     }
   }
   if (ncs > 0) {
@@ -1085,7 +1074,7 @@ double HamiltonElementFrozen(int isym, int isi, int isj) {
     nz = ang_frozen.nz[kz];
     ang = ang_frozen.z[kz];
   } else {
-    nz = AngularZMix(&ang, ti, tj, -1, -1, NULL, NULL);
+    nz = AngularZMix(&ang, ti, tj, -1, -1);
   }
   a = 0.0;
   for (i = 0; i < nz; i++) {
@@ -1720,20 +1709,15 @@ int TestHamilton(void) {
 ** after the DiagonalizeHamilton call
 */
 int DiagonalizeHamilton(HAMILTON *h) {
-  double *ap;
-  double *w, *wi;
-  double *z, *x, *y, *b, *d, *ep;
+  gsl_matrix *am, *evec;
+  gsl_vector_view vv;
+  gsl_eigen_symmv_workspace *wsp;
+  double *w;
+  double *z;
   double *mixing = NULL;
-  char jobz[] = "V";  
-  char uplo[] = "U";
-  char trans[] = "N";
-  int n, m, np;
-  int ldz;
-  int lwork;
-  int liwork;
+  int n, m;
   int info;
-  int i, j, t, t0, k, one;
-  double d_one, d_zero, a;
+  int i, j;
 #ifdef PERFORM_STATISTICS
   clock_t start, stop;
   start = clock();
@@ -1741,12 +1725,16 @@ int DiagonalizeHamilton(HAMILTON *h) {
 
   n = h->dim;
   m = h->n_basis;
-  ldz = n;
-  t0 = n*(n+1);
-
-  lwork = h->lwork;
-  liwork = h->liwork;  
- 
+  
+  if (m > n) {
+    printf("m > n in DiagonalizeHamilton(), %d %d\n", m, n);
+    abort();
+  }
+  if (h->heff != NULL) {
+    printf("h->heff != NULL in DiagonalizeHamilton()\n");
+    abort();
+  }
+  
   if (ci_level == -1) {
     mixing = h->mixing+n;
     for (i = 0; i < n; i++) {
@@ -1760,123 +1748,48 @@ int DiagonalizeHamilton(HAMILTON *h) {
     return 0;
   }
 
-  if (m > n) {
-    mixing = h->work + lwork;
-  } else {
-    mixing = h->mixing;
-  }
+  mixing = h->mixing;
   w = mixing;
   z = mixing + n;
-  if (h->heff == NULL) {
-    int i, j;
-    gsl_matrix *a, *evec;
-    gsl_vector_view vv;
-    gsl_eigen_symmv_workspace *wsp;
-    
-    ap = h->hamilton;
-#if 0
-    DSPEV(jobz, uplo, n, ap, w, z, ldz, h->work, &info);
-#else
-    wsp = gsl_eigen_symmv_alloc(n);
 
-    a    = gsl_matrix_alloc(n, n);
-    evec = gsl_matrix_alloc(n, n);
-    
-    for (j = 0; j < h->dim; j++) {
-      int t = j*(j+1)/2;
-      for (i = 0; i <= j; i++) {
-        gsl_matrix_set(a, j, i, h->hamilton[i + t]);
-      }
-    }
-    
-    vv = gsl_vector_view_array(w, n);
-    
-    info = gsl_eigen_symmv(a, &vv.vector, evec, wsp);
-    gsl_eigen_symmv_free(wsp);
-    gsl_matrix_free(a);
-    
-    gsl_eigen_symmv_sort(&vv.vector, evec, GSL_EIGEN_SORT_VAL_ASC);
-    
-    for (j = 0; j < h->dim; j++) {
-      for (i = 0; i < h->dim; i++) {
-        z[j*h->dim + i] = gsl_matrix_get(evec, i, j);
-      }
-    }
-    gsl_matrix_free(evec);
-#endif
-    if (info) {
-      goto ERROR;
-    }
-  } else {
-    ap = h->heff;
-    wi = h->work + lwork;
-    DGEEV(trans, jobz, n, ap, n, w, wi, z, n, z, n, 
-	  h->work, lwork, &info);
-    if (info) {
-      printf("dgeev Error: %d\n", info);	
-      goto ERROR;
+  wsp = gsl_eigen_symmv_alloc(n);
+
+  am   = gsl_matrix_alloc(n, n);
+  evec = gsl_matrix_alloc(n, n);
+
+  for (j = 0; j < h->dim; j++) {
+    int t = j*(j+1)/2;
+    for (i = 0; i <= j; i++) {
+      gsl_matrix_set(am, j, i, h->hamilton[i + t]);
     }
   }
 
-  if (m > n) {
-    np = m-n;
-    b = h->hamilton + t0/2;
-    ep = b + n*np;
-    y = h->mixing+n;
-    one = 1;
-    d_one = 1.0;
-    d_zero = 0.0;
-    for (i = 0; i < n; i++) {
-      x = y+n;
-      DGEMV(trans, np, n, d_one, b, np, z, one, d_zero, x, one);
-      y += m;
-      z += n;
-    }
-    y = h->mixing + 2*n;
-    for (j = 0; j < n; j++) {
-      t = j*(j+1)/2;
-      x = h->mixing + 2*n;
-      for (i = 0; i <= j; i++) {
-	a = 0.0;
-	for (k = 0; k < np; k++) {
-	  a += x[k]*y[k]/(w[j] - ep[k]);
-	}
-	if (i == j) a += w[j];
-	h->hamilton[i+t] = a;
-	x += m;
-      }
-      y += m;
-    }
-    w = h->mixing;
-    d = h->work+lwork+t0;
-    DSPEVD(jobz, uplo, n, ap, w, d, ldz, h->work, lwork,
-	    h->iwork, liwork, &info);
-    y = h->mixing+n;
-    z = mixing+n;
-    for (i = 0; i < n; i++) {
-      x = y+n;
-      DGEMV(trans, n, n, d_one, z, n, d, one, d_zero, y, one);
-      DGEMV(trans, np, n, d_one, b, np, y, one, d_zero, x, one);
-      for (j = 0; j < np; j++) {
-	x[j] *= 1.0/(w[i]-ep[j]);
-      } 
-      a = DDOT(np, x, one, x, one);
-      a = 1.0/sqrt(1.0+a);
-      DSCAL(m, a, y, one);
-      y += m;
-      d += n;
+  vv = gsl_vector_view_array(w, n);
+
+  info = gsl_eigen_symmv(am, &vv.vector, evec, wsp);
+  gsl_eigen_symmv_free(wsp);
+  gsl_matrix_free(am);
+
+  gsl_eigen_symmv_sort(&vv.vector, evec, GSL_EIGEN_SORT_VAL_ASC);
+
+  for (j = 0; j < h->dim; j++) {
+    for (i = 0; i < h->dim; i++) {
+      z[j*h->dim + i] = gsl_matrix_get(evec, i, j);
     }
   }
+  
+  gsl_matrix_free(evec);
 
 #ifdef PERFORM_STATISTICS
   stop = clock();
   timing.diag_ham += stop-start;
 #endif
 
-  return 0;
-
- ERROR: 
-  return -1;
+  if (info) {
+    return -1;
+  } else {
+    return 0;
+  }
 }
 
 int AddToLevels(HAMILTON *h, int ng, int *kg) {
@@ -3583,10 +3496,10 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
       if (ne1 == ne2) {
 	if (ih1 > ih2) {
 	  nz = AngularZMix((ANGULAR_ZMIX **)(&((ad->angz)[is])), 
-			   is2[i2], is1[i1], -1, -1, NULL, NULL);
+			   is2[i2], is1[i1], -1, -1);
 	} else {
 	  nz = AngularZMix((ANGULAR_ZMIX **)(&((ad->angz)[is])), 
-			   is1[i1], is2[i2], -1, -1, NULL, NULL);
+			   is1[i1], is2[i2], -1, -1);
 	}
       } else {
 	if (ne1 > ne2) {
@@ -3724,14 +3637,13 @@ int GetBaseJ(STATE *s) {
   return ih;
 }
 
-int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
-		int *nmk, double **mbk) {
+int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   int i, j, j1, j2, jb1, jb2;
   int kg1, kg2, kc1, kc2;
   int ih1, ih2, isz0, isz;
   int jlow, jup, kb1, kb2;
-  int nz, n, ns, im, nk, naw = 0;
-  double r0, *awgrid, *rg, aw = 0.0;
+  int nz, n, ns, im;
+  double r0;
   int ik, kmin, kmax, m, nmax;
   int nz_sub, nfb;
   STATE *slow, *sup;
@@ -3750,10 +3662,6 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
 
   lev1 = GetLevel(lower);
   lev2 = GetLevel(upper);
-  if (nmk) {
-    *nmk = 0;
-    *mbk = NULL;
-  }
   if (angmz_array) {
     ih1 = lev1->iham;
     ih2 = lev2->iham;
@@ -3879,7 +3787,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
 	  }
 	}
 	if (kb1 == kb2){	  
-	  nz_sub = AngularZMix(&ang_sub, kg1, kg2, kmin, kmax, NULL, NULL);
+	  nz_sub = AngularZMix(&ang_sub, kg1, kg2, kmin, kmax);
 	  if (nz_sub <= 0) {
 	    continue;
 	  }
@@ -3961,21 +3869,6 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
       lev = NULL;
     }
     ns = AngularZMixStates(&ad, lev1->iham, lev2->iham);
-    if (nmk) {
-      if (mbpt_mk > 0) {
-	*nmk = mbpt_mk;
-	nk = mbpt_mk*2;
-	*mbk = malloc(sizeof(double)*nk);
-	for (i = 0; i < nk; i++) {
-	  (*mbk)[i] = 0.0;
-	}
-	aw = fabs(lev1->energy - lev2->energy)*FINE_STRUCTURE_CONST;
-	naw = GetAWGridMBPT(&awgrid);
-      } else {
-	*nmk = 0;
-	*mbk = NULL;
-      }
-    }
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < angz_cut) continue;
@@ -3999,18 +3892,6 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
 				  ang_sub[m].k0, ang_sub[m].k1, r0);
 	  }
 	}
-	if (mbk && (*mbk)) {
-	  for (ik = 0; ik < mbpt_mk; ik++) {
-	    im = ik*naw;
-	    if (lev) {
-	      rg = &(ad->mk[isz+ns][im]);
-	    } else {
-	      rg = &(ad->mk[isz][im]);
-	    }
-	    r0 = InterpolateMultipole(aw, naw, awgrid, rg);
-	    (*mbk)[ik] += a*r0;
-	  }
-	}
       }
     }
     PackAngularZMix(&n, ang, nz);
@@ -4019,14 +3900,6 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
       AngZSwapBraKet(n, *ang, j1-j2);
     }
 
-    if (mbk && *mbk) {
-      for (i = 0; i < n; i++) {
-	ik = (*ang)[i].k/2-1;
-	if (ik >= 0 && ik < mbpt_mk) {
-	  (*mbk)[mbpt_mk+ik] += fabs((*ang)[i].coeff);
-	}
-      }
-    }
     /*
     for (i = 0; i < n; i++) {
       printf("%2d %3d %2d %2d %2d %10.3E\n", lower, upper, 
@@ -4091,7 +3964,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
       jup = GetBaseJ(sup);
       kg = sup->kgroup;
       kg = -kg-1;
-      nz_sub = AngularZMix(&ang_z, lower, kg, -1, -1, NULL, NULL);
+      nz_sub = AngularZMix(&ang_z, lower, kg, -1, -1);
       if (nz_sub <= 0) {
 	continue;
       }
@@ -4716,4 +4589,3 @@ int ReinitStructure(int m) {
   }
   return 0;
 }
-

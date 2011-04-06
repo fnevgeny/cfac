@@ -122,8 +122,6 @@ typedef struct _STRUCT_TIMING_ {
 int GetStructTiming(STRUCT_TIMING *t);
 #endif
 
-void SetMaxKMBPT(int m);
-int GetMaxKMBPT(void);
 int SortUnique(int n, int *a);
 int CompareInt(const void *a1, const void *a2);
 int ConstructHamilton(HAMILTON *h,
@@ -161,8 +159,7 @@ int GetBaseJ(STATE *s);
 void AngularFrozen(int nts, int *ts, int ncs, int *cs);
 void ClearAngularFrozen(void);
 int PrepAngular(int n1, int *is1, int n2, int *is2);
-int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk,
-		int *nmk, double **mbk);
+int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk);
 int CompareAngularZMix(const void *c1, const void *c2);
 int CompareAngularZxZMix(const void *c1, const void *c2);
 int CompareAngularZFB(const void *c1, const void *c2);

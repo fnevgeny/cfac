@@ -184,8 +184,8 @@ static int _TRMultipole(double *strength, double *energy,
   int m2;
   int p1, p2, j1, j2;
   LEVEL *lev1, *lev2;
-  double s, r, a, aw, *mbk;
-  int nz, i, nmk;
+  double s, r, aw;
+  int nz, i;
   ANGULAR_ZMIX *ang;
   
   *strength = 0.0;
@@ -218,9 +218,8 @@ static int _TRMultipole(double *strength, double *energy,
 
   s = 0.0;
 
-  nz = AngularZMix(&ang, lower, upper, m2, m2, &nmk, &mbk);
-  if (nz <= 0 && nmk < m2/2) {
-    if (nmk > 0) free(mbk);
+  nz = AngularZMix(&ang, lower, upper, m2, m2);
+  if (nz <= 0) {
     return -1;
   }
 
@@ -235,23 +234,9 @@ static int _TRMultipole(double *strength, double *energy,
     }
     s += r * ang[i].coeff;
   }
-  if (nmk >= m2/2) {
-    r = mbk[m2/2-1];
-    if (transition_option.gauge == G_COULOMB && m < 0) {
-      r /= aw;
-    }
-    a = r/s;
-    a *= a;
-    if (a < 0.75) {
-      s += r;
-    }
-  }
   if (nz > 0) {
     free(ang);	
   }  
-  if (nmk > 0) {
-    free(mbk);
-  }
 
   *strength = s;
   

@@ -17,7 +17,6 @@ CSRCS = angular.c \
 	init.c \
 	interpolation.c \
 	ionization.c \
-	mbpt.c \
 	nucleus.c \
 	orbital.c \
 	parser.c \

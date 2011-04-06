@@ -792,7 +792,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
   double qk[MAXNKL], dqk[MAXNKL];
   double rq[MAXNTE][MAXNE+1], e1, te, te0;
   double drq[MAXNTE][MAXNE+1], *rqc, **p, *ptr;
-  int index[5], mb, mk;
+  int index[5], mb;
   int one = 1, ieb[MAXNTE];
   double logj, xb;
 
@@ -1018,8 +1018,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
   nqk = n_tegrid*n_egrid1;
   t = nqk + 1;
   if (type >= 0 && k > 0) {
-    mk = GetMaxKMBPT();
-    if (k/2 <= mk) t = nqk*2 + 1;
+    if (k/2 <= 0) t = nqk*2 + 1;
   }
   *p = malloc(sizeof(double)*t);
   rqc = *p;
@@ -1361,7 +1360,7 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
   
 int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
   int i, nd, type;
-  int j, m, mk;
+  int j, m;
   double *rqe, rq[MAXNTE];
   double *xte, x0;
   
@@ -1392,8 +1391,7 @@ int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
   }
 
   if (type >= 0 && k > 0) {
-    mk = GetMaxKMBPT();
-    if (k/2 <= mk) {
+    if (k/2 <= 0) {
       rqe += n_tegrid*n_egrid1+1;
       rqc += n_egrid1;
       if (n_tegrid == 1) {
@@ -1699,10 +1697,10 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
   double te, a, ap, c, cp, r, s[3];
   double rq[MAXNE+1], qkc[MAXNE+1];
-  double born_egrid, born_cross, *mbk;
+  double born_egrid, born_cross;
   int ie, i1, i2, i1p, i2p, p1, p2, p1p, p2p;
   int j1, j2, j1p, j2p, mlev1, mlev2, mlev1p, mlev2p;
-  int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k, nmk;
+  int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k;
   ANGULAR_ZMIX *ang, *angp;
   double bte, bms;
         
@@ -1728,7 +1726,7 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
       DecodePJ(plev2->pj, &p2, &j2);
       c = lev1->mixing[i1]*lev2->mixing[i2];      
       if (fabs(c) < EPS10) continue;
-      nz = AngularZMix(&ang, ilev1, ilev2, -1, -1, &nmk, &mbk);
+      nz = AngularZMix(&ang, ilev1, ilev2, -1, -1);
       for (i = 0; i < nz; i++) {
 	a = W3j(j1, ang[i].k, j2, -mlev1, mlev1-mlev2, mlev2);
 	if (IsOdd((j1-mlev1)/2)) a = -a;
@@ -1745,7 +1743,7 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
 	    DecodePJ(plev2p->pj, &p2p, &j2p);
 	    cp = lev1->mixing[i1p]*lev2->mixing[i2p];
 	    if (fabs(cp) < EPS10) continue;
-	    nzp = AngularZMix(&angp, ilev1p, ilev2p, -1, -1, &nmk, &mbk);
+	    nzp = AngularZMix(&angp, ilev1p, ilev2p, -1, -1);
 	    for (ip = 0; ip < nzp; ip++) {
 	      if (angp[ip].k != ang[i].k) continue;
 	      ap = W3j(j1p, angp[ip].k, j2p, -mlev1p, mlev1p-mlev2p, mlev2p);
@@ -1814,8 +1812,8 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
   double te, a, ap, c, cp, r;
   double rq[(MAXNE+2)*MAXMSUB];
   double d, d1, d2, rs;
-  int q, nq, kkp, qb, qbp, ith, iph, m, ka, nmk;
-  double born_egrid, born_cross, *mbk;
+  int q, nq, kkp, qb, qbp, ith, iph, m, ka;
+  double born_egrid, born_cross;
   int ie, i1, i2, i1p, i2p, p1, p2, p1p, p2p;
   int j1, j2, j1p, j2p, mlev1, mlev2, mlev1p, mlev2p;
   int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k;
@@ -1845,7 +1843,7 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
       DecodePJ(plev2->pj, &p2, &j2);
       c = lev1->mixing[i1]*lev2->mixing[i2];      
       if (fabs(c) < EPS10) continue;
-      nz = AngularZMix(&ang, ilev1, ilev2, -1, -1, &nmk, &mbk);
+      nz = AngularZMix(&ang, ilev1, ilev2, -1, -1);
       for (i = 0; i < nz; i++) {
 	a = W3j(j1, ang[i].k, j2, -mlev1, mlev1-mlev2, mlev2);
 	if (IsOdd((j1-mlev1)/2)) a = -a;
@@ -1862,7 +1860,7 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
 	    DecodePJ(plev2p->pj, &p2p, &j2p);
 	    cp = lev1->mixing[i1p]*lev2->mixing[i2p];
 	    if (fabs(cp) < EPS10) continue;
-	    nzp = AngularZMix(&angp, ilev1p, ilev2p, -1, -1, &nmk, &mbk);
+	    nzp = AngularZMix(&angp, ilev1p, ilev2p, -1, -1);
 	    for (ip = 0; ip < nzp; ip++) {	      
 	      ap = W3j(j1p, angp[ip].k, j2p, -mlev1p, mlev1p-mlev2p, mlev2p);
 	      if (IsOdd((j1p-mlev1p)/2)) ap = -ap;
@@ -1961,9 +1959,9 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
 int CollisionStrength(const TRANSITION *tr, int msub,
                       double *qkt, double *params, double *bethe) {
   int i, j, t, h, p, m, type, ty, p1, p2, gauge;  
-  double te, c, r, s3j, c1, c2, *mbk, aw;
+  double te, c, r, s3j, c1, aw;
   ANGULAR_ZMIX *ang;
-  int nz, j1, j2, ie, nq, kkp, nmk;
+  int nz, j1, j2, ie, nq, kkp;
   double rq[MAXMSUB*(MAXNE+1)];
   double qkc[MAXMSUB*(MAXNE+1)];
   double *rqk, *rqkt;
@@ -2002,9 +2000,8 @@ int CollisionStrength(const TRANSITION *tr, int msub,
     }    
   }
   gauge = GetTransitionGauge();
-  nz = AngularZMix(&ang, tr->nlo, tr->nup, -1, -1, &nmk, &mbk);
+  nz = AngularZMix(&ang, tr->nlo, tr->nup, -1, -1);
   if (nz <= 0) {
-    if (nmk > 0) free(mbk);
     return -1;
   }
 
@@ -2024,34 +2021,14 @@ int CollisionStrength(const TRANSITION *tr, int msub,
 	ty = CERadialQk(rq, te, ang[i].k0, ang[i].k1,
 			ang[j].k0, ang[j].k1, ang[i].k);
 	t = ang[i].k/2;
-	if (ty >= 0 && t > 0 && t <= nmk) {
-	  c1 = AngZCorrection(nmk, mbk, ang+i, t);
-	  if (i == j) c2 = c1;
-	  else {
-	    c2 = AngZCorrection(nmk, mbk, ang+j, t);
-	  }
-	  if (gauge == G_COULOMB) {
-	    c1 /= aw;
-	    c2 /= aw;
-	  }
-	  c1 = c*(1.0+c1)*(1.0+c2);
-	} else {
-	  c1 = c;
-	}
+	c1 = c;
 	if (fpw) {
 	  fprintf(fpw, "\n\n");
 	}
 	if (ty > type) type = ty;	  
-	if (ty >= 0 && t > 0 && t <= nmk) {
-	  for (ie = 0; ie < n_egrid1; ie++) {
-	    qkc[ie] += c1*(rq[ie+n_egrid1]) + c*(rq[ie]-rq[ie+n_egrid1]);
-	    qkc[ie+n_egrid1] += c*rq[ie];
-	  }
-	} else {
-	  for (ie = 0; ie < n_egrid1; ie++) {
-	    qkc[ie] += c*rq[ie];
-	    qkc[ie+n_egrid1] += c*rq[ie];
-	  }
+	for (ie = 0; ie < n_egrid1; ie++) {
+	  qkc[ie] += c*rq[ie];
+	  qkc[ie+n_egrid1] += c*rq[ie];
 	}
       } else {
 	ty = CERadialQkMSub(rq, te, ang[i].k0, ang[i].k1,
@@ -2116,13 +2093,6 @@ int CollisionStrength(const TRANSITION *tr, int msub,
 	c1 = ang[i].coeff;
 	r += c1*c;
       }
-      if (nmk >= 1 && t == 0) {
-	c1 = mbk[0];
-	if (c1 + 1.0 != 1.0) {
-	  if (gauge == G_COULOMB) c1 /= aw;
-	  r += c1;
-	}
-      }
     }    
     if (fabs(r) > 0.0) {
       r = OscillatorStrength(-1, te, r, NULL);
@@ -2174,7 +2144,6 @@ int CollisionStrength(const TRANSITION *tr, int msub,
   }
 
   free(ang);
-  if (nmk > 0) free(mbk);
   
   /* there is a factor of 4 coming from normalization and the 2 
      from the formula */

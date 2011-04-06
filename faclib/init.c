@@ -6,7 +6,6 @@
 #include "recouple.h"
 #include "angular.h"
 #include "radial.h"
-#include "mbpt.h"
 #include "excitation.h"
 #include "ionization.h"
 #include "recombination.h"
@@ -63,7 +62,6 @@ int InitFac(void) {
   InitExcitation();
   InitRecombination();
   InitIonization();
-  InitMBPT();
 
   return 0;
 }

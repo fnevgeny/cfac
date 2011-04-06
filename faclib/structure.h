@@ -144,7 +144,7 @@ double Hamilton1E(int n_shells, SHELL_STATE *sbra,
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 HAMILTON *GetHamilton(void);
 SHAMILTON *GetSHamilton(int *n);
-int DiagnolizeHamilton(HAMILTON *h);
+int DiagonalizeHamilton(HAMILTON *h);
 int AddToLevels(HAMILTON *h, int ng, int *kg);
 int AddECorrection(int kref, int k, double e, int nmin);
 LEVEL *GetLevel(int k);

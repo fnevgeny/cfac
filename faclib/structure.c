@@ -1,6 +1,10 @@
 #include <time.h>
 #include <math.h>
 
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_eigen.h>
+
 #include "global.h"
 #include "nucleus.h"
 #include "radial.h"
@@ -1713,9 +1717,9 @@ int TestHamilton(void) {
 
 /* 
 ** be careful that the h->hamilton or h->heff is overwritten
-** after the DiagnolizeHamilton call
+** after the DiagonalizeHamilton call
 */
-int DiagnolizeHamilton(HAMILTON *h) {
+int DiagonalizeHamilton(HAMILTON *h) {
   double *ap;
   double *w, *wi;
   double *z, *x, *y, *b, *d, *ep;
@@ -1764,12 +1768,42 @@ int DiagnolizeHamilton(HAMILTON *h) {
   w = mixing;
   z = mixing + n;
   if (h->heff == NULL) {
+    int i, j;
+    gsl_matrix *a, *evec;
+    gsl_vector_view vv;
+    gsl_eigen_symmv_workspace *wsp;
+    
     ap = h->hamilton;
-    /* the dspevd sometimes fails. use dspev instead 
-    DSPEVD(jobz, uplo, n, ap, w, z, ldz, h->work, lwork,
-	  h->iwork, liwork, &info);    
-    */
+#if 0
     DSPEV(jobz, uplo, n, ap, w, z, ldz, h->work, &info);
+#else
+    wsp = gsl_eigen_symmv_alloc(n);
+
+    a    = gsl_matrix_alloc(n, n);
+    evec = gsl_matrix_alloc(n, n);
+    
+    for (j = 0; j < h->dim; j++) {
+      int t = j*(j+1)/2;
+      for (i = 0; i <= j; i++) {
+        gsl_matrix_set(a, j, i, h->hamilton[i + t]);
+      }
+    }
+    
+    vv = gsl_vector_view_array(w, n);
+    
+    info = gsl_eigen_symmv(a, &vv.vector, evec, wsp);
+    gsl_eigen_symmv_free(wsp);
+    gsl_matrix_free(a);
+    
+    gsl_eigen_symmv_sort(&vv.vector, evec, GSL_EIGEN_SORT_VAL_ASC);
+    
+    for (j = 0; j < h->dim; j++) {
+      for (i = 0; i < h->dim; i++) {
+        z[j*h->dim + i] = gsl_matrix_get(evec, i, j);
+      }
+    }
+    gsl_matrix_free(evec);
+#endif
     if (info) {
       goto ERROR;
     }
@@ -1834,14 +1868,14 @@ int DiagnolizeHamilton(HAMILTON *h) {
     }
   }
 
-  return 0;
-
- ERROR: 
 #ifdef PERFORM_STATISTICS
   stop = clock();
   timing.diag_ham += stop-start;
 #endif
 
+  return 0;
+
+ ERROR: 
   return -1;
 }
 
@@ -2967,7 +3001,7 @@ void StructureEB(HAMILTON *h, char *fn, int n, int *ilev) {
   
   ConstructHamiltonEB(h, n, ilev);
 
-  DiagnolizeHamilton(h);
+  DiagonalizeHamilton(h);
   
   k = n_eblevels;
   AddToLevels(h, 0, NULL);

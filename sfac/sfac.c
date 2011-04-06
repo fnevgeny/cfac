@@ -2843,7 +2843,7 @@ static int PStructure(int argc, char *argv[], int argt[],
     for (i = 0; i < ns; i++) {
       k = ConstructHamilton(h, i, ng0, ng, kg, ngp, kgp, 111);
       if (k < 0) continue;
-      if (DiagnolizeHamilton(h) < 0) return -1;
+      if (DiagonalizeHamilton(h) < 0) return -1;
       if (ng0 < ng) {
 	AddToLevels(h, ng0, kg);
       } else {

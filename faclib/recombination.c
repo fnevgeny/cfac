@@ -287,7 +287,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
   for (i = 0; i < nsym; i++) {
     m = ConstructHamilton(h, i, k, k, kg, 0, NULL, 111);
     if (m < 0) continue;
-    j = DiagnolizeHamilton(h);
+    j = DiagonalizeHamilton(h);
     if (j < 0) return -1;
     AddToLevels(h, 0, NULL);
   }
@@ -366,7 +366,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	  if (!InGroups(s->kgroup, k, kg)) continue;
 	  m = ConstructHamiltonFrozen(h, i, j, NULL, n, 0, NULL);
 	  if (m < 0) continue;
-	  if (DiagnolizeHamilton(h) < 0) return -2;
+	  if (DiagonalizeHamilton(h) < 0) return -2;
 	  AddToLevels(h, 0, NULL);
 	}
 	i0 = rec_complex[t].s1+1;
@@ -374,7 +374,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
     } else {
       m = ConstructHamiltonFrozen(h, i, k, kg, n, 0, NULL);
       if (m < 0) continue;
-      if (DiagnolizeHamilton(h) < 0) return -2;
+      if (DiagonalizeHamilton(h) < 0) return -2;
       AddToLevels(h, 0, NULL);
     }
   }

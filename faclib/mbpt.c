@@ -3136,7 +3136,7 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
     meff[isym]->n2 = n2;
     printf("sym: %3d %d\n", isym, h->dim);
     fflush(stdout);    
-    if (DiagnolizeHamilton(h) < 0) {
+    if (DiagonalizeHamilton(h) < 0) {
       printf("Diagnolizing Hamiltonian Error\n");
       fflush(stdout);
       exit(1);
@@ -3451,7 +3451,7 @@ int StructureMBPT1(char *fn, char *fn1, int nkg, int *kg, int nk, int *nkm,
 	}
       }
       fflush(f);
-      if (DiagnolizeHamilton(h) < 0) {
+      if (DiagonalizeHamilton(h) < 0) {
 	printf("Diagnolizing Effective Hamiltonian Error\n");
 	ierr = -1;
 	goto ERROR;
@@ -4189,7 +4189,7 @@ int StructureReadMBPT(char *fn, char *fn2, int nf, char *fn1[],
 	fflush(f2);
       }
     }
-    if (DiagnolizeHamilton(h) < 0) {
+    if (DiagonalizeHamilton(h) < 0) {
       printf("Diagnolizing Hamiltonian Error\n");
       ierr = -1;
       goto ERROR;

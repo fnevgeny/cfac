@@ -1106,7 +1106,7 @@ int SpecSymbol(char *s, int kl) {
 */
 int Couple(CONFIG *cfg) {
   CONFIG outmost, inner;
-  int errcode, i;
+  int errcode;
 
   if (cfg->n_shells == 0) {
     errcode = -1;
@@ -1120,16 +1120,6 @@ int Couple(CONFIG *cfg) {
 
   /* make sure that the shells are sorted in inverse order */
   qsort(cfg->shells, cfg->n_shells, sizeof(SHELL), CompareShellInvert);
-
-  if (IsUTA()) {
-    cfg->csfs = NULL;
-    cfg->n_csfs = 0;
-    cfg->n_electrons = 0;
-    for (i = 0; i < cfg->n_shells; i++) {
-      cfg->n_electrons += cfg->shells[i].nq;
-    }
-    return 0;
-  }
 
   if (cfg->n_shells == 1) {
     if (GetSingleShell(cfg) < 0) {

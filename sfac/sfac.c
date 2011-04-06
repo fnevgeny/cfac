@@ -120,7 +120,7 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
 static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
   int n, ng, *kg, i, j, k, im, m, m0;
   int nrg, *krg, nrec;
-  int ig, nlevels, iuta;
+  int ig, nlevels;
   LEVEL *lev;
   SYMMETRY *sym;
   STATE *s;
@@ -133,7 +133,6 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
   nv1 = 0;
   rv = 0;
 
-  iuta = IsUTA();
   n = DecodeArgs(argv, v, at, variables);
   nv = n;
   if (n > 0) {
@@ -148,14 +147,10 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       k = 0;
       for (j = 0; j < nlevels; j++) {
 	lev = GetLevel(j);
-	if (iuta) {
-	  ig = lev->iham;
-	} else {
-	  im = lev->pb;
-	  sym = GetSymmetry(lev->pj);
-	  s = (STATE *) ArrayGet(&(sym->states), im);
-	  ig = s->kgroup;
-	}
+	im = lev->pb;
+	sym = GetSymmetry(lev->pj);
+	s = (STATE *) ArrayGet(&(sym->states), im);
+	ig = s->kgroup;
 	if (InGroups(ig, ng, kg)) {
 	  (*t)[k] = j;
 	  k++;
@@ -2702,19 +2697,15 @@ static int PStructure(int argc, char *argv[], int argt[],
   }
 
   nlevels = GetNumLevels();
-  if (IsUTA()) {
-    AddToLevels(h, ng0, kg);
-  } else {
-    ns = MAX_SYMMETRIES;  
-    for (i = 0; i < ns; i++) {
-      k = ConstructHamilton(h, i, ng0, ng, kg, ngp, kgp, 111);
-      if (k < 0) continue;
-      if (DiagonalizeHamilton(h) < 0) return -1;
-      if (ng0 < ng) {
-	AddToLevels(h, ng0, kg);
-      } else {
-	AddToLevels(h, 0, kg);
-      }
+  ns = MAX_SYMMETRIES;  
+  for (i = 0; i < ns; i++) {
+    k = ConstructHamilton(h, i, ng0, ng, kg, ngp, kgp, 111);
+    if (k < 0) continue;
+    if (DiagonalizeHamilton(h) < 0) return -1;
+    if (ng0 < ng) {
+      AddToLevels(h, ng0, kg);
+    } else {
+      AddToLevels(h, 0, kg);
     }
   }
 
@@ -2723,25 +2714,6 @@ static int PStructure(int argc, char *argv[], int argt[],
 
   if (ng > 0) free(kg);
   if (ngp > 0) free(kgp);
-  
-  return 0;
-}
-
-static int PSetUTA(int argc, char *argv[], int argt[], 
-		   ARRAY *variables) {
-  int m = 0, mci = 0;
-
-  if (argc == 1) {
-    if (argt[0] != NUMBER) return -1;
-    m = atoi(argv[0]);
-    mci = 1;
-  } else if (argc == 2) {
-    if (argt[0] != NUMBER || argt[1] != NUMBER) return -1;
-    m = atoi(argv[0]);
-    mci = atoi(argv[1]);
-  }
-
-  SetUTA(m, mci);
   
   return 0;
 }
@@ -3462,7 +3434,6 @@ static int PGeneralizedMoment(int argc, char *argv[], int argt[],
 static METHOD methods[] = {
   {"GeneralizedMoment", PGeneralizedMoment, METH_VARARGS},
   {"SlaterCoeff", PSlaterCoeff, METH_VARARGS},
-  {"SetUTA", PSetUTA, METH_VARARGS}, 
   {"SetTRF", PSetTRF, METH_VARARGS}, 
   {"SetCEPWFile", PSetCEPWFile, METH_VARARGS}, 
   {"AppendTable", PAppendTable, METH_VARARGS}, 

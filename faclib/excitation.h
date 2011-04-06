@@ -74,8 +74,6 @@ int CERadialQkMSub(double *rq, double te, int k0, int k1,
 		   int k2, int k3, int k, int kp);
 void CERadialQkFromFit(int np, double *p, int n, double *x, double *logx,
 		       double *y, double *dy, int ndy, void *extra);
-int CollisionStrengthUTA(const TRANSITION *tr,
-                         double *qkt, double *params, double *bethe);
 int CollisionStrength(const TRANSITION *tr, int msub,
                       double *qkt, double *params, double *bethe);
 int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn);

@@ -1583,115 +1583,6 @@ void RelativisticCorrection(int m, double *s, double *p, double te, double b) {
   }
 }
 
-int CollisionStrengthUTA(const TRANSITION *tr,
-                         double *qkt, double *params, double *bethe) {
-  INTERACT_DATUM *idatum;
-  int p1, p2, j1, j2, k0, k1, type, ty;
-  int ns, q1, q2, ie, kmin, kmax, k;
-  double te, *rqk;
-  double rq[MAXMSUB*(MAXNE+1)], qkc[MAXMSUB*(MAXNE+1)];
-  double born_egrid, born_cross, c, d, r;
-  double bte, bms;
-
-  if (!tr) {
-    return -1;
-  }
-  
-  te = tr->e;
-  if (te <= 0) return -1;
-  
-  p1 = tr->llo->pj;
-  p2 = tr->lup->pj;
-
-  rqk = qkc;
-  for (ie = 0; ie < n_egrid1; ie++) {
-    rqk[ie] = 0.0;
-  }
-
-  idatum = NULL;
-  ns = GetInteract(&idatum, NULL, NULL, tr->llo->iham, tr->lup->iham,
-		   tr->llo->pb, tr->lup->pb, 0, 0, 0);
-  if (ns <= 0) return -1;
-  if (idatum->s[0].index < 0 || idatum->s[3].index >= 0) {
-    free(idatum->bra);
-    free(idatum);
-    return -1;
-  }
-  if (idatum->s[0].nq_bra > idatum->s[0].nq_ket) {
-    j1 = idatum->s[0].j;
-    j2 = idatum->s[1].j;
-    q1 = idatum->s[0].nq_bra;
-    q2 = idatum->s[1].nq_bra;
-    k0 = OrbitalIndex(idatum->s[0].n, idatum->s[0].kappa, 0.0);
-    k1 = OrbitalIndex(idatum->s[1].n, idatum->s[1].kappa, 0.0);
-  } else {
-    j1 = idatum->s[1].j;
-    j2 = idatum->s[0].j;
-    q1 = idatum->s[1].nq_bra;
-    q2 = idatum->s[0].nq_bra;
-    k1 = OrbitalIndex(idatum->s[0].n, idatum->s[0].kappa, 0.0);
-     k0 = OrbitalIndex(idatum->s[1].n, idatum->s[1].kappa, 0.0);
-  }
-    
-  type = -1;
-  kmin = abs(j1-j2);
-  kmax = j1 + j2;
-  for (k = kmin; k <= kmax; k += 2) {
-    ty = CERadialQk(rq, te, k0, k1, k0, k1, k);
-    if (ty > type) type = ty;
-    for (ie = 0; ie < n_egrid1; ie++) {
-      qkc[ie] += rq[ie]/(k+1.0);
-    }
-  }
-
-  d = (tr->llo->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0));
-  for (ie = 0; ie < n_egrid1; ie++) {
-    qkc[ie] *= d;
-  }
-  bte = te;
-  if (type >= 0) {
-    r = 0.0;
-    if (Triangle(j1, j2, 2) && IsOdd(p1+p2)) {
-      r = MultipoleRadialNR(-1, k0, k1, G_BABUSHKIN);
-    }
-    if (fabs(r) > 0.0) {
-      r = OscillatorStrength(-1, te, r, NULL);
-      bethe[0] = d*2.0*r/te;
-      BornFormFactorTE(&bte);
-      bms = BornMass();
-      bte = (te + bte)/bms;
-    } else {
-      bethe[0] = 0.0;
-    }
-    ie = n_egrid;
-    born_cross = qkc[ie]*8.0;
-    if (born_cross > 0) {
-      c = egrid[ie]+bte;
-      born_egrid = c/te;
-      if (bethe[0] > 0) bethe[1] = born_cross - bethe[0]*log(born_egrid);
-      else bethe[1] = born_cross;
-      bethe[2] = egrid[ie]; 
-    } else {
-      bethe[0] = -1.0;
-      bethe[1] = 0.0;
-      bethe[2] = 0.0;
-    }
-  } else {
-    bethe[0] = -1.0;
-    bethe[1] = 0.0;
-    bethe[2] = 0.0;
-  }
-  
-  for (ie = 0; ie < n_usr; ie++) {
-    qkt[ie] = 8.0*qkc[ie];
-  }
-  
-  RelativisticCorrection(0, qkt, params, bte, bethe[0]);
-  free(idatum->bra);
-  free(idatum);
-  return 1;
-}
-
 int CollisionStrengthEB(double *qkt, double *e, double *bethe,
 			int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
@@ -2200,15 +2091,9 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   F_HEADER fhdr;
   ARRAY subte;
   int isub, n_tegrid0, n_egrid0, n_usr0;
-  int te_set, e_set, usr_set, iuta;
+  int te_set, e_set, usr_set;
   double emin, emax, ebuf;
   int nc;
-
-  iuta = IsUTA();
-  if (iuta && msub) {
-    printf("cannot call CETableMSub in UTA mode\n");
-    return -1;
-  }
 
   /* if low or up not given, assume all levels */
   alev = NULL;
@@ -2337,6 +2222,8 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         TRANSITION tr;
         int swapped;
         CONFIG *cfg;
+        SYMMETRY *sym;
+        STATE *st;
         double e;
 
         if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
@@ -2352,18 +2239,13 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	if (tr.e > emax) emax = tr.e;
 
         /* ionization potential */
-        if (iuta) {
-          cfg = GetConfigFromGroup(tr.lup->iham, tr.lup->pb);
-          k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+        sym = GetSymmetry(tr.lup->pj);
+        st = (STATE *) ArrayGet(&(sym->states), tr.lup->pb);
+        if (st->kgroup < 0) {
+	  k = st->kcfg;
         } else {
-          SYMMETRY *sym = GetSymmetry(tr.lup->pj);
-          STATE *st = (STATE *) ArrayGet(&(sym->states), tr.lup->pb);
-          if (st->kgroup < 0) {
-	    k = st->kcfg;
-          } else {
-	    cfg = GetConfig(st);
-	    k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-          }
+	  cfg = GetConfig(st);
+	  k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
         }
         e = -(GetOrbital(k)->energy);
         if (m == 0) {
@@ -2504,11 +2386,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         
 	if (tr.e < e0 || tr.e >= e1) continue;
 
-	if (iuta) {
-	  k = CollisionStrengthUTA(&tr, qkc, params, bethe);
-	} else {
-	  k = CollisionStrength(&tr, msub, qkc, params, bethe); 
-	}
+	k = CollisionStrength(&tr, msub, qkc, params, bethe); 
 	if (k < 0) continue;
 	r.bethe = bethe[0];
 	r.born[0] = bethe[1];

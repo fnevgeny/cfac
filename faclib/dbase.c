@@ -27,8 +27,6 @@ static int mem_en_table_size = 0;
 static EN_SRECORD *mem_enf_table = NULL;
 static int mem_enf_table_size = 0;
 static int iground;
-static int iuta = 0;
-static int utaci = 1;
 static int itrf = 0;
 
 static double born_mass = 1.0;
@@ -139,15 +137,6 @@ void SetTRF(int m) {
   itrf = m;
 }
 
-void SetUTA(int m, int mci) {
-  iuta = m;
-  utaci = mci;
-}
-
-int IsUTA(void) {
-  return iuta;
-}
-
 int CheckEndian(F_HEADER *fh) {
   unsigned short t = 0x01;
   char *p;
@@ -240,11 +229,6 @@ int SwapEndianTRRecord(TR_RECORD *r, TR_EXTRA *rx) {
   SwapEndian((char *) &(r->lower), sizeof(int));
   SwapEndian((char *) &(r->upper), sizeof(int));
   SwapEndian((char *) &(r->strength), sizeof(float));
-  if (iuta) {
-    SwapEndian((char *) &(rx->energy), sizeof(float));
-    SwapEndian((char *) &(rx->sdev), sizeof(float));
-    SwapEndian((char *) &(rx->sci), sizeof(float));
-  }
   return 0;
 }
 
@@ -852,12 +836,6 @@ int WriteTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx) {
   WSF0(r->upper);
   WSF0(r->strength);
 
-  if (iuta) {
-    WSF0(rx->energy);
-    WSF0(rx->sdev);
-    WSF0(rx->sci);
-  }
-
   tr_header.ntransitions += 1;
   tr_header.length += m;
 
@@ -1138,9 +1116,6 @@ int ReadTRHeader(FILE *f, TR_HEADER *h, int swp) {
 
   if (swp) SwapEndianTRHeader(h);
 
-  if (h->length/h->ntransitions > SIZE_TR_RECORD) iuta = 1;
-  else iuta =0;
-  
   return m;
 }
 
@@ -1159,8 +1134,6 @@ int ReadTRFHeader(FILE *f, TRF_HEADER *h, int swp) {
   RSF0(h->fangle);
   if (swp) SwapEndianTRFHeader(h);
 
-  iuta = 0;
-  
   return m;
 }
 
@@ -1171,17 +1144,7 @@ int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp) {
   RSF0(r->upper);
   RSF0(r->strength);
 
-  if (iuta) {
-    RSF0(rx->energy);
-    RSF0(rx->sdev);
-    RSF0(rx->sci);
-  }
-
   if (swp) SwapEndianTRRecord(r, rx);
-
-  if (utaci == 0) {
-    rx->sci = 1.0;
-  }
 
   return m;
 }
@@ -2241,7 +2204,6 @@ int MemENTable(char *fn) {
   EN_HEADER h;
   EN_RECORD r;
   FILE *f;
-  char *s;
   int n, i, nlevels;
   float e0;
   int swp, sr;
@@ -2310,18 +2272,6 @@ int MemENTable(char *fn) {
       mem_en_table[r.ilev].p = r.p;
       mem_en_table[r.ilev].j = JFromENRecord(&r);
       mem_en_table[r.ilev].ibase = r.ibase;
-    }
-  }
-
-  if (nlevels > 0) {
-    s = r.name;
-    iuta = 1;
-    while (*s) {
-      if (*s == '(') {
-	iuta = 0;
-	break;
-      }
-      s++;
     }
   }
 
@@ -2508,36 +2458,18 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
     for (i = 0; i < h.ntransitions; i++) {
       n = ReadTRRecord(f1, &r, &rx, swp);
       if (n == 0) break;
-      if (iuta) {
-	if (v) {
-	  e = rx.energy;
-	  gf = OscillatorStrength(h.multipole, e, r.strength, &a);
-	  a /= (mem_en_table[r.upper].j + 1.0);
-	  a *= RATE_AU;
-	  fprintf(f2, "%5d %4d %5d %4d %13.6E %11.4E %13.6E %13.6E %13.6E %10.3E\n",
-		  r.upper, mem_en_table[r.upper].j, 
-		  r.lower, mem_en_table[r.lower].j,
-		  (e*HARTREE_EV), 
-		  (rx.sdev*HARTREE_EV), gf, a, r.strength, rx.sci);
-	} else {
-	  e = rx.energy;
-	  fprintf(f2, "%5d %5d %13.6E %11.4E %13.6E %10.3E\n",
-		  r.upper, r.lower, e, rx.sdev, r.strength, rx.sci);
-	}
+      if (v) {
+	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
+	gf = OscillatorStrength(h.multipole, e, (double)r.strength, &a);
+	a /= (mem_en_table[r.upper].j + 1.0);
+	a *= RATE_AU;
+	fprintf(f2, "%6d %2d %6d %2d %13.6E %13.6E %13.6E %13.6E\n",
+		r.upper, mem_en_table[r.upper].j,
+		r.lower, mem_en_table[r.lower].j,
+		(e*HARTREE_EV), gf, a, r.strength);
       } else {
-	if (v) {
-	  e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
-	  gf = OscillatorStrength(h.multipole, e, (double)r.strength, &a);
-	  a /= (mem_en_table[r.upper].j + 1.0);
-	  a *= RATE_AU;
-	  fprintf(f2, "%6d %2d %6d %2d %13.6E %13.6E %13.6E %13.6E\n",
-		  r.upper, mem_en_table[r.upper].j,
-		  r.lower, mem_en_table[r.lower].j,
-		  (e*HARTREE_EV), gf, a, r.strength);
-	} else {
-	  fprintf(f2, "%6d %6d %13.6E\n", 
-		  r.upper, r.lower, r.strength);
-	}
+	fprintf(f2, "%6d %6d %13.6E\n", 
+		r.upper, r.lower, r.strength);
       }
     }
     nb += 1;

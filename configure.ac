@@ -69,12 +69,11 @@ fi
 # gcc warnings
 if test -n "$GCC"
 then
-    CFLAGS="$CFLAGS -fno-common -Wall -Wextra -pedantic -Wno-sign-compare -Wno-unused"
+    CFLAGS="$CFLAGS -fno-common -Wall -Wextra -pedantic -Wno-sign-compare -Wno-unused-parameter"
 fi
 if test -n "$G77"
 then
-    FFLAGS="$FFLAGS -fno-common -Wall -Wno-unused"
-    FFLAGS=`echo $FFLAGS`
+    FFLAGS="$FFLAGS -fno-common -Wall -Wno-unused-parameter"
 fi
 
 # which F77 known by cfortran.h is used

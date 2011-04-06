@@ -480,7 +480,7 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         for (i = 0; i < h.ntransitions && retval == 0; i++) {
             CI_RECORD r;
             unsigned long int cid;
-            int k, t;
+            int t;
             
             n = ReadCIRecord(fp, &r, swp, &h);
             if (n == 0) {
@@ -557,7 +557,7 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         for (i = 0; i < h.ntransitions && retval == 0; i++) {
             RR_RECORD r;
             unsigned long int cid;
-            int k, t;
+            int t;
             double ap0, ap1;
             
             n = ReadRRRecord(fp, &r, swp, &h);

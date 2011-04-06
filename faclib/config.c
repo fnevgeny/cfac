@@ -54,22 +54,6 @@ static SYMMETRY *symmetry_list;
 */
 static char spec_symbols[MAX_SPEC_SYMBOLS+2] = "spdfghiklmnoqrtuvwxyz*"; 
 
-static void InitConfigData(void *p, int n) {
-  CONFIG *d;
-  int i;
-
-  d = (CONFIG *) p;
-  for (i = 0; i < n; i++) {
-    d[i].n_shells = 0;
-    d[i].n_csfs = 0;
-    d[i].nnrs = 0;
-    d[i].nrs = NULL;
-    d[i].symstate = NULL;
-    d[i].shells = NULL;
-    d[i].csfs = NULL;
-  }
-}
-
 void *ReallocNew(void *p, int s) {
   void *q;
 

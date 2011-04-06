@@ -181,10 +181,10 @@ int TRMultipoleUTA(double *strength, TR_EXTRA *rx,
 /* If strict flag is set, calculate only if energy > 0 */
 static int _TRMultipole(double *strength, double *energy,
 		int m, int lower, int upper, int strict) {
-  int m0, m1, m2;
+  int m2;
   int p1, p2, j1, j2;
   LEVEL *lev1, *lev2;
-  double s, r, a, aw, *mbk, tr;
+  double s, r, a, aw, *mbk;
   int nz, i, nmk;
   ANGULAR_ZMIX *ang;
   
@@ -309,12 +309,7 @@ static void TRMultipole_cache_free(TRM_CACHE_T *cache)
    if strict flag is set, calculate only if *energy > 0 */
 int TRMultipole(double *strength, double *energy,
 		int m, int lower, int upper, int strict) {
-  int m0, m1, m2;
-  int p1, p2, j1, j2;
-  LEVEL *lev1, *lev2;
-  double s, r, a, aw, *mbk, tr, dE;
-  int nz, i, nmk;
-  ANGULAR_ZMIX *ang;
+  double dE = 0.0;
   
   TRANS_T *trans = NULL;
   

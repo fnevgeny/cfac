@@ -364,7 +364,7 @@ static int PClosed(int argc, char *argv[], int argt[], ARRAY *variables) {
 
 static int PGetConfigNR(int argc, char *argv[], int argt[], ARRAY *variables) {
   CONFIG *cfg;
-  int i, j, k, t, ncfg;
+  int i, j, t, ncfg;
   char scfg[MCHSHELL], s[16];
   
   for (i = 0; i < argc; i++) {
@@ -2996,7 +2996,7 @@ static int PPrepAngular(int argc, char *argv[], int argt[],
 
 static int PTransitionTable(int argc, char *argv[], int argt[], 
 			    ARRAY *variables) {
-  int n, m;
+  int m;
   int nlow, nup, *low, *up;
   
   nlow = 0; 

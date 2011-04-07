@@ -129,7 +129,7 @@ void *ArraySet(ARRAY *a, int i, const void *d);
 void *ArrayAppend(ARRAY *a, const void *d);
 int   ArrayTrim(ARRAY *a, int n);
 int   ArrayFree(ARRAY *a);
-int   ArrayFreeData(ARRAY *a, DATA *p, int esize, int block);
+int   ArrayFreeData(ARRAY *a, DATA *p);
 
 /*
 ** the following set of funcitons are a different implementation

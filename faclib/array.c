@@ -129,11 +129,11 @@ void *ArraySet(ARRAY *a, int i, const void *d) {
     if (a->InitData) a->InitData(p->dptr, a->block);
   }
   
-  ct = (char *) p->dptr;
+  ct = p->dptr;
   for (; i > 0; i--) {
     ct += a->esize;
   }
-  pt = (void *) ct;
+  pt = ct;
 
   if (d) memcpy(pt, d, a->esize);
   return pt;
@@ -173,21 +173,21 @@ void *ArrayAppend(ARRAY *a, const void *d) {
 ** SIDE EFFECT: 
 ** NOTE:        this function calls itself recursively.
 */
-int ArrayFreeData(ARRAY *a, DATA *p, int esize, int block) {
-  void *pt;
+int ArrayFreeData(ARRAY *a, DATA *p) {
+  char *pt;
   int i;
 
   if (p == NULL) return 0;
 
   if (p->next) {
-    ArrayFreeData(a, p->next, esize, block);
+    ArrayFreeData(a, p->next);
   }
     
   if (a->FreeElem && p->dptr) {
     pt = p->dptr;
-    for (i = 0; i < block; i++) {
+    for (i = 0; i < a->block; i++) {
       a->FreeElem(pt);
-      pt = ((char *) pt) + esize;
+      pt += a->esize;
     }
   }
   if (p->dptr) {
@@ -214,7 +214,7 @@ int ArrayFreeData(ARRAY *a, DATA *p, int esize, int block) {
 int ArrayFree(ARRAY *a) {
   if (!a) return 0;
   if (a->dim == 0) return 0;
-  ArrayFreeData(a, a->data, a->esize, a->block);
+  ArrayFreeData(a, a->data);
   a->dim = 0;
   a->data = NULL;
   return 0;
@@ -255,11 +255,11 @@ int ArrayTrim(ARRAY *a, int n) {
   }
 
   if (i == 0) {
-    ArrayFreeData(a, p, a->esize, a->block);
+    ArrayFreeData(a, p);
     p = NULL;
   } else {
     if (p->next) {
-      ArrayFreeData(a, p->next, a->esize, a->block);
+      ArrayFreeData(a, p->next);
       p->next = NULL;
     }
     if (p->dptr && a->FreeElem) {

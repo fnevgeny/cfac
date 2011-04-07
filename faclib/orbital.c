@@ -7,6 +7,7 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv2.h>
+#include <gsl/gsl_linalg.h>
 
 #include "nucleus.h"
 #include "config.h"
@@ -17,7 +18,6 @@
 
 /* the following arrays provide storage space in the calculation */
 static double _veff[MAXRP];
-static double ABAND[4*MAXRP];
 static double _dwork[MAXRP];
 static double _dwork1[MAXRP];
 static double _dwork2[MAXRP];
@@ -1758,9 +1758,10 @@ static int CountNodes(double *p, int i1, int i2) {
 static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
 			   int i1, double p1, int i2, double p2, int q) {
   double a, b, r, x, y, z, p0, a1, a2;
-  int kl=1, ku=1, nrhs=1;
-  int i, info, n, m, j, k;
-  int ipiv[MAXRP];
+  int i, info, n, m, k;
+  double ABAND[4*MAXRP];
+  gsl_vector_view bv;
+  gsl_vector *xv, *dv, *supv, *subv;
   
   m = i2 - i1 - 1;
   if (m < 0) return 0;
@@ -1782,10 +1783,9 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
     p[i] = 0.0;
   }
 
-  j = 1;
-  n = 2*kl + ku + 1;
-  k = kl + ku;
-  for (i = i1+1; i < i2; i++, j++, k += n) {
+  n = 4;
+  k = 2;
+  for (i = i1+1; i < i2; i++, k += n) {
     r = pot->rad[i];
     x = 2.0*(_veff[i] - e);
     x *= 4.0*r*r;
@@ -1841,7 +1841,7 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
   x *= y / 12.0;
   a1 = 1.0 - x;
   if (q == 2) {
-    k = kl + ku;
+    k = 2;
     ABAND[k] -= 2*p1*a1;
     k += n;
     ABAND[k-1] += a1;
@@ -1850,7 +1850,33 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
     p[i1+1] += -a1*p1;
   }
 
-  DGBSV(m, kl, ku, nrhs, ABAND, n, ipiv, p+i1+1, m, &info);
+  bv   = gsl_vector_view_array(p+i1+1, m);
+  xv   = gsl_vector_alloc(m);
+  dv   = gsl_vector_alloc(m);
+  supv = gsl_vector_alloc(m - 1);
+  subv = gsl_vector_alloc(m - 1);
+  
+  for (i = 0; i < m; i++) {
+    k = n*(i + 1) - 2;
+    gsl_vector_set(dv, i, ABAND[k]);
+    if (i < m - 1) {
+      k = n*(i + 1) - 1;
+      gsl_vector_set(subv, i, ABAND[k]);
+      k = n*(i + 2) - 3;
+      gsl_vector_set(supv, i, ABAND[k]);
+    }
+  }
+  
+  info = gsl_linalg_solve_tridiag(dv, supv, subv, &bv.vector, xv);
+
+  gsl_vector_free(dv);
+  gsl_vector_free(supv);
+  gsl_vector_free(subv);
+
+  gsl_vector_memcpy(&bv.vector, xv);
+  
+  gsl_vector_free(xv);
+
   if (info) {
     printf("Error in Integrating the radial equation: %d\n", info);
     exit(1);

@@ -1,4 +1,5 @@
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_linalg.h>
 
 #include "consts.h"
 #include "global.h"
@@ -28,105 +29,69 @@ static struct {
 void SVDFit(int np, double *coeff, double *chisq, double tol,
 	    int nd, double *x, double *logx, double *y, double *sig,
 	    void Basis(int, double *, double, double)) {
-  double *u, *v, *w, *b, *afunc;
-  int i, j, k;
-  double tmp, thresh, wmax, sum;
-  double *dwork;
-  int *iwork, lwork, infor;
-  char jobz[] = "O";
+  int i, j;
+  double *afunc;
+  double thresh, wmax;
+  int infor;
+  gsl_matrix *Am, *Vm;
+  gsl_vector *bv, *Sv, *wv;
+  gsl_vector_view xv;
  
-  k = np*np;
-  lwork = 5*k + 4*np;
-  if (lwork < nd) lwork = nd;
-  lwork += 3*k;
-  lwork *= 2;
-  i = (np+nd)*(np+1)+np;
-  w = (double *) malloc(sizeof(double)*(i+lwork));
-  iwork = (int *) malloc(sizeof(int)*8*np);
+  Am = gsl_matrix_alloc(nd, np);
+  Vm = gsl_matrix_alloc(np, np);
+  bv = gsl_vector_alloc(nd);
+  Sv = gsl_vector_alloc(np);
+  
+  wv = gsl_vector_alloc(np);
 
-  v = w + np;
-  u = v + np*np;
-  b = u + np*nd;
-  afunc = b + nd;
-  dwork = afunc + np;
+  xv = gsl_vector_view_array(coeff, np);
+
+  afunc = malloc(sizeof(double)*np);
+
   for (i = 0; i < nd; i++) {
+    double tmp;
+    
     if (logx) {
       Basis(np, afunc, x[i], logx[i]);
     } else {
       Basis(np, afunc, x[i], 0.0);
     }
-    k = i;
+    
     if (sig) {
       tmp = 1.0/sig[i];
-      for (j = 0; j < np; j++) {
-	u[k] = afunc[j]*tmp;
-	k += nd;
-      }
-      b[i] = y[i]*tmp;
     } else {
-      for (j = 0; j < np; j++) {
-	u[k] = afunc[j];
-	k += nd;
-      }
-      b[i] = y[i];
+      tmp = 1.0;
     }
+    
+    for (j = 0; j < np; j++) {
+      gsl_matrix_set(Am, i, j, afunc[j]*tmp);
+    }
+    gsl_vector_set(bv, i, y[i]*tmp);
   }
+  
+  free(afunc);
 
-  DGESDD(jobz, nd, np, u, nd, w, u, nd, v, np,
-	  dwork, lwork, iwork, &infor);
-   
+  infor = gsl_linalg_SV_decomp(Am, Vm, Sv, wv);
+  
+  gsl_vector_free(wv);
+    
   if (infor != 0) {
     fprintf(stderr, "DGESDD() failed with %d\n", infor);
     abort();
   }
     
-  wmax = w[0];
+  wmax = gsl_vector_get(Sv, 0);
   thresh = tol*wmax;
   for (j = 0; j < np; j++) {
-    if (w[j] < thresh) w[j] = 0.0;
+    if (gsl_vector_get(Sv, j) < thresh) gsl_vector_set(Sv, j, 0.0);
   }
+
+  gsl_linalg_SV_solve(Am, Vm, Sv, bv, &xv.vector);
   
-  k = 0;
-  for (j = 0; j < np; j++) {
-    tmp = 0.0;
-    if (w[j] != 0.0) {
-      for (i = 0; i < nd; i++) {
-	tmp += u[k++]*b[i];
-      }
-      tmp /= w[j];
-    }
-    afunc[j] = tmp;
-  }
-  
-  k = 0;
-  for (j = 0; j < np; j++) {
-    tmp = 0.0;
-    for (i = 0; i < np; i++) {
-      tmp += v[k++]*afunc[i];
-    }
-    coeff[j] = tmp;
-  }
-  
-  if (chisq) {
-    *chisq = 0.0;
-    for (i = 0; i < nd; i++) {
-      if (logx) {
-	Basis(np, afunc, x[i], logx[i]);
-      } else {
-	Basis(np, afunc, x[i], 0);
-      }
-      sum = 0.0;
-      for (j = 0; j < np; j++) {
-	sum += coeff[j]*afunc[j];
-      }
-      tmp = y[i] - sum;
-      if (sig) tmp /= sig[i];
-      *chisq += tmp*tmp;
-    }
-  }  
-  
-  free(w);
-  free(iwork);
+  gsl_vector_free(bv);
+  gsl_vector_free(Sv);
+  gsl_matrix_free(Am);
+  gsl_matrix_free(Vm);
 }
 
 static void MinFunc(int *m, int *n, double *x, double *fvec, 

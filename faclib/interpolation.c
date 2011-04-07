@@ -76,7 +76,7 @@ void SVDFit(int np, double *coeff, double *chisq, double tol,
   gsl_vector_free(wv);
     
   if (infor != 0) {
-    fprintf(stderr, "DGESDD() failed with %d\n", infor);
+    fprintf(stderr, "gsl_linalg_SV_decomp() failed with %d\n", infor);
     abort();
   }
     

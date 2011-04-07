@@ -45,7 +45,7 @@ void SetMS(int nms, int sms);
 int SetAWGrid(int n, double min, double max);
 int GetAWGrid(double **a);
 int SetRadialGrid(int maxrp, double ratio, double asymp, double rmin);
-double SetPotential(AVERAGE_CONFIG *acfg, int iter);
+double SetPotential(AVERAGE_CONFIG *acfg, int iter, double *vbuf);
 POTENTIAL *RadialPotential(void);
 int GetPotential(char *s);
 double GetResidualZ(void);

@@ -501,14 +501,13 @@ int PotentialHX(AVERAGE_CONFIG *acfg, double *u, double *v, double *w) {
   return jmax;
 }
 
-double SetPotential(AVERAGE_CONFIG *acfg, int iter) {
+double SetPotential(AVERAGE_CONFIG *acfg, int iter, double *vbuf) {
   int jmax, i, j, k;
   double *u, *w, *v, a, b, c, r;
-  double _dwork[MAXRP];
 
   u = potential->U;
   w = potential->W;
-  v = _dwork;
+  v = vbuf;
 
   jmax = PotentialHX(acfg, u, NULL, w);
 
@@ -653,7 +652,7 @@ int SetAverageConfig(int nshells, int *n, int *kappa, double *nq) {
   return 0;
 }
 
-int OptimizeLoop(AVERAGE_CONFIG *acfg) {
+int OptimizeLoop(AVERAGE_CONFIG *acfg, double *vbuf) {
   double tol, a, b;
   ORBITAL orb_old, *orb;
   int i, k, iter, no_old;
@@ -663,7 +662,7 @@ int OptimizeLoop(AVERAGE_CONFIG *acfg) {
   tol = 1.0; 
   while (tol > optimize_control.tolerance) {
     if (iter > optimize_control.maxiter) break;
-    a = SetPotential(acfg, iter);
+    a = SetPotential(acfg, iter, vbuf);
     FreeYkArray();
     tol = 0.0;
     for (i = 0; i < acfg->n_shells; i++) {
@@ -716,6 +715,8 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
   AVERAGE_CONFIG *acfg;
   double a, b, c, z, emin, smin, hxs[NXS], ehx[NXS];
   int iter, i, j, im, md;
+  
+  double vbuf[MAXRP];
 
   /* get the average configuration for the groups */
   acfg = &(average_config);
@@ -792,7 +793,7 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
       for (i = 0; i < NXS; i++) {
 	ReinitRadial(1);
 	potential->hxs = hxs[i];
-	iter = OptimizeLoop(acfg);
+	iter = OptimizeLoop(acfg, vbuf);
 	if (iter > optimize_control.maxiter) {
 	  printf("Maximum iteration reached in OptimizeRadial %d %d\n", i, iter);
 	  return -1;
@@ -813,10 +814,10 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
       for (i = 1; i < NXS; i++) {
 	hxs[i] = hxs[i-1] + a;
       }
-      iter = OptimizeLoop(acfg);
+      iter = OptimizeLoop(acfg, vbuf);
       for (i = 0; i < NXS; i++) {
 	potential->hxs = hxs[i];
-	SetPotential(acfg, iter);
+	SetPotential(acfg, iter, vbuf);
 	ReinitRadial(1);
 	ClearOrbitalTable(0);
 	if (ng > 0) {
@@ -845,9 +846,9 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
     
     ReinitRadial(1);
     potential->hxs = smin;
-    iter = OptimizeLoop(acfg);
+    iter = OptimizeLoop(acfg, vbuf);
   } else {
-    iter = OptimizeLoop(acfg);
+    iter = OptimizeLoop(acfg, vbuf);
   }
 
   if (potential->uehling[0] == 0.0) {
@@ -878,7 +879,7 @@ int RefineRadial(int maxfun, int msglvl) {
   int n, ierr, mode, nfe, lw[4];
   double xtol, scale[2];
   double f0, f, x[2];
-  static double _dwork[MAXRP];
+  double _dwork[MAXRP];
   
   if (maxfun <= 0) maxfun = 250;
   xtol = EPS3;

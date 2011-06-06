@@ -1565,7 +1565,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   double a, b, xi, r2, r3;
   double z, dk, r0, *r_o = _dwork, *v_o = _dwork1, w, v1;
   
-  double y[2], rtol = EPS6, atol = 0.0, h0 = -0.01;
+  double y[2], rtol = EPS4, atol = 0.0, h0 = -0.01;
 
   gsl_odeiv2_system ode_sys;
   gsl_odeiv2_driver *ode_drv;

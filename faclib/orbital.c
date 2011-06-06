@@ -1630,7 +1630,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
 
     gsl_status = gsl_odeiv2_driver_apply(ode_drv, &r0, r_o[i], y);
     if (gsl_status != GSL_SUCCESS) {
-       printf ("ODE error %d\n", gsl_status);
+       printf ("ORI ODE error %d\n", gsl_status);
        exit(1);
     }
   }
@@ -1646,7 +1646,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
 
     gsl_status = gsl_odeiv2_driver_apply(ode_drv, &r0, r, y);
     if (gsl_status != GSL_SUCCESS) {
-       printf ("ODE error %d\n", gsl_status);
+       printf ("IRI ODE error %d\n", gsl_status);
        exit(1);
     }
     p[i] = y[0];

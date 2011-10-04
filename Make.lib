@@ -9,6 +9,7 @@ include $(TOP)/Make.conf
 COBJS = ${CSRCS:.c=.o}
 FOBJS = ${FSRCS:.f=.o}
 
+SRCS = $(CSRCS) $(FSRCS)
 OBJS = $(COBJS) $(FOBJS)
 
 .f.o: 

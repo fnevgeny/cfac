@@ -298,6 +298,7 @@ void uvip3p(int nd, const double *xd, const double *yd,
     const gsl_interp_type *type;
     gsl_interp_accel *acc;
     gsl_spline *spline;
+    double xmin, xmax;
     
     switch (nd) {
     case 2:
@@ -317,8 +318,27 @@ void uvip3p(int nd, const double *xd, const double *yd,
 
     gsl_spline_init(spline, xd, yd, nd);
 
+    xmin = xd[0];
+    xmax = xd[nd - 1];
+    
     for (i = 0; i < ni; i++) {
-        yi[i] = gsl_spline_eval(spline, xi[i], acc);
+        if (xi[i] < xmin && nd >= 2) {
+            yi[i] = yd[0];
+            fprintf(stderr, "uvip3p(): xi[%d]=%g not within [%g - %g]\n",
+                i, xi[i], xmin, xmax);
+        } else
+        if (xi[i] > xmax && nd >= 2) {
+            yi[i] = yd[nd - 1];
+            fprintf(stderr, "uvip3p(): xi[%d]=%g not within [%g - %g]\n",
+                i, xi[i], xmin, xmax);
+        } else {
+            int gsl_status = gsl_spline_eval_e(spline, xi[i], acc, &yi[i]);
+            if (gsl_status != GSL_SUCCESS) {
+                fprintf(stderr,
+                    "gsl_spline_eval_e failed with status %d\n", gsl_status);
+                abort();
+            }
+        }
     }
     
     gsl_spline_free(spline);

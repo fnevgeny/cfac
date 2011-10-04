@@ -7,3 +7,6 @@ sysdef.h
 build
 ChangeLog
 .gdb_history
+bin
+results
+

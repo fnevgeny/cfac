@@ -137,6 +137,8 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt,  1, sid);
+
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
     
     while (retval == 0) {
         EN_HEADER h;
@@ -196,6 +198,8 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             sqlite3_reset(stmt);
         }
     }
+
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
     
     sqlite3_finalize(stmt);
 
@@ -209,7 +213,7 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     sqlite3_stmt *stmt;
     
     char *sql;
-
+    
     sql = "INSERT INTO rtransitions" \
           " (sid, ini_id, fin_id, mpole, rme, mode)" \
           " VALUES (?, ?, ?, ?, ?, ?)";
@@ -218,6 +222,8 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
     sqlite3_bind_int(stmt,  1, sid);
     
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
+
     while (retval == 0) {
         TR_HEADER h;
         int n, i;
@@ -254,6 +260,8 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         }
     }
 
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
+
     sqlite3_finalize(stmt);
 
     return retval;
@@ -275,6 +283,8 @@ int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
     sqlite3_bind_int(stmt,  1, sid);
     
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
+
     while (retval == 0) {
         AI_HEADER h;
         int n, i;
@@ -305,6 +315,8 @@ int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             sqlite3_reset(stmt);
         }
     }
+
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
 
     sqlite3_finalize(stmt);
 
@@ -389,6 +401,8 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
+
     while (retval == 0) {
         CE_HEADER h;
         int n, i;
@@ -449,6 +463,8 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         free(h.usr_egrid);
     }
 
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
+
     sqlite3_finalize(stmt);
 
     return retval;
@@ -467,6 +483,8 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
           " VALUES (?, ?, ?)";
     
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
 
     while (retval == 0) {
         CI_HEADER h;
@@ -521,6 +539,8 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         free(h.usr_egrid);
     }
 
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
+
     sqlite3_finalize(stmt);
 
     return retval;
@@ -543,6 +563,8 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     sqlite3_bind_int(stmt, 1, sid);
     sqlite3_bind_int(stmt, 2, DB_SQL_CS_RR);
     
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
+
     while (retval == 0) {
         RR_HEADER h;
         int n, i;
@@ -606,6 +628,8 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         free(h.egrid);
         free(h.usr_egrid);
     }
+
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
 
     sqlite3_finalize(stmt);
 

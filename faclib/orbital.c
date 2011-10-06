@@ -2161,6 +2161,10 @@ static double UehlingK0(double x) {
 
   double r, x2;
 
+  if (x <= 0.0) {
+    return a[0];
+  }
+  
   if (x <= 1.0) {
     r = Poly(x, 8, a);
     if (x) {
@@ -2203,6 +2207,10 @@ static double UehlingK1(double x) {
 
   double r, x2;
 
+  if (x <= 0.0) {
+    return 0.0;
+  }
+  
   if (x <= 1.0) {
     r = Poly(x, 8, a);
     x2 = x*x;
@@ -2231,7 +2239,11 @@ double UehlingL0(double x) {
   
   double logx, x2, r;
   
-  if (x <= 2) {
+  if (x <= 0.0) {
+    return f[0];
+  }
+  
+  if (x <= 2.0) {
     logx = log(x);
     r = Poly(x, 6, f);
     if (x) {
@@ -2262,7 +2274,11 @@ double UehlingL1(double x) {
   
   double logx, x2, r;
   
-  if (x <= 2) {
+  if (x <= 0.0) {
+    return 0.0;
+  }
+  
+  if (x <= 2.0) {
     logx = log(x);
     r = Poly(x, 6, f);
     x2 = x*x;

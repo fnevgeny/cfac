@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <gsl/gsl_ieee_utils.h>
+
 #include "global.h"
 #include "consts.h"
 #include "coulomb.h"
@@ -62,6 +64,8 @@ int InitFac(void) {
   InitExcitation();
   InitRecombination();
   InitIonization();
+  
+  gsl_ieee_env_setup();
 
   return 0;
 }

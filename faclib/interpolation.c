@@ -49,7 +49,7 @@ void SVDFit(int np, double *coeff, double *chisq, double tol,
   afunc = malloc(sizeof(double)*np);
 
   for (i = 0; i < nd; i++) {
-    double tmp;
+    double weight;
     
     if (logx) {
       Basis(np, afunc, x[i], logx[i]);
@@ -58,15 +58,15 @@ void SVDFit(int np, double *coeff, double *chisq, double tol,
     }
     
     if (sig) {
-      tmp = 1.0/sig[i];
+      weight = 1.0/sig[i];
     } else {
-      tmp = 1.0;
+      weight = 1.0;
     }
     
     for (j = 0; j < np; j++) {
-      gsl_matrix_set(Am, i, j, afunc[j]*tmp);
+      gsl_matrix_set(Am, i, j, afunc[j]*weight);
     }
-    gsl_vector_set(bv, i, y[i]*tmp);
+    gsl_vector_set(bv, i, y[i]*weight);
   }
   
   free(afunc);
@@ -385,7 +385,6 @@ void uvip3c(int nd, const double xd[], const double yd[],
 {
     int i;
     const gsl_interp_type *type;
-    gsl_interp_accel *acc;
     gsl_spline *spline;
     gsl_interp *interp;
     
@@ -395,19 +394,27 @@ void uvip3c(int nd, const double xd[], const double yd[],
     } else
     if (nd > 2) {
         type = gsl_interp_cspline;
+    } else
+    if (nd == 2) {
+        type = gsl_interp_linear;
     } else {
         fprintf(stderr, "uvip3c() called with nd = %d\n", nd);
         abort();
     }
     
-    acc = gsl_interp_accel_alloc();
     spline = gsl_spline_alloc(type, nd);
 
     gsl_spline_init(spline, xd, yd, nd);
     
     interp = spline->interp;
     
-    if (nd < 5) {
+    if (nd > 4) {
+        const akima_state_t* as = (akima_state_t *) interp->state;
+        memcpy(c1, as->b, sizeof(double)*(nd - 1));
+        memcpy(c2, as->c, sizeof(double)*(nd - 1));
+        memcpy(c3, as->d, sizeof(double)*(nd - 1));
+    } else
+    if (nd > 2) {
         const cspline_state_t* cs = (cspline_state_t *) interp->state;
         for (i = 0; i < nd - 1; i++) {
             double dx = xd[i + 1] - xd[i];
@@ -415,16 +422,13 @@ void uvip3c(int nd, const double xd[], const double yd[],
             
             coeff_calc(cs->c, dy, dx, i, &c1[i], &c2[i], &c3[i]);
         }
-        
     } else {
-        const akima_state_t* as = (akima_state_t *) interp->state;
-        memcpy(c1, as->b, sizeof(double)*(nd - 1));
-        memcpy(c2, as->c, sizeof(double)*(nd - 1));
-        memcpy(c3, as->d, sizeof(double)*(nd - 1));
+        c1[0] = (yd[1] - yd[0])/(xd[1] - xd[0]);
+        c2[0] = 0.0;
+        c3[0] = 0.0;
     }
 
     gsl_spline_free(spline);
-    gsl_interp_accel_free(acc);
 
     return;
 }

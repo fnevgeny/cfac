@@ -464,17 +464,13 @@ void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx,
   double t, s;
 
   kl = *((int *) extra);
-  if (ndy <= 0) {
-    for (i = 0; i < n; i++) {
-      t = (1 + p[2])/(sqrt(x[i]) + p[2]);
-      s = pow(x[i], p[1]/2 - 4.5 - kl)*pow(t, p[1]);
+  for (i = 0; i < n; i++) {
+    t = (1 + p[2])/(sqrt(x[i]) + p[2]);
+    s = pow(x[i], p[1]/2 - 4.5 - kl)*pow(t, p[1]);
+    
+    if (ndy <= 0) {
       y[i] = p[0]*s;
-    }
-  } else {
-    for (i = 0; i < n; i++) {
-      t = (1 + p[2])/(sqrt(x[i]) + p[2]);
-      s = pow(x[i], p[1]/2 - 4.5 - kl)*pow(t, p[1]);
-
+    } else {
       k = i;
       dy[k] = s;
 

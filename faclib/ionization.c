@@ -471,7 +471,7 @@ void CIRadialQkFromFit(int np, double *p, int n,
 }
 
 int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
-		  double *logxe, double *q, double *p, double te) {
+		  double *xe, double *logxe, double *q, double *p, double te) {
   double integrand[NINT];
   double x[NINT], y[NINT], t[NINT], s[NINT], d;
   double x0[MAXNUSR];
@@ -534,9 +534,13 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
     (*b) = Simpson(integrand, 0, NINT-1);
     (*b) *= d;
     for (i = 0; i < n_egrid; i++) {
-      x0[i] = 1.0/xusr[i];
+      x0[i] = 1.0/xe[i];
     }
     UVIP3P(n, t, y, n_egrid, x0, dp);
+  }
+  
+  if (!isfinite(*bethe)) {
+    return 1;
   }
   return 0;
 }
@@ -677,17 +681,17 @@ double BEScale(int k, double e) {
  
 int IonizeStrength(double *qku, double *qkc, double *te, 
 		   int b, int f) {
-  int i, ip, j, ierr;
+  int i, ip, ierr;
   LEVEL *lev1, *lev2;
   ORBITAL *orb;
   ANGULAR_ZFB *ang;
-  double bethe, b0, c, c0, cmax, qke[MAXNUSR], sigma[MAXNUSR];
-  int nz, j0, j0p, kl0 = 0, kl, kb, kbp, nq, nqk, kb0;
-  double tol, x[MAXNE], logx[MAXNE], es;
+  double b0, qke[MAXNUSR], sigma[MAXNUSR];
+  int nz, j0, j0p, kl0 = 0, kl, kb, kbp, nq, nqk;
+  double tol, x[MAXNE], logx[MAXNE];
 
-  cmax = 0.0;
-  c0 = 0.0;
   if (qk_mode == QK_CB) {
+    double cmax = 0.0;
+    
     nqk = NPARAMS;
     lev1 = GetLevel(b);
     lev2 = GetLevel(f);
@@ -701,10 +705,13 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       log_xusr[i] = log(xusr[i]);
       qku[i] = 0.0;
     }
-    for (j = 0; j < nqk; j++) {
-      qkc[j] = 0.0;
+    for (i = 0; i < nqk; i++) {
+      qkc[i] = 0.0;
     }
     for (i = 0; i < nz; i++) {
+      int j;
+      double c;
+      
       kb = ang[i].kb;
       orb = GetOrbital(kb);
       kb = orb->kappa;
@@ -718,7 +725,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       }
       ip = (orb->n - 1)*orb->n/2;
       for (j = 0; j < nqk; j++) {
-	qke[j] = (cbo_params[ip+kl][j]/(*te)) * (M_PI/2.0);
+	qke[j] = M_PI_2*cbo_params[ip+kl][j]/(*te);
 	qkc[j] += c*qke[j];
       }
     }
@@ -726,47 +733,71 @@ int IonizeStrength(double *qku, double *qkc, double *te,
     free(ang);
     return kl0;
   } else {
+    double bethe;
+    
     kl0 = BoundFreeOS(qke, qkc, te, b, f, -1);
     if (kl0 < 0) return kl0;
+    
     nz = AngularZFreeBound(&ang, f, b);
+    
     for (i = 0; i < n_egrid; i++) {
-      x[i] = (*te + egrid[i])/(*te);
+      x[i] = 1.0 + egrid[i]/(*te);
       logx[i] = log(x[i]);
-      xusr[i] = x[i];
     }
-    CIRadialQkBED(qku, &bethe, &b0, kl0, logx, qke, qkc, *te);
+    
+    CIRadialQkBED(qku, &bethe, &b0, kl0, x, logx, qke, qkc, *te);
+    
     if (qk_mode == QK_BED) {
-      kb0 = -1;
+      int kb0 = -1;
+      double csum = 0.0, cmax = 0.0;
+      double es;
+      
       for (i = 0; i < nz; i++) {
 	kb = ang[i].kb;
-	j0 =GetOrbital(kb)->kappa;
-	j0 = GetJFromKappa(j0);
+	j0 = GetJFromKappa(GetOrbital(kb)->kappa);
 	for (ip = 0; ip <= i; ip++) {
-	  kbp = ang[ip].kb;
-	  j0p = GetOrbital(kbp)->kappa;
-	  j0p = GetJFromKappa(j0p);
+	  double c;
+          
+          kbp = ang[ip].kb;
+	  j0p = GetJFromKappa(GetOrbital(kbp)->kappa);
+
 	  if (j0p != j0) continue;
+
 	  c = ang[i].coeff*ang[ip].coeff;
-	  if (ip != i) {
-	    c *= 2.0;
-	  } else if (c > c0) {
-	    c0 = c;
+          
+          /* max diagonal mixing */
+          if (ip == i && c > cmax) {
+	    cmax = c;
 	    kb0 = kb;
 	  }
-	  cmax += c;
+          
+	  if (ip == i) {
+            csum += c;
+          } else {
+            csum += 2*c;
+          }
 	}
       }
+
       es = BEScale(kb0, *te);
-      b0 = ((4.0*M_PI)/(*te))*cmax - b0;
-      for (j = 0; j < n_egrid; j++) {
-	c = b0*(1.0-1.0/x[j]-logx[j]/(1.0+x[j]));
-	qku[j] = qku[j]*logx[j] + c;
-	qku[j] *= x[j]/(es+x[j]);
-      }
+
       for (i = 0; i < n_egrid; i++) {
+	double c;
+        
+        c = (((4.0*M_PI)/(*te))*csum - b0)*
+            (1.0 - 1.0/x[i] - logx[i]/(1.0 + x[i]));
+
+	qku[i] = (qku[i]*logx[i] + c)*(x[i]/(es + x[i]));
+
+        if (qku[i] < 0.0) {
+            printf("Warning: qku[%d] = %g < 0, setting to zero\n", i, qku[i]);
+            qku[i] = 0.0;
+        }
+
 	qke[i] = qku[i] - bethe*logx[i];
 	sigma[i] = qke[i];
       }
+
       qkc[0] = bethe;
       for (i = 1; i < NPARAMS; i++) {
 	qkc[i] = 0.0;
@@ -774,6 +805,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       tol = qk_fit_tolerance;
       SVDFit(NPARAMS-1, qkc+1, NULL, tol, n_egrid, x, logx, 
 	     qke, sigma, CIRadialQkBasis);
+
       if (usr_different) {
 	for (i = 0; i < n_usr; i++) {
 	  xusr[i] = usr_egrid[i]/(*te);
@@ -788,12 +820,13 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       }
       for (i = 0; i < nz; i++) {
 	kb = ang[i].kb;
-	j0 =GetOrbital(kb)->kappa;
-	j0 = GetJFromKappa(j0);
+	j0 = GetJFromKappa(GetOrbital(kb)->kappa);
 	for (ip = 0; ip <= i; ip++) {
-	  kbp = ang[ip].kb;
-	  j0p = GetOrbital(kbp)->kappa;
-	  j0p = GetJFromKappa(j0p);
+	  int j;
+          double c;
+          
+          kbp = ang[ip].kb;
+	  j0p = GetJFromKappa(GetOrbital(kbp)->kappa);
 	  if (j0p != j0) continue;
 	  c = ang[i].coeff*ang[ip].coeff;
 	  if (ip != i) {

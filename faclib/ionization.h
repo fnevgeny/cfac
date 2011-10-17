@@ -30,7 +30,7 @@ void CIRadialQkBasis(int npar, double *yb, double x, double logx);
 void CIRadialQkFromFit(int np, double *p, int n, 
 		       double *x, double *logx, double *y);
 int CIRadialQkBED(double *dp, double *bethe, double *b0, int kl,
-		  double *logxe, double *q, double *p, double te);
+		  double *xe, double *logxe, double *q, double *p, double te);
 double *CIRadialQkIntegratedTable(int kb, int kbp);
 int IonizeStrength(double *qku, double *p, double *e, int b, int f);
 int SaveIonization(int nb, int *b, int nf, int *f, char *fn);

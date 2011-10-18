@@ -581,18 +581,29 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             unsigned long int cid;
             int t;
             double ap0, ap1;
+            TRANSITION tr;
+            int swapped;
+            double dE;
             
             n = ReadRRRecord(fp, &r, swp, &h);
             if (n == 0) {
                 break;
             }
+            
+            GetTransition(r.b, r.f, &tr, &swapped);
+            dE = fabs(tr.e);
 
             /* TODO: full fit ? */
             
-            if (h.qk_mode == QK_FIT) {
-              ap0 = r.params[0]*pow(1.0 + r.params[2], r.params[1]);
+            if (h.qk_mode == QK_FIT && r.params[0]) {
+                double p0, p1, p2, p3;
+                p0 = r.params[0];
+                p1 = r.params[1];
+                p2 = r.params[2];
+                p3 = r.params[3];
+                ap0 = p0*pow(1.0 + p2, p1)*pow(p3/dE, 3.5 + r.kl);
             } else {
-              ap0 = r.strength[h.n_usr - 1]*
+                ap0 = r.strength[h.n_usr - 1]*
                     pow(h.usr_egrid[h.n_usr - 1], 3.5 + r.kl);
             }
             ap1 = (double) r.kl;

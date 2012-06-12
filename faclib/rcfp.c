@@ -1887,7 +1887,7 @@ double ReducedOperator(RCFP_STATE *bra, RCFP_STATE *ket,
   double coeff;
   RCFP_STATE run;
   int run_nu, Jrun;
-  int Jbra, jbra, Jket, jket;
+  int Jbra=0, jbra, Jket=0, jket;
   double w6j1;
   int min_bra, max_bra;
   int min_ket, max_ket;

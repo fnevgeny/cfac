@@ -979,6 +979,10 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   *rate = 0.0;
   lev1 = GetLevel(rec);
   lev2 = GetLevel(f);
+
+  if (GetLevNumElectrons(lev1) != GetLevNumElectrons(lev2) + 1) {
+    return -1;
+  }
   
   log_e = log(*e);
 
@@ -1648,7 +1652,32 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   int isub, n_egrid0;
   int e_set;
 
+  int *alev;
+  int nc;
+
+  /* if low or up not given, assume all levels */
+  alev = NULL;
+  if (nlow == 0 || nup == 0) {
+    int n = GetNumLevels();
+    if (n <= 0) return -1;
+    alev = malloc(sizeof(int)*n);
+    if (!alev) return -1;
+    
+    for (i = 0; i < n; i++) alev[i] = i;
+
+    if (nlow == 0) {
+      nlow = n; 
+      low = alev;
+    }
+    if (nup == 0) {
+      nup = n;
+      up = alev;
+    }
+  }
+
   if (nup <= 0 || nlow <= 0) return -1;
+
+  nc = OverlapLowUp(nlow, low, nup, up);
 
   eref /= HARTREE_EV;
   emin = 1E10;
@@ -1658,6 +1687,11 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
     lev1 = GetLevel(low[i]);
     for (j = 0; j < nup; j++) {
       lev2 = GetLevel(up[j]);
+      
+      if (GetLevNumElectrons(lev1) != GetLevNumElectrons(lev2) + 1) {
+        continue;
+      }
+      
       a = lev1->energy - lev2->energy;
       if (a < 0) a -= eref;
       if (a > 0) k++;

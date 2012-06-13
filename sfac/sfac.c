@@ -524,22 +524,39 @@ static int PAddConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
 }
 
 static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
-  int nlow, *low, nup, *up;
-  double c;
+  int nlow = 0, *low = NULL, nup = 0, *up = NULL;
+  double c = 0.0;
+  char *fname;
 
-  if (argc != 3 && argc != 4) return -1;
-  if (argt[0] != STRING) return -1;
-  
-  if (argc == 4) {
-    if (argt[3] != NUMBER) return -1;
+  if (argc > 0 && argt[0] != STRING) {
+    return -1; 
+  }
+
+  switch (argc) {
+  case 4:
+    if (argt[3] != NUMBER) {
+      return -1;
+    }
     c = atof(argv[3]);
-  } else c = 0.0;
-  
-  nlow = SelectLevels(&low, argv[1], argt[1], variables);
-  nup = SelectLevels(&up, argv[2], argt[2], variables);
-  SaveAI(nlow, low, nup, up, argv[0], c, 0);
-  if (nlow > 0) free(low);
-  if (nup > 0) free(up);
+  case 3:
+    nlow = SelectLevels(&low, argv[1], argt[1], variables);
+    nup  = SelectLevels(&up, argv[2], argt[2], variables);
+  case 1:
+    fname = argv[0];
+    break;
+  default:
+    return -1;
+    break;
+  }
+
+  SaveAI(nlow, low, nup, up, fname, c, 0);
+
+  if (nlow > 0) {
+    free(low);
+  }
+  if (nup > 0) {
+    free(up);
+  }
 
   return 0;
 }

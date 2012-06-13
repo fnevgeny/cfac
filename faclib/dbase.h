@@ -444,8 +444,6 @@ int TRBranch(char *fn, int i, int j, double *te, double *pa, double *ta);
 int AIBranch(char *fn, int i, int j, double *te, double *pa, double *ta);
 int LevelInfor(char *fn, int ilev, EN_RECORD *r0);
 int FindLevelByName(char *fn, int nele, char *nc, char *cnr, char *cr);
-int AdjustEnergy(int nlevs, int *ilevs, double *e, 
-		 char *efn0, char *efn1, char *afn0, char *afn1);
 int ISearch(int i, int n, int *ia);
 void SetBornFormFactor(double te, char *fn);
 int BornFormFactorTE(double *te);

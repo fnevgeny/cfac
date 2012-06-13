@@ -721,75 +721,6 @@ static int PClearOrbitalTable(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PAdjustEnergy(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-  int nlevs, k, *ilevs;
-  double e, *elevs;
-  int i, ie, ii;
-  FILE *f;
-  char *iv[MAXNARGS], *ev[MAXNARGS];
-  int it[MAXNARGS], et[MAXNARGS];
-
-  ii = 0; 
-  ie = 0;
-  if (argc == 5) {
-    if (argt[0] != STRING) {
-      return -1;
-    }
-    f = fopen(argv[0], "r");
-    
-    i = 0;
-    while (1) {
-      if (fscanf(f, "%d%lf\n", &k, &e) == EOF) break;
-      i++;
-    }
-    nlevs = i;    
-    ilevs = (int *) malloc(sizeof(int)*nlevs);
-    elevs = (double *) malloc(sizeof(double)*nlevs);
-    fseek(f, 0, SEEK_SET);
-    i = 0;
-    while (1) {
-      if (fscanf(f, "%d%lf\n", &k, &e) == EOF) break;
-      e /= HARTREE_EV;
-      ilevs[i] = k;
-      elevs[i] = e;
-      i++;
-    }
-    fclose(f);
-    AdjustEnergy(nlevs, ilevs, elevs, argv[1], argv[2], argv[3], argv[4]);
-  } else {
-    if (argt[0] != LIST || argt[1] != LIST) {
-      printf("The last two of three arguments ");
-      printf("for CorrectEnergy must be two Lists\n");
-      return -1;
-    }
-    ii = DecodeArgs(argv[0], iv, it, variables);
-    ie = DecodeArgs(argv[1], ev, et, variables);
-    if (ii != ie) return -1;
-    nlevs = ii;
-    ilevs = (int *) malloc(sizeof(int)*nlevs);
-    elevs = (double *) malloc(sizeof(double)*nlevs);
-    for (i = 0; i < nlevs; i++) {
-      if (it[i] != NUMBER || et[i] != NUMBER) return -1;
-      k = atoi(iv[i]);
-      e = atof(ev[i]);
-      e /= HARTREE_EV;
-      ilevs[i] = k;
-      elevs[i] = e;
-    }
-    AdjustEnergy(nlevs, ilevs, elevs, argv[2], argv[3], argv[4], argv[5]);
-  }
-
-  for (i = 0; i < ii; i++) free(iv[i]);
-  for (i = 0; i < ie; i++) free(ev[i]);
-  if (nlevs > 0) {
-    free(ilevs);
-    free(elevs);
-  }
-  
-  return 0;
-}
-
 static int PCorrectEnergy(int argc, char *argv[], int argt[], 
 			  ARRAY *variables) {
   int n, k, kref;
@@ -3478,7 +3409,6 @@ static METHOD methods[] = {
   {"ListConfig", PListConfig},
   {"GetConfigNR", PGetConfigNR},
   {"ConfigEnergy", PConfigEnergy},
-  {"AdjustEnergy", PAdjustEnergy},
   {"CorrectEnergy", PCorrectEnergy},
   {"Exit", PExit},
   {"FreeExcitationQk", PFreeExcitationQk},

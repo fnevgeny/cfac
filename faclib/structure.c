@@ -2228,14 +2228,12 @@ int SortLevels(int start, int n, int m) {
   return 0;
 }
 
-int GetNumElectrons(int k) {
-  LEVEL *lev;
+int GetLevNumElectrons(const LEVEL *lev) {
   SYMMETRY *sym;
   STATE *s;
   CONFIG_GROUP *g;
   int nele;
   
-  lev = GetLevel(k);
   sym = GetSymmetry(lev->pj);
   s = (STATE *) ArrayGet(&(sym->states), lev->basis[0]);
   if (s->kgroup >= 0) {
@@ -2248,6 +2246,16 @@ int GetNumElectrons(int k) {
   return nele;
 }
 
+int GetNumElectrons(int k)
+{
+    LEVEL *lev = GetLevel(k);
+    
+    if (!lev) {
+        return -1;
+    } else {
+        return GetLevNumElectrons(lev);
+    }
+}
 
 int GetTransition(int nlo, int nup, TRANSITION *tr, int *swapped)
 {

@@ -150,6 +150,7 @@ LEVEL *GetEBLevel(int k);
 int LevelTotalJ(int k);
 int GetNumEBLevels(void);
 int GetNumLevels(void);
+int GetLevNumElectrons(const LEVEL *lev);
 int GetNumElectrons(int k);
 int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym);
 int GetPrincipleBasis(double *mix, int d, int *kpb);

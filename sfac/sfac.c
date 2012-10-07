@@ -739,10 +739,17 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
     }
     nmin = atoi(argv[1]);
     f = fopen(argv[0], "r");
+    if (!f) {
+      printf("Cannot open file %s\n", argv[0]);
+      return -1;
+    }
     n = -1;
     i = 0;
     while (1) {
-      if (fscanf(f, "%d%lf\n", &k, &e) == EOF) break;
+      int nf = fscanf(f, "%d%lf\n", &k, &e);
+      if (nf != 2 || nf == EOF) {
+        break;
+      }
       e /= HARTREE_EV;
       if (k < 0) {
 	k = -k;

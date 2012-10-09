@@ -436,22 +436,6 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   return 0;
 }      
   
-static int PRemoveConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
-  int k, ng, *kg;
-  
-  if (argc <= 0) return -1;
-  ng = DecodeGroupArgs(&kg, argc, argv, argt, variables);
-  
-  for (k = 0; k < ng; k++) {
-    RemoveGroup(kg[k]);
-  }
-  ReinitStructure(1);
-  ReinitRecouple(0);
-  if (ng > 0) free(kg);
-
-  return 0;
-}
-  
 static int PListConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   int k, ng, *kg;
   char *s;
@@ -696,29 +680,6 @@ static int PCITableMSub(int argc, char *argv[], int argt[],
   if (nlow > 0) free(low);
   if (nup > 0) free(up);
     
-  return 0;
-}
-
-static int PClearLevelTable(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
-  if (argc != 0) return -1;
-  ClearLevelTable();
- 
-  return 0;
-}
-
-static int PClearOrbitalTable(int argc, char *argv[], int argt[], 
-			      ARRAY *variables) {
-  int m;
-  
-  m = 1;
-  if (argc != 0 && argc != 1) return -1;
-  if (argc == 1) {
-    if (argt[0] != NUMBER) return -1;
-    m = atoi(argv[0]);
-  }
-
-  ClearOrbitalTable(m);
   return 0;
 }
 
@@ -1081,211 +1042,6 @@ static int PRecStates(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PReinitConfig(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitConfig(m);
-  _closed_shells[0] = '\0';
-
-  return 0;
-}
-
-static int PReinitRecouple(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitRecouple(m);
-  return 0;
-}
-
-static int PReinitRadial(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitRadial(m);
-  return 0;
-}
-
-static int PReinitDBase(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitDBase(m);
-  return 0;
-}
-
-static int PReinitStructure(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitStructure(m);
-  return 0;
-}
-
-static int PReinitExcitation(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitExcitation(m);
-  return 0;
-}
-
-static int PReinitRecombination(int argc, char *argv[], int argt[], 
-				ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitRecombination(m);
-  return 0;
-}
-
-static int PReinitIonization(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  m = atoi(argv[0]);
-
-  ReinitIonization(m);
-  return 0;
-}
-
-static int PReinit(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
-  int i, m;  
-  int m_config;
-  int m_recouple;
-  int m_radial;
-  int m_dbase;
-  int m_structure;
-  int m_excitation;
-  int m_recombination;
-  int m_ionization;
-
-  m_config = -1;
-  m_recouple = -1;
-  m_radial = -1;
-  m_dbase = -1;
-  m_structure = -1;
-  m_excitation = -1;
-  m_recombination = -1;
-  m_ionization = -1;
-
-  if (argc == 0 || argc == 1) {
-    if (argc == 0) {
-      m = 0;
-    } else {
-      if (argt[0] != NUMBER) return -1;
-      m = atoi(argv[0]);
-    } 
-    if (m == 0) {
-      m_config = 0;
-      m_recouple = 0;
-      m_radial = 0;
-      m_dbase = 0;
-      m_structure = 0;
-      m_excitation = 0;
-      m_recombination = 0;
-      m_ionization = 0;
-    } else if (m > 0) {
-      m_config = -1;
-      m_recouple = -1;
-      m_radial = 0;
-      m_dbase = 0;
-      m_structure = 2;
-      m_excitation = 0;
-      m_recombination = 0;
-      m_ionization = 0;
-    } else {
-      m_config = 1;
-      m_recouple = 1;
-      m_radial = 1;
-      m_dbase = 1;
-      m_structure = 1;
-      m_excitation = 1;
-      m_recombination = 1;
-      m_ionization = 1;
-    }
-  } else {
-    for (i = 0; i < argc; ) {
-      if (argt[i] != KEYWORD) {
-	i++;
-	continue;
-      }
-      if (strcmp(argv[i], "config") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_config = atoi(argv[i]);
-	i++;
-      } else if (strcmp(argv[i], "recouple") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_recouple = atoi(argv[i]);
-	i++;
-      } else if (strcmp(argv[i], "dbase") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_dbase = atoi(argv[i]);
-	i++;
-      } else if (strcmp(argv[i], "structure") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_structure = atoi(argv[i]);
-	i++;
-      } else if (strcmp(argv[i], "excitation") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_excitation = atoi(argv[i]);
-	i++;
-      } else if (strcmp(argv[i], "radial") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_radial = atoi(argv[i]);
-	i++;
-      } else if (strcmp(argv[i], "recombination") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_recombination = atoi(argv[i]);
-	i++;
-      } else if (strcmp(argv[i], "ionization") == 0) {
-	i++;
-	if (argt[i] != NUMBER) return -1;
-	m_ionization = atoi(argv[i]);
-	i++;
-      }
-    }
-  }
- 
-  ReinitFac(m_config, m_recouple, m_radial, m_dbase,
-	    m_structure, m_excitation, m_recombination, m_ionization);
-  if (m_config == 0) {
-    _closed_shells[0] = '\0';
-  }
-
-  return 0;
-}
-  
 static int PRRMultipole(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int nlow, *low, nup, *up, m;
@@ -3408,12 +3164,9 @@ static METHOD methods[] = {
   {"CheckEndian", PCheckEndian},
   {"CITable", PCITable},
   {"CITableMSub", PCITableMSub},
-  {"ClearLevelTable", PClearLevelTable},
-  {"ClearOrbitalTable", PClearOrbitalTable},
   {"Closed", PClosed},
   {"Config", PConfig},
   {"CutMixing", PCutMixing},
-  {"RemoveConfig", PRemoveConfig},
   {"ListConfig", PListConfig},
   {"GetConfigNR", PGetConfigNR},
   {"ConfigEnergy", PConfigEnergy},
@@ -3438,15 +3191,6 @@ static METHOD methods[] = {
   {"PrintMemInfo", PPrintMemInfo},
   {"PrintTable", PPrintTable},
   {"RecStates", PRecStates},
-  {"ReinitConfig", PReinitConfig},
-  {"ReinitRecouple", PReinitRecouple},
-  {"ReinitRadial", PReinitRadial},
-  {"ReinitDBase", PReinitDBase},
-  {"ReinitStructure", PReinitStructure},
-  {"ReinitExcitation", PReinitExcitation},
-  {"ReinitRecombination", PReinitRecombination},
-  {"ReinitIonization", PReinitIonization},
-  {"Reinit", PReinit},
   {"RRTable", PRRTable},
   {"RRMultipole", PRRMultipole},
   {"SetAICut", PSetAICut},

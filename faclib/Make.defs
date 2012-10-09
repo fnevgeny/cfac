@@ -5,7 +5,8 @@
 
 LIB  = $(CFAC_FAC_LIB)
 
-CSRCS = angular.c \
+CSRCS = cfac.c \
+	angular.c \
 	array.c \
 	cfp.c \
 	config.c \

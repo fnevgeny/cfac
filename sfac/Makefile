@@ -2,7 +2,7 @@ TOP = ..
 
 include $(TOP)/Make.conf
 
-ALL_CFLAGS = $(CPPFLAGS) -I$(TOP) -I$(TOP)/faclib $(CFLAGS)
+ALL_CFLAGS = $(CPPFLAGS) -I$(TOP) -I$(TOP)/include -I$(TOP)/faclib $(CFLAGS)
 
 .c.o: 
 	$(CC) -c $(ALL_CFLAGS) $<

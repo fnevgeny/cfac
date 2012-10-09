@@ -3,7 +3,8 @@
 #include <math.h>
 #include <gsl/gsl_sf_legendre.h>
 
-#include "nucleus.h"
+#include "global.h"
+#include "cfac.h"
 #include "angular.h"
 #include "radial.h"
 #include "structure.h"
@@ -2194,8 +2195,8 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   }
 
   fhdr.type = DB_CE;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   f = OpenFile(fn, &fhdr);
 
   for (isub = 0; isub < subte.dim - 1; isub++) {
@@ -2590,8 +2591,8 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   
   e0 = emin*0.999;
   fhdr.type = DB_CEF;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   f = OpenFile(fn, &fhdr);
   for (isub = 1; isub < subte.dim; isub++) {
     e1 = *((double *) ArrayGet(&subte, isub));
@@ -2842,8 +2843,8 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   born = malloc(sizeof(double)*(m+1));
   e0 = emin*0.999;
   fhdr.type = DB_CEMF;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   f = OpenFile(fn, &fhdr);
   for (isub = 1; isub < subte.dim; isub++) {
     e1 = *((double *) ArrayGet(&subte, isub));

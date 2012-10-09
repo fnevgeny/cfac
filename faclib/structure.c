@@ -7,7 +7,7 @@
 #include <gsl/gsl_eigen.h>
 
 #include "global.h"
-#include "nucleus.h"
+#include "cfac.h"
 #include "radial.h"
 #include "angular.h"
 #include "dbase.h"
@@ -103,7 +103,7 @@ void SetFields(double b, double e, double a, int m) {
     B1[i] *= MBOHR/HARTREE_EV;
   }
 
-  mass = GetAtomicMass();
+  mass = GetAtomicMass(cfac);
   mass = 1.0 + 5.45683e-4/mass;
   for (i = 0; i < 3; i++) {
     B1[i] *= mass;
@@ -2303,8 +2303,8 @@ int SaveEBLevels(char *fn, int m, int n) {
   n0 = m;
   if (n < 0) n = n_eblevels - m;
   fhdr.type = DB_ENF;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   f = OpenFile(fn, &fhdr);
 
   lev = GetEBLevel(n0);
@@ -2362,8 +2362,8 @@ int SaveLevels(char *fn, int m, int n) {
   n0 = m;
   if (n < 0) n = n_levels - m;
   fhdr.type = DB_EN;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   f = OpenFile(fn, &fhdr);
 
   for (k = 0; k < n; k++) {

@@ -5,7 +5,7 @@
 
 #include "global.h"
 #include "consts.h"
-#include "nucleus.h"
+#include "cfac.h"
 #include "radial.h"
 #include "angular.h"
 #include "structure.h"
@@ -341,8 +341,8 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
     }
   }
   fhdr.type = DB_TRF;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();  
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);  
   lev1 = GetEBLevel(low[0]);
   DecodeBasisEB(lev1->pb, &i, &j);  
   tr_hdr.nele = GetNumElectrons(i);
@@ -434,8 +434,8 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
   }
   
   fhdr.type = DB_TR;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   tr_hdr.nele = GetNumElectrons(low[0]);
   tr_hdr.multipole = m;
   tr_hdr.gauge = GetTransitionGauge();

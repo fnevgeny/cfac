@@ -9,7 +9,8 @@
 #include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_linalg.h>
 
-#include "nucleus.h"
+#include "global.h"
+#include "cfac.h"
 #include "config.h"
 #include "coulomb.h"
 #include "orbital.h"
@@ -1928,7 +1929,7 @@ int SetOrbitalRGrid(POTENTIAL *pot) {
 
   gratio = pot->ratio;
   gasymp = pot->asymp;
-  z0 = GetAtomicNumber();
+  z0 = GetAtomicNumber(cfac);
   z = z0;
   if (pot->N > 0) z = (z - pot->N + 1);
   if (pot->flag == 0) pot->flag = -1; 
@@ -2020,7 +2021,7 @@ int SetPotentialZ(POTENTIAL *pot, double c) {
 
   c = 1.0+c;
   for (i = 0; i < pot->maxrp; i++) {
-    pot->Z[i] = c*GetAtomicEffectiveZ(pot->rad[i]);
+    pot->Z[i] = c*GetAtomicEffectiveZ(cfac, pot->rad[i]);
   }
   return 0;
 }
@@ -2312,7 +2313,7 @@ int SetPotentialUehling(POTENTIAL *pot, int vp) {
     pot->uehling[i] /= pot->rad[i];
   }
   
-  rn = GetAtomicR();
+  rn = GetAtomicR(cfac);
 
   if (rn) {
     a = -2.0*r0*FINE_STRUCTURE_CONST/3.0;

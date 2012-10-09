@@ -4,9 +4,8 @@
 #include <math.h>
 
 #include "consts.h"
-#include "nucleus.h"
+#include "cfacP.h"
 
-static NUCLEUS atom;
 static char _ename[N_ELEMENTS][3] = 
 {"H", "He", "Li", "Be", "B", "C", "N", "O", "F",
  "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", 
@@ -31,15 +30,8 @@ static double _emass[N_ELEMENTS] =
  254, 253, 256, 254, 257, 257, 260, 263, 262, 265, 266};
 
 
-char *GetAtomicSymbolTable(void) {
-  return (char *) _ename;
-}
-
-double *GetAtomicMassTable(void) {
-  return _emass;
-}
-
-int SetAtom(char *s, double z, double mass, double rn) {
+int SetAtom(cfac_t *cfac, char *s, double z, double mass, double rn) {
+  cfac_nucleus_t *atom = &cfac->nucleus;
   int i;
 
   if (s == NULL) return -1;
@@ -49,12 +41,12 @@ int SetAtom(char *s, double z, double mass, double rn) {
     }
     s = _ename[(int)(z-0.8)];
   }
-  strncpy(atom.symbol, s, 2); 
+  strncpy(atom->symbol, s, 2); 
   if (z <= 0 || mass <= 0) {
     for (i = 0; i < N_ELEMENTS; i++) {
       if (strncasecmp(_ename[i], s, 2) == 0) {
-	if (z <= 0) atom.atomic_number = i+1;
-	if (mass <= 0) atom.mass = _emass[i];
+	if (z <= 0) atom->atomic_number = i+1;
+	if (mass <= 0) atom->mass = _emass[i];
 	break;
       }
     }
@@ -62,33 +54,34 @@ int SetAtom(char *s, double z, double mass, double rn) {
   }
 
   if (z > 0) {
-    atom.atomic_number = z;
+    atom->atomic_number = z;
   } 
   if (mass > 0.0) {
-    atom.mass = mass;
+    atom->mass = mass;
   }
   if (rn < 0.0) {
-    atom.rn = 2.2677E-5 * pow(atom.mass, 1.0/3);
+    atom->rn = 2.2677E-5 * pow(atom->mass, 1.0/3);
   } else {
-    atom.rn = rn;
+    atom->rn = rn;
   }
 
   return 0;
 }
 
-double GetAtomicMass(void) {
-  return atom.mass;
+double GetAtomicMass(const cfac_t *cfac) {
+  return cfac->nucleus.mass;
 }
 
-double GetAtomicNumber(void) {
-  return atom.atomic_number;
+double GetAtomicNumber(const cfac_t *cfac) {
+  return cfac->nucleus.atomic_number;
 }
 
-char *GetAtomicSymbol(void) {
-  return atom.symbol;
+const char *GetAtomicSymbol(const cfac_t *cfac) {
+  return cfac->nucleus.symbol;
 }
 
-double GetAtomicEffectiveZ(double r) {
+double GetAtomicEffectiveZ(const cfac_t *cfac, double r) {
+  cfac_nucleus_t atom = cfac->nucleus;
   double x, y;
   if (r > atom.rn) {
     return (double) atom.atomic_number;
@@ -100,6 +93,6 @@ double GetAtomicEffectiveZ(double r) {
   }
 }
 
-double GetAtomicR(void) {
-  return atom.rn;
+double GetAtomicR(const cfac_t *cfac) {
+  return cfac->nucleus.rn;
 }

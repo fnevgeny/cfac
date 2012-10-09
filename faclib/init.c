@@ -14,6 +14,8 @@
 #include "dbase.h"
 #include "init.h"
 
+cfac_t *cfac = NULL;
+
 #if FAC_DEBUG
   FILE *debug_log = NULL;
 #endif
@@ -42,6 +44,8 @@ int InitFac(void) {
 #ifdef PERFORM_STATISTICS
   perform_log = fopen("perform.log", "w");
 #endif
+
+  cfac = cfac_new();
 
   ierr = InitConfig();
   if ( ierr < 0) {

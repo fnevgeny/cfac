@@ -1,6 +1,7 @@
 #include <math.h>
 
-#include "nucleus.h"
+#include "global.h"
+#include "cfac.h"
 #include "radial.h"
 #include "angular.h"
 #include "coulomb.h"
@@ -1422,7 +1423,7 @@ static int PSetAtom(int argc, char *argv[], int argt[],
     }
   }
   
-  if (SetAtom(argv[0], z, mass, rn) < 0) return -1;
+  if (SetAtom(cfac, argv[0], z, mass, rn) < 0) return -1;
   
   return 0;
 }

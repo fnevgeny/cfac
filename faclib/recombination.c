@@ -2,9 +2,10 @@
 #include <math.h>
 #include <gsl/gsl_sf_legendre.h>
 
+#include "global.h"
 #include "consts.h"
 #include "parser.h"
-#include "nucleus.h"
+#include "cfac.h"
 #include "coulomb.h"
 #include "structure.h"
 #include "radial.h"
@@ -1498,8 +1499,8 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   }
 
   fhdr.type = DB_RR;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   rr_hdr.nele = GetNumElectrons(low[0]);
   rr_hdr.qk_mode = qk_mode;
   rr_hdr.nparams = nqk;
@@ -1728,8 +1729,8 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   } else {
     fhdr.type = DB_AIM;
   }
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   if (!msub) {
     ai_hdr.nele = GetNumElectrons(low[0]);
     ai_hdr.emin = eref;
@@ -2061,7 +2062,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
       }
       e0 *= HARTREE_EV;
       fprintf(f, "#  %2s  %2d %2d\n", 
-	      GetAtomicSymbol(), (int)GetAtomicNumber(), (int)GetResidualZ());
+	      GetAtomicSymbol(cfac), (int)GetAtomicNumber(cfac), (int)GetResidualZ());
       fprintf(f, "#  %d%s%c %d %d %d %12.5E  %d %d\n",
 	      n, sp, js, n, kl, jj, e0, n_usr, mx);
       for (i = 0; i < n_usr; i++) {

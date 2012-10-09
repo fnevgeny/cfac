@@ -2,7 +2,8 @@
 #include <string.h>
 #include <math.h>
 
-#include "nucleus.h"
+#include "global.h"
+#include "cfac.h"
 #include "angular.h"
 #include "radial.h"
 #include "structure.h"
@@ -666,7 +667,7 @@ double BEScale(int k, double e) {
   double z, a, b, c;
   ORBITAL *orb;
 
-  z = GetAtomicNumber();
+  z = GetAtomicNumber(cfac);
   a = MeanPotential(k, k);
   b = RadialMoments(-1, k, k);
   c = -a/b;
@@ -951,8 +952,8 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
   r.params = (float *) malloc(sizeof(float)*nqk);
     
   fhdr.type = DB_CI;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   ci_hdr.nele = GetNumElectrons(b[0]);
   ci_hdr.qk_mode = qk_mode;
   ci_hdr.nparams = nqk;
@@ -1458,8 +1459,8 @@ int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
   }  
     
   fhdr.type = DB_CIM;
-  strcpy(fhdr.symbol, GetAtomicSymbol());
-  fhdr.atom = GetAtomicNumber();
+  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
+  fhdr.atom = GetAtomicNumber(cfac);
   ci_hdr.nele = GetNumElectrons(b[0]);
   ci_hdr.egrid_type = egrid_type;
   ci_hdr.usr_egrid_type = usr_egrid_type;

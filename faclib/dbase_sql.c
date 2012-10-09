@@ -6,7 +6,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "nucleus.h"
+#include "global.h"
+#include "cfac.h"
 #include "structure.h"
 #include "dbase.h"
 
@@ -106,9 +107,9 @@ int StoreInit(const char *fn, int reset, sqlite3 **db, unsigned long *sid)
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
     
     sqlite3_bind_int   (stmt, 1, *sid);
-    SQLITE3_BIND_STR   (stmt, 2, GetAtomicSymbol());
-    sqlite3_bind_int   (stmt, 3, GetAtomicNumber());
-    sqlite3_bind_double(stmt, 4, GetAtomicMass());
+    SQLITE3_BIND_STR   (stmt, 2, GetAtomicSymbol(cfac));
+    sqlite3_bind_int   (stmt, 3, GetAtomicNumber(cfac));
+    sqlite3_bind_double(stmt, 4, GetAtomicMass(cfac));
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {

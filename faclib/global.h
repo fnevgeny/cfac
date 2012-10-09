@@ -1,6 +1,7 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_ 1
 
+#include "cfac.h"
 
 /*************************************************************
   Header file defining some global constants, macros.
@@ -42,6 +43,8 @@ extern FILE *debug_log;
 # include <time.h>
 extern FILE *perform_log;
 #endif
+
+extern cfac_t *cfac;
 
 #endif
 

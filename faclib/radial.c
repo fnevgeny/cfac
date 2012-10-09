@@ -4,7 +4,7 @@
 #include <gsl/gsl_sf_bessel.h>
 
 #include "global.h"
-#include "nucleus.h"
+#include "cfac.h"
 #include "coulomb.h"
 #include "radial.h"
 #include "recouple.h"
@@ -2994,7 +2994,7 @@ int SlaterTotal(double *sd, double *se, int *j, int *ks, int k, int mode) {
   if (js[2] <= 0) js[2] = GetJFromKappa(orb2->kappa);
   if (js[3] <= 0) js[3] = GetJFromKappa(orb3->kappa);  
 
-  am = AMU * GetAtomicMass();
+  am = AMU * GetAtomicMass(cfac);
   if (sd) {
     d = 0.0;
     if (IsEven((kl0+kl2)/2+kk) && IsEven((kl1+kl3)/2+kk) &&
@@ -3150,14 +3150,14 @@ double QED1E(int k0, int k1) {
     IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
     a = -a;
     if (k0 == k1) a += orb1->energy;
-    a /= (AMU * GetAtomicMass());
+    a /= (AMU * GetAtomicMass(cfac));
     r += a;
     for (i = 0; i < potential->maxrp; i++) {
       _yk[i] = orb1->energy - (potential->U[i] + potential->Vc[i]);
       _yk[i] *= orb2->energy - (potential->U[i] + potential->Vc[i]);
     }
     IntegrateS(_yk, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
-    a *= FINE_STRUCTURE_CONST2/(2.0 * AMU * GetAtomicMass());
+    a *= FINE_STRUCTURE_CONST2/(2.0 * AMU * GetAtomicMass(cfac));
     r += a;
   }
 

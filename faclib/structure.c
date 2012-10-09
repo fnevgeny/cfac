@@ -4323,26 +4323,6 @@ void ClearAngularFrozen(void) {
   ang_frozen.ncs = 0;
 }
 
-void ClearRMatrixLevels(int n) {
-  int i, m;
-  SYMMETRY *sym;
-  STATE *s;
-
-  ArrayTrim(levels, n);
-  n_levels = n;
-  for (i = 0; i < MAX_SYMMETRIES; i++) {
-    sym = GetSymmetry(i);
-    for (m = 0; m < sym->n_states; m++) {
-      s = ArrayGet(&(sym->states), m);
-      if (s->kgroup < 0) {
-	ArrayTrim(&(sym->states), m);
-	sym->n_states = m;
-	break;
-      }
-    }
-  }
-}
-
 int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
   int jp, t;
 

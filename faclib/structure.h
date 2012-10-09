@@ -195,7 +195,6 @@ int SetCILevel(int m);
 int SetMixCut(double c, double c2);
 int FreeAngZArray(void);
 int InitAngZArray(void);
-void ClearRMatrixLevels(int n);
 int ClearLevelTable(void);
 int InitStructure(void);
 int ReinitStructure(int m);

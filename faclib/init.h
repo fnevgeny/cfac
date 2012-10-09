@@ -3,6 +3,5 @@
 
 int Info(void);
 int InitFac(void);
-int ReinitFac(int, int, int, int, int, int, int, int);
 
 #endif

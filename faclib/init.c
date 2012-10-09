@@ -73,18 +73,3 @@ int InitFac(void) {
 
   return 0;
 }
-
-int ReinitFac(int m_config, int m_recouple, int m_radial,
-	      int m_dbase, int m_structure, int m_excitation,
-	      int m_recombination, int m_ionization) {
-  ReinitExcitation(m_excitation);
-  ReinitRecombination(m_recombination);
-  ReinitIonization(m_ionization);
-  ReinitRecouple(m_recouple);
-  ReinitRadial(m_radial);
-  ReinitDBase(m_dbase);
-  ReinitStructure(m_structure);
-  ReinitConfig(m_config);
-
-  return 0;
-}

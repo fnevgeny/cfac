@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "consts.h"
 #include "cfacP.h"
+#include "structure.h"
 
-static char _ename[N_ELEMENTS][3] = 
+static char _ename[][3] = 
 {"H", "He", "Li", "Be", "B", "C", "N", "O", "F",
  "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", 
  "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", 
@@ -20,7 +20,7 @@ static char _ename[N_ELEMENTS][3] =
  "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es",
  "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt"};
 
-static double _emass[N_ELEMENTS] = 
+static double _emass[] = 
 {1, 4, 7, 9, 11, 12, 14, 16, 19, 20, 23, 24, 27, 28, 31, 32, 35, 40, 39, 
  40, 45, 48, 51, 52, 55, 56, 58, 59, 64, 65, 70, 73, 75, 79, 80, 84, 85,
  88, 89, 91, 93, 96, 98, 101, 103, 106, 108, 112, 115, 119, 122, 128, 127,
@@ -32,7 +32,7 @@ static double _emass[N_ELEMENTS] =
 
 int SetAtom(cfac_t *cfac, char *s, double z, double mass, double rn) {
   cfac_nucleus_t *atom = &cfac->nucleus;
-  int i;
+  unsigned int i, n_elements = sizeof(_emass)/sizeof(double);
 
   if (s == NULL) return -1;
   if (strlen(s) == 0) {
@@ -43,15 +43,17 @@ int SetAtom(cfac_t *cfac, char *s, double z, double mass, double rn) {
   }
   strncpy(atom->symbol, s, 2); 
   if (z <= 0 || mass <= 0) {
-    for (i = 0; i < N_ELEMENTS; i++) {
+    for (i = 0; i < n_elements; i++) {
       if (strncasecmp(_ename[i], s, 2) == 0) {
 	if (z <= 0) atom->atomic_number = i+1;
 	if (mass <= 0) atom->mass = _emass[i];
 	break;
       }
     }
-    if (i == N_ELEMENTS) return -1;
+    if (i == n_elements) return -1;
   }
+  
+  cfac->anum = i;
 
   if (z > 0) {
     atom->atomic_number = z;
@@ -64,6 +66,14 @@ int SetAtom(cfac_t *cfac, char *s, double z, double mass, double rn) {
   } else {
     atom->rn = rn;
   }
+  
+  /* allocate & init per-charge-state level arrays */
+  cfac->levels_per_ion = malloc(sizeof(ARRAY)*(cfac->anum + 1));
+
+  for (i = 0; i <= cfac->anum; i++) {
+    ArrayInit(&cfac->levels_per_ion[i], sizeof(LEVEL_ION), 512, NULL, NULL);
+  }
+
 
   return 0;
 }

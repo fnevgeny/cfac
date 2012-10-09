@@ -16,7 +16,7 @@ OBJS = $(COBJS) $(FOBJS)
 	$(FC) -c ${FFLAGS} $<
 
 .c.o: 
-	$(CC) -c -I$(TOP) -I$(TOP)/include ${CPPFLAGS} ${CFLAGS} $<
+	$(CC) -c -I$(TOP) -I$(TOP)/include -I. ${CPPFLAGS} ${CFLAGS} $<
 
 
 all : library
@@ -32,7 +32,7 @@ Make.dep : $(CSRCS) Make.defs $(GENINCS)
 	@echo -n "Generating dependencies... "
 	@echo "# Generated automatically by \`make depend'" > Make.dep
 	@(test -n "$(CSRCS)" && \
-	 $(CC) -I$(TOP) -I$(TOP)/include ${CPPFLAGS} $(CFLAGS) -MM $(CSRCS)) >> Make.dep || true
+	 $(CC) -I$(TOP) -I$(TOP)/include -I. ${CPPFLAGS} $(CFLAGS) -MM $(CSRCS)) >> Make.dep || true
 	@echo "done"
 
 $(LIB) : $(OBJS) Make.defs

@@ -7,7 +7,7 @@
 #include <gsl/gsl_eigen.h>
 
 #include "global.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "radial.h"
 #include "angular.h"
 #include "dbase.h"
@@ -31,7 +31,6 @@ static SHAMILTON hams[MAX_HAMS];
 static HAMILTON _ham = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			NULL, NULL, NULL, NULL, NULL, NULL};
 
-static ARRAY levels_per_ion[N_ELEMENTS+1];
 static ARRAY *levels;
 static int n_levels = 0;
 static ARRAY *eblevels;
@@ -65,6 +64,26 @@ int GetStructTiming(STRUCT_TIMING *t) {
   return 0;
 }
 #endif
+
+
+static ARRAY *cfac_get_ion_levels(cfac_t *cfac, unsigned int nele)
+{
+    if (nele > cfac->anum) {
+        return NULL;
+    } else {
+        return &cfac->levels_per_ion[nele];
+    }
+}
+
+static int cfac_get_ion_nlevels(cfac_t *cfac, unsigned int nele)
+{
+    ARRAY *larray = cfac_get_ion_levels(cfac, nele);
+    if (larray) {
+        return larray->dim;
+    } else {
+        return 0;
+    }
+}
 
 void GetFields(double *b, double *e, double *a) {
   *b = BINP;
@@ -2394,9 +2413,7 @@ int SaveLevels(char *fn, int m, int n) {
     if (s->kgroup > 0) {
       cfg = GetConfig(s);
       nk = cfg->n_electrons-1;
-      if (nk < 0 || 
-	  levels_per_ion[nk].dim == 0 ||
-	  cfg->shells[0].nq > 1) {
+      if (cfac_get_ion_nlevels(cfac, nk) == 0 || cfg->shells[0].nq > 1) {
 	lev->ibase = -1;
       } else {
 	csf = cfg->csfs + s->kstate;
@@ -2417,8 +2434,8 @@ int SaveLevels(char *fn, int m, int n) {
 	  a = 1.0/a;
 	}
 	for (ib = 0; ib < NPRINCIPLE; ib++) {
-	  for (t = 0; t < levels_per_ion[nk].dim; t++) {
-	    gion = (LEVEL_ION *) ArrayGet(levels_per_ion+nk, t);
+	  for (t = 0; t < cfac_get_ion_nlevels(cfac, nk); t++) {
+	    gion = (LEVEL_ION *) ArrayGet(cfac->levels_per_ion+nk, t);
 	    for (q = gion->imin; q <= gion->imax; q++) {
 	      lev1 = GetLevel(q);
 	      sym1 = GetSymmetry(lev1->pj);
@@ -2501,9 +2518,9 @@ int SaveLevels(char *fn, int m, int n) {
 	DeinitFile(f, &fhdr);
 	q = 0;
 	nk = nele0;
-	t = levels_per_ion[nk].dim;
+	t = cfac_get_ion_nlevels(cfac, nk);
 	if (t > 0) {
-	  gion = (LEVEL_ION *) ArrayGet(levels_per_ion+nk, t-1);
+	  gion = (LEVEL_ION *) ArrayGet(cfac->levels_per_ion+nk, t-1);
 	  if (gion->imax+1 == n0) {
 	    gion->imax = n_levels-1;
 	    q = 1;
@@ -2512,7 +2529,7 @@ int SaveLevels(char *fn, int m, int n) {
 	if (q == 0) {
 	  gion1.imin = n0;
 	  gion1.imax = i-1;
-	  ArrayAppend(levels_per_ion+nk, &gion1);
+	  ArrayAppend(cfac->levels_per_ion+nk, &gion1);
 	}
       }
       n0 = i;
@@ -2529,9 +2546,9 @@ int SaveLevels(char *fn, int m, int n) {
   q = 0;
   nk = nele0;
   if (nk >= 0) {
-    t = levels_per_ion[nk].dim;
+    t = cfac_get_ion_nlevels(cfac, nk);
     if (t > 0) {
-      gion = (LEVEL_ION *) ArrayGet(levels_per_ion+nk, t-1);
+      gion = (LEVEL_ION *) ArrayGet(cfac->levels_per_ion+nk, t-1);
       if (gion->imax+1 == n0) {
 	gion->imax = n_levels-1;
 	q = 1;
@@ -2540,7 +2557,7 @@ int SaveLevels(char *fn, int m, int n) {
     if (q == 0 && n_levels > n0) {
       gion1.imin = n0;
       gion1.imax = n_levels-1;
-      ArrayAppend(levels_per_ion+nk, &gion1);
+      ArrayAppend(cfac->levels_per_ion+nk, &gion1);
     }
   }
 #ifdef PERFORM_STATISTICS
@@ -4306,37 +4323,6 @@ void ClearAngularFrozen(void) {
   ang_frozen.ncs = 0;
 }
 
-int ClearLevelTable(void) {
-  CONFIG_GROUP *g;
-  CONFIG *cfg;
-  int ng, i, k;
-
-  n_levels = 0;
-  ArrayFree(levels);
-  n_eblevels = 0;
-  ArrayFree(eblevels);
-
-  ng = GetNumGroups();
-  for (k = 0; k < ng; k++) {
-    g = GetGroup(k);
-    for (i = 0; i < g->n_cfgs; i++) {
-      cfg = (CONFIG *) ArrayGet(&(g->cfg_list), i);
-      cfg->energy = 0.0;
-      cfg->delta = 0.0;
-    }
-  }
-  
-  for (k = 0; k <= N_ELEMENTS; k++) {
-    ArrayFree(levels_per_ion+k);
-  }
-
-  ncorrections = 0;
-  ArrayFree(ecorrections);
-
-  ClearAngularFrozen();
-  return 0;
-}
-
 void ClearRMatrixLevels(int n) {
   int i, m;
   SYMMETRY *sym;
@@ -4415,12 +4401,6 @@ int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
 }
 
 int InitStructure(void) {
-  int i;
-
-  for (i = 0; i <= N_ELEMENTS; i++) {
-    ArrayInit(levels_per_ion+i, sizeof(LEVEL_ION), 512, NULL, NULL);
-  }
-
   InitAngZArray();
   nhams = 0;
 
@@ -4452,19 +4432,5 @@ int InitStructure(void) {
   ncorrections = 0;
 
   AllocHamMem(&_ham, 1000, 1000);
-  return 0;
-}
-
-int ReinitStructure(int m) {
-
-  if (m < 0) {
-    return 0;
-  } else {
-    FreeHamsArray();
-    FreeAngZArray();
-    ClearLevelTable();
-    InitAngZArray();
-    _ham.heff = NULL;
-  }
   return 0;
 }

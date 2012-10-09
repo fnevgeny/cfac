@@ -18,6 +18,14 @@ cfac_t *cfac_new(void)
 void cfac_free(cfac_t *cfac)
 {
     if (cfac) {
+        unsigned int k;
+
+        for (k = 0; k <= cfac->anum; k++) {
+            ArrayFree(&cfac->levels_per_ion[k]);
+        }
+        free(cfac->levels_per_ion);
+
         free(cfac);
     }
 }
+

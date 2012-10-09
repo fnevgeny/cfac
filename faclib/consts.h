@@ -119,9 +119,6 @@
 #define FINE_STRUCTURE_CONST2 5.32513620E-5
 #define AMU  1836.153
 
-/* nucleus */
-#define N_ELEMENTS 109
-
 /* radial QK modes */
 #define QK_DEFAULT    -1
 #define QK_EXACT       0

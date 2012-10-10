@@ -4395,6 +4395,5 @@ int InitStructure(void) {
   ArrayInit(ecorrections, sizeof(ECORRECTION), 512, NULL, NULL);
   ncorrections = 0;
 
-  AllocHamMem(&_ham, 1000, 1000);
   return 0;
 }

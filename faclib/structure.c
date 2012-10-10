@@ -416,12 +416,12 @@ int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
   }
 
   if (m > 0) {
-    hs = hams + nhams;
-    nhams++;
-    if (nhams > MAX_HAMS) {
+    if (nhams >= MAX_HAMS) {
       printf("Number of hamiltons exceeded the maximum %d\n", MAX_HAMS);
       exit(1);
     }
+    hs = &hams[nhams];
+    nhams++;
     hs->pj = h->pj;
     hs->nlevs = h->dim;
     hs->nbasis = h->n_basis;
@@ -617,7 +617,7 @@ int ConstructHamilton(HAMILTON *h,
       printf("Number of hamiltons exceeded the maximum %d\n", MAX_HAMS);
       exit(1);
     }
-    hs = hams + nhams;
+    hs = &hams[nhams];
     nhams++;
     hs->pj = h->pj;
     hs->nlevs = h->dim;
@@ -1716,10 +1716,6 @@ int TestHamilton(void) {
   return 0;
 }
 
-/* 
-** be careful that the h->hamilton or h->heff is overwritten
-** after the DiagonalizeHamilton call
-*/
 int DiagonalizeHamilton(HAMILTON *h) {
   gsl_matrix *am, *evec;
   gsl_vector_view vv;
@@ -1740,10 +1736,6 @@ int DiagonalizeHamilton(HAMILTON *h) {
   
   if (m > n) {
     printf("m > n in DiagonalizeHamilton(), %d %d\n", m, n);
-    abort();
-  }
-  if (h->heff != NULL) {
-    printf("h->heff != NULL in DiagonalizeHamilton()\n");
     abort();
   }
   
@@ -4317,15 +4309,23 @@ void ClearAngularFrozen(void) {
   ang_frozen.ncs = 0;
 }
 
+/* (Re)allocate Hamiltonian */
 int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
   int jp, t;
 
   jp = nbasis - hdim;
-  h->dim = hdim;
+  if (jp < 0) return -1;
+
+  h->dim     = hdim;
   h->n_basis = nbasis;
+  
+  /* size of the triangular matrix, including diagonal elements */
   t = hdim*(hdim+1)/2;
+  
+  /* matrix partitioned as: H1[t] + B[hdim*jp] + H2[jp] */
   h->hsize = t + hdim*jp + jp;
   
+  /* start reallocations as needed */
   if (h->n_basis > h->n_basis0) {
     h->basis = realloc(h->basis, sizeof(int)*(h->n_basis));
     h->n_basis0 = h->n_basis;

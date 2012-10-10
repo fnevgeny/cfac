@@ -762,64 +762,6 @@ static int PExit(int argc, char *argv[], int argt[], ARRAY *variables) {
   exit(0);
 }
 
-static int PFreeExcitationQk(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
-  if (argc != 0) return -1;
-  FreeExcitationQk();
-  return 0;
-}
-
-static int PFreeIonizationQk(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
-  if (argc != 0) return -1;
-  FreeIonizationQk();
-  return 0;
-}
-
-static int PFreeMemENTable(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
-  
-  if (argc != 0) return -1;
-  FreeMemENTable();
-  return 0;
-}
-
-static int PFreeMultipole(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
-  if (argc != 0) return -1;
-  FreeMultipoleArray();
-  FreeMomentsArray();
-  return 0;
-}
-
-static int PFreeSlater(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
-  if (argc != 0) return -1;
-  FreeSlaterArray();
-  return 0;
-}
-
-static int PFreeResidual(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-  if (argc != 0) return -1;
-  FreeResidualArray();
-  return 0;
-}
-
-static int PFreeRecPk(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
-  if (argc != 0) return -1;
-  FreeRecPk();
-  return 0;
-}
-
-static int PFreeRecQk(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
-  if (argc != 0) return -1;
-  FreeRecQk();
-  return 0;
-}
-
 static int PGetPotential(int argc, char *argv[], int argt[], 
 			 ARRAY *variables) {
   if (argc != 1 || argt[0] != STRING) return -1;
@@ -3172,14 +3114,6 @@ static METHOD methods[] = {
   {"ConfigEnergy", PConfigEnergy},
   {"CorrectEnergy", PCorrectEnergy},
   {"Exit", PExit},
-  {"FreeExcitationQk", PFreeExcitationQk},
-  {"FreeIonizationQk", PFreeIonizationQk},
-  {"FreeMemENTable", PFreeMemENTable},
-  {"FreeMultipole", PFreeMultipole},
-  {"FreeSlater", PFreeSlater},
-  {"FreeResidual", PFreeResidual},
-  {"FreeRecPk", PFreeRecPk},
-  {"FreeRecQk", PFreeRecQk},
   {"GetPotential", PGetPotential},
   {"Info", PInfo},
   {"MemENTable", PMemENTable},

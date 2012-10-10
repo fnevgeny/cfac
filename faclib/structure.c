@@ -4331,51 +4331,35 @@ int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
   h->n_basis = nbasis;
   t = hdim*(hdim+1)/2;
   h->hsize = t + hdim*jp + jp;
-  if (h->basis == NULL) {
-    h->n_basis0 = h->n_basis;
-    h->basis = (int *) malloc(sizeof(int)*(h->n_basis));
-  } else if (h->n_basis > h->n_basis0) {
-    h->n_basis0 = h->n_basis;
-    free(h->basis);
-    h->basis = (int *) malloc(sizeof(int)*(h->n_basis));
-  }
-  if (!(h->basis)) return -1;
   
-  if (h->hamilton == NULL) {
-    h->hsize0 = h->hsize;
-    h->hamilton = (double *) malloc(sizeof(double)*h->hsize);
-  } else if (h->hsize > h->hsize0) {
-    h->hsize0 = h->hsize;
-    free(h->hamilton);
-    h->hamilton = (double *) malloc(sizeof(double)*h->hsize);
+  if (h->n_basis > h->n_basis0) {
+    h->basis = realloc(h->basis, sizeof(int)*(h->n_basis));
+    h->n_basis0 = h->n_basis;
   }
-  if (!(h->hamilton)) return -1;
+  if (!h->basis) return -1;
+  
+  if (h->hsize > h->hsize0) {
+    h->hsize0 = h->hsize;
+    h->hamilton = realloc(h->hamilton, sizeof(double)*h->hsize);
+  }
+  if (!h->hamilton) return -1;
     
-  t = t*2;
-  h->lwork = 1 + 10*hdim + t;
+  h->lwork = 1 + 10*hdim + 2*t;
   h->liwork = 3 + 10*hdim;
-  if (h->work == NULL) {
-    h->dim0 = h->dim;
-    h->work = (double *) malloc(sizeof(double)*(h->lwork+2*t));
-    h->iwork = (int *) malloc(sizeof(int)*h->liwork);
-  } else if (h->dim > h->dim0) {
-    h->dim0 = h->dim;
-    free(h->work);
-    free(h->iwork);
-    h->work = (double *) malloc(sizeof(double)*(h->lwork+2*t));
-    h->iwork = (int *) malloc(sizeof(int)*h->liwork);
+  
+  if (h->dim > h->dim0) {
+    h->work  = realloc(h->work, sizeof(double)*(h->lwork+4*t));
+    h->iwork = realloc(h->iwork, sizeof(int)*h->liwork);
+    h->dim0  = h->dim;
   }
+  if (!h->work || !h->iwork) return -1;
 
   h->msize = h->dim * h->n_basis + h->dim;  
-  if (h->mixing == NULL) {
+  if (h->msize > h->msize0) {
     h->msize0 = h->msize;
-    h->mixing = (double *) malloc(sizeof(double)*h->msize);
-  } else if (h->msize > h->msize0) {
-    h->msize0 = h->msize;
-    free(h->mixing);
-    h->mixing = (double *) malloc(sizeof(double)*h->msize);
+    h->mixing = realloc(h->mixing, sizeof(double)*h->msize);
   }
-  if (!(h->mixing)) return -1;
+  if (!h->mixing) return -1;
 
   return 0;
 }

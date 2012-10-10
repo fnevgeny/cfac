@@ -5,19 +5,26 @@
 #include "config.h"
 
 typedef struct _HAMILTON_ {
-  int pj;
-  int dim;
-  int n_basis;
-  int hsize;
-  int msize;
-  int dim0;
-  int n_basis0;
-  int hsize0;
-  int msize0;
-  int *basis;
-  double *hamilton;
-  double *mixing;
-  double *heff;
+  int     pj;        /* symmetry index                                   */
+
+  int     dim;       /* dimension of the subset of basis of interest,
+                        dim <= n_basis                                   */
+  int     n_basis;   /* dimension of the basis                           */
+  int     hsize;     /* size of Hamiltonian (.hamilton)                  */
+  int     msize;     /* size of the mixing coefficients (.mixing),
+                        n_basis*(dim+1)                                  */
+
+  int     dim0;      /* factually allocated dim, dim0 >= dim             */
+  int     n_basis0;  /* same for n_basis                                 */
+  int     hsize0;    /* same for hsize                                   */
+  int     msize0;    /* same for msize                                   */
+
+  int    *basis;     /* basis                                            */
+  double *hamilton;  /* matrix elements of H,
+                        H1[dim*dim] &
+                        H2[n_basis-dim] &
+                        B[dim*(n_basis-dim)], Eq. (29) in structure.pdf  */
+  double *mixing;    /* mixing coefficients                              */
 } HAMILTON;
 
 typedef struct _SHAMILTON_ {
@@ -218,6 +225,3 @@ void AddSlaterCoeff(double *c, double a, int n_shells,
 		    int nb, SHELL *sb);
 
 #endif
-
-
-

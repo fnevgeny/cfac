@@ -42,16 +42,15 @@ int SetAtom(cfac_t *cfac, char *s, double z, double mass, double rn) {
     s = _ename[(int)(z-0.8)];
   }
   strncpy(atom->symbol, s, 2); 
-  if (z <= 0 || mass <= 0) {
-    for (i = 0; i < n_elements; i++) {
-      if (strncasecmp(_ename[i], s, 2) == 0) {
-	if (z <= 0) atom->atomic_number = i+1;
-	if (mass <= 0) atom->mass = _emass[i];
-	break;
-      }
+  
+  for (i = 0; i < n_elements; i++) {
+    if (strncasecmp(_ename[i], s, 2) == 0) {
+      if (z <= 0) atom->atomic_number = i+1;
+      if (mass <= 0) atom->mass = _emass[i];
+      break;
     }
-    if (i == n_elements) return -1;
   }
+  if (i == n_elements) return -1;
   
   cfac->anum = i;
 

@@ -48,10 +48,6 @@ static double angz_cut = ANGZCUT;
 static double mix_cut = MIXCUT;
 static double mix_cut2 = MIXCUT2;
 
-static int sym_pp = -1;
-static int sym_njj = 0;
-static int *sym_jj = NULL;
-
 static double E1[3], B0, B1[3], B2[5], EINP, BINP, AINP;
 
 #ifdef PERFORM_STATISTICS 
@@ -169,28 +165,6 @@ void SetFields(double b, double e, double a, int m) {
   */
 }
 
-void SetSymmetry(int p, int nj, int *j) {
-  if (p >= 0) {
-    sym_pp = IsOdd(p);
-  } else {
-    sym_pp = -1;
-  }
-  if (sym_njj > 0) free(sym_jj);
-  if (nj > 0 && j[0] < 0) nj = 0;
-  sym_njj = nj;
-  if (nj > 0) {
-    sym_jj = malloc(sizeof(int)*nj);
-    memcpy(sym_jj, j, sizeof(int)*nj);
-    qsort(sym_jj, nj, sizeof(int), CompareInt);
-  }
-}
-
-int *GetSymmetrySet(int *p, int *nj) {
-  if (p) *p = sym_pp;
-  if (nj) *nj = sym_njj;
-  return sym_jj;
-}
-
 static void InitLevelData(void *p, int n) {
   LEVEL *lev;
   int k;
@@ -270,7 +244,7 @@ SHAMILTON *GetSHamilton(int *n) {
 int ZerothEnergyConfigSym(int n, int *s0, double **e1) {
   CONFIG_GROUP *g0;
   CONFIG *c1;
-  int i, q, ncc, p, j;
+  int i, q, ncc;
 
   ncc = 0;
   for (i = 0; i < n; i++) {
@@ -284,20 +258,6 @@ int ZerothEnergyConfigSym(int n, int *s0, double **e1) {
     g0 = GetGroup(cfac, s0[i]);
     for (q = 0; q < g0->n_cfgs; q++) {
       c1 = GetConfigFromGroup(cfac, i, q);
-      if (sym_pp >= 0) {
-	p = ConfigParity(c1);
-	if (p != sym_pp) continue;
-      }
-      if (sym_njj > 0) {
-	p = -1;
-	for (j = 0; j < c1->n_csfs; j++) {
-	  p = IBisect(c1->csfs[j*c1->n_shells].totalJ, sym_njj, sym_jj);
-	  if (p >= 0) {
-	    break;
-	  }
-	}
-	if (p < 0) continue;
-      } 
       (*e1)[ncc++] = ZerothEnergyConfig(c1);
     }
   }
@@ -356,8 +316,6 @@ int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
 #endif
 
   DecodePJ(isym, &i, &j);
-  if (sym_pp >= 0 && i != sym_pp) return -2;
-  if (sym_njj > 0 && IBisect(j, sym_njj, sym_jj) < 0) return -3;
 
   if (k <= 0) return -1;
   sym = GetSymmetry(cfac, isym);
@@ -531,8 +489,6 @@ int ConstructHamilton(HAMILTON *h,
   ** no basis exists later.
   **/
   DecodePJ(isym, &i, &j);
-  if (sym_pp >= 0 && i != sym_pp) return -2;
-  if (sym_njj > 0 && IBisect(j, sym_njj, sym_jj) < 0) return -3;
 
   sym = GetSymmetry(cfac, isym);
   if (sym == NULL) return -1;
@@ -701,8 +657,6 @@ int ConstructHamiltonFrozen(HAMILTON *h,
 #endif
 
   DecodePJ(isym, &i, &j);
-  if (sym_pp >= 0 && i != sym_pp) return -2;
-  if (sym_njj > 0 && IBisect(j, sym_njj, sym_jj) < 0) return -3;
 
   j = 0;
   ncs = 0;

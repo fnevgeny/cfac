@@ -202,8 +202,6 @@ int InitStructure(void);
 int ReinitStructure(int m);
 int TestHamilton(void);
 int ShellDegeneracy(int g, int nq);
-void SetSymmetry(int p, int n, int *j);
-int *GetSymmetrySet(int *p, int *nj);
 int ZerothEnergyConfigSym(int n, int *s0, double **e);
 void CutMixing(int nlev, int *ilev, int n, int *kg, double c);
 void FlagClosed(SHAMILTON *h);

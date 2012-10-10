@@ -300,7 +300,8 @@ int IsClosedShell(int ih, int k) {
   return (hams[ih].closed[i] & (1 << j));
 }
 
-int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
+static int ConstructHamiltonDiagonal(HAMILTON *h,
+  int isym, int k, int *kg, int m) {
   int i, j, t;
   SHAMILTON *hs;
   ARRAY *st;

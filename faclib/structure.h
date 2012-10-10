@@ -129,7 +129,6 @@ int SortUnique(int n, int *a);
 int CompareInt(const void *a1, const void *a2);
 int ConstructHamilton(HAMILTON *h,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
-int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m);
 int ValidBasis(STATE *s, int k, int *kg, int n);
 int ConstructHamiltonFrozen(HAMILTON *h,
     int isym, int k, int *kg, int n, int nc, int *kc);

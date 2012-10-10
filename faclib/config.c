@@ -2148,10 +2148,11 @@ int IBisect(int b, int n, int *a) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int InGroups(const cfac_t *cfac, int kg, int ng, int *kgroup) {
+int InGroups(int kg, int ng, const int *kgroup) {
   int i;
   if (ng < 0) {
-    if (kg >= 0 && kg < cfac->n_groups) return 1;
+    printf("negative ng passed to InGroups %d\n", ng);
+    abort();
   }
 
   for (i = 0; i < ng; i++) {

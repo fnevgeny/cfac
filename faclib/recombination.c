@@ -326,7 +326,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
       m = lev->pb;
       sym = GetSymmetry(cfac, lev->pj);
       s = (STATE *) ArrayGet(&(sym->states), m);
-      if (!InGroups(cfac, s->kgroup, k, kg)) {
+      if (!InGroups(s->kgroup, k, kg)) {
 	continue;
       }
       j1 = lev->pj;
@@ -364,7 +364,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	  m = lev->pb;
 	  sym = GetSymmetry(cfac, lev->pj);
 	  s = (STATE *) ArrayGet(&(sym->states), m);
-	  if (!InGroups(cfac, s->kgroup, k, kg)) continue;
+	  if (!InGroups(s->kgroup, k, kg)) continue;
 	  m = ConstructHamiltonFrozen(h, i, j, NULL, n, 0, NULL);
 	  if (m < 0) continue;
 	  if (DiagonalizeHamilton(h) < 0) return -2;

@@ -366,7 +366,7 @@ int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
   j = 0;
   for (t = 0; t < sym->n_states; t++) {
     s = (STATE *) ArrayGet(st, t);
-    if (InGroups(cfac, s->kgroup, k, kg)) j++;
+    if (InGroups(s->kgroup, k, kg)) j++;
   }
   if (j == 0) return -1;
 
@@ -399,7 +399,7 @@ int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
   j = 0;  
   for (t = 0; t < sym->n_states; t++) {
     s = (STATE *) ArrayGet(st, t);
-    if (InGroups(cfac, s->kgroup, k, kg)) {
+    if (InGroups(s->kgroup, k, kg)) {
       h->basis[j] = t;
       j++;
     }
@@ -534,14 +534,15 @@ int ConstructHamilton(HAMILTON *h,
   if (sym_pp >= 0 && i != sym_pp) return -2;
   if (sym_njj > 0 && IBisect(j, sym_njj, sym_jj) < 0) return -3;
 
-  m1 = md/100;
-  t = md%100;
-  m2 = t/10;
-  m3 = t%10;
   sym = GetSymmetry(cfac, isym);
   if (sym == NULL) return -1;
   h->pj = isym;
 
+  m1 = md/100;
+  t = md%100;
+  m2 = t/10;
+  m3 = t%10;
+  
   if (m1) {
     if (k <= 0) return -1;
     if (ci_level == -1) {
@@ -552,8 +553,8 @@ int ConstructHamilton(HAMILTON *h,
     j0 = 0;
     for (t = 0; t < sym->n_states; t++) {
       s = (STATE *) ArrayGet(st, t);
-      if (InGroups(cfac, s->kgroup, k0, kg)) j0++;
-      if (InGroups(cfac, s->kgroup, k, kg)) j++;
+      if (InGroups(s->kgroup, k0, kg)) j0++;
+      if (InGroups(s->kgroup, k, kg)) j++;
     }
     if (j0 == 0) return -1;
 
@@ -561,7 +562,7 @@ int ConstructHamilton(HAMILTON *h,
     if (kp > 0) {
       for (t = 0; t < sym->n_states; t++) {
 	s = (STATE *) ArrayGet(st, t);
-	if (InGroups(cfac, s->kgroup, kp, kgp)) jp++;
+	if (InGroups(s->kgroup, kp, kgp)) jp++;
       }
     }    
 
@@ -570,7 +571,7 @@ int ConstructHamilton(HAMILTON *h,
     j = 0;  
     for (t = 0; t < sym->n_states; t++) {
       s = (STATE *) ArrayGet(st, t);
-      if (InGroups(cfac, s->kgroup, k, kg)) {
+      if (InGroups(s->kgroup, k, kg)) {
 	h->basis[j] = t;
 	j++;
       }
@@ -578,7 +579,7 @@ int ConstructHamilton(HAMILTON *h,
     if (jp > 0) {  
       for (t = 0; t < sym->n_states; t++) {
 	s = (STATE *) ArrayGet(st, t);
-	if (kp > 0 && InGroups(cfac, s->kgroup, kp, kgp)) {
+	if (kp > 0 && InGroups(s->kgroup, kp, kgp)) {
 	  h->basis[j] = t;
 	  j++;
 	}
@@ -679,7 +680,7 @@ int ValidBasis(STATE *s, int k, int *kg, int n) {
     sym = GetSymmetry(cfac, lev->pj);
     sp = (STATE *) ArrayGet(&(sym->states), m);
     t = sp->kgroup;
-    return InGroups(cfac, t, k, kg);
+    return InGroups(t, k, kg);
   } else {
     if (t == k) return 1;
     else return 0;
@@ -1850,14 +1851,14 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
     k = GetPrincipleBasis(mix, d, NULL);
     s = (STATE *) ArrayGet(&(sym->states), h->basis[k]);
     if (ng > 0) {      
-      if (!InGroups(cfac, s->kgroup, ng, kg)) {
+      if (!InGroups(s->kgroup, ng, kg)) {
 	m = 0;
 	if (mix_cut2 < 1.0) {
 	  a = fabs(mix_cut2*mix[k]);
 	  for (t = 0; t < h->n_basis; t++) {
 	    if (fabs(mix[t]) >= a && t != k) {
 	      s1 = (STATE *) ArrayGet(&(sym->states), h->basis[t]);
-	      if (InGroups(cfac, s1->kgroup, ng, kg)) {
+	      if (InGroups(s1->kgroup, ng, kg)) {
 		m = 1;
 		break;
 	      }
@@ -1927,7 +1928,7 @@ void CutMixing(int nlev, int *ilev, int n, int *kg, double c) {
     for (t = 0; t < lev->n_basis; t++) {
       if (fabs(lev->mixing[t]) < c) continue;
       s = (STATE *) ArrayGet(&(sym->states), lev->basis[t]);
-      if (n > 0 && !InGroups(cfac, s->kgroup, n, kg)) continue;
+      if (n > 0 && !InGroups(s->kgroup, n, kg)) continue;
       lev->ibasis[m] = lev->ibasis[t];
       lev->basis[m] = lev->basis[t];
       lev->mixing[m] = lev->mixing[t];

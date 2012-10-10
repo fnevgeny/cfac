@@ -152,7 +152,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	sym = GetSymmetry(cfac, lev->pj);
 	s = (STATE *) ArrayGet(&(sym->states), im);
 	ig = s->kgroup;
-	if (InGroups(cfac, ig, ng, kg)) {
+	if (InGroups(ig, ng, kg)) {
 	  (*t)[k] = j;
 	  k++;
 	}
@@ -216,7 +216,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	    (*t)[k] = j;
 	    k++;
 	  } else {
-	    if (InGroups(cfac, ig, nrg, krg)) {
+	    if (InGroups(ig, nrg, krg)) {
 	      (*t)[k] = j;
 	      k++;
 	    }

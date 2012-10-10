@@ -14,13 +14,9 @@ typedef struct _HAMILTON_ {
   int n_basis0;
   int hsize0;
   int msize0;
-  int lwork;
-  int liwork;
   int *basis;
   double *hamilton;
   double *mixing;
-  double *work;
-  int *iwork;
   double *heff;
 } HAMILTON;
 

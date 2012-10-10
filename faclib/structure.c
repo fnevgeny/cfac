@@ -1748,6 +1748,7 @@ int DiagonalizeHamilton(HAMILTON *h) {
   }
   
   if (ci_level == -1) {
+    /* no configuration interaction at all */
     mixing = h->mixing+n;
     for (i = 0; i < n; i++) {
       h->mixing[i] = h->hamilton[i];
@@ -4336,16 +4337,6 @@ int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
     h->hamilton = realloc(h->hamilton, sizeof(double)*h->hsize);
   }
   if (!h->hamilton) return -1;
-    
-  h->lwork = 1 + 10*hdim + 2*t;
-  h->liwork = 3 + 10*hdim;
-  
-  if (h->dim > h->dim0) {
-    h->work  = realloc(h->work, sizeof(double)*(h->lwork+4*t));
-    h->iwork = realloc(h->iwork, sizeof(int)*h->liwork);
-    h->dim0  = h->dim;
-  }
-  if (!h->work || !h->iwork) return -1;
 
   h->msize = h->dim * h->n_basis + h->dim;  
   if (h->msize > h->msize0) {

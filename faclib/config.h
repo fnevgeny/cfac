@@ -49,6 +49,7 @@
 ** NOTE:        
 */
 
+#include "cfacP.h"
 #include "consts.h"
 #include "array.h"
 
@@ -261,36 +262,34 @@ int          ShellToInt(int n, int k);
 int          ShellIndex(int n, int kappa, int ns, SHELL *s);
 void         IntToShell(int i, int *n, int *k);
 void         PackShellState(SHELL_STATE *s, int J, int j, int nu, int Nr);
-int          GetAverageConfig(int ng, int *kg, double *weight,
+int          GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
 			      int n_screen, int *screened_n, 
 			      double screened_charge,
 			      int screened_kl, AVERAGE_CONFIG *acfg);
-int          GroupIndex(char *name);
-int          GroupExists(char *name);
-int          AddConfigToList(int k, CONFIG *cfg);
-int          AddGroup(char *name);
-int          RemoveGroup(int k);
-CONFIG_GROUP *GetGroup(int k);
-CONFIG_GROUP *GetNewGroup(void);
-int          GetNumGroups(void);
-int          GetNumConfigs(void);
+int          GroupIndex(cfac_t *cfac, const char *name);
+int          GroupExists(const cfac_t *cfac, const char *name);
+int          AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg);
+int          AddGroup(cfac_t *cfac, const char *name);
+int          RemoveGroup(cfac_t *cfac, int k);
+CONFIG_GROUP *GetGroup(const cfac_t *cfac, int k);
+CONFIG_GROUP *GetNewGroup(cfac_t *cfac);
+int          GetNumGroups(const cfac_t *cfac);
+int          GetNumConfigs(const cfac_t *cfac);
 int          ConfigParity(CONFIG *c);
-CONFIG       *GetConfig(STATE *s);
-CONFIG       *GetConfigFromGroup(int kg, int kc);
-int          AddStateToSymmetry(int kg, int kc, int kstate, 
+CONFIG       *GetConfig(cfac_t *cfac, STATE *s);
+CONFIG       *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc);
+int          AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate, 
 				int parity, int j);
-int          AddConfigToSymmetry(int kg, int kc, CONFIG *cfg);
-SYMMETRY     *GetSymmetry(int k);
+int          AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg);
+SYMMETRY     *GetSymmetry(cfac_t *cfac, int k);
 void         DecodePJ(int i, int *p, int *j);
 int          SpecSymbol(char *s, int kl);
 int          ConstructConfigName(char *s, int n, CONFIG *c);
-void         ListConfig(char *fn, int n, int *kg);
+void         ListConfig(const cfac_t *cfac, char *fn, int n, int *kg);
 int          IBisect(int k, int n, int *a);
 int          Bisect(void *p0, int n, int m, void *p,
 		    int (*comp)(const void *, const void *));
-int          InGroups(int kg, int ng, int *kgroup);
-int          InitConfig(void);
-int          ReinitConfig(int m);
+int          InGroups(const cfac_t *cfac, int kg, int ng, int *kgroup);
 int          SetNCG(void);
 
 #endif

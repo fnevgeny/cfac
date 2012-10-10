@@ -4,7 +4,7 @@
 #include <gsl/gsl_sf_legendre.h>
 
 #include "global.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "angular.h"
 #include "radial.h"
 #include "structure.h"
@@ -2240,12 +2240,12 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	if (tr.e > emax) emax = tr.e;
 
         /* ionization potential */
-        sym = GetSymmetry(tr.lup->pj);
+        sym = GetSymmetry(cfac, tr.lup->pj);
         st = (STATE *) ArrayGet(&(sym->states), tr.lup->pb);
         if (st->kgroup < 0) {
 	  k = st->kcfg;
         } else {
-	  cfg = GetConfig(st);
+	  cfg = GetConfig(cfac, st);
 	  k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
         }
         e = -(GetOrbital(k)->energy);
@@ -2534,12 +2534,12 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   ei = 1E31;
   for (j = 0; j < nup0; j++) {
     lev2 = GetLevel(up0[j]);    
-    sym = GetSymmetry(lev2->pj);
+    sym = GetSymmetry(cfac, lev2->pj);
     st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
     if (st->kgroup < 0) {
       k = st->kcfg;
     } else {
-      cfg = GetConfig(st);
+      cfg = GetConfig(cfac, st);
       k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
     }
     e = -(GetOrbital(k)->energy);
@@ -2782,12 +2782,12 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   ei = 1E31;
   for (j = 0; j < nup0; j++) {
     lev2 = GetLevel(up0[j]);    
-    sym = GetSymmetry(lev2->pj);
+    sym = GetSymmetry(cfac, lev2->pj);
     st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
     if (st->kgroup < 0) {
       k = st->kcfg;
     } else {
-      cfg = GetConfig(st);
+      cfg = GetConfig(cfac, st);
       k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
     }
     e = -(GetOrbital(k)->energy);

@@ -4,7 +4,7 @@
 #include <gsl/gsl_sf_bessel.h>
 
 #include "global.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "coulomb.h"
 #include "radial.h"
 #include "recouple.h"
@@ -737,7 +737,7 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
       acfg->nq = NULL;
       acfg->kappa = NULL;
     }
-    GetAverageConfig(ng, kg, weight, 
+    GetAverageConfig(cfac, ng, kg, weight, 
 		     optimize_control.n_screen,
 		     optimize_control.screened_n,
 		     optimize_control.screened_charge,
@@ -1305,11 +1305,11 @@ int ConfigEnergy(int m, int mr, int ng, int *kg) {
 
   if (m == 0) {
     if (ng == 0) {
-      ng = GetNumGroups();
+      ng = GetNumGroups(cfac);
       for (k = 0; k < ng; k++) {
 	OptimizeRadial(1, &k, NULL);
 	if (mr > 0) RefineRadial(mr, 0);
-	g = GetGroup(k);
+	g = GetGroup(cfac, k);
 	for (i = 0; i < g->n_cfgs; i++) {
 	  cfg = (CONFIG *) ArrayGet(&(g->cfg_list), i);
 	  cfg->energy = AverageEnergyConfig(cfg);
@@ -1321,7 +1321,7 @@ int ConfigEnergy(int m, int mr, int ng, int *kg) {
       OptimizeRadial(ng, kg, NULL);
       if (mr) RefineRadial(mr, 0);
       for (k = 0; k < ng; k++) {
-	g = GetGroup(kg[k]);
+	g = GetGroup(cfac, kg[k]);
 	for (i = 0; i < g->n_cfgs; i++) {
 	  cfg = (CONFIG *) ArrayGet(&(g->cfg_list), i);
 	  if (cfg->energy == 0) {
@@ -1333,9 +1333,9 @@ int ConfigEnergy(int m, int mr, int ng, int *kg) {
       ClearOrbitalTable(0);
     }
   } else {
-    ng = GetNumGroups();
+    ng = GetNumGroups(cfac);
     for (k = 0; k < ng; k++) {
-      g = GetGroup(k);
+      g = GetGroup(cfac, k);
       for (i = 0; i < g->n_cfgs; i++) {
 	cfg = (CONFIG *) ArrayGet(&(g->cfg_list), i);
 	if (cfg->energy != 0) {
@@ -1355,7 +1355,7 @@ double TotalEnergyGroup(int kg) {
   int t;
   double total_energy;
 
-  g = GetGroup(kg);
+  g = GetGroup(cfac, kg);
   c = &(g->cfg_list);
   
   total_energy = 0.0;

@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 
 #include "global.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "structure.h"
 #include "dbase.h"
 

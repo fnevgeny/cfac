@@ -281,16 +281,16 @@ int ZerothEnergyConfigSym(int n, int *s0, double **e1) {
 
   ncc = 0;
   for (i = 0; i < n; i++) {
-    g0 = GetGroup(s0[i]);
+    g0 = GetGroup(cfac, s0[i]);
     ncc += g0->n_cfgs;
   }    
   if (ncc == 0) return 0;
   *e1 = malloc(sizeof(double)*ncc);
   ncc = 0;
   for (i = 0; i < n; i++) {
-    g0 = GetGroup(s0[i]);
+    g0 = GetGroup(cfac, s0[i]);
     for (q = 0; q < g0->n_cfgs; q++) {
-      c1 = GetConfigFromGroup(i, q);
+      c1 = GetConfigFromGroup(cfac, i, q);
       if (sym_pp >= 0) {
 	p = ConfigParity(c1);
 	if (p != sym_pp) continue;
@@ -318,7 +318,7 @@ void FlagClosed(SHAMILTON *h) {
   unsigned char t[MBCLOSE];
 
   for (i = 0; i < h->nbasis; i++) {
-    c = GetConfig(h->basis[i]);
+    c = GetConfig(cfac, h->basis[i]);
     for (k = 0; k < MBCLOSE; k++) {
       t[k] = 0;
     }
@@ -367,13 +367,13 @@ int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
   if (sym_njj > 0 && IBisect(j, sym_njj, sym_jj) < 0) return -3;
 
   if (k <= 0) return -1;
-  sym = GetSymmetry(isym);
+  sym = GetSymmetry(cfac, isym);
   if (sym == NULL) return -1;
   st = &(sym->states);
   j = 0;
   for (t = 0; t < sym->n_states; t++) {
     s = (STATE *) ArrayGet(st, t);
-    if (InGroups(s->kgroup, k, kg)) j++;
+    if (InGroups(cfac, s->kgroup, k, kg)) j++;
   }
   if (j == 0) return -1;
 
@@ -406,7 +406,7 @@ int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
   j = 0;  
   for (t = 0; t < sym->n_states; t++) {
     s = (STATE *) ArrayGet(st, t);
-    if (InGroups(s->kgroup, k, kg)) {
+    if (InGroups(cfac, s->kgroup, k, kg)) {
       h->basis[j] = t;
       j++;
     }
@@ -415,7 +415,7 @@ int ConstructHamiltonDiagonal(HAMILTON *h, int isym, int k, int *kg, int m) {
   for (j = 0; j < h->dim; j++) {
     s = ArrayGet(st, h->basis[j]);
     if (m == 0) {
-      r = ZerothEnergyConfig(GetConfig(s));
+      r = ZerothEnergyConfig(GetConfig(cfac, s));
     } else {
       r = HamiltonElement(isym, h->basis[j], h->basis[j]);
     }
@@ -545,7 +545,7 @@ int ConstructHamilton(HAMILTON *h,
   t = md%100;
   m2 = t/10;
   m3 = t%10;
-  sym = GetSymmetry(isym);
+  sym = GetSymmetry(cfac, isym);
   if (sym == NULL) return -1;
   h->pj = isym;
 
@@ -559,8 +559,8 @@ int ConstructHamilton(HAMILTON *h,
     j0 = 0;
     for (t = 0; t < sym->n_states; t++) {
       s = (STATE *) ArrayGet(st, t);
-      if (InGroups(s->kgroup, k0, kg)) j0++;
-      if (InGroups(s->kgroup, k, kg)) j++;
+      if (InGroups(cfac, s->kgroup, k0, kg)) j0++;
+      if (InGroups(cfac, s->kgroup, k, kg)) j++;
     }
     if (j0 == 0) return -1;
 
@@ -568,7 +568,7 @@ int ConstructHamilton(HAMILTON *h,
     if (kp > 0) {
       for (t = 0; t < sym->n_states; t++) {
 	s = (STATE *) ArrayGet(st, t);
-	if (InGroups(s->kgroup, kp, kgp)) jp++;
+	if (InGroups(cfac, s->kgroup, kp, kgp)) jp++;
       }
     }    
 
@@ -577,7 +577,7 @@ int ConstructHamilton(HAMILTON *h,
     j = 0;  
     for (t = 0; t < sym->n_states; t++) {
       s = (STATE *) ArrayGet(st, t);
-      if (InGroups(s->kgroup, k, kg)) {
+      if (InGroups(cfac, s->kgroup, k, kg)) {
 	h->basis[j] = t;
 	j++;
       }
@@ -585,7 +585,7 @@ int ConstructHamilton(HAMILTON *h,
     if (jp > 0) {  
       for (t = 0; t < sym->n_states; t++) {
 	s = (STATE *) ArrayGet(st, t);
-	if (kp > 0 && InGroups(s->kgroup, kp, kgp)) {
+	if (kp > 0 && InGroups(cfac, s->kgroup, kp, kgp)) {
 	  h->basis[j] = t;
 	  j++;
 	}
@@ -683,10 +683,10 @@ int ValidBasis(STATE *s, int k, int *kg, int n) {
   if (kg) {
     lev = GetLevel(t);
     m = lev->pb;
-    sym = GetSymmetry(lev->pj);
+    sym = GetSymmetry(cfac, lev->pj);
     sp = (STATE *) ArrayGet(&(sym->states), m);
     t = sp->kgroup;
-    return InGroups(t, k, kg);
+    return InGroups(cfac, t, k, kg);
   } else {
     if (t == k) return 1;
     else return 0;
@@ -712,7 +712,7 @@ int ConstructHamiltonFrozen(HAMILTON *h,
 
   j = 0;
   ncs = 0;
-  sym = GetSymmetry(isym);
+  sym = GetSymmetry(cfac, isym);
   st = &(sym->states);
   for (t = 0; t < sym->n_states; t++) { 
     s = (STATE *) ArrayGet(st, t);
@@ -978,7 +978,7 @@ double HamiltonElementFB(int isym, int isi, int isj) {
   SYMMETRY *sym;
   LEVEL *lev1, *lev2;
 
-  sym = GetSymmetry(isym);
+  sym = GetSymmetry(cfac, isym);
   si = (STATE *) ArrayGet(&(sym->states), isi);
   sj = (STATE *) ArrayGet(&(sym->states), isj);
   r = 0.0;
@@ -1051,7 +1051,7 @@ double HamiltonElementFrozen(int isym, int isi, int isj) {
   SYMMETRY *sym;
   LEVEL *lev1, *lev2;
 
-  sym = GetSymmetry(isym);
+  sym = GetSymmetry(cfac, isym);
   si = (STATE *) ArrayGet(&(sym->states), isi);
   sj = (STATE *) ArrayGet(&(sym->states), isj);
   r = 0.0;
@@ -1140,13 +1140,13 @@ void HamiltonElement1E2E(int isym, int isi, int isj, double *x1, double *x2) {
 
   *x1 = 0.0;
   *x2 = 0.0;
-  sym = GetSymmetry(isym);
+  sym = GetSymmetry(cfac, isym);
   si = (STATE *) ArrayGet(&(sym->states), isi);
   sj = (STATE *) ArrayGet(&(sym->states), isj);
   
-  ci = GetConfig(si);
+  ci = GetConfig(cfac, si);
   if (ci->n_shells == 0) return;
-  cj = GetConfig(sj);
+  cj = GetConfig(cfac, sj);
   if (cj->n_shells == 0) return;
   
   switch (ci_level) {
@@ -1302,16 +1302,16 @@ int SlaterCoeff(char *fn, int nlevs, int *ilevs,
       coeff[i] = 0.0;
     }
     lev = GetLevel(ilevs[m]);
-    sym = GetSymmetry(lev->pj);
+    sym = GetSymmetry(cfac, lev->pj);
     for (i0 = 0; i0 < lev->n_basis; i0++) {
       s0 = (STATE *) ArrayGet(&(sym->states), lev->basis[i0]);
-      c0 = GetConfig(s0);
+      c0 = GetConfig(cfac, s0);
       k0 = s0->kstate;
       for (i1 = 0; i1 < lev->n_basis; i1++) {
 	a = lev->mixing[i0] * lev->mixing[i1];
 	if (fabs(a) < angz_cut) continue;
 	s1 = (STATE *) ArrayGet(&(sym->states), lev->basis[i1]);
-	c1 = GetConfig(s1);
+	c1 = GetConfig(cfac, s1);
 	k1 = s1->kstate;
 	idatum = NULL;
 	n_shells = GetInteract(&idatum, &sbra, &sket, s0->kgroup, s1->kgroup, 
@@ -1712,7 +1712,7 @@ int TestHamilton(void) {
   double r1;
 
   for (t = 0; t < MAX_SYMMETRIES; t++) {
-    sym = GetSymmetry(t);
+    sym = GetSymmetry(cfac, t);
     for (i = 0; i < sym->n_states; i++) {
       for (j = 0; j < sym->n_states; j++) {
 	r1 = HamiltonElement(t, i, j);
@@ -1859,19 +1859,19 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
   }
 
   j = n_levels;
-  sym = GetSymmetry(h->pj);  
+  sym = GetSymmetry(cfac, h->pj);  
   for (i = 0; i < d; i++) {
     k = GetPrincipleBasis(mix, d, NULL);
     s = (STATE *) ArrayGet(&(sym->states), h->basis[k]);
     if (ng > 0) {      
-      if (!InGroups(s->kgroup, ng, kg)) {
+      if (!InGroups(cfac, s->kgroup, ng, kg)) {
 	m = 0;
 	if (mix_cut2 < 1.0) {
 	  a = fabs(mix_cut2*mix[k]);
 	  for (t = 0; t < h->n_basis; t++) {
 	    if (fabs(mix[t]) >= a && t != k) {
 	      s1 = (STATE *) ArrayGet(&(sym->states), h->basis[t]);
-	      if (InGroups(s1->kgroup, ng, kg)) {
+	      if (InGroups(cfac, s1->kgroup, ng, kg)) {
 		m = 1;
 		break;
 	      }
@@ -1937,11 +1937,11 @@ void CutMixing(int nlev, int *ilev, int n, int *kg, double c) {
   for (i = 0; i < nlev; i++) {
     lev = GetLevel(ilev[i]);
     m = 0;
-    sym = GetSymmetry(lev->pj);
+    sym = GetSymmetry(cfac, lev->pj);
     for (t = 0; t < lev->n_basis; t++) {
       if (fabs(lev->mixing[t]) < c) continue;
       s = (STATE *) ArrayGet(&(sym->states), lev->basis[t]);
-      if (n > 0 && !InGroups(s->kgroup, n, kg)) continue;
+      if (n > 0 && !InGroups(cfac, s->kgroup, n, kg)) continue;
       lev->ibasis[m] = lev->ibasis[t];
       lev->basis[m] = lev->basis[t];
       lev->mixing[m] = lev->mixing[t];
@@ -2144,8 +2144,8 @@ int CompareLevels(LEVEL *lev1, LEVEL *lev2) {
 
   i1 = lev1->pb;
   i2 = lev2->pb;
-  sym1 = GetSymmetry(lev1->pj);
-  sym2 = GetSymmetry(lev2->pj);
+  sym1 = GetSymmetry(cfac, lev1->pj);
+  sym2 = GetSymmetry(cfac, lev2->pj);
   s1 = (STATE *) ArrayGet(&(sym1->states), i1);
   s2 = (STATE *) ArrayGet(&(sym2->states), i2);
   if (s1->kgroup < 0 && s2->kgroup < 0) {
@@ -2253,10 +2253,10 @@ int GetLevNumElectrons(const LEVEL *lev) {
   CONFIG_GROUP *g;
   int nele;
   
-  sym = GetSymmetry(lev->pj);
+  sym = GetSymmetry(cfac, lev->pj);
   s = (STATE *) ArrayGet(&(sym->states), lev->basis[0]);
   if (s->kgroup >= 0) {
-    g = GetGroup(s->kgroup);
+    g = GetGroup(cfac, s->kgroup);
     nele = g->n_electrons;
   } else {
     nele = 1+GetNumElectrons(-(s->kgroup)-1);
@@ -2389,7 +2389,7 @@ int SaveLevels(char *fn, int m, int n) {
     i = m + k;
     lev = GetLevel(i);
     si = lev->pb;
-    sym = GetSymmetry(lev->pj);
+    sym = GetSymmetry(cfac, lev->pj);
     s = (STATE *) ArrayGet(&(sym->states), si);
     if (ncorrections > 0) {
       for (p = 0; p < ecorrections->dim; p++) {
@@ -2411,7 +2411,7 @@ int SaveLevels(char *fn, int m, int n) {
     }
 
     if (s->kgroup > 0) {
-      cfg = GetConfig(s);
+      cfg = GetConfig(cfac, s);
       nk = cfg->n_electrons-1;
       if (cfac_get_ion_nlevels(cfac, nk) == 0 || cfg->shells[0].nq > 1) {
 	lev->ibase = -1;
@@ -2425,7 +2425,7 @@ int SaveLevels(char *fn, int m, int n) {
 	  a = 0.0;
 	  for (t = 0; t < lev->n_basis; t++) {
 	    s1 = ArrayGet(&(sym->states), lev->basis[t]);
-	    cfg1 = GetConfig(s1);
+	    cfg1 = GetConfig(cfac, s1);
 	    if (cfg1->shells[0].n == cfg->shells[0].n &&
 		cfg1->shells[0].nq == 1) {
 	      a += (lev->mixing[t])*(lev->mixing[t]);
@@ -2438,9 +2438,9 @@ int SaveLevels(char *fn, int m, int n) {
 	    gion = (LEVEL_ION *) ArrayGet(cfac->levels_per_ion+nk, t);
 	    for (q = gion->imin; q <= gion->imax; q++) {
 	      lev1 = GetLevel(q);
-	      sym1 = GetSymmetry(lev1->pj);
+	      sym1 = GetSymmetry(cfac, lev1->pj);
 	      s1 = ArrayGet(&(sym1->states), lev1->basis[lev1->kpb[ib]]);
-	      cfg1 = GetConfig(s1);
+	      cfg1 = GetConfig(cfac, s1);
 	      csf1 = cfg1->csfs + s1->kstate;
 	      mst = cfg1->n_shells*sizeof(SHELL_STATE);
 	      ms = cfg1->n_shells*sizeof(SHELL);
@@ -2621,7 +2621,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
     if (basis->kcfg < 0) {
       lev = GetLevel(i);
       si = lev->pb;
-      sym = GetSymmetry(lev->pj);
+      sym = GetSymmetry(cfac, lev->pj);
       basis = ArrayGet(&(sym->states), si);
       nele = ConstructLevelName(name, sname, nc, vnl, basis);
       return nele;
@@ -2642,7 +2642,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
       }
       lev = GetLevel(i);
       si = lev->pb;
-      sym = GetSymmetry(lev->pj);
+      sym = GetSymmetry(cfac, lev->pj);
       basis = (STATE *) ArrayGet(&(sym->states), si);
       if (sname || nc) {
 	nele = ConstructLevelName(NULL, sname, nc, NULL, basis);
@@ -2660,7 +2660,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
     }
   }
 
-  c = GetConfig(basis);
+  c = GetConfig(cfac, basis);
   nele = c->n_electrons;
   if (!name && !sname && !nc) return nele;
 
@@ -2774,7 +2774,7 @@ int GetBasisTable(char *fn, int m) {
     nsym = MAX_SYMMETRIES;
     fprintf(f, "============Basis Table===========================\n");
     for (i = 0; i < nsym; i++) {
-      sym = GetSymmetry(i);
+      sym = GetSymmetry(cfac, i);
       DecodePJ(i, &p, &j);
       st = &(sym->states);
       if (sym->n_states <= 0) continue;
@@ -2790,7 +2790,7 @@ int GetBasisTable(char *fn, int m) {
     fprintf(f, "============Mixing Coefficients===================\n");
     for (i = 0; i < n_levels; i++) {
       lev = GetLevel(i);
-      sym = GetSymmetry(lev->pj);
+      sym = GetSymmetry(cfac, lev->pj);
       DecodePJ(lev->pj, &p, &j);
       for (k = 0; k < lev->n_basis; k++) {
 	si = lev->basis[k];
@@ -2877,7 +2877,7 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
     ks1 = s1->kstate;    
-    c1 = GetConfigFromGroup(kg1, kc1);
+    c1 = GetConfigFromGroup(cfac, kg1, kc1);
     if (ih1 == ih2) {
       i2m = i1;
     } else {
@@ -2888,7 +2888,7 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
       ks2 = s2->kstate;          
-      c2 = GetConfigFromGroup(kg2, kc2);
+      c2 = GetConfigFromGroup(cfac, kg2, kc2);
       if (ih1 == ih2) {
 	iz1 = i1*ns2 + i2;
 	iz2 = i2*ns1 + i1;
@@ -3084,14 +3084,14 @@ int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
     ks1 = s1->kstate;    
-    c1 = GetConfigFromGroup(kg1, kc1);
+    c1 = GetConfigFromGroup(cfac, kg1, kc1);
     j1 = (c1->csfs[ks1]).totalJ;
     for (i2 = 0; i2 < ns2; i2++) {
       s2 = hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
       ks2 = s2->kstate;          
-      c2 = GetConfigFromGroup(kg2, kc2);
+      c2 = GetConfigFromGroup(cfac, kg2, kc2);
           
       if (abs(c1->n_shells+1 - c2->n_shells) > 1) {
 	a[iz] = NULL;
@@ -3224,14 +3224,14 @@ int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
     ks1 = s1->kstate;    
-    c1 = GetConfigFromGroup(kg1, kc1);
+    c1 = GetConfigFromGroup(cfac, kg1, kc1);
     j1 = (c1->csfs[ks1]).totalJ;
     for (i2 = 0; i2 < ns2; i2++) {
       s2 = hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
       ks2 = s2->kstate;          
-      c2 = GetConfigFromGroup(kg2, kc2);
+      c2 = GetConfigFromGroup(cfac, kg2, kc2);
       
       if (abs(c1->n_shells+1 - c2->n_shells) > 2) {
 	a[iz] = NULL;
@@ -3344,18 +3344,18 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
   for (i1 = 0; i1 < n1; i1++) {
     lev1 = GetLevel(is1[i1]);
     ih1 = lev1->iham;
-    sym1 = GetSymmetry(lev1->pj);
+    sym1 = GetSymmetry(cfac, lev1->pj);
     s1 = ArrayGet(&(sym1->states), lev1->pb);
     if (s1->kgroup < 0) continue;
-    ne1 = GetGroup(s1->kgroup)->n_electrons;
+    ne1 = GetGroup(cfac, s1->kgroup)->n_electrons;
     ns1 = hams[ih1].nlevs;
     for (i2 = 0; i2 < n2; i2++) {
       lev2 = GetLevel(is2[i2]);
       ih2 = lev2->iham;
-      sym2 = GetSymmetry(lev2->pj);
+      sym2 = GetSymmetry(cfac, lev2->pj);
       s2 = ArrayGet(&(sym2->states), lev2->pb);
       if (s2->kgroup < 0) continue;
-      ne2 = GetGroup(s2->kgroup)->n_electrons;
+      ne2 = GetGroup(cfac, s2->kgroup)->n_electrons;
       if (abs(ne2-ne1) > 1) continue;
       ns2 = hams[ih2].nlevs;
       ns = ns1*ns2;
@@ -3454,8 +3454,8 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
     }
   }
 
-  sym1 = GetSymmetry(lev1->pj);
-  sym2 = GetSymmetry(lev2->pj);
+  sym1 = GetSymmetry(cfac, lev1->pj);
+  sym2 = GetSymmetry(cfac, lev2->pj);
   j1 = lev1->pj;
   j2 = lev2->pj;
   DecodePJ(j1, NULL, &j1);
@@ -3583,8 +3583,8 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       }  
       if (nz != 0) {
 	if (nz > 0 && ih1 > ih2) {
-	  sym1 = GetSymmetry(lev1->pj);
-	  sym2 = GetSymmetry(lev2->pj);
+	  sym1 = GetSymmetry(cfac, lev1->pj);
+	  sym2 = GetSymmetry(cfac, lev2->pj);
 	  j1 = lev1->pj;
 	  j2 = lev2->pj;
 	  DecodePJ(j1, NULL, &j1);
@@ -3596,8 +3596,8 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
     }
   }
 
-  sym1 = GetSymmetry(lev1->pj);
-  sym2 = GetSymmetry(lev2->pj);
+  sym1 = GetSymmetry(cfac, lev1->pj);
+  sym2 = GetSymmetry(cfac, lev2->pj);
   j1 = lev1->pj;
   j2 = lev2->pj;
   DecodePJ(j1, NULL, &j1);
@@ -3835,8 +3835,8 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
 
   lev1 = GetLevel(lower);
   lev2 = GetLevel(upper);
-  sym1 = GetSymmetry(lev1->pj);
-  sym2 = GetSymmetry(lev2->pj);
+  sym1 = GetSymmetry(cfac, lev1->pj);
+  sym2 = GetSymmetry(cfac, lev2->pj);
   j1 = lev1->pj;
   j2 = lev2->pj;
   DecodePJ(j1, NULL, &j1);

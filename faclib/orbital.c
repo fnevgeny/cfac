@@ -10,7 +10,7 @@
 #include <gsl/gsl_linalg.h>
 
 #include "global.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "config.h"
 #include "coulomb.h"
 #include "orbital.h"

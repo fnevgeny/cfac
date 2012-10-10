@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "global.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "angular.h"
 #include "radial.h"
 #include "structure.h"

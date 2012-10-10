@@ -3,6 +3,7 @@
 #include <time.h>
 #include <math.h>
 
+#include "cfacP.h"
 #include "consts.h"
 #include "dbase.h"
 #include "structure.h"

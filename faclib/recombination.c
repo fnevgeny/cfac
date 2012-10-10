@@ -3,9 +3,9 @@
 #include <gsl/gsl_sf_legendre.h>
 
 #include "global.h"
+#include "cfacP.h"
 #include "consts.h"
 #include "parser.h"
-#include "cfac.h"
 #include "coulomb.h"
 #include "structure.h"
 #include "radial.h"
@@ -198,7 +198,7 @@ int ConstructRecGroupName(char *rgn, char *gn, int n) {
 int IsRecombinedGroup(int i) {
   char *s;
   int n;
-  s = GetGroup(i)->name;
+  s = GetGroup(cfac, i)->name;
   if (s[0] != '+') return 0;
   n = strtol(s, NULL, 10);
   return n;
@@ -216,7 +216,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
 
   nm = 0;
   for (i = 0; i < k; i++) {
-    g = GetGroup(kg[i]);
+    g = GetGroup(cfac, kg[i]);
     clist = &(g->cfg_list);
     for (t = 0; t < g->n_cfgs; t++) {
       c = (CONFIG *) ArrayGet(clist, t);
@@ -239,11 +239,11 @@ int RecStates(int n, int k, int *kg, char *fn) {
   ncfgs = 0;
   for (i = 0; i < k; i++) {
     kg0 = kg[i];
-    g = GetGroup(kg0);
+    g = GetGroup(cfac, kg0);
     gn = g->name;
     ConstructRecGroupName(rgn, gn, n);
-    if ((kg[i] = GroupExists(rgn)) >= 0) continue;
-    kg[i] = AddGroup(rgn);
+    if ((kg[i] = GroupExists(cfac, rgn)) >= 0) continue;
+    kg[i] = AddGroup(cfac, rgn);
     if (kg[i] < 0) {
       printf("Can not add more Groups\n");
       exit(1);
@@ -275,7 +275,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
 	}
 	
 	if (Couple(rcfg) < 0) return -3;
-	if (AddConfigToList(kg[i], rcfg) < 0) return -4;
+	if (AddConfigToList(cfac, kg[i], rcfg) < 0) return -4;
 	ncfgs++;
       }
     }
@@ -324,9 +324,9 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
     for (i = i0; i < i1; i++) {
       lev = GetLevel(i);
       m = lev->pb;
-      sym = GetSymmetry(lev->pj);
+      sym = GetSymmetry(cfac, lev->pj);
       s = (STATE *) ArrayGet(&(sym->states), m);
-      if (!InGroups(s->kgroup, k, kg)) {
+      if (!InGroups(cfac, s->kgroup, k, kg)) {
 	continue;
       }
       j1 = lev->pj;
@@ -341,7 +341,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	jmin = abs(j2 - j1);
 	jmax = j2 + j1;
 	for (tj = jmin; tj <= jmax; tj += 2) {
-	  AddStateToSymmetry(-(i+1), ko, tj, p, tj);
+	  AddStateToSymmetry(cfac, -(i+1), ko, tj, p, tj);
 	  nstates++;
 	}
       }
@@ -362,9 +362,9 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	for (j = i0; j < i1; j++) {
 	  lev = GetLevel(j);
 	  m = lev->pb;
-	  sym = GetSymmetry(lev->pj);
+	  sym = GetSymmetry(cfac, lev->pj);
 	  s = (STATE *) ArrayGet(&(sym->states), m);
-	  if (!InGroups(s->kgroup, k, kg)) continue;
+	  if (!InGroups(cfac, s->kgroup, k, kg)) continue;
 	  m = ConstructHamiltonFrozen(h, i, j, NULL, n, 0, NULL);
 	  if (m < 0) continue;
 	  if (DiagonalizeHamilton(h) < 0) return -2;
@@ -992,11 +992,11 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   j1 = lev1->pj;
   j2 = lev2->pj;
 
-  st = (STATE *) ArrayGet(&(GetSymmetry(j1)->states), i);
+  st = (STATE *) ArrayGet(&(GetSymmetry(cfac, j1)->states), i);
   if (st->kgroup < 0) {
     k = GetOrbital(st->kcfg)->kappa;
   } else {
-    k = (GetConfig(st)->shells[0]).kappa;
+    k = (GetConfig(cfac, st)->shells[0]).kappa;
   }
   k = GetLFromKappa(k);
   k = k/2;

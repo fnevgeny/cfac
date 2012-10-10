@@ -5,7 +5,7 @@
 
 #include "global.h"
 #include "consts.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "radial.h"
 #include "angular.h"
 #include "structure.h"

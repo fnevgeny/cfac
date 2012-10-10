@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "global.h"
+#include "cfacP.h"
 #include "angular.h"
 #include "rcfp.h"
 #include "cf77.h"
@@ -1540,8 +1541,8 @@ int GetInteract(INTERACT_DATUM **idatum,
   start = clock();
 #endif
 
-  ci = GetConfigFromGroup(kgi, kci);
-  cj = GetConfigFromGroup(kgj, kcj);
+  ci = GetConfigFromGroup(cfac, kgi, kci);
+  cj = GetConfigFromGroup(cfac, kgj, kcj);
   if (ci->n_csfs > 0) {
     csf_i = ci->csfs + ki;
     csf_j = cj->csfs + kj;
@@ -1986,16 +1987,16 @@ void TestAngular(void) {
   ns = MAX_SYMMETRIES;
   
   for (i = 0; i < ns; i++) {
-    sym = GetSymmetry(i);
+    sym = GetSymmetry(cfac, i);
     s1 = &(sym->states);
     s2 = s1;
     for (t = 0; t < sym->n_states; t++) {
       st1 = ArrayGet(s1, t);
-      c1 = GetConfig(st1);      
+      c1 = GetConfig(cfac, st1);      
       ConstructLevelName(name1, NULL, NULL, NULL, st1);
       for (q = 0; q < sym->n_states; q++) {
 	st2 = ArrayGet(s2, q);
-	c2 = GetConfig(st2);
+	c2 = GetConfig(cfac, st2);
 	ConstructLevelName(name2, NULL, NULL, NULL, st2);
 	printf("Bra: %s \nKet: %s\n", name1, name2);
 	n_shells = GetInteract(&idatum, &sbra, &sket, 

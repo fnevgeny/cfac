@@ -8,6 +8,7 @@
 #include <math.h>
 #include <gsl/gsl_sf_gamma.h>
 
+#include "cfacP.h"
 #include "consts.h"
 #include "array.h"
 #include "angular.h"

@@ -1,7 +1,7 @@
 #include <math.h>
 
 #include "global.h"
-#include "cfac.h"
+#include "cfacP.h"
 #include "radial.h"
 #include "angular.h"
 #include "coulomb.h"
@@ -97,7 +97,7 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
 	return -1;
       }
       s = v[i];
-      k = GroupExists(s);
+      k = GroupExists(cfac, s);
       
       if (k < 0) {
 	free((*kg));
@@ -108,7 +108,7 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
       (*kg)[i] = k;
     }
   } else {
-    ng = GetNumGroups();
+    ng = GetNumGroups(cfac);
     (*kg) = malloc(sizeof(int)*ng);
     for (i = 0; i < ng; i++) (*kg)[i] = i;
   }
@@ -149,10 +149,10 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       for (j = 0; j < nlevels; j++) {
 	lev = GetLevel(j);
 	im = lev->pb;
-	sym = GetSymmetry(lev->pj);
+	sym = GetSymmetry(cfac, lev->pj);
 	s = (STATE *) ArrayGet(&(sym->states), im);
 	ig = s->kgroup;
-	if (InGroups(ig, ng, kg)) {
+	if (InGroups(cfac, ig, ng, kg)) {
 	  (*t)[k] = j;
 	  k++;
 	}
@@ -202,13 +202,13 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	}
 	nrec = atoi(v1[m]);
 	for (i = 0; i < nrg; i++) {
-	  ConstructRecGroupName(rgn, GetGroup(kg[i])->name, nrec);
-	  krg[i] = GroupExists(rgn);
+	  ConstructRecGroupName(rgn, GetGroup(cfac, kg[i])->name, nrec);
+	  krg[i] = GroupExists(cfac, rgn);
 	}
 	for (j = 0; j < nlevels; j++) {
 	  lev = GetLevel(j);
 	  im = lev->pb;
-	  sym = GetSymmetry(lev->pj);
+	  sym = GetSymmetry(cfac, lev->pj);
 	  s = (STATE *) ArrayGet(&(sym->states), im);
 	  ig = s->kgroup;
 	  if (ig < 0) {
@@ -216,7 +216,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	    (*t)[k] = j;
 	    k++;
 	  } else {
-	    if (InGroups(ig, nrg, krg)) {
+	    if (InGroups(cfac, ig, nrg, krg)) {
 	      (*t)[k] = j;
 	      k++;
 	    }
@@ -426,9 +426,9 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
     ncfg = GetConfigFromString(&cfg, scfg);
     for (j = 0; j < ncfg; j++) {
       if (Couple(cfg+j) < 0) return -1;
-      t = GroupIndex(gname);
+      t = GroupIndex(cfac, gname);
       if (t < 0) return -1;
-      if (AddConfigToList(t, cfg+j) < 0) return -1;
+      if (AddConfigToList(cfac, t, cfg+j) < 0) return -1;
     }   
     if (ncfg > 0) free(cfg);
   }
@@ -449,14 +449,14 @@ static int PListConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
     }
   }
   if (ng <= 0) {
-    ng = GetNumGroups();
+    ng = GetNumGroups(cfac);
     kg = malloc(sizeof(int)*ng);
     for (k = 0; k < ng; k++) {
       kg[k] = k;
     }
   }
 
-  ListConfig(s, ng, kg);
+  ListConfig(cfac, s, ng, kg);
 
   if (ng > 0) free(kg);
 
@@ -500,9 +500,9 @@ static int PAddConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   if (ConfigListToC(argv[1], &cfg, variables) < 0) return -1;
   if (Couple(cfg) < 0) return -1;
 
-  k = GroupIndex(argv[0]);
+  k = GroupIndex(cfac, argv[0]);
   if (k < 0) return -1;
-  if (AddConfigToList(k, cfg) < 0) return -1;
+  if (AddConfigToList(cfac, k, cfg) < 0) return -1;
   free(cfg);
   
   return 0;

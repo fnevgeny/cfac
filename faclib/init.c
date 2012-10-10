@@ -2,6 +2,7 @@
 
 #include <gsl/gsl_ieee_utils.h>
 
+#include "cfacP.h"
 #include "global.h"
 #include "consts.h"
 #include "coulomb.h"
@@ -34,7 +35,7 @@ int Info(void) {
   return 0;
 }
 
-int InitFac(void) {
+int InitFac() {
   int ierr;
 
 #if FAC_DEBUG
@@ -46,12 +47,6 @@ int InitFac(void) {
 #endif
 
   cfac = cfac_new();
-
-  ierr = InitConfig();
-  if ( ierr < 0) {
-    printf("initialize failed in InitConfig\n");
-    return ierr;
-  }
 
   InitCoulomb();
   InitAngular();

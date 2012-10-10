@@ -13,37 +13,11 @@
 #include <ctype.h>
 #include <math.h>
 
+#include "cfacP.h"
 #include "config.h"
 #include "array.h"
 #include "parser.h"
 #include "dbase.h"
-
-/*
-** VARIABLE:    cfg_groups
-** TYPE:        static array
-** PURPOSE:     a list of configuration groups.
-** NOTE:        
-*/
-static CONFIG_GROUP *cfg_groups;
-
-/*
-** VARIABLE:    n_groups
-** TYPE:        static int
-** PURPOSE:     number of groups present.
-** NOTE:        
-*/
-static int n_groups; 
-
-/*
-** VARIABLE:    symmetry_list
-** TYPE:        static array
-** PURPOSE:     a list of symmetries.
-** NOTE:        the symmetry array is initialized in InitConfig.
-**              the number of symmetries are fixed at 512. the i-th 
-**              symmetry have the j = floor(i/2), 
-**              and the parity = mod(i, 2). 
-*/
-static SYMMETRY *symmetry_list;
 
 /*
 ** VARIABLE:    spec_symbols
@@ -1554,14 +1528,14 @@ void PackShellState(SHELL_STATE *s, int J, int j, int nu, int Nr){
 ** SIDE EFFECT: if the group does not exist, a new one is created.
 ** NOTE:        
 */
-int GroupIndex(char *name) {
+int GroupIndex(cfac_t *cfac, const char *name) {
   int i;
 
-  for (i = n_groups - 1; i >= 0; i--) {
-    if (strncmp(name, cfg_groups[i].name, GROUP_NAME_LEN) == 0) 
+  for (i = cfac->n_groups - 1; i >= 0; i--) {
+    if (strncmp(name, cfac->cfg_groups[i].name, GROUP_NAME_LEN) == 0) 
       break;
   }
-  if (i < 0) i = AddGroup(name);
+  if (i < 0) i = AddGroup(cfac, name);
   return i;
 }
 
@@ -1576,11 +1550,11 @@ int GroupIndex(char *name) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int GroupExists(char *name) {
+int GroupExists(const cfac_t *cfac, const char *name) {
   int i;
 
-  for (i = n_groups - 1; i >= 0; i--) {
-    if (strncmp(name, cfg_groups[i].name, GROUP_NAME_LEN) == 0) 
+  for (i = cfac->n_groups - 1; i >= 0; i--) {
+    if (strncmp(name, cfac->cfg_groups[i].name, GROUP_NAME_LEN) == 0) 
       break;
   }
   return i;
@@ -1596,15 +1570,15 @@ int GroupExists(char *name) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int AddGroup(char *name) {
+int AddGroup(cfac_t *cfac, const char *name) {
   if (name == NULL) return -1;
-  if (n_groups == MAX_GROUPS) {
+  if (cfac->n_groups == MAX_GROUPS) {
     printf("Max # groups reached\n");
     exit(1);
   }
-  strncpy(cfg_groups[n_groups].name, name, GROUP_NAME_LEN);
-  n_groups++;
-  return n_groups-1;
+  strncpy(cfac->cfg_groups[cfac->n_groups].name, name, GROUP_NAME_LEN);
+  cfac->n_groups++;
+  return cfac->n_groups-1;
 }
 
 /* 
@@ -1617,9 +1591,9 @@ int AddGroup(char *name) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-CONFIG_GROUP *GetGroup(int k) {
-  if (k < 0 || k >= n_groups) return NULL;
-  return cfg_groups+k;
+CONFIG_GROUP *GetGroup(const cfac_t *cfac, int k) {
+  if (k < 0 || k >= cfac->n_groups) return NULL;
+  return cfac->cfg_groups+k;
 }
 
 /* 
@@ -1631,13 +1605,13 @@ CONFIG_GROUP *GetGroup(int k) {
 ** SIDE EFFECT: 
 ** NOTE:        the name of the group is initialized as '_all_'.
 */
-CONFIG_GROUP *GetNewGroup(void) {
-  if (n_groups == MAX_GROUPS) {
+CONFIG_GROUP *GetNewGroup(cfac_t *cfac) {
+  if (cfac->n_groups == MAX_GROUPS) {
     printf("Max # groups reached\n");
     exit(1);
   }
-  n_groups++;
-  return cfg_groups+n_groups-1;
+  cfac->n_groups++;
+  return cfac->cfg_groups+cfac->n_groups-1;
 }
 
 /* 
@@ -1649,8 +1623,8 @@ CONFIG_GROUP *GetNewGroup(void) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int GetNumGroups(void) {
-  return n_groups;
+int GetNumGroups(const cfac_t *cfac) {
+  return cfac->n_groups;
 }
 
 /* 
@@ -1663,18 +1637,18 @@ int GetNumGroups(void) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-CONFIG *GetConfig(STATE *s) {
+CONFIG *GetConfig(cfac_t *cfac, STATE *s) {
   CONFIG *c;
   int i, j;
 
   i = s->kgroup;
   j = s->kcfg;
-  c = (CONFIG *) ArrayGet(&(cfg_groups[i].cfg_list), j);
+  c = (CONFIG *) ArrayGet(&(cfac->cfg_groups[i].cfg_list), j);
   return c;
 }
 
-CONFIG *GetConfigFromGroup(int kg, int kc) {
-  return (CONFIG *) ArrayGet(&(cfg_groups[kg].cfg_list), kc);
+CONFIG *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc) {
+  return (CONFIG *) ArrayGet(&(cfac->cfg_groups[kg].cfg_list), kc);
 }
 
 /* 
@@ -1691,19 +1665,19 @@ CONFIG *GetConfigFromGroup(int kg, int kc) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int AddConfigToList(int k, CONFIG *cfg) {
+int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   ARRAY *clist;  
   int n0, kl0, nq0, m, i, n, kl, j, nq;
 
-  if (k < 0 || k >= n_groups) return -1;
-  if (cfg_groups[k].n_cfgs == 0) {
-    cfg_groups[k].n_electrons = cfg->n_electrons;
-  } else if (cfg_groups[k].n_electrons != cfg->n_electrons) {
+  if (k < 0 || k >= cfac->n_groups) return -1;
+  if (cfac->cfg_groups[k].n_cfgs == 0) {
+    cfac->cfg_groups[k].n_electrons = cfg->n_electrons;
+  } else if (cfac->cfg_groups[k].n_electrons != cfg->n_electrons) {
     printf("Error: AddConfigToList, Configurations in a group ");
     printf("must have the same number of electrons\n");
     return -1;
   }
-  clist = &(cfg_groups[k].cfg_list);
+  clist = &(cfac->cfg_groups[k].cfg_list);
 
   cfg->energy = 0.0;
   cfg->delta = 0.0;
@@ -1741,9 +1715,9 @@ int AddConfigToList(int k, CONFIG *cfg) {
   }
   if (ArrayAppend(clist, cfg) == NULL) return -1;
   if (cfg->n_csfs > 0) {    
-    AddConfigToSymmetry(k, cfg_groups[k].n_cfgs, cfg); 
+    AddConfigToSymmetry(cfac, k, cfac->cfg_groups[k].n_cfgs, cfg); 
   }
-  cfg_groups[k].n_cfgs++;
+  cfac->cfg_groups[k].n_cfgs++;
 
   return 0;
 }
@@ -1762,7 +1736,7 @@ int AddConfigToList(int k, CONFIG *cfg) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int AddStateToSymmetry(int kg, int kc, int kstate, int parity, int j) {
+int AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate, int parity, int j) {
   int k;
   STATE s;
   ARRAY *st;
@@ -1776,9 +1750,9 @@ int AddStateToSymmetry(int kg, int kc, int kstate, int parity, int j) {
   s.kgroup = kg;
   s.kcfg = kc;
   s.kstate = kstate;
-  st = &(symmetry_list[k].states);
+  st = &(cfac->symmetry_list[k].states);
   if (ArrayAppend(st, &s) == NULL) return -1;
-  symmetry_list[k].n_states++;
+  cfac->symmetry_list[k].n_states++;
   return 0;
 }
 
@@ -1816,7 +1790,7 @@ void UnpackSymState(int st, int *s, int *k) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int AddConfigToSymmetry(int kg, int kc, CONFIG *cfg) {
+int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg) {
   int parity;
   int i, j, k, m;
   STATE s;
@@ -1838,10 +1812,10 @@ int AddConfigToSymmetry(int kg, int kc, CONFIG *cfg) {
     s.kgroup = kg;
     s.kcfg = kc;
     s.kstate = i;
-    cfg->symstate[m] = PackSymState(k, symmetry_list[k].n_states);
-    st = &(symmetry_list[k].states);
+    cfg->symstate[m] = PackSymState(k, cfac->symmetry_list[k].n_states);
+    st = &(cfac->symmetry_list[k].states);
     if (ArrayAppend(st, &s) == NULL) return -1;
-    symmetry_list[k].n_states++;
+    cfac->symmetry_list[k].n_states++;
   }
   return 0;
 }
@@ -1872,9 +1846,9 @@ void DecodePJ(int i, int *p, int *j) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-SYMMETRY *GetSymmetry(int k) {
+SYMMETRY *GetSymmetry(cfac_t *cfac, int k) {
   if (k < 0 || k >= MAX_SYMMETRIES) return NULL;
-  return symmetry_list+k;
+  return cfac->symmetry_list+k;
 }
 
 int ShellIndex(int n, int kappa, int ns, SHELL *s) {
@@ -1924,7 +1898,7 @@ int ConstructConfigName(char *s, int n, CONFIG *c) {
   return m;
 }
 
-void ListConfig(char *fn, int n, int *kg) {
+void ListConfig(const cfac_t *cfac, char *fn, int n, int *kg) {
   int i, m, j;
   CONFIG *c;
   CONFIG_GROUP *g;
@@ -1936,9 +1910,9 @@ void ListConfig(char *fn, int n, int *kg) {
 
   m = 0;
   for (i = 0; i < n; i++) {
-    g = GetGroup(kg[i]);
+    g = GetGroup(cfac, kg[i]);
     for (j = 0; j < g->n_cfgs; j++) {
-      c = GetConfigFromGroup(kg[i], j);
+      c = GetConfigFromGroup(cfac, kg[i], j);
       ConstructConfigName(a, 2048, c);
       fprintf(f, "%10s %6d   %s\n", g->name, m, a);
       m++;
@@ -1982,7 +1956,7 @@ void ListConfig(char *fn, int n, int *kg) {
 **              with M = 2500, the limit is about 70, which should be 
 **              more than enough.
 */
-int GetAverageConfig(int ng, int *kg, double *weight,
+int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
 		     int n_screen, int *screened_n, double screened_charge,
 		     int screened_kl, AVERAGE_CONFIG *acfg) {
 #define M 2500 /* max # of shells may be present in an average config */
@@ -2016,9 +1990,9 @@ int GetAverageConfig(int ng, int *kg, double *weight,
   }
 
   for (i = 0; i < ng; i++) {
-    c = &(cfg_groups[kg[i]].cfg_list);
-    a = 1.0/cfg_groups[kg[i]].n_cfgs;
-    for (t = 0; t < cfg_groups[kg[i]].n_cfgs; t++) {
+    c = &(cfac->cfg_groups[kg[i]].cfg_list);
+    a = 1.0/cfac->cfg_groups[kg[i]].n_cfgs;
+    for (t = 0; t < cfac->cfg_groups[kg[i]].n_cfgs; t++) {
       cfg = (CONFIG *) ArrayGet(c, t);
       for (j = 0; j < cfg->n_shells; j++) {
 	n = cfg->shells[j].n;
@@ -2028,7 +2002,7 @@ int GetAverageConfig(int ng, int *kg, double *weight,
 	tnq[k] += (((double)(cfg->shells[j].nq)) * weight[i]*a);
       }
     }
-    acfg->n_cfgs += cfg_groups[kg[i]].n_cfgs;
+    acfg->n_cfgs += cfac->cfg_groups[kg[i]].n_cfgs;
   }
 
   for (i = 0, j = 0; i < M; i++) {
@@ -2174,10 +2148,10 @@ int IBisect(int b, int n, int *a) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int InGroups(int kg, int ng, int *kgroup) {
+int InGroups(const cfac_t *cfac, int kg, int ng, int *kgroup) {
   int i;
   if (ng < 0) {
-    if (kg >= 0 && kg < n_groups) return 1;
+    if (kg >= 0 && kg < cfac->n_groups) return 1;
   }
 
   for (i = 0; i < ng; i++) {
@@ -2226,16 +2200,7 @@ int CompareShellInvert(const void *ts1, const void *ts2) {
   return -CompareShell(ts1, ts2);
 }
 
-/* 
-** FUNCTION:    FreeConfigData
-** PURPOSE:     free the memory in a CONFIG struct.
-** INPUT:       {void *},
-**              pointer to the CONFIG struct.
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
-*/
-static void FreeConfigData(void *p) {
+void FreeConfigData(void *p) {
   CONFIG *c;
 
   c = (CONFIG *) p;
@@ -2254,52 +2219,22 @@ static void FreeConfigData(void *p) {
   }
 }
 
-/* 
-** FUNCTION:    InitConfig
-** PURPOSE:     initialize the module "config".
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
-*/
-int InitConfig(void) {
-  int i;
-
-  n_groups = 0;
-  cfg_groups = malloc(MAX_GROUPS*sizeof(CONFIG_GROUP));
-  for (i = 0; i < MAX_GROUPS; i++) {
-    strcpy(cfg_groups[i].name, "_all_");
-    cfg_groups[i].n_cfgs = 0;
-    ArrayInit(&(cfg_groups[i].cfg_list), sizeof(CONFIG), CONFIGS_BLOCK,
-        FreeConfigData, NULL);
-  }
-
-  symmetry_list = malloc(MAX_SYMMETRIES*sizeof(SYMMETRY));
-  for (i = 0; i < MAX_SYMMETRIES; i++) {
-    symmetry_list[i].n_states = 0;
-    ArrayInit(&(symmetry_list[i].states), sizeof(STATE), STATES_BLOCK,
-        NULL, NULL);
-  }
-  
-  return 0; 
-}
-
-int RemoveGroup(int k) {
+int RemoveGroup(cfac_t *cfac, int k) {
   SYMMETRY *sym;
   STATE *s;
   int i, m;
 
-  if (k != n_groups-1) {
+  if (k != cfac->n_groups-1) {
     printf("only the last group can be removed\n");
     return -1;
   }
-  ArrayFree(&(cfg_groups[k].cfg_list));
-  cfg_groups[k].n_cfgs = 0;
-  strcpy(cfg_groups[k].name, "_all_");
-  n_groups--;
+  ArrayFree(&(cfac->cfg_groups[k].cfg_list));
+  cfac->cfg_groups[k].n_cfgs = 0;
+  strcpy(cfac->cfg_groups[k].name, "_all_");
+  cfac->n_groups--;
 
   for (i = 0; i < MAX_SYMMETRIES; i++) {
-    sym = GetSymmetry(i);
+    sym = GetSymmetry(cfac, i);
     for (m = 0; m < sym->n_states; m++) {
       s = ArrayGet(&(sym->states), m);
       if (s->kgroup == k) {
@@ -2310,37 +2245,5 @@ int RemoveGroup(int k) {
     }
   }
   
-  return 0;
-}
-  
-/* 
-** FUNCTION:    ReinitConfig
-** PURPOSE:     reinitialize the module "config".
-** INPUT:       {int m},
-**              0: do a full reinitialization.
-**              -1, 1: do nothing.
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
-*/
-int ReinitConfig(int m) {
-  int i;
-
-  if (m) return 0;
-
-  for (i = 0; i < n_groups; i++) {
-    ArrayFree(&(cfg_groups[i].cfg_list));
-    cfg_groups[i].n_cfgs = 0;
-    strcpy(cfg_groups[i].name, "_all_");
-  }
-  n_groups = 0;
-
-  for (i = 0; i < MAX_SYMMETRIES; i++) {
-    if (symmetry_list[i].n_states > 0) {
-      ArrayFree(&(symmetry_list[i].states));
-      symmetry_list[i].n_states = 0;
-    }
-  }
-
   return 0;
 }

@@ -28,9 +28,6 @@
 static int nhams = 0;
 static SHAMILTON hams[MAX_HAMS];
 
-static HAMILTON _ham = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			NULL, NULL, NULL, NULL, NULL, NULL};
-
 static ARRAY *levels;
 static int n_levels = 0;
 static ARRAY *eblevels;
@@ -263,10 +260,6 @@ int SortUnique(int n, int *a) {
   }
   
   return j;
-}
-
-HAMILTON *GetHamilton(void) {
-  return &_ham;
 }
 
 SHAMILTON *GetSHamilton(int *n) {

@@ -140,7 +140,6 @@ double Hamilton2E(int n_shells, SHELL_STATE *sbra,
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 double Hamilton1E(int n_shells, SHELL_STATE *sbra, 
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
-HAMILTON *GetHamilton(void);
 SHAMILTON *GetSHamilton(int *n);
 int DiagonalizeHamilton(HAMILTON *h);
 int AddToLevels(HAMILTON *h, int ng, int *kg);

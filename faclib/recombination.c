@@ -212,7 +212,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
   CONFIG_GROUP *g;
   char *gn, rgn[GROUP_NAME_LEN];
   int nm;
-  HAMILTON *h = GetHamilton();
+  HAMILTON *h = &cfac->hamiltonian;
 
   nm = 0;
   for (i = 0; i < k; i++) {
@@ -307,7 +307,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
   STATE *s;
   SYMMETRY *sym;
   int i0, i1, t, nt;
-  HAMILTON *h = GetHamilton();
+  HAMILTON *h = &cfac->hamiltonian;
 
   nstates = 0;
 

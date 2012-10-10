@@ -54,16 +54,6 @@ static SYMMETRY *symmetry_list;
 */
 static char spec_symbols[MAX_SPEC_SYMBOLS+2] = "spdfghiklmnoqrtuvwxyz*"; 
 
-void *ReallocNew(void *p, int s) {
-  void *q;
-
-  q = malloc(s);
-  memcpy(q, p, s);
-  free(p);
-  
-  return q;
-}
-  
 /* 
 ** FUNCTION:    DistributeElectronsShell
 ** PURPOSE:     distribute nq electrons among the specified shells
@@ -1744,7 +1734,7 @@ int AddConfigToList(int k, CONFIG *cfg) {
 
   cfg->nnrs = m;
   if (m < cfg->n_shells) {
-    cfg->nrs = ReallocNew(cfg->nrs, sizeof(int)*m);
+    cfg->nrs = realloc(cfg->nrs, sizeof(int)*m);
   }
   if (cfg->n_csfs > 0) {
     cfg->symstate = malloc(sizeof(int)*cfg->n_csfs);

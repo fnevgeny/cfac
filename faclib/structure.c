@@ -1902,9 +1902,9 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
     }
     lev.n_basis = m;
     if (m < t) {
-      lev.ibasis = (short *) ReallocNew(lev.ibasis, sizeof(short)*m);
-      lev.basis = (int *) ReallocNew(lev.basis, sizeof(int)*m);
-      lev.mixing = (double *) ReallocNew(lev.mixing, sizeof(double)*m);
+      lev.ibasis = (short *) realloc(lev.ibasis, sizeof(short)*m);
+      lev.basis = (int *) realloc(lev.basis, sizeof(int)*m);
+      lev.mixing = (double *) realloc(lev.mixing, sizeof(double)*m);
     }
     SortMixing(0, m, &lev, sym);
     GetPrincipleBasis(lev.mixing, m, lev.kpb);
@@ -1949,9 +1949,9 @@ void CutMixing(int nlev, int *ilev, int n, int *kg, double c) {
     }
     if (m < lev->n_basis) {
       lev->n_basis = m;
-      lev->ibasis = (short *) ReallocNew(lev->ibasis, sizeof(short)*m);
-      lev->basis = (int *) ReallocNew(lev->basis, sizeof(int)*m);
-      lev->mixing = (double *) ReallocNew(lev->mixing, sizeof(double)*m);      
+      lev->ibasis = (short *) realloc(lev->ibasis, sizeof(short)*m);
+      lev->basis = (int *) realloc(lev->basis, sizeof(int)*m);
+      lev->mixing = (double *) realloc(lev->mixing, sizeof(double)*m);      
       SortMixing(0, m, lev, sym);
       GetPrincipleBasis(lev->mixing, m, lev->kpb);
     }
@@ -4011,7 +4011,7 @@ int PackAngularZxZMix(int *n, ANGULAR_ZxZMIX **ang, int nz) {
     if (nz > 0) free(*ang);
   } else {
     if (m < nz) {
-      (*ang) = ReallocNew((*ang), m*sizeof(ANGULAR_ZxZMIX));
+      (*ang) = realloc((*ang), m*sizeof(ANGULAR_ZxZMIX));
       *n = m;
     }
   }
@@ -4051,7 +4051,7 @@ int PackAngularZMix(int *n, ANGULAR_ZMIX **ang, int nz) {
     if (nz > 0) free(*ang);
   } else {
     if (m < nz) {
-      (*ang) = ReallocNew((*ang), m*sizeof(ANGULAR_ZMIX));
+      (*ang) = realloc((*ang), m*sizeof(ANGULAR_ZMIX));
       *n = m;
     }
   }
@@ -4089,7 +4089,7 @@ int PackAngularZFB(int *n, ANGULAR_ZFB **ang, int nz) {
     if (nz > 0) free(*ang);
   } else {
     if (m < nz) {
-      (*ang) = ReallocNew((*ang), m*sizeof(ANGULAR_ZFB));
+      (*ang) = realloc((*ang), m*sizeof(ANGULAR_ZFB));
       *n = m;
     }
   }

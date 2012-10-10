@@ -460,14 +460,14 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
   (*pk)->nkl = t;
   (*pk)->nkappa = m;
   if (pw_type == 0) {
-    (*pk)->kappa0 = ReallocNew(kappa0, sizeof(short)*m);
-    (*pk)->kappa1 = ReallocNew(kappa1, sizeof(short)*m);
+    (*pk)->kappa0 = realloc(kappa0, sizeof(short)*m);
+    (*pk)->kappa1 = realloc(kappa1, sizeof(short)*m);
   } else {
-    (*pk)->kappa0 = ReallocNew(kappa1, sizeof(short)*m);
-    (*pk)->kappa1 = ReallocNew(kappa0, sizeof(short)*m);
+    (*pk)->kappa0 = realloc(kappa1, sizeof(short)*m);
+    (*pk)->kappa1 = realloc(kappa0, sizeof(short)*m);
   }
-  (*pk)->pkd = ReallocNew(pkd, sizeof(double)*q);
-  (*pk)->pke = ReallocNew(pke, sizeof(double)*q);  
+  (*pk)->pkd = realloc(pkd, sizeof(double)*q);
+  (*pk)->pke = realloc(pke, sizeof(double)*q);  
     
 #ifdef PERFORM_STATISTICS
   stop = clock();

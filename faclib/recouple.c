@@ -1490,7 +1490,7 @@ int InteractingShells(INTERACT_DATUM **idatum,
   if (n_shells == 0) n_shells = -1;
   (*idatum)->n_shells = n_shells;
   if (n_shells > 0) {
-    (*idatum)->bra = (SHELL *) ReallocNew(bra, sizeof(SHELL)*n_shells);
+    (*idatum)->bra = (SHELL *) realloc(bra, sizeof(SHELL)*n_shells);
     /* adjust the index so that it counts from inner shells */
     for (i = 0; i < 4; i++) {
       if (s[i].index >= 0) 

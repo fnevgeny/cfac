@@ -2277,29 +2277,27 @@ static int PStructure(int argc, char *argv[], int argt[],
   int i, k, ng0, ng, ngp, ns;
   int ip, nlevels;
   int *kg, *kgp;
-  int n;
   HAMILTON *h = &cfac->hamiltonian;
 
   ng = 0;
   ngp = 0;
-  n = argc;
   kgp = NULL;
   ip = 0;
 
   if (argc < 1) return -1;
 
-  if (n == 1) {
+  if (argc == 1) {
     if (argt[0] != STRING) return -1;
     ng = DecodeGroupArgs(&kg, 0, NULL, NULL, variables);
     if (ng < 0) return -1;
   } else {
-    if (n > 4) return -1;
-    if (n == 4) ip = atoi(argv[3]);		  
+    if (argc > 4) return -1;
+    if (argc == 4) ip = atoi(argv[3]);		  
     if (argt[0] != STRING) return -1;
     if (argt[1] != LIST && argt[1] != TUPLE) return -1;
     ng = DecodeGroupArgs(&kg, 1, &(argv[1]), &(argt[1]), variables);
     if (ng < 0) return -1;
-    if (n >= 3) {
+    if (argc >= 3) {
       if (argt[2] != LIST && argt[2] != TUPLE) return -1;
       ngp = DecodeGroupArgs(&kgp, 1, &(argv[2]), &(argt[2]), variables);
     }

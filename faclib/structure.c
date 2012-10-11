@@ -25,9 +25,6 @@
         }
 #endif /* (FAC_DEBUG >= DEBUG_STRUCTURE) */
 
-static int nhams = 0;
-static SHAMILTON hams[MAX_HAMS];
-
 static int angz_dim, angz_dim2;
 static ANGZ_DATUM *angz_array;
 static ANGZ_DATUM *angzxz_array;
@@ -184,16 +181,6 @@ int SetAngZOptions(cfac_t *cfac, int n, double mix, double cut) {
   return 0;
 }
 
-int ShellDegeneracy(int g, int nq) {
-  if (nq == 1) {
-    return g;
-  } else if (nq == g) {
-    return 1;
-  } else {
-    return (int) (exp(LnFactorial(g)-LnFactorial(nq)-LnFactorial(g-nq))+0.5);
-  }
-}
-
 int CompareInt(const void *a1, const void *a2) {
   int *i1, *i2;
   
@@ -202,59 +189,13 @@ int CompareInt(const void *a1, const void *a2) {
   return (*i1 - *i2);
 }
 
-int SortUnique(int n, int *a) {
-  int i, j, b;
-
-  qsort(a, n, sizeof(int), CompareInt);
-  j = 1;
-  b = a[0];
-  for (i = 1; i < n; i++) {
-    if (a[i] != b) {
-      a[j] = a[i];
-      b = a[i];
-      j++;      
-    }
-  }
-  
-  return j;
-}
-
-SHAMILTON *GetSHamilton(int *n) {
-  if (n) *n = nhams;
-  return hams;
-}
-
-int ZerothEnergyConfigSym(int n, int *s0, double **e1) {
-  CONFIG_GROUP *g0;
-  CONFIG *c1;
-  int i, q, ncc;
-
-  ncc = 0;
-  for (i = 0; i < n; i++) {
-    g0 = GetGroup(cfac, s0[i]);
-    ncc += g0->n_cfgs;
-  }    
-  if (ncc == 0) return 0;
-  *e1 = malloc(sizeof(double)*ncc);
-  ncc = 0;
-  for (i = 0; i < n; i++) {
-    g0 = GetGroup(cfac, s0[i]);
-    for (q = 0; q < g0->n_cfgs; q++) {
-      c1 = GetConfigFromGroup(cfac, i, q);
-      (*e1)[ncc++] = ZerothEnergyConfig(c1);
-    }
-  }
-  
-  return ncc;
-}
-
-void FlagClosed(SHAMILTON *h) {
+static void FlagClosed(cfac_t *cfac, SHAMILTON *hs) {
   int i, j, k, m1, m2;
   CONFIG *c;
   unsigned char t[MBCLOSE];
 
-  for (i = 0; i < h->nbasis; i++) {
-    c = GetConfig(cfac, h->basis[i]);
+  for (i = 0; i < hs->nbasis; i++) {
+    c = GetConfig(cfac, hs->basis[i]);
     for (k = 0; k < MBCLOSE; k++) {
       t[k] = 0;
     }
@@ -268,19 +209,23 @@ void FlagClosed(SHAMILTON *h) {
       }      
     }
     for (k = 0; k < MBCLOSE; k++) {
-      if (i == 0) h->closed[k] = t[k];
-      else h->closed[k] &= t[k];
+      if (i == 0) hs->closed[k] = t[k];
+      else hs->closed[k] &= t[k];
     }
   }
 }
 
-int IsClosedShell(int ih, int k) {
+static int IsClosedShell(const cfac_t *cfac, int ih, int k) {
   int i, j;
+  
+  if (ih >= MAX_HAMS) {
+    abort();
+  }
 
   i = k/8;
   if (i >= MBCLOSE) return 0;
   j = k%8;
-  return (hams[ih].closed[i] & (1 << j));
+  return (cfac->hams[ih].closed[i] & (1 << j));
 }
 
 static int ConstructHamiltonDiagonal(cfac_t *cfac,
@@ -359,12 +304,12 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
   }
 
   if (m > 0) {
-    if (nhams >= MAX_HAMS) {
+    if (cfac->nhams >= MAX_HAMS) {
       printf("Number of hamiltons exceeded the maximum %d\n", MAX_HAMS);
       exit(1);
     }
-    hs = &hams[nhams];
-    nhams++;
+    hs = &cfac->hams[cfac->nhams];
+    cfac->nhams++;
     hs->pj = h->pj;
     hs->nlevs = h->dim;
     hs->nbasis = h->n_basis;
@@ -373,7 +318,7 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
       s = (STATE *) ArrayGet(&(sym->states), h->basis[t]);
       hs->basis[t] = s;
     }
-    FlagClosed(hs);
+    FlagClosed(cfac, hs);
   }
 
 #ifdef PERFORM_STATISTICS
@@ -557,12 +502,12 @@ int ConstructHamilton(cfac_t *cfac,
     }
   }
   if (m3) {
-    if (nhams >= MAX_HAMS) {
+    if (cfac->nhams >= MAX_HAMS) {
       printf("Number of hamiltons exceeded the maximum %d\n", MAX_HAMS);
       exit(1);
     }
-    hs = &hams[nhams];
-    nhams++;
+    hs = &cfac->hams[cfac->nhams];
+    cfac->nhams++;
     hs->pj = h->pj;
     hs->nlevs = h->dim;
     hs->nbasis = h->n_basis;
@@ -571,7 +516,7 @@ int ConstructHamilton(cfac_t *cfac,
       s = (STATE *) ArrayGet(&(sym->states), h->basis[t]);
       hs->basis[t] = s;
     }
-    FlagClosed(hs);
+    FlagClosed(cfac, hs);
   }
 #ifdef PERFORM_STATISTICS
   stop = clock();
@@ -1819,7 +1764,7 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg) {
     }
     lev.energy = h->mixing[i];
     lev.pj = h->pj;
-    lev.iham = nhams-1;
+    lev.iham = cfac->nhams-1;
     lev.ilev = i;
     lev.pb = h->basis[k];
     lev.ibasis = (short *) malloc(sizeof(short)*h->n_basis);
@@ -2793,8 +2738,8 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
     return ns;
   }
 
-  ns1 = hams[ih1].nbasis;
-  ns2 = hams[ih2].nbasis;
+  ns1 = cfac->hams[ih1].nbasis;
+  ns2 = cfac->hams[ih2].nbasis;
   (*ad)->ns = ns1*ns2;
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
@@ -2806,7 +2751,7 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   pnz = (*ad)->nz;
 
   for (i1 = 0; i1 < ns1; i1++) {
-    s1 = hams[ih1].basis[i1];
+    s1 = cfac->hams[ih1].basis[i1];
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
     ks1 = s1->kstate;    
@@ -2817,7 +2762,7 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
       i2m = 0;
     }
     for (i2 = i2m; i2 < ns2; i2++) {
-      s2 = hams[ih2].basis[i2];
+      s2 = cfac->hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
       ks2 = s2->kstate;          
@@ -2878,7 +2823,8 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
 	for (q = 0; q < n_shells; q++) {	    
 	  p = ShellToInt(bra[q].n, bra[q].kappa);
 	  if (ih1 != ih2 || i1 != i2) {
-	    if (IsClosedShell(ih1, p) && IsClosedShell(ih2, p)) continue;
+	    if (IsClosedShell(cfac, ih1, p) &&
+                IsClosedShell(cfac, ih2, p)) continue;
 	  }
 	  s[0].index = n_shells - q - 1;      
 	  s[1].index = s[0].index;
@@ -2999,8 +2945,8 @@ int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
     return ns;
   }
 
-  ns1 = hams[ih1].nbasis;
-  ns2 = hams[ih2].nbasis;
+  ns1 = cfac->hams[ih1].nbasis;
+  ns2 = cfac->hams[ih2].nbasis;
   (*ad)->ns = ns1 * ns2;
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
@@ -3013,14 +2959,14 @@ int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   pnz = (*ad)->nz;
     
   for (i1 = 0; i1 < ns1; i1++) {
-    s1 = hams[ih1].basis[i1];
+    s1 = cfac->hams[ih1].basis[i1];
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
     ks1 = s1->kstate;    
     c1 = GetConfigFromGroup(cfac, kg1, kc1);
     j1 = (c1->csfs[ks1]).totalJ;
     for (i2 = 0; i2 < ns2; i2++) {
-      s2 = hams[ih2].basis[i2];
+      s2 = cfac->hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
       ks2 = s2->kstate;          
@@ -3140,8 +3086,8 @@ int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
     return ns;
   }
   
-  ns1 = hams[ih1].nbasis;
-  ns2 = hams[ih2].nbasis;
+  ns1 = cfac->hams[ih1].nbasis;
+  ns2 = cfac->hams[ih2].nbasis;
   (*ad)->ns = ns1*ns2;
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZxZMIX *)*ns);
@@ -3153,14 +3099,14 @@ int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
 
 
   for (i1 = 0; i1 < ns1; i1++) {
-    s1 = hams[ih1].basis[i1];
+    s1 = cfac->hams[ih1].basis[i1];
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
     ks1 = s1->kstate;    
     c1 = GetConfigFromGroup(cfac, kg1, kc1);
     j1 = (c1->csfs[ks1]).totalJ;
     for (i2 = 0; i2 < ns2; i2++) {
-      s2 = hams[ih2].basis[i2];
+      s2 = cfac->hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
       ks2 = s2->kstate;          
@@ -3281,7 +3227,7 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
     s1 = ArrayGet(&(sym1->states), lev1->pb);
     if (s1->kgroup < 0) continue;
     ne1 = GetGroup(cfac, s1->kgroup)->n_electrons;
-    ns1 = hams[ih1].nlevs;
+    ns1 = cfac->hams[ih1].nlevs;
     for (i2 = 0; i2 < n2; i2++) {
       lev2 = GetLevel(cfac, is2[i2]);
       ih2 = lev2->iham;
@@ -3290,23 +3236,23 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
       if (s2->kgroup < 0) continue;
       ne2 = GetGroup(cfac, s2->kgroup)->n_electrons;
       if (abs(ne2-ne1) > 1) continue;
-      ns2 = hams[ih2].nlevs;
+      ns2 = cfac->hams[ih2].nlevs;
       ns = ns1*ns2;
       if (ne1 == ne2) {
 	if (ih1 > ih2) {
 	  iz = ih2 * MAX_HAMS + ih1;
-	  is = lev2->ilev * hams[ih1].nlevs + lev1->ilev;
+	  is = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
 	} else {
 	  iz = ih1 * MAX_HAMS + ih2;
-	  is = lev1->ilev *hams[ih2].nlevs + lev2->ilev;
+	  is = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
 	}
       } else {
 	if (ne1 > ne2) {
 	  iz = ih2 * MAX_HAMS + ih1;
-	  is = lev2->ilev * hams[ih1].nlevs + lev1->ilev;
+	  is = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
 	} else {
 	  iz = ih1 * MAX_HAMS + ih2;
-	  is = lev1->ilev *hams[ih2].nlevs + lev2->ilev;
+	  is = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
 	}
       }
       ad = &(angmz_array[iz]);
@@ -3376,7 +3322,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
       ad = &(angmz_array[isz]);
       nz = 0;
       if (ad->ns > 0) {
-	isz0 = lev1->ilev * hams[ih2].nlevs + lev2->ilev;
+	isz0 = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
 	nz = (ad->nz)[isz0];
 	if (nz > 0) {
 	  *ang = malloc(sizeof(ANGULAR_ZFB)*nz);
@@ -3427,7 +3373,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
       ih1 = lev1->ibasis[i];
-      isz0 = ih1 * hams[lev2->iham].nbasis;
+      isz0 = ih1 * cfac->hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
 	if (fabs(mix2) < cfac->angz_cut) continue;
@@ -3504,9 +3450,9 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       nz = 0;
       if (ad->ns > 0) {
 	if (ih1 > ih2) {
-	  isz0 = lev2->ilev * hams[ih1].nlevs + lev1->ilev;
+	  isz0 = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
 	} else {
-	  isz0 = lev1->ilev * hams[ih2].nlevs + lev2->ilev;
+	  isz0 = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
 	}
 	nz = (ad->nz)[isz0];
 	if (nz > 0) {
@@ -3702,7 +3648,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
       ih1 = lev1->ibasis[i];
-      isz0 = ih1 * hams[lev2->iham].nbasis;
+      isz0 = ih1 * cfac->hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
 	if (fabs(mix2) < cfac->angz_cut) continue;
@@ -3823,7 +3769,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;      
       ih1 = lev1->ibasis[i];
-      isz0 = ih1 * hams[lev2->iham].nbasis;
+      isz0 = ih1 * cfac->hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
 	if (fabs(mix2) < cfac->angz_cut) continue;
@@ -4208,16 +4154,16 @@ void FreeLevelData(void *p) {
   }
 }
 
-void FreeHamsArray() {
+void FreeHamsArray(cfac_t *cfac) {
   int i;
 
-  for (i = 0; i < nhams; i++) {
-    if (hams[i].nbasis > 0) {
-      free(hams[i].basis);
+  for (i = 0; i < cfac->nhams; i++) {
+    if (cfac->hams[i].nbasis > 0) {
+      free(cfac->hams[i].basis);
     }
-    hams[i].nbasis = 0;
+    cfac->hams[i].nbasis = 0;
   }
-  nhams = 0;
+  cfac->nhams = 0;
 }
 
 void ClearAngularFrozen(void) {
@@ -4297,7 +4243,7 @@ int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
 
 int InitStructure(void) {
   InitAngZArray();
-  nhams = 0;
+  cfac->nhams = 0;
 
   ang_frozen.nts = 0;
   ang_frozen.ncs = 0;

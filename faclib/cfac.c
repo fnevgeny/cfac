@@ -54,6 +54,14 @@ cfac_t *cfac_new(void)
         return NULL;
     }
     memset(cfac->hamiltonian, 0, sizeof(HAMILTON));
+    
+    cfac->nhams = 0;
+    cfac->hams = malloc(MAX_HAMS*sizeof(SHAMILTON));
+    if (!cfac->hams) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    memset(cfac->hams, 0, MAX_HAMS*sizeof(SHAMILTON));
 
 
     cfac->levels = malloc(sizeof(ARRAY));
@@ -114,6 +122,9 @@ void cfac_free(cfac_t *cfac)
         free(cfac->ecorrections);
         
         /* FIXME: properly free hamiltonian */
+        
+        FreeHamsArray(cfac);
+        free(cfac->hams);
         
         free(cfac);
     }

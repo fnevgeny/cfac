@@ -28,9 +28,9 @@ typedef struct _HAMILTON_ {
 } HAMILTON;
 
 typedef struct _SHAMILTON_ {
-  int pj;
-  int nbasis, nlevs;
-  STATE **basis;
+  int pj;            /* symmetry index                                   */
+  int nbasis, nlevs; /* equal to n_basis & dim of HAMILTON, respectively */
+  STATE **basis;     /* n_basis pointers to STATE structures             */
   unsigned char closed[MBCLOSE];
 } SHAMILTON;
 
@@ -125,7 +125,6 @@ typedef struct _STRUCT_TIMING_ {
 int GetStructTiming(STRUCT_TIMING *t);
 #endif
 
-int SortUnique(int n, int *a);
 int CompareInt(const void *a1, const void *a2);
 int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
@@ -142,7 +141,6 @@ double Hamilton2E(int n_shells, SHELL_STATE *sbra,
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 double Hamilton1E(int n_shells, SHELL_STATE *sbra, 
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
-SHAMILTON *GetSHamilton(int *n);
 int DiagonalizeHamilton(cfac_t *cfac);
 int AddToLevels(cfac_t *cfac, int ng, int *kg);
 int AddECorrection(cfac_t *cfac, int kref, int k, double e, int nmin);
@@ -200,11 +198,7 @@ int ClearLevelTable(void);
 int InitStructure(void);
 int ReinitStructure(int m);
 int TestHamilton(void);
-int ShellDegeneracy(int g, int nq);
-int ZerothEnergyConfigSym(int n, int *s0, double **e);
 void CutMixing(int nlev, int *ilev, int n, int *kg, double c);
-void FlagClosed(SHAMILTON *h);
-int IsClosedShell(int ih, int p);
 int AllocHamMem(HAMILTON *h, int hdim, int nbasis);
 void SetFields(cfac_t *cfac, double b, double e, double a, int m);
 void GetFields(const cfac_t *cfac, double *b, double *e, double *a);

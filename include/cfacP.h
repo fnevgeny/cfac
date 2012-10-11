@@ -31,6 +31,9 @@ struct _cfac_t {
     
     HAMILTON *hamiltonian;    /* Hamiltonian                                 */
 
+    SHAMILTON *hams;          /* state Hamiltonians                          */
+    int nhams;                /* number of them in use                       */
+
     ARRAY *levels;            /* levels                                      */
     int n_levels;             /* number of levels                            */
     
@@ -61,6 +64,8 @@ FreeConfigData(void *p);
 /* structure.c */
 void
 FreeLevelData(void *p);
+void
+FreeHamsArray(cfac_t *cfac);
 void
 InitLevelData(void *p, int n);
 

@@ -3,7 +3,6 @@
 #include <gsl/gsl_ieee_utils.h>
 
 #include "cfacP.h"
-#include "global.h"
 #include "coulomb.h"
 #include "recouple.h"
 #include "angular.h"

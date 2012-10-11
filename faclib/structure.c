@@ -6,7 +6,6 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_eigen.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "radial.h"
 #include "angular.h"

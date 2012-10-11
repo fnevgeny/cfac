@@ -190,10 +190,10 @@ int ConstructLevelName(char *name, char *sname, char *nc,
 int GetTransition(int nlo, int nup, TRANSITION *tr, int *swapped);
 int SaveLevels(char *fn, int m, int n);
 int SaveEBLevels(char *fn, int m, int n);
-int SetAngZOptions(int n, double mc, double c);
+int SetAngZOptions(cfac_t *cfac, int n, double mc, double c);
 int SetAngZCut(double c);
-int SetCILevel(int m);
-int SetMixCut(double c, double c2);
+int SetCILevel(cfac_t *cfac, int m);
+int SetMixCut(cfac_t *cfac, double c, double c2);
 int FreeAngZArray(void);
 int InitAngZArray(void);
 int ClearLevelTable(void);

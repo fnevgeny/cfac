@@ -18,12 +18,11 @@ struct _cfac_t {
     cfac_nucleus_t nucleus;
 
     CONFIG_GROUP *cfg_groups; /* a list of configuration groups              */
-    int n_groups;             /* number of groups present                    */
+    int n_groups;             /* number of configuration groups present      */
 
     double ef, bf, eb_angle;  /* electric, magnetic ield, and angle between  */
     double e1[3];             /* spherical components of the E field         */
     double b0, b1[3], b2[5];  /* 0th, 1st, and 2nd-order tensors of B        */
-
 
     SYMMETRY *symmetry_list;  /* list of symmetries. The i-th symmetry has
                                  j = floor(i/2) and parity = mod(i, 2).      */
@@ -31,7 +30,6 @@ struct _cfac_t {
     ARRAY *levels_per_ion;
     
     HAMILTON *hamiltonian;    /* Hamiltonian                                 */
-
 
     ARRAY *levels;            /* levels                                      */
     int n_levels;             /* number of levels                            */
@@ -41,6 +39,19 @@ struct _cfac_t {
 
     ARRAY *ecorrections;      /* energy corrections                          */
     int ncorrections;         /* number of energy corrections                */
+
+    int confint;              /* configuration interaction flag (-1,0,1,2,3) */
+
+    int angz_maxn;            /* max PQN above which angular mix between
+                                 different bound configurations is ignored   */
+    double angz_cut;          /* threshold of angular mixing                 */
+    
+    double mix_cut;           /* threshold mixing (relative to the leading
+                                 component); bases with weaker mixings are
+                                 not recoupled                               */
+    
+    double mix_cut2;          /* _lower_ threshold for recoupling between
+                                 different configurations                    */
 };
 
 /* config.c */

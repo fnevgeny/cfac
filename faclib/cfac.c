@@ -14,6 +14,13 @@ cfac_t *cfac_new(void)
     }
     memset(cfac, 0, sizeof(cfac_t));
 
+    cfac->confint = 0;
+    
+    cfac->angz_maxn = 0;
+    cfac->angz_cut = ANGZCUT;
+    cfac->mix_cut = MIXCUT;
+    cfac->mix_cut2 = MIXCUT2;
+
     /* init config groups */
     cfac->n_groups = 0;
     cfac->cfg_groups = malloc(MAX_GROUPS*sizeof(CONFIG_GROUP));

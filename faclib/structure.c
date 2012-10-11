@@ -34,12 +34,6 @@ static ANGZ_DATUM *angzxz_array;
 static ANGZ_DATUM *angmz_array;
 static ANGULAR_FROZEN ang_frozen;
 
-static int ci_level = 0;
-static int rydberg_ignored = 0;
-static double angz_cut = ANGZCUT;
-static double mix_cut = MIXCUT;
-static double mix_cut2 = MIXCUT2;
-
 #ifdef PERFORM_STATISTICS 
 static STRUCT_TIMING timing = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int GetStructTiming(STRUCT_TIMING *t) {
@@ -164,29 +158,29 @@ void InitLevelData(void *p, int n) {
   }
 }
 
-int SetCILevel(int m) {
-  ci_level = m;
+int SetCILevel(cfac_t *cfac, int m) {
+  cfac->confint = m;
   return 0;
 }
 
 int SetAngZCut(double cut) {
-  if (cut >= 0) angz_cut = cut;
-  else angz_cut = ANGZCUT;
+  if (cut >= 0) cfac->angz_cut = cut;
+  else cfac->angz_cut = ANGZCUT;
   return 0;
 }
 
-int SetMixCut(double cut, double cut2) {
-  if (cut >= 0) mix_cut = cut;
-  else cut = MIXCUT;
-  if (cut2 >= 0) mix_cut2 = cut2;
-  else cut2 = MIXCUT2;
+int SetMixCut(cfac_t *cfac, double cut, double cut2) {
+  if (cut >= 0) cfac->mix_cut = cut;
+  else cfac->mix_cut = MIXCUT;
+  if (cut2 >= 0) cfac->mix_cut2 = cut2;
+  else cfac->mix_cut2 = MIXCUT2;
   return 0;
 }
 
-int SetAngZOptions(int n, double mix, double cut) {
-  rydberg_ignored = n;
-  mix_cut = mix;
-  angz_cut = cut;
+int SetAngZOptions(cfac_t *cfac, int n, double mix, double cut) {
+  cfac->angz_maxn = n;
+  cfac->mix_cut = mix;
+  cfac->angz_cut = cut;
   return 0;
 }
 
@@ -491,7 +485,7 @@ int ConstructHamilton(HAMILTON *h,
   
   if (m1) {
     if (k <= 0) return -1;
-    if (ci_level == -1) {
+    if (cfac->confint == -1) {
       return ConstructHamiltonDiagonal(h, isym, k, kg, 1);
     }
     st = &(sym->states);
@@ -1088,7 +1082,7 @@ void HamiltonElement1E2E(int isym, int isi, int isj, double *x1, double *x2) {
   cj = GetConfig(cfac, sj);
   if (cj->n_shells == 0) return;
   
-  switch (ci_level) {
+  switch (cfac->confint) {
   case 1:
     if (ci != cj) return;
   case 2:
@@ -1248,7 +1242,7 @@ int SlaterCoeff(char *fn, int nlevs, int *ilevs,
       k0 = s0->kstate;
       for (i1 = 0; i1 < lev->n_basis; i1++) {
 	a = lev->mixing[i0] * lev->mixing[i1];
-	if (fabs(a) < angz_cut) continue;
+	if (fabs(a) < cfac->angz_cut) continue;
 	s1 = (STATE *) ArrayGet(&(sym->states), lev->basis[i1]);
 	c1 = GetConfig(cfac, s1);
 	k1 = s1->kstate;
@@ -1685,7 +1679,7 @@ int DiagonalizeHamilton(HAMILTON *h) {
     abort();
   }
   
-  if (ci_level == -1) {
+  if (cfac->confint == -1) {
     /* no configuration interaction at all */
     mixing = h->mixing+n;
     for (i = 0; i < n; i++) {
@@ -1798,8 +1792,8 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
     if (ng > 0) {      
       if (!InGroups(s->kgroup, ng, kg)) {
 	m = 0;
-	if (mix_cut2 < 1.0) {
-	  a = fabs(mix_cut2*mix[k]);
+	if (cfac->mix_cut2 < 1.0) {
+	  a = fabs(cfac->mix_cut2*mix[k]);
 	  for (t = 0; t < h->n_basis; t++) {
 	    if (fabs(mix[t]) >= a && t != k) {
 	      s1 = (STATE *) ArrayGet(&(sym->states), h->basis[t]);
@@ -1824,7 +1818,7 @@ int AddToLevels(HAMILTON *h, int ng, int *kg) {
     lev.ibasis = (short *) malloc(sizeof(short)*h->n_basis);
     lev.basis = (int *) malloc(sizeof(int)*h->n_basis);
     lev.mixing = (double *) malloc(sizeof(double)*h->n_basis);
-    a = fabs(mix_cut * mix[k]);
+    a = fabs(cfac->mix_cut * mix[k]);
     for (t = 0, m = 0; t < h->n_basis; t++) {
       if (fabs(mix[t]) < a) continue;
       lev.ibasis[m] = t;
@@ -3401,7 +3395,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
     (*ang) = malloc(sizeof(ANGULAR_ZFB)*nz);
     for (j = 0; j < lev2->n_basis; j++) {
       mix2 = lev2->mixing[j];
-      if (fabs(mix2) < angz_cut) {
+      if (fabs(mix2) < cfac->angz_cut) {
 	break;
       }
       sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
@@ -3412,7 +3406,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
 	jf = GetOrbital(kb)->kappa;
 	jf = GetJFromKappa(jf);
 	r0 = mix2*sqrt_j2;
-	if (fabs(r0) < angz_cut) continue;
+	if (fabs(r0) < cfac->angz_cut) continue;
 	if (IsEven((j2+jf-j1)/2)) r0 = -r0;
 	ia = AddToAngularZFB(&n, &nz, ang, kb, r0);
       }
@@ -3424,14 +3418,14 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
     ns = AngularZFreeBoundStates(&ad, lev1->iham, lev2->iham);
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
-      if (fabs(mix1) < angz_cut) continue;
+      if (fabs(mix1) < cfac->angz_cut) continue;
       ih1 = lev1->ibasis[i];
       isz0 = ih1 * hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < angz_cut) continue;
+	if (fabs(mix2) < cfac->angz_cut) continue;
 	r0 = mix1*mix2;
-	if (fabs(r0) < angz_cut) continue;
+	if (fabs(r0) < cfac->angz_cut) continue;
 	ih2 = lev2->ibasis[j];
 	isz = isz0 + ih2;
 	m = (ad->nz)[isz];
@@ -3439,7 +3433,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
 	  ang_sub = (ad->angz)[isz];
 	  kb = ang_sub->kb;
 	  r0 *= ang_sub->coeff;
-	  if (fabs(r0) < angz_cut) continue;
+	  if (fabs(r0) < cfac->angz_cut) continue;
 	  ia = AddToAngularZFB(&n, &nz, ang, kb, r0);
 	}
       }
@@ -3558,7 +3552,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   if (kg1 < 0) {
     kb1 = slow->kcfg;
     n = GetOrbital(kb1)->n;
-    if (rydberg_ignored > 0 && rydberg_ignored < n) ignore_ryd = 1;
+    if (cfac->angz_maxn > 0 && cfac->angz_maxn < n) ignore_ryd = 1;
     nmax = GetNMax();
     if (n >= nmax && kg2 < 0) {
       kb2 = sup->kcfg;
@@ -3570,7 +3564,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   } else if (kg2 < 0) {
     kb2 = sup->kcfg;
     n = GetOrbital(kb2)->n;
-    if (rydberg_ignored > 0 && rydberg_ignored < n) ignore_ryd = 1;
+    if (cfac->angz_maxn > 0 && cfac->angz_maxn < n) ignore_ryd = 1;
   }
   
   n = 0;
@@ -3579,7 +3573,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   if (kg1 < 0 && kg2 < 0) {      
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
-      if (fabs(mix1) < angz_cut) continue;
+      if (fabs(mix1) < cfac->angz_cut) continue;
       slow = (STATE *) ArrayGet(&(sym1->states), lev1->basis[i]);
       jlow = GetBaseJ(slow);
       kg1 = slow->kgroup;
@@ -3589,9 +3583,9 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       jb1 = GetJFromKappa(jb1);
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < angz_cut) continue;
+	if (fabs(mix2) < cfac->angz_cut) continue;
 	a = mix1*mix2;
-	if (fabs(a) < angz_cut) continue;
+	if (fabs(a) < cfac->angz_cut) continue;
 	sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
 	jup = GetBaseJ(sup);
 	kg2 = sup->kgroup;
@@ -3609,7 +3603,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 	    r0 = W6j(jlow, jb1, j1, ik, j2, jb2);
 	    if (fabs(r0) < EPS30) continue;
 	    r0 *= a*sqrt_j12;
-	    if (fabs(r0) < angz_cut) continue;
+	    if (fabs(r0) < cfac->angz_cut) continue;
 	    if (IsEven((j1+jb2-jlow-ik)/2+j2)) r0 = -r0;
 	    im = AddToAngularZMix(&n, &nz, ang, ik, kb1, kb2, r0);
 	  }
@@ -3623,7 +3617,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 	    r0 = W6j(jlow, jb1, j1, j2, ang_sub[m].k, jup);
 	    if (fabs(r0) < EPS30) continue;
 	    r0 *= a*ang_sub[m].coeff;
-	    if (fabs(r0) < angz_cut) continue;
+	    if (fabs(r0) < cfac->angz_cut) continue;
 	    r0 *= sqrt_j12;
 	    if (IsOdd((jlow+jb1+j2+ang_sub[m].k)/2)) r0 = -r0;
 	    im = AddToAngularZMix(&n, &nz, ang, ang_sub[m].k, 
@@ -3637,7 +3631,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   } else if (kg1 < 0 && !ignore_ryd) {        
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
-      if (fabs(mix1) < angz_cut) continue;
+      if (fabs(mix1) < cfac->angz_cut) continue;
       slow = (STATE *) ArrayGet(&(sym1->states), lev1->basis[i]);
       kb1 = slow->kcfg;
       jb1 = GetOrbital(kb1)->kappa;
@@ -3653,7 +3647,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 	  r0 = W6j(jlow, jb1, j1, ik, j2, jb2);
 	  if (fabs(r0) < EPS30) continue;
 	  r0 *= mix1*afb[m].coeff*sqrt(j1+1.0);
-	  if (fabs(r0) < angz_cut) continue;
+	  if (fabs(r0) < cfac->angz_cut) continue;
 	  if (IsOdd((j1+j2-ik)/2)) r0 = -r0;
 	  im = AddToAngularZMix(&n, &nz, ang, ik, kb1, afb[m].kb, r0);
 	}
@@ -3664,7 +3658,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   } else if (kg2 < 0 && !ignore_ryd) {
     for (j = 0; j < lev2->n_basis; j++) {
       mix2 = lev2->mixing[j];
-      if (fabs(mix2) < angz_cut) continue;
+      if (fabs(mix2) < cfac->angz_cut) continue;
       sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
       kb2 = sup->kcfg;
       jb2 = GetOrbital(kb2)->kappa;
@@ -3680,7 +3674,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 	  r0 = W6j(jup, jb2, j2, ik, j1, jb1);
 	  if (fabs(r0) < EPS30) continue;
 	  r0 *= mix2*afb[m].coeff*sqrt(j2+1.0);
-	  if (fabs(r0) < angz_cut) continue;
+	  if (fabs(r0) < cfac->angz_cut) continue;
 	  if (IsOdd((2*j1-ik+jb1-jb2)/2)) r0 = -r0;
 	  im = AddToAngularZMix(&n, &nz, ang, ik, afb[m].kb, kb2, r0);
 	}
@@ -3699,14 +3693,14 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
     ns = AngularZMixStates(&ad, lev1->iham, lev2->iham);
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
-      if (fabs(mix1) < angz_cut) continue;
+      if (fabs(mix1) < cfac->angz_cut) continue;
       ih1 = lev1->ibasis[i];
       isz0 = ih1 * hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < angz_cut) continue;
+	if (fabs(mix2) < cfac->angz_cut) continue;
 	a = mix1*mix2;
-	if (fabs(a) < angz_cut) continue;
+	if (fabs(a) < cfac->angz_cut) continue;
 	ih2 = lev2->ibasis[j];
 	isz = isz0 + ih2;
 	nz_sub = (ad->nz)[isz];
@@ -3715,7 +3709,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 	  for (m = 0; m < nz_sub; m++) {
 	    if (ang_sub[m].k > kmax || ang_sub[m].k < kmin) continue;
 	    r0 = ang_sub[m].coeff*a;
-	    if (fabs(r0) < angz_cut) continue;
+	    if (fabs(r0) < cfac->angz_cut) continue;
 	    im = AddToAngularZMix(&n, &nz, ang, ang_sub[m].k, 
 				  ang_sub[m].k0, ang_sub[m].k1, r0);
 	  }
@@ -3784,7 +3778,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
   if (sup->kgroup < 0) {  
     for (j = 0; j < lev2->n_basis; j++) {
       mix2 = lev2->mixing[j];
-      if (fabs(mix2) < angz_cut) continue;
+      if (fabs(mix2) < cfac->angz_cut) continue;
       sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
       kb = sup->kcfg;
       jb = GetOrbital(kb)->kappa;
@@ -3809,7 +3803,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
 	  if (fabs(r0) < EPS30) continue;
 	  if (IsOdd((jup+jf+j2)/2)) r0 = -r0;
 	  r0 *= r;
-	  if (fabs(r0) < angz_cut) continue;
+	  if (fabs(r0) < cfac->angz_cut) continue;
 	  im = AddToAngularZxZMix(&n, &nz, ang, ang_z[i].k, 
 				  jf, kb, orb0, orb1, r0);
 	}
@@ -3820,14 +3814,14 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
     ns = AngularZxZFreeBoundStates(&ad, lev1->iham, lev2->iham);
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
-      if (fabs(mix1) < angz_cut) continue;      
+      if (fabs(mix1) < cfac->angz_cut) continue;      
       ih1 = lev1->ibasis[i];
       isz0 = ih1 * hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < angz_cut) continue;
+	if (fabs(mix2) < cfac->angz_cut) continue;
 	r = mix1*mix2;
-	if (fabs(r) < angz_cut) continue;	
+	if (fabs(r) < cfac->angz_cut) continue;	
 	ih2 = lev2->ibasis[j];
 	isz = isz0 + ih2;
 	nz_sub = (ad->nz)[isz];
@@ -3835,7 +3829,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
 	  ang_sub = (ad->angz)[isz];
 	  for (m = 0; m < nz_sub; m++) {
 	    r0 = ang_sub[m].coeff*r;
-	    if (fabs(r0) < angz_cut) continue;
+	    if (fabs(r0) < cfac->angz_cut) continue;
 	    im = AddToAngularZxZMix(&n, &nz, ang, 
 				    ang_sub[m].k, ang_sub[m].k0,
 				    ang_sub[m].k1, ang_sub[m].k2,

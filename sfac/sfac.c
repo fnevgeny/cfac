@@ -1035,7 +1035,7 @@ static int PSetAngZOptions(int argc, char *argv[], int argt[],
       c = atof(argv[2]);
     }
   }
-  SetAngZOptions(n, mc, c);
+  SetAngZOptions(cfac, n, mc, c);
   
   return 0;
 }
@@ -1046,7 +1046,7 @@ static int PSetCILevel(int argc, char *argv[], int argt[],
   
   if (argc != 1 || argt[0] != NUMBER) return -1;
   i = atoi(argv[0]);
-  SetCILevel(i);
+  SetCILevel(cfac, i);
 
   return 0;
 }
@@ -1074,7 +1074,7 @@ static int PSetMixCut(int argc, char *argv[], int argt[],
     if (argt[1] != NUMBER) return -1;
     c2 = atof(argv[1]);
   }
-  SetMixCut(c, c2);
+  SetMixCut(cfac, c, c2);
   
   return 0;
 }

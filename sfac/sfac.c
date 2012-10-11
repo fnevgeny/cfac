@@ -861,15 +861,6 @@ static int PPause(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PPrintMemInfo(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
-#ifdef DEBUG_ARRAY
-  PrintMemInfo();
-#endif
- 
-  return 0;
-}
-
 static int PPrintTable(int argc, char *argv[], int argt[], 
 		       ARRAY *variables) {
   int v;
@@ -3087,7 +3078,6 @@ static METHOD methods[] = {
   {"Pause", PPause},
   {"RadialOverlaps", PRadialOverlaps},
   {"RefineRadial", PRefineRadial},
-  {"PrintMemInfo", PPrintMemInfo},
   {"PrintTable", PPrintTable},
   {"RecStates", PRecStates},
   {"RRTable", PRRTable},

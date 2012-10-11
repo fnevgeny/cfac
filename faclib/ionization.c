@@ -698,7 +698,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
     lev2 = GetLevel(cfac, f);
     *te = lev2->energy - lev1->energy;
     if (*te <= 0) return -1;
-    nz = AngularZFreeBound(&ang, f, b);
+    nz = AngularZFreeBound(cfac, &ang, f, b);
     if (nz <= 0) return -1;
     for (i = 0; i < n_usr; i++) {
       xusr[i] = usr_egrid[i]/(*te);
@@ -739,7 +739,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
     kl0 = BoundFreeOS(qke, qkc, te, b, f, -1);
     if (kl0 < 0) return kl0;
     
-    nz = AngularZFreeBound(&ang, f, b);
+    nz = AngularZFreeBound(cfac, &ang, f, b);
     
     for (i = 0; i < n_egrid; i++) {
       x[i] = 1.0 + egrid[i]/(*te);
@@ -954,7 +954,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
   fhdr.type = DB_CI;
   strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
   fhdr.atom = GetAtomicNumber(cfac);
-  ci_hdr.nele = GetNumElectrons(b[0]);
+  ci_hdr.nele = GetNumElectrons(cfac, b[0]);
   ci_hdr.qk_mode = qk_mode;
   ci_hdr.nparams = nqk;
   ci_hdr.pw_type = pw_type;
@@ -1352,7 +1352,7 @@ int IonizeStrengthMSub(double *qku, double *te, int b, int f) {
   }
 
 
-  nz = AngularZFreeBound(&ang, f, b);
+  nz = AngularZFreeBound(cfac, &ang, f, b);
   for (i = 0; i < nz; i++) {
     kb = ang[i].kb;
     for (ip = 0; ip <= i; ip++) {
@@ -1461,7 +1461,7 @@ int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
   fhdr.type = DB_CIM;
   strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
   fhdr.atom = GetAtomicNumber(cfac);
-  ci_hdr.nele = GetNumElectrons(b[0]);
+  ci_hdr.nele = GetNumElectrons(cfac, b[0]);
   ci_hdr.egrid_type = egrid_type;
   ci_hdr.usr_egrid_type = usr_egrid_type;
   file = OpenFile(fn, &fhdr);

@@ -128,13 +128,14 @@ int GetStructTiming(STRUCT_TIMING *t);
 int CompareInt(const void *a1, const void *a2);
 int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
-int ValidBasis(STATE *s, int k, int *kg, int n);
+int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n);
 int ConstructHamiltonFrozen(cfac_t *cfac,
     int isym, int k, int *kg, int n, int nc, int *kc);
-void HamiltonElement1E2E(int isym, int isi, int isj, double *r1, double *r2);
-double HamiltonElement(int isym, int isi, int isj);
-double HamiltonElementFrozen(int isym, int isi, int isj);
-double HamiltonElementFB(int isym, int isi, int isj);
+void HamiltonElement1E2E(cfac_t *cfac,
+    int isym, int isi, int isj, double *r1, double *r2);
+double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj);
+double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj);
+double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj);
 double Hamilton2E2(int n_shells, SHELL_STATE *sbra, 
 		   SHELL_STATE *sket,INTERACT_SHELL *s);
 double Hamilton2E(int n_shells, SHELL_STATE *sbra, 
@@ -146,32 +147,32 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg);
 int AddECorrection(cfac_t *cfac, int kref, int k, double e, int nmin);
 LEVEL *GetLevel(const cfac_t *cfac, int k);
 LEVEL *GetEBLevel(const cfac_t *cfac, int k);
-int LevelTotalJ(int k);
+int LevelTotalJ(cfac_t *cfac, int k);
 int GetNumEBLevels(const cfac_t *cfac);
 int GetNumLevels(const cfac_t *cfac);
-int GetLevNumElectrons(const LEVEL *lev);
-int GetNumElectrons(int k);
+int GetLevNumElectrons(cfac_t *cfac, const LEVEL *lev);
+int GetNumElectrons(cfac_t *cfac, int k);
 int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym);
 int GetPrincipleBasis(double *mix, int d, int *kpb);
-int CompareLevels(LEVEL *lev1, LEVEL *lev2);
-int SortLevels(int start, int n, int m);
-int GetBaseJ(STATE *s);
-void AngularFrozen(int nts, int *ts, int ncs, int *cs);
-void ClearAngularFrozen(void);
-int PrepAngular(int n1, int *is1, int n2, int *is2);
-int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk);
+int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2);
+int SortLevels(cfac_t *cfac, int start, int n, int m);
+int GetBaseJ(cfac_t *cfac, STATE *s);
+void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs);
+void ClearAngularFrozen(cfac_t *cfac);
+int PrepAngular(cfac_t *cfac, int n1, int *is1, int n2, int *is2);
+int AngularZMix(cfac_t *cfac,
+    ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk);
 int CompareAngularZMix(const void *c1, const void *c2);
 int CompareAngularZxZMix(const void *c1, const void *c2);
 int CompareAngularZFB(const void *c1, const void *c2);
 int PackAngularZxZMix(int *n, ANGULAR_ZxZMIX **ang, int nz);
 int PackAngularZMix(int *n, ANGULAR_ZMIX **ang, int nz);
 int PackAngularZFB(int *n, ANGULAR_ZFB **ang, int nz);
-int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper);
-int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2);
+int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper);
+int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AngZSwapBraKet(int nz, ANGULAR_ZMIX *ang, int p);
-int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2);
-int AngularZxZMixStates(ANGZ_DATUM **ad, int ih1, int ih2);
-int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2);
+int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
+int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AddToAngularZxZ(int *n, int *nz, ANGULAR_ZxZMIX **ang, 
 		    int n_shells, int phase, SHELL_STATE *sbra, 
 		    SHELL_STATE *sket, INTERACT_SHELL *s, int m);
@@ -181,20 +182,19 @@ int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
 		     int k, int k0, int k1, double coeff);
 int AddToAngularZFB(int *n, int *nz, ANGULAR_ZFB **ang,
 		    int kb, double coeff);
-int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper);
-int GetBasisTable(char *fn, int m);
-int ConstructLevelName(char *name, char *sname, char *nc, 
+int AngularZxZFreeBound(cfac_t *cfac, ANGULAR_ZxZMIX **ang, int lower, int upper);
+int GetBasisTable(cfac_t *cfac, char *fn, int m);
+int ConstructLevelName(cfac_t *cfac, char *name, char *sname, char *nc, 
 		       int *vnl, STATE *basis);
-int GetTransition(int nlo, int nup, TRANSITION *tr, int *swapped);
-int SaveLevels(char *fn, int m, int n);
-int SaveEBLevels(char *fn, int m, int n);
+int GetTransition(cfac_t *cfac, int nlo, int nup, TRANSITION *tr, int *swapped);
+int SaveLevels(cfac_t *cfac, char *fn, int m, int n);
+int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n);
 int SetAngZOptions(cfac_t *cfac, int n, double mc, double c);
-int SetAngZCut(double c);
+int SetAngZCut(cfac_t *cfac, double c);
 int SetCILevel(cfac_t *cfac, int m);
 int SetMixCut(cfac_t *cfac, double c, double c2);
-int ClearLevelTable(void);
-int TestHamilton(void);
-void CutMixing(int nlev, int *ilev, int n, int *kg, double c);
+int TestHamilton(cfac_t *cfac);
+void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c);
 int AllocHamMem(HAMILTON *h, int hdim, int nbasis);
 void SetFields(cfac_t *cfac, double b, double e, double a, int m);
 void GetFields(const cfac_t *cfac, double *b, double *e, double *a);
@@ -202,9 +202,10 @@ int CodeBasisEB(int s, int m);
 void DecodeBasisEB(int k, int *s, int *m);
 int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev);
 void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev);
-double HamiltonElementEB(cfac_t *cfac, int i, int j);
+double HamiltonElementEB(const cfac_t *cfac, int i, int j);
 
-int SlaterCoeff(char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 
+int SlaterCoeff(cfac_t *cfac,
+    char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 
 		int nb, SHELL *sb);
 void AddSlaterCoeff(double *c, double a, int n_shells, 
 		    SHELL_STATE *sbra, SHELL_STATE *sket, 

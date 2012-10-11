@@ -293,8 +293,8 @@ int RecStates(int n, int k, int *kg, char *fn) {
   }
   rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;
   n_complex++;
-  SortLevels(nlevels, -1, 0);
-  SaveLevels(fn, nlevels, -1);
+  SortLevels(cfac, nlevels, -1, 0);
+  SaveLevels(cfac, fn, nlevels, -1);
 
   return 0;
 }
@@ -379,8 +379,8 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
   }
   rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;
   n_complex++;
-  SortLevels(nlevels, -1, 0);
-  SaveLevels(fn, nlevels, -1);
+  SortLevels(cfac, nlevels, -1, 0);
+  SaveLevels(cfac, fn, nlevels, -1);
 
   return 0;
 }
@@ -788,7 +788,7 @@ int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
   eb = (lev2->energy - lev1->energy);
   if (eb <= 0.0) return -1;
 
-  nz = AngularZFreeBound(&ang, f, rec);
+  nz = AngularZFreeBound(cfac, &ang, f, rec);
   if (nz <= 0) return -1;
 
   k = abs(m)*2;
@@ -861,7 +861,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   *eb = (lev2->energy - lev1->energy);
   if (*eb <= 0.0) return -1;
 
-  nz = AngularZFreeBound(&ang, f, rec);
+  nz = AngularZFreeBound(cfac, &ang, f, rec);
   if (nz <= 0) return -1;
 
   gauge = GetTransitionGauge();
@@ -979,7 +979,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   lev1 = GetLevel(cfac, rec);
   lev2 = GetLevel(cfac, f);
 
-  if (GetLevNumElectrons(lev1) != GetLevNumElectrons(lev2) + 1) {
+  if (GetLevNumElectrons(cfac, lev1) != GetLevNumElectrons(cfac, lev2) + 1) {
     return -1;
   }
   
@@ -1010,7 +1010,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   p = malloc(sizeof(double)*nkappaf);
   for (ip = 0; ip < nkappaf; ip++) p[ip] = 0.0;
 
-  nz = AngularZxZFreeBound(&ang, f, rec);
+  nz = AngularZxZFreeBound(cfac, &ang, f, rec);
   nt = 1;
   if (nz > 0) {
     for (i = 0; i < nz; i++) {
@@ -1042,7 +1042,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
     free(ang);
   }
   
-  nzfb = AngularZFreeBound(&zfb, f, rec);
+  nzfb = AngularZFreeBound(cfac, &zfb, f, rec);
   if (nzfb > 0) {
     for (i = 0; i < nzfb; i++) {
       kb = zfb[i].kb;
@@ -1499,7 +1499,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   fhdr.type = DB_RR;
   strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
   fhdr.atom = GetAtomicNumber(cfac);
-  rr_hdr.nele = GetNumElectrons(low[0]);
+  rr_hdr.nele = GetNumElectrons(cfac, low[0]);
   rr_hdr.qk_mode = qk_mode;
   rr_hdr.nparams = nqk;
   rr_hdr.multipole = m;
@@ -1687,7 +1687,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
     for (j = 0; j < nup; j++) {
       lev2 = GetLevel(cfac, up[j]);
       
-      if (GetLevNumElectrons(lev1) != GetLevNumElectrons(lev2) + 1) {
+      if (GetLevNumElectrons(cfac, lev1) != GetLevNumElectrons(cfac, lev2) + 1) {
         continue;
       }
       
@@ -1730,10 +1730,10 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
   fhdr.atom = GetAtomicNumber(cfac);
   if (!msub) {
-    ai_hdr.nele = GetNumElectrons(low[0]);
+    ai_hdr.nele = GetNumElectrons(cfac, low[0]);
     ai_hdr.emin = eref;
   } else {
-    ai_hdr1.nele = GetNumElectrons(low[0]);
+    ai_hdr1.nele = GetNumElectrons(cfac, low[0]);
     ai_hdr1.emin = eref;
   }
   f = OpenFile(fn, &fhdr);

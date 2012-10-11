@@ -1993,11 +1993,11 @@ void TestAngular(void) {
     for (t = 0; t < sym->n_states; t++) {
       st1 = ArrayGet(s1, t);
       c1 = GetConfig(cfac, st1);      
-      ConstructLevelName(name1, NULL, NULL, NULL, st1);
+      ConstructLevelName(cfac, name1, NULL, NULL, NULL, st1);
       for (q = 0; q < sym->n_states; q++) {
 	st2 = ArrayGet(s2, q);
 	c2 = GetConfig(cfac, st2);
-	ConstructLevelName(name2, NULL, NULL, NULL, st2);
+	ConstructLevelName(cfac, name2, NULL, NULL, NULL, st2);
 	printf("Bra: %s \nKet: %s\n", name1, name2);
 	n_shells = GetInteract(&idatum, &sbra, &sket, 
 			       st1->kgroup, st2->kgroup, 

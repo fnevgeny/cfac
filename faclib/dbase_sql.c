@@ -591,7 +591,7 @@ int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                 break;
             }
             
-            GetTransition(r.b, r.f, &tr, &swapped);
+            GetTransition(cfac, r.b, r.f, &tr, &swapped);
             dE = fabs(tr.e);
 
             /* TODO: full fit ? */

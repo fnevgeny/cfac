@@ -154,7 +154,7 @@ int SetCILevel(cfac_t *cfac, int m) {
   return 0;
 }
 
-int SetAngZCut(double cut) {
+int SetAngZCut(cfac_t *cfac, double cut) {
   if (cut >= 0) cfac->angz_cut = cut;
   else cfac->angz_cut = ANGZCUT;
   return 0;
@@ -292,7 +292,7 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
     if (m == 0) {
       r = ZerothEnergyConfig(GetConfig(cfac, s));
     } else {
-      r = HamiltonElement(isym, h->basis[j], h->basis[j]);
+      r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
     }
     h->hamilton[j] = r;
   }
@@ -354,8 +354,8 @@ int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
   int n_basis;
 
   h->pj = -1;
-  ClearAngularFrozen();
-  AngularFrozen(n, ilev, 0, NULL);
+  ClearAngularFrozen(cfac);
+  AngularFrozen(cfac, n, ilev, 0, NULL);
 
   n_basis = 0;
   for (i = 0; i < n; i++) {
@@ -472,7 +472,7 @@ int ConstructHamilton(cfac_t *cfac,
     for (j = 0; j < h->dim; j++) {
       t = j*(j+1)/2;
       for (i = 0; i <= j; i++) {
-	r = HamiltonElement(isym, h->basis[i], h->basis[j]);
+	r = HamiltonElement(cfac, isym, h->basis[i], h->basis[j]);
 	h->hamilton[i+t] = r;
       }
     } 
@@ -481,14 +481,14 @@ int ConstructHamilton(cfac_t *cfac,
       t = ((h->dim+1)*(h->dim))/2;
       for (i = 0; i < h->dim; i++) {
 	for (j = h->dim; j < h->n_basis; j++) {
-	  r = HamiltonElement(isym, h->basis[i], h->basis[j]);
+	  r = HamiltonElement(cfac, isym, h->basis[i], h->basis[j]);
 	  h->hamilton[t++] = r;
 	}
 	ReinitRecouple(0);
 	ReinitRadial(1);
       }
       for (j = h->dim; j < h->n_basis; j++) {
-	r = HamiltonElement(isym, h->basis[j], h->basis[j]);
+	r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
 	h->hamilton[t++] = r;
       }
       ReinitRecouple(0);
@@ -528,7 +528,7 @@ int ConstructHamilton(cfac_t *cfac,
   return -1;
 }
 
-int ValidBasis(STATE *s, int k, int *kg, int n) {
+int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n) {
   int t, m, kb;
   LEVEL *lev;
   STATE *sp;
@@ -591,10 +591,10 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   st = &(sym->states);
   for (t = 0; t < sym->n_states; t++) { 
     s = (STATE *) ArrayGet(st, t);
-    if (ValidBasis(s, k, kg, n)) {
+    if (ValidBasis(cfac, s, k, kg, n)) {
       j++;
     } else if (nc > 0) {
-      if (ValidBasis(s, nc, kc, 0)) {
+      if (ValidBasis(cfac, s, nc, kc, 0)) {
 	j++;
 	ncs++;
       }
@@ -611,7 +611,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   if (ncs > 0) {
     for (t = 0; t < sym->n_states; t++) { 
       s = (STATE *) ArrayGet(st, t);
-      if (ValidBasis(s, nc, kc, 0)) {
+      if (ValidBasis(cfac, s, nc, kc, 0)) {
 	h->basis[j] = t;
 	j++;
       }
@@ -619,7 +619,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   }
   for (t = 0; t < sym->n_states; t++) { 
     s = (STATE *) ArrayGet(st, t);
-    if (ValidBasis(s, k, kg, n)) {
+    if (ValidBasis(cfac, s, k, kg, n)) {
       h->basis[j] = t;
       j++;
     }
@@ -628,7 +628,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   for (j = ncs; j < h->dim; j++) {
     t = j*(j+1)/2;
     for (i = ncs; i <= j; i++) {
-      r = HamiltonElementFrozen(isym, h->basis[i], h->basis[j]);
+      r = HamiltonElementFrozen(cfac, isym, h->basis[i], h->basis[j]);
       h->hamilton[i+t] = r;
     }
     for (i = 0; i < j; i++) {
@@ -649,7 +649,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   for (i = 0; i < ncs; i++) {
     for (j = ncs; j < h->dim; j++) {
       t = j*(j+1)/2 + i;
-      r = HamiltonElementFB(isym, h->basis[j], h->basis[i]);
+      r = HamiltonElementFB(cfac, isym, h->basis[j], h->basis[i]);
       h->hamilton[t] = r;
     }
   }
@@ -669,7 +669,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   return -1;
 }
 
-void AngularFrozen(int nts, int *ts, int ncs, int *cs) {
+void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs) {
   int i, j, kz;
   
   cfac->ang_frozen.nts = nts;
@@ -688,7 +688,7 @@ void AngularFrozen(int nts, int *ts, int ncs, int *cs) {
   for (i = 0; i < nts; i++) {
     for (j = 0; j < nts; j++) {
       kz = j*nts + i;
-      cfac->ang_frozen.nz[kz] = AngularZMix(&(cfac->ang_frozen.z[kz]), 
+      cfac->ang_frozen.nz[kz] = AngularZMix(cfac, &(cfac->ang_frozen.z[kz]), 
 				      ts[i], ts[j], -1, -1);
     }
   }
@@ -700,16 +700,16 @@ void AngularFrozen(int nts, int *ts, int ncs, int *cs) {
     for (i = 0; i < nts; i++) {
       for (j = 0; j < ncs; j++) {
 	kz = j*nts + i;
-	cfac->ang_frozen.nzfb[kz] = AngularZFreeBound(&(cfac->ang_frozen.zfb[kz]),
-						ts[i], cs[j]);
-	cfac->ang_frozen.nzxzfb[kz] = AngularZxZFreeBound(&(cfac->ang_frozen.zxzfb[kz]),
-						    ts[i], cs[j]);
+	cfac->ang_frozen.nzfb[kz] = AngularZFreeBound(cfac,
+            &(cfac->ang_frozen.zfb[kz]), ts[i], cs[j]);
+	cfac->ang_frozen.nzxzfb[kz] = AngularZxZFreeBound(cfac,
+            &(cfac->ang_frozen.zxzfb[kz]), ts[i], cs[j]);
       }
     }
   }
 }
 
-double HamiltonElementEB(cfac_t *cfac, int i0, int j0) {
+double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
   HAMILTON *h = cfac->hamiltonian;
   int ib, jb;
   int si, sj, mi, mj, pi, pj, ji, jj, ti, tj, kz, nz;
@@ -844,7 +844,7 @@ double HamiltonElementEB(cfac_t *cfac, int i0, int j0) {
   return r;
 }
 
-double HamiltonElementFB(int isym, int isi, int isj) {
+double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
   STATE *si, *sj;
   double r, sd, se, a;
   int i, ti, tj, ji, jj, j0, k0, k1, nz1, nz2;
@@ -880,7 +880,7 @@ double HamiltonElementFB(int isym, int isi, int isj) {
     nz1 = cfac->ang_frozen.nzfb[kz];
     a1 = cfac->ang_frozen.zfb[kz];
   } else {
-    nz1 = AngularZFreeBound(&a1, ti, tj);
+    nz1 = AngularZFreeBound(cfac, &a1, ti, tj);
   }
   for (i = 0; i < nz1; i++) {
     k1 = a1[i].kb;
@@ -898,7 +898,7 @@ double HamiltonElementFB(int isym, int isi, int isj) {
     nz2 = cfac->ang_frozen.nzxzfb[kz];
     a2 = cfac->ang_frozen.zxzfb[kz];
   } else {
-    nz2 = AngularZxZFreeBound(&a2, ti, tj);
+    nz2 = AngularZxZFreeBound(cfac, &a2, ti, tj);
   }
   for (i = 0; i < nz2; i++) {
     if (j0 == a2[i].k0) {
@@ -918,7 +918,7 @@ double HamiltonElementFB(int isym, int isi, int isj) {
   return r;
 }
 
-double HamiltonElementFrozen(int isym, int isi, int isj) {
+double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
   STATE *si, *sj;
   double r, r0, sd, se, a;
   int i, ti, tj, ji1, ji2, jj1, jj2, ki2, kj2, j, nz;
@@ -970,7 +970,7 @@ double HamiltonElementFrozen(int isym, int isi, int isj) {
     nz = cfac->ang_frozen.nz[kz];
     ang = cfac->ang_frozen.z[kz];
   } else {
-    nz = AngularZMix(&ang, ti, tj, -1, -1);
+    nz = AngularZMix(cfac, &ang, ti, tj, -1, -1);
   }
   a = 0.0;
   for (i = 0; i < nz; i++) {
@@ -994,15 +994,16 @@ double HamiltonElementFrozen(int isym, int isi, int isj) {
   return r;
 } 
 
-double HamiltonElement(int isym, int isi, int isj) {
+double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj) {
   double r1, r2;
   
-  HamiltonElement1E2E(isym, isi, isj, &r1, &r2);
+  HamiltonElement1E2E(cfac, isym, isi, isj, &r1, &r2);
   
   return r1 + r2;
 }
 
-void HamiltonElement1E2E(int isym, int isi, int isj, double *x1, double *x2) { 
+void HamiltonElement1E2E(cfac_t *cfac,
+  int isym, int isi, int isj, double *x1, double *x2) { 
   CONFIG *ci, *cj;
   int ki, kj;
   SYMMETRY *sym;
@@ -1148,7 +1149,7 @@ void HamiltonElement1E2E(int isym, int isi, int isj, double *x1, double *x2) {
   free(sket);
 }
 
-int SlaterCoeff(char *fn, int nlevs, int *ilevs, 
+int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs, 
 		int na, SHELL *sa, int nb, SHELL *sb) {
   FILE *f;
   int m, i, j, i0, i1, k0, k1, q0, q1;
@@ -1304,7 +1305,7 @@ int SlaterCoeff(char *fn, int nlevs, int *ilevs,
     a = sqrt(j+1.0);
 
     s0 = (STATE *) ArrayGet(&(sym->states), lev->pb);
-    ConstructLevelName(name, sname, nc, &vnl, s0);
+    ConstructLevelName(cfac, name, sname, nc, &vnl, s0);
     fprintf(f, "# %6d %1d %3d   %-s\n",
 	    ilevs[m], i, j, name);
     for (i0 = 0; i0 < na; i0++) {
@@ -1583,7 +1584,7 @@ double Hamilton2E(int n_shells, SHELL_STATE *sbra, SHELL_STATE *sket,
   return x;
 }
 
-int TestHamilton(void) {
+int TestHamilton(cfac_t *cfac) {
   SYMMETRY *sym;
   int i, j, t;
   double r1;
@@ -1592,7 +1593,7 @@ int TestHamilton(void) {
     sym = GetSymmetry(cfac, t);
     for (i = 0; i < sym->n_states; i++) {
       for (j = 0; j < sym->n_states; j++) {
-	r1 = HamiltonElement(t, i, j);
+	r1 = HamiltonElement(cfac, t, i, j);
 	printf("HAM: %3d %d %d %10.3E\n", t, i, j, r1);
       }
     }
@@ -1800,7 +1801,7 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg) {
   return 0;
 }
 
-void CutMixing(int nlev, int *ilev, int n, int *kg, double c) {
+void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c) {
   int i, m, t;
   SYMMETRY *sym;
   STATE *s;
@@ -1943,7 +1944,7 @@ LEVEL *GetLevel(const cfac_t *cfac, int k) {
   return (LEVEL *) ArrayGet(cfac->levels, k);
 }
 
-int LevelTotalJ(int k) {
+int LevelTotalJ(cfac_t *cfac, int k) {
   int i;
   i = GetLevel(cfac, k)->pj;
   DecodePJ(i, NULL, &i);
@@ -2001,7 +2002,7 @@ int GetPrincipleBasis(double *mix, int d, int *kpb) {
   return k;
 }
 
-int CompareLevels(LEVEL *lev1, LEVEL *lev2) {
+int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
   STATE *s1, *s2;
   SYMMETRY *sym1, *sym2;
   ORBITAL *orb;
@@ -2043,7 +2044,7 @@ int CompareLevels(LEVEL *lev1, LEVEL *lev2) {
   }
 }
 
-int SortLevels(int start, int n, int m) {
+int SortLevels(cfac_t *cfac, int start, int n, int m) {
   int i, j, i0, j0;
   LEVEL tmp, *lev1, *lev2, *levp;
 
@@ -2066,7 +2067,7 @@ int SortLevels(int start, int n, int m) {
     
     while (i < j) {
       while (i < j) {
-	if (CompareLevels(lev1, levp) > 0) break;
+	if (CompareLevels(cfac, lev1, levp) > 0) break;
 	i++;
 	if (m == 0) {
 	  lev1 = GetLevel(cfac, i);
@@ -2075,7 +2076,7 @@ int SortLevels(int start, int n, int m) {
 	}
       }
       while (i < j) {
-	if (CompareLevels(levp, lev2) > 0) break;
+	if (CompareLevels(cfac, levp, lev2) > 0) break;
 	j--;
 	if (m == 0) {
 	  lev2 = GetLevel(cfac, j);
@@ -2105,12 +2106,12 @@ int SortLevels(int start, int n, int m) {
     j0 = n - i0 - 1;
     if (j0 < i0) {
       if (1 < j0) {
-	SortLevels(i+1, j0, m);
+	SortLevels(cfac, i+1, j0, m);
       }
       n = i0;
     } else {
       if (1 < i0) {
-	SortLevels(start, i0, m);
+	SortLevels(cfac, start, i0, m);
       }
       start = i+1;
       n = j0;
@@ -2119,7 +2120,7 @@ int SortLevels(int start, int n, int m) {
   return 0;
 }
 
-int GetLevNumElectrons(const LEVEL *lev) {
+int GetLevNumElectrons(cfac_t *cfac, const LEVEL *lev) {
   SYMMETRY *sym;
   STATE *s;
   CONFIG_GROUP *g;
@@ -2131,24 +2132,24 @@ int GetLevNumElectrons(const LEVEL *lev) {
     g = GetGroup(cfac, s->kgroup);
     nele = g->n_electrons;
   } else {
-    nele = 1+GetNumElectrons(-(s->kgroup)-1);
+    nele = 1+GetNumElectrons(cfac, -(s->kgroup)-1);
   }    
 
   return nele;
 }
 
-int GetNumElectrons(int k)
+int GetNumElectrons(cfac_t *cfac, int k)
 {
     LEVEL *lev = GetLevel(cfac, k);
     
     if (!lev) {
         return -1;
     } else {
-        return GetLevNumElectrons(lev);
+        return GetLevNumElectrons(cfac, lev);
     }
 }
 
-int GetTransition(int nlo, int nup, TRANSITION *tr, int *swapped)
+int GetTransition(cfac_t *cfac, int nlo, int nup, TRANSITION *tr, int *swapped)
 {
     if (!tr) {
         return -1;
@@ -2183,7 +2184,7 @@ int GetTransition(int nlo, int nup, TRANSITION *tr, int *swapped)
 }
 
 
-int SaveEBLevels(char *fn, int m, int n) {
+int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   int n0, k, i, ilev, mlev, nele;
   FILE *f;
   LEVEL *lev;
@@ -2200,7 +2201,7 @@ int SaveEBLevels(char *fn, int m, int n) {
 
   lev = GetEBLevel(cfac, n0);
   DecodeBasisEB(lev->pb, &ilev, &mlev);
-  nele = GetNumElectrons(ilev);
+  nele = GetNumElectrons(cfac, ilev);
   enf_hdr.nele = nele;
   enf_hdr.efield = cfac->ef;
   enf_hdr.bfield = cfac->bf;
@@ -2220,7 +2221,7 @@ int SaveEBLevels(char *fn, int m, int n) {
   return 0;
 }  
   
-int SaveLevels(char *fn, int m, int n) {
+int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
   STATE *s, *s1;
   SYMMETRY *sym, *sym1;
   CONFIG *cfg, *cfg1;
@@ -2373,7 +2374,7 @@ int SaveLevels(char *fn, int m, int n) {
     r.j = j0;
     r.energy = lev->energy;
 
-    nele = ConstructLevelName(name, sname, nc, &vnl, s);
+    nele = ConstructLevelName(cfac, name, sname, nc, &vnl, s);
     strncpy(r.name, name, LNAME);
     strncpy(r.sname, sname, LSNAME);
     strncpy(r.ncomplex, nc, LNCOMPLEX);
@@ -2471,7 +2472,7 @@ int SaveLevels(char *fn, int m, int n) {
   return 0;
 }
 
-int ConstructLevelName(char *name, char *sname, char *nc, 
+int ConstructLevelName(cfac_t *cfac, char *name, char *sname, char *nc, 
 		       int *vnl, STATE *basis) {
   int n, nq, kl, j;
   int nele, i, len;
@@ -2495,7 +2496,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
       si = lev->pb;
       sym = GetSymmetry(cfac, lev->pj);
       basis = ArrayGet(&(sym->states), si);
-      nele = ConstructLevelName(name, sname, nc, vnl, basis);
+      nele = ConstructLevelName(cfac, name, sname, nc, vnl, basis);
       return nele;
     } else {
       orb = GetOrbital(basis->kcfg);
@@ -2517,7 +2518,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
       sym = GetSymmetry(cfac, lev->pj);
       basis = (STATE *) ArrayGet(&(sym->states), si);
       if (sname || nc) {
-	nele = ConstructLevelName(NULL, sname, nc, NULL, basis);
+	nele = ConstructLevelName(cfac, NULL, sname, nc, NULL, basis);
 	if (nc) {
 	  if (nele == 0) {
 	    nc[0] = '\0';
@@ -2526,7 +2527,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
 	  strcat(nc, ashell);
 	}
       } else {
-	nele = ConstructLevelName(NULL, NULL, NULL, NULL, basis);
+	nele = ConstructLevelName(cfac, NULL, NULL, NULL, NULL, basis);
       }
       return nele+1;
     }
@@ -2619,7 +2620,7 @@ int ConstructLevelName(char *name, char *sname, char *nc,
   return nele;
 }
     
-int GetBasisTable(char *fn, int m) {
+int GetBasisTable(cfac_t *cfac, char *fn, int m) {
   FILE *f;
   int i, p, j, k, si, nsym;
   char nc[LEVEL_NAME_LEN];
@@ -2652,7 +2653,7 @@ int GetBasisTable(char *fn, int m) {
       if (sym->n_states <= 0) continue;
       for (k = 0; k < sym->n_states; k++) {
 	s = (STATE *) ArrayGet(st, k);
-	ConstructLevelName(name, sname, nc, NULL, s);
+	ConstructLevelName(cfac, name, sname, nc, NULL, s);
 	fprintf(f, "%6d   %2d %2d   %5d %3d %5d %5d   %-20s %-20s %-20s\n",
 		i, p, j, k, s->kgroup, s->kcfg, s->kstate, nc, sname, name);
       }
@@ -2686,11 +2687,11 @@ void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
   
   k = cfac->n_eblevels;
   AddToLevels(cfac, 0, NULL);
-  SortLevels(k, -1, 1);
-  SaveEBLevels(fn, k, -1);
+  SortLevels(cfac, k, -1, 1);
+  SaveEBLevels(cfac, fn, k, -1);
 }
 
-int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
+int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   int kg1, kg2, kc1, kc2;
   int ns, n, p, q, nz, iz, iz1, iz2;
   int ns1, ns2, *pnz;
@@ -2897,7 +2898,7 @@ int AngZSwapBraKet(int nz, ANGULAR_ZMIX *ang, int p) {
   return 0;
 }
     
-int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
+int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   int kg1, kg2;
   int kc1, kc2;
   int n_shells, i1, i2;
@@ -3035,11 +3036,7 @@ int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   return (*ad)->ns;
 }
 
-int AngularZxZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
-  return 0;
-}
-
-int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
+int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   int kg1, kg2, kc1, kc2;
   int n_shells, i1, i2;
   int phase;
@@ -3190,7 +3187,7 @@ int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   return (*ad)->ns;
 }
 
-int PrepAngular(int n1, int *is1, int n2, int *is2) {
+int PrepAngular(cfac_t *cfac, int n1, int *is1, int n2, int *is2) {
   int i1, i2, ih1, ih2, ns1, ns2, ne1, ne2;
   int iz, is, i, nz, ns = 0;
   SYMMETRY *sym1, *sym2;
@@ -3264,18 +3261,18 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
       if (nz != 0) continue;
       if (ne1 == ne2) {
 	if (ih1 > ih2) {
-	  nz = AngularZMix((ANGULAR_ZMIX **)(&((ad->angz)[is])), 
+	  nz = AngularZMix(cfac, (ANGULAR_ZMIX **)(&((ad->angz)[is])), 
 			   is2[i2], is1[i1], -1, -1);
 	} else {
-	  nz = AngularZMix((ANGULAR_ZMIX **)(&((ad->angz)[is])), 
+	  nz = AngularZMix(cfac, (ANGULAR_ZMIX **)(&((ad->angz)[is])), 
 			   is1[i1], is2[i2], -1, -1);
 	}
       } else {
 	if (ne1 > ne2) {
-	  nz = AngularZFreeBound((ANGULAR_ZFB **)(&((ad->angz)[is])), 
+	  nz = AngularZFreeBound(cfac, (ANGULAR_ZFB **)(&((ad->angz)[is])), 
 				 is2[i2], is1[i1]);
 	} else {
-	  nz = AngularZFreeBound((ANGULAR_ZFB **)(&((ad->angz)[is])), 
+	  nz = AngularZFreeBound(cfac, (ANGULAR_ZFB **)(&((ad->angz)[is])), 
 				 is1[i1], is2[i2]);
 	}	
       }
@@ -3287,7 +3284,7 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
   return ns;
 }
 
-int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
+int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
   int i, j, m; 
   int nz, n;
   double r0;
@@ -3362,7 +3359,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
     n = 0;
     nz = ANGZ_BLOCK;
     (*ang) = malloc(sizeof(ANGULAR_ZFB)*nz);
-    ns = AngularZFreeBoundStates(&ad, lev1->iham, lev2->iham);
+    ns = AngularZFreeBoundStates(cfac, &ad, lev1->iham, lev2->iham);
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
@@ -3396,7 +3393,7 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
   return n;
 }
 
-int GetBaseJ(STATE *s) {
+int GetBaseJ(cfac_t *cfac, STATE *s) {
   int ih;
   if (s->kgroup >= 0) return -1;
   ih = s->kgroup;
@@ -3406,7 +3403,8 @@ int GetBaseJ(STATE *s) {
   return ih;
 }
 
-int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
+int AngularZMix(cfac_t *cfac,
+  ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   int i, j, j1, j2, jb1, jb2;
   int kg1, kg2, kc1, kc2;
   int ih1, ih2, isz0, isz;
@@ -3522,7 +3520,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
       slow = (STATE *) ArrayGet(&(sym1->states), lev1->basis[i]);
-      jlow = GetBaseJ(slow);
+      jlow = GetBaseJ(cfac, slow);
       kg1 = slow->kgroup;
       kg1 = -kg1-1;
       kb1 = slow->kcfg;
@@ -3534,7 +3532,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 	a = mix1*mix2;
 	if (fabs(a) < cfac->angz_cut) continue;
 	sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
-	jup = GetBaseJ(sup);
+	jup = GetBaseJ(cfac, sup);
 	kg2 = sup->kgroup;
 	kg2 = -kg2-1;
 	kb2 = sup->kcfg;
@@ -3556,7 +3554,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 	  }
 	}
 	if (kb1 == kb2){	  
-	  nz_sub = AngularZMix(&ang_sub, kg1, kg2, kmin, kmax);
+	  nz_sub = AngularZMix(cfac, &ang_sub, kg1, kg2, kmin, kmax);
 	  if (nz_sub <= 0) {
 	    continue;
 	  }
@@ -3583,10 +3581,10 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       kb1 = slow->kcfg;
       jb1 = GetOrbital(kb1)->kappa;
       jb1 = GetJFromKappa(jb1);
-      jlow = GetBaseJ(slow);
+      jlow = GetBaseJ(cfac, slow);
       kg1 = slow->kgroup;
       kg1 = -kg1-1;
-      nfb = AngularZFreeBound(&afb, kg1, upper);
+      nfb = AngularZFreeBound(cfac, &afb, kg1, upper);
       for (m = 0; m < nfb; m++) {
 	jb2 = GetOrbital(afb[m].kb)->kappa;
 	jb2 = GetJFromKappa(jb2);
@@ -3610,10 +3608,10 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       kb2 = sup->kcfg;
       jb2 = GetOrbital(kb2)->kappa;
       jb2 = GetJFromKappa(jb2);
-      jup = GetBaseJ(sup);
+      jup = GetBaseJ(cfac, sup);
       kg2 = sup->kgroup;
       kg2 = -kg2-1;
-      nfb = AngularZFreeBound(&afb, kg2, lower);
+      nfb = AngularZFreeBound(cfac, &afb, kg2, lower);
       for (m = 0; m < nfb; m++) {
 	jb1 = GetOrbital(afb[m].kb)->kappa;
 	jb1 = GetJFromKappa(jb1);
@@ -3637,7 +3635,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
     } else {
       lev = NULL;
     }
-    ns = AngularZMixStates(&ad, lev1->iham, lev2->iham);
+    ns = AngularZMixStates(cfac, &ad, lev1->iham, lev2->iham);
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
@@ -3685,7 +3683,8 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   return n;
 }
 
-int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
+int AngularZxZFreeBound(cfac_t *cfac,
+  ANGULAR_ZxZMIX **ang, int lower, int upper) {
   int i, j, j1, j2;
   int nz, n;
   int kg, jf, ih1, ih2, isz0;
@@ -3730,10 +3729,10 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
       kb = sup->kcfg;
       jb = GetOrbital(kb)->kappa;
       jb = GetJFromKappa(jb);
-      jup = GetBaseJ(sup);
+      jup = GetBaseJ(cfac, sup);
       kg = sup->kgroup;
       kg = -kg-1;
-      nz_sub = AngularZMix(&ang_z, lower, kg, -1, -1);
+      nz_sub = AngularZMix(cfac, &ang_z, lower, kg, -1, -1);
       if (nz_sub <= 0) {
 	continue;
       }
@@ -3758,7 +3757,7 @@ int AngularZxZFreeBound(ANGULAR_ZxZMIX **ang, int lower, int upper) {
       free(ang_z);
     }
   } else {
-    ns = AngularZxZFreeBoundStates(&ad, lev1->iham, lev2->iham);
+    ns = AngularZxZFreeBoundStates(cfac, &ad, lev1->iham, lev2->iham);
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;      
@@ -4111,7 +4110,7 @@ void FreeHamsArray(cfac_t *cfac) {
   cfac->nhams = 0;
 }
 
-void ClearAngularFrozen(void) {
+void ClearAngularFrozen(cfac_t *cfac) {
   int i, n;
 
   if (cfac->ang_frozen.nts > 0) {

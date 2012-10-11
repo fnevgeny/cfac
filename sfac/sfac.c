@@ -189,7 +189,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	  s = (STATE *) ArrayGet(&(sym->states), im);
 	  ig = s->kgroup;
 	  if (ig < 0) {
-	    if (!ValidBasis(s, ng, kg, nrec)) continue;
+	    if (!ValidBasis(cfac, s, ng, kg, nrec)) continue;
 	    (*t)[k] = j;
 	    k++;
 	  } else {
@@ -553,7 +553,7 @@ static int PBasisTable(int argc, char *argv[], int argt[], ARRAY *variables) {
   if (argc == 2) m = atoi(argv[1]);
   else m = 0;
 
-  GetBasisTable(argv[0], m);
+  GetBasisTable(cfac, argv[0], m);
   
   return 0;
 }
@@ -1057,7 +1057,7 @@ static int PSetAngZCut(int argc, char *argv[], int argt[],
   
   if (argc != 1 || argt[0] != NUMBER) return -1;
   c = atof(argv[0]);
-  SetAngZCut(c);
+  SetAngZCut(cfac, c);
 
   return 0;
 }
@@ -2244,7 +2244,7 @@ static int PSortLevels(int argc, char *argv[], int argt[],
 		       ARRAY *variables) {
   if (argc != 0) return -1;
 
-  SortLevels(0, 0, 0);
+  SortLevels(cfac, 0, 0, 0);
   
   return 0;
 }
@@ -2264,7 +2264,7 @@ static int PCutMixing(int argc, char *argv[], int argt[],
   if (argc == 3) c = atof(argv[2]);
   else c = 0.0;
 
-  CutMixing(nlev, ilev, n, kg, c);
+  CutMixing(cfac, nlev, ilev, n, kg, c);
 
  DONE:
   if (nlev > 0) free(ilev);
@@ -2329,8 +2329,8 @@ static int PStructure(int argc, char *argv[], int argt[],
     }
   }
 
-  SortLevels(nlevels, -1, 0);
-  SaveLevels(argv[0], nlevels, -1);
+  SortLevels(cfac, nlevels, -1, 0);
+  SaveLevels(cfac, argv[0], nlevels, -1);
 
   if (ng > 0) free(kg);
   if (ngp > 0) free(kgp);
@@ -2447,7 +2447,7 @@ static int PPrepAngular(int argc, char *argv[], int argt[],
       return -1;
     }
   }
-  PrepAngular(nlow, low, nup, up);
+  PrepAngular(cfac, nlow, low, nup, up);
 
   return 0;
 }
@@ -3024,7 +3024,7 @@ static int PSlaterCoeff(int argc, char *argv[], int argt[],
 
 
   if (nlev > 0 && na > 0 && nb > 0) {
-    SlaterCoeff(argv[0], nlev, ilev, na, sa, nb, sb);
+    SlaterCoeff(cfac, argv[0], nlev, ilev, na, sa, nb, sb);
     free(ilev);
     free(sa);
     free(sb);

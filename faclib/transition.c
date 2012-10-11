@@ -106,7 +106,7 @@ static int _TRMultipole(double *strength, double *energy,
   
   *energy = lev2->energy - lev1->energy;
   
-  if (GetNumElectrons(lower) != GetNumElectrons(upper)) {
+  if (GetNumElectrons(cfac, lower) != GetNumElectrons(cfac, upper)) {
     return -1;
   }
   
@@ -127,7 +127,7 @@ static int _TRMultipole(double *strength, double *energy,
 
   s = 0.0;
 
-  nz = AngularZMix(&ang, lower, upper, m2, m2);
+  nz = AngularZMix(cfac, &ang, lower, upper, m2, m2);
   if (nz <= 0) {
     return -1;
   }
@@ -345,7 +345,7 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
   fhdr.atom = GetAtomicNumber(cfac);  
   lev1 = GetEBLevel(cfac, low[0]);
   DecodeBasisEB(lev1->pb, &i, &j);  
-  tr_hdr.nele = GetNumElectrons(i);
+  tr_hdr.nele = GetNumElectrons(cfac, i);
   tr_hdr.multipole = m;
   tr_hdr.gauge = GetTransitionGauge();
   if (m == 1) { /* always FR for M1 transitions */
@@ -436,7 +436,7 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
   fhdr.type = DB_TR;
   strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
   fhdr.atom = GetAtomicNumber(cfac);
-  tr_hdr.nele = GetNumElectrons(low[0]);
+  tr_hdr.nele = GetNumElectrons(cfac, low[0]);
   tr_hdr.multipole = m;
   tr_hdr.gauge = GetTransitionGauge();
   if (m == 1) { /* always FR for M1 transitions */
@@ -451,7 +451,7 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
   s = malloc(sizeof(double)*nlow);
   et = malloc(sizeof(double)*nlow);
   for (j = 0; j < nup; j++) {
-    jup = LevelTotalJ(up[j]);
+    jup = LevelTotalJ(cfac, up[j]);
     trd = 0.0;
     for (i = 0; i < nlow; i++) {
       a[i] = 0.0;

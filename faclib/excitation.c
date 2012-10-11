@@ -1618,7 +1618,7 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
       DecodePJ(plev2->pj, &p2, &j2);
       c = lev1->mixing[i1]*lev2->mixing[i2];      
       if (fabs(c) < EPS10) continue;
-      nz = AngularZMix(&ang, ilev1, ilev2, -1, -1);
+      nz = AngularZMix(cfac, &ang, ilev1, ilev2, -1, -1);
       for (i = 0; i < nz; i++) {
 	a = W3j(j1, ang[i].k, j2, -mlev1, mlev1-mlev2, mlev2);
 	if (IsOdd((j1-mlev1)/2)) a = -a;
@@ -1635,7 +1635,7 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
 	    DecodePJ(plev2p->pj, &p2p, &j2p);
 	    cp = lev1->mixing[i1p]*lev2->mixing[i2p];
 	    if (fabs(cp) < EPS10) continue;
-	    nzp = AngularZMix(&angp, ilev1p, ilev2p, -1, -1);
+	    nzp = AngularZMix(cfac, &angp, ilev1p, ilev2p, -1, -1);
 	    for (ip = 0; ip < nzp; ip++) {
 	      if (angp[ip].k != ang[i].k) continue;
 	      ap = W3j(j1p, angp[ip].k, j2p, -mlev1p, mlev1p-mlev2p, mlev2p);
@@ -1735,7 +1735,7 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
       DecodePJ(plev2->pj, &p2, &j2);
       c = lev1->mixing[i1]*lev2->mixing[i2];      
       if (fabs(c) < EPS10) continue;
-      nz = AngularZMix(&ang, ilev1, ilev2, -1, -1);
+      nz = AngularZMix(cfac, &ang, ilev1, ilev2, -1, -1);
       for (i = 0; i < nz; i++) {
 	a = W3j(j1, ang[i].k, j2, -mlev1, mlev1-mlev2, mlev2);
 	if (IsOdd((j1-mlev1)/2)) a = -a;
@@ -1752,7 +1752,7 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
 	    DecodePJ(plev2p->pj, &p2p, &j2p);
 	    cp = lev1->mixing[i1p]*lev2->mixing[i2p];
 	    if (fabs(cp) < EPS10) continue;
-	    nzp = AngularZMix(&angp, ilev1p, ilev2p, -1, -1);
+	    nzp = AngularZMix(cfac, &angp, ilev1p, ilev2p, -1, -1);
 	    for (ip = 0; ip < nzp; ip++) {	      
 	      ap = W3j(j1p, angp[ip].k, j2p, -mlev1p, mlev1p-mlev2p, mlev2p);
 	      if (IsOdd((j1p-mlev1p)/2)) ap = -ap;
@@ -1892,7 +1892,7 @@ int CollisionStrength(const TRANSITION *tr, int msub,
     }    
   }
   gauge = GetTransitionGauge();
-  nz = AngularZMix(&ang, tr->nlo, tr->nup, -1, -1);
+  nz = AngularZMix(cfac, &ang, tr->nlo, tr->nup, -1, -1);
   if (nz <= 0) {
     return -1;
   }
@@ -2127,7 +2127,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       TRANSITION tr;
       int swapped;
       
-      if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
+      if (GetTransition(cfac, low[i], up[j], &tr, &swapped) != 0) {
         return -1;
       }
       
@@ -2227,7 +2227,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         STATE *st;
         double e;
 
-        if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
+        if (GetTransition(cfac, low[i], up[j], &tr, &swapped) != 0) {
           return -1;
         }
 
@@ -2344,7 +2344,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       }
     }
 
-    ce_hdr.nele = GetNumElectrons(low[0]);
+    ce_hdr.nele = GetNumElectrons(cfac, low[0]);
     ce_hdr.nparams = 0;
 
     ce_hdr.te0 = te0;
@@ -2377,7 +2377,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         TRANSITION tr;
         int swapped;
 
-        if (GetTransition(low[i], up[j], &tr, &swapped) != 0) {
+        if (GetTransition(cfac, low[i], up[j], &tr, &swapped) != 0) {
           return -1;
         }
         
@@ -2668,7 +2668,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
       PrepCoulombBethe(1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
 		       pw_scratch.nkl, pw_scratch.kl, 0);
     }
-    ce_hdr.nele = GetNumElectrons(low0[0]);
+    ce_hdr.nele = GetNumElectrons(cfac, low0[0]);
     ce_hdr.n_tegrid = n_tegrid;
     ce_hdr.n_egrid = n_egrid;
     ce_hdr.tegrid = tegrid;
@@ -2921,7 +2921,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     PrepCoulombBethe(1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
 		     pw_scratch.nkl, pw_scratch.kl, 1);
     }
-    ce_hdr.nele = GetNumElectrons(low0[0]);
+    ce_hdr.nele = GetNumElectrons(cfac, low0[0]);
     ce_hdr.n_tegrid = n_tegrid;
     ce_hdr.n_egrid = n_egrid;
     ce_hdr.n_thetagrid = n_thetagrid;

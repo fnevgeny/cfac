@@ -212,7 +212,6 @@ int RecStates(int n, int k, int *kg, char *fn) {
   CONFIG_GROUP *g;
   char *gn, rgn[GROUP_NAME_LEN];
   int nm;
-  HAMILTON *h = cfac->hamiltonian;
 
   nm = 0;
   for (i = 0; i < k; i++) {
@@ -286,11 +285,11 @@ int RecStates(int n, int k, int *kg, char *fn) {
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
   for (i = 0; i < nsym; i++) {
-    m = ConstructHamilton(h, i, k, k, kg, 0, NULL, 111);
+    m = ConstructHamilton(cfac, i, k, k, kg, 0, NULL, 111);
     if (m < 0) continue;
-    j = DiagonalizeHamilton(h);
+    j = DiagonalizeHamilton(cfac);
     if (j < 0) return -1;
-    AddToLevels(h, 0, NULL);
+    AddToLevels(cfac, 0, NULL);
   }
   rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;
   n_complex++;
@@ -307,7 +306,6 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
   STATE *s;
   SYMMETRY *sym;
   int i0, i1, t, nt;
-  HAMILTON *h = cfac->hamiltonian;
 
   nstates = 0;
 
@@ -365,18 +363,18 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	  sym = GetSymmetry(cfac, lev->pj);
 	  s = (STATE *) ArrayGet(&(sym->states), m);
 	  if (!InGroups(s->kgroup, k, kg)) continue;
-	  m = ConstructHamiltonFrozen(h, i, j, NULL, n, 0, NULL);
+	  m = ConstructHamiltonFrozen(cfac, i, j, NULL, n, 0, NULL);
 	  if (m < 0) continue;
-	  if (DiagonalizeHamilton(h) < 0) return -2;
-	  AddToLevels(h, 0, NULL);
+	  if (DiagonalizeHamilton(cfac) < 0) return -2;
+	  AddToLevels(cfac, 0, NULL);
 	}
 	i0 = rec_complex[t].s1+1;
       }
     } else {
-      m = ConstructHamiltonFrozen(h, i, k, kg, n, 0, NULL);
+      m = ConstructHamiltonFrozen(cfac, i, k, kg, n, 0, NULL);
       if (m < 0) continue;
-      if (DiagonalizeHamilton(h) < 0) return -2;
-      AddToLevels(h, 0, NULL);
+      if (DiagonalizeHamilton(cfac) < 0) return -2;
+      AddToLevels(cfac, 0, NULL);
     }
   }
   rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;

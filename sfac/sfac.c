@@ -2278,7 +2278,6 @@ static int PStructure(int argc, char *argv[], int argt[],
   int i, k, ng0, ng, ngp, ns;
   int ip, nlevels;
   int *kg, *kgp;
-  HAMILTON *h = cfac->hamiltonian;
 
   ng = 0;
   ngp = 0;
@@ -2320,13 +2319,13 @@ static int PStructure(int argc, char *argv[], int argt[],
   nlevels = GetNumLevels(cfac);
   ns = MAX_SYMMETRIES;  
   for (i = 0; i < ns; i++) {
-    k = ConstructHamilton(h, i, ng0, ng, kg, ngp, kgp, 111);
+    k = ConstructHamilton(cfac, i, ng0, ng, kg, ngp, kgp, 111);
     if (k < 0) continue;
-    if (DiagonalizeHamilton(h) < 0) return -1;
+    if (DiagonalizeHamilton(cfac) < 0) return -1;
     if (ng0 < ng) {
-      AddToLevels(h, ng0, kg);
+      AddToLevels(cfac, ng0, kg);
     } else {
-      AddToLevels(h, 0, kg);
+      AddToLevels(cfac, 0, kg);
     }
   }
 
@@ -2878,14 +2877,13 @@ static int PSetFields(int argc, char *argv[], int argt[],
 static int PStructureEB(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int n, *ilev;
-  HAMILTON *h = cfac->hamiltonian;
 
   if (argc != 2 || argt[0] != STRING || argt[1] != LIST) return -1;
 
   n = SelectLevels(&ilev, argv[1], argt[1], variables);
   if (n <= 0) return -1;
   
-  StructureEB(h, argv[0], n, ilev);
+  StructureEB(cfac, argv[0], n, ilev);
   free(ilev);
 
   return 0;

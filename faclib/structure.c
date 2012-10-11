@@ -283,8 +283,9 @@ int IsClosedShell(int ih, int k) {
   return (hams[ih].closed[i] & (1 << j));
 }
 
-static int ConstructHamiltonDiagonal(HAMILTON *h,
+static int ConstructHamiltonDiagonal(cfac_t *cfac,
   int isym, int k, int *kg, int m) {
+  HAMILTON *h = cfac->hamiltonian;
   int i, j, t;
   SHAMILTON *hs;
   ARRAY *st;
@@ -406,7 +407,8 @@ void DecodeBasisEB(int k, int *s, int *m) {
   if (k < 0) *m = -(*m);
 }
 
-int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev) {
+int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
+  HAMILTON *h = cfac->hamiltonian;
   int i, j, p, k, t, m;
   double r;
   LEVEL *lev;
@@ -437,7 +439,7 @@ int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev) {
   for (j = 0; j < h->dim; j++) {
     t = j*(j+1)/2;
     for (i = 0; i <= j; i++) {
-      r = HamiltonElementEB(h, i, j);
+      r = HamiltonElementEB(cfac, i, j);
       /*
       printf("HAM: %8d %8d %15.8E\n", h->basis[i], h->basis[j], r);
       */
@@ -452,8 +454,9 @@ int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev) {
   return -1;
 }
 
-int ConstructHamilton(HAMILTON *h,
+int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md) {
+  HAMILTON *h = cfac->hamiltonian;
   int i, j, j0, t, jp = 0, m1, m2, m3;
   SHAMILTON *hs;
   ARRAY *st;
@@ -486,7 +489,7 @@ int ConstructHamilton(HAMILTON *h,
   if (m1) {
     if (k <= 0) return -1;
     if (cfac->confint == -1) {
-      return ConstructHamiltonDiagonal(h, isym, k, kg, 1);
+      return ConstructHamiltonDiagonal(cfac, isym, k, kg, 1);
     }
     st = &(sym->states);
     j = 0;
@@ -627,8 +630,9 @@ int ValidBasis(STATE *s, int k, int *kg, int n) {
   }
 }
 
-int ConstructHamiltonFrozen(HAMILTON *h,
+int ConstructHamiltonFrozen(cfac_t *cfac,
     int isym, int k, int *kg, int n, int nc, int *kc) {
+  HAMILTON *h = cfac->hamiltonian;
   int i, j, t, ncs;
   LEVEL *lev;
   ARRAY *st;
@@ -766,7 +770,8 @@ void AngularFrozen(int nts, int *ts, int ncs, int *cs) {
   }
 }
 
-double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
+double HamiltonElementEB(cfac_t *cfac, int i0, int j0) {
+  HAMILTON *h = cfac->hamiltonian;
   int ib, jb;
   int si, sj, mi, mj, pi, pj, ji, jj, ti, tj, kz, nz;
   int i, m, q, q2, jorb0, korb0, jorb1, korb1;
@@ -1656,7 +1661,8 @@ int TestHamilton(void) {
   return 0;
 }
 
-int DiagonalizeHamilton(HAMILTON *h) {
+int DiagonalizeHamilton(cfac_t *cfac) {
+  HAMILTON *h = cfac->hamiltonian;
   gsl_matrix *am, *evec;
   gsl_vector_view vv;
   gsl_eigen_symmv_workspace *wsp;
@@ -1737,7 +1743,8 @@ int DiagonalizeHamilton(HAMILTON *h) {
   }
 }
 
-int AddToLevels(HAMILTON *h, int ng, int *kg) {
+int AddToLevels(cfac_t *cfac, int ng, int *kg) {
+  HAMILTON *h = cfac->hamiltonian;
   int i, d, j, k, t, m;
   LEVEL lev;
   SYMMETRY *sym;
@@ -2731,15 +2738,15 @@ int GetBasisTable(char *fn, int m) {
   return 0;
 }
 
-void StructureEB(HAMILTON *h, char *fn, int n, int *ilev) {
+void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
   int k;
   
-  ConstructHamiltonEB(h, n, ilev);
+  ConstructHamiltonEB(cfac, n, ilev);
 
-  DiagonalizeHamilton(h);
+  DiagonalizeHamilton(cfac);
   
   k = cfac->n_eblevels;
-  AddToLevels(h, 0, NULL);
+  AddToLevels(cfac, 0, NULL);
   SortLevels(k, -1, 1);
   SaveEBLevels(fn, k, -1);
 }

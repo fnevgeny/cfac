@@ -127,10 +127,10 @@ int GetStructTiming(STRUCT_TIMING *t);
 
 int SortUnique(int n, int *a);
 int CompareInt(const void *a1, const void *a2);
-int ConstructHamilton(HAMILTON *h,
+int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
 int ValidBasis(STATE *s, int k, int *kg, int n);
-int ConstructHamiltonFrozen(HAMILTON *h,
+int ConstructHamiltonFrozen(cfac_t *cfac,
     int isym, int k, int *kg, int n, int nc, int *kc);
 void HamiltonElement1E2E(int isym, int isi, int isj, double *r1, double *r2);
 double HamiltonElement(int isym, int isi, int isj);
@@ -143,8 +143,8 @@ double Hamilton2E(int n_shells, SHELL_STATE *sbra,
 double Hamilton1E(int n_shells, SHELL_STATE *sbra, 
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 SHAMILTON *GetSHamilton(int *n);
-int DiagonalizeHamilton(HAMILTON *h);
-int AddToLevels(HAMILTON *h, int ng, int *kg);
+int DiagonalizeHamilton(cfac_t *cfac);
+int AddToLevels(cfac_t *cfac, int ng, int *kg);
 int AddECorrection(cfac_t *cfac, int kref, int k, double e, int nmin);
 LEVEL *GetLevel(const cfac_t *cfac, int k);
 LEVEL *GetEBLevel(const cfac_t *cfac, int k);
@@ -210,9 +210,9 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m);
 void GetFields(const cfac_t *cfac, double *b, double *e, double *a);
 int CodeBasisEB(int s, int m);
 void DecodeBasisEB(int k, int *s, int *m);
-int ConstructHamiltonEB(HAMILTON *h, int n, int *ilev);
-void StructureEB(HAMILTON *h, char *fn, int n, int *ilev);
-double HamiltonElementEB(HAMILTON *h, int i, int j);
+int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev);
+void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev);
+double HamiltonElementEB(cfac_t *cfac, int i, int j);
 
 int SlaterCoeff(char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 
 		int nb, SHELL *sb);

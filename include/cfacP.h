@@ -30,7 +30,7 @@ struct _cfac_t {
 
     ARRAY *levels_per_ion;
     
-    HAMILTON hamiltonian;     /* Hamiltonian                                 */
+    HAMILTON *hamiltonian;    /* Hamiltonian                                 */
 
 
     ARRAY *levels;            /* levels                                      */

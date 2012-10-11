@@ -2278,7 +2278,7 @@ static int PStructure(int argc, char *argv[], int argt[],
   int i, k, ng0, ng, ngp, ns;
   int ip, nlevels;
   int *kg, *kgp;
-  HAMILTON *h = &cfac->hamiltonian;
+  HAMILTON *h = cfac->hamiltonian;
 
   ng = 0;
   ngp = 0;
@@ -2878,7 +2878,7 @@ static int PSetFields(int argc, char *argv[], int argt[],
 static int PStructureEB(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int n, *ilev;
-  HAMILTON *h = &cfac->hamiltonian;
+  HAMILTON *h = cfac->hamiltonian;
 
   if (argc != 2 || argt[0] != STRING || argt[1] != LIST) return -1;
 

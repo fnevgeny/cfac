@@ -39,6 +39,14 @@ cfac_t *cfac_new(void)
         ArrayInit(&(cfac->symmetry_list[i].states),
             sizeof(STATE), STATES_BLOCK, NULL, NULL);
     }
+    
+    /* allocate Hamiltonian structure */
+    cfac->hamiltonian = malloc(sizeof(HAMILTON));
+    if (!cfac->hamiltonian) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    memset(cfac->hamiltonian, 0, sizeof(HAMILTON));
 
 
     cfac->levels = malloc(sizeof(ARRAY));
@@ -97,6 +105,8 @@ void cfac_free(cfac_t *cfac)
 
         ArrayFree(cfac->ecorrections);
         free(cfac->ecorrections);
+        
+        /* FIXME: properly free hamiltonian */
         
         free(cfac);
     }

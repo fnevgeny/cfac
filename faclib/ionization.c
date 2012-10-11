@@ -694,8 +694,8 @@ int IonizeStrength(double *qku, double *qkc, double *te,
     double cmax = 0.0;
     
     nqk = NPARAMS;
-    lev1 = GetLevel(b);
-    lev2 = GetLevel(f);
+    lev1 = GetLevel(cfac, b);
+    lev2 = GetLevel(cfac, f);
     *te = lev2->energy - lev1->energy;
     if (*te <= 0) return -1;
     nz = AngularZFreeBound(&ang, f, b);
@@ -895,9 +895,9 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
   emax = 1E-10;
   k = 0;
   for (i = 0; i < nb; i++) {
-    lev1 = GetLevel(b[i]);
+    lev1 = GetLevel(cfac, b[i]);
     for (j = 0; j < nf; j++) {
-      lev2 = GetLevel(f[j]);
+      lev2 = GetLevel(cfac, f[j]);
       e = lev2->energy - lev1->energy;
       if (e > 0) k++;
       if (e < emin && e > 0) emin = e;
@@ -970,9 +970,9 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
     emax = e0;
     k = 0;
     for (i = 0; i < nb; i++) {
-      lev1 = GetLevel(b[i]);
+      lev1 = GetLevel(cfac, b[i]);
       for (j = 0; j < nf; j++) {
-	lev2 = GetLevel(f[j]);
+	lev2 = GetLevel(cfac, f[j]);
 	e = lev2->energy - lev1->energy;
 	if (e < e0 || e >= e1) continue;
 	if (e < emin) emin = e;
@@ -1081,9 +1081,9 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
     InitFile(file, &fhdr, &ci_hdr);
 
     for (i = 0; i < nb; i++) {
-      lev1 = GetLevel(b[i]);
+      lev1 = GetLevel(cfac, b[i]);
       for (j = 0; j < nf; j++) {
-	lev2 = GetLevel(f[j]);
+	lev2 = GetLevel(cfac, f[j]);
 	e = lev2->energy - lev1->energy;
 	if (e < e0 || e >= e1) continue;
 	nq = IonizeStrength(qku, qk, &e, b[i], f[j]);
@@ -1321,8 +1321,8 @@ int IonizeStrengthMSub(double *qku, double *te, int b, int f) {
   double qkc[MAXMSUB*MAXNE], *rqk;
   int j1, j2, m1, m2, nz, i, ip, ie, kb, kbp;
   
-  lev1 = GetLevel(b);
-  lev2 = GetLevel(f);
+  lev1 = GetLevel(cfac, b);
+  lev2 = GetLevel(cfac, f);
   *te = lev2->energy - lev1->energy;
   if (*te <= 0) return -1;
   
@@ -1411,9 +1411,9 @@ int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
   emax = 1E-10;
   k = 0;
   for (i = 0; i < nb; i++) {
-    lev1 = GetLevel(b[i]);
+    lev1 = GetLevel(cfac, b[i]);
     for (j = 0; j < nf; j++) {
-      lev2 = GetLevel(f[j]);
+      lev2 = GetLevel(cfac, f[j]);
       e = lev2->energy - lev1->energy;
       if (e > 0) k++;
       if (e < emin && e > 0) emin = e;
@@ -1486,9 +1486,9 @@ int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
   InitFile(file, &fhdr, &ci_hdr);
   
   for (i = 0; i < nb; i++) {
-    lev1 = GetLevel(b[i]);
+    lev1 = GetLevel(cfac, b[i]);
     for (j = 0; j < nf; j++) {
-      lev2 = GetLevel(f[j]);
+      lev2 = GetLevel(cfac, f[j]);
       e = lev2->energy - lev1->energy;
       nq = IonizeStrengthMSub(qku, &e, b[i], f[j]);
       if (nq < 0) continue;

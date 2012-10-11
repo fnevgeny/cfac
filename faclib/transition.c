@@ -99,9 +99,9 @@ static int _TRMultipole(double *strength, double *energy,
   
   *strength = 0.0;
 
-  lev1 = GetLevel(lower);
+  lev1 = GetLevel(cfac, lower);
   if (lev1 == NULL) return -1;
-  lev2 = GetLevel(upper);
+  lev2 = GetLevel(cfac, upper);
   if (lev2 == NULL) return -1;
   
   *energy = lev2->energy - lev1->energy;
@@ -242,9 +242,9 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
   LEVEL *lev1, *lev2;
   int i1, m2, q;
 
-  lev1 = GetEBLevel(lower);
+  lev1 = GetEBLevel(cfac, lower);
   if (lev1 == NULL) return -1;
-  lev2 = GetEBLevel(upper);
+  lev2 = GetEBLevel(cfac, upper);
   if (lev2 == NULL) return -1;
   
   *energy = lev2->energy - lev1->energy;
@@ -262,7 +262,7 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
     if (lev1->mixing[i1] == 0) continue;
 
     DecodeBasisEB(lev1->basis[i1], &ilev1, &mlev1);
-    plev1 = GetLevel(ilev1);
+    plev1 = GetLevel(cfac, ilev1);
     DecodePJ(plev1->pj, &p1, &j1);
     
     for (i2 = 0; i2 < lev2->n_basis; i2++) {
@@ -274,7 +274,7 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
 
       c = lev1->mixing[i1]*lev2->mixing[i2];
       DecodeBasisEB(lev2->basis[i2], &ilev2, &mlev2);
-      plev2 = GetLevel(ilev2);
+      plev2 = GetLevel(cfac, ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
       
       if (TRMultipole(&r, NULL, m, ilev1, ilev2, 0) != 0) {
@@ -313,9 +313,9 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
     emin = 1E10;
     emax = 1E-10;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetEBLevel(low[i]);
+      lev1 = GetEBLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetEBLevel(up[j]);
+	lev2 = GetEBLevel(cfac, up[j]);
 	e0 = lev2->energy - lev1->energy;
 	if (e0 > 0) k++;
 	if (e0 < emin && e0 > 0) emin = e0;
@@ -343,7 +343,7 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
   fhdr.type = DB_TRF;
   strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
   fhdr.atom = GetAtomicNumber(cfac);  
-  lev1 = GetEBLevel(low[0]);
+  lev1 = GetEBLevel(cfac, low[0]);
   DecodeBasisEB(lev1->pb, &i, &j);  
   tr_hdr.nele = GetNumElectrons(i);
   tr_hdr.multipole = m;
@@ -406,9 +406,9 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
   emin = 1E10;
   emax = 1E-10;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetLevel(low[i]);
+    lev1 = GetLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      lev2 = GetLevel(up[j]);
+      lev2 = GetLevel(cfac, up[j]);
       e0 = lev2->energy - lev1->energy;
       if (e0 > 0) k++;
       if (e0 < emin && e0 > 0) emin = e0;
@@ -579,7 +579,7 @@ int SaveTransition(int nlow, int *low, int nup, int *up,
   
   n = 0;
   if (nlow == 0 || nup == 0) {
-    n = GetNumLevels();
+    n = GetNumLevels(cfac);
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;
@@ -615,7 +615,7 @@ int GetLowUpEB(int *nlow, int **low, int *nup, int **up,
   int i, j, ilev, mlev, n;
   LEVEL *lev;
  
-  n = GetNumEBLevels();
+  n = GetNumEBLevels(cfac);
   if (n == 0) return -1;
 
   *low = malloc(sizeof(int)*n);
@@ -623,7 +623,7 @@ int GetLowUpEB(int *nlow, int **low, int *nup, int **up,
   *nlow = 0;
   *nup = 0;
   for (i = 0; i < n; i++) {
-    lev = GetEBLevel(i);
+    lev = GetEBLevel(cfac, i);
     DecodeBasisEB(lev->pb, &ilev, &mlev);
     for (j = 0; j < nlow0; j++) {
       if (low0[j] == ilev) {
@@ -649,7 +649,7 @@ int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
   n = GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
   if (n == -1) return 0;
   
-  trm_cache = TRMultipole_cache_new(GetNumLevels());
+  trm_cache = TRMultipole_cache_new(GetNumLevels(cfac));
 
   nc = OverlapLowUp(nlow, low, nup, up);
   SaveTransitionEB0(nc, low+nlow-nc, nc, up+nup-nc, fn, m);

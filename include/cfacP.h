@@ -26,10 +26,23 @@ struct _cfac_t {
     ARRAY *levels_per_ion;
     
     HAMILTON hamiltonian;     /* Hamiltonian                                 */
+
+
+    ARRAY *levels;            /* levels                                      */
+    int n_levels;             /* number of levels                            */
+    
+    ARRAY *eblevels;          /* levels when calculated with fields          */
+    int n_eblevels;           /* number of eblevels                          */
 };
 
 /* config.c */
 void
 FreeConfigData(void *p);
+
+/* structure.c */
+void
+FreeLevelData(void *p);
+void
+InitLevelData(void *p, int n);
 
 #endif /* __CFACP_H_ */

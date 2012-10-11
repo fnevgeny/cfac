@@ -281,7 +281,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
     }
   }
   if (ncfgs == 0) return -1;
-  nlevels = GetNumLevels();
+  nlevels = GetNumLevels(cfac);
   nsym = MAX_SYMMETRIES;
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
@@ -292,7 +292,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
     if (j < 0) return -1;
     AddToLevels(h, 0, NULL);
   }
-  rec_complex[n_complex].s1 = GetNumLevels()-1;
+  rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;
   n_complex++;
   SortLevels(nlevels, -1, 0);
   SaveLevels(fn, nlevels, -1);
@@ -314,7 +314,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
   i0 = 0;
   if (n_complex == 0) {
     nt = 1;
-    i1 = GetNumLevels();
+    i1 = GetNumLevels(cfac);
     rec_complex[0].s0 = i1;
   } else {
     nt = n_complex;
@@ -322,7 +322,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
   for (t = 0; t < nt; t++) {
     i1 = rec_complex[t].s0;
     for (i = i0; i < i1; i++) {
-      lev = GetLevel(i);
+      lev = GetLevel(cfac, i);
       m = lev->pb;
       sym = GetSymmetry(cfac, lev->pj);
       s = (STATE *) ArrayGet(&(sym->states), m);
@@ -351,7 +351,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 
   if (nstates == 0) return -1;
   nsym = MAX_SYMMETRIES;
-  nlevels = GetNumLevels();
+  nlevels = GetNumLevels(cfac);
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
   for (i = 0; i < nsym; i++) {
@@ -360,7 +360,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
       for (t = 0; t < nt; t++) {
 	i1 = rec_complex[t].s0;
 	for (j = i0; j < i1; j++) {
-	  lev = GetLevel(j);
+	  lev = GetLevel(cfac, j);
 	  m = lev->pb;
 	  sym = GetSymmetry(cfac, lev->pj);
 	  s = (STATE *) ArrayGet(&(sym->states), m);
@@ -379,7 +379,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
       AddToLevels(h, 0, NULL);
     }
   }
-  rec_complex[n_complex].s1 = GetNumLevels()-1;
+  rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;
   n_complex++;
   SortLevels(nlevels, -1, 0);
   SaveLevels(fn, nlevels, -1);
@@ -777,8 +777,8 @@ int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
   int jmin, jmax, jt, jfmin, jfmax, jf, klf, kf, jb, klb;
   double rq[MAXNE], rqu[MAXNE], eb, a;
 
-  lev1 = GetLevel(rec);
-  lev2 = GetLevel(f);
+  lev1 = GetLevel(cfac, rec);
+  lev2 = GetLevel(cfac, f);
   j1 = lev1->pj;
   j2 = lev2->pj;
   DecodePJ(j1, &p1, &j1);
@@ -857,8 +857,8 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   int nkl = 0, nq = 0;
   int kb, kbp, jb, klb, jbp;
 
-  lev1 = GetLevel(rec);
-  lev2 = GetLevel(f);
+  lev1 = GetLevel(cfac, rec);
+  lev2 = GetLevel(cfac, f);
 
   *eb = (lev2->energy - lev1->energy);
   if (*eb <= 0.0) return -1;
@@ -978,8 +978,8 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   int kappafp, jfp, klfp, dkl;
 
   *rate = 0.0;
-  lev1 = GetLevel(rec);
-  lev2 = GetLevel(f);
+  lev1 = GetLevel(cfac, rec);
+  lev2 = GetLevel(cfac, f);
 
   if (GetLevNumElectrons(lev1) != GetLevNumElectrons(lev2) + 1) {
     return -1;
@@ -1282,9 +1282,9 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
   emax = 1E-10;
   k = 0;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetLevel(low[i]);
+    lev1 = GetLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      lev2 = GetLevel(up[j]);
+      lev2 = GetLevel(cfac, up[j]);
       e = lev2->energy - lev1->energy;
       if (e > 0) k++;
       if (e < emin && e > 0) emin = e;
@@ -1340,9 +1340,9 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
     emax = e0;
     k = 0;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetLevel(low[i]);
+      lev1 = GetLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetLevel(up[j]);
+	lev2 = GetLevel(cfac, up[j]);
 	e = lev2->energy - lev1->energy;
 	if (e < e0 || e >= e1) continue;
 	if (e < emin) emin = e;
@@ -1391,9 +1391,9 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
     PrepRREGrids(e, emax0);
     
     for (i = 0; i < nup; i++) {
-      lev1 = GetLevel(up[i]);
+      lev1 = GetLevel(cfac, up[i]);
       for (j = 0; j < nlow; j++) {
-	lev2 = GetLevel(low[j]);
+	lev2 = GetLevel(cfac, low[j]);
 	e = lev1->energy - lev2->energy;
 	if (e < e0 || e >= e1) continue;
 	BoundFreeMultipole(f, low[j], up[i], m);
@@ -1442,9 +1442,9 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   emax = 1E-10;
   k = 0;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetLevel(low[i]);
+    lev1 = GetLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      lev2 = GetLevel(up[j]);
+      lev2 = GetLevel(cfac, up[j]);
       e = lev2->energy - lev1->energy;
       if (e > 0) k++;
       if (e < emin && e > 0) emin = e;
@@ -1515,9 +1515,9 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
     emax = e0;
     k = 0;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetLevel(low[i]);
+      lev1 = GetLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetLevel(up[j]);
+	lev2 = GetLevel(cfac, up[j]);
 	e = lev2->energy - lev1->energy;
 	if (e < e0 || e >= e1) continue;
 	if (e < emin) emin = e;
@@ -1583,9 +1583,9 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
     InitFile(f, &fhdr, &rr_hdr);
     
     for (i = 0; i < nup; i++) {
-      lev1 = GetLevel(up[i]);
+      lev1 = GetLevel(cfac, up[i]);
       for (j = 0; j < nlow; j++) {
-	lev2 = GetLevel(low[j]);
+	lev2 = GetLevel(cfac, low[j]);
 	e = lev1->energy - lev2->energy;
 	if (e < e0 || e >= e1) continue;
 	nq = BoundFreeOS(rqu, qc, &eb, low[j], up[i], m);
@@ -1659,7 +1659,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   /* if low or up not given, assume all levels */
   alev = NULL;
   if (nlow == 0 || nup == 0) {
-    int n = GetNumLevels();
+    int n = GetNumLevels(cfac);
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;
@@ -1685,9 +1685,9 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   emax = 1E-10;
   k = 0;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetLevel(low[i]);
+    lev1 = GetLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      lev2 = GetLevel(up[j]);
+      lev2 = GetLevel(cfac, up[j]);
       
       if (GetLevNumElectrons(lev1) != GetLevNumElectrons(lev2) + 1) {
         continue;
@@ -1748,9 +1748,9 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
     emax = e0;
     k = 0;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetLevel(low[i]);
+      lev1 = GetLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetLevel(up[j]);
+	lev2 = GetLevel(cfac, up[j]);
 	a = lev1->energy - lev2->energy;
 	if (a < 0) a -= eref;
 	if (a < e0 || a >= e1) continue;
@@ -1791,9 +1791,9 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
       InitFile(f, &fhdr, &ai_hdr1);
     }
     for (i = 0; i < nlow; i++) {
-      lev1 = GetLevel(low[i]);
+      lev1 = GetLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetLevel(up[j]);
+	lev2 = GetLevel(cfac, up[j]);
 	e = lev1->energy - lev2->energy;
 	if (e < 0 && lev1->ibase != up[j]) e -= eref;
 	if (e < e0 || e >= e1) continue;
@@ -2122,7 +2122,7 @@ int DROpen(int n, int *nlev, int **ops) {
   LEVEL *lev;
   double e0, e, z;
 
-  e0 = GetLevel(0)->energy;
+  e0 = GetLevel(cfac, 0)->energy;
   z = GetResidualZ();
   z = z*z/2.0;
 
@@ -2130,7 +2130,7 @@ int DROpen(int n, int *nlev, int **ops) {
   j = 0;
   old_n = -1;
   for (i = 0; i < n; i++) {
-    lev = GetLevel(nlev[i]);
+    lev = GetLevel(cfac, nlev[i]);
     e = lev->energy - e0;
     if (e < EPS16) continue;
     n0 = ceil(sqrt(z/e));

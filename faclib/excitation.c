@@ -1596,9 +1596,9 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
   ANGULAR_ZMIX *ang, *angp;
   double bte, bms;
         
-  lev1 = GetEBLevel(lower);
+  lev1 = GetEBLevel(cfac, lower);
   if (lev1 == NULL) return -1;
-  lev2 = GetEBLevel(upper);
+  lev2 = GetEBLevel(cfac, upper);
   if (lev2 == NULL) return -1;
   te = lev2->energy - lev1->energy;
   if (te <= 0) return -1;
@@ -1610,11 +1610,11 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
 
   for (i1 = 0; i1 < lev1->n_basis; i1++) {
     DecodeBasisEB(lev1->basis[i1], &ilev1, &mlev1);
-    plev1 = GetLevel(ilev1);
+    plev1 = GetLevel(cfac, ilev1);
     DecodePJ(plev1->pj, &p1, &j1);
     for (i2 = 0; i2 < lev2->n_basis; i2++) {
       DecodeBasisEB(lev2->basis[i2], &ilev2, &mlev2);
-      plev2 = GetLevel(ilev2);
+      plev2 = GetLevel(cfac, ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
       c = lev1->mixing[i1]*lev2->mixing[i2];      
       if (fabs(c) < EPS10) continue;
@@ -1626,12 +1626,12 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
 	if (fabs(a) < EPS10) continue;
 	for (i1p = 0; i1p < lev1->n_basis; i1p++) {
 	  DecodeBasisEB(lev1->basis[i1p], &ilev1p, &mlev1p);
-	  plev1p = GetLevel(ilev1p);
+	  plev1p = GetLevel(cfac, ilev1p);
 	  DecodePJ(plev1p->pj, &p1p, &j1p);
 	  for (i2p = 0; i2p < lev2->n_basis; i2p++) {
 	    DecodeBasisEB(lev2->basis[i2p], &ilev2p, &mlev2p);
 	    if (mlev1p-mlev2p != mlev1-mlev2) continue;
-	    plev2p = GetLevel(ilev2p);
+	    plev2p = GetLevel(cfac, ilev2p);
 	    DecodePJ(plev2p->pj, &p2p, &j2p);
 	    cp = lev1->mixing[i1p]*lev2->mixing[i2p];
 	    if (fabs(cp) < EPS10) continue;
@@ -1712,9 +1712,9 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
   ANGULAR_ZMIX *ang, *angp;
   double bte, bms;
       
-  lev1 = GetEBLevel(lower);
+  lev1 = GetEBLevel(cfac, lower);
   if (lev1 == NULL) return -1;
-  lev2 = GetEBLevel(upper);
+  lev2 = GetEBLevel(cfac, upper);
   if (lev2 == NULL) return -1;
   te = lev2->energy - lev1->energy;
   if (te <= 0) return -1;
@@ -1727,11 +1727,11 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
 
   for (i1 = 0; i1 < lev1->n_basis; i1++) {
     DecodeBasisEB(lev1->basis[i1], &ilev1, &mlev1);
-    plev1 = GetLevel(ilev1);
+    plev1 = GetLevel(cfac, ilev1);
     DecodePJ(plev1->pj, &p1, &j1);
     for (i2 = 0; i2 < lev2->n_basis; i2++) {
       DecodeBasisEB(lev2->basis[i2], &ilev2, &mlev2);
-      plev2 = GetLevel(ilev2);
+      plev2 = GetLevel(cfac, ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
       c = lev1->mixing[i1]*lev2->mixing[i2];      
       if (fabs(c) < EPS10) continue;
@@ -1743,12 +1743,12 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
 	if (fabs(a) < EPS10) continue;
 	for (i1p = 0; i1p < lev1->n_basis; i1p++) {
 	  DecodeBasisEB(lev1->basis[i1p], &ilev1p, &mlev1p);
-	  plev1p = GetLevel(ilev1p);
+	  plev1p = GetLevel(cfac, ilev1p);
 	  DecodePJ(plev1p->pj, &p1p, &j1p);
 	  for (i2p = 0; i2p < lev2->n_basis; i2p++) {
 	    DecodeBasisEB(lev2->basis[i2p], &ilev2p, &mlev2p);
 	    if (mlev1p-mlev2p != mlev1-mlev2) continue;
-	    plev2p = GetLevel(ilev2p);
+	    plev2p = GetLevel(cfac, ilev2p);
 	    DecodePJ(plev2p->pj, &p2p, &j2p);
 	    cp = lev1->mixing[i1p]*lev2->mixing[i2p];
 	    if (fabs(cp) < EPS10) continue;
@@ -2099,7 +2099,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   /* if low or up not given, assume all levels */
   alev = NULL;
   if (nlow == 0 || nup == 0) {
-    int n = GetNumLevels();
+    int n = GetNumLevels(cfac);
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;
@@ -2517,9 +2517,9 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   emax = 1E-10;
   m = 0;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetEBLevel(low[i]);
+    lev1 = GetEBLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      lev2 = GetEBLevel(up[j]);
+      lev2 = GetEBLevel(cfac, up[j]);
       e = lev2->energy - lev1->energy;
       if (i < nlow-nc || j < nup-nc) e = fabs(e);
       if (e > 0) m++;
@@ -2533,7 +2533,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 
   ei = 1E31;
   for (j = 0; j < nup0; j++) {
-    lev2 = GetLevel(up0[j]);    
+    lev2 = GetLevel(cfac, up0[j]);    
     sym = GetSymmetry(cfac, lev2->pj);
     st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
     if (st->kgroup < 0) {
@@ -2601,9 +2601,9 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     emax = e0;
     m = 0;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetEBLevel(low[i]);
+      lev1 = GetEBLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetEBLevel(up[j]);
+	lev2 = GetEBLevel(cfac, up[j]);
 	e = lev2->energy - lev1->energy;
 	if (i < nlow-nc || j < nup-nc) e = fabs(e);
 	if (e < e0 || e >= e1) continue;
@@ -2679,9 +2679,9 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     r.strength = malloc(sizeof(float)*m);
     
     for (i = 0; i < nlow; i++) {
-      lev1 = GetEBLevel(low[i]);
+      lev1 = GetEBLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetEBLevel(up[j]);
+	lev2 = GetEBLevel(cfac, up[j]);
 	e = lev2->energy - lev1->energy;	
 	ilow = low[i];
 	iup = up[j];
@@ -2765,9 +2765,9 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   emax = 1E-10;
   m = 0;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetEBLevel(low[i]);
+    lev1 = GetEBLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      lev2 = GetEBLevel(up[j]);
+      lev2 = GetEBLevel(cfac, up[j]);
       e = lev2->energy - lev1->energy;
       if (i < nlow-nc || j < nup-nc) e = fabs(e);
       if (e > 0) m++;
@@ -2781,7 +2781,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 
   ei = 1E31;
   for (j = 0; j < nup0; j++) {
-    lev2 = GetLevel(up0[j]);    
+    lev2 = GetLevel(cfac, up0[j]);    
     sym = GetSymmetry(cfac, lev2->pj);
     st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
     if (st->kgroup < 0) {
@@ -2853,9 +2853,9 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     emax = e0;
     m = 0;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetEBLevel(low[i]);
+      lev1 = GetEBLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetEBLevel(up[j]);
+	lev2 = GetEBLevel(cfac, up[j]);
 	e = lev2->energy - lev1->energy;
 	if (i < nlow-nc || j < nup-nc) e = fabs(e);
 	if (e < e0 || e >= e1) continue;
@@ -2938,9 +2938,9 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     r.bethe = malloc(sizeof(float)*(m+1));
     
     for (i = 0; i < nlow; i++) {
-      lev1 = GetEBLevel(low[i]);
+      lev1 = GetEBLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetEBLevel(up[j]);
+	lev2 = GetEBLevel(cfac, up[j]);
 	e = lev2->energy - lev1->energy;	
 	ilow = low[i];
 	iup = up[j];

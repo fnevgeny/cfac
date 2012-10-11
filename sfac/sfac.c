@@ -120,11 +120,11 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	rv = -1;
 	goto END;
       }
-      nlevels = GetNumLevels();
+      nlevels = GetNumLevels(cfac);
       (*t) = malloc(sizeof(int)*nlevels);
       k = 0;
       for (j = 0; j < nlevels; j++) {
-	lev = GetLevel(j);
+	lev = GetLevel(cfac, j);
 	im = lev->pb;
 	sym = GetSymmetry(cfac, lev->pj);
 	s = (STATE *) ArrayGet(&(sym->states), im);
@@ -165,7 +165,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
     
       nrg = ng;
       krg = malloc(sizeof(int)*nrg);
-      nlevels = GetNumLevels();
+      nlevels = GetNumLevels(cfac);
       (*t) = malloc(sizeof(int)*nlevels);
       if (!(*t)) {
 	rv = -1;
@@ -183,7 +183,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	  krg[i] = GroupExists(cfac, rgn);
 	}
 	for (j = 0; j < nlevels; j++) {
-	  lev = GetLevel(j);
+	  lev = GetLevel(cfac, j);
 	  im = lev->pb;
 	  sym = GetSymmetry(cfac, lev->pj);
 	  s = (STATE *) ArrayGet(&(sym->states), im);
@@ -2272,6 +2272,7 @@ static int PCutMixing(int argc, char *argv[], int argt[],
 
   return 0;  
 }
+
 static int PStructure(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
   int i, k, ng0, ng, ngp, ns;
@@ -2284,14 +2285,13 @@ static int PStructure(int argc, char *argv[], int argt[],
   kgp = NULL;
   ip = 0;
 
-  if (argc < 1) return -1;
+  if (argc < 1 || argc > 4) return -1;
 
   if (argc == 1) {
     if (argt[0] != STRING) return -1;
     ng = DecodeGroupArgs(&kg, 0, NULL, NULL, variables);
     if (ng < 0) return -1;
   } else {
-    if (argc > 4) return -1;
     if (argc == 4) ip = atoi(argv[3]);		  
     if (argt[0] != STRING) return -1;
     if (argt[1] != LIST && argt[1] != TUPLE) return -1;
@@ -2317,7 +2317,7 @@ static int PStructure(int argc, char *argv[], int argt[],
     }
   }
 
-  nlevels = GetNumLevels();
+  nlevels = GetNumLevels(cfac);
   ns = MAX_SYMMETRIES;  
   for (i = 0; i < ns; i++) {
     k = ConstructHamilton(h, i, ng0, ng, kg, ngp, kgp, 111);

@@ -17,6 +17,10 @@ cfac_t *cfac_new(void)
     /* init config groups */
     cfac->n_groups = 0;
     cfac->cfg_groups = malloc(MAX_GROUPS*sizeof(CONFIG_GROUP));
+    if (!cfac->cfg_groups) {
+        cfac_free(cfac);
+        return NULL;
+    }
     for (i = 0; i < MAX_GROUPS; i++) {
         strcpy(cfac->cfg_groups[i].name, "_all_");
         cfac->cfg_groups[i].n_cfgs = 0;
@@ -26,11 +30,32 @@ cfac_t *cfac_new(void)
 
     /* init config symmetries */
     cfac->symmetry_list = malloc(MAX_SYMMETRIES*sizeof(SYMMETRY));
+    if (!cfac->symmetry_list) {
+        cfac_free(cfac);
+        return NULL;
+    }
     for (i = 0; i < MAX_SYMMETRIES; i++) {
         cfac->symmetry_list[i].n_states = 0;
         ArrayInit(&(cfac->symmetry_list[i].states),
             sizeof(STATE), STATES_BLOCK, NULL, NULL);
     }
+
+
+    cfac->levels = malloc(sizeof(ARRAY));
+    if (!cfac->levels) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    ArrayInit(cfac->levels, sizeof(LEVEL), LEVELS_BLOCK,
+        FreeLevelData, InitLevelData);
+
+    cfac->eblevels = malloc(sizeof(ARRAY));
+    if (!cfac->eblevels) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    ArrayInit(cfac->eblevels, sizeof(LEVEL), LEVELS_BLOCK,
+        FreeLevelData, InitLevelData);
     
     return cfac;
 }
@@ -57,6 +82,9 @@ void cfac_free(cfac_t *cfac)
             ArrayFree(&cfac->levels_per_ion[i]);
         }
         free(cfac->levels_per_ion);
+        
+        ArrayFree(cfac->levels);
+        ArrayFree(cfac->eblevels);
 
         free(cfac);
     }

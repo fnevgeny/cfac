@@ -86,7 +86,22 @@ cfac_t *cfac_new(void)
         return NULL;
     }
     ArrayInit(cfac->ecorrections, sizeof(ECORRECTION), 512, NULL, NULL);
+
+
+    cfac->angz_array = malloc(sizeof(ANGZ_DATUM)*MAX_HAMS2);
+    if (!cfac->angz_array) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    memset(cfac->angz_array, 0, sizeof(ANGZ_DATUM)*MAX_HAMS2);
     
+    cfac->angzxz_array = malloc(sizeof(ANGZ_DATUM)*MAX_HAMS2);
+    if (!cfac->angzxz_array) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    memset(cfac->angzxz_array, 0, sizeof(ANGZ_DATUM)*MAX_HAMS2);
+
     return cfac;
 }
 
@@ -125,6 +140,20 @@ void cfac_free(cfac_t *cfac)
         
         FreeHamsArray(cfac);
         free(cfac->hams);
+        
+        for (i = 0; i < MAX_HAMS2; i++) {
+            FreeAngZDatum(&(cfac->angz_array[i]));
+            FreeAngZDatum(&(cfac->angzxz_array[i]));
+        }
+        free(cfac->angz_array);
+        free(cfac->angzxz_array);
+        
+        if (cfac->angmz_array) {
+            for (i = 0; i < MAX_HAMS2; i++) {
+                FreeAngZDatum(&(cfac->angmz_array[i]));
+            }
+            free(cfac->angmz_array);
+        }
         
         free(cfac);
     }

@@ -168,6 +168,7 @@
 
 /* structure */
 #define MAX_HAMS           2000
+#define MAX_HAMS2          (MAX_HAMS*MAX_HAMS)
 #define LEVELS_BLOCK       1024
 #define ANGZ_BLOCK         1024
 #define ANGZxZ_BLOCK       8192

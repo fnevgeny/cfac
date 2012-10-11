@@ -25,12 +25,6 @@
         }
 #endif /* (FAC_DEBUG >= DEBUG_STRUCTURE) */
 
-static int angz_dim, angz_dim2;
-static ANGZ_DATUM *angz_array;
-static ANGZ_DATUM *angzxz_array;
-static ANGZ_DATUM *angmz_array;
-static ANGULAR_FROZEN ang_frozen;
-
 #ifdef PERFORM_STATISTICS 
 static STRUCT_TIMING timing = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int GetStructTiming(STRUCT_TIMING *t) {
@@ -678,37 +672,37 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
 void AngularFrozen(int nts, int *ts, int ncs, int *cs) {
   int i, j, kz;
   
-  ang_frozen.nts = nts;
+  cfac->ang_frozen.nts = nts;
   if (nts > 0) {
-    ang_frozen.ts = malloc(sizeof(int)*nts);
-    memcpy(ang_frozen.ts, ts, sizeof(int)*nts);
+    cfac->ang_frozen.ts = malloc(sizeof(int)*nts);
+    memcpy(cfac->ang_frozen.ts, ts, sizeof(int)*nts);
   }
-  ang_frozen.ncs = ncs;  
+  cfac->ang_frozen.ncs = ncs;  
   if (ncs > 0) {
-    ang_frozen.cs = malloc(sizeof(int)*ncs);
-    memcpy(ang_frozen.cs, cs, sizeof(int)*ncs);
+    cfac->ang_frozen.cs = malloc(sizeof(int)*ncs);
+    memcpy(cfac->ang_frozen.cs, cs, sizeof(int)*ncs);
   }
 
-  ang_frozen.nz = malloc(sizeof(int)*nts*nts);
-  ang_frozen.z = malloc(sizeof(ANGULAR_ZMIX *)*nts*nts);
+  cfac->ang_frozen.nz = malloc(sizeof(int)*nts*nts);
+  cfac->ang_frozen.z = malloc(sizeof(ANGULAR_ZMIX *)*nts*nts);
   for (i = 0; i < nts; i++) {
     for (j = 0; j < nts; j++) {
       kz = j*nts + i;
-      ang_frozen.nz[kz] = AngularZMix(&(ang_frozen.z[kz]), 
+      cfac->ang_frozen.nz[kz] = AngularZMix(&(cfac->ang_frozen.z[kz]), 
 				      ts[i], ts[j], -1, -1);
     }
   }
   if (ncs > 0) {
-    ang_frozen.nzfb = malloc(sizeof(int)*nts*ncs);
-    ang_frozen.zfb = malloc(sizeof(ANGULAR_ZFB *)*nts*ncs);
-    ang_frozen.nzxzfb = malloc(sizeof(int)*nts*ncs);
-    ang_frozen.zxzfb = malloc(sizeof(ANGULAR_ZxZMIX *)*nts*ncs);
+    cfac->ang_frozen.nzfb = malloc(sizeof(int)*nts*ncs);
+    cfac->ang_frozen.zfb = malloc(sizeof(ANGULAR_ZFB *)*nts*ncs);
+    cfac->ang_frozen.nzxzfb = malloc(sizeof(int)*nts*ncs);
+    cfac->ang_frozen.zxzfb = malloc(sizeof(ANGULAR_ZxZMIX *)*nts*ncs);
     for (i = 0; i < nts; i++) {
       for (j = 0; j < ncs; j++) {
 	kz = j*nts + i;
-	ang_frozen.nzfb[kz] = AngularZFreeBound(&(ang_frozen.zfb[kz]),
+	cfac->ang_frozen.nzfb[kz] = AngularZFreeBound(&(cfac->ang_frozen.zfb[kz]),
 						ts[i], cs[j]);
-	ang_frozen.nzxzfb[kz] = AngularZxZFreeBound(&(ang_frozen.zxzfb[kz]),
+	cfac->ang_frozen.nzxzfb[kz] = AngularZxZFreeBound(&(cfac->ang_frozen.zxzfb[kz]),
 						    ts[i], cs[j]);
       }
     }
@@ -739,11 +733,11 @@ double HamiltonElementEB(cfac_t *cfac, int i0, int j0) {
   } else {
     r = 0.0;
   }
-  ti = IBisect(si, ang_frozen.nts, ang_frozen.ts);
-  tj = IBisect(sj, ang_frozen.nts, ang_frozen.ts);
-  kz = tj*ang_frozen.nts + ti;
-  ang = ang_frozen.z[kz];
-  nz = ang_frozen.nz[kz];
+  ti = IBisect(si, cfac->ang_frozen.nts, cfac->ang_frozen.ts);
+  tj = IBisect(sj, cfac->ang_frozen.nts, cfac->ang_frozen.ts);
+  kz = tj*cfac->ang_frozen.nts + ti;
+  ang = cfac->ang_frozen.z[kz];
+  nz = cfac->ang_frozen.nz[kz];
   for (i = 0; i < nz; i++) {
     if (cfac->b1[0] || cfac->b1[1] || cfac->b1[2]) {
       if (ang[i].k == 2) {
@@ -879,12 +873,12 @@ double HamiltonElementFB(int isym, int isi, int isj) {
   DecodePJ(ji, NULL, &ji);
   DecodePJ(jj, NULL, &jj);
 
-  if (ang_frozen.nts > 0) {
-    ti = IBisect(ti, ang_frozen.nts, ang_frozen.ts);
-    tj = IBisect(tj, ang_frozen.ncs, ang_frozen.cs);
-    kz = tj*ang_frozen.nts + ti;
-    nz1 = ang_frozen.nzfb[kz];
-    a1 = ang_frozen.zfb[kz];
+  if (cfac->ang_frozen.nts > 0) {
+    ti = IBisect(ti, cfac->ang_frozen.nts, cfac->ang_frozen.ts);
+    tj = IBisect(tj, cfac->ang_frozen.ncs, cfac->ang_frozen.cs);
+    kz = tj*cfac->ang_frozen.nts + ti;
+    nz1 = cfac->ang_frozen.nzfb[kz];
+    a1 = cfac->ang_frozen.zfb[kz];
   } else {
     nz1 = AngularZFreeBound(&a1, ti, tj);
   }
@@ -899,10 +893,10 @@ double HamiltonElementFB(int isym, int isi, int isj) {
       r += a;
     }
   }
-  if (nz1 > 0 && ang_frozen.nts == 0) free(a1);
-  if (ang_frozen.nts > 0) {
-    nz2 = ang_frozen.nzxzfb[kz];
-    a2 = ang_frozen.zxzfb[kz];
+  if (nz1 > 0 && cfac->ang_frozen.nts == 0) free(a1);
+  if (cfac->ang_frozen.nts > 0) {
+    nz2 = cfac->ang_frozen.nzxzfb[kz];
+    a2 = cfac->ang_frozen.zxzfb[kz];
   } else {
     nz2 = AngularZxZFreeBound(&a2, ti, tj);
   }
@@ -917,7 +911,7 @@ double HamiltonElementFB(int isym, int isi, int isj) {
       r += a;
     }
   }
-  if (nz2 > 0 && ang_frozen.nts == 0) free(a2);
+  if (nz2 > 0 && cfac->ang_frozen.nts == 0) free(a2);
 
   r /= sqrt(jj + 1.0);
   
@@ -969,12 +963,12 @@ double HamiltonElementFrozen(int isym, int isi, int isj) {
   ks[1] = si->kcfg;
   ks[3] = sj->kcfg;
 
-  if (ang_frozen.nts > 0) {
-    ti = IBisect(ti, ang_frozen.nts, ang_frozen.ts);
-    tj = IBisect(tj, ang_frozen.nts, ang_frozen.ts);
-    kz = tj*ang_frozen.nts + ti;
-    nz = ang_frozen.nz[kz];
-    ang = ang_frozen.z[kz];
+  if (cfac->ang_frozen.nts > 0) {
+    ti = IBisect(ti, cfac->ang_frozen.nts, cfac->ang_frozen.ts);
+    tj = IBisect(tj, cfac->ang_frozen.nts, cfac->ang_frozen.ts);
+    kz = tj*cfac->ang_frozen.nts + ti;
+    nz = cfac->ang_frozen.nz[kz];
+    ang = cfac->ang_frozen.z[kz];
   } else {
     nz = AngularZMix(&ang, ti, tj, -1, -1);
   }
@@ -993,7 +987,7 @@ double HamiltonElementFrozen(int isym, int isi, int isj) {
   if (IsOdd((ji2 + jj1 + j)/2)) a = -a;
   r += a;
 
-  if (nz > 0 && ang_frozen.nts == 0) {
+  if (nz > 0 && cfac->ang_frozen.nts == 0) {
     free(ang);
   } 
 
@@ -2717,8 +2711,8 @@ int AngularZMixStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   start = clock();
 #endif
   
-  iz = ih1*angz_dim + ih2;
-  *ad = &(angz_array[iz]);
+  iz = ih1*MAX_HAMS + ih2;
+  *ad = &(cfac->angz_array[iz]);
   ns = (*ad)->ns;
   if (ns < 0) {
 #ifdef PERFORM_STATISTICS
@@ -2926,8 +2920,8 @@ int AngularZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   start = clock();
 #endif
   
-  iz = ih1*angz_dim + ih2;
-  *ad = &(angz_array[iz]);
+  iz = ih1*MAX_HAMS + ih2;
+  *ad = &(cfac->angz_array[iz]);
   ns = (*ad)->ns;
 
   if (ns < 0) {
@@ -3066,8 +3060,8 @@ int AngularZxZFreeBoundStates(ANGZ_DATUM **ad, int ih1, int ih2) {
   start = clock();
 #endif
 
-  iz = ih1 * angz_dim + ih2;
-  *ad = &(angzxz_array[iz]);
+  iz = ih1 * MAX_HAMS + ih2;
+  *ad = &(cfac->angzxz_array[iz]);
   ns = (*ad)->ns;
 
   if (ns < 0) { 
@@ -3203,15 +3197,15 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
   STATE *s1, *s2;
   LEVEL *lev1, *lev2;
   ANGZ_DATUM *ad;
-
-  if (angmz_array == NULL) {
-    angmz_array = malloc(sizeof(ANGZ_DATUM)*angz_dim2);
-    if (!angmz_array) {
-      printf("cannot allocate memory for angmz_array %d\n", angz_dim2);
+  
+  if (cfac->angmz_array == NULL) {
+    cfac->angmz_array = malloc(sizeof(ANGZ_DATUM)*MAX_HAMS2);
+    if (!cfac->angmz_array) {
+      printf("cannot allocate memory for cfac->angmz_array %d\n", MAX_HAMS2);
     }
-    for (i = 0; i < angz_dim2; i++) {
-      angmz_array[i].ns = 0;
-      angmz_array[i].mk = NULL;
+    for (i = 0; i < MAX_HAMS2; i++) {
+      cfac->angmz_array[i].ns = 0;
+      cfac->angmz_array[i].mk = NULL;
     }
   }
 
@@ -3255,7 +3249,7 @@ int PrepAngular(int n1, int *is1, int n2, int *is2) {
 	  is = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
 	}
       }
-      ad = &(angmz_array[iz]);
+      ad = &(cfac->angmz_array[iz]);
       if (ad->ns == 0) {
 	if (ne1 == ne2) {
 	  ad->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
@@ -3314,12 +3308,12 @@ int AngularZFreeBound(ANGULAR_ZFB **ang, int lower, int upper) {
   lev1 = GetLevel(cfac, lower);
   lev2 = GetLevel(cfac, upper);
 
-  if (angmz_array) {
+  if (cfac->angmz_array) {
     ih1 = lev1->iham;
     ih2 = lev2->iham;
     if (ih1 >= 0 && ih2 >= 0) {
       isz = ih1 * MAX_HAMS + ih2;
-      ad = &(angmz_array[isz]);
+      ad = &(cfac->angmz_array[isz]);
       nz = 0;
       if (ad->ns > 0) {
 	isz0 = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
@@ -3437,7 +3431,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
 
   lev1 = GetLevel(cfac, lower);
   lev2 = GetLevel(cfac, upper);
-  if (angmz_array) {
+  if (cfac->angmz_array) {
     ih1 = lev1->iham;
     ih2 = lev2->iham;
     if (ih1 >= 0 && ih2 >= 0) {
@@ -3446,7 +3440,7 @@ int AngularZMix(ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
       } else {
 	isz = ih1 * MAX_HAMS + ih2;
       }
-      ad = &(angmz_array[isz]);
+      ad = &(cfac->angmz_array[isz]);
       nz = 0;
       if (ad->ns > 0) {
 	if (ih1 > ih2) {
@@ -4094,55 +4088,6 @@ void FreeAngZDatum(ANGZ_DATUM *ap) {
   ap->ns = 0;
 }
 
-int InitAngZArray(void) {
-  int i;
-
-  angz_dim = MAX_HAMS;
-  angz_dim2 = angz_dim*angz_dim;
-  
-  angz_array = malloc(sizeof(ANGZ_DATUM)*angz_dim2);
-  if (!angz_array) {
-    printf("cannot allocate memory for angz_array %d\n", angz_dim2);
-  }
-  angzxz_array = malloc(sizeof(ANGZ_DATUM)*angz_dim2);
-  if (!angzxz_array) {
-    printf("cannot allocate memory for angzxz_array %d\n", angz_dim2);
-  }
-
-  angmz_array = NULL;
-  for (i = 0; i < angz_dim2; i++) {
-    angz_array[i].ns = 0;
-    angzxz_array[i].ns = 0;
-    angz_array[i].mk = NULL;
-    angzxz_array[i].mk = NULL;
-  }
-  
-  return 0;
-}
-  
-int FreeAngZArray(void) {  
-  int i;
-  
-  if (angz_dim2 > 0) {
-    for (i = 0; i < angz_dim2; i++) {
-      FreeAngZDatum(&(angz_array[i]));
-      FreeAngZDatum(&(angzxz_array[i]));
-    }
-    free(angz_array);
-    free(angzxz_array);
-    if (angmz_array) {
-      for (i = 0; i < angz_dim2; i++) {
-	FreeAngZDatum(&(angmz_array[i]));
-      }
-      free(angmz_array);
-    }
-    angz_dim = 0;
-    angz_dim2 = 0;
-  }
-  
-  return 0;
-}
-
 void FreeLevelData(void *p) {
   LEVEL *lev;
   lev = (LEVEL *) p;
@@ -4169,37 +4114,37 @@ void FreeHamsArray(cfac_t *cfac) {
 void ClearAngularFrozen(void) {
   int i, n;
 
-  if (ang_frozen.nts > 0) {
-    free(ang_frozen.ts);
-    n = ang_frozen.nts*ang_frozen.nts;
+  if (cfac->ang_frozen.nts > 0) {
+    free(cfac->ang_frozen.ts);
+    n = cfac->ang_frozen.nts*cfac->ang_frozen.nts;
     for (i = 0; i < n; i++) {
-      if (ang_frozen.nz[i] > 0) free(ang_frozen.z[i]);
+      if (cfac->ang_frozen.nz[i] > 0) free(cfac->ang_frozen.z[i]);
     }
-    free(ang_frozen.nz);
-    free(ang_frozen.z);
-    ang_frozen.ts = NULL;
-    ang_frozen.nz = NULL;
-    ang_frozen.z = NULL;
+    free(cfac->ang_frozen.nz);
+    free(cfac->ang_frozen.z);
+    cfac->ang_frozen.ts = NULL;
+    cfac->ang_frozen.nz = NULL;
+    cfac->ang_frozen.z = NULL;
   }
-  if (ang_frozen.ncs > 0) {
-    free(ang_frozen.cs);
-    n = ang_frozen.nts*ang_frozen.ncs;
+  if (cfac->ang_frozen.ncs > 0) {
+    free(cfac->ang_frozen.cs);
+    n = cfac->ang_frozen.nts*cfac->ang_frozen.ncs;
     for (i = 0; i < n; i++) {
-      if (ang_frozen.nzfb[i] > 0) free(ang_frozen.zfb[i]);
-      if (ang_frozen.nzxzfb[i] > 0) free(ang_frozen.zxzfb[i]);
+      if (cfac->ang_frozen.nzfb[i] > 0) free(cfac->ang_frozen.zfb[i]);
+      if (cfac->ang_frozen.nzxzfb[i] > 0) free(cfac->ang_frozen.zxzfb[i]);
     }
-    free(ang_frozen.nzfb);
-    free(ang_frozen.nzxzfb);
-    free(ang_frozen.zfb);
-    free(ang_frozen.zxzfb);
-    ang_frozen.cs = NULL;
-    ang_frozen.nzfb = NULL;
-    ang_frozen.nzxzfb = NULL;
-    ang_frozen.zfb = NULL;
-    ang_frozen.zxzfb = NULL;
+    free(cfac->ang_frozen.nzfb);
+    free(cfac->ang_frozen.nzxzfb);
+    free(cfac->ang_frozen.zfb);
+    free(cfac->ang_frozen.zxzfb);
+    cfac->ang_frozen.cs = NULL;
+    cfac->ang_frozen.nzfb = NULL;
+    cfac->ang_frozen.nzxzfb = NULL;
+    cfac->ang_frozen.zfb = NULL;
+    cfac->ang_frozen.zxzfb = NULL;
   }
-  ang_frozen.nts = 0;
-  ang_frozen.ncs = 0;
+  cfac->ang_frozen.nts = 0;
+  cfac->ang_frozen.ncs = 0;
 }
 
 /* (Re)allocate Hamiltonian */
@@ -4238,23 +4183,5 @@ int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
   }
   if (!h->mixing) return -1;
 
-  return 0;
-}
-
-int InitStructure(void) {
-  InitAngZArray();
-  cfac->nhams = 0;
-
-  ang_frozen.nts = 0;
-  ang_frozen.ncs = 0;
-  ang_frozen.ts = NULL;
-  ang_frozen.cs = NULL;
-  ang_frozen.nz = NULL;
-  ang_frozen.nzfb = NULL;
-  ang_frozen.nzxzfb = NULL;
-  ang_frozen.z = NULL;
-  ang_frozen.zfb = NULL;
-  ang_frozen.zxzfb = NULL;
-  
   return 0;
 }

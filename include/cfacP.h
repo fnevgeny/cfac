@@ -55,6 +55,12 @@ struct _cfac_t {
     
     double mix_cut2;          /* _lower_ threshold for recoupling between
                                  different configurations                    */
+
+    ANGZ_DATUM *angz_array;   /* angular coefficients                        */
+    ANGZ_DATUM *angzxz_array; /* ZxZ angular coefficients                    */
+    ANGZ_DATUM *angmz_array;  /* precalculated angular coefficients          */
+
+    ANGULAR_FROZEN ang_frozen;/* angular coefficients for frozen states      */
 };
 
 /* config.c */
@@ -66,6 +72,8 @@ void
 FreeLevelData(void *p);
 void
 FreeHamsArray(cfac_t *cfac);
+void
+FreeAngZDatum(ANGZ_DATUM *ap);
 void
 InitLevelData(void *p, int n);
 

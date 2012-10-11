@@ -59,7 +59,6 @@ int InitFac() {
   }
   
   InitDBase();
-  InitStructure();
   InitExcitation();
   InitRecombination();
   InitIonization();

@@ -175,14 +175,6 @@ int SetAngZOptions(cfac_t *cfac, int n, double mix, double cut) {
   return 0;
 }
 
-int CompareInt(const void *a1, const void *a2) {
-  int *i1, *i2;
-  
-  i1 = (int *) a1;
-  i2 = (int *) a2;
-  return (*i1 - *i2);
-}
-
 static void FlagClosed(cfac_t *cfac, SHAMILTON *hs) {
   int i, j, k, m1, m2;
   CONFIG *c;

@@ -125,7 +125,6 @@ typedef struct _STRUCT_TIMING_ {
 int GetStructTiming(STRUCT_TIMING *t);
 #endif
 
-int CompareInt(const void *a1, const void *a2);
 int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n);

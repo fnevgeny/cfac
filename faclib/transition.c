@@ -519,6 +519,14 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
   return 0;
 }
 
+static int CompareInt(const void *a1, const void *a2) {
+  int *i1, *i2;
+  
+  i1 = (int *) a1;
+  i2 = (int *) a2;
+  return (*i1 - *i2);
+}
+
 int OverlapLowUp(int nlow, int *low, int nup, int *up) {
   int i, j, n;
   int *lowinup, *upinlow, *icom;

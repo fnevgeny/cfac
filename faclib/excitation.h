@@ -25,14 +25,6 @@ typedef struct _CEPK_ {
   double *pke;
 } CEPK;
 
-#ifdef PERFORM_STATISTICS
-typedef struct _EXCIT_TIMING_ {
-  double rad_pk;
-  double rad_qk;
-  double set_kappa;
-} EXCIT_TIMING;
-#endif
-
 CEPW_SCRATCH *GetCEPWScratch(void);
 int FreeExcitationQk(void);
 int InitExcitation(void);

@@ -68,14 +68,6 @@ static double awgrid[MAXNTE];
 
 static double PhaseRDependent(double x, double eta, double b);
 
-#ifdef PERFORM_STATISTICS
-static RAD_TIMING rad_timing = {0, 0, 0, 0};
-int GetRadTiming(RAD_TIMING *t) {
-  memcpy(t, &rad_timing, sizeof(RAD_TIMING));
-  return 0;
-}
-#endif
-
 static void InitOrbitalData(void *p, int n) {
   ORBITAL *d;
   int i;
@@ -916,10 +908,6 @@ int RefineRadial(int maxfun, int msglvl) {
 
 int SolveDirac(ORBITAL *orb) {
   int err;
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   err = 0;  
   potential->flag = -1;
@@ -929,10 +917,6 @@ int SolveDirac(ORBITAL *orb) {
     printf("%d %d %10.3E\n", orb->n, orb->kappa, orb->energy);
     exit(1);
   }
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  rad_timing.dirac += stop - start;
-#endif
 
   return err;
 }
@@ -1980,9 +1964,6 @@ double AverageEnergyConfig(CONFIG *cfg) {
       }
       Slater(&y, k, k, k, k, 0, 0);
       b = ((nq-1.0)/2.0) * (y - (1.0 + 1.0/j2)*t);
-#if FAC_DEBUG
-      fprintf(debug_log, "\nAverage Radial: %lf\n", y);
-#endif
 
     } else {
       b = 0.0;
@@ -2005,16 +1986,8 @@ double AverageEnergyConfig(CONFIG *cfg) {
 	Slater(&y, k, kp, kp, k, kk/2, 0);
 	q = W3j(j2, kk, j2p, -1, 0, 1);
 	a += y * q * q;
-#if FAC_DEBUG
-	fprintf(debug_log, "exchange rank: %d, q*q: %lf, Radial: %lf\n", 
-		kk/2, q*q, y);
-#endif
-
       }
       Slater(&y, k, kp, k, kp, 0, 0);
-#if FAC_DEBUG
-      fprintf(debug_log, "direct: %lf\n", y);
-#endif
 
       t += nqp * (y - a);
     }
@@ -2055,10 +2028,6 @@ void DiExAvgConfig(AVERAGE_CONFIG *cfg, double *d0, double *d1) {
     b = ((nq-1.0)/2.0);
     *d0 += nq*b*(y - (1.0+1.0/j2)*t);
     
-#if FAC_DEBUG
-      fprintf(debug_log, "\nAverage Radial: %lf\n", y);
-#endif
-      
     for (j = 0; j < i; j++) {
       np = cfg->n[j];
       kappap = cfg->kappa[j];
@@ -2075,17 +2044,10 @@ void DiExAvgConfig(AVERAGE_CONFIG *cfg, double *d0, double *d1) {
 	Slater(&y, k, kp, kp, k, kk/2, 0);
 	q = W3j(j2, kk, j2p, -1, 0, 1);
 	a += y * q * q;
-#if FAC_DEBUG
-	fprintf(debug_log, "exchange rank: %d, q*q: %lf, Radial: %lf\n", 
-		kk/2, q*q, y);
-#endif
 
       }
       Slater(&y, k, kp, k, kp, 0, 0);
 
-#if FAC_DEBUG
-      fprintf(debug_log, "direct: %lf\n", y);
-#endif
       *d0 += nq*nqp*y;
       *d1 += -nq*nqp*a;
     }
@@ -2118,10 +2080,6 @@ double AverageEnergyAvgConfig(AVERAGE_CONFIG *cfg) {
     Slater(&y, k, k, k, k, 0, 0);
     b = ((nq-1.0)/2.0) * (y - (1.0 + 1.0/j2)*t);
     
-#if FAC_DEBUG
-      fprintf(debug_log, "\nAverage Radial: %lf\n", y);
-#endif
-      
     t = 0.0;
     for (j = 0; j < i; j++) {
       np = cfg->n[j];
@@ -2139,17 +2097,8 @@ double AverageEnergyAvgConfig(AVERAGE_CONFIG *cfg) {
 	Slater(&y, k, kp, kp, k, kk/2, 0);
 	q = W3j(j2, kk, j2p, -1, 0, 1);
 	a += y * q * q;
-#if FAC_DEBUG
-	fprintf(debug_log, "exchange rank: %d, q*q: %lf, Radial: %lf\n", 
-		kk/2, q*q, y);
-#endif
-
       }
       Slater(&y, k, kp, k, kp, 0, 0);
-
-#if FAC_DEBUG
-      fprintf(debug_log, "direct: %lf\n", y);
-#endif
 
       t += nqp * (y - a);
     }
@@ -2370,11 +2319,6 @@ double MultipoleRadialNR(int m, int k1, int k2, int gauge) {
   double r;
   int kappa1, kappa2;
 
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop; 
-  start = clock();
-#endif
-
   orb1 = GetOrbital(k1);
   orb2 = GetOrbital(k2);
   kappa1 = orb1->kappa;
@@ -2411,11 +2355,6 @@ double MultipoleRadialNR(int m, int k1, int k2, int gauge) {
     r *= ReducedCL(GetJFromKappa(kappa1), 2*m, GetJFromKappa(kappa2));
   }
 
-#ifdef PERFORM_STATISTICS 
-  stop = clock();
-  rad_timing.radial_1e += stop - start;
-#endif
-  
   return r;
 }
 
@@ -2428,11 +2367,6 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
   double x, a, r, rp, ef, **p1;
   int n, i, j, npts;
   double rcl;
-
-#ifdef PERFORM_STATISTICS 
-  clock_t start, stop;
-  start = clock();
-#endif
 
   if (m == 0) return 0;
   
@@ -2548,12 +2482,6 @@ int MultipoleRadialFRGrid(double **p0, int m, int k1, int k2, int gauge) {
     }
   }
 
-
-#ifdef PERFORM_STATISTICS 
-  stop = clock();
-  rad_timing.radial_1e += stop - start;
-#endif
-
   *p0 = *p1;
   return n_awgrid;
 }
@@ -2603,11 +2531,6 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
   double x, a, r, rp, **p1, ef;
   int n, i, j, npts;
   double rcl;
-
-#ifdef PERFORM_STATISTICS 
-  clock_t start, stop;
-  start = clock();
-#endif
 
   if (m == 0) return 0.0;
   
@@ -2739,10 +2662,6 @@ double MultipoleRadialFR0(double aw, int m, int k1, int k2, int gauge) {
   if (gauge == G_COULOMB && m < 0) r /= aw;
   r *= rcl;
 
-#ifdef PERFORM_STATISTICS 
-  stop = clock();
-  rad_timing.radial_1e += stop - start;
-#endif
   return r;
 }
 
@@ -2901,11 +2820,6 @@ int SlaterTotal(double *sd, double *se, int *j, int *ks, int k, int mode) {
   int k0, k1, k2, k3;
   int js[4];
   ORBITAL *orb0, *orb1, *orb2, *orb3;
-
-#ifdef PERFORM_STATISTICS 
-  clock_t start, stop;
-  start = clock();
-#endif
 
   k0 = ks[0];
   k1 = ks[1];
@@ -3066,10 +2980,6 @@ int SlaterTotal(double *sd, double *se, int *j, int *ks, int k, int mode) {
   }
 
  EXIT:
-#ifdef PERFORM_STATISTICS 
-    stop = clock();
-    rad_timing.radial_slater += stop - start;
-#endif
   return 0;
 }
 
@@ -3420,10 +3330,6 @@ int Slater(double *s, int k0, int k1, int k2, int k3, int k, int mode) {
   int ilast, i, npts, m;
   ORBITAL *orb0, *orb1, *orb2, *orb3;
   double norm;
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop; 
-  start = clock();
-#endif
 
   index[0] = k0;
   index[1] = k1;
@@ -3503,10 +3409,7 @@ int Slater(double *s, int k0, int k1, int k2, int k3, int k, int mode) {
 
     if (p) *p = *s;
   }
-#ifdef PERFORM_STATISTICS 
-    stop = clock();
-    rad_timing.radial_2e += stop - start;
-#endif
+
   return 0;
 }
 

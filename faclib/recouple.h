@@ -113,26 +113,6 @@ typedef struct _FORMULA_ {
   int phase;
 } FORMULA;
 
-#ifdef PERFORM_STATISTICS
-/*
-** STRUCT:      RECOUPLE_TIMING
-** PURPOSE:     the timing statistics of the module "recouple".
-** FIELDS:      {clock_t angz, angzxz, decouple, interact},
-**              time used in the functions AngZ, AngZxZ0, 
-**              DecoupleShell, and GetInteract respectively.
-** NOTE:        it is only compiled in when the macro 
-**              PERFORM_STATISTICS is defined in "global.h".
-*/
-typedef struct _RECOUPLE_TIMING_ {
-  double angz;
-  double angzxz;
-  double decouple;
-  double interact;
-} RECOUPLE_TIMING;
-
-int     GetRecoupleTiming(RECOUPLE_TIMING *t);
-#endif
-
 /* the recoupling matrix going from the coupled operators to uncoupled ones */
 double  DecoupleShell(int n_shells, SHELL_STATE *bra, SHELL_STATE *ket, 
 		      int n_interact, int *interact, int *rank);

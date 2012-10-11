@@ -4,7 +4,6 @@
 
 #include "cfacP.h"
 #include "global.h"
-#include "consts.h"
 #include "coulomb.h"
 #include "recouple.h"
 #include "angular.h"
@@ -16,14 +15,6 @@
 #include "init.h"
 
 cfac_t *cfac = NULL;
-
-#if FAC_DEBUG
-  FILE *debug_log = NULL;
-#endif
-
-#ifdef PERFORM_STATISTICS
-  FILE *perform_log = NULL;
-#endif
 
 int Info(void) {
   printf("========================================\n");
@@ -38,13 +29,7 @@ int Info(void) {
 int InitFac() {
   int ierr;
 
-#if FAC_DEBUG
-  debug_log = fopen("debug.log", "w");
-#endif
-
-#ifdef PERFORM_STATISTICS
-  perform_log = fopen("perform.log", "w");
-#endif
+  gsl_ieee_env_setup();
 
   cfac = cfac_new();
 
@@ -63,7 +48,5 @@ int InitFac() {
   InitRecombination();
   InitIonization();
   
-  gsl_ieee_env_setup();
-
   return 0;
 }

@@ -105,26 +105,6 @@ typedef struct _TRANSITION_ {
     double e;
 } TRANSITION;
 
-#ifdef PERFORM_STATISTICS
-typedef struct _STRUCT_TIMING_ {
-  double angz_mix;
-  double angzxz_mix;
-  double angz_fb;
-  double angzxz_fb;
-  double angz_states;
-  double angz_states_load;
-  long n_angz_states;
-  long n_angz_states_load;
-  double angzfb_states;
-  double angzxzfb_states;
-  double add_angz;
-  double add_angzxz;
-  double diag_ham;
-  double set_ham;
-} STRUCT_TIMING;
-int GetStructTiming(STRUCT_TIMING *t);
-#endif
-
 int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n);

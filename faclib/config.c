@@ -2026,9 +2026,6 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
       acfg->n[j] = n;
       acfg->kappa[j] = kappa;
       acfg->nq[j] = tnq[i];
-#if FAC_DEBUG      
-      fprintf(debug_log, "acfg: %d %d %lf\n", n, kappa, tnq[i]);
-#endif
       j++;
     }
   }

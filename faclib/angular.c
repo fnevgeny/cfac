@@ -18,30 +18,6 @@
 double ln_factorial[MAX_FACTORIAL];
 double ln_integer[MAX_FACTORIAL];
 
-#ifdef PERFORM_STATISTICS
-static ANGULAR_TIMING timing = {0, 0, 0};
-
-/* 
-** FUNCTION:    GetAngularTiming.
-** PURPOSE:     Get the profiling information for 
-**              module *angular*.
-**              
-** INPUT:       {ANGULAR_TIMING *t},
-**              pointer to the struct
-**              which holds the result on output.
-** RETURN:      {int}, 
-**              always 0.
-** SIDE EFFECT: 
-** NOTE:        included only if the macro PERFOR_STATISTICS 
-**              is defined in "global.h".
-**              the input pointer must have the storage allocated.
-*/
-int GetAngularTiming(ANGULAR_TIMING *t) {
-  memcpy(t, &timing, sizeof(timing));
-  return 0;
-}
-#endif
-
 /* 
 ** FUNCTION:    InitAngular.
 ** PURPOSE:     initialize the nature log of factorial 
@@ -97,21 +73,7 @@ int Triangle(int j1, int j2, int j3) {
 ** calculate the Wigner 3j symbols.
 */
 double W3j(int j1, int j2, int j3, int m1, int m2, int m3) {
-  double r;
-  
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;  
-  start = clock();
-#endif
-
-  r = gsl_sf_coupling_3j(j1, j2, j3, m1, m2, m3);
-
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.w3j += stop - start;
-#endif
-
-  return r;
+  return gsl_sf_coupling_3j(j1, j2, j3, m1, m2, m3);
 }
 
 /* 
@@ -119,21 +81,7 @@ double W3j(int j1, int j2, int j3, int m1, int m2, int m3) {
 ** PURPOSE:     calculate the 6j symbol.
 */
 double W6j(int j1, int j2, int j3, int i1, int i2, int i3) {
-  double r;
-  
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;  
-  start = clock();
-#endif
-
-  r = gsl_sf_coupling_6j(j1, j2, j3, i1, i2, i3);
-
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.w6j += stop - start;
-#endif
-
-  return r;
+  return gsl_sf_coupling_6j(j1, j2, j3, i1, i2, i3);
 }
 
 /* 
@@ -172,21 +120,7 @@ int W6jTriangle(int j1, int j2, int j3, int i1, int i2, int i3) {
 double W9j(int j1, int j2, int j3,
 	   int i1, int i2, int i3,
 	   int k1, int k2, int k3) {
-  double r;
-  
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;  
-  start = clock();
-#endif
-
-  r = gsl_sf_coupling_9j(j1, j2, j3, i1, i2, i3, k1, k2, k3);
-
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.w9j += stop - start;
-#endif
-
-  return r;
+  return gsl_sf_coupling_9j(j1, j2, j3, i1, i2, i3, k1, k2, k3);
 }
 
 /* 

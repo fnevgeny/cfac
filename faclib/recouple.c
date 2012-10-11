@@ -37,24 +37,6 @@ static int max_rank = MAXRANK;
 */
 static MULTI *interact_shells;
 
-#ifdef PERFORM_STATISTICS
-static RECOUPLE_TIMING timing = {0, 0, 0, 0};
-/* 
-** FUNCTION:    GetRecoupleTiming
-** PURPOSE:     retrieve the timing information of the module "recouple".
-** INPUT:       {RECOUPLE_TIMING *t},
-**              pointer of the structure which will hold the result.
-** RETURN:      {int},
-**              always 0.
-** SIDE EFFECT: 
-** NOTE:        
-*/
-int GetRecoupleTiming(RECOUPLE_TIMING *t) {
-  memcpy(t, &timing, sizeof(timing));
-  return 0;
-}
-#endif
-
 static void InitInteractDatum(void *p, int n) {
   INTERACT_DATUM *d;
   int i;
@@ -339,11 +321,6 @@ int AngularZ(double **coeff, int **kk, int nk,
   double coeff1, coeff2;
   RCFP_STATE rcfp_bra, rcfp_ket;
 
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
-
   if (nk == 0) {
     k = (bra[0]).totalJ;
     m = (ket[0]).totalJ;
@@ -377,10 +354,6 @@ int AngularZ(double **coeff, int **kk, int nk,
       rank[1] = (*kk)[m];
       (*coeff)[m] = DecoupleShell(n_shells, bra, ket, 
 				  n_interact, interact, rank);
-#if (FAC_DEBUG >= DEBUG_RECOUPLE)
-    fprintf(debug_log, "AngularZ: Decouple %d %lf\n", m, (*coeff)[m]);
-#endif
-     
     }
     st1 = bra[n_shells - s1->index -1];
     st2 = ket[n_shells - s1->index -1];
@@ -395,9 +368,6 @@ int AngularZ(double **coeff, int **kk, int nk,
     rcfp_ket.subshellMQ = rcfp_ket.nq - (s1->j + 1)/2;
     for (k = 0; k < nk; k++) {
       (*coeff)[k] *= ReducedW(&rcfp_bra, &rcfp_ket, (*kk)[k]/2, 1, -1);
-#if (FAC_DEBUG >= DEBUG_RECOUPLE)
-    fprintf(debug_log, "AngularZ: %d %lf\n", k, (*coeff)[k]);
-#endif
     }
 
   } else { /* two different interacting shells */
@@ -457,15 +427,8 @@ int AngularZ(double **coeff, int **kk, int nk,
  
   for (k = 0; k < nk; k++) {
     (*coeff)[k] /= -sqrt((*kk)[k] + 1);
-#if FAC_DEBUG    
-    fprintf(debug_log, "AngularZ: %d %lf\n", (*kk)[k], (*coeff)[k]);
-#endif
   }
 
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.angz += stop-start;
-#endif
   return nk;
 }
 
@@ -514,11 +477,6 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
   int i, j;
   double r, a, b;  
   RCFP_STATE rcfp_bra[4], rcfp_ket[4];
-
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   /* if nk is non positive, allocate the memory for the coeff. and kk */
   if (nk <= 0) {
@@ -583,40 +541,20 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
     }
     recouple_operators = 0;
   } else if (nops[0] == 3 && nops[1] == 1) { /* 1 x 3 */
-#if FAC_DEBUG    
-    fprintf(debug_log, "%d %d  %d %d  %d %d  %d %d\n",
-	    s[0].nq_bra, s[0].nq_ket, s[1].nq_bra, s[1].nq_ket, 
-	    s[2].nq_bra, s[2].nq_ket, s[3].nq_bra, s[3].nq_ket);
-#endif
     for (m = 0; m < nk1; m++){
       rank[1] = s[order[0]].j;
       rank[2] = rank[1];
       rank[3] = rank[1];
       coeff1[m] = DecoupleShell(n_shells, bra, ket, 
 				n_interact, interact, rank); 
-#if FAC_DEBUG
-      fprintf(debug_log, "  1x3 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
       if (order[0] == 0 || order[0] == 1) { 
 	coeff1[m] *= ReducedAxW(rcfp_bra, rcfp_ket, kk1[m]/2, rank[1],
 				qm[order[1]], qm[order[2]], qm[order[3]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "1x3:1 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
 	coeff1[m] *= ReducedA(rcfp_bra+1, rcfp_ket+1, qm[order[0]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "1x3:1 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
       } else {     
 	coeff1[m] *= ReducedWxA(rcfp_bra, rcfp_ket, kk1[m]/2, rank[1],
 				qm[order[1]], qm[order[2]], qm[order[3]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "1x3:2 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
 	coeff1[m] *= ReducedA(rcfp_bra+1, rcfp_ket+1, qm[order[0]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "1x3:2 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
       }
     }
     if (order[0] == 0 || order[0] == 1) recouple_operators = 1;
@@ -628,29 +566,14 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
       rank[3] = rank[1];
       coeff1[m] = DecoupleShell(n_shells, bra, ket, 
 				n_interact, interact, rank); 
-#if FAC_DEBUG
-      fprintf(debug_log, "  3x1 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
       if (order[3] == 0 || order[3] == 1) {
 	coeff1[m] *= ReducedA(rcfp_bra, rcfp_ket, qm[order[3]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "3x1:3 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
 	coeff1[m] *= ReducedAxW(rcfp_bra+1, rcfp_ket+1, kk1[m]/2, rank[1],
 				qm[order[0]], qm[order[1]], qm[order[2]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "3x1:3 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
       } else {
 	coeff1[m] *= ReducedA(rcfp_bra, rcfp_ket, qm[order[3]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "3x1:4 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
 	coeff1[m] *= ReducedWxA(rcfp_bra+1, rcfp_ket+1, kk1[m]/2, rank[1],
 				qm[order[0]], qm[order[1]], qm[order[2]]);
-#if FAC_DEBUG
-	fprintf(debug_log, "3x1:4 rank %d %lf\n", kk1[m], coeff1[m]);
-#endif
       }
     }
     if (order[3] == 0 || order[3] == 1) recouple_operators = 3;
@@ -702,11 +625,6 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
       }
     }
 
-#if (FAC_DEBUG >= DEBUG_RECOUPLE)
-    fprintf(debug_log, "AngularZxZ0: Order, %d %d %d %d, nk1 = %d\n", 
-	    order[0], order[1], order[2], order[3], nk1);
-#endif
-
     for (m = 0; m < nk1; m++){
       rank[1] = kk1[m];
       rank[2] = rank[1];
@@ -714,33 +632,13 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
       coeff1[m] = DecoupleShell(n_shells, bra, ket, 
 				n_interact, interact, rank); 
 
-#if (FAC_DEBUG >= DEBUG_RECOUPLE)
-      fprintf(debug_log, "2x2 rank: %d, %lf \n", kk1[m], coeff1[m]);
-#endif
-
       r = ReducedW(rcfp_bra, rcfp_ket, kk1[m]/2, 
 		   qm[order[2]], qm[order[3]]);
       coeff1[m] *= r;
 
-#if (FAC_DEBUG >= DEBUG_RECOUPLE)
-      fprintf(debug_log, "2x2 rank: %d, %lf \n", kk1[m], r);
-      fprintf(debug_log, "%d %d %d %d %d %d %d %d \n", 
-	      rcfp_bra[0].state, rcfp_bra[0].nq, rcfp_bra[0].subshellMQ,
-	      rcfp_ket[0].state, rcfp_ket[0].nq, rcfp_ket[0].subshellMQ,
-	      qm[order[2]], qm[order[3]]);
-#endif
-
       r = ReducedW(rcfp_bra+1, rcfp_ket+1, kk1[m]/2,
 		   qm[order[0]], qm[order[1]]);
       coeff1[m] *= r;
-
-#if (FAC_DEBUG >= DEBUG_RECOUPLE)
-      fprintf(debug_log, "2x2 rank: %d, %lf \n", kk1[m], r);
-      fprintf(debug_log, "%d %d %d %d %d %d %d %d \n", 
-	      rcfp_bra[1].state, rcfp_bra[1].nq, rcfp_bra[1].subshellMQ,
-	      rcfp_ket[1].state, rcfp_ket[1].nq, rcfp_ket[1].subshellMQ,
-	      qm[order[0]], qm[order[1]]);
-#endif
 
     }
     recouple_operators = 6;
@@ -799,31 +697,15 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
       coeff1[m] = DecoupleShell(n_shells, bra, ket, 
 				n_interact, interact, rank); 
 
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-      fprintf(debug_log, "2x1x1 rank, %d %lf \n", kk1[m], coeff1[m]);
-#endif
-
       r = ReducedA(rcfp_bra, rcfp_ket, qm[order[3]]);
       coeff1[m] *= r;
-
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-      fprintf(debug_log, "2x1x1 rank, %d %lf \n", kk1[m], r);
-#endif
 
       r = ReducedA(rcfp_bra+1, rcfp_ket+1, qm[order[2]]);
       coeff1[m] *= r;
 
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-      fprintf(debug_log, "2x1x1 rank, %d %lf \n", kk1[m], r);
-#endif
-
       r = ReducedW(rcfp_bra+2, rcfp_ket+2, kk1[m]/2,
 		   qm[order[0]], qm[order[1]]);
       coeff1[m] *= r;
-
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-      fprintf(debug_log, "2x1x1 rank, %d %lf \n", kk1[m], r);
-#endif
 
     }
     recouple_operators = 8;
@@ -863,10 +745,6 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
     recouple_operators = 9;
   }
 
-#if FAC_DEBUG
-  fprintf(debug_log, "shell order: %d %d %d %d %d %d\n",
-	  order[0], order[1], order[2], order[3], phase, recouple_operators);
-#endif
   /* now adjust the phase factor, and do the recoupling if necessary */
   switch (recouple_operators) {
   case 0:
@@ -991,12 +869,6 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
 		 IsOrder(order, 1, 2, 0, 3)) {
 	SumCoeff((*coeff), (*kk), nk, 0, coeff1, kk1, nk1, 1, phase,
 		 s[0].j, s[1].j, s[2].j, s[3].j);
-
-#if (FAC_DEBUG >= DEBUG_RECOUPLE)
-	fprintf(debug_log, "AngularZxZ0: recouple_operators = 6, %lf, %lf\n",
-		(*coeff)[0], coeff1[0]);
-#endif
-
       }
       free(coeff1);
       free(kk1);
@@ -1008,10 +880,6 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
       /* do nothing in this case */
     } else if (IsOrder(order, 1, 0, 2, 3)) {
       for (m = 0; m < nk1; m++) {
-#if FAC_DEBUG
-	fprintf(debug_log, "rank*: %d, phase: %d %d %lf \n", kk1[m], phase,
-		(s[0].j + s[1].j - kk1[m])/2, coeff1[m]);
-#endif
 	if (IsOdd(phase + (s[0].j+s[1].j-kk1[m])/2)) 
 	  coeff1[m] = -coeff1[m];
       }
@@ -1062,19 +930,11 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
       }
     } else if (IsOrder(order, 0, 1, 3, 2)) {
 
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-      fprintf(debug_log, "phase: %d %lf\n", phase, coeff1[0]);
-#endif
-
       for (m = 0; m < nk1; m++) {
 	if (IsOdd(phase + (s[2].j+s[3].j-kk1[m])/2)) 
 	  coeff1[m] = -coeff1[m];
       }
     } else if (IsOrder(order, 2, 3, 1, 0)) {
-
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-      fprintf(debug_log, "phase: %d %lf\n", phase, coeff1[0]);
-#endif
 
       for (m = 0; m < nk1; m++) {
 	if (IsOdd(phase + (s[0].j+s[1].j-kk1[m])/2)) 
@@ -1189,11 +1049,6 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
     (*coeff)[m] /= sqrt((*kk)[m] + 1);
     if (IsOdd((*kk)[m]/2)) (*coeff)[m] = -(*coeff)[m];
   }
-
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.angzxz += stop - start;
-#endif
 
   return nk;
 }
@@ -1421,12 +1276,6 @@ int InteractingShells(INTERACT_DATUM **idatum,
 
   if (csf_i == NULL) goto END;
 
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-  fprintf(debug_log, "before sort: %d %d %d %d\n", 
-	  interaction[0], interaction[1], 
-	  interaction[2], interaction[3]);
-#endif
-
   /* determine the phase factor */
   for (j = 0; j < 3; j++){
     for (i = 3; i > j; i--) {
@@ -1438,12 +1287,6 @@ int InteractingShells(INTERACT_DATUM **idatum,
     }
   }
 
-#if (FAC_DEBUG > DEBUG_RECOUPLE)
-  fprintf(debug_log, "after sort: %d %d %d %d\n", 
-	  interaction[0], interaction[1], 
-	  interaction[2], interaction[3]);
-#endif
-  
   (*idatum)->phase = 0;
   if (interaction[0] >= 0) {
     for (j = interaction[0]+1; j <= interaction[1]; j++) {
@@ -1535,11 +1378,6 @@ int GetInteract(INTERACT_DATUM **idatum,
   INTERACT_SHELL *s;
   int n_shells;
   int index[4];
-
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;  
-  start = clock();
-#endif
 
   ci = GetConfigFromGroup(cfac, kgi, kci);
   cj = GetConfigFromGroup(cfac, kgj, kcj);
@@ -1643,11 +1481,6 @@ int GetInteract(INTERACT_DATUM **idatum,
     free((*idatum));
     idatum = NULL;
   }
-
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.interact += stop -start;
-#endif
 
   return n_shells;
 }
@@ -2146,239 +1979,6 @@ void CheckAngularConsistency(int n_shells, SHELL *bra,
       printf("Ang: %2d %15.8E %15.8E\n", k, ang1[i], y);
     }
   }
-
-#if FAC_DEBUG
-  memcpy(s, ss, sizeof(INTERACT_SHELL)*4);
-
-  nk1 = AngularZxZ0(&ang1, &kk1, 0, n_shells, sbra, sket, s);
-
-  if (nk1 <= 0) {
-    fprintf(debug_log, "no angular coeff.\n\n");
-    return;
-  }
-  ang4 = malloc(sizeof(double)*nk1);
-  for (i = 0; i < nk1; i++) ang4[i] = 0.0;
-
-  z0 = 0;
-  if (s[1].index == s[2].index) {
-    nk0 = 1;
-    k = 0;
-    k0 = &k;
-    x = &z0;
-    nk0 = AngularZ(&x, &k0, nk0, n_shells, sbra, sket, s, s+3);
-    z0 = z0/sqrt(s[0].j+1.0);
-    if (IsOdd((s[0].j + s[2].j)/2)) z0 = -z0;
-  }
-  
-  t = (SHELL *) malloc(sizeof(SHELL)*n_shells);
-  if (t == NULL) {
-    free(ang1);
-    free(ang4);
-    free(kk1);
-    exit(1);
-  }
-
-  icfg.shells = t;
-  icfg.n_shells = n_shells;
-  memcpy(t, bra, sizeof(SHELL)*n_shells);
-  icfg.shells[n_shells-1-s[0].index].nq -= 1;
-  icfg.shells[n_shells-1-s[1].index].nq += 1;
-  s[0].nq_ket = icfg.shells[n_shells-1-s[0].index].nq;
-  s[1].nq_ket = icfg.shells[n_shells-1-s[1].index].nq;
-  s[2].nq_bra = icfg.shells[n_shells-1-s[2].index].nq;
-  s[3].nq_bra = icfg.shells[n_shells-1-s[3].index].nq;
-
-
-  fprintf(debug_log, "Interacting Shells: %d %d %d %d\n", 
-	  s[0].index, s[1].index, s[2].index, s[3].index);
-  fprintf(debug_log, "Intermediate Config.: ");
-  for (i = n_shells-1; i >= 0; i--) {
-    fprintf(debug_log, "(%d %d %d), ", icfg.shells[i].n, 
-	   icfg.shells[i].kappa, icfg.shells[i].nq);
-  }
-  fprintf(debug_log, "\n");
-  
-  for (i = 0; i < n_shells; i++) {
-    maxq = 2*abs(icfg.shells[i].kappa);
-    if (icfg.shells[i].nq < 0 || icfg.shells[i].nq > maxq) {
-      fprintf(debug_log, "\n");
-      for (i = 0; i < nk1; i++) {
-	if (IsOdd(p)) ang4[i] = -ang4[i];
-	fprintf(debug_log, "Rank: %d, ZxZ0: %12.8lf, %12.8lf; Z0: %12.8lf \n", 
-		kk1[i]/2, ang1[i], ang4[i], z0);    
-	if (fabs(ang1[i] - ang4[i]) > EPS10) {
-	  fprintf(debug_log, "***********Error*********\n");
-	}
-      }
-      fprintf(debug_log, "No CSFs for this intermediate Config.\n");
-      fprintf(debug_log, "\n");
-      free(ang1);
-      free(ang4);
-      free(kk1);
-      free(t);
-      return;
-    }
-  }
-
-  err = Couple(&icfg);
-
-  if (err < 0) {  
-    fprintf(debug_log, "\n");
-    for (i = 0; i < nk1; i++) {
-      if (IsOdd(p)) ang4[i] = -ang4[i];
-      fprintf(debug_log, "Rank: %d, ZxZ0: %12.8lf, %12.8lf; Z0: %12.8lf \n", 
-	      kk1[i]/2, ang1[i], ang4[i], z0);    
-      if (fabs(ang1[i] - ang4[i]) > EPS10) {
-	fprintf(debug_log, "***********Error*********\n");
-      }
-    }
-    fprintf(debug_log, "No CSFs for this intermediate Config.\n");
-    fprintf(debug_log, "\n");
-    free(ang1);
-    free(ang4);
-    free(kk1);
-    free(t);
-    return;
-  }
-  
-  if (s[0].index < s[1].index) {
-    imin = s[0].index;
-    imax = s[1].index;
-  } else {
-    imin = s[1].index;
-    imax = s[0].index;
-  }
-
-  p = 0;
-  if (s[2].index < imax && s[2].index >= imin) p += 1;
-  if (s[3].index < imax && s[3].index >= imin) p += 1;
-  
-  p2 = 0;
-  for (i = imin; i < imax; i++) {
-    p2 += icfg.shells[n_shells-1-i].nq;
-  }
-
-  if (s[2].index < s[3].index) {
-    imin = s[2].index;
-    imax = s[3].index;
-  } else {
-    imin = s[3].index;
-    imax = s[2].index;
-  }
-
-  if (imin == imax) p3 = 0; 
-  else {
-    p3 = 1;
-    for (i = imin; i < imax; i++) {
-      p3 += icfg.shells[n_shells-1-i].nq;
-    }
-  }
-  p = (IsOdd(p)?-1:1);
-  p2 = (IsOdd(p2)?-1:1);
-  p3 = (IsOdd(p3)?-1:1);
-  phase = (IsOdd(phase)?-1:1);
-  
-  for (i = 0; i < n_shells*icfg.n_csfs; i += n_shells) {
-    fprintf(debug_log, "bra state: ");
-    for (k = n_shells-1; k >= 0; k--) {
-      fprintf(debug_log, "(%d %d), ", sbra[k].shellJ, sbra[k].totalJ);
-    }
-    fprintf(debug_log, "\n");
-    
-    fprintf(debug_log, "ket state: ");
-    for (k = n_shells-1; k >= 0; k--) {
-      fprintf(debug_log, "(%d %d), ", sket[k].shellJ, sket[k].totalJ);
-    }
-    fprintf(debug_log, "\n");    
-    
-    fprintf(debug_log, "Intermediate State %d: ", i);
-    for (k = n_shells-1; k >= 0; k--) {
-      fprintf(debug_log, "(%d %d), ",  
-	      icfg.csfs[i+k].shellJ, icfg.csfs[i+k].totalJ);
-    }
-    fprintf(debug_log, "\n");
-    
-    nk2 = AngularZ(&ang2, &kk2, 0, n_shells, sbra, icfg.csfs+i, 
-		   s, s+1);
-    if (nk2 <= 0) continue;
-
-    nk3 = AngularZ(&ang3, &kk3, 0, n_shells, icfg.csfs+i, sket, 
-		   s+2, s+3);
-    if (nk3 <= 0) {
-      free(ang2);
-      free(kk2);
-      continue;
-    }
-
-    if (kk2[0] > kk3[0]) {
-      k2 = 0;
-      k3 = (kk2[0] - kk3[0])/2;
-    } else {
-      k2 = (kk3[0] - kk2[0])/2;
-      k3 = 0;
-    } 
-
-    if (k2 >= nk2 || k3 >= nk3) {
-      free(ang2);
-      free(kk2);
-      free(ang3);
-      free(kk3);
-      continue;
-    }
-
-    if (kk2[k2] > kk1[0]) {
-      k1 = (kk2[k2] - kk1[0]) / 2;
-    } else {
-      k1 = 0;
-      k = (kk1[0] - kk2[k2])/2;
-      k2 += k;
-      k3 += k;
-    } 
- 
-    if (k1 >= nk1 || k2 >= nk2 || k3 >= nk3) {
-      free(ang2);
-      free(ang3);
-      free(kk2);
-      free(kk3);
-      continue;
-    }
-
-    fprintf(debug_log, 
-	    "Sum Range: 1: %d %d,  2: %d %d, 3: %d %d .. %d %d %d\n", 
-	    k1, nk1, k2, nk2, k3, nk3, kk1[k1], kk2[k2], kk3[k3]);
-
-    for (j1 = k1, j2 = k2, j3 = k3; 
-	 j1 < nk1 && j2 < nk2 && j3 < nk3;
-	 j1++, j2++, j3++) {
-      y = ang2[j2] * ang3[j3];
-      if (IsOdd((sbra[0].totalJ - icfg.csfs[i].totalJ) / 2)) y = -y;
-      fprintf(debug_log, "Sum Terms; %d %d %d %lf\n",
-	      kk1[j1], kk2[j2], kk3[j3], y);
-      ang4[j1] += y/sqrt(sbra[0].totalJ + 1.0);
-    }
-    free(ang2);
-    free(ang3);
-    free(kk2);
-    free(kk3);
-  }
-  fprintf(debug_log, "\n");
-  for (i = 0; i < nk1; i++) {
-    fprintf(debug_log, 
-	    "Rank: %d, ZxZ0: %+d %10.6lf;  %+d %+d %10.6lf; %+d \n", 
-	    kk1[i]/2, phase, ang1[i], p2, p3, ang4[i], p);    
-    if (fabs(phase*ang1[i] - p2*p3*ang4[i]) > EPS10) {
-      fprintf(debug_log, "***********Error*********\n");
-    }
-    if (phase != p*p2*p3) {
-      fprintf(debug_log, "Phase Error\n");
-    }
-  }
-  fprintf(debug_log, "\n");
-
-  free(ang4);
-  free(t);
-  free(icfg.csfs);
-#endif /* FAC_DEBUG */
 
   free(kk1);
   free(ang1);

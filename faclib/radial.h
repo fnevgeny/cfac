@@ -20,17 +20,6 @@ typedef struct _SLATER_YK_ {
   float coeff[2];
 } SLATER_YK;
 
-#ifdef PERFORM_STATISTICS
-typedef struct _RAD_TIMING_ {
-  double radial_1e;
-  double radial_2e;
-  double dirac;
-  double radial_slater;
-} RAD_TIMING;
-
-int GetRadTiming(RAD_TIMING *t);
-#endif
-
 double *WLarge(ORBITAL *orb);
 double *WSmall(ORBITAL *orb);
 int GetBoundary(double *rb, double *b, int *nmax, double *dr);

@@ -13,27 +13,6 @@
 #include "dbase.h"
 #include "structure.h"
 
-#if (FAC_DEBUG >= DEBUG_STRUCTURE)
-#define debug_integral(s, ne, r) \
-        {int ks; \
-         for (ks = 0; ks < (2*(ne)); ks++) { \
-         fprintf(debug_log, "%d %d %d %d %d\n", \
-	         (s)[ks].index, (s)[ks].n, (s)[ks].kappa,\
-                 (s)[ks].nq_bra, (s)[ks].nq_ket); \
-        } \
-         fprintf(debug_log, "%d electron: %lf\n\n", (ne), (r)); \
-        }
-#endif /* (FAC_DEBUG >= DEBUG_STRUCTURE) */
-
-#ifdef PERFORM_STATISTICS 
-static STRUCT_TIMING timing = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int GetStructTiming(STRUCT_TIMING *t) {
-  memcpy(t, &timing, sizeof(timing));
-  return 0;
-}
-#endif
-
-
 static ARRAY *cfac_get_ion_levels(cfac_t *cfac, unsigned int nele)
 {
     if (nele > cfac->anum) {
@@ -223,13 +202,6 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
   STATE *s;
   SYMMETRY *sym;
   double r;
-#if (FAC_DEBUG >= DEBUG_STRUCTURE) 
-  char name[LEVEL_NAME_LEN];
-#endif
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   DecodePJ(isym, &i, &j);
 
@@ -307,18 +279,9 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
     FlagClosed(cfac, hs);
   }
 
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.set_ham += stop-start;
-#endif
-
   return 0;
 
  ERROR:
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.set_ham += stop-start;
-#endif
   printf("ConstructHamiltonDiagonal Error\n");
   return -1;
 }
@@ -394,13 +357,6 @@ int ConstructHamilton(cfac_t *cfac,
   STATE *s;
   SYMMETRY *sym;
   double r;
-#if (FAC_DEBUG >= DEBUG_STRUCTURE) 
-  char name[LEVEL_NAME_LEN];
-#endif
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   /* 
   ** the return code -2, and -3, here distinguses it from the case where 
@@ -504,18 +460,10 @@ int ConstructHamilton(cfac_t *cfac,
     }
     FlagClosed(cfac, hs);
   }
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.set_ham += stop-start;
-#endif
 
   return 0;
 
  ERROR:
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.set_ham += stop-start;
-#endif
   printf("ConstructHamilton Error\n");
   return -1;
 }
@@ -570,10 +518,6 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   STATE *s;
   SYMMETRY *sym;
   double r, delta;
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   DecodePJ(isym, &i, &j);
 
@@ -646,18 +590,9 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
     }
   }
 
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.set_ham += stop-start;
-#endif
-
   return 0;
 
  ERROR:
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.set_ham += stop-start;
-#endif
   return -1;
 }
 
@@ -1077,9 +1012,6 @@ void HamiltonElement1E2E(cfac_t *cfac,
       s[3].nq_ket = s[2].nq_ket;
       r = Hamilton2E(n_shells, sbra, sket, s);
       *x2 += r;
-#if (FAC_DEBUG >= DEBUG_STRUCTURE)
-      debug_integral(s, 2, r);
-#endif
     }
   } else {
     for (i = 0; i < n_shells; i++) {
@@ -1099,9 +1031,6 @@ void HamiltonElement1E2E(cfac_t *cfac,
       s[1].nq_ket = s[1].nq_bra;      
       r = Hamilton1E(n_shells, sbra, sket, s);
       *x1 += r;      
-#if (FAC_DEBUG >= DEBUG_STRUCTURE)
-      debug_integral(s, 1, r);
-#endif
       for (j = 0; j <= i; j++) {
 	s[2].nq_bra = GetNq(bra+j);
 	if (j == i && s[2].nq_bra < 2) continue;
@@ -1120,9 +1049,6 @@ void HamiltonElement1E2E(cfac_t *cfac,
 	s[3].kl = s[2].kl;
 	r = Hamilton2E(n_shells, sbra, sket, s);
 	*x2 += r;
-#if (FAC_DEBUG >= DEBUG_STRUCTURE)
-	debug_integral(s, 2, r);
-#endif
       }
     }
   }
@@ -1604,10 +1530,6 @@ int DiagonalizeHamilton(cfac_t *cfac) {
   int n, m;
   int info;
   int i, j;
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   n = h->dim;
   m = h->n_basis;
@@ -1662,11 +1584,6 @@ int DiagonalizeHamilton(cfac_t *cfac) {
   }
   
   gsl_matrix_free(evec);
-
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.diag_ham += stop-start;
-#endif
 
   if (info) {
     return -1;
@@ -2234,13 +2151,6 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
   int nele, nele0, vnl, ib, dn, ik;
   int si, ms, mst, t, q, nk, n0;
 
-#ifdef PERFORM_STATISTICS
-  STRUCT_TIMING structt;
-  ANGULAR_TIMING angt;
-  RECOUPLE_TIMING recouplet;
-  RAD_TIMING radt;
-#endif
-
   f = NULL;
   nele0 = -1;
   n0 = m;
@@ -2425,41 +2335,6 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
       ArrayAppend(cfac->levels_per_ion+nk, &gion1);
     }
   }
-#ifdef PERFORM_STATISTICS
-  GetStructTiming(&structt);
-  fprintf(perform_log, "AngZMix: %6.1E, AngZFB: %6.1E, AngZxZFB: %6.1E, SetH: %6.1E DiagH: %6.1E\n",
-	  ((double) (structt.angz_mix))/CLOCKS_PER_SEC,
-	  ((double) (structt.angz_fb))/CLOCKS_PER_SEC,
-	  ((double) (structt.angzxz_fb))/CLOCKS_PER_SEC,
-	  ((double) (structt.set_ham))/CLOCKS_PER_SEC,
-	  ((double) (structt.diag_ham))/CLOCKS_PER_SEC);
-  fprintf(perform_log, "AngZS: %6.1E, AngZFBS: %6.1E, AngZxZFBS: %6.1E, AddZ: %6.1E, AddZxZ: %6.1E\n",
-	  ((double) (structt.angz_states))/CLOCKS_PER_SEC,
-	  ((double) (structt.angzfb_states))/CLOCKS_PER_SEC,
-	  ((double) (structt.angzxzfb_states))/CLOCKS_PER_SEC,
-	  ((double) (structt.add_angz))/CLOCKS_PER_SEC,
-	  ((double) (structt.add_angzxz))/CLOCKS_PER_SEC);
-
-  GetAngularTiming(&angt);
-  fprintf(perform_log, "W3J: %6.1E, W6J: %6.1E, W9J: %6.1E\n", 
-	  ((double)angt.w3j)/CLOCKS_PER_SEC, 
-	  ((double)angt.w6j)/CLOCKS_PER_SEC, 
-	  ((double)angt.w9j)/CLOCKS_PER_SEC);
-  GetRecoupleTiming(&recouplet);
-  fprintf(perform_log, "AngZ: %6.1E, AngZxZ: %6.1E, Interact: %6.1E\n",
-	  ((double)recouplet.angz)/CLOCKS_PER_SEC,
-	  ((double)recouplet.angzxz)/CLOCKS_PER_SEC,
-	  ((double)recouplet.interact)/CLOCKS_PER_SEC);
-  GetRadTiming(&radt);
-  fprintf(perform_log, "Dirac: %d, %6.1E, 1E: %6.1E, Slater: %6.1E, 2E: %6.1E\n", 
-	  GetNumContinua(),
-	  ((double)radt.dirac)/CLOCKS_PER_SEC, 
-	  ((double)radt.radial_1e)/CLOCKS_PER_SEC,
-	  ((double)radt.radial_slater)/CLOCKS_PER_SEC,
-	  ((double)radt.radial_2e)/CLOCKS_PER_SEC);
-  fprintf(perform_log, "\n");
-  fflush(perform_log);
-#endif /* PERFORM_STATISTICS */
   
   return 0;
 }
@@ -2699,29 +2574,15 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   SHELL *bra;
   SHELL_STATE *sbra, *sket;
   ANGULAR_ZMIX **a, *ang;
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
   
   iz = ih1*MAX_HAMS + ih2;
   *ad = &(cfac->angz_array[iz]);
   ns = (*ad)->ns;
   if (ns < 0) {
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angz_states_load += stop-start;
-    timing.n_angz_states_load++;
-#endif
     return -1;
   }
   
   if (ns > 0) {
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angz_states_load += stop-start;
-    timing.n_angz_states_load++;
-#endif
     return ns;
   }
 
@@ -2864,11 +2725,6 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       }
     }
   }
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.angz_states += stop - start;
-  timing.n_angz_states++;
-#endif
 
   return (*ad)->ns;
 }
@@ -2908,27 +2764,14 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   CONFIG *c1, *c2;
   ANGULAR_ZFB *ang, **a;
   
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
-  
   iz = ih1*MAX_HAMS + ih2;
   *ad = &(cfac->angz_array[iz]);
   ns = (*ad)->ns;
 
   if (ns < 0) {
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angzfb_states += stop-start;
-#endif
     return -1;
   }
   if (ns > 0) {
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angzfb_states += stop-start;
-#endif
     return ns;
   }
 
@@ -3021,10 +2864,6 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
     }
   }
   
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.angzfb_states += stop-start;
-#endif
   return (*ad)->ns;
 }
 
@@ -3044,28 +2883,15 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   STATE *s1, *s2;
   ANGULAR_ZxZMIX **a, *ang;
 
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop; 
-  start = clock();
-#endif
-
   iz = ih1 * MAX_HAMS + ih2;
   *ad = &(cfac->angzxz_array[iz]);
   ns = (*ad)->ns;
 
   if (ns < 0) { 
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angzxzfb_states += stop-start;
-#endif
     return -1;
   }
   
   if (ns > 0) {
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angzfb_states += stop-start;
-#endif
     return ns;
   }
   
@@ -3170,11 +2996,6 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       iz++;
     }
   }
-
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.angzfb_states += stop-start;
-#endif
 
   return (*ad)->ns;
 }
@@ -3289,10 +3110,6 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
   ANGULAR_ZFB *ang_sub;
   double mix1, mix2, sqrt_j2;
   int kg, jf, kb, ia, j1, j2;
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
   
   lev1 = GetLevel(cfac, lower);
   lev2 = GetLevel(cfac, upper);
@@ -3378,10 +3195,6 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
   
   PackAngularZFB(&n, ang, nz);
 
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angz_fb += stop-start;
-#endif
   return n;
 }
 
@@ -3413,11 +3226,6 @@ int AngularZMix(cfac_t *cfac,
   ANGULAR_ZFB *afb;
   double mix1, mix2, sqrt_j12, a;
   int ignore_ryd = 0;
-
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   lev1 = GetLevel(cfac, lower);
   lev2 = GetLevel(cfac, upper);
@@ -3472,10 +3280,6 @@ int AngularZMix(cfac_t *cfac,
   if (mink >= 0) kmin = Max(kmin, mink);
   if (maxk >= 0) kmax = Min(kmax, maxk);
   if (kmax < kmin) {
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angz_mix += stop-start;
-#endif
     return 0;
   }
 
@@ -3667,11 +3471,6 @@ int AngularZMix(cfac_t *cfac,
     */
   }
 
-#ifdef PERFORM_STATISTICS
-  stop = clock();
-  timing.angz_mix += stop - start;
-#endif
-
   return n;
 }
 
@@ -3692,10 +3491,6 @@ int AngularZxZFreeBound(cfac_t *cfac,
   double r, r0, sqrt_j2;
   int nz_sub;
   int im, m;
-#ifdef PERFORM_STATISTICS
-  clock_t start, stop;
-  start = clock();
-#endif
 
   lev1 = GetLevel(cfac, lower);
   lev2 = GetLevel(cfac, upper);
@@ -3780,11 +3575,6 @@ int AngularZxZFreeBound(cfac_t *cfac,
 
   PackAngularZxZMix(&n, ang, nz);
 
-#ifdef PERFORM_STATISTICS
-    stop = clock();
-    timing.angzxz_fb += stop - start;
-#endif
-	
   return n;
 }
   

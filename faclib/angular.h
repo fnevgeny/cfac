@@ -103,29 +103,6 @@ extern double ln_integer[MAX_FACTORIAL];
 */
 #define LnInteger(n) ln_integer[(n)]
 
-#ifdef PERFORM_STATISTICS
-/*
-** STRUCT:      ANGULAR_TIMING
-** PURPOSE:     tracking the time spent in the angular module.
-** FIELDS:      {clock_t w3j},
-**              time spent in W3j.
-**              {clock_t w6j},
-**              time spent in w6j.
-**              {clock_t w9j},
-**              time spent in w9j.
-** NOTE:        this is used for profiling. 
-**              it is only compiled in when the macro 
-**              PERFORM_STATISTICS is defined in "global.h".
-*/
-typedef struct _ANGULAR_TIMING_ {
-  clock_t w3j;
-  clock_t w6j;
-  clock_t w9j;
-} ANGULAR_TIMING;
-
-int    GetAngularTiming(ANGULAR_TIMING *t);
-#endif
-
 /*
 ** Public functions provided by *angular*
 */

@@ -324,17 +324,9 @@ void uvip3p(int nd, const double *xd, const double *yd,
     for (i = 0; i < ni; i++) {
         if (xi[i] < xmin && nd >= 2) {
             yi[i] = yd[0];
-#if FAC_DEBUG    
-            fprintf(debug_log, "uvip3p(): xi[%d]=%g not within [%g - %g]\n",
-                i, xi[i], xmin, xmax);
-#endif
         } else
         if (xi[i] > xmax && nd >= 2) {
             yi[i] = yd[nd - 1];
-#if FAC_DEBUG    
-            fprintf(debug_log, "uvip3p(): xi[%d]=%g not within [%g - %g]\n",
-                i, xi[i], xmin, xmax);
-#endif
         } else {
             int gsl_status = gsl_spline_eval_e(spline, xi[i], acc, &yi[i]);
             if (gsl_status != GSL_SUCCESS) {

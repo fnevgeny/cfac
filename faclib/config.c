@@ -1057,6 +1057,10 @@ int SpecSymbol(char *s, int kl) {
   return 0;
 }
 
+static int CompareShellInvert(const void *ts1, const void *ts2) {
+  return -CompareShell(ts1, ts2);
+}
+
 /* 
 ** FUNCTION:    Couple
 ** PURPOSE:     recursively construct all possible states for a Config.
@@ -2194,10 +2198,6 @@ int CompareShell(const void *ts1, const void *ts2) {
   }
 }
 
-int CompareShellInvert(const void *ts1, const void *ts2) {
-  return -CompareShell(ts1, ts2);
-}
-
 void FreeConfigData(void *p) {
   CONFIG *c;
 
@@ -2215,33 +2215,4 @@ void FreeConfigData(void *p) {
     free(c->nrs);
     c->nnrs = 0;
   }
-}
-
-int RemoveGroup(cfac_t *cfac, int k) {
-  SYMMETRY *sym;
-  STATE *s;
-  int i, m;
-
-  if (k != cfac->n_groups-1) {
-    printf("only the last group can be removed\n");
-    return -1;
-  }
-  ArrayFree(&(cfac->cfg_groups[k].cfg_list));
-  cfac->cfg_groups[k].n_cfgs = 0;
-  strcpy(cfac->cfg_groups[k].name, "_all_");
-  cfac->n_groups--;
-
-  for (i = 0; i < MAX_SYMMETRIES; i++) {
-    sym = GetSymmetry(cfac, i);
-    for (m = 0; m < sym->n_states; m++) {
-      s = ArrayGet(&(sym->states), m);
-      if (s->kgroup == k) {
-	ArrayTrim(&(sym->states), m);
-	sym->n_states = m;
-	break;
-      }
-    }
-  }
-  
-  return 0;
 }

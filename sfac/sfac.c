@@ -696,7 +696,7 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
       } else if (i == 0) {
 	kref = k;
       }
-      AddECorrection(kref, k, e, nmin);
+      AddECorrection(cfac, kref, k, e, nmin);
       i++;
     }
     fclose(f);
@@ -722,7 +722,7 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
       } else if (i == 0) {
 	kref = k;
       }
-      AddECorrection(kref, k, e, nmin);
+      AddECorrection(cfac, kref, k, e, nmin);
     }
   } else {
     return -1;
@@ -2870,7 +2870,7 @@ static int PSetFields(int argc, char *argv[], int argt[],
     m = atoi(argv[3]);
   }
 
-  SetFields(b, e, a, m);
+  SetFields(cfac, b, e, a, m);
   
   return 0;
 }

@@ -355,7 +355,7 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
   }
   nq = 2*abs(m) + 1;
   r.strength = (float *) malloc(sizeof(float)*nq);
-  GetFields(&tr_hdr.bfield, &tr_hdr.efield, &tr_hdr.fangle);
+  GetFields(cfac, &tr_hdr.bfield, &tr_hdr.efield, &tr_hdr.fangle);
     
   f = OpenFile(fn, &fhdr);
   InitFile(f, &fhdr, &tr_hdr);

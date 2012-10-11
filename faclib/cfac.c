@@ -56,6 +56,13 @@ cfac_t *cfac_new(void)
     }
     ArrayInit(cfac->eblevels, sizeof(LEVEL), LEVELS_BLOCK,
         FreeLevelData, InitLevelData);
+
+    cfac->ecorrections = malloc(sizeof(ARRAY));
+    if (!cfac->ecorrections) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    ArrayInit(cfac->ecorrections, sizeof(ECORRECTION), 512, NULL, NULL);
     
     return cfac;
 }
@@ -84,8 +91,13 @@ void cfac_free(cfac_t *cfac)
         free(cfac->levels_per_ion);
         
         ArrayFree(cfac->levels);
+        free(cfac->levels);
         ArrayFree(cfac->eblevels);
+        free(cfac->eblevels);
 
+        ArrayFree(cfac->ecorrections);
+        free(cfac->ecorrections);
+        
         free(cfac);
     }
 }

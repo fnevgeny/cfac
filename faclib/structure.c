@@ -34,16 +34,11 @@ static ANGZ_DATUM *angzxz_array;
 static ANGZ_DATUM *angmz_array;
 static ANGULAR_FROZEN ang_frozen;
 
-static int ncorrections = 0;
-static ARRAY *ecorrections;
-
 static int ci_level = 0;
 static int rydberg_ignored = 0;
 static double angz_cut = ANGZCUT;
 static double mix_cut = MIXCUT;
 static double mix_cut2 = MIXCUT2;
-
-static double E1[3], B0, B1[3], B2[5], EINP, BINP, AINP;
 
 #ifdef PERFORM_STATISTICS 
 static STRUCT_TIMING timing = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -73,10 +68,10 @@ static int cfac_get_ion_nlevels(cfac_t *cfac, unsigned int nele)
     }
 }
 
-void GetFields(double *b, double *e, double *a) {
-  *b = BINP;
-  *e = EINP;
-  *a = AINP;
+void GetFields(const cfac_t *cfac, double *b, double *e, double *a) {
+  *b = cfac->bf;
+  *e = cfac->ef;
+  *a = cfac->eb_angle;
 }
 
 /* 
@@ -84,79 +79,78 @@ void GetFields(double *b, double *e, double *a) {
 ** if the angle a < 0, the E is Z-axis, ExB is Y-axis, and B is in X-Z plane.
 ** angle a is always measured from E->B, 
 */
-void SetFields(double b, double e, double a, int m) {
+void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
   int i, q, i1, i2, q1, q2;
   double w, mass;
 
-  EINP = e;
-  BINP = b;
-  AINP = a;
+  cfac->ef = e;
+  cfac->bf = b;
+  cfac->eb_angle = a;
+  
   a = fabs(a);
   a *= M_PI/180.0;
-  if (AINP >= 0) {
-    B1[0] = B1[2] = 0.0;
-    B1[1] = b;
-    E1[0] = e*sin(a)/sqrt(2);
-    E1[1] = e*cos(a);
-    E1[2] = -E1[0];
+  
+  b *= MBOHR/HARTREE_EV;
+  e *= RBOHR/HARTREE_EV;
+  
+  if (cfac->eb_angle >= 0) {
+    cfac->b1[0] = cfac->b1[2] = 0.0;
+    cfac->b1[1] = b;
+    cfac->e1[0] = e*sin(a)/sqrt(2);
+    cfac->e1[1] = e*cos(a);
+    cfac->e1[2] = -cfac->e1[0];
   } else {
-    E1[0] = E1[2] = 0.0;
-    E1[1] = e;
-    B1[0] = -b*sin(a)/sqrt(2);
-    B1[1] = b*cos(a);
-    B1[2] = -B1[0];
-  }
-  for (i = 0; i < 3; i++) {
-    B1[i] *= MBOHR/HARTREE_EV;
+    cfac->e1[0] = cfac->e1[2] = 0.0;
+    cfac->e1[1] = e;
+    cfac->b1[0] = -b*sin(a)/sqrt(2);
+    cfac->b1[1] = b*cos(a);
+    cfac->b1[2] = -cfac->b1[0];
   }
 
   mass = GetAtomicMass(cfac);
   mass = 1.0 + 5.45683e-4/mass;
   for (i = 0; i < 3; i++) {
-    B1[i] *= mass;
+    cfac->b1[i] *= mass;
   }
 
-  B0 = 0.0;
+  cfac->b0 = 0.0;
   for (i = 0; i < 5; i++) {
-    B2[i] = 0.0;
+    cfac->b2[i] = 0.0;
   }
 
   if (m == 0) {
     for (i1 = 0; i1 < 3; i1++) {
       q1 = 2*(i1-1);
-      if (B1[i1] == 0) continue;
+      if (cfac->b1[i1] == 0) continue;
       for (i2 = 0; i2 < 3; i2++) {
 	q2 = 2*(i2-1);
-	if (B1[i2] == 0) continue;
+	if (cfac->b1[i2] == 0) continue;
 	w = W3j(2, 2, 0, q1, q2, 0);
 	if (w) {
-	  B0 += w*B1[i1]*B1[i2];
+	  cfac->b0 += w*cfac->b1[i1]*cfac->b1[i2];
 	}
 	for (i = 0; i < 5; i++) {
 	  q = 2*(i-2);
 	  w = W3j(2, 2, 4, q1, q2, q);
 	  if (w) {
-	    B2[i] += w*B1[i1]*B1[i2];
+	    cfac->b2[i] += w*cfac->b1[i1]*cfac->b1[i2];
 	  }
 	}
       }
     }
-    B0 *= sqrt(3)*W6j(2, 2, 0, 2, 2, 2);
+    cfac->b0 *= sqrt(3)*W6j(2, 2, 0, 2, 2, 2);
     for (i = 0; i < 5; i++) {
-      B2[i] *= -sqrt(30)*W6j(2, 2, 4, 2, 2, 2);
+      cfac->b2[i] *= -sqrt(30)*W6j(2, 2, 4, 2, 2, 2);
     }
-    B0 *= mass;
+    cfac->b0 *= mass;
     for (i = 0; i < 5; i++) {
-      B2[i] *= mass;
+      cfac->b2[i] *= mass;
     }
   }
 
-  for (i = 0; i < 3; i++) {
-    E1[i] *= RBOHR/HARTREE_EV;
-  }
   /*
   printf("EB: %10.3E %10.3E %10.3E %10.3E %10.3E %10.3E\n", 
-	 E1[0], E1[1], E1[2], B1[0], B1[1], B1[2]);
+	 e1[0], e1[1], e1[2], b1[0], b1[1], b1[2]);
   */
 }
 
@@ -807,7 +801,7 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
   ang = ang_frozen.z[kz];
   nz = ang_frozen.nz[kz];
   for (i = 0; i < nz; i++) {
-    if (B1[0] || B1[1] || B1[2]) {
+    if (cfac->b1[0] || cfac->b1[1] || cfac->b1[2]) {
       if (ang[i].k == 2) {
 	orb0 = GetOrbital(ang[i].k0);
 	orb1 = GetOrbital(ang[i].k1);
@@ -815,7 +809,7 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
 	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
         if (orb0->n == orb1->n && korb0 == korb1) {
 	  for (m = 0; m < 3; m++) {
-	    if (B1[m] == 0) continue;
+	    if (cfac->b1[m] == 0) continue;
 	    
             q = m-1;
 	    q2 = 2*q;	
@@ -823,7 +817,7 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
             a = W3j(ji, 2, jj, -mi, -q2, mj);
 	    if (a == 0.0) continue;
 	    
-            a *= B1[m]*ang[i].coeff;
+            a *= cfac->b1[m]*ang[i].coeff;
 	    if (IsOdd(abs(ji-mi+q2)/2)) a = -a;
 	    
             /* (j|J|j') = sqrt(j*(j + 1)*(2j + 1))*delta(j,j') */
@@ -843,7 +837,7 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
         }
       }      
     }
-    if (E1[0] || E1[1] || E1[2]) {
+    if (cfac->e1[0] || cfac->e1[1] || cfac->e1[2]) {
       if (ang[i].k == 2) {
 	orb0 = GetOrbital(ang[i].k0);
 	orb1 = GetOrbital(ang[i].k1);
@@ -852,7 +846,7 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
 	if (IsOdd((korb0+korb1)/2)) {
 	  for (m = 0; m < 3; m++) {
 	    double rvme;
-            if (E1[m] == 0) continue;
+            if (cfac->e1[m] == 0) continue;
 	    q = m-1;
 	    q2 = 2*q;
 	    a = W3j(ji, 2, jj, -mi, -q2, mj);
@@ -862,13 +856,14 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
 	    b = ReducedCL(jorb0, 2, jorb1);
 	    c = RadialMoments(1, ang[i].k0, ang[i].k1);
 	    rvme = a*b*c;
-            r += E1[m]*rvme;
+            r += cfac->e1[m]*rvme;
 	  }
 	}    
       }
     }
 
-    if (B0 || B2[0] || B2[1] || B2[2] || B2[3] || B2[4]) {
+    if (cfac->b0 || cfac->b2[0] || cfac->b2[1] || cfac->b2[2] ||
+        cfac->b2[3] || cfac->b2[4]) {
       if (ang[i].k == 0) {
 	a = W3j(ji, 0, jj, -mi, 0, mj);
 	if (a) {
@@ -877,7 +872,7 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
 	  GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
 	  GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
 	  if (IsEven((korb0+korb1)/2)) {
-	    a *= B0*ang[i].coeff;
+	    a *= cfac->b0*ang[i].coeff;
 	    b = ReducedCL(jorb0, 0, jorb1);
 	    c = RadialMoments(2, ang[i].k0, ang[i].k1);
 	    if (IsOdd((ji-mi)/2)) a = -a;
@@ -892,12 +887,12 @@ double HamiltonElementEB(HAMILTON *h, int i0, int j0) {
 	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
 	if (IsEven((korb0+korb1)/2)) {
 	  for (m = 0; m < 5; m++) {
-	    if (B2[m] == 0) continue;
+	    if (cfac->b2[m] == 0) continue;
 	    q = m-2;
 	    q2 = q*2;
 	    a = W3j(ji, 4, jj, -mi, -q2, mj);
 	    if (a == 0.0) continue;
-	    a *= B2[m]*ang[i].coeff;
+	    a *= cfac->b2[m]*ang[i].coeff;
 	    b = ReducedCL(jorb0, 4, jorb1);
 	    c = RadialMoments(2, ang[i].k0, ang[i].k1);
 	    if (IsOdd((ji-mi)/2)) a = -a;
@@ -1987,15 +1982,15 @@ int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
   return 0;
 }
   
-int AddECorrection(int iref, int ilev, double e, int nmin) {
+int AddECorrection(cfac_t *cfac, int iref, int ilev, double e, int nmin) {
   ECORRECTION c;
 
   c.iref = iref;
   c.ilev = ilev;
   c.e = e;
   c.nmin = nmin;
-  ArrayAppend(ecorrections, &c);
-  ncorrections += 1;
+  ArrayAppend(cfac->ecorrections, &c);
+  cfac->ncorrections += 1;
 
   return 0;
 }
@@ -2267,9 +2262,9 @@ int SaveEBLevels(char *fn, int m, int n) {
   DecodeBasisEB(lev->pb, &ilev, &mlev);
   nele = GetNumElectrons(ilev);
   enf_hdr.nele = nele;
-  enf_hdr.efield = EINP;
-  enf_hdr.bfield = BINP;
-  enf_hdr.fangle = AINP;
+  enf_hdr.efield = cfac->ef;
+  enf_hdr.bfield = cfac->bf;
+  enf_hdr.fangle = cfac->eb_angle;
   InitFile(f, &fhdr, &enf_hdr);
   for (k = 0; k < n; k++) {
     i = m + k;
@@ -2328,9 +2323,9 @@ int SaveLevels(char *fn, int m, int n) {
     si = lev->pb;
     sym = GetSymmetry(cfac, lev->pj);
     s = (STATE *) ArrayGet(&(sym->states), si);
-    if (ncorrections > 0) {
-      for (p = 0; p < ecorrections->dim; p++) {
-	ec = (ECORRECTION *) ArrayGet(ecorrections, p);
+    if (cfac->ncorrections > 0) {
+      for (p = 0; p < cfac->ecorrections->dim; p++) {
+	ec = (ECORRECTION *) ArrayGet(cfac->ecorrections, p);
 	if (ec->ilev == i) {
 	  if (ec->ilev == ec->iref) {
 	    e0 = lev->energy;
@@ -2341,7 +2336,7 @@ int SaveLevels(char *fn, int m, int n) {
 	  lev->energy += ec->e;
 	  ec->s = s;
 	  ec->ilev = -(ec->ilev+1);
-	  ncorrections -= 1;
+	  cfac->ncorrections -= 1;
 	  break;
 	}
       }
@@ -2395,8 +2390,8 @@ int SaveLevels(char *fn, int m, int n) {
 		  ik = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
 		  orb = GetOrbital(ik);
 		  a = lev->energy - orb->energy;
-		  for (p = 0; p < ecorrections->dim; p++) {
-		    ec = (ECORRECTION *) ArrayGet(ecorrections, p);
+		  for (p = 0; p < cfac->ecorrections->dim; p++) {
+		    ec = (ECORRECTION *) ArrayGet(cfac->ecorrections, p);
 		    if (-(q+1) == ec->ilev) {
 		      a += ec->e;
 		      break;
@@ -2418,8 +2413,8 @@ int SaveLevels(char *fn, int m, int n) {
       }
 
       if (lev->ibase >= 0) {
-	for (p = 0; p < ecorrections->dim; p++) {
-	  ec = (ECORRECTION *) ArrayGet(ecorrections, p);
+	for (p = 0; p < cfac->ecorrections->dim; p++) {
+	  ec = (ECORRECTION *) ArrayGet(cfac->ecorrections, p);
 	  if (-(i+1) == ec->ilev) break;
 	  if (-(lev->ibase + 1) == ec->ilev && cfg->shells[0].n >= ec->nmin) {
 	    lev->energy += ec->e;
@@ -4314,9 +4309,5 @@ int InitStructure(void) {
   ang_frozen.zfb = NULL;
   ang_frozen.zxzfb = NULL;
   
-  ecorrections = malloc(sizeof(ARRAY));
-  ArrayInit(ecorrections, sizeof(ECORRECTION), 512, NULL, NULL);
-  ncorrections = 0;
-
   return 0;
 }

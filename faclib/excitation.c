@@ -2673,7 +2673,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     ce_hdr.n_egrid = n_egrid;
     ce_hdr.tegrid = tegrid;
     ce_hdr.egrid = egrid;
-    GetFields(&ce_hdr.bfield, &ce_hdr.efield, &ce_hdr.fangle);
+    GetFields(cfac, &ce_hdr.bfield, &ce_hdr.efield, &ce_hdr.fangle);
     InitFile(f, &fhdr, &ce_hdr);  
     m = ce_hdr.n_egrid;
     r.strength = malloc(sizeof(float)*m);
@@ -2930,7 +2930,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     ce_hdr.egrid = egrid;
     ce_hdr.thetagrid = thetagrid;
     ce_hdr.phigrid = phigrid;
-    GetFields(&ce_hdr.bfield, &ce_hdr.efield, &ce_hdr.fangle);
+    GetFields(cfac, &ce_hdr.bfield, &ce_hdr.efield, &ce_hdr.fangle);
     InitFile(f, &fhdr, &ce_hdr);  
     m = n_thetagrid*n_phigrid;
     r.strength = malloc(sizeof(float)*m*n_egrid);

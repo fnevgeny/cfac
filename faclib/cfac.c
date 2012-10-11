@@ -136,17 +136,30 @@ void cfac_free(cfac_t *cfac)
         ArrayFree(cfac->ecorrections);
         free(cfac->ecorrections);
         
-        /* FIXME: properly free hamiltonian */
+        if (cfac->hamiltonian) {
+            free(cfac->hamiltonian->basis);
+            free(cfac->hamiltonian->hamilton);
+            free(cfac->hamiltonian->mixing);
+            
+            free(cfac->hamiltonian);
+        }
         
         FreeHamsArray(cfac);
         free(cfac->hams);
         
-        for (i = 0; i < MAX_HAMS2; i++) {
-            FreeAngZDatum(&(cfac->angz_array[i]));
-            FreeAngZDatum(&(cfac->angzxz_array[i]));
+        if (cfac->angz_array) {
+            for (i = 0; i < MAX_HAMS2; i++) {
+                FreeAngZDatum(&(cfac->angz_array[i]));
+            }
+            free(cfac->angz_array);
         }
-        free(cfac->angz_array);
-        free(cfac->angzxz_array);
+        
+        if (cfac->angzxz_array) {
+            for (i = 0; i < MAX_HAMS2; i++) {
+                FreeAngZDatum(&(cfac->angzxz_array[i]));
+            }
+            free(cfac->angzxz_array);
+        }
         
         if (cfac->angmz_array) {
             for (i = 0; i < MAX_HAMS2; i++) {

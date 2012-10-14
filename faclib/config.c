@@ -2181,6 +2181,18 @@ int CompareShell(const void *ts1, const void *ts2) {
   }
 }
 
+void InitConfigData(void *p, int n) {
+  CONFIG *c;
+  int k;
+
+  c = (CONFIG *) p;
+  for (k = 0; k < n; k++, c++) {
+    c->n_shells = 0;
+    c->n_csfs = 0;
+    c->nnrs = 0;
+  }
+}
+
 void FreeConfigData(void *p) {
   CONFIG *c;
 

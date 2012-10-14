@@ -66,6 +66,8 @@ struct _cfac_t {
 /* config.c */
 void
 FreeConfigData(void *p);
+void
+InitConfigData(void *p, int n);
 
 /* structure.c */
 void

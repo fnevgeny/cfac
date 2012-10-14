@@ -28,11 +28,12 @@ cfac_t *cfac_new(void)
         cfac_free(cfac);
         return NULL;
     }
+    memset(cfac->cfg_groups, 0, MAX_GROUPS*sizeof(CONFIG_GROUP));
     for (i = 0; i < MAX_GROUPS; i++) {
-        strcpy(cfac->cfg_groups[i].name, "_all_");
-        cfac->cfg_groups[i].n_cfgs = 0;
-        ArrayInit(&(cfac->cfg_groups[i].cfg_list),
-            sizeof(CONFIG), CONFIGS_BLOCK, FreeConfigData, NULL);
+        CONFIG_GROUP *cfg = &cfac->cfg_groups[i];
+        strcpy(cfg->name, "_all_");
+        ArrayInit(&cfg->cfg_list,
+            sizeof(CONFIG), CONFIGS_BLOCK, FreeConfigData, InitConfigData);
     }
 
     /* init config symmetries */
@@ -112,7 +113,8 @@ void cfac_free(cfac_t *cfac)
         unsigned int i;
 
         for (i = 0; i < cfac->n_groups; i++) {
-            ArrayFree(&(cfac->cfg_groups[i].cfg_list));
+            CONFIG_GROUP *cfg = &cfac->cfg_groups[i];
+            ArrayFree(&cfg->cfg_list);
         }
         free(cfac->cfg_groups);
 

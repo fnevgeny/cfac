@@ -444,7 +444,11 @@ int GetRestriction(char *scfg, SHELL_RESTRICTION **sr, int m) {
   nc = StrSplit(scfg, ';');
   nc--;
 
-  *sr = (SHELL_RESTRICTION *) malloc(sizeof(SHELL_RESTRICTION)*nc);
+  if (nc > 0) {
+    *sr = malloc(sizeof(SHELL_RESTRICTION)*nc);
+  } else {
+    *sr = NULL;
+  }
  
   for (i = 0; i < nc; i++) {     
     while (*scfg) scfg++;
@@ -588,15 +592,15 @@ int DistributeElectrons(CONFIG **cfg, double *nq, char *scfg) {
 
   if (nq) {
     *nq = dnq;
-    *cfg = (CONFIG *) malloc(sizeof(CONFIG));
+    *cfg = malloc(sizeof(CONFIG));
     (*cfg)->n_shells = ns;
-    (*cfg)->shells = (SHELL *) malloc(sizeof(SHELL)*ns);
+    (*cfg)->shells = malloc(sizeof(SHELL)*ns);
     memcpy((*cfg)->shells, shell, sizeof(SHELL)*ns);
     free(shell);
     return ns;
   }
 
-  maxq = (int *) malloc(sizeof(int)*ns);
+  maxq = malloc(sizeof(int)*ns);
   maxq[ns-1] = 0;
   for (i = ns-2; i >= 0; i--) {
     j = GetJFromKappa(shell[i+1].kappa);
@@ -1672,16 +1676,20 @@ CONFIG *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc) {
 int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   ARRAY *clist;  
   int n0, kl0, nq0, m, i, n, kl, j, nq;
+  CONFIG_GROUP *cfgr;
 
   if (k < 0 || k >= cfac->n_groups) return -1;
-  if (cfac->cfg_groups[k].n_cfgs == 0) {
-    cfac->cfg_groups[k].n_electrons = cfg->n_electrons;
-  } else if (cfac->cfg_groups[k].n_electrons != cfg->n_electrons) {
+  
+  cfgr = &cfac->cfg_groups[k];
+  
+  if (cfgr->n_cfgs == 0) {
+    cfgr->n_electrons = cfg->n_electrons;
+  } else if (cfgr->n_electrons != cfg->n_electrons) {
     printf("Error: AddConfigToList, Configurations in a group ");
     printf("must have the same number of electrons\n");
     return -1;
   }
-  clist = &(cfac->cfg_groups[k].cfg_list);
+  clist = &(cfgr->cfg_list);
 
   cfg->energy = 0.0;
   cfg->delta = 0.0;
@@ -1719,9 +1727,9 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   }
   if (ArrayAppend(clist, cfg) == NULL) return -1;
   if (cfg->n_csfs > 0) {    
-    AddConfigToSymmetry(cfac, k, cfac->cfg_groups[k].n_cfgs, cfg); 
+    AddConfigToSymmetry(cfac, k, cfgr->n_cfgs, cfg); 
   }
-  cfac->cfg_groups[k].n_cfgs++;
+  cfgr->n_cfgs++;
 
   return 0;
 }

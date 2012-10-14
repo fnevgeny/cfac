@@ -107,7 +107,7 @@ void *ArraySet(ARRAY *a, int i, const void *d) {
   DATA *p;
  
   if (a->dim == 0) {
-    a->data = (DATA *) malloc(sizeof(DATA));
+    a->data = malloc(sizeof(DATA));
     a->data->dptr = malloc(a->bsize);
     if (a->InitData) a->InitData(a->data->dptr, a->block);
     a->data->next = NULL;
@@ -116,7 +116,7 @@ void *ArraySet(ARRAY *a, int i, const void *d) {
   if (a->dim <= i) a->dim = i+1;
   while (i >= a->block) {
     if (!(p->next)) {
-      p->next = (DATA *) malloc(sizeof(DATA));
+      p->next = malloc(sizeof(DATA));
       p->next->dptr = NULL;
       p->next->next = NULL;
     }
@@ -194,7 +194,6 @@ int ArrayFreeData(ARRAY *a, DATA *p) {
     free(p->dptr);
   }
   free(p);
-  p = NULL;
 
   return 0;
 }
@@ -212,8 +211,7 @@ int ArrayFreeData(ARRAY *a, DATA *p) {
 ** NOTE:        
 */    
 int ArrayFree(ARRAY *a) {
-  if (!a) return 0;
-  if (a->dim == 0) return 0;
+  if (!a || !a->dim) return 0;
   ArrayFreeData(a, a->data);
   a->dim = 0;
   a->data = NULL;

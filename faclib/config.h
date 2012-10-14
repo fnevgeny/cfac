@@ -283,7 +283,7 @@ SYMMETRY     *GetSymmetry(cfac_t *cfac, int k);
 void         DecodePJ(int i, int *p, int *j);
 int          SpecSymbol(char *s, int kl);
 int          ConstructConfigName(char *s, int n, CONFIG *c);
-void         ListConfig(const cfac_t *cfac, char *fn, int n, int *kg);
+void         ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg);
 int          IBisect(int k, int n, int *a);
 int          InGroups(int kg, int ng, const int *kgroup);
 

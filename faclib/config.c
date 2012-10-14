@@ -637,7 +637,7 @@ int DistributeElectronsNR(CONFIG **cfg, char *scfg) {
   }
 
   inq = (int) dnq;
-  ncfg = DistributeElectronsShellNR(cfg, ns, shell, (int)dnq, maxq);
+  ncfg = DistributeElectronsShellNR(cfg, ns, shell, inq, maxq);
 
   free(shell);
   free(maxq);
@@ -1902,7 +1902,7 @@ int ConstructConfigName(char *s, int n, CONFIG *c) {
   return m;
 }
 
-void ListConfig(const cfac_t *cfac, char *fn, int n, int *kg) {
+void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
   int i, m, j;
   CONFIG *c;
   CONFIG_GROUP *g;

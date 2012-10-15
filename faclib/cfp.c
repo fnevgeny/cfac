@@ -814,7 +814,7 @@ static double cfp5_9[20][18] = { /** (9/2)5 **/
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int GetIndex(int j2, int q, int tj2, int w) {
+static int GetIndex(int j2, int q, int tj2, int w) {
   switch (q) {
   case 1: /** one electron **/
     return 0;

@@ -63,7 +63,6 @@
 */
 int CFP(double *coeff, int j2, int q, int dj, 
 	int dw, int pj, int pw);
-int GetIndex(int j2, int q, int tj2, int w);
 
 #endif
 

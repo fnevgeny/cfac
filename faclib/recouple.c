@@ -9,13 +9,15 @@
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <math.h>
 
 #include "global.h"
 #include "cfacP.h"
 #include "angular.h"
 #include "rcfp.h"
-#include "cf77.h"
 #include "recouple.h"
 
 /*
@@ -1436,7 +1438,6 @@ int InitRecouple(void) {
   int blocks[4] = {10, 10, 64, 64};
   int ndim = 4;
   
-  FACTT();
   interact_shells = (MULTI *) malloc(sizeof(MULTI));
   return MultiInit(interact_shells, sizeof(INTERACT_DATUM), ndim, blocks,
     FreeInteractDatum, InitInteractDatum);

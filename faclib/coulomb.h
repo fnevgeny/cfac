@@ -54,8 +54,6 @@ double  HydrogenicDipole(double z, int n0, int kl0,
 			int n1, int kl1);
 double HydrogenicExpectation(double z, int m, int n, int kl);
 double HydrogenicSelfEnergy(double z, int n, int k);
-double  TRRateHydrogenic(double z, int n0, int kl0,
-			int n1, int kl1, int s);
 double  CoulombPhaseShift(double z, double e, int kappa);
 int CoulombMultip(char *fn, double z, double te, double e1,
 		  int k, int q0, int q1, int m);

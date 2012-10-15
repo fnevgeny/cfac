@@ -92,30 +92,6 @@ double HydrogenicDipole(double z, int n0, int kl0, int n1, int kl1) {
   }
 }
 
-double TRRateHydrogenic(double z, int n0, int kl0, int n1, int kl1, int s) {
-  double c, g, al;
-  double factor, e2, r;
-
-  c = HydrogenicDipole(z, n0, kl0, n1, kl1);
-  if (c == 0) return c;
-  e2 = z*z*(1.0/(n0*n0) - 1.0/(n1*n1));
-  al = (double) Max(kl0, kl1);
-  if (s == 0) {
-    factor = 2.6775015E9*e2*e2*e2;
-    r = (al/(2.0*kl1 + 1.0))*c*c*factor;
-  } else if (s == 1) {
-    factor = 2.6775015E9*e2;
-    r = (4.0*al/(2.0*kl1 + 1.0))*c*c*factor;
-    c = 1.0/(2.0*pow(FINE_STRUCTURE_CONST, 3.0));
-    r /= RATE_AU;
-    g = 2.0*(2.0*kl1+1.0);
-    r *= g*c;
-  } else {
-    r = c;
-  }
-  return r;
-}
-
 double HydrogenicExpectation(double z, int m, int n, int kl) {
   double r, n2, k, e;
   

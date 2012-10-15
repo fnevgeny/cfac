@@ -2339,20 +2339,6 @@ static int PSetTRF(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PCoulombBethe(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
-  double z, te, e1;
-
-  if (argc != 4) return -1;
-  z = atof(argv[1]);
-  te = atof(argv[2]);
-  e1 = atof(argv[3]);
-
-  CoulombBethe(argv[0], z, te, e1);
-
-  return 0;
-}
-
 static int PTestIntegrate(int argc, char *argv[], int argt[], 
 			  ARRAY *variables) {
   TestIntegrate();  
@@ -3133,7 +3119,6 @@ static METHOD methods[] = {
   {"StoreInit", PStoreInit},
   {"StoreTable", PStoreTable},
   {"Structure", PStructure},
-  {"CoulombBethe", PCoulombBethe}, 
   {"TestIntegrate", PTestIntegrate}, 
   {"TestMyArray", PTestMyArray},   
   {"TransitionTable", PTransitionTable},  

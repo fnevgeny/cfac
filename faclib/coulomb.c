@@ -571,45 +571,6 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
   return 0;
 }
 
-int CoulombBethe(char *s, double z, double te, double e1) {
-#define M 200
-  double kl[M];
-  int i, j, m;
-  FILE *f;
-  int nte, ne1, ne2;
-  double e2, *tcb;
-  
-  ne2 = 1;
-  ne1 = 1;
-  nte = 1;
-  e2 = 0.0;
-  f = fopen(s, "w");
-  fprintf(f, "## TE = %10.3E, E1 = %10.3E\n", te, e1);
-
-  te /= HARTREE_EV;
-  e1 /= HARTREE_EV;
-  for (i = 0; i < M; i++) {
-    kl[i] = i;
-  }
-
-  PrepCoulombBethe(ne2, nte, ne1, z, &e2, &te, &e1, M, kl, 1);
-  for (i = 1; i < M; i++) {
-    fprintf(f, "%3d %3d ", i, (int)kl[i]);
-    for (j = 0; j < CBMULT; j++) {
-      for (m = 0; m <= j+1; m++) {
-	tcb = GetCoulombBethe(0, 0, 0, j+1, m);
-	fprintf(f, "%12.5E ", tcb[i]);
-      }
-    }
-    fprintf(f, "\n");
-  }
-
-  fclose(f);
-
-  return 0;
-#undef M
-}
-
 int CoulombMultip(char *fn, double z, double te, double e1,
 		   int k, int q0, int q1, int m) {
   FILE *f;

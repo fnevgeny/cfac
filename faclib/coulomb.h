@@ -64,7 +64,6 @@ int     CoulombBetheTail(int n, double *w, int nkl, double *kl, double *tcb);
 int     PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 			 double *e2, double *te, double *e1,
 			 int nkl, double *kl, int mode);
-int     CoulombBethe(char *s, double z, double te, double e1);
 int     InitCoulomb(void);
 
 #endif

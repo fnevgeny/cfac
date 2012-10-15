@@ -2,6 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include <gsl/gsl_sf_bessel.h>
+#include <gsl/gsl_multimin.h>
 
 #include "global.h"
 #include "cfacP.h"
@@ -851,55 +852,105 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
 }      
 #undef NXS
 
-static double EnergyFunc(int *n, double *x) {
-  double a;
 
-  if (x[1] < -EPS10) return 0.0;
-  if (x[0] <= 0.0) return 0.0;
+static double EnergyFunc(const gsl_vector *v, void *params) {
+  double lambda, a, avg;
+  
+  lambda = gsl_vector_get(v, 0);
+  a      = gsl_vector_get(v, 1);
 
-  potential->lambda = x[0];
-  potential->a = x[1];
+  if (a < -EPS10) return 0.0;
+  if (lambda <= 0.0) return 0.0;
+
+  potential->lambda = lambda;
+  potential->a = a;
   SetPotentialVc(potential);
   ReinitRadial(1);
   ClearOrbitalTable(0);
-  a = AverageEnergyAvgConfig(&average_config);
+  avg = AverageEnergyAvgConfig(&average_config);
 
-  return a;
+  /* printf("x[0]=%g, x[1]=%g\n", lambda, a); */
+
+  return avg;
 }
 
+
+double subplx(double (* my_f) (const gsl_vector *v, void *params),
+    int n, double xtol, int maxfun, const gsl_vector *ss, gsl_vector *x,
+    int *iter)
+{
+    const gsl_multimin_fminimizer_type *T = 
+      gsl_multimin_fminimizer_nmsimplex2;
+    gsl_multimin_fminimizer *s = NULL;
+    gsl_multimin_function minex_func;
+
+    int status;
+    double size;
+
+    *iter = 0;
+    
+    /* Initialize method and iterate */
+    minex_func.n = n;
+    minex_func.f = my_f;
+    minex_func.params = NULL;
+
+    s = gsl_multimin_fminimizer_alloc(T, n);
+    gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
+
+    do {
+        (*iter)++;
+        status = gsl_multimin_fminimizer_iterate(s);
+
+        if (status) 
+          break;
+
+        size = gsl_multimin_fminimizer_size(s);
+        
+        status = gsl_multimin_test_size(size, xtol);
+    } while (status == GSL_CONTINUE && *iter < maxfun);
+    
+    gsl_vector_memcpy(x, s->x);
+
+    gsl_multimin_fminimizer_free(s);
+
+    return status;
+}
+
+
 int RefineRadial(int maxfun, int msglvl) {
-  int n, ierr, mode, nfe, lw[4];
-  double xtol, scale[2];
-  double f0, f, x[2];
-  double _dwork[MAXRP];
+  int n, status, nfe = 0;
+  double xtol;
+  double f0, f;
+  gsl_vector *x, *ss;
   
   if (maxfun <= 0) maxfun = 250;
   xtol = EPS3;
   n = 2;
-  mode = 0;
-  x[0] = potential->lambda;
-  x[1] = potential->a;
-  scale[0] = 0.01;
-  scale[1] = 0.01;
-  
-  f0 = EnergyFunc(&n, x);
+
+  x = gsl_vector_alloc(n);
+  gsl_vector_set(x, 0, potential->lambda);
+  gsl_vector_set(x, 1, potential->a);
+
+  ss = gsl_vector_alloc(n);
+  gsl_vector_set_all(ss, 0.01);
+
+  f0 = EnergyFunc(x, NULL);
   if (msglvl > 0) {
-    printf("%10.3E %10.3E %15.8E\n", x[0], x[1], f0);
+    printf("%10.3E %10.3E %15.8E\n", potential->lambda, potential->a, f0);
   }
-  nfe = 0;
-  ierr = 0;
-  SUBPLX(EnergyFunc, n, xtol, maxfun, mode, scale, x,
-	 &f, &nfe, _dwork, lw, &ierr);
+
+  status = subplx(EnergyFunc, n, xtol, maxfun, ss, x, &nfe);
+
+  f = EnergyFunc(x, NULL);
   if (msglvl > 0) {
-    printf("%10.3E %10.3E %15.8E %d\n", x[0], x[1], f, nfe);
+    printf("%10.3E %10.3E %15.8E %d\n", potential->lambda, potential->a, f, nfe);
   }
-  f = EnergyFunc(&n, x);
-  if (ierr) {
+  if (status != GSL_SUCCESS) {
     if (f > f0) {
-      printf("Error in RefineRadial: %d\n", ierr);
-      return ierr;
+      printf("Error in RefineRadial: %d\n", status);
+      return status;
     } else if (msglvl > 0) {
-      printf("Warning in RefineRadial: %d\n", ierr);
+      printf("Warning in RefineRadial: %d\n", status);
     }
   }
   

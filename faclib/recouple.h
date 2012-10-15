@@ -158,23 +158,10 @@ int GetInteract(INTERACT_DATUM **idatum,
 		int ki, int kj, int bf);
 void CompactInteractShell(char c[4], INTERACT_SHELL *s, int m);
 
-/* only compile these test routines if the debug flag is on */
-void    TestAngular(void);
-void    CheckAngularConsistency(int n_shells, SHELL *bra, 
-			     SHELL_STATE *sbra, SHELL_STATE *sket,
-			     INTERACT_SHELL *s, int phase);
 int     SetMaxRank(int k);
 int     GetMaxRank(void);
 int     InitRecouple(void);
 int     ReinitRecouple(int m);
-double EvaluateFormula(FORMULA *fm);
-int GenerateFormula(FORMULA *fm);
-int FixJsZ(INTERACT_SHELL *s, FORMULA *fm);
-int TriadsZ(int n1, int n2, FORMULA *fm);
-int CoupleSuccessive(int n, int *ik, int itr, TRIADS tr, int *i0);
-int RecoupleTensor(int ns, INTERACT_SHELL *s, FORMULA *fm);
-void EvaluateTensor(int nshells, SHELL_STATE *bra, SHELL_STATE *ket,
-		    INTERACT_SHELL *s, int itr, FORMULA *fm);
 #endif
 
 

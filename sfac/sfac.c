@@ -2353,12 +2353,6 @@ static int PCoulombBethe(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PTestAngular(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
-  TestAngular();  
-  return 0;
-}
-
 static int PTestIntegrate(int argc, char *argv[], int argt[], 
 			  ARRAY *variables) {
   TestIntegrate();  
@@ -3140,7 +3134,6 @@ static METHOD methods[] = {
   {"StoreTable", PStoreTable},
   {"Structure", PStructure},
   {"CoulombBethe", PCoulombBethe}, 
-  {"TestAngular", PTestAngular}, 
   {"TestIntegrate", PTestIntegrate}, 
   {"TestMyArray", PTestMyArray},   
   {"TransitionTable", PTransitionTable},  

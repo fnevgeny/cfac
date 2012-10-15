@@ -2050,59 +2050,6 @@ double AverageEnergyConfig(CONFIG *cfg) {
   return x;
 }
 
-/* calculate the average energy of an average configuration, 
-** with seperate direct and exchange contributions */
-void DiExAvgConfig(AVERAGE_CONFIG *cfg, double *d0, double *d1) {
-  int i, j, n, kappa, np, kappap;
-  int k, kp, kk, kl, klp, kkmin, kkmax, j2, j2p;
-  double y, t, q, a, b, nq, nqp;
- 
-  *d0 = 0.0;
-  *d1 = 0.0;
-  for (i = 0; i < cfg->n_shells; i++) {
-    n = cfg->n[i];
-    kappa = cfg->kappa[i];
-    kl = GetLFromKappa(kappa);
-    j2 = GetJFromKappa(kappa);
-    nq = cfg->nq[i];
-    k = OrbitalIndex(n, kappa, 0.0);
-
-    t = 0.0;
-    for (kk = 2; kk <= j2; kk += 2) {
-      Slater(&y, k, k, k, k, kk, 0);
-      q = W3j(j2, 2*kk, j2, -1, 0, 1);
-      t += y * q * q ;
-    }
-    Slater(&y, k, k, k, k, 0, 0);
-    b = ((nq-1.0)/2.0);
-    *d0 += nq*b*(y - (1.0+1.0/j2)*t);
-    
-    for (j = 0; j < i; j++) {
-      np = cfg->n[j];
-      kappap = cfg->kappa[j];
-      klp = GetLFromKappa(kappap);
-      j2p = GetJFromKappa(kappap);
-      nqp = cfg->nq[j];
-      kp = OrbitalIndex(np, kappap, 0.0);
-
-      kkmin = abs(j2 - j2p);
-      kkmax = (j2 + j2p);
-      if (IsOdd((kkmin + kl + klp)/2)) kkmin += 2;
-      a = 0.0;
-      for (kk = kkmin; kk <= kkmax; kk += 4) {
-	Slater(&y, k, kp, kp, k, kk/2, 0);
-	q = W3j(j2, kk, j2p, -1, 0, 1);
-	a += y * q * q;
-
-      }
-      Slater(&y, k, kp, k, kp, 0, 0);
-
-      *d0 += nq*nqp*y;
-      *d1 += -nq*nqp*a;
-    }
-  }
-}
-
 /* calculate the average energy of an average configuration */
 double AverageEnergyAvgConfig(AVERAGE_CONFIG *cfg) {
   int i, j, n, kappa, np, kappap;

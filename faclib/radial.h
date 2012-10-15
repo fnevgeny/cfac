@@ -80,7 +80,6 @@ double ZerothEnergyConfig(CONFIG *cfg);
 double ZerothResidualConfig(CONFIG *cfg);
 double AverageEnergyConfig(CONFIG *cfg);
 double AverageEnergyAvgConfig(AVERAGE_CONFIG *cfg);
-void DiExAvgConfig(AVERAGE_CONFIG *cfg, double *d0, double *d1);
 
 /* routines for radial integral calculations */
 int GetYk(int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 

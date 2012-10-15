@@ -409,9 +409,9 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
 	    if (noex[i] == 0) {
 	      if (kl1 >= pw_scratch.qr &&
 		  kl0 >= pw_scratch.qr) {
-		SlaterTotal(&sd, &se, js, ks, k, -1);
+		SlaterTotal(cfac, &sd, &se, js, ks, k, -1);
 	      } else {
-		SlaterTotal(&sd, &se, js, ks, k, 1);
+		SlaterTotal(cfac, &sd, &se, js, ks, k, 1);
 	      }
 	      if (i == 0) {
 		if (1.0+sd == 1.0 && 1.0+se == 1.0) {
@@ -424,9 +424,9 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
 	      se = 0.0;
 	      if (kl1 >= pw_scratch.qr &&
 		  kl0 >= pw_scratch.qr) {
-		SlaterTotal(&sd, NULL, js, ks, k, -1);
+		SlaterTotal(cfac, &sd, NULL, js, ks, k, -1);
 	      } else {
-		SlaterTotal(&sd, NULL, js, ks, k, 1);
+		SlaterTotal(cfac, &sd, NULL, js, ks, k, 1);
 	      }
 	      if (i == 0) {
 		if (1.0+sd == 1.0) {

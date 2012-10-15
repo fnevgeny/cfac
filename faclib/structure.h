@@ -115,11 +115,9 @@ void HamiltonElement1E2E(cfac_t *cfac,
 double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj);
 double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj);
 double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj);
-double Hamilton2E2(int n_shells, SHELL_STATE *sbra, 
-		   SHELL_STATE *sket,INTERACT_SHELL *s);
-double Hamilton2E(int n_shells, SHELL_STATE *sbra, 
+double Hamilton2E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, 
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
-double Hamilton1E(int n_shells, SHELL_STATE *sbra, 
+double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, 
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 int DiagonalizeHamilton(cfac_t *cfac);
 int AddToLevels(cfac_t *cfac, int ng, int *kg);

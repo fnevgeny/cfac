@@ -4,7 +4,6 @@
 #include <gsl/gsl_sf_bessel.h>
 #include <gsl/gsl_multimin.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "coulomb.h"
 #include "radial.h"
@@ -703,7 +702,7 @@ int OptimizeLoop(AVERAGE_CONFIG *acfg, double *vbuf) {
 }
 
 #define NXS 5
-int OptimizeRadial(int ng, int *kg, double *weight) {
+int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   AVERAGE_CONFIG *acfg;
   double a, b, c, z, emin, smin, hxs[NXS], ehx[NXS];
   int iter, i, j, im, md;
@@ -793,7 +792,7 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
 	if (ng > 0) {
 	  ehx[i] = 0.0;
 	  for (j = 0; j < ng; j++) {
-	    ehx[i] += TotalEnergyGroup(kg[j]);
+	    ehx[i] += TotalEnergyGroup(cfac, kg[j]);
 	  }
 	} else {
 	  ehx[i] = AverageEnergyAvgConfig(acfg);
@@ -815,7 +814,7 @@ int OptimizeRadial(int ng, int *kg, double *weight) {
 	if (ng > 0) {
 	  ehx[i] = 0.0;
 	  for (j = 0; j < ng; j++) {
-	    ehx[i] += TotalEnergyGroup(kg[j]);
+	    ehx[i] += TotalEnergyGroup(cfac, kg[j]);
 	  }
 	} else {
 	  ehx[i] = AverageEnergyAvgConfig(acfg);
@@ -1332,7 +1331,7 @@ int FreeContinua(double e) {
   return 0;
 }
 
-int ConfigEnergy(int m, int mr, int ng, int *kg) {
+int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg) {
   CONFIG_GROUP *g;
   CONFIG *cfg;
   int k, i;
@@ -1341,7 +1340,7 @@ int ConfigEnergy(int m, int mr, int ng, int *kg) {
     if (ng == 0) {
       ng = GetNumGroups(cfac);
       for (k = 0; k < ng; k++) {
-	OptimizeRadial(1, &k, NULL);
+	OptimizeRadial(cfac, 1, &k, NULL);
 	if (mr > 0) RefineRadial(mr, 0);
 	g = GetGroup(cfac, k);
 	for (i = 0; i < g->n_cfgs; i++) {
@@ -1352,7 +1351,7 @@ int ConfigEnergy(int m, int mr, int ng, int *kg) {
 	ClearOrbitalTable(0);
       }
     } else {
-      OptimizeRadial(ng, kg, NULL);
+      OptimizeRadial(cfac, ng, kg, NULL);
       if (mr) RefineRadial(mr, 0);
       for (k = 0; k < ng; k++) {
 	g = GetGroup(cfac, kg[k]);
@@ -1382,7 +1381,7 @@ int ConfigEnergy(int m, int mr, int ng, int *kg) {
 }
 
 /* calculate the total configuration average energy of a group. */
-double TotalEnergyGroup(int kg) {
+double TotalEnergyGroup(const cfac_t *cfac, int kg) {
   CONFIG_GROUP *g;
   ARRAY *c;
   CONFIG *cfg;
@@ -2861,7 +2860,8 @@ double InterpolateMultipole(double aw, int n, double *x, double *y) {
   return r;
 }
 
-int SlaterTotal(double *sd, double *se, int *j, int *ks, int k, int mode) {
+int SlaterTotal(cfac_t *cfac,
+    double *sd, double *se, int *j, int *ks, int k, int mode) {
   int t, kk, tt, maxn;
   int tmin, tmax;
   double e, a, d, a1, a2, am;
@@ -3065,7 +3065,7 @@ double SelfEnergyRatio(ORBITAL *orb) {
   return b/a;
 }
 
-double QED1E(int k0, int k1) {
+double QED1E(cfac_t *cfac, int k0, int k1) {
   int i;
   ORBITAL *orb1, *orb2;
   int index[2];

@@ -376,9 +376,9 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
 		ks[0] = kb;
 		if (kl1 >= pw_scratch.qr &&
 		    kl0 >= pw_scratch.qr) {
-		  SlaterTotal(&sd, &se, js, ks, k, -1);
+		  SlaterTotal(cfac, &sd, &se, js, ks, k, -1);
 		} else {
-		  SlaterTotal(&sd, &se, js, ks, k, 1);
+		  SlaterTotal(cfac, &sd, &se, js, ks, k, 1);
 		} 
 		r = sd + se;
                 if (!r) break;
@@ -388,9 +388,9 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
 		  ks[0] = kbp;
 		  if (kl1 >= pw_scratch.qr &&
 		      kl0 >= pw_scratch.qr) {
-		    SlaterTotal(&sd, &se, js, ks, k, -1);
+		    SlaterTotal(cfac, &sd, &se, js, ks, k, -1);
 		  } else {
-		    SlaterTotal(&sd, &se, js, ks, k, 1);
+		    SlaterTotal(cfac, &sd, &se, js, ks, k, 1);
 		  } 
 		  rp = sd + se;
                   if (!rp) break;
@@ -1173,7 +1173,7 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
 		  ks[1] = OrbitalIndex(0, kappa0, e0);
 		  ph0 = GetPhaseShift(ks[1]);
 		  ks[0] = k0;
-		  SlaterTotal(&sd, &se, NULL, ks, k, 1);
+		  SlaterTotal(cfac, &sd, &se, NULL, ks, k, 1);
 		  r = sd + se;
 		  for (j0p = j0pmin; j0p <= j0pmax; j0p += 2) {
 		    for (kl0p = j0p - 1; kl0p <= j0p + 1; kl0p += 2) {
@@ -1181,7 +1181,7 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
 		      ks[1] = OrbitalIndex(0, kappa0p, e0);
 		      ph0p = GetPhaseShift(ks[1]);
 		      ks[0] = k1;
-		      SlaterTotal(&sd, &se, NULL, ks, kp, 1);
+		      SlaterTotal(cfac, &sd, &se, NULL, ks, kp, 1);
 		      rp = sd + se;
 		      Jmin = abs(J0 - k);
 		      Jmax = J0 + k;

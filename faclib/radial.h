@@ -69,13 +69,13 @@ void SetOptimizeControl(double tolerence, double stablizer,
 			int maxiter, int iprint);
 void SetScreening(int n_screen, int *screened_n, 
 		  double screened_harge, int kl);
-int OptimizeRadial(int ng, int *kg, double *weight);
+int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight);
 int RefineRadial(int maxfun, int msglvl);
 double ConfigEnergyShiftCI(int nrs0, int nrs1);
 double ConfigEnergyShift(int ns, SHELL *bra, int ia, int ib, int m2);
 double ConfigEnergyVariance(int ns, SHELL *bra, int ia, int ib, int m2);
-int ConfigEnergy(int m, int mr, int ng, int *kg);
-double TotalEnergyGroup(int kg);
+int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg);
+double TotalEnergyGroup(const cfac_t *cfac, int kg);
 double ZerothEnergyConfig(CONFIG *cfg);
 double ZerothResidualConfig(CONFIG *cfg);
 double AverageEnergyConfig(CONFIG *cfg);
@@ -96,9 +96,10 @@ int IntegrateSubRegion(int i0, int i1,
 int IntegrateSinCos(int j, double *x, double *y, 
 		    double *phase, double *dphase, 
 		    int i0, double *r, int last_only);
-int SlaterTotal(double *sd, double *se, int *js, int *ks, int k, int mode);
+int SlaterTotal(cfac_t *cfac,
+    double *sd, double *se, int *js, int *ks, int k, int mode);
 double Vinti(int k0, int k1);
-double QED1E(int k0, int k1);
+double QED1E(cfac_t *cfac, int k0, int k1);
 double SelfEnergyRatio(ORBITAL *orb);
 int Slater(double *s, int k0, int k1, int k2, int k3, int k, int mode);
 double BreitC(int n, int m, int k, int k0, int k1, int k2, int k3);

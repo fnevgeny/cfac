@@ -449,16 +449,16 @@ static int PConfigEnergy(int argc, char *argv[], int argt[],
   m = atoi(argv[0]);
   
   if (argc == 1 || m != 0) {
-    ConfigEnergy(m, 0, 0, NULL);
+    ConfigEnergy(cfac, m, 0, 0, NULL);
   } else {
     mr = atoi(argv[1]);
     if (argc == 2) {
-      ConfigEnergy(m, mr, 0, NULL);
+      ConfigEnergy(cfac, m, mr, 0, NULL);
     } else {
       for (i = 1; i < argc; i++) {
 	ng = DecodeGroupArgs(&kg, 1, argv+i, argt+i, variables);
 	if (ng < 0) return -1;
-	ConfigEnergy(m, mr, ng, kg);
+	ConfigEnergy(cfac, m, mr, ng, kg);
 	if (ng > 0) free(kg);
       }
     }
@@ -820,7 +820,7 @@ static int POptimizeRadial(int argc, char *argv[], int argt[],
   }
 
  END:
-  if (OptimizeRadial(ng, kg, weight) < 0) {
+  if (OptimizeRadial(cfac, ng, kg, weight) < 0) {
     if (kg) free(kg);
     if (weight) free(weight);
     return -1;

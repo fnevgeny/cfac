@@ -1824,6 +1824,7 @@ C
 
       DX2  = 0.0
       DCLM = 0.0
+      DTPM = 0.0
 
       B(1)=.FALSE.
       B(2)=.FALSE.

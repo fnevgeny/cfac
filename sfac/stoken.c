@@ -235,7 +235,17 @@ int TokenizeLine(int nline, char *line, METHOD *methods,
   }  
 }
 
-void FreeStatementData(void *p) {
+static void InitStatementData(void *p, int n) {
+  STATEMENT *st;
+  int i;
+  
+  st = (STATEMENT *) p;
+  for (i = 0; i < n; i++) {
+    st[i].argc = 0;
+  }
+}
+
+static void FreeStatementData(void *p) {
   STATEMENT *st;
   int i;
   
@@ -245,7 +255,18 @@ void FreeStatementData(void *p) {
   }
 }
 
-void FreeVariableData(void *p) {
+static void InitVariableData(void *p, int n) {
+  VARIABLE *v;
+  int i;
+  
+  v = (VARIABLE *) p;
+  for (i = 0; i < n; i++) {
+    v[i].name = NULL;
+    v[i].value = NULL;
+  }
+}
+
+static void FreeVariableData(void *p) {
   VARIABLE *v;
   
   v = (VARIABLE *) p;
@@ -261,8 +282,10 @@ int EvalFile(FILE *f, int exebyline, METHOD *methods) {
   int i, nlines;
   int ierr;
 
-  ArrayInit(&statements, sizeof(STATEMENT), 1024, FreeStatementData, NULL);
-  ArrayInit(&variables, sizeof(VARIABLE), 1024, FreeVariableData, NULL);
+  ArrayInit(&statements,
+    sizeof(STATEMENT), 1024, FreeStatementData, InitStatementData);
+  ArrayInit(&variables,
+    sizeof(VARIABLE), 1024, FreeVariableData, InitVariableData);
 
   nlines = 0;
   while (1) {

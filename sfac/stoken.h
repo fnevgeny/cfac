@@ -57,8 +57,6 @@ int TokenizeLine(int nline, char *line, METHOD *methods,
 		 ARRAY *statements, ARRAY *variables);
 int EvalFile(FILE *f, int exebyline, METHOD *methods);
 int EvalStatement(STATEMENT *st, METHOD *methods, ARRAY *variables);
-void FreeStatementData(void *p);
-void FreeVariableData(void *p);
 void ErrorOcurred(int ierr, int loc);
 void SetModName(char *s);
 

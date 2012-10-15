@@ -1811,7 +1811,7 @@ void TestAngular(void) {
   int n_shells;
   SHELL *bra;
   SHELL_STATE *sbra, *sket;
-  INTERACT_DATUM *idatum;
+  INTERACT_DATUM *idatum = NULL;
   INTERACT_SHELL *s;
   char name1[LEVEL_NAME_LEN];
   char name2[LEVEL_NAME_LEN];

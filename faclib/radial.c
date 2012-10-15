@@ -12,7 +12,6 @@
 #include "angular.h"
 #include "grid.h"
 #include "interpolation.h"
-#include "cf77.h"
 
 static POTENTIAL *potential;
 #define Large(orb) ((orb)->wfun)

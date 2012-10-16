@@ -152,7 +152,10 @@ void *ArraySet(ARRAY *a, int i, const void *d) {
 ** NOTE:        
 */
 void *ArrayAppend(ARRAY *a, const void *d) {
-  int i;  
+  int i;
+  if (!a) {
+    return NULL;
+  }
   i = a->dim;
   return ArraySet(a, i, d);
 }
@@ -480,6 +483,8 @@ int NMultiFreeData(MULTI *ma) {
   ARRAY *a;
   int i, n;
 
+  if (!ma) return 0;
+  
   n = HashSize(ma->ndim);
   for (i = 0; i < n; i++) {
     a = &(ma->array[i]);

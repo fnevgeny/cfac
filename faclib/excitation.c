@@ -295,8 +295,8 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
   index[2] = k1;    
   
   type = -1;
-  orb0 = GetOrbital(k0);
-  orb1 = GetOrbital(k1);
+  orb0 = GetOrbital(cfac, k0);
+  orb1 = GetOrbital(cfac, k1);
   GetJLFromKappa(orb0->kappa, &j0, &kl0);
   GetJLFromKappa(orb1->kappa, &j1, &kl1);
   kl0 = kl0/2;
@@ -524,9 +524,9 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
   ko2 = k/2;  
   ty = ko2;
   *qk = 0.0;
-  p0 = GetOrbital(k0)->kappa;
+  p0 = GetOrbital(cfac, k0)->kappa;
   GetJLFromKappa(p0, &j0, &m0);
-  p1 = GetOrbital(k1)->kappa;
+  p1 = GetOrbital(cfac, k1)->kappa;
   GetJLFromKappa(p1, &j1, &m1);
   if (!Triangle(j0, k, j1)) {
     return -1;
@@ -534,9 +534,9 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
   if (IsOdd((m0+m1+k)/2)) {
     ty = -1;
   }
-  p2 = GetOrbital(k2)->kappa;
+  p2 = GetOrbital(cfac, k2)->kappa;
   GetJLFromKappa(p2, &j2, &m2);
-  p3 = GetOrbital(k3)->kappa;
+  p3 = GetOrbital(cfac, k3)->kappa;
   GetJLFromKappa(p3, &j3, &m3);
   if (!Triangle(j2, k, j3)) {
     return -1;
@@ -642,16 +642,16 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   for (iq = 0; iq < nq; iq++) {
     qk[iq] = 0.0;
   }
-  p0 = GetOrbital(k0)->kappa;
+  p0 = GetOrbital(cfac, k0)->kappa;
   GetJLFromKappa(p0, &j0, &m0);
-  p1 = GetOrbital(k1)->kappa;
+  p1 = GetOrbital(cfac, k1)->kappa;
   GetJLFromKappa(p1, &j1, &m1);
   if (IsOdd((m0+m1+k)/2) || !Triangle(j0, k, j1)) {
     return -1;
   }
-  p2 = GetOrbital(k2)->kappa;
+  p2 = GetOrbital(cfac, k2)->kappa;
   GetJLFromKappa(p2, &j2, &m2);
-  p3 = GetOrbital(k3)->kappa;
+  p3 = GetOrbital(cfac, k3)->kappa;
   GetJLFromKappa(p3, &j3, &m3);
   if (IsOdd((m2+m3+kp)/2) || !Triangle(j2, kp, j3)) {
     return -1;
@@ -813,12 +813,12 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
       }
     }
   } else {
-    te0 = -GetOrbital(k0)->energy;
-    te = -GetOrbital(k1)->energy;
+    te0 = -GetOrbital(cfac, k0)->energy;
+    te = -GetOrbital(cfac, k1)->energy;
     te0 = Max(te0, te);
-    te = -GetOrbital(k2)->energy;
+    te = -GetOrbital(cfac, k2)->energy;
     te0 = Max(te0, te);
-    te = -GetOrbital(k3)->energy;
+    te = -GetOrbital(cfac, k3)->energy;
     te0 = Max(te0, te);
     ie = n_egrid;
     for (ie = n_egrid; ie < n_egrid1; ie++) {
@@ -1103,12 +1103,12 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
 	}
       }
     }
-    te0 = -GetOrbital(k0)->energy;
-    te = -GetOrbital(k1)->energy;
+    te0 = -GetOrbital(cfac, k0)->energy;
+    te = -GetOrbital(cfac, k1)->energy;
     te0 = Max(te0, te);
-    te = -GetOrbital(k2)->energy;
+    te = -GetOrbital(cfac, k2)->energy;
     te0 = Max(te0, te);
-    te = -GetOrbital(k3)->energy;
+    te = -GetOrbital(cfac, k3)->energy;
     te0 = Max(te0, te);
     for (ite = 0; ite < n_tegrid; ite++) {
       ieb[ite] = 0;
@@ -2210,7 +2210,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	  cfg = GetConfig(cfac, st);
 	  k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
         }
-        e = -(GetOrbital(k)->energy);
+        e = -(GetOrbital(cfac, k)->energy);
         if (m == 0) {
           ei = e;
         } else
@@ -2464,7 +2464,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
       cfg = GetConfig(cfac, st);
       k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
     }
-    e = -(GetOrbital(k)->energy);
+    e = -(GetOrbital(cfac, k)->energy);
     if (e < ei) ei = e;
   }
 
@@ -2712,7 +2712,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
       cfg = GetConfig(cfac, st);
       k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
     }
-    e = -(GetOrbital(k)->energy);
+    e = -(GetOrbital(cfac, k)->energy);
     if (e < ei) ei = e;
   }
 

@@ -27,22 +27,18 @@ int Info(void) {
 }
 
 int InitFac() {
-  int ierr;
-
   gsl_ieee_env_setup();
 
   cfac = cfac_new();
+  if (!cfac) {
+    printf("Initialization failed\n");
+    return -1;
+  }
 
   InitCoulomb();
   InitAngular();
   InitRecouple();
 
-  ierr = InitRadial(cfac);
-  if (ierr < 0) {
-    printf("initialize failed in InitRadial\n");
-    return ierr;
-  }
-  
   InitDBase();
   InitExcitation();
   InitRecombination();

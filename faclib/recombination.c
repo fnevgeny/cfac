@@ -602,7 +602,7 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   int nh, klh;
   double hparams[NPARAMS];
 
-  orb = GetOrbital(k0);
+  orb = GetOrbital(cfac, k0);
   kappa0 = orb->kappa;
   GetJLFromKappa(kappa0, &jb0, &klb02);
   klb0 = klb02/2;
@@ -812,7 +812,7 @@ int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
 	}
 	for (i = 0; i < nz; i++) {
 	  kb = ang[i].kb;
-	  orb = GetOrbital(kb);
+	  orb = GetOrbital(cfac, kb);
 	  GetJLFromKappa(orb->kappa, &jb, &klb);
 	  if ((m < 0 && IsOdd((klb+klf+k)/2)) ||
 	      (m > 0 && IsEven((klb+klf+k)/2))) {
@@ -874,13 +874,13 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   amax = 0.0;
   for (i = 0; i < nz; i++) {
     kb = ang[i].kb;
-    orb = GetOrbital(kb);
+    orb = GetOrbital(cfac, kb);
     jbp = orb->kappa;
     GetJLFromKappa(jbp, &jb, &klb);
     klb /= 2;
     for (j = 0; j <= i; j++) {
       kbp = ang[j].kb;
-      jbp = GetOrbital(kbp)->kappa;
+      jbp = GetOrbital(cfac, kbp)->kappa;
       jbp = GetJFromKappa(jbp);
       if (jbp != jb) continue;
       k = RRRadialQk(rq, *eb, kb, kbp, m);
@@ -992,7 +992,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
 
   st = (STATE *) ArrayGet(&(GetSymmetry(cfac, j1)->states), i);
   if (st->kgroup < 0) {
-    k = GetOrbital(st->kcfg)->kappa;
+    k = GetOrbital(cfac, st->kcfg)->kappa;
   } else {
     k = (GetConfig(cfac, st)->shells[0]).kappa;
   }
@@ -1018,11 +1018,11 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
       kb = ang[i].k1;
       k0 = ang[i].k2;
       k1 = ang[i].k3;
-      kappafp = GetOrbital(kb)->kappa;
+      kappafp = GetOrbital(cfac, kb)->kappa;
       klfp = GetLFromKappa(kappafp);
-      kappafp = GetOrbital(k0)->kappa;
+      kappafp = GetOrbital(cfac, k0)->kappa;
       klfp += GetLFromKappa(kappafp);
-      kappafp = GetOrbital(k1)->kappa;
+      kappafp = GetOrbital(cfac, k1)->kappa;
       klfp += GetLFromKappa(kappafp);      
       ij = (jf - jmin);
       for (ik = -1; ik <= 1; ik += 2) {
@@ -1046,7 +1046,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   if (nzfb > 0) {
     for (i = 0; i < nzfb; i++) {
       kb = zfb[i].kb;
-      kappaf = GetOrbital(kb)->kappa;
+      kappaf = GetOrbital(cfac, kb)->kappa;
       GetJLFromKappa(kappaf, &jf, &klf);
       ij = jf - jmin;
       ik = klf - jf;
@@ -1367,15 +1367,15 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
 	  SetRRTEGrid(n_tegrid, emin, emax);
 	}
       }
-      FreeMultipoleArray();
+      FreeMultipoleArray(cfac);
       awmin = emin * FINE_STRUCTURE_CONST;
       awmax = emax * FINE_STRUCTURE_CONST;
       if (e < 0.3) {
-	SetAWGrid(1, awmin, awmax);
+	SetAWGrid(cfac, 1, awmin, awmax);
       } else if (e < 1.0) {
-	SetAWGrid(2, awmin, awmax);
+	SetAWGrid(cfac, 2, awmin, awmax);
       } else {
-	SetAWGrid(3, awmin, awmax);
+	SetAWGrid(cfac, 3, awmin, awmax);
       }
     } else {
       SetRRTEGrid(1, emin, emax);
@@ -1542,15 +1542,15 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
 	  SetRRTEGrid(n_tegrid, emin, emax);
 	}
       }
-      FreeMultipoleArray();
+      FreeMultipoleArray(cfac);
       awmin = emin * FINE_STRUCTURE_CONST;
       awmax = emax * FINE_STRUCTURE_CONST;
       if (e < 0.3) {
-	SetAWGrid(1, awmin, awmax);
+	SetAWGrid(cfac, 1, awmin, awmax);
       } else if (e < 1.0) {
-	SetAWGrid(2, awmin, awmax);
+	SetAWGrid(cfac, 2, awmin, awmax);
       } else {
-	SetAWGrid(3, awmin, awmax);
+	SetAWGrid(cfac, 3, awmin, awmax);
       }
     } else {
       SetRRTEGrid(1, emin, emax);
@@ -1840,7 +1840,7 @@ int AsymmetryM_PI(int k0, double e, int mx, int m, double *b) {
   int jmin, jmax, se, kappa, k, Lp, Lp2, ip, pp, q2;
   double aw, aw0, ph1, ph2, c, d;
 
-  orb0 = GetOrbital(k0);
+  orb0 = GetOrbital(cfac, k0);
   GetJLFromKappa(orb0->kappa, &j0, &kl0);
   aw = FINE_STRUCTURE_CONST*e;
   aw0 = FINE_STRUCTURE_CONST*(e - orb0->energy);
@@ -1991,9 +1991,9 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
       else js = '-';
       SpecSymbol(sp, kl/2);
       k0 = OrbitalIndex(cfac, n, kappa, 0);
-      orb0 = GetOrbital(k0);
+      orb0 = GetOrbital(cfac, k0);
       e0 = -(orb0->energy);
-      SetAWGrid(1, e0*FINE_STRUCTURE_CONST, e0*FINE_STRUCTURE_CONST);
+      SetAWGrid(cfac, 1, e0*FINE_STRUCTURE_CONST, e0*FINE_STRUCTURE_CONST);
       if (usr_egrid[0] < 0) {
 	if (egrid[0] > 0) {
 	  SetUsrPEGridDetail(n_egrid, egrid);

@@ -331,13 +331,13 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
     emax *= FINE_STRUCTURE_CONST;
     e0 = 2.0*(emax-emin)/(emin+emax);
     
-    FreeMultipoleArray();
+    FreeMultipoleArray(cfac);
     if (e0 < EPS3) {
-      SetAWGrid(1, emin, emax);
+      SetAWGrid(cfac, 1, emin, emax);
     } else if (e0 < 1.0) {
-      SetAWGrid(2, emin, emax);
+      SetAWGrid(cfac, 2, emin, emax);
     } else {
-      SetAWGrid(3, emin, emax);
+      SetAWGrid(cfac, 3, emin, emax);
     }
   }
   fhdr.type = DB_TRF;
@@ -417,13 +417,13 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
   emax *= FINE_STRUCTURE_CONST;
   e0 = 2.0*(emax-emin)/(emin+emax);
     
-  FreeMultipoleArray();
+  FreeMultipoleArray(cfac);
   if (e0 < EPS3) {
-    SetAWGrid(1, emin, emax);
+    SetAWGrid(cfac, 1, emin, emax);
   } else if (e0 < 1.0) {
-    SetAWGrid(2, emin, emax);
+    SetAWGrid(cfac, 2, emin, emax);
   } else {
-    SetAWGrid(3, emin, emax);
+    SetAWGrid(cfac, 3, emin, emax);
   }
   
   fhdr.type = DB_TR;

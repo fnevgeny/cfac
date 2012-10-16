@@ -268,7 +268,7 @@ static int PAvgConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   ns = GetAverageConfigFromString(&n, &kappa, &nq, argv[0]);
   if (ns <= 0) return -1;
 
-  if (SetAverageConfig(ns, n, kappa, nq) < 0) return -1;
+  if (SetAverageConfig(cfac, ns, n, kappa, nq) < 0) return -1;
 
   free(n);
   free(kappa);
@@ -1125,7 +1125,7 @@ static int PSetAvgConfig(int argc, char *argv[], int argt[],
   
   for (j = 0; j < ns; j++) free(vc[j]);
 
-  if (SetAverageConfig(ns, n, kappa, nq) < 0) return -1;
+  if (SetAverageConfig(cfac, ns, n, kappa, nq) < 0) return -1;
   free(n);
   free(kappa);
   free(nq);
@@ -1665,7 +1665,7 @@ static int PSetOptimizeControl(int argc, char *argv[], int argt[],
   maxiter = atoi(argv[2]);
   if (argc == 4) iprint = atoi(argv[3]);
   
-  SetOptimizeControl(tol, s, maxiter, iprint);
+  SetOptimizeControl(cfac, tol, s, maxiter, iprint);
 
   return 0;
 }
@@ -1939,7 +1939,7 @@ static int PSetSE(int argc, char *argv[], int argt[],
   if (argc != 1) return -1;
   c = atoi(argv[0]);
 
-  SetSE(c);
+  SetSE(cfac, c);
   
   return 0;
 }
@@ -1951,7 +1951,7 @@ static int PSetVP(int argc, char *argv[], int argt[],
   if (argc != 1) return -1;
   c = atoi(argv[0]);
 
-  SetVP(c);
+  SetVP(cfac, c);
   
   return 0;
 }
@@ -1963,7 +1963,7 @@ static int PSetBreit(int argc, char *argv[], int argt[],
   if (argc != 1) return -1;
   c = atoi(argv[0]);
 
-  SetBreit(c);
+  SetBreit(cfac, c);
   
   return 0;
 }
@@ -1976,7 +1976,7 @@ static int PSetMS(int argc, char *argv[], int argt[],
   c1 = atoi(argv[0]);
   c2 = atoi(argv[1]);
 
-  SetMS(c1, c2);
+  SetMS(cfac, c1, c2);
   
   return 0;
 }
@@ -2011,7 +2011,7 @@ static int PSetScreening(int argc, char *argv[], int argt[],
     free(v[i]);
   }
   
-  SetScreening(n_screen, screened_n, screened_charge, kl);
+  SetScreening(cfac, n_screen, screened_n, screened_charge, kl);
 
   return 0;
 }
@@ -2225,7 +2225,7 @@ static int PSolveBound(int argc, char *argv[], int argt[],
     return -1;
   }
 
-  orb = GetOrbital(k);
+  orb = GetOrbital(cfac, k);
   printf("Energy = %16.8E\n", orb->energy);
   
   return 0;
@@ -2510,7 +2510,7 @@ static int PSetOptimizeMaxIter(int argc, char *argv[], int argt[],
   }
 
   m = atoi(argv[0]);
-  SetOptimizeMaxIter(m);
+  SetOptimizeMaxIter(cfac, m);
   return 0;
 }
 
@@ -2523,7 +2523,7 @@ static int PSetOptimizeStabilizer(int argc, char *argv[], int argt[],
   }
 
   m = atof(argv[0]);
-  SetOptimizeStabilizer(m);
+  SetOptimizeStabilizer(cfac, m);
   return 0;
 }
 
@@ -2536,7 +2536,7 @@ static int PSetOptimizePrint(int argc, char *argv[], int argt[],
   }
 
   m = atoi(argv[0]);
-  SetOptimizePrint(m);
+  SetOptimizePrint(cfac, m);
   return 0;
 }
 
@@ -2549,7 +2549,7 @@ static int PSetOptimizeTolerance(int argc, char *argv[], int argt[],
   }
 
   m = atof(argv[0]);
-  SetOptimizeTolerance(m);
+  SetOptimizeTolerance(cfac, m);
   return 0;
 }
 
@@ -2778,7 +2778,7 @@ static int PSetSlaterCut(int argc, char *argv[], int argt[],
   k0 = atoi(argv[0]);
   k1 = atoi(argv[1]);
   
-  SetSlaterCut(k0, k1);
+  SetSlaterCut(cfac, k0, k1);
   
   return 0;
 }
@@ -2806,22 +2806,6 @@ static int PJoinTable(int argc, char *argv[], int argt[],
   if (argc != 3) return -1;
   
   JoinTable(argv[0], argv[1], argv[2]);
-  
-  return 0;
-}
-
-static int PLimitArray(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
-  int m;
-  double n;
-
-  if (argc != 2) return -1;
-  m = atoi(argv[0]);
-  n = atof(argv[1]);
-
-  if (m < 10) {
-    LimitArrayRadial(m, n);
-  }
   
   return 0;
 }
@@ -3028,7 +3012,6 @@ static METHOD methods[] = {
   {"SetCEPWFile", PSetCEPWFile}, 
   {"AppendTable", PAppendTable}, 
   {"JoinTable", PJoinTable}, 
-  {"LimitArray", PLimitArray},
   {"SetSlaterCut", PSetSlaterCut}, 
   {"Print", PPrint},
   {"AddConfig", PAddConfig},

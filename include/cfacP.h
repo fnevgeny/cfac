@@ -32,6 +32,52 @@ struct _cfac_t {
     ARRAY *levels_per_ion;
 
     POTENTIAL *potential;     /* potential                                   */
+
+
+    ARRAY *orbitals;          /* array of orbitals                           */
+    int n_orbitals;           /* total number of orbitals                    */
+    int n_continua;           /* number of continuum orbitals                */
+ 
+    MULTI *slater_array;
+    MULTI *breit_array;
+    MULTI *vinti_array;
+    MULTI *qed1e_array;
+    MULTI *residual_array;
+    MULTI *multipole_array; 
+    MULTI *moments_array;
+    MULTI *gos_array;
+    MULTI *yk_array;
+
+    struct {
+      double stabilizer;
+      double tolerance;       /* tolerance for self-consistency              */
+      int maxiter;            /* max iter. for self-consistency              */
+      double screened_charge; 
+      int screened_kl;
+      int n_screen;
+      int *screened_n;
+      int iprint;             /* printing infomation in each iteration.      */
+      int iset;
+    } optimize_control;
+    
+    struct {
+      int kl0;
+      int kl1;
+    } slater_cut;
+
+    struct {
+      int se;
+      int vp;
+      int nms;
+      int sms;
+      int br;
+    } qed;
+
+    AVERAGE_CONFIG average_config;
+
+    int n_awgrid;
+    double awgrid[MAXNTE];
+
     
     HAMILTON *hamiltonian;    /* Hamiltonian                                 */
 
@@ -72,6 +118,18 @@ void
 FreeConfigData(void *p);
 void
 InitConfigData(void *p, int n);
+
+/* radial.c */
+void
+FreeOrbitalData(void *p);
+void
+InitOrbitalData(void *p, int n);
+void
+FreeMultipole(void *p);
+void
+FreeYkData(void *p);
+void
+InitYkData(void *p, int n);
 
 /* structure.c */
 void

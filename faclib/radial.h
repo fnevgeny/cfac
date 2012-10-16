@@ -22,17 +22,17 @@ typedef struct _SLATER_YK_ {
 
 int SetBoundary(cfac_t *cfac, int nmax, double p, double bqp);
 int RadialOverlaps(cfac_t *cfac, char *fn, int kappa);
-void SetSlaterCut(int k0, int k1);
+void SetSlaterCut(cfac_t *cfac, int k0, int k1);
 void SetPotentialMode(cfac_t *cfac, int m, double h);
-void SetSE(int n);
-void SetVP(int n);
-void SetBreit(int n);
-void SetMS(int nms, int sms);
-int SetAWGrid(int n, double min, double max);
-int GetAWGrid(double **a);
+void SetSE(cfac_t *cfac, int n);
+void SetVP(cfac_t *cfac, int n);
+void SetBreit(cfac_t *cfac, int n);
+void SetMS(cfac_t *cfac, int nms, int sms);
+int SetAWGrid(cfac_t *cfac, int n, double min, double max);
+int GetAWGrid(cfac_t *cfac, double **a);
 int SetRadialGrid(cfac_t *cfac,
     int maxrp, double ratio, double asymp, double rmin);
-double SetPotential(POTENTIAL *potential, AVERAGE_CONFIG *acfg, int iter, double *vbuf);
+double SetPotential(cfac_t *cfac, int iter, double *vbuf);
 int GetPotential(const cfac_t *cfac, char *s);
 double GetResidualZ(const cfac_t *cfac);
 double GetRMax(cfac_t *cfac);
@@ -42,39 +42,39 @@ int SolveDirac(POTENTIAL *potential, ORBITAL *orb);
 int WaveFuncTable(cfac_t *cfac, char *s, int n, int kappa, double e);
 
 /* get the index of the given orbital in the table */
-int OrbitalIndex(const cfac_t *cfac, int n, int kappa, double energy);
-int OrbitalExists(POTENTIAL *potential, int n, int kappa, double energy);
-int AddOrbital(ORBITAL *orb);
-ORBITAL *GetOrbital(int k);
-ORBITAL *GetOrbitalSolved(POTENTIAL *potential, int k);
-ORBITAL *GetNewOrbital(void);
-int GetNumBounds(void);
-int GetNumOrbitals(void);
-int GetNumContinua(void);
+int OrbitalIndex(cfac_t *cfac, int n, int kappa, double energy);
+int OrbitalExists(const cfac_t *cfac, int n, int kappa, double energy);
+int AddOrbital(cfac_t *cfac, ORBITAL *orb);
+ORBITAL *GetOrbital(const cfac_t *cfac, int k);
+ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k);
+ORBITAL *GetNewOrbital(cfac_t *cfac);
+int GetNumBounds(const cfac_t *cfac);
+int GetNumOrbitals(const cfac_t *cfac);
+int GetNumContinua(const cfac_t *cfac);
 
 double GetPhaseShift(cfac_t *cfac, int k);
 
 /* radial optimization */
-int SetAverageConfig(int nshells, int *n, int *kappa, double *nq);
-void SetOptimizeMaxIter(int m);
-void SetOptimizeStabilizer(double m);
-void SetOptimizeTolerance(double c);
-void SetOptimizePrint(int m);
-void SetOptimizeControl(double tolerence, double stablizer, 
+int SetAverageConfig(cfac_t *cfac, int nshells, int *n, int *kappa, double *nq);
+void SetOptimizeMaxIter(cfac_t *cfac, int m);
+void SetOptimizeStabilizer(cfac_t *cfac, double m);
+void SetOptimizeTolerance(cfac_t *cfac, double c);
+void SetOptimizePrint(cfac_t *cfac, int m);
+void SetOptimizeControl(cfac_t *cfac, double tolerence, double stablizer, 
 			int maxiter, int iprint);
-void SetScreening(int n_screen, int *screened_n, 
+void SetScreening(cfac_t *cfac, int n_screen, int *screened_n, 
 		  double screened_harge, int kl);
 int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight);
 int RefineRadial(cfac_t *cfac, int maxfun, int msglvl);
 int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg);
-double TotalEnergyGroup(const cfac_t *cfac, int kg);
+double TotalEnergyGroup(cfac_t *cfac, int kg);
 double ZerothEnergyConfig(cfac_t *cfac, CONFIG *cfg);
 double ZerothResidualConfig(cfac_t *cfac, CONFIG *cfg);
-double AverageEnergyConfig(const cfac_t *cfac, CONFIG *cfg);
-double AverageEnergyAvgConfig(cfac_t *cfac, AVERAGE_CONFIG *cfg);
+double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg);
+double AverageEnergyAvgConfig(cfac_t *cfac);
 
 /* routines for radial integral calculations */
-int GetYk(POTENTIAL *potential, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 
+int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 
 	  int k1, int k2, RadIntType type);
 int IntegrateF(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     RadIntType type, double x[], int id);
@@ -89,28 +89,25 @@ int IntegrateSinCos(POTENTIAL *potential, int j, double *x, double *y,
 		    int i0, double *r, int last_only);
 int SlaterTotal(cfac_t *cfac,
     double *sd, double *se, int *js, int *ks, int k, int mode);
-double Vinti(POTENTIAL *potential, int k0, int k1);
+double Vinti(cfac_t *cfac, int k0, int k1);
 double QED1E(cfac_t *cfac, int k0, int k1);
 double SelfEnergyRatio(POTENTIAL *potential, ORBITAL *orb);
 int Slater(const cfac_t *cfac, double *s, int k0, int k1, int k2, int k3, int k, int mode);
-double BreitC(POTENTIAL *potential, int n, int m, int k, int k0, int k1, int k2, int k3);
-double BreitS(POTENTIAL *potential, int k0, int k1, int k2, int k3, int k);
-double BreitI(POTENTIAL *potential, int n, int k0, int k1, int k2, int k3, int m);
-double Breit(POTENTIAL *potential, int k0, int k1, int k2, int k3, int k,
+double BreitC(cfac_t *cfac, int n, int m, int k, int k0, int k1, int k2, int k3);
+double BreitS(cfac_t *cfac, int k0, int k1, int k2, int k3, int k);
+double BreitI(cfac_t *cfac, int n, int k0, int k1, int k2, int k3, int m);
+double Breit(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
 	     int kl0, int kl1, int kl2, int kl3);
 void SortSlaterKey(int *kd);
 int ResidualPotential(const cfac_t *cfac, double *s, int k0, int k1);
 double MeanPotential(cfac_t *cfac, int k0, int k1);
-int FreeResidualArray(void);
-int FreeMultipoleArray(void);
-int FreeSlaterArray(void);
-int FreeSimpleArray(MULTI *ma);
-int FreeMomentsArray(void);
-int FreeGOSArray(void);
+int FreeMultipoleArray(cfac_t *cfac);
+int FreeMomentsArray(cfac_t *cfac);
+int FreeGOSArray(cfac_t *cfac);
 
 double RadialMoments(const cfac_t *cfac, int m, int k1, int k2);
 double MultipoleRadialNR(cfac_t *cfac, int m, int k1, int k2, int guage);
-int MultipoleRadialFRGrid(POTENTIAL *potential, double **p, int m, int k1, int k2, int guage);
+int MultipoleRadialFRGrid(cfac_t *cfac, double **p, int m, int k1, int k2, int guage);
 double MultipoleRadialFR(cfac_t *cfac, double aw, int m, int k1, int k2, int guage);
 double InterpolateMultipole(double aw2, int n, double *x, double *y);
 double *GeneralizedMoments(cfac_t *cfac, int k0, int k1, int m);
@@ -118,13 +115,12 @@ void PrintGeneralizedMoments(cfac_t *cfac,
     char *fn, int m, int n0, int k0, int n1, int k1, double e1);
 int SaveOrbital(int i);
 int RestoreOrbital(int i); 
-int FreeOrbital(int i);
-int SaveAllContinua(int mode); 
-int SaveContinua(double e, int mode);
-int FreeAllContinua(void);
-int FreeContinua(double e);
+int FreeOrbital(cfac_t *cfac, int i);
+int SaveAllContinua(cfac_t *cfac, int mode); 
+int SaveContinua(cfac_t *cfac, double e, int mode);
+int FreeAllContinua(cfac_t *cfac);
+int FreeContinua(cfac_t *cfac, double e);
 int ClearOrbitalTable(cfac_t *cfac, int m);
-void LimitArrayRadial(int m, double n);
 int InitRadial(cfac_t *cfac);
 int ReinitRadial(cfac_t *cfac, int m);
 int TestIntegrate(cfac_t *cfac);

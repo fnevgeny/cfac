@@ -479,18 +479,18 @@ int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n) {
   if (n > 0) {
     kb = s->kcfg;
     if (kb < 0) return 0;
-    kb = GetOrbital(kb)->n;
+    kb = GetOrbital(cfac, kb)->n;
     if (kb != n) return 0;
   } else if (n == 0) {
     kb = s->kcfg;
     if (kb >= 0) {
-      kb = GetOrbital(kb)->n;
+      kb = GetOrbital(cfac, kb)->n;
       if (kb <= 0) return 0;
     }
   } else {
     kb = s->kcfg;
     if (kb < 0) return 0;
-    kb = GetOrbital(kb)->n;
+    kb = GetOrbital(cfac, kb)->n;
     if (kb > 0) return 0;
   }
 
@@ -667,8 +667,8 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
   for (i = 0; i < nz; i++) {
     if (cfac->b1[0] || cfac->b1[1] || cfac->b1[2]) {
       if (ang[i].k == 2) {
-	orb0 = GetOrbital(ang[i].k0);
-	orb1 = GetOrbital(ang[i].k1);
+	orb0 = GetOrbital(cfac, ang[i].k0);
+	orb1 = GetOrbital(cfac, ang[i].k1);
 	GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
 	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
         if (orb0->n == orb1->n && korb0 == korb1) {
@@ -703,8 +703,8 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
     }
     if (cfac->e1[0] || cfac->e1[1] || cfac->e1[2]) {
       if (ang[i].k == 2) {
-	orb0 = GetOrbital(ang[i].k0);
-	orb1 = GetOrbital(ang[i].k1);
+	orb0 = GetOrbital(cfac, ang[i].k0);
+	orb1 = GetOrbital(cfac, ang[i].k1);
 	GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
 	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
 	if (IsOdd((korb0+korb1)/2)) {
@@ -731,8 +731,8 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
       if (ang[i].k == 0) {
 	a = W3j(ji, 0, jj, -mi, 0, mj);
 	if (a) {
-	  orb0 = GetOrbital(ang[i].k0);
-	  orb1 = GetOrbital(ang[i].k1);
+	  orb0 = GetOrbital(cfac, ang[i].k0);
+	  orb1 = GetOrbital(cfac, ang[i].k1);
 	  GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
 	  GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
 	  if (IsEven((korb0+korb1)/2)) {
@@ -745,8 +745,8 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
 	}
       }
       if (ang[i].k == 4) {	
-	orb0 = GetOrbital(ang[i].k0);
-	orb1 = GetOrbital(ang[i].k1);
+	orb0 = GetOrbital(cfac, ang[i].k0);
+	orb1 = GetOrbital(cfac, ang[i].k1);
 	GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
 	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
 	if (IsEven((korb0+korb1)/2)) {
@@ -787,7 +787,7 @@ double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
   r = 0.0;
   ti = si->kgroup;
   k0 = si->kcfg;
-  orb0 = GetOrbital(k0);
+  orb0 = GetOrbital(cfac, k0);
   j0 = GetJFromKappa(orb0->kappa);
   tj = sj->kgroup;
   ti = -ti-1;
@@ -810,7 +810,7 @@ double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
   }
   for (i = 0; i < nz1; i++) {
     k1 = a1[i].kb;
-    orb1 = GetOrbital(k1);
+    orb1 = GetOrbital(cfac, k1);
     if (orb0->kappa == orb1->kappa) {
       ResidualPotential(cfac, &a, k0, k1);
       a += QED1E(cfac, k0, k1);
@@ -862,8 +862,8 @@ double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
   tj = sj->kgroup;
   ti = -ti-1;
   tj = -tj-1;
-  orbi = GetOrbital(si->kcfg);
-  orbj = GetOrbital(sj->kcfg);
+  orbi = GetOrbital(cfac, si->kcfg);
+  orbj = GetOrbital(cfac, sj->kcfg);
   lev1 = GetLevel(cfac, ti);
   lev2 = GetLevel(cfac, tj);
   ji1 = lev1->pj;
@@ -1353,7 +1353,7 @@ double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, SHELL_STATE *sk
   k1 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
   k2 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
   ResidualPotential(cfac, &r0, k1, k2);
-  if (k1 == k2) r0 += (GetOrbital(k1))->energy;
+  if (k1 == k2) r0 += (GetOrbital(cfac, k1))->energy;
   r0 += QED1E(cfac, k1, k2);
   z0 *= sqrt(s[0].j + 1.0);
 
@@ -1845,9 +1845,9 @@ int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
   s1 = (STATE *) ArrayGet(&(sym1->states), i1);
   s2 = (STATE *) ArrayGet(&(sym2->states), i2);
   if (s1->kgroup < 0 && s2->kgroup < 0) {
-    orb = GetOrbital(s1->kcfg);
+    orb = GetOrbital(cfac, s1->kcfg);
     GetJLFromKappa(orb->kappa, &p1, &j1);
-    orb = GetOrbital(s2->kcfg);
+    orb = GetOrbital(cfac, s2->kcfg);
     GetJLFromKappa(orb->kappa, &p2, &j2);
     i1 = p1 - p2;
     if (i1) return i1;
@@ -2145,7 +2145,7 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
 		  }
 		} else {
 		  ik = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-		  orb = GetOrbital(ik);
+		  orb = GetOrbital(cfac, ik);
 		  a = lev->energy - orb->energy;
 		  for (p = 0; p < cfac->ecorrections->dim; p++) {
 		    ec = (ECORRECTION *) ArrayGet(cfac->ecorrections, p);
@@ -2280,7 +2280,7 @@ int ConstructLevelName(cfac_t *cfac, char *name, char *sname, char *nc,
       nele = ConstructLevelName(cfac, name, sname, nc, vnl, basis);
       return nele;
     } else {
-      orb = GetOrbital(basis->kcfg);
+      orb = GetOrbital(cfac, basis->kcfg);
       GetJLFromKappa(orb->kappa, &j, &kl);
       if (vnl) {
 	*vnl = (kl/2) + 100*(orb->n);
@@ -2631,7 +2631,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	  if (n > 0) {
 	    ang = malloc(sizeof(ANGULAR_ZMIX)*n);
 	    memcpy(ang, a[iz1], sizeof(ANGULAR_ZMIX)*n);
-	    AngZSwapBraKet(n, ang, 0);
+	    AngZSwapBraKet(cfac, n, ang, 0);
 	  }
 	  a[iz2] = ang;
 	  pnz[iz2] = n;
@@ -2643,7 +2643,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   return (*ad)->ns;
 }
 
-int AngZSwapBraKet(int nz, ANGULAR_ZMIX *ang, int p) {
+int AngZSwapBraKet(cfac_t *cfac, int nz, ANGULAR_ZMIX *ang, int p) {
   int i;
   int k0, k1;
   for (i = 0; i < nz; i++) {
@@ -2651,8 +2651,8 @@ int AngZSwapBraKet(int nz, ANGULAR_ZMIX *ang, int p) {
     k1 = ang[i].k1;
     ang[i].k0 = k1;
     ang[i].k1 = k0;
-    k0 = GetOrbital(k0)->kappa;
-    k1 = GetOrbital(k1)->kappa;
+    k0 = GetOrbital(cfac, k0)->kappa;
+    k1 = GetOrbital(cfac, k1)->kappa;
     k0 = GetJFromKappa(k0);
     k1 = GetJFromKappa(k1);
     if (IsOdd(abs(k1-k0+p)/2)) ang[i].coeff = - ang[i].coeff;
@@ -3070,7 +3070,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
       kg = -kg-1;
       if (kg == lower) {
 	kb = sup->kcfg;
-	jf = GetOrbital(kb)->kappa;
+	jf = GetOrbital(cfac, kb)->kappa;
 	jf = GetJFromKappa(jf);
 	r0 = mix2*sqrt_j2;
 	if (fabs(r0) < cfac->angz_cut) continue;
@@ -3174,7 +3174,7 @@ int AngularZMix(cfac_t *cfac,
 	  j2 = lev2->pj;
 	  DecodePJ(j1, NULL, &j1);
 	  DecodePJ(j2, NULL, &j2);
-	  AngZSwapBraKet(nz, *ang, j1-j2);
+	  AngZSwapBraKet(cfac, nz, *ang, j1-j2);
 	}
 	return nz;
       }
@@ -3206,19 +3206,19 @@ int AngularZMix(cfac_t *cfac,
 
   if (kg1 < 0) {
     kb1 = slow->kcfg;
-    n = GetOrbital(kb1)->n;
+    n = GetOrbital(cfac, kb1)->n;
     if (cfac->angz_maxn > 0 && cfac->angz_maxn < n) ignore_ryd = 1;
     nmax = GetNMax();
     if (n >= nmax && kg2 < 0) {
       kb2 = sup->kcfg;
-      m = GetOrbital(kb2)->n;
+      m = GetOrbital(cfac, kb2)->n;
       if (m == n) {
 	ignore_ryd = 1;
       }
     }
   } else if (kg2 < 0) {
     kb2 = sup->kcfg;
-    n = GetOrbital(kb2)->n;
+    n = GetOrbital(cfac, kb2)->n;
     if (cfac->angz_maxn > 0 && cfac->angz_maxn < n) ignore_ryd = 1;
   }
   
@@ -3234,7 +3234,7 @@ int AngularZMix(cfac_t *cfac,
       kg1 = slow->kgroup;
       kg1 = -kg1-1;
       kb1 = slow->kcfg;
-      jb1 = GetOrbital(kb1)->kappa;
+      jb1 = GetOrbital(cfac, kb1)->kappa;
       jb1 = GetJFromKappa(jb1);
       for (j = 0; j < lev2->n_basis; j++) {
 	mix2 = lev2->mixing[j];
@@ -3246,7 +3246,7 @@ int AngularZMix(cfac_t *cfac,
 	kg2 = sup->kgroup;
 	kg2 = -kg2-1;
 	kb2 = sup->kcfg;
-	jb2 = GetOrbital(kb2)->kappa;
+	jb2 = GetOrbital(cfac, kb2)->kappa;
 	jb2 = GetJFromKappa(jb2);
 
 	if (ignore_ryd && kb1 != kb2) {
@@ -3289,14 +3289,14 @@ int AngularZMix(cfac_t *cfac,
       if (fabs(mix1) < cfac->angz_cut) continue;
       slow = (STATE *) ArrayGet(&(sym1->states), lev1->basis[i]);
       kb1 = slow->kcfg;
-      jb1 = GetOrbital(kb1)->kappa;
+      jb1 = GetOrbital(cfac, kb1)->kappa;
       jb1 = GetJFromKappa(jb1);
       jlow = GetBaseJ(cfac, slow);
       kg1 = slow->kgroup;
       kg1 = -kg1-1;
       nfb = AngularZFreeBound(cfac, &afb, kg1, upper);
       for (m = 0; m < nfb; m++) {
-	jb2 = GetOrbital(afb[m].kb)->kappa;
+	jb2 = GetOrbital(cfac, afb[m].kb)->kappa;
 	jb2 = GetJFromKappa(jb2);
 	for (ik = kmin; ik <= kmax; ik += 2) {
 	  r0 = W6j(jlow, jb1, j1, ik, j2, jb2);
@@ -3316,14 +3316,14 @@ int AngularZMix(cfac_t *cfac,
       if (fabs(mix2) < cfac->angz_cut) continue;
       sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
       kb2 = sup->kcfg;
-      jb2 = GetOrbital(kb2)->kappa;
+      jb2 = GetOrbital(cfac, kb2)->kappa;
       jb2 = GetJFromKappa(jb2);
       jup = GetBaseJ(cfac, sup);
       kg2 = sup->kgroup;
       kg2 = -kg2-1;
       nfb = AngularZFreeBound(cfac, &afb, kg2, lower);
       for (m = 0; m < nfb; m++) {
-	jb1 = GetOrbital(afb[m].kb)->kappa;
+	jb1 = GetOrbital(cfac, afb[m].kb)->kappa;
 	jb1 = GetJFromKappa(jb1);
 	for (ik = kmin; ik <= kmax; ik += 2) {
 	  r0 = W6j(jup, jb2, j2, ik, j1, jb1);
@@ -3374,7 +3374,7 @@ int AngularZMix(cfac_t *cfac,
     PackAngularZMix(&n, ang, nz);
 
     if (lev) {
-      AngZSwapBraKet(n, *ang, j1-j2);
+      AngZSwapBraKet(cfac, n, *ang, j1-j2);
     }
 
     /*
@@ -3428,7 +3428,7 @@ int AngularZxZFreeBound(cfac_t *cfac,
       if (fabs(mix2) < cfac->angz_cut) continue;
       sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
       kb = sup->kcfg;
-      jb = GetOrbital(kb)->kappa;
+      jb = GetOrbital(cfac, kb)->kappa;
       jb = GetJFromKappa(jb);
       jup = GetBaseJ(cfac, sup);
       kg = sup->kgroup;

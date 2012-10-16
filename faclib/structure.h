@@ -147,7 +147,7 @@ int PackAngularZMix(int *n, ANGULAR_ZMIX **ang, int nz);
 int PackAngularZFB(int *n, ANGULAR_ZFB **ang, int nz);
 int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper);
 int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
-int AngZSwapBraKet(int nz, ANGULAR_ZMIX *ang, int p);
+int AngZSwapBraKet(cfac_t *cfac, int nz, ANGULAR_ZMIX *ang, int p);
 int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang, 

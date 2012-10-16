@@ -282,7 +282,7 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
   kl_max0 = Min(kl_max0, t);
   max0 = 12;
 
-  orb = GetOrbital(kb);
+  orb = GetOrbital(cfac, kb);
   kappab = orb->kappa;
   GetJLFromKappa(kappab, &jb, &klb);
   klb /= 2;
@@ -671,7 +671,7 @@ double BEScale(int k, double e) {
   a = MeanPotential(cfac, k, k);
   b = RadialMoments(cfac, -1, k, k);
   c = -a/b;
-  orb = GetOrbital(k);
+  orb = GetOrbital(cfac, k);
   a = orb->energy - a;
   if (c >= z) c = z;  
   b = (1.0 + a/e);
@@ -714,7 +714,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       double c;
       
       kb = ang[i].kb;
-      orb = GetOrbital(kb);
+      orb = GetOrbital(cfac, kb);
       kb = orb->kappa;
       GetJLFromKappa(kb, &j0, &kl);
       kl /= 2;
@@ -755,12 +755,12 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       
       for (i = 0; i < nz; i++) {
 	kb = ang[i].kb;
-	j0 = GetJFromKappa(GetOrbital(kb)->kappa);
+	j0 = GetJFromKappa(GetOrbital(cfac, kb)->kappa);
 	for (ip = 0; ip <= i; ip++) {
 	  double c;
           
           kbp = ang[ip].kb;
-	  j0p = GetJFromKappa(GetOrbital(kbp)->kappa);
+	  j0p = GetJFromKappa(GetOrbital(cfac, kbp)->kappa);
 
 	  if (j0p != j0) continue;
 
@@ -821,13 +821,13 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       }
       for (i = 0; i < nz; i++) {
 	kb = ang[i].kb;
-	j0 = GetJFromKappa(GetOrbital(kb)->kappa);
+	j0 = GetJFromKappa(GetOrbital(cfac, kb)->kappa);
 	for (ip = 0; ip <= i; ip++) {
 	  int j;
           double c;
           
           kbp = ang[ip].kb;
-	  j0p = GetJFromKappa(GetOrbital(kbp)->kappa);
+	  j0p = GetJFromKappa(GetOrbital(cfac, kbp)->kappa);
 	  if (j0p != j0) continue;
 	  c = ang[i].coeff*ang[ip].coeff;
 	  if (ip != i) {
@@ -1137,9 +1137,9 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
   double y[MAXNKL], r, rp, d, ph0, ph0p, sd, se, c, d1, d2;
   double w6j1, w6j2, w3j1, w3j2, w3j3, w3j4, w3j5, w3j6, w3j7, w3j8;
 
-  orb0 = GetOrbital(k0);
+  orb0 = GetOrbital(cfac, k0);
   jk0 = GetJFromKappa(orb0->kappa);
-  orb1 = GetOrbital(k1);
+  orb1 = GetOrbital(cfac, k1);
   jk1 = GetJFromKappa(orb1->kappa);
 
   for (t = 0; t < pw_scratch.nkl; t++) {

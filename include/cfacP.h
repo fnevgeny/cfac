@@ -4,6 +4,8 @@
 #include "cfac.h"
 #include "array.h"
 #include "config.h"
+#include "orbital.h"
+#include "radial.h"
 #include "structure.h"
 
 typedef struct {
@@ -28,6 +30,8 @@ struct _cfac_t {
                                  j = floor(i/2) and parity = mod(i, 2).      */
 
     ARRAY *levels_per_ion;
+
+    POTENTIAL *potential;     /* potential                                   */
     
     HAMILTON *hamiltonian;    /* Hamiltonian                                 */
 

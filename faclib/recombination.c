@@ -334,7 +334,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	kl2 = pw_scratch.kl[j/2];
 	p = p1 + kl2;
 	if (kl2 >= n) break;
-	ko = OrbitalIndex(n, pw_scratch.kappa0[j], 0.0);
+	ko = OrbitalIndex(cfac, n, pw_scratch.kappa0[j], 0.0);
 	j2 = GetJFromKappa(pw_scratch.kappa0[j]);
 	jmin = abs(j2 - j1);
 	jmax = j2 + j1;
@@ -571,11 +571,11 @@ int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
     aw = FINE_STRUCTURE_CONST * tegrid[ite];        
     for (ie = 0; ie < n_egrid; ie++) {
       e = egrid[ie];
-      kf = OrbitalIndex(0, kappaf, e);
+      kf = OrbitalIndex(cfac, 0, kappaf, e);
       if (mode == M_NR && m != 1) {
-	qk[ie] = MultipoleRadialNR(m, k0, kf, gauge);
+	qk[ie] = MultipoleRadialNR(cfac, m, k0, kf, gauge);
       } else {
-	qk[ie] = MultipoleRadialFR(aw, m, k0, kf, gauge);
+	qk[ie] = MultipoleRadialFR(cfac, aw, m, k0, kf, gauge);
       }
       qk[ie] *= pref;
     }
@@ -615,7 +615,7 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
 
   GetHydrogenicNL(&nh, &klh, NULL, NULL);
   if (m == -1) {
-    r0 = GetResidualZ();
+    r0 = GetResidualZ(cfac);
     RRRadialQkHydrogenicParams(NPARAMS, hparams, r0, orb->n, klb0);
     RRRadialQkFromFit(NPARAMS, hparams, n_egrid, 
 		      xegrid, log_xegrid, tq0, NULL, 0, &klb0);
@@ -680,20 +680,20 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
 	kappaf = GetKappaFromJL(jf, klf);
 	for (ie = 0; ie < n_egrid; ie++) {
 	  e = egrid[ie];
-	  kf = OrbitalIndex(0, kappaf, e);
+	  kf = OrbitalIndex(cfac, 0, kappaf, e);
 	  if (mode == M_NR && m != 1) {
-	    r0 = MultipoleRadialNR(m, k0, kf, gauge);
+	    r0 = MultipoleRadialNR(cfac, m, k0, kf, gauge);
 	    if (k1 == k0) {
 	      r1 = r0;
 	    } else {
-	      r1 = MultipoleRadialNR(m, k1, kf, gauge);
+	      r1 = MultipoleRadialNR(cfac, m, k1, kf, gauge);
 	    }
 	  } else {
-	    r0 = MultipoleRadialFR(aw, m, k0, kf, gauge);
+	    r0 = MultipoleRadialFR(cfac, aw, m, k0, kf, gauge);
 	    if (k1 == k0) {
 	      r1 = r0;
 	    } else {
-	      r1 = MultipoleRadialFR(aw, m, k1, kf, gauge);
+	      r1 = MultipoleRadialFR(cfac, aw, m, k1, kf, gauge);
 	    }
 	  }	  
 	  tq[ie] += r0*r1;
@@ -902,7 +902,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
     }
   }
   if (qk_mode == QK_FIT) {
-    z = GetResidualZ();
+    z = GetResidualZ(cfac);
     RRRadialQkHydrogenicParams(NPARAMS, rqc, z, nq, nkl);
     for (ie = 0; ie < n_egrid; ie++) {
       xegrid[ie] = 1.0 + egrid[ie]/eb0;
@@ -1117,10 +1117,10 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
 	    } else {
 	      kappafp = GetKappaFromJL(jfp, klfp);
 	      for (ik = 0; ik < n_egrid; ik++) {
-		k0 = OrbitalIndex(0, kappaf, egrid[ik]);
-		k1 = OrbitalIndex(0, kappafp, egrid[ik]);
-		ai_pk0[ik] = GetPhaseShift(k0);
-		ai_pk0[ik] -= GetPhaseShift(k1);
+		k0 = OrbitalIndex(cfac, 0, kappaf, egrid[ik]);
+		k1 = OrbitalIndex(cfac, 0, kappafp, egrid[ik]);
+		ai_pk0[ik] = GetPhaseShift(cfac, k0);
+		ai_pk0[ik] -= GetPhaseShift(cfac, k1);
 	      }	      
 	      if (n_egrid > 1) {
 		UVIP3P(n_egrid, log_egrid, ai_pk0, nt, &log_e, &a);
@@ -1154,8 +1154,8 @@ int AIRadial1E(double *ai_pk, int kb, int kappaf) {
   int i;
 
   for (i = 0; i < n_egrid; i++) {
-    kf = OrbitalIndex(0, kappaf, egrid[i]);
-    ResidualPotential(ai_pk+i, kf, kb);
+    kf = OrbitalIndex(cfac, 0, kappaf, egrid[i]);
+    ResidualPotential(cfac, ai_pk+i, kf, kb);
   }
   return 0;
 }  
@@ -1187,7 +1187,7 @@ int AIRadialPk(double **ai_pk, int k0, int k1, int kb, int kappaf, int k) {
   *ai_pk = *p;
   for (i = 0; i < n_egrid; i++) {
     e = egrid[i];
-    kf = OrbitalIndex(0, kappaf, e);
+    kf = OrbitalIndex(cfac, 0, kappaf, e);
     ks[0] = k0;
     ks[1] = kf;
     ks[2] = k1;
@@ -1398,7 +1398,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
       }
     }
     
-    ReinitRadial(1);
+    ReinitRadial(cfac, 1);
     FreeRecQk();
     FreeRecPk();
     
@@ -1608,7 +1608,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
     DeinitFile(f, &fhdr);
     
     free(r.strength);
-    ReinitRadial(1);
+    ReinitRadial(cfac, 1);
     FreeRecQk();
     FreeRecPk();
     
@@ -1817,7 +1817,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 
     DeinitFile(f, &fhdr);
 
-    ReinitRadial(1);
+    ReinitRadial(cfac, 1);
     FreeRecQk();
     FreeRecPk();
 
@@ -1876,11 +1876,11 @@ int AsymmetryM_PI(int k0, double e, int mx, int m, double *b) {
       }
       kappa = GetKappaFromJL(j1, kl1);
       kak[i][p] = kappa;
-      k = OrbitalIndex(0, kappa, e);
+      k = OrbitalIndex(cfac, 0, kappa, e);
       if (IsEven(i)) {
-	ak[i][p] = MultipoleRadialFR(aw, -L, k0, k, gauge);
+	ak[i][p] = MultipoleRadialFR(cfac, aw, -L, k0, k, gauge);
       } else {
-	ak[i][p] = MultipoleRadialFR(aw, L, k0, k, gauge);
+	ak[i][p] = MultipoleRadialFR(cfac, aw, L, k0, k, gauge);
       }
       ak[i][p] *= c;
       b[0] += ak[i][p]*ak[i][p];
@@ -1893,15 +1893,15 @@ int AsymmetryM_PI(int k0, double e, int mx, int m, double *b) {
     L2 = 2*L;
     for (p = 0; p < nak[i]; p++) {
       GetJLFromKappa(kak[i][p], &j1, &kl1);
-      k = OrbitalIndex(0, kak[i][p], e);
-      ph1 = GetPhaseShift(k);
+      k = OrbitalIndex(cfac, 0, kak[i][p], e);
+      ph1 = GetPhaseShift(cfac, k);
       for (ip = 0; ip < mx; ip++) {
 	Lp = ip/2 + 1;
 	Lp2 = 2*Lp;
 	for (pp = 0; pp < nak[ip]; pp++) {
 	  GetJLFromKappa(kak[ip][pp], &j2, &kl2);
-	  k = OrbitalIndex(0, kak[ip][pp], e);
-	  ph2 = GetPhaseShift(k);
+	  k = OrbitalIndex(cfac, 0, kak[ip][pp], e);
+	  ph2 = GetPhaseShift(cfac, k);
 	  c = sqrt((j1+1.0)*(j2+1.0)*(kl1+1.0)*(kl2+1.0)*(L2+1.0)*(Lp2+1.0));
 	  c *= ak[i][p]*ak[ip][pp];
 	  if (ph1 != ph2) c *= cos(ph1-ph2);
@@ -1990,7 +1990,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
       if (jj > kl) js = '+';
       else js = '-';
       SpecSymbol(sp, kl/2);
-      k0 = OrbitalIndex(n, kappa, 0);
+      k0 = OrbitalIndex(cfac, n, kappa, 0);
       orb0 = GetOrbital(k0);
       e0 = -(orb0->energy);
       SetAWGrid(1, e0*FINE_STRUCTURE_CONST, e0*FINE_STRUCTURE_CONST);
@@ -2018,7 +2018,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
       }
       e0 *= HARTREE_EV;
       fprintf(f, "#  %2s  %2d %2d\n", 
-	      GetAtomicSymbol(cfac), (int)GetAtomicNumber(cfac), (int)GetResidualZ());
+	      GetAtomicSymbol(cfac), (int)GetAtomicNumber(cfac), (int)GetResidualZ(cfac));
       fprintf(f, "#  %d%s%c %d %d %d %12.5E  %d %d\n",
 	      n, sp, js, n, kl, jj, e0, n_usr, mx);
       for (i = 0; i < n_usr; i++) {
@@ -2067,7 +2067,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
   free(pqa);
   free(pqa2);
   
-  ReinitRadial(1);
+  ReinitRadial(cfac, 1);
   ReinitRecombination(1);
 
   return 0;
@@ -2079,7 +2079,7 @@ int DROpen(int n, int *nlev, int **ops) {
   double e0, e, z;
 
   e0 = GetLevel(cfac, 0)->energy;
-  z = GetResidualZ();
+  z = GetResidualZ(cfac);
   z = z*z/2.0;
 
   (*ops) = malloc(sizeof(int)*n);

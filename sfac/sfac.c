@@ -742,7 +742,7 @@ static int PExit(int argc, char *argv[], int argt[], ARRAY *variables) {
 static int PGetPotential(int argc, char *argv[], int argt[], 
 			 ARRAY *variables) {
   if (argc != 1 || argt[0] != STRING) return -1;
-  GetPotential(argv[0]);
+  GetPotential(cfac, argv[0]);
   return 0;
 }
 
@@ -846,7 +846,7 @@ static int PRefineRadial(int argc, char *argv[], int argt[],
     }
   }
   
-  return RefineRadial(maxfun, msglvl);
+  return RefineRadial(cfac, maxfun, msglvl);
 }
 
 static int PPause(int argc, char *argv[], int argt[], 
@@ -1827,7 +1827,7 @@ static int PSetPotentialMode(int argc, char *argv[], int argt[],
   if (argc > 1) {
     h = atof(argv[1]);
   }
-  SetPotentialMode(m, h);
+  SetPotentialMode(cfac, m, h);
 
   return 0;
 }
@@ -1844,7 +1844,7 @@ static int PSetRadialGrid(int argc, char *argv[], int argt[],
   asym = atof(argv[2]);
   rmin = atof(argv[3]);
 
-  return SetRadialGrid(maxrp, ratio, asym, rmin);
+  return SetRadialGrid(cfac, maxrp, ratio, asym, rmin);
 }
 
 static int PSetRecPWLimits(int argc, char *argv[], int argt[], 
@@ -2219,7 +2219,7 @@ static int PSolveBound(int argc, char *argv[], int argt[],
     return -1;
   }
 
-  k = OrbitalIndex(n, kappa, 0.0);
+  k = OrbitalIndex(cfac, n, kappa, 0.0);
   if (k < 0) {
     printf("Fetal error in sloving dirac equation\n");
     return -1;
@@ -2341,7 +2341,7 @@ static int PSetTRF(int argc, char *argv[], int argt[],
 
 static int PTestIntegrate(int argc, char *argv[], int argt[], 
 			  ARRAY *variables) {
-  TestIntegrate();  
+  TestIntegrate(cfac);  
   return 0;
 }
 
@@ -2496,7 +2496,7 @@ static int PWaveFuncTable(int argc, char *argv[], int argt[],
     e = 0.0;
   }
 
-  WaveFuncTable(argv[0], n, k, e);
+  WaveFuncTable(cfac, argv[0], n, k, e);
 
   return 0;
 }
@@ -2744,7 +2744,7 @@ static int PRadialOverlaps(int argc, char *argv[], int argt[],
   if (argc == 2) kappa = atoi(argv[1]);
   else kappa = -1;
 
-  RadialOverlaps(argv[0], kappa);
+  RadialOverlaps(cfac, argv[0], kappa);
   
   return 0;
 }
@@ -2765,7 +2765,7 @@ static int PSetBoundary(int argc, char *argv[], int argt[],
 
   nmax = atoi(argv[0]);
   
-  return SetBoundary(nmax, p, bqp);
+  return SetBoundary(cfac, nmax, p, bqp);
 }
 
 
@@ -3016,7 +3016,7 @@ static int PGeneralizedMoment(int argc, char *argv[], int argt[],
   k1 = atoi(argv[5]);
   if (argc == 7) e1 = atof(argv[6]);
   else e1 = 0.0;
-  PrintGeneralizedMoments(argv[0], m, n0, k0, n1, k1, e1);
+  PrintGeneralizedMoments(cfac, argv[0], m, n0, k0, n1, k1, e1);
   
   return 0;
 }

@@ -3,6 +3,7 @@
 #include <gsl/gsl_ieee_utils.h>
 
 #include "cfacP.h"
+#include "global.h"
 #include "coulomb.h"
 #include "recouple.h"
 #include "angular.h"
@@ -36,7 +37,7 @@ int InitFac() {
   InitAngular();
   InitRecouple();
 
-  ierr = InitRadial();
+  ierr = InitRadial(cfac);
   if (ierr < 0) {
     printf("initialize failed in InitRadial\n");
     return ierr;

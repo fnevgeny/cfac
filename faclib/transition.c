@@ -135,10 +135,10 @@ static int _TRMultipole(double *strength, double *energy,
   for (i = 0; i < nz; i++) {
     if (ang[i].k != m2) continue;
     if (transition_option.mode == M_NR && m != 1) {
-      r = MultipoleRadialNR(m, ang[i].k0, ang[i].k1, 
+      r = MultipoleRadialNR(cfac, m, ang[i].k0, ang[i].k1, 
 			    transition_option.gauge);
     } else {
-      r = MultipoleRadialFR(aw, m, ang[i].k0, ang[i].k1,
+      r = MultipoleRadialFR(cfac, aw, m, ang[i].k0, ang[i].k1,
 			    transition_option.gauge);
     }
     s += r * ang[i].coeff;
@@ -568,7 +568,7 @@ int SaveTransition(int nlow, int *low, int nup, int *up,
   SaveTransition0(nup, up, nlow-nc, low, fn, m);
 
   if (n > 0) free(alev);
-  ReinitRadial(1);
+  ReinitRadial(cfac, 1);
 
   return 0;
 }
@@ -623,7 +623,7 @@ int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
 
   free(low);
   free(up);
-  ReinitRadial(1);
+  ReinitRadial(cfac, 1);
   
   TRMultipole_cache_free(trm_cache);
   trm_cache = NULL;

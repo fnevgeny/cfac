@@ -150,7 +150,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AngZSwapBraKet(int nz, ANGULAR_ZMIX *ang, int p);
 int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
-int AddToAngularZxZ(int *n, int *nz, ANGULAR_ZxZMIX **ang, 
+int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang, 
 		    int n_shells, int phase, SHELL_STATE *sbra, 
 		    SHELL_STATE *sket, INTERACT_SHELL *s, int m);
 int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang, 

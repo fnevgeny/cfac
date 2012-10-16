@@ -9,7 +9,6 @@
 #include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_linalg.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "config.h"
 #include "coulomb.h"
@@ -1922,10 +1921,11 @@ double InnerProduct(int i1, int n, double *p1, double *p2, POTENTIAL *pot) {
   return Simpson(_dwork, i1, n);
 }
 
-int SetOrbitalRGrid(POTENTIAL *pot) {
+int SetOrbitalRGrid(cfac_t *cfac) {
   int i;  
   double z0, z, d1, d2, del, gratio, gasymp;
   double a = 0.0, b, c = 0.0, r1, rmin, rmax = 0.0;
+  POTENTIAL *pot = cfac->potential;
 
   gratio = pot->ratio;
   gasymp = pot->asymp;
@@ -2016,8 +2016,9 @@ double GetRFromRho(double rho, double a, double b, double r0) {
   return r0;
 }
 
-int SetPotentialZ(POTENTIAL *pot, double c) {
+int SetPotentialZ(cfac_t *cfac, double c) {
   int i;
+  POTENTIAL *pot = cfac->potential;
 
   c = 1.0+c;
   for (i = 0; i < pot->maxrp; i++) {
@@ -2293,10 +2294,11 @@ double UehlingL1(double x) {
   return r;
 }
 
-int SetPotentialUehling(POTENTIAL *pot, int vp) {
+int SetPotentialUehling(cfac_t *cfac, int vp) {
   int i, j, i1;
   double a, b, r0, r, rm, rp, rn;
   double v, d, c;
+  POTENTIAL *pot = cfac->potential;
 
   if (vp <= 0) return 0;
 

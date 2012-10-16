@@ -274,8 +274,8 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
     qk[i] = 0.0;
   }
   
-  r = GetRMax();
-  z = GetResidualZ();
+  r = GetRMax(cfac);
+  z = GetResidualZ(cfac);
   z2 = z*z;
   t = r*sqrt(e1+2.0*z/r);
   kl_max0 = pw_scratch.max_kl;
@@ -316,7 +316,7 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
       }
       */
       js[2] = 0;
-      kf = OrbitalIndex(0, kappaf, e2);	
+      kf = OrbitalIndex(cfac, 0, kappaf, e2);	
       ks[2] = kf;  
 
       if (xborn) {
@@ -364,12 +364,12 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
 		js[3] = j1;
 		if (kappa1 > 0) kappa1 = -kappa1 - 1;
 	      }
-	      kf1 = OrbitalIndex(0, kappa1, e1);
+	      kf1 = OrbitalIndex(cfac, 0, kappa1, e1);
 	      ks[3] = kf1;
 	      for (i = 0; i < n_tegrid; i++) {
 		te = tegrid[i];		
 		e0 = e1 + e2 + te;
-		kf0 = OrbitalIndex(0, kappa0, e0);
+		kf0 = OrbitalIndex(cfac, 0, kappa0, e0);
 		ks[1] = kf0;
 
 		js[0] = 0;
@@ -631,7 +631,7 @@ double *CIRadialQkIntegratedTable(int kb, int kbp) {
     }
   }
 
-  ReinitRadial(1);
+  ReinitRadial(cfac, 1);
   return (*p);
 }
 
@@ -668,8 +668,8 @@ double BEScale(int k, double e) {
   ORBITAL *orb;
 
   z = GetAtomicNumber(cfac);
-  a = MeanPotential(k, k);
-  b = RadialMoments(-1, k, k);
+  a = MeanPotential(cfac, k, k);
+  b = RadialMoments(cfac, -1, k, k);
   c = -a/b;
   orb = GetOrbital(k);
   a = orb->energy - a;
@@ -1107,7 +1107,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
     DeinitFile(file, &fhdr);
 
     free(r.strength);
-    ReinitRadial(1);
+    ReinitRadial(cfac, 1);
     FreeRecQk();
     FreeRecPk();
     FreeIonizationQk();
@@ -1148,7 +1148,7 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
     for (j1 = kl1-1; j1 <= kl1+1; j1 += 2) {
       if (j1 < 0) continue;
       kappa1 = GetKappaFromJL(j1, kl1);
-      ks[3] = OrbitalIndex(0, kappa1, e1);
+      ks[3] = OrbitalIndex(cfac, 0, kappa1, e1);
       for (k = 0; k <= pw_scratch.max_k; k += 2) {
 	for (kp = 0; kp <= pw_scratch.max_k; kp += 2) {
 	  kmax = Min(k, kp);
@@ -1162,7 +1162,7 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
 	    for (kl2 = j2-1; kl2 <= j2+1; kl2 += 2) {
 	      if (kl2/2 > pw_scratch.max_kl_eject) continue;
 	      kappa2 = GetKappaFromJL(j2, kl2);
-	      ks[2] = OrbitalIndex(0, kappa2, e2);
+	      ks[2] = OrbitalIndex(cfac, 0, kappa2, e2);
 	      j0max = j1 + k;
 	      j0min = abs(j1 - k);
 	      j0pmax = j1 + kp;
@@ -1170,16 +1170,16 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
 	      for (j0 = j0min; j0 <= j0max; j0 += 2) {
 		for (kl0 = j0 - 1; kl0 <= j0 + 1; kl0 += 2) {
 		  kappa0 = GetKappaFromJL(j0, kl0);
-		  ks[1] = OrbitalIndex(0, kappa0, e0);
-		  ph0 = GetPhaseShift(ks[1]);
+		  ks[1] = OrbitalIndex(cfac, 0, kappa0, e0);
+		  ph0 = GetPhaseShift(cfac, ks[1]);
 		  ks[0] = k0;
 		  SlaterTotal(cfac, &sd, &se, NULL, ks, k, 1);
 		  r = sd + se;
 		  for (j0p = j0pmin; j0p <= j0pmax; j0p += 2) {
 		    for (kl0p = j0p - 1; kl0p <= j0p + 1; kl0p += 2) {
 		      kappa0p = GetKappaFromJL(j0p, kl0p);
-		      ks[1] = OrbitalIndex(0, kappa0p, e0);
-		      ph0p = GetPhaseShift(ks[1]);
+		      ks[1] = OrbitalIndex(cfac, 0, kappa0p, e0);
+		      ph0p = GetPhaseShift(cfac, ks[1]);
 		      ks[0] = k1;
 		      SlaterTotal(cfac, &sd, &se, NULL, ks, kp, 1);
 		      rp = sd + se;
@@ -1310,7 +1310,7 @@ double CIRadialQkIntegratedMSub(int j1, int m1, int j2, int m2,
   r = Simpson(yi, 0, NINT-1);
   r *= d*e12;
   
-  ReinitRadial(1);
+  ReinitRadial(cfac, 1);
   return r;
 }
 

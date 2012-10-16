@@ -253,7 +253,7 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
   for (j = 0; j < h->dim; j++) {
     s = ArrayGet(st, h->basis[j]);
     if (m == 0) {
-      r = ZerothEnergyConfig(GetConfig(cfac, s));
+      r = ZerothEnergyConfig(cfac, GetConfig(cfac, s));
     } else {
       r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
     }
@@ -432,14 +432,14 @@ int ConstructHamilton(cfac_t *cfac,
 	  h->hamilton[t++] = r;
 	}
 	ReinitRecouple(0);
-	ReinitRadial(1);
+	ReinitRadial(cfac, 1);
       }
       for (j = h->dim; j < h->n_basis; j++) {
 	r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
 	h->hamilton[t++] = r;
       }
       ReinitRecouple(0);
-      ReinitRadial(1);
+      ReinitRadial(cfac, 1);
     }
   }
   if (m3) {
@@ -718,7 +718,7 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
 	    a *= ang[i].coeff;
 	    if (IsOdd(abs(ji-mi+q2)/2)) a = -a;
 	    b = ReducedCL(jorb0, 2, jorb1);
-	    c = RadialMoments(1, ang[i].k0, ang[i].k1);
+	    c = RadialMoments(cfac, 1, ang[i].k0, ang[i].k1);
 	    rvme = a*b*c;
             r += cfac->e1[m]*rvme;
 	  }
@@ -738,7 +738,7 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
 	  if (IsEven((korb0+korb1)/2)) {
 	    a *= cfac->b0*ang[i].coeff;
 	    b = ReducedCL(jorb0, 0, jorb1);
-	    c = RadialMoments(2, ang[i].k0, ang[i].k1);
+	    c = RadialMoments(cfac, 2, ang[i].k0, ang[i].k1);
 	    if (IsOdd((ji-mi)/2)) a = -a;
 	    r += a*b*c;
 	  }
@@ -758,7 +758,7 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
 	    if (a == 0.0) continue;
 	    a *= cfac->b2[m]*ang[i].coeff;
 	    b = ReducedCL(jorb0, 4, jorb1);
-	    c = RadialMoments(2, ang[i].k0, ang[i].k1);
+	    c = RadialMoments(cfac, 2, ang[i].k0, ang[i].k1);
 	    if (IsOdd((ji-mi)/2)) a = -a;
 	    r += a*b*c;
 	  }
@@ -812,7 +812,7 @@ double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
     k1 = a1[i].kb;
     orb1 = GetOrbital(k1);
     if (orb0->kappa == orb1->kappa) {
-      ResidualPotential(&a, k0, k1);
+      ResidualPotential(cfac, &a, k0, k1);
       a += QED1E(cfac, k0, k1);
       a *= a1[i].coeff;
       if (IsOdd((ji-jj+j0)/2)) a = -a;
@@ -875,7 +875,7 @@ double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
   j = si->kstate;
   if (si->kgroup == sj->kgroup) { 
     if (ji2 == jj2 && ki2 == kj2) {
-      ResidualPotential(&a, si->kcfg, sj->kcfg);
+      ResidualPotential(cfac, &a, si->kcfg, sj->kcfg);
       r += a;
       r0 = QED1E(cfac, si->kcfg, sj->kcfg);
       r += r0;
@@ -1350,9 +1350,9 @@ double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, SHELL_STATE *sk
   x = &z0;
   nk0 = AngularZ(&x, &k0, nk0, n_shells, sbra, sket, s, s+1);
   if (fabs(z0) < EPS30) return 0.0;
-  k1 = OrbitalIndex(s[0].n, s[0].kappa, 0.0);
-  k2 = OrbitalIndex(s[1].n, s[1].kappa, 0.0);
-  ResidualPotential(&r0, k1, k2);
+  k1 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
+  k2 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
+  ResidualPotential(cfac, &r0, k1, k2);
   if (k1 == k2) r0 += (GetOrbital(k1))->energy;
   r0 += QED1E(cfac, k1, k2);
   z0 *= sqrt(s[0].j + 1.0);
@@ -1374,10 +1374,10 @@ double Hamilton2E(cfac_t *cfac,
   js[2] = 0;
   js[3] = 0;
   
-  ks[0] = OrbitalIndex(s[0].n, s[0].kappa, 0.0);
-  ks[1] = OrbitalIndex(s[2].n, s[2].kappa, 0.0);
-  ks[2] = OrbitalIndex(s[1].n, s[1].kappa, 0.0);
-  ks[3] = OrbitalIndex(s[3].n, s[3].kappa, 0.0);
+  ks[0] = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
+  ks[1] = OrbitalIndex(cfac, s[2].n, s[2].kappa, 0.0);
+  ks[2] = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
+  ks[3] = OrbitalIndex(cfac, s[3].n, s[3].kappa, 0.0);
 
   z0 = 0.0;
   nk0 = 0;
@@ -2144,7 +2144,7 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
 		    lev->ibase = q;
 		  }
 		} else {
-		  ik = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+		  ik = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
 		  orb = GetOrbital(ik);
 		  a = lev->energy - orb->energy;
 		  for (p = 0; p < cfac->ecorrections->dim; p++) {
@@ -2572,8 +2572,8 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       if (s[0].index >= 0) {
 	nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1);
 	if (nkk > 0) {
-	  orb0 = OrbitalIndex(s[0].n, s[0].kappa, 0.0);
-	  orb1 = OrbitalIndex(s[1].n, s[1].kappa, 0.0);
+	  orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
+	  orb1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
 	  for (p = 0; p < nkk; p++) {
 	    if (IsOdd(phase)) r[p] = -r[p];
 	    im = AddToAngularZMix(&n, &nz, &ang, k[p], orb0, orb1, r[p]);
@@ -2604,7 +2604,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	  s[1].nq_ket = s[1].nq_bra;
 	  nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1);
 	  if (nkk > 0) {
-	    orb0 = OrbitalIndex(s[0].n, s[0].kappa, 0.0);
+	    orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
 	    orb1 = orb0;
 	    for (p = 0; p < nkk; p++) {
 	      if (fabs(r[p]) < EPS30) continue;
@@ -2763,7 +2763,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	if (fabs(*r) < EPS30) goto END;
 	if (IsOdd(phase+(jp+j2-k0)/2)) *r = -(*r);
 	*r /= sqrt(jp+1.0)*W6j(j1, jf, jp, k0, j2, s[1].j);
-	kb = OrbitalIndex(s[1].n, s[1].kappa, 0.0);
+	kb = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
 	ang = (ANGULAR_ZFB *) malloc(sizeof(ANGULAR_ZFB));
 	ang->kb = kb;
 	ang->coeff = *r;
@@ -2867,7 +2867,7 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	sbra[0].shellJ = s[2].j;
 	
 	if (s[0].index >= 0) {
-	  AddToAngularZxZ(&n, &nz, &ang, n_shells, phase, 
+	  AddToAngularZxZ(cfac, &n, &nz, &ang, n_shells, phase, 
 			  sbra, sket, s, 1);
 	} else {
 	  for (i = 0; i < n_shells; i++) {
@@ -2894,7 +2894,7 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	    }
 	    s[1].nq_bra = s[0].nq_bra;
 	    s[1].nq_ket = s[0].nq_ket;
-	    AddToAngularZxZ(&n, &nz, &ang, n_shells, phase, 
+	    AddToAngularZxZ(cfac, &n, &nz, &ang, n_shells, phase, 
 			    sbra, sket, s, 1);
 	  }
 	}
@@ -3664,7 +3664,7 @@ int PackAngularZFB(int *n, ANGULAR_ZFB **ang, int nz) {
   return 0;
 }			    
 
-int AddToAngularZxZ(int *n, int *nz, ANGULAR_ZxZMIX **ang, 
+int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang, 
 		    int n_shells, int phase, SHELL_STATE *sbra, 
 		    SHELL_STATE *sket, INTERACT_SHELL *s, int m) {
   int nkk, *k, p, im;
@@ -3675,15 +3675,15 @@ int AddToAngularZxZ(int *n, int *nz, ANGULAR_ZxZMIX **ang,
   nkk = AngularZxZ0(&r, &k, 0, n_shells, sbra, sket, s);
   if (nkk > 0) {    
     if (m == 0) {
-      orb0 = OrbitalIndex(s[0].n, s[0].kappa, 0.0);
-      orb1 = OrbitalIndex(s[1].n, s[1].kappa, 0.0);
-      kk0 = OrbitalIndex(s[2].n, s[2].kappa, 0.0);
-      kk1 = OrbitalIndex(s[3].n, s[3].kappa, 0.0);
+      orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
+      orb1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
+      kk0 = OrbitalIndex(cfac, s[2].n, s[2].kappa, 0.0);
+      kk1 = OrbitalIndex(cfac, s[3].n, s[3].kappa, 0.0);
     } else {
       orb0 = s[2].j;      
-      orb1 = OrbitalIndex(s[3].n, s[3].kappa, 0.0);
-      kk0 = OrbitalIndex(s[0].n, s[0].kappa, 0.0);
-      kk1 = OrbitalIndex(s[1].n, s[1].kappa, 0.0);
+      orb1 = OrbitalIndex(cfac, s[3].n, s[3].kappa, 0.0);
+      kk0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
+      kk1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
     }
     for (p = 0; p < nkk; p++) {
       if (fabs(r[p]) < EPS30) continue;

@@ -48,6 +48,15 @@ cfac_t *cfac_new(void)
             sizeof(STATE), STATES_BLOCK, NULL, NULL);
     }
     
+    cfac->potential = malloc(sizeof(POTENTIAL));
+    if (!cfac->potential) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    memset(cfac->potential, 0, sizeof(POTENTIAL));
+    SetBoundary(cfac, 0, 1.0, -1.0);
+    SetRadialGrid(cfac, DMAXRP, -1.0, -1.0, -1.0);
+    
     /* allocate Hamiltonian structure */
     cfac->hamiltonian = malloc(sizeof(HAMILTON));
     if (!cfac->hamiltonian) {

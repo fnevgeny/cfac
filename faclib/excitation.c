@@ -371,10 +371,10 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
       j1min = abs(j0 - k);
       j1max = j0 + k;
       if (pw_type == 1 && egrid_type == 1) {
-	kf1 = OrbitalIndex(0, km0, e1);
+	kf1 = OrbitalIndex(cfac, 0, km0, e1);
 	ks[3] = kf1;
       } else if (pw_type == 0 && egrid_type == 0) {
-	kf1 = OrbitalIndex(0, km0, e0);
+	kf1 = OrbitalIndex(cfac, 0, km0, e0);
 	ks[1] = kf1;
       }
       for (j1 = j1min; j1 <= j1max; j1 += 2) {
@@ -389,20 +389,20 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
 	    if (kpp1 > 0) km1 = -kpp1 - 1;
 	  }
 	  if (pw_type == 0 && egrid_type == 1) {
-	    kf1 = OrbitalIndex(0, km1, e1);
+	    kf1 = OrbitalIndex(cfac, 0, km1, e1);
 	    ks[3] = kf1;
 	  } else if (pw_type == 1 && egrid_type == 0) {
-	    kf1 = OrbitalIndex(0, km1, e0);
+	    kf1 = OrbitalIndex(cfac, 0, km1, e0);
 	    ks[1] = kf1;
 	  }
 	  for (i = 0; i < n_tegrid; i++) {
 	    te = tegrid[i];
 	    e0 = e1 + te;
 	    if (pw_type == 0) {
-	      kf0 = OrbitalIndex(0, km0, e0);
+	      kf0 = OrbitalIndex(cfac, 0, km0, e0);
 	      ks[1] = kf0;
 	    } else {
-	      kf0 = OrbitalIndex(0, km1, e0);
+	      kf0 = OrbitalIndex(cfac, 0, km1, e0);
 	      ks[1] = kf0;	      
 	    }
 	    
@@ -548,9 +548,9 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
 
   r = ReducedCL(j0, k, j1) * ReducedCL(j2, k, j3);
   r *= (k+1.0)*(k+1.0);
-  g1 = GeneralizedMoments(k0, k1, ko2);
+  g1 = GeneralizedMoments(cfac, k0, k1, ko2);
   x1 = g1 + NGOSK;
-  g2 = GeneralizedMoments(k2, k3, ko2);
+  g2 = GeneralizedMoments(cfac, k2, k3, ko2);
   x2 = g2 + NGOSK;
 
   bnk = BornFormFactorTE(&bte);
@@ -666,9 +666,9 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
 
   r = ReducedCL(j0, k, j1) * ReducedCL(j2, kp, j3);
   r *= (k+1.0)*(kp+1.0);
-  g1 = GeneralizedMoments(k0, k1, ko2);
+  g1 = GeneralizedMoments(cfac, k0, k1, ko2);
   x1 = g1 + NGOSK;
-  g2 = GeneralizedMoments(k2, k3, ko2p);
+  g2 = GeneralizedMoments(cfac, k2, k3, ko2p);
   x2 = g2 + NGOSK;
 
   bnk = BornFormFactorTE(&bte);
@@ -1188,10 +1188,10 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
 	      if (klp0_2 >= pw_scratch.qr) { 
 		if (kmp0 > 0) kmp0_m = -kmp0 - 1; 
 	      } 
-	      c0 = OrbitalIndex(0, km0_m, e0); 
-	      cp0 = OrbitalIndex(0, kmp0_m, e0);
-	      pha0 = GetPhaseShift(c0); 
-	      phap0 = GetPhaseShift(cp0);	      
+	      c0 = OrbitalIndex(cfac, 0, km0_m, e0); 
+	      cp0 = OrbitalIndex(cfac, 0, kmp0_m, e0);
+	      pha0 = GetPhaseShift(cfac, c0); 
+	      phap0 = GetPhaseShift(cfac, cp0);	      
 	      r = cos(pha0 - phap0);
 	      s *= r;
 	      sd *= r;
@@ -1798,7 +1798,7 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
   if (t <= 0) return 0.0;
   r = mbk[t-1];
   if (1.0 + r == 1.0) return 0.0;
-  r /= MultipoleRadialNR(-t, ang->k0, ang->k1, G_BABUSHKIN);
+  r /= MultipoleRadialNR(cfac, -t, ang->k0, ang->k1, G_BABUSHKIN);
   if (ang->coeff < 0) r = -r;
   r /= mbk[nmk+t-1];
 
@@ -1949,7 +1949,7 @@ int CollisionStrength(const TRANSITION *tr, int msub,
     if (Triangle(j1, j2, 2) && IsOdd(p1+p2)) {
       for (i = 0; i < nz; i++) {
 	if (ang[i].k != 2) continue;
-	c = MultipoleRadialNR(-1, ang[i].k0, ang[i].k1, G_BABUSHKIN);
+	c = MultipoleRadialNR(cfac, -1, ang[i].k0, ang[i].k1, G_BABUSHKIN);
 	c1 = ang[i].coeff;
 	r += c1*c;
       }
@@ -2208,7 +2208,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	  k = st->kcfg;
         } else {
 	  cfg = GetConfig(cfac, st);
-	  k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+	  k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
         }
         e = -(GetOrbital(k)->energy);
         if (m == 0) {
@@ -2294,7 +2294,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       egrid[ie] = 2*egrid[ie-1];
     }
     
-    c = GetResidualZ();
+    c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
       ebuf = 0.0;
       if (PrepCoulombBethe(1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
@@ -2392,7 +2392,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     DeinitFile(f, &fhdr);
     FreeExcitationQk();
     
-    ReinitRadial(2);
+    ReinitRadial(cfac, 2);
   }
 
   ReinitExcitation(1);
@@ -2462,7 +2462,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
       k = st->kcfg;
     } else {
       cfg = GetConfig(cfac, st);
-      k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+      k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
     }
     e = -(GetOrbital(k)->energy);
     if (e < ei) ei = e;
@@ -2585,7 +2585,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     if (egrid[ie] < 2*egrid[ie-1]) egrid[ie] = 2*egrid[ie-1];
 
     e = 0.0;
-    c = GetResidualZ();
+    c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
       PrepCoulombBethe(1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
 		       pw_scratch.nkl, pw_scratch.kl, 0);
@@ -2638,7 +2638,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     DeinitFile(f, &fhdr);
     e0 = e1;
     FreeExcitationQk();
-    ReinitRadial(2);
+    ReinitRadial(cfac, 2);
   }
 
   ReinitExcitation(1);
@@ -2710,7 +2710,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
       k = st->kcfg;
     } else {
       cfg = GetConfig(cfac, st);
-      k = OrbitalIndex(cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+      k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
     }
     e = -(GetOrbital(k)->energy);
     if (e < ei) ei = e;
@@ -2838,7 +2838,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     egrid[ie-1] = 0.7*egrid[ie];
 
     e = 0.0;
-    c = GetResidualZ();
+    c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
     PrepCoulombBethe(1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
 		     pw_scratch.nkl, pw_scratch.kl, 1);
@@ -2903,7 +2903,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     DeinitFile(f, &fhdr);
     e0 = e1;
     FreeExcitationQk();
-    ReinitRadial(2);
+    ReinitRadial(cfac, 2);
   }    			   
 
   free(bethe);

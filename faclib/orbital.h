@@ -54,10 +54,10 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot);
 double InnerProduct(int i1, int n, 
 		    double *p1, double *p2, POTENTIAL *pot);
 void Differential(double *p, double *dp, int i1, int i2);
-int SetOrbitalRGrid(POTENTIAL *pot);
+int SetOrbitalRGrid(cfac_t *cfac);
 double GetRFromRho(double rho, double a, double b, double r0);
-int SetPotentialZ(POTENTIAL *pot, double c);
-int SetPotentialUehling(POTENTIAL *pot, int vp);
+int SetPotentialZ(cfac_t *cfac, double c);
+int SetPotentialUehling(cfac_t *cfac, int vp);
 int SetPotentialVc(POTENTIAL *pot);
 int SetPotentialU(POTENTIAL *pot, int n, double *u);
 int SetPotentialW (POTENTIAL *pot, double e, int kappa);

@@ -127,12 +127,12 @@ int     IsShellInteracting(int n_shells, SHELL_STATE *bra, SHELL_STATE *ket,
 /* the coeff of type (Z^k dot Z^k) */
 int     AngularZxZ0(double **coeff, int **kk, int nk, 
 		    int n_shells, SHELL_STATE *bra, SHELL_STATE *ket, 
-		    INTERACT_SHELL *s);
+		    INTERACT_SHELL *s, int max_rank);
 
 /* the coeff of type Z^k */
 int     AngularZ(double **coeff, int **kk, int nk,
 		 int n_shells, SHELL_STATE *bra, SHELL_STATE *ket, 
-		 INTERACT_SHELL *s1, INTERACT_SHELL *s2);
+		 INTERACT_SHELL *s1, INTERACT_SHELL *s2, int max_rank);
 
 void    SumCoeff(double *coeff,  int *kk,  int nk,  int p, 
 		 double *coeff1, int *kk1, int nk1, int p1, 
@@ -150,7 +150,7 @@ int InteractingShells(INTERACT_DATUM **idatum,
 		      SHELL_STATE **sket, 
 		      CONFIG *ci, CONFIG *cj,
 		      SHELL_STATE *csf_i, SHELL_STATE *csf_j);
-int GetInteract(INTERACT_DATUM **idatum,
+int GetInteract(cfac_t *cfac, INTERACT_DATUM **idatum,
 		SHELL_STATE **sbra, 
 		SHELL_STATE **sket, 
 		int kgi, int kgj,
@@ -158,10 +158,9 @@ int GetInteract(INTERACT_DATUM **idatum,
 		int ki, int kj, int bf);
 void CompactInteractShell(char c[4], INTERACT_SHELL *s, int m);
 
-int     SetMaxRank(int k);
-int     GetMaxRank(void);
-int     InitRecouple(void);
-int     ReinitRecouple(int m);
+int     SetMaxRank(cfac_t *cfac, int k);
+int     GetMaxRank(const cfac_t *cfac);
+int     ReinitRecouple(cfac_t *cfac);
 #endif
 
 

@@ -2150,7 +2150,7 @@ int SlaterTotal(cfac_t *cfac,
   tmax = js[0] + js[3];
   tt = js[1] + js[2];
   tmax = Min(tt, tmax);
-  tmax = Min(tmax, GetMaxRank());
+  tmax = Min(tmax, GetMaxRank(cfac));
   if (IsOdd(tmin)) tmin++;
   
   for (t = tmin; t <= tmax; t += 2) {

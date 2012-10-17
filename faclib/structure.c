@@ -969,7 +969,7 @@ void HamiltonElement1E2E(cfac_t *cfac,
   kj = sj->kstate;
 
   idatum = NULL;
-  n_shells = GetInteract(&idatum, &sbra, &sket, 
+  n_shells = GetInteract(cfac, &idatum, &sbra, &sket, 
 			 si->kgroup, sj->kgroup,
 			 si->kcfg, sj->kcfg,
 			 ki, kj, 0);
@@ -1109,14 +1109,14 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
 	c1 = GetConfig(cfac, s1);
 	k1 = s1->kstate;
 	idatum = NULL;
-	n_shells = GetInteract(&idatum, &sbra, &sket, s0->kgroup, s1->kgroup, 
+	n_shells = GetInteract(cfac, &idatum, &sbra, &sket, s0->kgroup, s1->kgroup, 
 			       s0->kcfg, s1->kcfg, k0, k1, 0);
 	if (n_shells <= 0) continue;
 	memcpy(s, idatum->s, sizeof(INTERACT_SHELL)*4);
 	bra = idatum->bra;
 	if (IsOdd(idatum->phase)) a = -a;
 	if (s[0].index >= 0 && s[3].index >= 0) {
-	  AddSlaterCoeff(coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+	  AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
 	} else if (s[0].index >= 0) {
 	  q0 = ShellIndex(s[0].n, s[0].kappa, na, sa);
 	  if (q0 >= 0) {
@@ -1148,7 +1148,7 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
 		}
 		s[3].nq_bra = s[2].nq_bra;
 		s[3].nq_ket = s[2].nq_ket;
-		AddSlaterCoeff(coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
 	      } else if (s[0].j == s[1].j) {
 		s[2].n = sb[j].n;
 		s[2].kappa = sb[j].kappa;
@@ -1156,7 +1156,7 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
 		s[2].nq_ket = 0;
 		GetJLFromKappa(s[2].kappa, &(s[2].j), &(s[2].kl));
 		memcpy(s+3, s+2, sizeof(INTERACT_SHELL));
-		AddSlaterCoeff(coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
 	      }
 	    }
 	  }
@@ -1200,7 +1200,7 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
 		s[3].nq_bra = s[2].nq_bra;
 		s[2].nq_ket = s[2].nq_bra;
 		s[3].nq_ket = s[2].nq_bra;
-		AddSlaterCoeff(coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
 	      } else {		
 		s[2].n = sb[q0].n;
 		s[2].kappa = sb[q0].kappa;
@@ -1208,7 +1208,7 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
 		s[2].nq_ket = 0;
 		GetJLFromKappa(s[2].kappa, &(s[2].j), &(s[2].kl));
 		memcpy(s+3, s+2, sizeof(INTERACT_SHELL));
-		AddSlaterCoeff(coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
 	      }
 	    }
 	  }
@@ -1256,12 +1256,13 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
   return 0;
 }
 	  
-void AddSlaterCoeff(double *coeff, double a, int n_shells, 
+void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells, 
 		    SHELL_STATE *sbra, SHELL_STATE *sket, 
 		    INTERACT_SHELL *s, int na, SHELL *sa, int nb, SHELL *sb) {
   int t, nk, *kk, j, i0, i1, i, nk0, k, *kk0;
   int k0, k1, k2, k3, js[4], na2, nb2, nab2;
   double e, z0, *y, *ang;
+  int kmax = GetMaxRank(cfac);
 
   if (s[0].kl != s[1].kl) return;
   if (s[2].kl != s[3].kl) return;
@@ -1292,7 +1293,7 @@ void AddSlaterCoeff(double *coeff, double a, int n_shells,
   j = i0*nb2 + i1;
 
   if (s[2].nq_bra > 0) {
-    nk = AngularZxZ0(&ang, &kk, 0, n_shells, sbra, sket, s);
+    nk = AngularZxZ0(&ang, &kk, 0, n_shells, sbra, sket, s, kmax);
     for (i = 0; i < nk; i++) {    
       if (fabs(ang[i]) < EPS30) continue;    
       for (t = 2; t <= 4; t += 2) {
@@ -1321,7 +1322,7 @@ void AddSlaterCoeff(double *coeff, double a, int n_shells,
     k = 0; 
     kk0 = &k;
     y = &z0;
-    nk0 = AngularZ(&y, &kk0, nk0, n_shells, sbra, sket, s, s+1);
+    nk0 = AngularZ(&y, &kk0, nk0, n_shells, sbra, sket, s, s+1, kmax);
     if (nk0 > 0) {
       z0 /= sqrt(s[0].j + 1.0);
       if (IsOdd((s[0].j - s[2].j)/2)) z0 = -z0;
@@ -1341,6 +1342,7 @@ double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, SHELL_STATE *sk
   int *k0;
   double *x, z0, r0;
   int k1, k2;
+  int kmax = GetMaxRank(cfac);
 
   if (s[0].j != s[1].j ||
       s[0].kl != s[1].kl) return 0.0;
@@ -1348,7 +1350,7 @@ double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, SHELL_STATE *sk
   k = 0;
   k0 = &k;
   x = &z0;
-  nk0 = AngularZ(&x, &k0, nk0, n_shells, sbra, sket, s, s+1);
+  nk0 = AngularZ(&x, &k0, nk0, n_shells, sbra, sket, s, s+1, kmax);
   if (fabs(z0) < EPS30) return 0.0;
   k1 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
   k2 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
@@ -1368,6 +1370,7 @@ double Hamilton2E(cfac_t *cfac,
   double se, sd, x;
   double z0, *y;
   int ks[4], js[4];
+  int kmax = GetMaxRank(cfac);
 
   js[0] = 0;
   js[1] = 0;
@@ -1387,7 +1390,7 @@ double Hamilton2E(cfac_t *cfac,
     k = 0;
     kk0 = &k;
     y = &z0;
-    nk0 = AngularZ(&y, &kk0, nk0, n_shells, sbra, sket, s, s+3);
+    nk0 = AngularZ(&y, &kk0, nk0, n_shells, sbra, sket, s, s+3, kmax);
     if (nk0 > 0) {
       z0 /= sqrt(s[0].j + 1.0);
       if (IsOdd((s[0].j - s[2].j)/2)) z0 = -z0;
@@ -1395,7 +1398,7 @@ double Hamilton2E(cfac_t *cfac,
   }
 
   x = 0.0;    
-  nk = AngularZxZ0(&ang, &kk, 0, n_shells, sbra, sket, s);
+  nk = AngularZxZ0(&ang, &kk, 0, n_shells, sbra, sket, s, kmax);
   for (i = 0; i < nk; i++) {
     sd = 0;
     se = 0;
@@ -2488,6 +2491,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   SHELL *bra;
   SHELL_STATE *sbra, *sket;
   ANGULAR_ZMIX **a, *ang;
+  int kmax = GetMaxRank(cfac);
   
   iz = ih1*MAX_HAMS + ih2;
   *ad = &(cfac->angz_array[iz]);
@@ -2548,7 +2552,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       }
 
       idatum = NULL; 
-      n_shells = GetInteract(&idatum, &sbra, &sket, 
+      n_shells = GetInteract(cfac, &idatum, &sbra, &sket, 
 			     kg1, kg2, kc1, kc2, 
 			     ks1, ks2, 0);
       n = 0;
@@ -2570,7 +2574,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	exit(1);
       }
       if (s[0].index >= 0) {
-	nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1);
+	nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1, kmax);
 	if (nkk > 0) {
 	  orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
 	  orb1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
@@ -2602,7 +2606,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	  s[0].nq_ket = s[0].nq_bra;
 	  s[1].nq_bra = s[0].nq_bra;
 	  s[1].nq_ket = s[1].nq_bra;
-	  nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1);
+	  nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1, kmax);
 	  if (nkk > 0) {
 	    orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
 	    orb1 = orb0;
@@ -2696,7 +2700,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   (*ad)->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
   (*ad)->nz = (int *) malloc(sizeof(int)*ns);
   
-  kmax = GetMaxRank();
+  kmax = GetMaxRank(cfac);
 
   iz = 0;
   a = (ANGULAR_ZFB **) (*ad)->angz;
@@ -2725,7 +2729,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       
       j2 = (c2->csfs[ks2]).totalJ;
       idatum = NULL;
-      n_shells = GetInteract(&idatum, &sbra, &sket,
+      n_shells = GetInteract(cfac, &idatum, &sbra, &sket,
 			     kg1, kg2, kc1, kc2, 
 			     ks1, ks2, 1);
       n = 0;
@@ -2759,7 +2763,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	sbra[0].totalJ = jp; 
 	k = &k0;
 	r = &r0;
-	nkk = AngularZ(&r, &k, 1, n_shells, sbra, sket, s, s+1);
+	nkk = AngularZ(&r, &k, 1, n_shells, sbra, sket, s, s+1, kmax);
 	if (fabs(*r) < EPS30) goto END;
 	if (IsOdd(phase+(jp+j2-k0)/2)) *r = -(*r);
 	*r /= sqrt(jp+1.0)*W6j(j1, jf, jp, k0, j2, s[1].j);
@@ -2844,7 +2848,7 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
    
       j2 = (c2->csfs[ks2]).totalJ;
       idatum = NULL;
-      n_shells = GetInteract(&idatum, &sbra, &sket,
+      n_shells = GetInteract(cfac, &idatum, &sbra, &sket,
 			     kg1, kg2, kc1, kc2, 
 			     ks1, ks2, 1);
       n = 0;
@@ -3671,8 +3675,9 @@ int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang,
   double *r;
   int orb0, orb1;
   int kk0, kk1;
+  int kmax = GetMaxRank(cfac);
   
-  nkk = AngularZxZ0(&r, &k, 0, n_shells, sbra, sket, s);
+  nkk = AngularZxZ0(&r, &k, 0, n_shells, sbra, sket, s, kmax);
   if (nkk > 0) {    
     if (m == 0) {
       orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);

@@ -310,7 +310,7 @@ int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
     return type;
   }
 
-  nkappa = (MAXNKL)*(GetMaxRank()+1)*4;
+  nkappa = (MAXNKL)*(GetMaxRank(cfac)+1)*4;
   kappa0 = malloc(sizeof(short)*nkappa);
   kappa1 = malloc(sizeof(short)*nkappa);
   pkd = malloc(sizeof(double)*(nkappa*n_tegrid));
@@ -1049,7 +1049,7 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
   int one = 1;
   double logj;
 
-  index[0] = (k/2)*(1+(GetMaxRank()/2)) + kp/2;
+  index[0] = (k/2)*(1+(GetMaxRank(cfac)/2)) + kp/2;
   index[1] = k0;
   index[2] = k1;
   index[3] = k2;

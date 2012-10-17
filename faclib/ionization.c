@@ -134,7 +134,7 @@ int SetIEGridDetail(int n, double *x) {
 }
 
 int SetCIMaxK(int k) {
-  pw_scratch.max_k = GetMaxRank();
+  pw_scratch.max_k = GetMaxRank(cfac);
   if (k >= 0) pw_scratch.max_k = Min(k, pw_scratch.max_k);
   return 0;
 }

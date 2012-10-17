@@ -184,7 +184,7 @@ double HamiltonElementEB(const cfac_t *cfac, int i, int j);
 int SlaterCoeff(cfac_t *cfac,
     char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 
 		int nb, SHELL *sb);
-void AddSlaterCoeff(double *c, double a, int n_shells, 
+void AddSlaterCoeff(const cfac_t *cfac, double *c, double a, int n_shells, 
 		    SHELL_STATE *sbra, SHELL_STATE *sket, 
 		    INTERACT_SHELL *s, int na, SHELL *sa, 
 		    int nb, SHELL *sb);

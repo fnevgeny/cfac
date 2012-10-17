@@ -1647,7 +1647,7 @@ static int PSetMaxRank(int argc, char *argv[], int argt[],
   if (argc != 1 || argt[0] != NUMBER) {
     return -1;
   }
-  SetMaxRank(2*atoi(argv[0]));
+  SetMaxRank(cfac, 2*atoi(argv[0]));
 
   return 0;
 }

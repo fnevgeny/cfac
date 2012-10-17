@@ -78,6 +78,10 @@ struct _cfac_t {
     int n_awgrid;
     double awgrid[MAXNTE];
 
+    struct {
+        int max_rank;         /* the maximum rank of the operators allowed.  */
+        MULTI *int_shells;    /* interacting shell information array         */
+    } recouple;
     
     HAMILTON *hamiltonian;    /* Hamiltonian                                 */
 
@@ -118,6 +122,13 @@ void
 FreeConfigData(void *p);
 void
 InitConfigData(void *p, int n);
+
+/* recouple */
+int
+cfac_init_recouple(cfac_t *cfac);
+void
+cfac_free_recouple(cfac_t *cfac);
+
 
 /* radial.c */
 void

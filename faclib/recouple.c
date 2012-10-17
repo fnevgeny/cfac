@@ -14,30 +14,10 @@
 #include <string.h>
 #include <math.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "angular.h"
 #include "rcfp.h"
 #include "recouple.h"
-
-/*
-** VARIABLE:    max_rank
-** TYPE:        static int
-** PURPOSE:     the maximum rank of the operators allowed.
-** NOTE:        the ranks are represented by an integer that is
-**              twice of its actuall value. The default value of 
-**              16 means a maximum rank of 8.
-*/
-static int max_rank = MAXRANK;
-
-/*
-** VARIABLE:    interact_shells
-** TYPE:        static MULTI *
-** PURPOSE:     the multi-dimensional array stores the interacting 
-**              shells information.
-** NOTE:        
-*/
-static MULTI *interact_shells;
 
 static void InitInteractDatum(void *p, int n) {
   INTERACT_DATUM *d;
@@ -78,11 +58,11 @@ static void FreeInteractDatum(void *p) {
 **              actual value.
 ** RETURN:      {int}
 **              always 0.
-** SIDE EFFECT: the static max_rank is set to k.
+** SIDE EFFECT: the static cfac->recouple.max_rank is set to k.
 ** NOTE:        
 */
-int SetMaxRank(int k) {
-  max_rank = k;
+int SetMaxRank(cfac_t *cfac, int k) {
+  cfac->recouple.max_rank = k;
   return 0;
 }
 
@@ -95,8 +75,8 @@ int SetMaxRank(int k) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int GetMaxRank(void) {
-  return max_rank;
+int GetMaxRank(const cfac_t *cfac) {
+  return cfac->recouple.max_rank;
 }
 
 /* 
@@ -265,7 +245,7 @@ double DecoupleShellRecursive(int n_shells, SHELL_STATE *bra, SHELL_STATE *ket,
 */   
 int AngularZ(double **coeff, int **kk, int nk,
 	     int n_shells, SHELL_STATE *bra, SHELL_STATE *ket, 
-	     INTERACT_SHELL *s1, INTERACT_SHELL *s2){
+	     INTERACT_SHELL *s1, INTERACT_SHELL *s2, int max_rank){
   SHELL_STATE st1, st2;
   int rank[4];
   int interact[2];
@@ -413,7 +393,7 @@ int AngularZ(double **coeff, int **kk, int nk,
 */
 int AngularZxZ0(double **coeff, int **kk, int nk,
 		int n_shells, SHELL_STATE *bra, SHELL_STATE *ket, 
-		INTERACT_SHELL *s) {
+		INTERACT_SHELL *s, int max_rank) {
   
   SHELL_STATE st1, st2;
   int rank[8];
@@ -1306,7 +1286,7 @@ int InteractingShells(INTERACT_DATUM **idatum,
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int GetInteract(INTERACT_DATUM **idatum,
+int GetInteract(cfac_t *cfac, INTERACT_DATUM **idatum,
 		SHELL_STATE **sbra, 
 		SHELL_STATE **sket, 
 		int kgi, int kgj,
@@ -1342,7 +1322,7 @@ int GetInteract(INTERACT_DATUM **idatum,
       index[1] = kgj;
       index[2] = kci;
       index[3] = kcj;
-      (*idatum) = (INTERACT_DATUM *) MultiSet(interact_shells, index, 
+      (*idatum) = (INTERACT_DATUM *) MultiSet(cfac->recouple.int_shells, index, 
 					      NULL);
     }
     if ((*idatum)->n_shells < 0) return -1;
@@ -1427,34 +1407,40 @@ int GetInteract(INTERACT_DATUM **idatum,
 }
 
 /* 
-** FUNCTION:    InitRecouple
+** FUNCTION:    cfac_init_recouple
 ** PURPOSE:     Initialize the module "recouple"
 ** INPUT:       
 ** RETURN:      
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int InitRecouple(void) {
-  int blocks[4] = {10, 10, 64, 64};
-  int ndim = 4;
-  
-  interact_shells = (MULTI *) malloc(sizeof(MULTI));
-  return MultiInit(interact_shells, sizeof(INTERACT_DATUM), ndim, blocks,
-    FreeInteractDatum, InitInteractDatum);
+int cfac_init_recouple(cfac_t *cfac) {
+    int blocks[4] = {10, 10, 64, 64};
+    int ndim = 4;
+    cfac->recouple.max_rank = MAXRANK;
+    cfac->recouple.int_shells = malloc(sizeof(MULTI));
+    if (!cfac->recouple.int_shells) {
+        return -1;
+    }
+
+    return MultiInit(cfac->recouple.int_shells, sizeof(INTERACT_DATUM),
+        ndim, blocks, FreeInteractDatum, InitInteractDatum);
+}
+
+void cfac_free_recouple(cfac_t *cfac)
+{
+    MultiFree(cfac->recouple.int_shells);
+    free(cfac->recouple.int_shells);
 }
 
 /* 
 ** FUNCTION:    ReinitRecouple
 ** PURPOSE:     Reinitialize the module "recouple"
-** INPUT:       {int m},
-**              >=0: do a full reinitialization.
-**               <0: do nothing.
 ** RETURN:      
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int ReinitRecouple(int m) {
-  if (m < 0) return 0;
-  MultiFreeData(interact_shells);  
+int ReinitRecouple(cfac_t *cfac) {
+  MultiFreeData(cfac->recouple.int_shells);  
   return 0;
 }

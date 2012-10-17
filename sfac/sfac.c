@@ -1691,7 +1691,7 @@ static int PSetHydrogenicNL(int argc, char *argv[], int argt[],
       }
     }
   }
-  SetHydrogenicNL(n, k, nm, km);
+  SetHydrogenicNL(cfac, n, k, nm, km);
 
   return 0;
 }  

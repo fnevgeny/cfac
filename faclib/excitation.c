@@ -770,7 +770,8 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   return Max(ko2, ko2p);
 }
 
-double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
+static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
+    int k0, int k1, int k2, int k3, int k) {
   int type = 0, t, ie, ite, ipk, ipkp, nqk;
   int i, j, kl0, kl1, kl, nkappa, nkl, nkappap, nklp;
   CEPK *cepk, *cepkp, *tmp;
@@ -783,7 +784,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
   int index[5], mb;
   int one = 1, ieb[MAXNTE];
   double logj, xb;
-
+  
   index[0] = k/2;
   index[1] = k0;
   index[2] = k1;
@@ -950,7 +951,7 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
 	      }
 	      xb = xborn;
 	    } else if (type > 0) {
-	      b = (GetCoulombBethe(0, ite, ie, k/2, 0))[nklp];
+	      b = (GetCoulombBethe(cbcache, 0, ite, ie, k/2, 0))[nklp];
 	      if (b < 0 || IsNan(b)) {
 		c = dqk[nklp]/dqk[nklp-1];
 		c = pow(c, 1.0/(pw_scratch.kl[nklp]-pw_scratch.kl[nklp-1]));
@@ -1028,7 +1029,8 @@ double *CERadialQkTable(int k0, int k1, int k2, int k3, int k) {
   return *p;
 }
 
-double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
+static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
+    int k0, int k1, int k2, int k3, int k, int kp) {
   int type1 = 0, type2 = 0, kl, nqk;
   int i, j, kl0, klp0, kl0_2, klp0_2, kl1;
   CEPK *cepk, *cepkp;
@@ -1260,7 +1262,7 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
 		  else b = 0.0;
 		}
 	      } else if (type1 >= 0) {
-		b = (GetCoulombBethe(0, ite, ie, k/2, abs(q[iq])/2))[i];
+		b = (GetCoulombBethe(cbcache, 0, ite, ie, k/2, abs(q[iq])/2))[i];
 		if (b < 0 || IsNan(b)) {
 		  c = dqk[iq][i]/dqk[iq][i-1];
 		  c = pow(c, 1.0/(pw_scratch.kl[i]-pw_scratch.kl[i-1]));
@@ -1327,13 +1329,14 @@ double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp) {
   return rqc;
 } 	
   
-int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
+int CERadialQk(const cfac_cbcache_t *cbcache,
+    double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
   int i, nd, type;
   int j, m;
   double *rqe, rq[MAXNTE];
   double *xte, x0;
   
-  rqe = CERadialQkTable(k0, k1, k2, k3, k);
+  rqe = CERadialQkTable(cbcache, k0, k1, k2, k3, k);
   if (n_tegrid == 1) {
     for (i = 0; i < n_egrid1; i++) {
       rqc[i] = rqe[i];
@@ -1391,14 +1394,14 @@ int CERadialQk(double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
   return type;
 }
 
-int CERadialQkMSub(double *rqc, double te, int k0, int k1, int k2, int k3, 
-		   int k, int kp) {
+int CERadialQkMSub(const cfac_cbcache_t *cbcache,
+    double *rqc, double te, int k0, int k1, int k2, int k3, int k, int kp) {
   int i, nd, iq, n;
   int j, m, type, nq;
   double *rqe, rq[MAXNTE];
   double *xte, x0;
   
-  rqe = CERadialQkMSubTable(k0, k1, k2, k3, k, kp);
+  rqe = CERadialQkMSubTable(cbcache, k0, k1, k2, k3, k, kp);
   nq = Min(k, kp)/2 + 1;
 
   if (n_tegrid == 1) {
@@ -1552,8 +1555,8 @@ void RelativisticCorrection(int m, double *s, double *p, double te, double b) {
   }
 }
 
-int CollisionStrengthEB(double *qkt, double *e, double *bethe,
-			int lower, int upper) {
+int CollisionStrengthEB(const cfac_cbcache_t *cbcache,
+    double *qkt, double *e, double *bethe, int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
   double te, a, ap, c, cp, r, s[3];
   double rq[MAXNE+1], qkc[MAXNE+1];
@@ -1611,7 +1614,7 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
 	      ap *= cp*angp[ip].coeff;
 	      if (fabs(ap) < EPS10) continue;
 	      r = a*ap/(ang[i].k + 1.0);
-	      k = CERadialQk(rq, te, ang[i].k0, ang[i].k1, 
+	      k = CERadialQk(cbcache, rq, te, ang[i].k0, ang[i].k1, 
 			     angp[ip].k0, angp[ip].k1, ang[i].k);
 	      for (ie = 0; ie < n_egrid1; ie++) {
 		qkc[ie] += r*rq[ie];
@@ -1666,8 +1669,8 @@ int CollisionStrengthEB(double *qkt, double *e, double *bethe,
   return 1;
 }
 
-int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
-			 int lower, int upper) {
+int CollisionStrengthEBD(const cfac_cbcache_t *cbcache,
+    double *qkt, double *e, double *bethe, double *born, int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
   double te, a, ap, c, cp, r;
   double rq[(MAXNE+2)*MAXMSUB];
@@ -1731,7 +1734,7 @@ int CollisionStrengthEBD(double *qkt, double *e, double *bethe, double *born,
 	      kkp = (ang[i].k + angp[ip].k)/2;
 	      qb = mlev1 - mlev2;
 	      qbp = mlev1p - mlev2p;
-	      k = CERadialQkMSub(rq, te, ang[i].k0, ang[i].k1, 
+	      k = CERadialQkMSub(cbcache, rq, te, ang[i].k0, ang[i].k1, 
 				 angp[ip].k0, angp[ip].k1, ang[i].k, angp[ip].k);
 	      for (q = -nq; q <= nq; q++) {
 		m = abs(q);	
@@ -1816,7 +1819,7 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
  * RETURN: 1 (or number of CS if msub is set) on success; -1 if fails
  * GLOBALS: FACin' lot...
  */
-int CollisionStrength(const TRANSITION *tr, int msub,
+int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int msub,
                       double *qkt, double *params, double *bethe) {
   int i, j, t, h, p, m, type, ty, p1, p2, gauge;  
   double te, c, r, s3j, c1, aw;
@@ -1878,7 +1881,7 @@ int CollisionStrength(const TRANSITION *tr, int msub,
 	  fprintf(fpw, "# %3d %3d %12.5E %12.5E %2d %2d %2d\n", 
 		  tr->nlo, tr->nup, te*HARTREE_EV, 8.0*c, ang[i].k, n_tegrid, n_egrid);
 	}
-	ty = CERadialQk(rq, te, ang[i].k0, ang[i].k1,
+	ty = CERadialQk(cbcache, rq, te, ang[i].k0, ang[i].k1,
 			ang[j].k0, ang[j].k1, ang[i].k);
 	t = ang[i].k/2;
 	c1 = c;
@@ -1891,7 +1894,7 @@ int CollisionStrength(const TRANSITION *tr, int msub,
 	  qkc[ie+n_egrid1] += c*rq[ie];
 	}
       } else {
-	ty = CERadialQkMSub(rq, te, ang[i].k0, ang[i].k1,
+	ty = CERadialQkMSub(cbcache, rq, te, ang[i].k0, ang[i].k1,
 			    ang[j].k0, ang[j].k1, ang[i].k, ang[j].k);
 	nq = Min(ang[i].k, ang[j].k);
 	kkp = (ang[i].k + ang[j].k)/2;
@@ -2057,6 +2060,10 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   int te_set, e_set, usr_set;
   double emin, emax, ebuf;
   int nc;
+
+  cfac_cbcache_t cbcache;
+  
+  cfac_cbcache_init(&cbcache);
 
   /* if low or up not given, assume all levels */
   alev = NULL;
@@ -2297,7 +2304,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
       ebuf = 0.0;
-      if (PrepCoulombBethe(1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
+      if (PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
 		       pw_scratch.nkl, pw_scratch.kl, msub) != 0) {
         printf("PrepCoulombBethe() failed, skipping CE transitions" \
                " in energy block %g - %g eV (ei = %g eV)\n",
@@ -2349,7 +2356,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         
 	if (tr.e < e0 || tr.e >= e1) continue;
 
-	k = CollisionStrength(&tr, msub, qkc, params, bethe); 
+	k = CollisionStrength(&cbcache, &tr, msub, qkc, params, bethe); 
 	if (k < 0) continue;
 	r.bethe = bethe[0];
 	r.born[0] = bethe[1];
@@ -2387,6 +2394,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
       }
     }
     
+    cfac_cbcache_free(&cbcache);
     if (msub) free(r.params);
     free(r.strength);
     DeinitFile(f, &fhdr);
@@ -2429,6 +2437,10 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   int nc, ilow, iup;
   FILE *f;
   double qkc[MAXNE+1];
+
+  cfac_cbcache_t cbcache;
+  
+  cfac_cbcache_init(&cbcache);
  
   if (GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0) == -1)
     return 0;
@@ -2587,7 +2599,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     e = 0.0;
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
-      PrepCoulombBethe(1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
+      PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
 		       pw_scratch.nkl, pw_scratch.kl, 0);
     }
     ce_hdr.nele = GetNumElectrons(cfac, low0[0]);
@@ -2615,7 +2627,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 	  }
 	}	    
 	if (e < e0 || e >= e1) continue;
-	k = CollisionStrengthEB(qkc, &e, bethe, ilow, iup); 
+	k = CollisionStrengthEB(&cbcache, qkc, &e, bethe, ilow, iup); 
 	if (k < 0) continue;
 
 	r.bethe = bethe[0];
@@ -2634,6 +2646,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 	}
       }
     }
+    cfac_cbcache_free(&cbcache);
     free(r.strength);
     DeinitFile(f, &fhdr);
     e0 = e1;
@@ -2677,6 +2690,10 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   FILE *f;
   double *qkc;
   double *bethe, *born;
+
+  cfac_cbcache_t cbcache;
+  
+  cfac_cbcache_init(&cbcache);
  
   if (GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0) == -1)
     return 0;
@@ -2840,7 +2857,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
     e = 0.0;
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
-    PrepCoulombBethe(1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
+    PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
 		     pw_scratch.nkl, pw_scratch.kl, 1);
     }
     ce_hdr.nele = GetNumElectrons(cfac, low0[0]);
@@ -2874,7 +2891,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 	  }
 	}	    
 	if (e < e0 || e >= e1) continue;
-	k = CollisionStrengthEBD(qkc, &e, bethe, born, ilow, iup); 
+	k = CollisionStrengthEBD(&cbcache, qkc, &e, bethe, born, ilow, iup); 
 	if (k < 0) continue;
 	
 	for (ie = 0; ie < m; ie++) {
@@ -2897,6 +2914,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 	}
       }
     }
+    cfac_cbcache_free(&cbcache);
     free(r.strength);
     free(r.bethe);
     free(r.born);

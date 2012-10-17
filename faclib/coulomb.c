@@ -1,6 +1,6 @@
 /*************************************************************
   Implementation for module "coulomb". 
-  This module calculates quatities related to the H-like ions.
+  This module calculates quantities related to the H-like ions.
 
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
@@ -10,45 +10,67 @@
 
 #include "cfacP.h"
 #include "consts.h"
-#include "array.h"
 #include "angular.h"
-#include "config.h"
 #include "coulomb.h"
 #include "interpolation.h"
 #include "cf77.h"
 
-static int n_hydrogenic;
-static int kl_hydrogenic;
-static int n_hydrogenic_max;
-static int kl_hydrogenic_max;
-static ARRAY *dipole_array;
+        
+void cfac_cbcache_init(cfac_cbcache_t *cbcache)
+{
+  unsigned int i, t;
 
-static int _cbindex[CBMULT][CBMULT+1];
-static double *_cb[MAXNE][MAXNTE][MAXNE][MAXNCB];
+  memset(cbcache->cb, 0, sizeof(cbcache->cb));
 
-void SetHydrogenicNL(int n, int kl, int nm, int klm) {
-  if (n > 0) n_hydrogenic = n;
-  else n_hydrogenic = NHYDROGEN;
-  if (kl >= 0) kl_hydrogenic = kl;
-  else kl_hydrogenic = LHYDROGEN;
-  if (nm > 0) n_hydrogenic_max = nm;
-  else n_hydrogenic_max = NHYDROGENMAX;
-  if (klm >= 0) kl_hydrogenic_max = klm;
-  else kl_hydrogenic_max = LHYDROGENMAX;
-  if (n_hydrogenic_max < n_hydrogenic) 
-    n_hydrogenic_max = n_hydrogenic;
-  if (kl_hydrogenic_max < kl_hydrogenic) 
-    kl_hydrogenic_max = kl_hydrogenic;
+  i = 0;
+  for (t = 1; t <= CBMULT; t++) {
+    int q;
+    for (q = 0; q <= t; q++) {
+      cbcache->cbindex[t-1][q] = i;
+      i++;
+    }
+  }
 }
 
-void GetHydrogenicNL(int *n, int *kl, int *nm, int *klm) {
-  if (n) *n = n_hydrogenic;
-  if (kl) *kl = kl_hydrogenic;
-  if (nm) *nm = n_hydrogenic_max;
-  if (klm) *klm = kl_hydrogenic_max;
+void cfac_cbcache_free(cfac_cbcache_t *cbcache)
+{
+  int i, ie1, ie2, ite;
+  for (ie2 = 0; ie2 < MAXNE; ie2++) {
+    for (ite = 0; ite < MAXNTE; ite++) {
+      for (ie1 = 0; ie1 < MAXNE; ie1++) {
+	for (i = 0; i < MAXNCB; i++) {
+	  free(cbcache->cb[ie2][ite][ie1][i]);
+          cbcache->cb[ie2][ite][ie1][i] = NULL;
+	}
+      }
+    }
+  }
 }
 
-double HydrogenicDipole(double z, int n0, int kl0, int n1, int kl1) {
+void SetHydrogenicNL(cfac_t *cfac, int n, int kl, int nm, int klm) {
+  if (n > 0) cfac->coulomb.n_h = n;
+  else cfac->coulomb.n_h = NHYDROGEN;
+  if (kl >= 0) cfac->coulomb.kl_h = kl;
+  else cfac->coulomb.kl_h = LHYDROGEN;
+  if (nm > 0) cfac->coulomb.n_h_max = nm;
+  else cfac->coulomb.n_h_max = NHYDROGENMAX;
+  if (klm >= 0) cfac->coulomb.kl_h_max = klm;
+  else cfac->coulomb.kl_h_max = LHYDROGENMAX;
+  if (cfac->coulomb.n_h_max < cfac->coulomb.n_h) 
+    cfac->coulomb.n_h_max = cfac->coulomb.n_h;
+  if (cfac->coulomb.kl_h_max < cfac->coulomb.kl_h) 
+    cfac->coulomb.kl_h_max = cfac->coulomb.kl_h;
+}
+
+void GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm) {
+  if (n) *n = cfac->coulomb.n_h;
+  if (kl) *kl = cfac->coulomb.kl_h;
+  if (nm) *nm = cfac->coulomb.n_h_max;
+  if (klm) *klm = cfac->coulomb.kl_h_max;
+}
+
+double HydrogenicDipole(const cfac_t *cfac,
+    double z, int n0, int kl0, int n1, int kl1) {
   double anc, am;
   double z0 = 1.0;
   int nmax = 512;
@@ -64,9 +86,9 @@ double HydrogenicDipole(double z, int n0, int kl0, int n1, int kl1) {
   if (kl1 != kl0 + 1 && kl1 != kl0 - 1) {
     return 0.0;
   }
-  qk = (double **) ArraySet(dipole_array, n1, NULL);
+  qk = (double **) ArraySet(cfac->coulomb.dipole_array, n1, NULL);
   if (*qk == NULL) {
-    *qk = (double *) malloc(sizeof(double)*n1*(n1-1));
+    *qk = malloc(sizeof(double)*n1*(n1-1));
     t = *qk;
     am = 100.0;
     if (iopt == 2) {
@@ -245,8 +267,12 @@ double CoulombPhaseShift(double z, double e, int kappa) {
   return phase;
 }
 
-double *GetCoulombBethe(int ie2, int ite, int ie1, int t, int q) {
-  return _cb[ie2][ite][ie1][_cbindex[t-1][q]];
+double *GetCoulombBethe(const cfac_cbcache_t *cbcache,
+    int ie2, int ite, int ie1, int t, int q) {
+  if (t < 1 || t > CBMULT) {
+    abort();
+  }
+  return cbcache->cb[ie2][ite][ie1][cbcache->cbindex[t-1][q]];
 }
 
 double GetCoulombBetheAsymptotic(double te, double e1) {
@@ -256,18 +282,6 @@ double GetCoulombBetheAsymptotic(double te, double e1) {
   r = r/(1.0-r);
   
   return r;
-}
-
-void PrepCBIndex(void) {
-  int t, q, i;
-
-  i = 0;
-  for (t = 1; t <= CBMULT; t++) {
-    for (q = 0; q <= t; q++) {
-      _cbindex[t-1][q] = i;
-      i++;
-    }
-  }
 }
 
 /* calculates the Coulomb Bethe contributions from L to Inf. */
@@ -368,7 +382,8 @@ double PartialOmega(int k0, double *r, int k) {
   return x;
 }
 
-int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
+int PrepCoulombBethe(cfac_cbcache_t *cbcache,
+                     int ne2, int nte, int ne1, double z,
 		     double *e2, double *te, double *e1,
 		     int nkl, double *kl, int mode) {
   int i, ie1, ie2, ite, i1, k, m, ik, ierr, q0, q1;
@@ -388,8 +403,7 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
     for (ite = 0; ite < MAXNTE; ite++) {
       for (ie1 = 0; ie1 < MAXNE; ie1++) {
 	for (i = 0; i < MAXNCB; i++) {
-	  free(_cb[ie2][ite][ie1][i]);
-	  _cb[ie2][ite][ie1][i] = malloc(sizeof(double)*nkl);
+	  cbcache->cb[ie2][ite][ie1][i] = malloc(sizeof(double)*nkl);
 	}
       }
     }
@@ -418,7 +432,7 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 	  a = a/(1-a);
 	  for (i = 0; i < MAXNCB; i++) {
 	    for (m = 0; m < nkl; m++) {
-	      _cb[ie2][ite][ie1][i][m] = a;
+	      cbcache->cb[ie2][ite][ie1][i][m] = a;
 	    }
 	  }
 	  continue;
@@ -464,7 +478,7 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 	      a = ee1/(ee0 - ee1);
 	      for (i = 0; i < MAXNCB; i++) {
 		for (m = 0; m < nkl; m++) {
-		  _cb[ie2][ite][ie1][i][m] = a;
+		  cbcache->cb[ie2][ite][ie1][i][m] = a;
 		}
 	      }
 	      goto NEXTE;
@@ -488,7 +502,7 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 	      ws[k] = a/b;
 	    }
 	    if (mode == 0) {
-	      tcb = GetCoulombBethe(ie2, ite, ie1, i1, 0);
+	      tcb = GetCoulombBethe(cbcache, ie2, ite, ie1, i1, 0);
 	      for (m = 0; m < nkl; m++) {
 		k = (int) kl[m];
 		if (k >= q1) {
@@ -511,7 +525,7 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 	  }
 	  if (mode == 0) {
 	    if (i1 > 1) {
-	      tcb = GetCoulombBethe(ie2, ite, ie1, i1, 0);
+	      tcb = GetCoulombBethe(cbcache, ie2, ite, ie1, i1, 0);
 	      CoulombBetheTail(CBLMAX+1, w, nkl, kl, tcb);
 	    }
 	  } else if (i1 == 1) {
@@ -544,7 +558,7 @@ int PrepCoulombBethe(int ne2, int nte, int ne1, double z,
 	      for (k = 0; k < q0; k++) {
 		w[k] = w[q0];
 	      }
-	      tcb = GetCoulombBethe(ie2, ite, ie1, t1+1, mq);
+	      tcb = GetCoulombBethe(cbcache, ie2, ite, ie1, t1+1, mq);
 	      CoulombBetheTail(CBLMAX+1, w, nkl, kl, tcb);
 	      if (t1 == 0) {
 		for (m = 0; m < nkl; m++) {
@@ -582,7 +596,7 @@ int CoulombMultip(char *fn, double z, double te, double e1,
 
   r0 = 0.1/z;
   r1 = -1.0;
-  r = (double *) malloc(sizeof(double)*(k+1)*(q1-q0+1));
+  r = malloc(sizeof(double)*(k+1)*(q1-q0+1));
   CMULTIP(r0, r1, z, k0, k1, k, q0, q1, r, m, &ierr);
   if (ierr != 0) {
     printf("error in CMULTIP: %d\n", ierr);
@@ -607,24 +621,21 @@ int CoulombMultip(char *fn, double z, double te, double e1,
   return 0;
 }
 
-int InitCoulomb(void) {
-  int i, ie1, ie2, ite;
+int cfac_init_coulomb(cfac_t *cfac) {
+  SetHydrogenicNL(cfac, -1, -1, -1, -1);
 
-  for (ie2 = 0; ie2 < MAXNE; ie2++) {
-    for (ite = 0; ite < MAXNTE; ite++) {
-      for (ie1 = 0; ie1 < MAXNE; ie1++) {
-	for (i = 0; i < MAXNCB; i++) {
-	  _cb[ie2][ite][ie1][i] = NULL;
-	}
-      }
-    }
+  cfac->coulomb.dipole_array = malloc(sizeof(ARRAY));
+  if (!cfac->coulomb.dipole_array) {
+    return -1;
   }
-  PrepCBIndex();
-  SetHydrogenicNL(-1, -1, -1, -1);
-
-  dipole_array = (ARRAY *) malloc(sizeof(ARRAY));
-  ArrayInit(dipole_array, sizeof(double *), DIPOLE_BLOCK,
+  ArrayInit(cfac->coulomb.dipole_array, sizeof(double *), DIPOLE_BLOCK,
     NULL, InitPointerData);
 
   return 0;
+}
+
+void cfac_free_coulomb(cfac_t *cfac)
+{
+    ArrayFree(cfac->coulomb.dipole_array);
+    free(cfac->coulomb.dipole_array);
 }

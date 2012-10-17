@@ -38,7 +38,7 @@ double GetResidualZ(const cfac_t *cfac);
 double GetRMax(cfac_t *cfac);
 
 /* solve the dirac equation for the given orbital */
-int SolveDirac(POTENTIAL *potential, ORBITAL *orb);
+int SolveDirac(const cfac_t *cfac, ORBITAL *orb);
 int WaveFuncTable(cfac_t *cfac, char *s, int n, int kappa, double e);
 
 /* get the index of the given orbital in the table */

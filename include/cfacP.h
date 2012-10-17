@@ -82,6 +82,14 @@ struct _cfac_t {
         int max_rank;         /* the maximum rank of the operators allowed.  */
         MULTI *int_shells;    /* interacting shell information array         */
     } recouple;
+
+    struct {
+        int n_h;
+        int kl_h;
+        int n_h_max;
+        int kl_h_max;
+        ARRAY *dipole_array;
+    } coulomb;
     
     HAMILTON *hamiltonian;    /* Hamiltonian                                 */
 
@@ -117,6 +125,11 @@ struct _cfac_t {
     ANGULAR_FROZEN ang_frozen;/* angular coefficients for frozen states      */
 };
 
+typedef struct {
+    int cbindex[CBMULT][CBMULT+1];
+    double *cb[MAXNE][MAXNTE][MAXNE][MAXNCB];
+} cfac_cbcache_t;
+
 /* config.c */
 void
 FreeConfigData(void *p);
@@ -129,6 +142,15 @@ cfac_init_recouple(cfac_t *cfac);
 void
 cfac_free_recouple(cfac_t *cfac);
 
+/* coulomb.c */
+int
+cfac_init_coulomb(cfac_t *cfac);
+void
+cfac_free_coulomb(cfac_t *cfac);
+void
+cfac_cbcache_init(cfac_cbcache_t *cbcache);
+void
+cfac_cbcache_free(cfac_cbcache_t *cbcache);
 
 /* radial.c */
 void

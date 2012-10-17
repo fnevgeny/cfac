@@ -535,7 +535,6 @@ static int OptimizeLoop(cfac_t *cfac, double *vbuf) {
   double tol, a, b;
   ORBITAL orb_old, *orb;
   int i, k, iter, no_old;
-  POTENTIAL *potential = cfac->potential;
   AVERAGE_CONFIG *acfg = &cfac->average_config;
   
   no_old = 0;
@@ -570,7 +569,7 @@ static int OptimizeLoop(cfac_t *cfac, double *vbuf) {
 	}
       }
 
-      if (SolveDirac(potential, orb) < 0) {
+      if (SolveDirac(cfac, orb) < 0) {
 	return -1;
       }
       
@@ -847,12 +846,13 @@ int RefineRadial(cfac_t *cfac, int maxfun, int msglvl) {
   return 0;
 }
 
-int SolveDirac(POTENTIAL *potential, ORBITAL *orb) {
+int SolveDirac(const cfac_t *cfac, ORBITAL *orb) {
   int err;
+  POTENTIAL *potential = cfac->potential;
 
   err = 0;  
   potential->flag = -1;
-  err = RadialSolver(orb, potential);
+  err = RadialSolver(cfac, orb);
   if (err) { 
     printf("Error ocuured in RadialSolver, %d\n", err);
     printf("%d %d %10.3E\n", orb->n, orb->kappa, orb->energy);
@@ -1042,7 +1042,7 @@ int OrbitalIndex(cfac_t *cfac, int n, int kappa, double energy) {
   orb->n = n;
   orb->kappa = kappa;
   orb->energy = energy;
-  j = SolveDirac(cfac->potential, orb);
+  j = SolveDirac(cfac, orb);
   if (j < 0) {
     printf("Error occured in solving Dirac eq. err = %d\n", j);
     exit(1);
@@ -1098,7 +1098,7 @@ ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k) {
   
   orb = (ORBITAL *) ArrayGet(cfac->orbitals, k);
   if (orb->wfun == NULL) {
-    i = SolveDirac(cfac->potential, orb);
+    i = SolveDirac(cfac, orb);
     if (i < 0) {
       printf("Error occured in solving Dirac eq. err = %d\n", i);
       exit(1);
@@ -1567,7 +1567,7 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
   kl1 /= 2;
   kl2 /= 2;	
 
-  GetHydrogenicNL(&nh, &klh, NULL, NULL);
+  GetHydrogenicNL(cfac, &nh, &klh, NULL, NULL);
 
   if (n1 > 0 && n2 > 0 && potential->ib <= 0) {
     if ((n1 > nh && n2 > nh) || 
@@ -1583,10 +1583,10 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
       } else if (m == 1) {
 	z = GetResidualZ(cfac);
 	if (n1 < n2) {
-	  r = HydrogenicDipole(z, n1, kl1, n2, kl2);
+	  r = HydrogenicDipole(cfac, z, n1, kl1, n2, kl2);
 	  return r;
 	} else if (n2 < n1) {
-	  r = HydrogenicDipole(z, n2, kl2, n1, kl1);
+	  r = HydrogenicDipole(cfac, z, n2, kl2, n1, kl1);
 	  return r;
 	}
       }

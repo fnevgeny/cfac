@@ -145,10 +145,11 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
   return energy;
 }
 
-int RadialSolver(ORBITAL *orb, POTENTIAL *pot) {
+int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
   int ierr;
   int nm, km, k;
   double z;
+  POTENTIAL *pot = cfac->potential;
 
   if (orb->n > 0) {
     if (orb->n == 1000000) {
@@ -157,7 +158,7 @@ int RadialSolver(ORBITAL *orb, POTENTIAL *pot) {
       if (pot->ib > 0 && orb->n > pot->nb) {
 	ierr = RadialBasis(orb, pot);
       } else {
-	GetHydrogenicNL(NULL, NULL, &nm, &km);
+	GetHydrogenicNL(cfac, NULL, NULL, &nm, &km);
 	k = GetLFromKappa(orb->kappa);
 	k /= 2;
 	if (orb->n > nm || k > km) {

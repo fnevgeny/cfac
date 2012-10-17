@@ -206,6 +206,11 @@ cfac_t *cfac_new(void)
         return NULL;
     }
     
+    if (cfac_init_coulomb(cfac)) {
+        cfac_free(cfac);
+        return NULL;
+    }
+    
     /* allocate Hamiltonian structure */
     cfac->hamiltonian = malloc(sizeof(HAMILTON));
     if (!cfac->hamiltonian) {
@@ -301,6 +306,8 @@ void cfac_free(cfac_t *cfac)
         free(cfac->ecorrections);
 
         cfac_free_recouple(cfac);
+        
+        cfac_free_coulomb(cfac);
         
         if (cfac->hamiltonian) {
             free(cfac->hamiltonian->basis);

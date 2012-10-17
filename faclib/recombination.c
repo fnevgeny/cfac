@@ -613,7 +613,7 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
     log_xegrid[ie] = log(xegrid[ie]);
   }
 
-  GetHydrogenicNL(&nh, &klh, NULL, NULL);
+  GetHydrogenicNL(cfac, &nh, &klh, NULL, NULL);
   if (m == -1) {
     r0 = GetResidualZ(cfac);
     RRRadialQkHydrogenicParams(NPARAMS, hparams, r0, orb->n, klb0);

@@ -46,7 +46,7 @@ typedef struct _ORBITAL_ {
 int GetNMax(const POTENTIAL *pot);
 double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
 			  double z, int n, int kappa);
-int RadialSolver(ORBITAL *orb,  POTENTIAL *pot);
+int RadialSolver(const cfac_t *cfac, ORBITAL *orb);
 int RadialBasis(ORBITAL *orb, POTENTIAL *pot);
 int RadialBasis(ORBITAL *orb, POTENTIAL *pot);
 int RadialRydberg(ORBITAL *orb, POTENTIAL *pot);

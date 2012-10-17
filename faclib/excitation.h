@@ -58,19 +58,17 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
 int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
 		       double te, double e1, 
 		       int nq, int *q, double *qk, int m);
-double *CERadialQkTable(int k0, int k1, int k2, int k3, int k);
-double *CERadialQkMSubTable(int k0, int k1, int k2, int k3, int k, int kp);
-int CERadialQk(double *r, double te, 
+int CERadialQk(const cfac_cbcache_t *cbcache, double *r, double te, 
 	       int k0, int k1, int k2, int k3, int k);
-int CERadialQkMSub(double *rq, double te, int k0, int k1,
+int CERadialQkMSub(const cfac_cbcache_t *cbcache, double *rq, double te, int k0, int k1,
 		   int k2, int k3, int k, int kp);
 void CERadialQkFromFit(int np, double *p, int n, double *x, double *logx,
 		       double *y, double *dy, int ndy, void *extra);
-int CollisionStrength(const TRANSITION *tr, int msub,
+int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int msub,
                       double *qkt, double *params, double *bethe);
 int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn);
-int CollisionStrengthEB(double *s, double *e, double *bethe, int lower, int upper);
-int CollisionStrengthEBD(double *s, double *e, double *bethe, double *born,
+int CollisionStrengthEB(const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, int lower, int upper);
+int CollisionStrengthEBD(const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, double *born,
 			 int lower, int upper);
 int SaveExcitationEB(int nlow, int *low, int nup, int *up, char *fn);
 int SaveExcitationEBD(int nlow, int *low, int nup, int *up, char *fn);

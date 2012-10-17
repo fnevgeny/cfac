@@ -10,21 +10,12 @@
 #include <gsl/gsl_linalg.h>
 
 #include "cfacP.h"
-#include "config.h"
 #include "coulomb.h"
-#include "orbital.h"
 #include "interpolation.h"
 #include "cf77.h"
 
-/* the following arrays provide storage space in the calculation */
-static double _veff[MAXRP];
-static double _dwork[MAXRP];
-static double _dwork1[MAXRP];
-static double _dwork2[MAXRP];
- 
-static int max_iteration = 512;
-static int nmax = 0;
-static double wave_zero = 1E-10;
+static const int max_iteration = 512;
+static const double wave_zero = 1E-10;
 
 static int SetVEffective(int kl, POTENTIAL *pot);
 static int TurningPoints(int n, double e, POTENTIAL *pot);
@@ -35,11 +26,11 @@ static double Amplitude(double *p, double e, int kl, POTENTIAL *pot, int i1);
 static int Phase(double *p, POTENTIAL *pot, int i1, double p0);
 static int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2);
 
-int GetNMax(void) {
-  return nmax;
+int GetNMax(const POTENTIAL *pot) {
+  return pot->nmax;
 }
  
-double EnergyH(double z, double n, int ka)
+static double EnergyH(double z, double n, int ka)
 {
   double a, np;
   a = FINE_STRUCTURE_CONST*z;
@@ -55,11 +46,8 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
   double a, alfa, an1, an2, argr, b, bn, bign, bignmk, nrfac;
   double eps, fac, facn, fden, ff, fg, fk, f1, f2, gamma;
   double ovlfac, rgamm1, rgamm2, rho, rhon, twogp1, zalfa;
-  double *ta, *tb;
+  double ta[MAXRP], tb[MAXRP];
   double energy, t;
-  
-  ta = _dwork1;
-  tb = _dwork2;
   
   alfa = FINE_STRUCTURE_CONST;
   nr = n - abs(kappa);
@@ -180,7 +168,7 @@ int RadialSolver(ORBITAL *orb, POTENTIAL *pot) {
 	  orb->wfun = NULL;
 	  return 0;
 	}
-	if (orb->n < nmax) {
+	if (orb->n < pot->nmax) {
 	  ierr = RadialBound(orb, pot);
 	} else {
 	  ierr = RadialRydberg(orb, pot);
@@ -193,10 +181,6 @@ int RadialSolver(ORBITAL *orb, POTENTIAL *pot) {
     ierr = RadialBasisOuter(orb, pot);
   }
   return ierr;
-}
-
-double *GetVEffective(void) { 
-  return _veff;
 }
 
 int LastMaximum(double *p, int i1, int i2) {
@@ -260,10 +244,9 @@ void Differential(double *p, double *dp, int i1, int i2) {
 }    
 
 static double DpDr(int kappa, int i1, double e, POTENTIAL *pot, double b) {
-  double *p, bqp, p1, p2 = 0.0;
+  double p[MAXRP], bqp, p1, p2 = 0.0;
   int k;
   
-  p = _dwork;
   bqp = (b + kappa)*FINE_STRUCTURE_CONST;
   bqp /= (2.0*pot->rad[i1]);
   for (k = i1-1; k <= i1+1; k++) {
@@ -314,7 +297,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   SetVEffective(kl, pot);
   emin = 1E30;
   for (i = pot->ib; i <= pot->ib1; i++) {
-    if (_veff[i] < emin) emin = _veff[i];
+    if (pot->veff[i] < emin) emin = pot->veff[i];
   }
   dr = pot->rad[pot->ib1]-pot->rad[pot->ib];
   ke = TWO_PI*(2*nr+5)/dr;
@@ -516,7 +499,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     SetVEffective(kl, pot);
     emin = 1E30;
     for (i = 0; i < pot->maxrp; i++) {
-      if (_veff[i] < emin) emin = _veff[i];
+      if (pot->veff[i] < emin) emin = pot->veff[i];
     }
     emin += ENEABSERR;
   } else {
@@ -896,7 +879,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     SetVEffective(kl, pot);
     emin = 1E30;
     for (i = 0; i < pot->maxrp; i++) {
-      if (_veff[i] < emin) emin = _veff[i];
+      if (pot->veff[i] < emin) emin = pot->veff[i];
     }
     emin += ENEABSERR;
   } else {
@@ -1204,7 +1187,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     else j = 1;
     i2p2 = pot->maxrp - j*pot->asymp - 5;
     for (i2 = pot->r_core; i2 < i2p2; i2++) {
-      if (_veff[i2+1] > _veff[i2]) break;
+      if (pot->veff[i2+1] > pot->veff[i2]) break;
     }
     i2 += j*pot->asymp;
     i2p2 = i2 + 2;
@@ -1421,6 +1404,9 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
 int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2) {
   int i, i0, i1, kappa;
   double xi, e, *p, a, b;
+  double _dwork[MAXRP];
+  double _dwork1[MAXRP];
+  double _dwork2[MAXRP];
 
   if (orb->n >= 0) i0 = 0;
   else i0 = pot->ib-1;
@@ -1563,7 +1549,7 @@ static int ode_func(double t, const double y[], double ydot[], void *params)
 double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   int i, n, kl1;
   double a, b, xi, r2, r3;
-  double z, dk, r0, *r_o = _dwork, *v_o = _dwork1, w, v1;
+  double z, dk, r0, r_o[MAXRP], v_o[MAXRP], w, v1;
   
   double y[2], rtol = EPS4, atol = 0.0, h0 = -0.01;
 
@@ -1589,7 +1575,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
 
   /* calculate (r & v) grids for the outer region */
   r_o[0] = pot->rad[n];
-  v_o[0] = _veff[n];
+  v_o[0] = pot->veff[n];
   for (i = 1; i < pot->maxrp; i++) {
     r_o[i] = r_o[i-1]*1.05;
     r2 = r_o[i]*r_o[i];
@@ -1640,8 +1626,8 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   for (i = n-1; i >= i0; i--) {
     double r = pot->rad[i];
     params.t0 = r0;
-    params.w0 = _veff[i+1]*r0;
-    params.s  = (_veff[i]*r - params.w0)/(r - r0);
+    params.w0 = pot->veff[i+1]*r0;
+    params.s  = (pot->veff[i]*r - params.w0)/(r - r0);
     params.e  = e;
 
     gsl_status = gsl_odeiv2_driver_apply(ode_drv, &r0, r, y);
@@ -1660,6 +1646,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
 int Phase(double *p, POTENTIAL *pot, int i1, double phase0) {
   int i;
   double fact;
+  double _dwork[MAXRP];
   
   fact = 1.0 / 3.0;
 
@@ -1687,8 +1674,8 @@ int SetVEffective(int kl, POTENTIAL *pot) {
   for (i = 0; i < pot->maxrp; i++) {
     r = pot->rad[i];
     r *= r;
-    _veff[i] = pot->Vc[i] + pot->U[i] + kl1/r;
-    _veff[i] += pot->W[i];
+    pot->veff[i] = pot->Vc[i] + pot->U[i] + kl1/r;
+    pot->veff[i] += pot->W[i];
   }
 
   return 0;
@@ -1700,7 +1687,7 @@ static int TurningPoints(int n, double e, POTENTIAL *pot) {
 
   if (n == 0) {
     for (i = 10; i < pot->maxrp-5; i++) {
-      x = e - _veff[i];
+      x = e - pot->veff[i];
       if (x <= 0) continue;
       b = 1.0/pot->rad[i];
       a = 20.0/(0.5*pot->ar*sqrt(b) + pot->br*b);
@@ -1711,7 +1698,7 @@ static int TurningPoints(int n, double e, POTENTIAL *pot) {
     if (IsOdd(i2)) (i2)--;
   } else if (n > 0) {
     for (i = pot->maxrp-1; i > 10; i--) {
-      if (e - _veff[i] > wave_zero) break;
+      if (e - pot->veff[i] > wave_zero) break;
     }
     if (i <= 10) return -2;
     i2 = pot->maxrp-5;
@@ -1723,11 +1710,11 @@ static int TurningPoints(int n, double e, POTENTIAL *pot) {
     }
   } else {
     for (i = pot->ib; i < pot->ib1; i++) {
-      if (e - _veff[i] > wave_zero) break;
+      if (e - pot->veff[i] > wave_zero) break;
     }
     i2 = i+20;
     for (i = pot->ib1-20; i > i2; i--) {
-      if (e - _veff[i] > wave_zero) break;
+      if (e - pot->veff[i] > wave_zero) break;
     }
     i2 = i;
   }
@@ -1787,7 +1774,7 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
   k = 2;
   for (i = i1+1; i < i2; i++, k += n) {
     r = pot->rad[i];
-    x = 2.0*(_veff[i] - e);
+    x = 2.0*(pot->veff[i] - e);
     x *= 4.0*r*r;
     a = pot->ar;
     b = pot->br;
@@ -1806,7 +1793,7 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
 
   i = i2;
   r = pot->rad[i];
-  x = 2.0*(_veff[i] - e);
+  x = 2.0*(pot->veff[i] - e);
   x *= 4.0*r*r;
   a = pot->ar;
   b = pot->br;
@@ -1829,7 +1816,7 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
     
   i = i1;
   r = pot->rad[i];
-  x = 2.0*(_veff[i] - e);
+  x = 2.0*(pot->veff[i] - e);
   x *= 4.0*r*r;
   a = pot->ar;
   b = pot->br;
@@ -1893,7 +1880,7 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
   i = i2;
   /*
   for (i = i2; i >= i1; i--) {
-    if (e >= _veff[i]) break;
+    if (e >= pot->veff[i]) break;
   }
   if (i <= i1) return n;
   */
@@ -1914,6 +1901,7 @@ static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
 
 double InnerProduct(int i1, int n, double *p1, double *p2, POTENTIAL *pot) {
   int k;
+  double _dwork[MAXRP];
 
   for (k = i1; k <= n; k++) {
     _dwork[k] = p1[k]*p2[k] * pot->dr_drho[k];
@@ -1961,7 +1949,7 @@ int SetOrbitalRGrid(cfac_t *cfac) {
     c = pot->maxrp-15.0 + a*(sqrt(rmin)-sqrt(rmax));
     c /= log(rmax) - log(rmin);
   }     
-  nmax = sqrt(rmax*z)/2.0;
+  pot->nmax = sqrt(rmax*z)/2.0;
 
   d1 = log(rmax/rmin);
   d2 = sqrt(rmax) - sqrt(rmin);
@@ -2299,6 +2287,7 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
   double a, b, r0, r, rm, rp, rn;
   double v, d, c;
   POTENTIAL *pot = cfac->potential;
+  double _dwork[MAXRP];
 
   if (vp <= 0) return 0;
 

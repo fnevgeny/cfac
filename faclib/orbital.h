@@ -28,6 +28,9 @@ typedef struct _POTENTIAL_ {
   double dW[MAXRP];
   double dW2[MAXRP];
   double uehling[MAXRP];
+  
+  unsigned int nmax;
+  double veff[MAXRP];
 } POTENTIAL;
 
 typedef struct _ORBITAL_ {
@@ -40,8 +43,7 @@ typedef struct _ORBITAL_ {
   int ilast;
 } ORBITAL;
 
-int GetNMax(void);
-double *GetVEffective(void);
+int GetNMax(const POTENTIAL *pot);
 double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
 			  double z, int n, int kappa);
 int RadialSolver(ORBITAL *orb,  POTENTIAL *pot);

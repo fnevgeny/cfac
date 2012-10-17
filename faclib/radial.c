@@ -1593,7 +1593,7 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
     }
   }
 
-  if (potential->ib <= 0 && n1 == n2 && m > 0 && n1 > GetNMax()) {
+  if (potential->ib <= 0 && n1 == n2 && m > 0 && n1 > GetNMax(potential)) {
     return 0.0;
   }
   if (orb1->wfun == NULL || orb2->wfun == NULL) {

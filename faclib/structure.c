@@ -3208,7 +3208,7 @@ int AngularZMix(cfac_t *cfac,
     kb1 = slow->kcfg;
     n = GetOrbital(cfac, kb1)->n;
     if (cfac->angz_maxn > 0 && cfac->angz_maxn < n) ignore_ryd = 1;
-    nmax = GetNMax();
+    nmax = GetNMax(cfac->potential);
     if (n >= nmax && kg2 < 0) {
       kb2 = sup->kcfg;
       m = GetOrbital(cfac, kb2)->n;

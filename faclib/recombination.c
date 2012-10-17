@@ -1915,7 +1915,7 @@ int AsymmetryM_PI(int k0, double e, int mx, int m, double *b) {
 	    b[q+1] += d*W3j(q2, Lp2, L2, 0, 2, -2);
 	    if (q >= 2) {
 	      if (IsOdd((kl2-Lp2-kl0)/2)) d = -d;
-	      d *= exp(0.5*(ln_factorial[q-2]-ln_factorial[q+2]));
+	      d *= exp(0.5*(LnFactorial(q-2)-LnFactorial(q+2)));
 	      d *= q*(q-1.0);
 	      b[q+1+m] += d*W3j(q2, Lp2, L2, 4, -2, -2);
 	    }

@@ -9,36 +9,30 @@
 
 #include <stdlib.h>
 #include <math.h>
+#include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_sf_coupling.h>
 
 #include "consts.h"
 #include "angular.h"
 
-double ln_factorial[MAX_FACTORIAL];
-double ln_integer[MAX_FACTORIAL];
-
-/* 
-** FUNCTION:    InitAngular.
-** PURPOSE:     initialize the nature log of factorial 
-**              and integer arrays.
-** INPUT:       
-** RETURN:      {int}, 
-**              always 0.
-** SIDE EFFECT: 
-** NOTE:        
-*/
-int InitAngular(void) {
-  int n;
-
-  ln_factorial[0] = 0.0;
-  ln_integer[0] = -100.0;
-  for (n = 1; n < MAX_FACTORIAL; n++) {
-    ln_integer[n] = log((double) n);
-    ln_factorial[n] = ln_factorial[n-1] + ln_integer[n]; 
-  }
-  return 0;
+double LnFactorial(unsigned int n)
+{
+    if (n == 0) {
+        return 0.0;
+    } else {
+        return gsl_sf_lnfact(n);
+    }
 }
- 
+
+double LnInteger(unsigned int n)
+{
+    if (n == 0) {
+        return -100.0;
+    } else {
+        return log((double) n);
+    }
+}
+
 /* 
 ** FUNCTION:    Triangle.
 ** PURPOSE:     check for triangular relation.

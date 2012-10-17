@@ -36,7 +36,6 @@ int InitFac() {
   }
 
   InitCoulomb();
-  InitAngular();
 
   InitDBase();
   InitExcitation();

@@ -15,11 +15,6 @@
 #define Large(orb) ((orb)->wfun)
 #define Small(orb) ((orb)->wfun + potential->maxrp)
 
-static double _yk[MAXRP];
-static double _zk[MAXRP];
-static double _xk[MAXRP];
-
-
 void InitOrbitalData(void *p, int n) {
   ORBITAL *d;
   int i;
@@ -199,34 +194,6 @@ int SetBoundary(cfac_t *cfac, int nmax, double p, double bqp) {
   return 0;
 }
 
-int RadialOverlaps(cfac_t *cfac, char *fn, int kappa) {
-  ORBITAL *orb1, *orb2;
-  int i, j, k;
-  double r;
-  FILE *f;
-  POTENTIAL *potential = cfac->potential;
-
-  f = fopen(fn, "w");
-  for (k = 0; k < potential->maxrp; k++) {
-    _yk[k] = 1.0;
-  }
-  for (i = 0; i < cfac->n_orbitals; i++) {
-    orb1 = GetOrbital(cfac, i);
-    if (orb1->kappa != kappa) continue;
-    for (j = 0; j <= i; j++) {
-      orb2 = GetOrbital(cfac, j);
-      if (orb2->kappa != kappa) continue;
-      IntegrateS(potential, _yk, orb1, orb2, INT_P1P2pQ1Q2, &r, 0);
-      fprintf(f, "%2d %2d %10.3E  %2d %2d %10.3E  %12.5E\n", 
-	      orb1->n, orb1->kappa, orb1->energy, 
-	      orb2->n, orb2->kappa, orb2->energy, r);
-    }
-  }
-  fclose(f);
-
-  return 0;
-}
-  
 void SetSE(cfac_t *cfac, int n) {
   cfac->qed.se = n;
 }
@@ -338,6 +305,7 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
   double large, small, a, b, c, d0, d1, d;
   POTENTIAL *potential = cfac->potential;
   const AVERAGE_CONFIG *acfg = &cfac->average_config;
+  double yk[MAXRP];
   
   if (potential->N < 1+EPS3) return -1;
   md = potential->mode % 10;
@@ -368,14 +336,14 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
     k1 = OrbitalExists(cfac, acfg->n[i], acfg->kappa[i], 0.0);
     if (k1 < 0) continue;
     orb1 = GetOrbital(cfac, k1);
-    GetYk(cfac, 0, _yk, orb1, orb1, k1, k1, 1);
+    GetYk(cfac, 0, yk, orb1, orb1, k1, k1, 1);
     for (m = 0; m <= jmax; m++) {    
-      u[m] += acfg->nq[i] * _yk[m];
+      u[m] += acfg->nq[i] * yk[m];
       if (w[m] && md == 0) {
 	large = Large(orb1)[m];
 	small = Small(orb1)[m];  
 	b = large*large + small*small;
-	a = _yk[m] * acfg->nq[i] * b/w[m];
+	a = yk[m] * acfg->nq[i] * b/w[m];
 	u[m] -= a;
       }
     }
@@ -494,7 +462,7 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   const AVERAGE_CONFIG *acfg = &(cfac->average_config);
   FILE *f;
   int i;
-  double *u, *v, *w;
+  double u[MAXRP], *v, *w;
   POTENTIAL *potential = cfac->potential;
 
   f = fopen(fn, "w");
@@ -511,7 +479,6 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   fprintf(f, "#   mode = %d\n", potential->mode);
   fprintf(f, "#    HXS = %10.3E\n", potential->hxs);
 
-  u = _zk;
   w = potential->W;
   v = potential->dW;
   PotentialHX(cfac, u, v, w);
@@ -548,18 +515,12 @@ double GetRMax(cfac_t *cfac) {
 int SetAverageConfig(cfac_t *cfac, int nshells, int *n, int *kappa, double *nq) {
   int i;
   if (nshells <= 0) return -1;
-  if (cfac->average_config.n_shells > 0) {
-    cfac->average_config.kappa = (int *) realloc(cfac->average_config.kappa, 
-					   sizeof(int)*nshells);
-    cfac->average_config.nq = (double *) realloc(cfac->average_config.nq, 
-					   sizeof(double)*nshells);
-    cfac->average_config.n = (int *) realloc(cfac->average_config.n, 
-				       sizeof(int)*nshells);
-  } else {
-    cfac->average_config.kappa = (int *) malloc(sizeof(int)*nshells);
-    cfac->average_config.nq = (double *) malloc(sizeof(double)*nshells);
-    cfac->average_config.n = (int *) malloc(sizeof(int)*nshells);
-  }
+  cfac->average_config.kappa = realloc(cfac->average_config.kappa, 
+					 sizeof(int)*nshells);
+  cfac->average_config.nq = realloc(cfac->average_config.nq, 
+					 sizeof(double)*nshells);
+  cfac->average_config.n = realloc(cfac->average_config.n, 
+				     sizeof(int)*nshells);
   for (i = 0; i < nshells; i++) {
     cfac->average_config.n[i] = n[i];
     cfac->average_config.kappa[i] = kappa[i];
@@ -1498,6 +1459,7 @@ int ResidualPotential(const cfac_t *cfac, double *s, int k0, int k1) {
   int index[2];
   double *p, z, *p1, *p2, *q1, *q2;
   POTENTIAL *potential = cfac->potential;
+  double dwork[MAXRP];
 
   orb1 = GetOrbitalSolved(cfac, k0);
   orb2 = GetOrbitalSolved(cfac, k1);
@@ -1531,18 +1493,18 @@ int ResidualPotential(const cfac_t *cfac, double *s, int k0, int k1) {
     for (i = potential->ib; i <= potential->ib1; i++) {
       z = potential->U[i];
       z += potential->Vc[i];
-      _yk[i] = -(potential->Z[i]/potential->rad[i]) - z;
-      _yk[i] *= potential->dr_drho[i];
-      _yk[i] *= p1[i]*p2[i] + q1[i]*q2[i];
+      dwork[i] = -(potential->Z[i]/potential->rad[i]) - z;
+      dwork[i] *= potential->dr_drho[i];
+      dwork[i] *= p1[i]*p2[i] + q1[i]*q2[i];
     }
-    *s = Simpson(_yk, potential->ib, potential->ib1);
+    *s = Simpson(dwork, potential->ib, potential->ib1);
   } else {
     for (i = 0; i < potential->maxrp; i++) {
       z = potential->U[i];
       z += potential->Vc[i];
-      _yk[i] = -(potential->Z[i]/potential->rad[i]) - z;
+      dwork[i] = -(potential->Z[i]/potential->rad[i]) - z;
     }
-    IntegrateS(potential, _yk, orb1, orb2, INT_P1P2pQ1Q2, s, -1);
+    IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, s, -1);
   }
   *p = *s;
   return 0;
@@ -1553,6 +1515,7 @@ double MeanPotential(cfac_t *cfac, int k0, int k1) {
   ORBITAL *orb1, *orb2;
   double z, *p1, *p2, *q1, *q2;
   POTENTIAL *potential = cfac->potential;
+  double dwork[MAXRP];
 
   orb1 = GetOrbitalSolved(cfac, k0);
   orb2 = GetOrbitalSolved(cfac, k1);
@@ -1567,20 +1530,16 @@ double MeanPotential(cfac_t *cfac, int k0, int k1) {
     q1 = Small(orb1);
     q2 = Small(orb2);
     for (i = potential->ib; i <= potential->ib1; i++) {
-      z = potential->U[i];
-      z += potential->Vc[i];
-      _yk[i] = z;
-      _yk[i] *= potential->dr_drho[i];
-      _yk[i] *= p1[i]*p2[i] + q1[i]*q2[i];
+      z = potential->U[i] + potential->Vc[i];
+      dwork[i] = z*potential->dr_drho[i]*(p1[i]*p2[i] + q1[i]*q2[i]);
     }
-    z = Simpson(_yk, potential->ib, potential->ib1);
+    z = Simpson(dwork, potential->ib, potential->ib1);
   } else {
     for (i = 0; i < potential->maxrp; i++) {
-      z = potential->U[i];
-      z += potential->Vc[i];
-      _yk[i] = z;
+      z = potential->U[i] + potential->Vc[i];
+      dwork[i] = z;
     }
-    IntegrateS(potential, _yk, orb1, orb2, INT_P1P2pQ1Q2, &z, -1);
+    IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, &z, -1);
   }
 
   return z;
@@ -1595,6 +1554,7 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
   int kl1, kl2;
   int nh, klh;
   POTENTIAL *potential = cfac->potential;
+  double yk[MAXRP];
   
   orb1 = GetOrbitalSolved(cfac, k1);
   orb2 = GetOrbitalSolved(cfac, k2);
@@ -1670,9 +1630,9 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
     for (i = i0; i <= npts; i++) {
       r = p1[i]*p2[i] + q1[i]*q2[i];
       r *= potential->dr_drho[i];
-      _yk[i] = pow(potential->rad[i], m)*r;
+      yk[i] = pow(potential->rad[i], m)*r;
     }
-    r = Simpson(_yk, i0, npts);
+    r = Simpson(yk, i0, npts);
     *q = r;
   } else {    
     npts = potential->maxrp-1;
@@ -1680,10 +1640,10 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
     if (n2 != 0) npts = Min(npts, orb2->ilast);
 
     for (i = 0; i <= npts; i++) {
-      _yk[i] = pow(potential->rad[i], m);
+      yk[i] = pow(potential->rad[i], m);
     }
     r = 0.0;
-    IntegrateS(potential, _yk, orb1, orb2, INT_P1P2pQ1Q2, &r, m);
+    IntegrateS(potential, yk, orb1, orb2, INT_P1P2pQ1Q2, &r, m);
     *q = r;
   }
   return r;
@@ -1744,6 +1704,7 @@ int MultipoleRadialFRGrid(cfac_t *cfac, double **p0, int m, int k1, int k2, int 
   int n, i, j, npts;
   double rcl;
   POTENTIAL *potential = cfac->potential;
+  double dwork1[MAXRP], dwork2[MAXRP];
 
   if (m == 0) return 0;
   
@@ -1778,7 +1739,7 @@ int MultipoleRadialFRGrid(cfac_t *cfac, double **p0, int m, int k1, int k2, int 
     ef = 0.0;
   }
 
-  *p1 = (double *) malloc(sizeof(double)*cfac->n_awgrid);
+  *p1 = malloc(sizeof(double)*cfac->n_awgrid);
   
   npts = potential->maxrp-1;
   if (orb1->n > 0) npts = Min(npts, orb1->ilast);
@@ -1796,9 +1757,9 @@ int MultipoleRadialFRGrid(cfac_t *cfac, double **p0, int m, int k1, int k2, int 
 	for (j = 0; j <= npts; j++) {
 	  x = a*potential->rad[j];
 	  n = m;
-	  _yk[j] = gsl_sf_bessel_jl(n, x);
+	  dwork1[j] = gsl_sf_bessel_jl(n, x);
 	}
-	IntegrateS(potential, _yk, orb1, orb2, INT_P1Q2pQ1P2, &r, 0);
+	IntegrateS(potential, dwork1, orb1, orb2, INT_P1Q2pQ1P2, &r, 0);
 	r *= t;
 	r *= (2*m + 1.0)/sqrt(m*(m+1.0));
 	r /= pow(a, m);
@@ -1811,20 +1772,20 @@ int MultipoleRadialFRGrid(cfac_t *cfac, double **p0, int m, int k1, int k2, int 
 	for (j = 0; j <= npts; j++) {
 	  x = a*potential->rad[j];
 	  n = am+1;
-	  _yk[j] = gsl_sf_bessel_jl(n, x);
+	  dwork1[j] = gsl_sf_bessel_jl(n, x);
 	  n = am-1;
-	  _zk[j] = gsl_sf_bessel_jl(n, x);
+	  dwork2[j] = gsl_sf_bessel_jl(n, x);
 	}
 	r = 0.0;
 	rp = 0.0;
 	if (t) {
-	  IntegrateS(potential, _yk, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
-	  IntegrateS(potential, _zk, orb1, orb2, INT_P1Q2pQ1P2, &ipm, 0);
+	  IntegrateS(potential, dwork1, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
+	  IntegrateS(potential, dwork2, orb1, orb2, INT_P1Q2pQ1P2, &ipm, 0);
 	  r = t*ip*q - t*ipm/q;
 	}
 	if (k1 != k2) {
-	  IntegrateS(potential, _yk, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
-	  IntegrateS(potential, _zk, orb1, orb2, INT_P1Q2mQ1P2, &imm, 0);
+	  IntegrateS(potential, dwork1, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
+	  IntegrateS(potential, dwork2, orb1, orb2, INT_P1Q2mQ1P2, &imm, 0);
 	  rp = (am + 1.0)*im*q + am*imm/q;
 	}
 	r += rp;
@@ -1835,20 +1796,20 @@ int MultipoleRadialFRGrid(cfac_t *cfac, double **p0, int m, int k1, int k2, int 
 	for (j = 0; j < npts; j++) {
 	  x = a*potential->rad[j];
 	  n = am+1;
-	  _yk[j] = gsl_sf_bessel_jl(n, x);
+	  dwork1[j] = gsl_sf_bessel_jl(n, x);
 	  n = am;
-	  _zk[j] = gsl_sf_bessel_jl(n, x);
+	  dwork2[j] = gsl_sf_bessel_jl(n, x);
 	}
 	if (t) {
-	  IntegrateS(potential, _yk, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
+	  IntegrateS(potential, dwork1, orb1, orb2, INT_P1Q2pQ1P2, &ip, 0);
 	  r = t*ip;
 	}
 	if (k1 != k2) {
-	  IntegrateS(potential, _yk, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
+	  IntegrateS(potential, dwork1, orb1, orb2, INT_P1Q2mQ1P2, &im, 0);
 	} else {
 	  im = 0.0;
 	}
-	IntegrateS(potential, _zk, orb1, orb2, INT_P1P2pQ1Q2, &imm, 0);
+	IntegrateS(potential, dwork2, orb1, orb2, INT_P1P2pQ1Q2, &imm, 0);
 	rp = (am + 1.0) * (imm + im);
 	q = (2*am + 1.0)/sqrt(am*(am+1.0));
 	q /= pow(a, am);
@@ -1909,6 +1870,7 @@ double *GeneralizedMoments(cfac_t *cfac, int k1, int k2, int m) {
   double _phase[MAXRP];
   double _dphase[MAXRP];
   POTENTIAL *potential = cfac->potential;
+  double yk[MAXRP];
   
   index[0] = m;
   if (k1 > k2) {
@@ -1929,7 +1891,7 @@ double *GeneralizedMoments(cfac_t *cfac, int k1, int k2, int m) {
   }
 
   nk = NGOSK;
-  *p = (double *) malloc(sizeof(double)*nk*2);
+  *p = malloc(sizeof(double)*nk*2);
   kg = *p + nk;
 
   if (orb1->wfun == NULL || orb2->wfun == NULL || 
@@ -2000,9 +1962,9 @@ double *GeneralizedMoments(cfac_t *cfac, int k1, int k2, int m) {
       k = exp(kg[t]);      
       for (i = 0; i <= n1; i++) {
 	x = k * potential->rad[i];
-	_yk[i] = gsl_sf_bessel_jl(m, x);
+	yk[i] = gsl_sf_bessel_jl(m, x);
       }
-      IntegrateS(potential, _yk, orb1, orb2, INT_P1P2pQ1Q2, &r, 0);
+      IntegrateS(potential, yk, orb1, orb2, INT_P1P2pQ1Q2, &r, 0);
       (*p)[t] = r/k;
     }
   }
@@ -2220,19 +2182,16 @@ int SlaterTotal(cfac_t *cfac,
 
 double SelfEnergyRatio(POTENTIAL *potential, ORBITAL *orb) {
   int i, npts;
-  double *p, *q, e, z;
+  double p[MAXRP], q[MAXRP], e, z;
   double *large, *small;
   double a, b;
   
   if (orb->wfun == NULL) return 1.0;
 
-  for (i = 0; i < potential->maxrp; i++) {
-    if (potential->uehling[i] > -EPS4) break;
+  for (npts = 0; npts < potential->maxrp; npts++) {
+    if (potential->uehling[npts] > -EPS4) break;
   }
-  npts = i;
   
-  p = _xk;
-  q = _zk;
   z = potential->Z[potential->maxrp-1];
   e = RadialDiracCoulomb(npts, p, q, potential->rad, z, 
 			 orb->n, orb->kappa);
@@ -2256,6 +2215,7 @@ double QED1E(cfac_t *cfac, int k0, int k1) {
   ORBITAL *orb1, *orb2;
   int index[2];
   double *p, r, a;
+  double dwork[MAXRP];
 
   if (cfac->qed.nms == 0 && cfac->qed.vp == 0) {
     if (cfac->qed.se == 0 || k0 != k1) {
@@ -2290,19 +2250,19 @@ double QED1E(cfac_t *cfac, int k0, int k1) {
   
   if (cfac->qed.nms > 0) {
     for (i = 0; i < potential->maxrp; i++) {
-      _yk[i] = potential->U[i] + potential->Vc[i];
+      dwork[i] = potential->U[i] + potential->Vc[i];
     }
     a = 0.0;
-    IntegrateS(potential, _yk, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
+    IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
     a = -a;
     if (k0 == k1) a += orb1->energy;
     a /= (AMU * GetAtomicMass(cfac));
     r += a;
     for (i = 0; i < potential->maxrp; i++) {
-      _yk[i] = orb1->energy - (potential->U[i] + potential->Vc[i]);
-      _yk[i] *= orb2->energy - (potential->U[i] + potential->Vc[i]);
+      dwork[i] = (orb1->energy - (potential->U[i] + potential->Vc[i]))*
+                 (orb2->energy - (potential->U[i] + potential->Vc[i]));
     }
-    IntegrateS(potential, _yk, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
+    IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
     a *= FINE_STRUCTURE_CONST2/(2.0 * AMU * GetAtomicMass(cfac));
     r += a;
   }
@@ -2335,6 +2295,7 @@ double Vinti(cfac_t *cfac, int k0, int k1) {
   int ka0, ka1;
   double a, b, r;
   POTENTIAL *potential = cfac->potential;
+  double dwork[MAXRP];
 
   orb1 = GetOrbitalSolved(cfac, k0);
   orb2 = GetOrbitalSolved(cfac, k1);
@@ -2364,19 +2325,19 @@ double Vinti(cfac_t *cfac, int k0, int k1) {
   b = 0.5*(-ka0*(-ka0+1.0) + ka1*(-ka1+1.0));
   r = 0.0;
 
-  Differential(large1, _zk, 0, potential->maxrp-1);
+  Differential(large1, dwork, 0, potential->maxrp-1);
   for (i = 0; i < potential->maxrp; i++) {
-    _yk[i] = large0[i]*_zk[i] - a*large0[i]*large1[i]/potential->rad[i];
-    _yk[i] *= potential->dr_drho[i];
+    dwork[i] = large0[i]*dwork[i] - a*large0[i]*large1[i]/potential->rad[i];
+    dwork[i] *= potential->dr_drho[i];
   }
-  r += Simpson(_yk, 0, potential->maxrp-1);
+  r += Simpson(dwork, 0, potential->maxrp-1);
   
-  Differential(small1, _zk, 0, potential->maxrp-1);
+  Differential(small1, dwork, 0, potential->maxrp-1);
   for (i = 0; i < potential->maxrp; i++) {
-    _yk[i] = small0[i]*_zk[i] - b*small0[i]*small1[i]/potential->rad[i];
-    _yk[i] *= potential->dr_drho[i];
+    dwork[i] = small0[i]*dwork[i] - b*small0[i]*small1[i]/potential->rad[i];
+    dwork[i] *= potential->dr_drho[i];
   }
-  r += Simpson(_yk, 0, potential->maxrp-1);
+  r += Simpson(dwork, 0, potential->maxrp-1);
   
   *p = r;
 
@@ -2469,7 +2430,7 @@ double BreitS(cfac_t *cfac, int k0, int k1, int k2, int k3, int k) {
   ORBITAL *orb0, *orb1, *orb2, *orb3;
   int index[5], i;
   double *p, r;
-  double _dwork[MAXRP];
+  double dwork1[MAXRP], dwork2[MAXRP];
   POTENTIAL *potential = cfac->potential;
   
   index[0] = k0;
@@ -2489,16 +2450,16 @@ double BreitS(cfac_t *cfac, int k0, int k1, int k2, int k3, int k) {
     if (!orb0 || !orb1 || !orb2 || !orb3) return 0.0;
     
     for (i = 0; i < potential->maxrp; i++) {
-      _dwork[i] = pow(potential->rad[i], k);
+      dwork1[i] = pow(potential->rad[i], k);
     }
     
-    IntegrateF(potential, _dwork, orb0, orb1, INT_P1Q2, _zk, 0);
+    IntegrateF(potential, dwork1, orb0, orb1, INT_P1Q2, dwork2, 0);
     
     for (i = 0; i < potential->maxrp; i++) {
-      _zk[i] /= _dwork[i]*potential->rad[i];
+      dwork2[i] /= dwork1[i]*potential->rad[i];
     }
 
-    IntegrateS(potential, _zk, orb2, orb3, INT_P1Q2, &r, 0);
+    IntegrateS(potential, dwork2, orb2, orb3, INT_P1Q2, &r, 0);
     *p = r;
   }
 
@@ -2570,6 +2531,7 @@ int Slater(const cfac_t *cfac,
   ORBITAL *orb0, *orb1, *orb2, *orb3;
   double norm;
   POTENTIAL *potential = cfac->potential;
+  double yk[MAXRP];
 
   index[0] = k0;
   index[1] = k1;
@@ -2597,25 +2559,25 @@ int Slater(const cfac_t *cfac,
     switch (mode) {
     case 0: /* fall through to case 1 */
     case 1: /* full relativistic with distorted free cfac->orbitals */
-      GetYk(cfac, k, _yk, orb0, orb2, k0, k2, 1); 
+      GetYk(cfac, k, yk, orb0, orb2, k0, k2, 1); 
       if (orb1->n > 0) ilast = orb1->ilast;
       else ilast = npts-1;
       if (orb3->n > 0) ilast = Min(ilast, orb3->ilast);
       for (i = 0; i <= ilast; i++) {
-	_yk[i] = (_yk[i]/potential->rad[i]);
+	yk[i] = (yk[i]/potential->rad[i]);
       }
-      IntegrateS(potential, _yk, orb1, orb3, INT_P1P2pQ1Q2, s, 0);
+      IntegrateS(potential, yk, orb1, orb3, INT_P1P2pQ1Q2, s, 0);
       break;
     
     case -1: /* quasi relativistic with distorted free cfac->orbitals */
-      GetYk(cfac, k, _yk, orb0, orb2, k0, k2, 2);
+      GetYk(cfac, k, yk, orb0, orb2, k0, k2, 2);
       if (orb1->n > 0) ilast = orb1->ilast;
       else ilast = npts-1;
       if (orb3->n > 0) ilast = Min(ilast, orb3->ilast);
       for (i = 0; i <= ilast; i++) {
-	_yk[i] /= potential->rad[i];
+	yk[i] /= potential->rad[i];
       }
-      IntegrateS(potential, _yk, orb1, orb3, INT_P1P2, s, 0);
+      IntegrateS(potential, yk, orb1, orb3, INT_P1P2, s, 0);
 
       norm  = orb0->qr_norm;
       norm *= orb1->qr_norm;
@@ -2689,32 +2651,33 @@ void SortSlaterKey(int *kd) {
 
 /*
 ** this is a better version of Yk than GetYk0.
-** note that on exit, _zk consists r^k, which is used in GetYk
+** note that on exit, rk contains r^k, which is used in GetYk
 */      
 static int GetYk1(POTENTIAL *potential,
-    int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, int type) {
+    int k, double *yk, double *rk,
+    const ORBITAL *orb1, const ORBITAL *orb2, int type) {
   int i, ilast;
   double r0, a;
-  double _dwork[MAXRP];
+  double dwork1[MAXRP];
+  double dwork2[MAXRP];
   
   ilast = Min(orb1->ilast, orb2->ilast);
   r0 = sqrt(potential->rad[0]*potential->rad[ilast]);  
   for (i = 0; i < potential->maxrp; i++) {
-    _dwork[i] = pow(potential->rad[i]/r0, k);
+    dwork1[i] = pow(potential->rad[i]/r0, k);
   }
-  IntegrateF(potential, _dwork, orb1, orb2, type, _zk, 0);
+  IntegrateF(potential, dwork1, orb1, orb2, type, dwork2, 0);
   a = pow(r0, k);
   for (i = 0; i < potential->maxrp; i++) {
-    _zk[i] /= _dwork[i];
-    yk[i] = _zk[i];
-    _zk[i] = _dwork[i]*a;
+    yk[i] = dwork2[i]/dwork1[i];
+    rk[i] = dwork1[i]*a;
   }  
   for (i = 0; i < potential->maxrp; i++) {
-    _dwork[i] = (r0/potential->rad[i])/_dwork[i];
+    dwork1[i] = (r0/potential->rad[i])/dwork1[i];
   }
-  IntegrateF(potential, _dwork, orb1, orb2, type, _xk, -1);
+  IntegrateF(potential, dwork1, orb1, orb2, type, dwork2, -1);
   for (i = 0; i < potential->maxrp; i++) {
-    yk[i] += _xk[i]/_dwork[i];
+    yk[i] += dwork2[i]/dwork1[i];
   }
       
   return 0;
@@ -2726,8 +2689,8 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
   double a, b, a2, b2, max, max1;
   int index[3];
   SLATER_YK *syk;
-  double _dwork[MAXRP];
   POTENTIAL *potential = cfac->potential;
+  double dwork[MAXRP];
 
   if (k1 <= k2) {
     index[0] = k1;
@@ -2740,25 +2703,25 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 
   syk = (SLATER_YK *) MultiSet(cfac->yk_array, index, NULL);
   if (syk->npts < 0) {
-    GetYk1(potential, k, yk, orb1, orb2, type);
+    GetYk1(potential, k, yk, dwork, orb1, orb2, type);
     max = 0;
     for (i = 0; i < potential->maxrp; i++) {
-      _zk[i] *= yk[i];
-      a = fabs(_zk[i]); 
+      dwork[i] *= yk[i];
+      a = fabs(dwork[i]); 
       if (a > max) max = a;
     }
     max1 = max*EPS5;
     max = max*EPS4;
-    a = _zk[potential->maxrp-1];
+    a = dwork[potential->maxrp-1];
     for (i = potential->maxrp-2; i >= 0; i--) {
-      if (fabs(_zk[i] - a) > max1) {
+      if (fabs(dwork[i] - a) > max1) {
 	break;
       }
     }
     i1 = i;
     for (i = i1; i >= 0; i--) {      
-      b = fabs(a - _zk[i]);
-      _zk[i] = log(b);
+      b = fabs(a - dwork[i]);
+      dwork[i] = log(b);
       if (b > max) {
 	break;
       }
@@ -2766,8 +2729,8 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
     i0 = i;
     if (i0 == i1) {
       i0--;
-      b = fabs(a - _zk[i0]);
-      _zk[i0] = log(b);
+      b = fabs(a - dwork[i0]);
+      dwork[i0] = log(b);
     }
     syk->coeff[0] = a;    
     syk->npts = i0+1;
@@ -2783,9 +2746,9 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
     for (i = i0; i <= i1; i++) {      
       max = (potential->rad[i]-potential->rad[i0]);
       a += max;
-      b += _zk[i];
+      b += dwork[i];
       a2 += max*max;
-      b2 += _zk[i]*max;
+      b2 += dwork[i]*max;
     }
     syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);       
     if (syk->coeff[1] >= 0) {
@@ -2794,9 +2757,9 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
       for (i = i0; i <= i1; i++) {      
 	max = (potential->rad[i]-potential->rad[i0]);
 	a += max;
-	b += _zk[i];
+	b += dwork[i];
 	a2 += max*max;
-	b2 += _zk[i]*max;
+	b2 += dwork[i]*max;
       }
       syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);  
     }
@@ -2805,13 +2768,13 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
     } 
   } else {
     for (i = syk->npts-1; i < potential->maxrp; i++) {
-      _dwork[i] = pow(potential->rad[i], k);
+      dwork[i] = pow(potential->rad[i], k);
     }
     for (i = 0; i < syk->npts; i++) {
       yk[i] = syk->yk[i];
     }
     i0 = syk->npts-1;
-    a = syk->yk[i0]*_dwork[i0];
+    a = syk->yk[i0]*dwork[i0];
     for (i = syk->npts; i < potential->maxrp; i++) {
       b = potential->rad[i] - potential->rad[i0];
       b = syk->coeff[1]*b;
@@ -2821,7 +2784,7 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 	yk[i] = (a - syk->coeff[0])*exp(b);
 	yk[i] += syk->coeff[0];
       }
-      yk[i] /= _dwork[i];
+      yk[i] /= dwork[i];
     }    
   }
       
@@ -4016,12 +3979,43 @@ int ReinitRadial(cfac_t *cfac, int m) {
   }
   return 0;
 }
- 
+
+
+int RadialOverlaps(cfac_t *cfac, char *fn, int kappa) {
+  ORBITAL *orb1, *orb2;
+  int i, j, k;
+  double r;
+  FILE *f;
+  POTENTIAL *potential = cfac->potential;
+  double dwork[MAXRP];
+
+  f = fopen(fn, "w");
+  for (k = 0; k < potential->maxrp; k++) {
+    dwork[k] = 1.0;
+  }
+  for (i = 0; i < cfac->n_orbitals; i++) {
+    orb1 = GetOrbital(cfac, i);
+    if (orb1->kappa != kappa) continue;
+    for (j = 0; j <= i; j++) {
+      orb2 = GetOrbital(cfac, j);
+      if (orb2->kappa != kappa) continue;
+      IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, &r, 0);
+      fprintf(f, "%2d %2d %10.3E  %2d %2d %10.3E  %12.5E\n", 
+	      orb1->n, orb1->kappa, orb1->energy, 
+	      orb2->n, orb2->kappa, orb2->energy, r);
+    }
+  }
+  fclose(f);
+
+  return 0;
+}
+
 int TestIntegrate(cfac_t *cfac) {
   ORBITAL *orb1, *orb2, *orb3, *orb4;
   int k1, k2, k3, k4, k, i, i0=1500;
   double r, a;
   POTENTIAL *potential = cfac->potential;
+  double dwork1[MAXRP], dwork2[MAXRP];
  
   k1 = OrbitalIndex(cfac, 2, -2, 0);
   k2 = OrbitalIndex(cfac, 3, -1, 0);
@@ -4035,17 +4029,17 @@ int TestIntegrate(cfac_t *cfac) {
 
   for (k = 1; k < 7; k++) {    
     for (i = 0; i < potential->maxrp; i++) {
-      _yk[i] = pow(potential->rad[i],k);
-      _yk[i+i0] = 1.0/_yk[i];
+      dwork1[i] = pow(potential->rad[i],k);
+      dwork1[i+i0] = 1.0/dwork1[i];
     }
-    IntegrateF(potential, _yk+i0, orb3, orb4, INT_P1P2pQ1Q2, _zk, 0);
-    IntegrateF(potential, _yk+i0, orb3, orb4, INT_P1P2pQ1Q2, _zk+i0, -1);
+    IntegrateF(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, dwork2, 0);
+    IntegrateF(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, dwork2+i0, -1);
     for (i = 0; i < potential->maxrp; i++) {
       printf("%d %4d %15.8E %15.8E %15.8E %15.8E %15.8E\n", 
-	     k, i, potential->rad[i], _yk[i], _zk[i], _yk[i+i0], _zk[i+i0]);
+	     k, i, potential->rad[i], dwork1[i], dwork2[i], dwork1[i+i0], dwork2[i+i0]);
     }
-    IntegrateS(potential, _yk+i0, orb3, orb4, INT_P1P2pQ1Q2, &r, 0);
-    IntegrateS(potential, _yk+i0, orb3, orb4, INT_P1P2pQ1Q2, &a, -1);
+    IntegrateS(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, &r, 0);
+    IntegrateS(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, &a, -1);
     printf("# %15.8E %15.8E\n", r, a);
     printf("\n\n");
   }

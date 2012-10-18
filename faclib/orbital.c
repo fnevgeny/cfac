@@ -1549,7 +1549,7 @@ static int ode_func(double t, const double y[], double ydot[], void *params)
 
 double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   int i, n, kl1;
-  double a, b, xi, r2, r3;
+  double a, b, xi, r2 = 0.0, r3 = 0.0;
   double z, dk, r0, r_o[MAXRP], v_o[MAXRP], w, v1;
   
   double y[2], rtol = EPS4, atol = 0.0, h0 = -0.01;

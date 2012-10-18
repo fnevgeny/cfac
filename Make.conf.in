@@ -8,14 +8,13 @@ PACKAGE=cfac
 
 SHELL = /bin/sh
 
-LIBDIRS = coul minpack faclib
+LIBDIRS = coul faclib
 SUBDIRS = $(LIBDIRS) sfac doc demo
 
 CFAC_COUL_LIB    = $(TOP)/coul/cfac_coul.a
-CFAC_MINPACK_LIB = $(TOP)/minpack/cfac_minpack.a
 CFAC_FAC_LIB     = $(TOP)/faclib/cfac_faclib.a
 
-FACLIBS = $(CFAC_FAC_LIB) $(CFAC_COUL_LIB) $(CFAC_MINPACK_LIB)
+FACLIBS = $(CFAC_FAC_LIB) $(CFAC_COUL_LIB)
 
 RANLIB = @RANLIB@
 

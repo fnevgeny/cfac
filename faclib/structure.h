@@ -97,14 +97,6 @@ typedef struct _ECORRECTION_ {
   STATE *s;
 } ECORRECTION;
 
-typedef struct _TRANSITION_ {
-    int nup;
-    int nlo;
-    LEVEL *lup;
-    LEVEL *llo;
-    double e;
-} TRANSITION;
-
 int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md);
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n);
@@ -163,8 +155,6 @@ int AngularZxZFreeBound(cfac_t *cfac, ANGULAR_ZxZMIX **ang, int lower, int upper
 int GetBasisTable(cfac_t *cfac, char *fn, int m);
 int ConstructLevelName(cfac_t *cfac, char *name, char *sname, char *nc, 
 		       int *vnl, STATE *basis);
-int GetTransition(const cfac_t *cfac,
-    int nlo, int nup, TRANSITION *tr, int *swapped);
 int SaveLevels(cfac_t *cfac, char *fn, int m, int n);
 int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n);
 int SetAngZOptions(cfac_t *cfac, int n, double mc, double c);

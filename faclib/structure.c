@@ -1975,41 +1975,6 @@ int GetNumElectrons(cfac_t *cfac, int k)
     }
 }
 
-int GetTransition(const cfac_t *cfac,
-    int nlo, int nup, TRANSITION *tr, int *swapped)
-{
-    if (!tr) {
-        return -1;
-    }
-    
-    tr->llo = GetLevel(cfac, nlo);
-    tr->lup = GetLevel(cfac, nup);
-    if (!tr->llo || !tr->lup) {
-        return -1;
-    }
-    
-    tr->e = tr->lup->energy - tr->llo->energy;
-    if (tr->e < 0) {
-        LEVEL *lbuf;
-        tr->e = -tr->e;
-        lbuf = tr->llo;
-        tr->llo = tr->lup;
-        tr->lup = lbuf;
-        
-        tr->nup = nlo;
-        tr->nlo = nup;
-        
-        *swapped = 1;
-    } else {
-        tr->nup = nup;
-        tr->nlo = nlo;
-        
-        *swapped = 0;
-    }
-    
-    return 0;
-}
-
 
 int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   int n0, k, i, ilev, mlev, nele;

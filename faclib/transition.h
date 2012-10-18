@@ -1,6 +1,16 @@
 #ifndef _TRANSITION_H_
 #define _TRANSITION_H_
 
+typedef struct _TRANSITION_ {
+    int nup;
+    int nlo;
+    LEVEL *lup;
+    LEVEL *llo;
+    double e;
+} TRANSITION;
+
+int GetTransition(const cfac_t *cfac,
+    int nlo, int nup, TRANSITION *tr, int *swapped);
 int SetTransitionCut(cfac_t *cfac, double c0, double c);
 double GetTransitionCut(const cfac_t *cfac);
 void SetTransitionMode(cfac_t *cfac, int m);

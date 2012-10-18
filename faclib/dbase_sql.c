@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 
 #include "cfacP.h"
-#include "structure.h"
+#include "transition.h"
 #include "dbase.h"
 
 #include "schema.i"

@@ -2,7 +2,7 @@
 #define _EXCITATION_H_
 
 #include "consts.h"
-#include "structure.h"
+#include "transition.h"
 
 typedef struct _CEPW_SCRATCH_ {
   int qr;

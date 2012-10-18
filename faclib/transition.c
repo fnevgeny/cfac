@@ -7,7 +7,6 @@
 #include "cfacP.h"
 #include "radial.h"
 #include "angular.h"
-#include "structure.h"
 #include "dbase.h"
 #include "transition.h"
 
@@ -708,3 +707,37 @@ int PolarizeCoeff(char *ifn, char *ofn, int i0, int i1) {
   return 0;
 }
   
+int GetTransition(const cfac_t *cfac,
+    int nlo, int nup, TRANSITION *tr, int *swapped)
+{
+    if (!tr) {
+        return -1;
+    }
+    
+    tr->llo = GetLevel(cfac, nlo);
+    tr->lup = GetLevel(cfac, nup);
+    if (!tr->llo || !tr->lup) {
+        return -1;
+    }
+    
+    tr->e = tr->lup->energy - tr->llo->energy;
+    if (tr->e < 0) {
+        LEVEL *lbuf;
+        tr->e = -tr->e;
+        lbuf = tr->llo;
+        tr->llo = tr->lup;
+        tr->lup = lbuf;
+        
+        tr->nup = nlo;
+        tr->nlo = nup;
+        
+        *swapped = 1;
+    } else {
+        tr->nup = nup;
+        tr->nlo = nlo;
+        
+        *swapped = 0;
+    }
+    
+    return 0;
+}

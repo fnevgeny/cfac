@@ -1,10 +1,10 @@
+#include <string.h>
+
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_multifit_nlin.h>
 
-#include "consts.h"
-#include "global.h"
 #include "interpolation.h"
-#include "cf77.h"
 
 /* closed Newton-Cotes formulae coeff. */
 static double _CNC[5][5] = {
@@ -14,16 +14,6 @@ static double _CNC[5][5] = {
   {3.0/8, 9.0/8, 9.0/8, 3.0/8, 0},
   {14.0/45, 64.0/45, 24.0/45, 64.0/45, 14.0/45,}
 };
-
-static struct {
-  double *x;
-  double *logx;
-  double *y;
-  double *sigma;
-  void *extra;
-  void (*function)(int, double *, int , double *, double *, 
-		   double *, double *, int, void *);
-} minpack_params;
 
 
 void SVDFit(int np, double *coeff, double *chisq, double tol,
@@ -94,89 +84,144 @@ void SVDFit(int np, double *coeff, double *chisq, double tol,
   gsl_matrix_free(Vm);
 }
 
-static void MinFunc(int *m, int *n, double *x, double *fvec, 
-		    double *fjac, int *ldfjac, int *iflag) {
-  int ndy, i, j, k;
+typedef struct {
+    double *x;
+    double *logx;
+    double *y;
+    double *sigma;
+    double *fvec;
+    double *fjac;
+    void *extra;
+    void (*function)(int np, double *p, int n, double *x, double *logx, 
+		     double *y, double *dy, int ndy, void *extra);
+} nlfit_data;
 
-  if (*iflag == 1) {
-    ndy = 0;
-    minpack_params.function(*n, x, *m, minpack_params.x,
-			    minpack_params.logx, fvec, 
-			    NULL, ndy, minpack_params.extra);
-    for (i = 0; i < *m; i++) {
-      fvec[i] = fvec[i] - minpack_params.y[i];
-      if (minpack_params.sigma) fvec[i] = fvec[i]/minpack_params.sigma[i];
-    }
-  } else if (*iflag == 2){
-    ndy = *ldfjac;
-    minpack_params.function(*n, x, *m, minpack_params.x,
-			    minpack_params.logx, NULL, 
-			    fjac, ndy, minpack_params.extra);
-    if (minpack_params.sigma) {
-      for (i = 0; i < *m; i++) {
-	k = i;
-	for (j = 0; j < *n; j++) {
-	  fjac[k] = fjac[k]/minpack_params.sigma[i];
-	  k += ndy;
-	}
-      }
-    }
-  }
-}
-/* provide fortran access with cfortran.h */
-FCALLSCSUB7(MinFunc, MINFUNC, minfunc, PINT, PINT, 
-	    DOUBLEV, DOUBLEV, DOUBLEV, PINT, PINT)
+static int nlsqfit_f(const gsl_vector *p, void *data, gsl_vector *f)
+{
+    nlfit_data *nldata = (nlfit_data *) data;
     
+    unsigned int i, n, np, ndy;
+    
+    double *fvec = nldata->fvec;
+    double *x    = p->data;
+    
+    np = p->size;
+    n  = f->size;
+
+    ndy = 0;
+    nldata->function(np, x, n, nldata->x,
+			    nldata->logx, fvec, 
+			    NULL, ndy, nldata->extra);
+
+    for (i = 0; i < n; i++) {
+        fvec[i] = fvec[i] - nldata->y[i];
+        if (nldata->sigma) {
+            fvec[i] /= nldata->sigma[i];
+        }
+        gsl_vector_set(f, i, fvec[i]);
+    }
+
+    return GSL_SUCCESS;
+}
+
+static int nlsqfit_df(const gsl_vector *p, void *data, gsl_matrix *J)
+{
+    nlfit_data *nldata = (nlfit_data *) data;
+
+    unsigned int i, j, k, n, np, ndy;
+    
+    double *x    = p->data;
+    double *fjac = nldata->fjac;
+    
+    np = p->size;
+    n  = J->size1;
+
+    ndy = n;
+    nldata->function(np, x, n, nldata->x,
+			    nldata->logx, NULL, 
+			    fjac, ndy, nldata->extra);
+
+    /* Jacobian matrix J(i,j) = dfi / dxj */
+    for (i = 0; i < n; i++) {
+	k = i;
+	for (j = 0; j < np; j++) {
+            if (nldata->sigma) {
+                fjac[k] /= nldata->sigma[i];
+            }
+            gsl_matrix_set(J, i, j, fjac[k]); 
+	    k += ndy;
+	}
+    }
+
+    return GSL_SUCCESS;
+}
+
+static int nlsqfit_fdf(const gsl_vector *x,
+    void *data, gsl_vector *f, gsl_matrix *J)
+{
+    nlsqfit_f(x, data, f);
+    nlsqfit_df(x, data, J);
+
+    return GSL_SUCCESS;
+}
+
 int NLSQFit(int np, double *p, double tol, int *ipvt,
 	    double *fvec, double *fjac, int ldfjac, double *wa, int lwa,
-	    int n, double *x, double *logx, double *y, double *sig,
-	    void Func(int, double *, int , double *, double *, 
-		      double *, double *, int, void *), 
+	    int n, double *x, double *logx, double *y, double *sigma,
+	    void Func(int np, double *p, int n, double *x, double *logx, 
+		     double *y, double *dy, int ndy, void *extra), 
 	    void *extra) {
-  int info, nprint, nfev, njev;
-  int maxfev, mode;
-  double factor, *diag, *qtf, *wa1, *wa2, *wa3, *wa4;
-  double zero = 0.0;
-  double ftol;
-
-  minpack_params.x = x;
-  minpack_params.logx = logx;
-  minpack_params.y = y;
-  minpack_params.sigma = sig;
-  minpack_params.extra = extra;
-  minpack_params.function = Func;
   
-  diag = wa;
-  qtf = wa+np;
-  wa1 = qtf+np;
-  wa2 = wa1+np;
-  wa3 = wa2+np;
-  wa4 = wa3+np;
-  mode = 1;
-  /*
-  MinFunc(&n, &np, p, fvec, fjac, &ldfjac, &mode);
-  CHKDER(n, np, p, fvec, fjac, ldfjac, wa3, wa4, mode, diag);
-  MinFunc(&n, &np, wa3, wa4, fjac, &ldfjac, &mode);
-  mode = 2;
-  MinFunc(&n, &np, p, fvec, fjac, &ldfjac, &mode);
-  CHKDER(n, np, p, fvec, fjac, ldfjac, wa3, wa4, mode, diag);
-  for (nfev = 0; nfev < n; nfev++) {
-    printf("%d %10.3E\n", nfev, diag[nfev]);
-  }
-  exit(1);
-  */
-  maxfev = 5000*np;
-  mode = 1;
-  nprint = 0;
-  factor = 100.0;
-  ftol = tol*tol*n;
-  LMDER(C_FUNCTION(MINFUNC, minfunc), n, np, p, fvec, fjac, ldfjac, 
-	ftol, tol, zero, maxfev, diag, mode, factor,
-	nprint, &info, &nfev, &njev, ipvt, qtf, wa1, wa2, wa3, wa4);
+    const gsl_multifit_fdfsolver_type *T;
+    gsl_multifit_fdfsolver *s;
+    int status;
+    unsigned int iter = 0;
 
-  return info;
+    gsl_multifit_function_fdf f;
+    gsl_vector_view xv = gsl_vector_view_array(p, np);
+
+    unsigned int i, maxfev = 5000*np;
+    
+    nlfit_data nldata;
+    nldata.x = x;
+    nldata.logx = logx;
+    nldata.y = y;
+    nldata.sigma = sigma;
+    nldata.extra = extra;
+    nldata.function = Func;
+    nldata.fvec = fvec;
+    nldata.fjac = fjac;
+    
+    f.f = &nlsqfit_f;
+    f.df = &nlsqfit_df;
+    f.fdf = &nlsqfit_fdf;
+    f.n = n;
+    f.p = np;
+    f.params = &nldata;
+
+    T = gsl_multifit_fdfsolver_lmder;
+    s = gsl_multifit_fdfsolver_alloc(T, n, np);
+    gsl_multifit_fdfsolver_set(s, &f, &xv.vector);
+
+    do {
+        iter++;
+        status = gsl_multifit_fdfsolver_iterate(s);
+        
+        if (status) {
+            break;
+        }
+
+        status = gsl_multifit_test_delta(s->dx, s->x, 0.0, tol);
+    } while (status == GSL_CONTINUE && iter < maxfev);
+
+    for (i = 0; i < np; i++) {
+        p[i] = gsl_vector_get(s->x, i);
+    }
+    
+    gsl_multifit_fdfsolver_free(s);
+
+    return status;
 }
-
 
 double Simpson(double *x, int i0, int i1) {
   int i, k;

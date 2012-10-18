@@ -119,7 +119,7 @@ AC_ARG_WITH(extralib,
 	[extralib=$withval])
 
 # setup libs 
-LIBS="$LIBS -lgsl -lgslcblas -lblas -lsqlite3"
+LIBS="$LIBS -lgsl -lgslcblas -lsqlite3"
 fwithm=`echo "$FLIBS " | grep " -lm"`
 if test "x$fwithm" = "x"
 then

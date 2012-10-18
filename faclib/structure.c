@@ -3616,7 +3616,9 @@ int PackAngularZFB(int *n, ANGULAR_ZFB **ang, int nz) {
     } else {
       p1++;
       m++;
-      memcpy(p1, p2, sizeof(ANGULAR_ZFB));
+      if (p1 != p2) {
+        memcpy(p1, p2, sizeof(ANGULAR_ZFB));
+      }
     }
     j++;
     p2++;

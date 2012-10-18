@@ -4,11 +4,11 @@
 void SVDFit(int np, double *coeff, double *chisq, double tol,
 	    int nd, double *x, double *logx, double *y, double *sig,
 	    void Basis(int, double *, double, double));
-int NLSQFit(int np, double *p, double tol, int *ipvt,
-	    double *fvec, double *fjac, int ldfjac, double *wa, int lwa,
-	    int n, double *x, double *logx, double *y, double *sig,
-	    void func(int, double *, int , double *, double *, 
-		      double *, double *, int, void *), 
+int NLSQFit(int np, double *p, double tol,
+	    double *fvec, double *fjac,
+	    int n, double *x, double *logx, double *y, double *sigma,
+	    void Func(int np, double *p, int n, double *x, double *logx, 
+		     double *y, double *dy, int ndy, void *extra), 
 	    void *extra);
 double Simpson(double *y, int ia, int ib);
 int NewtonCotes(double r[], const double x[], int ilast,

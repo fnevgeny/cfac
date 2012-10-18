@@ -165,8 +165,8 @@ static int nlsqfit_fdf(const gsl_vector *x,
     return GSL_SUCCESS;
 }
 
-int NLSQFit(int np, double *p, double tol, int *ipvt,
-	    double *fvec, double *fjac, int ldfjac, double *wa, int lwa,
+int NLSQFit(int np, double *p, double tol,
+	    double *fvec, double *fjac,
 	    int n, double *x, double *logx, double *y, double *sigma,
 	    void Func(int np, double *p, int n, double *x, double *logx, 
 		     double *y, double *dy, int ndy, void *extra), 

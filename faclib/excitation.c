@@ -1635,9 +1635,9 @@ int CollisionStrengthEB(const cfac_cbcache_t *cbcache,
   BornFormFactorTE(&bte);
   bms = BornMass();
   bte = (te + bte)/bms;
-  SetTransitionMode(M_NR);
-  SetTransitionGauge(G_BABUSHKIN);
-  k = TRMultipoleEB(s, &te, -1, lower, upper);
+  SetTransitionMode(cfac, M_NR);
+  SetTransitionGauge(cfac, G_BABUSHKIN);
+  k = TRMultipoleEB(cfac, s, &te, -1, lower, upper);
   if (k != 0) bethe[0] = 0;
   else {
     r = 0.0;
@@ -1862,7 +1862,7 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int m
       qkc[ie+n_egrid1] = 0.0;
     }    
   }
-  gauge = GetTransitionGauge();
+  gauge = GetTransitionGauge(cfac);
   nz = AngularZMix(cfac, &ang, tr->nlo, tr->nup, -1, -1);
   if (nz <= 0) {
     return -1;
@@ -2442,7 +2442,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   
   cfac_cbcache_init(&cbcache);
  
-  if (GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0) == -1)
+  if (GetLowUpEB(cfac, &nlow, &low, &nup, &up, nlow0, low0, nup0, up0) == -1)
     return 0;
 
   nc = OverlapLowUp(nlow, low, nup, up);
@@ -2695,7 +2695,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   
   cfac_cbcache_init(&cbcache);
  
-  if (GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0) == -1)
+  if (GetLowUpEB(cfac, &nlow, &low, &nup, &up, nlow0, low0, nup0, up0) == -1)
     return 0;
 
   nc = OverlapLowUp(nlow, low, nup, up);

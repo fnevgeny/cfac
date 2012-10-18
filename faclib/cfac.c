@@ -265,6 +265,13 @@ cfac_t *cfac_new(void)
         return NULL;
     }
     memset(cfac->angzxz_array, 0, sizeof(ANGZ_DATUM)*MAX_HAMS2);
+    
+    cfac->transition_options.gauge = DGAUGE;
+    cfac->transition_options.mode  = DMODE;
+    cfac->transition_options.max_e = ERANK;
+    cfac->transition_options.max_m = MRANK;
+    cfac->transition_options.eps0  = TRCUT0;
+    cfac->transition_options.eps   = TRCUT;
 
     return cfac;
 }

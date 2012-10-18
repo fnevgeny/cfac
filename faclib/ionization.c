@@ -1042,7 +1042,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
     } 
     
     if (qk_mode != QK_CB) {
-      SetTransitionOptions(2, 1, 4, 4);
+      SetTransitionOptions(cfac, 2, 1, 4, 4);
       SetRRTEGrid(1, e, e);
       SetPEGridLimits(egrid_min, egrid_max, egrid_limits_type);
       SetPEGridDetail(n_egrid, egrid);

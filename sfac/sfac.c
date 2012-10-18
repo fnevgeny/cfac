@@ -2027,7 +2027,7 @@ static int PSetTransitionCut(int argc, char *argv[], int argt[],
     c = atof(argv[1]);
   }
 
-  SetTransitionCut(c0, c);
+  SetTransitionCut(cfac, c0, c);
 						  
   return 0;
 }
@@ -2050,7 +2050,7 @@ static int PSetTransitionOptions(int argc, char *argv[], int argt[],
     }
   }
 
-  SetTransitionOptions(gauge, mode, max_e, max_m);
+  SetTransitionOptions(cfac, gauge, mode, max_e, max_m);
 
   return 0;
 }
@@ -2469,7 +2469,7 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
     return -1;
   }
 
-  SaveTransition(nlow, low, nup, up, argv[0], m);
+  SaveTransition(cfac, nlow, low, nup, up, argv[0], m);
   
   if (low) {
     free(low);
@@ -2679,7 +2679,7 @@ static int PSetTransitionMode(int argc, char *argv[], int argt[],
   }
 
   m = atoi(argv[0]);
-  SetTransitionMode(m);
+  SetTransitionMode(cfac, m);
   return 0;
 }
 
@@ -2692,7 +2692,7 @@ static int PSetTransitionGauge(int argc, char *argv[], int argt[],
   }
 
   m = atoi(argv[0]);
-  SetTransitionGauge(m);
+  SetTransitionGauge(cfac, m);
   return 0;
 }
 
@@ -2705,7 +2705,7 @@ static int PSetTransitionMaxE(int argc, char *argv[], int argt[],
   }
 
   m = atoi(argv[0]);
-  SetTransitionMaxE(m);
+  SetTransitionMaxE(cfac, m);
   return 0;
 }
 
@@ -2718,7 +2718,7 @@ static int PSetTransitionMaxM(int argc, char *argv[], int argt[],
   }
 
   m = atoi(argv[0]);
-  SetTransitionMaxM(m);
+  SetTransitionMaxM(cfac, m);
   return 0;
 }
 
@@ -2869,7 +2869,7 @@ static int PTransitionTableEB(int argc, char *argv[], int argt[],
     return -1;
   }
   
-  SaveTransitionEB(nlow, low, nup, up, argv[0], m);
+  SaveTransitionEB(cfac, nlow, low, nup, up, argv[0], m);
   free(low);
   free(up);
 

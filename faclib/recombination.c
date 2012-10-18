@@ -559,8 +559,8 @@ int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
     return 0;
   }
   
-  gauge = GetTransitionGauge();
-  mode = GetTransitionMode();
+  gauge = GetTransitionGauge(cfac);
+  mode = GetTransitionMode(cfac);
 
   *p = (double *) malloc(sizeof(double)*nqk);
   
@@ -653,8 +653,8 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
     return 0;
   }
 
-  gauge = GetTransitionGauge();
-  mode = GetTransitionMode();
+  gauge = GetTransitionGauge(cfac);
+  mode = GetTransitionMode(cfac);
 
   *p = (double *) malloc(sizeof(double)*nqk);
   
@@ -864,8 +864,8 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   nz = AngularZFreeBound(cfac, &ang, f, rec);
   if (nz <= 0) return -1;
 
-  gauge = GetTransitionGauge();
-  mode = GetTransitionMode();
+  gauge = GetTransitionGauge(cfac);
+  mode = GetTransitionMode(cfac);
   c = 2*abs(m) - 2;
 
   for (ie = 0; ie < n_egrid; ie++) {
@@ -1354,7 +1354,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
     }
     emin = e0;
     emax = e1;  
-    if (m == 1 || GetTransitionMode() == M_FR) {
+    if (m == 1 || GetTransitionMode(cfac) == M_FR) {
       e = (emax - emin)/(0.5*(emin+emax));
       if (!te_set) {
 	if (e < 0.1) {
@@ -1430,7 +1430,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   int te_set, e_set, usr_set;
   double c, e0, e1;
 
-  if (m != -1 && GetTransitionGauge() != G_BABUSHKIN && qk_mode == QK_FIT) {
+  if (m != -1 && GetTransitionGauge(cfac) != G_BABUSHKIN && qk_mode == QK_FIT) {
     printf("QK_FIT mode is only available to LENGTH form of E1 transitions\n");
     printf("Changing QK_FIT to QK_INTERPOLATE.\n");
     SetRecQkMode(QK_INTERPOLATE, -1.0);
@@ -1529,7 +1529,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
     }
     emin = e0;
     emax = e1;  
-    if (m == 1 || GetTransitionMode() == M_FR) {
+    if (m == 1 || GetTransitionMode(cfac) == M_FR) {
       e = (emax - emin)/(0.5*(emin+emax));
       if (!te_set) {
 	if (e < EPS3) {
@@ -1844,7 +1844,7 @@ int AsymmetryM_PI(int k0, double e, int mx, int m, double *b) {
   GetJLFromKappa(orb0->kappa, &j0, &kl0);
   aw = FINE_STRUCTURE_CONST*e;
   aw0 = FINE_STRUCTURE_CONST*(e - orb0->energy);
-  gauge = GetTransitionGauge();
+  gauge = GetTransitionGauge(cfac);
   
   nak = malloc(sizeof(int)*mx);
   ak = malloc(sizeof(double *)*mx);

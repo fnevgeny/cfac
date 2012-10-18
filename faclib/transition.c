@@ -3,7 +3,6 @@
 #include <time.h>
 #include <math.h>
 
-#include "global.h"
 #include "consts.h"
 #include "cfacP.h"
 #include "radial.h"
@@ -12,83 +11,64 @@
 #include "dbase.h"
 #include "transition.h"
 
-/* the following options controll the computation methods of OS.
-   gauge = 1 coulomb gauge (velocity form)
-         = 2 babushkin gauge (length form)
-
-   mode = 0 use relativistic expression for radial integrals.
-        = 1 use non-relativistic approximation.
-   
-   max_e, the maximum rank of electric multipoles.
-   max_m, the maximum rank of magnetic multipoles.
-*/
-static struct {
-  int gauge;
-  int mode;
-  int max_e;
-  int max_m;
-  double eps0;
-  double eps;
-} transition_option = {DGAUGE, DMODE, ERANK, MRANK, TRCUT0, TRCUT};
-
 typedef struct {
   TR_RECORD r;
   TR_EXTRA rx;
   int ks[2];
 } TR_DATUM;
 
-int SetTransitionCut(double c0, double c) {
+int SetTransitionCut(cfac_t *cfac, double c0, double c) {
   if (c0 >= 0) {
-    transition_option.eps0 = c0;
+    cfac->transition_options.eps0 = c0;
   } else {
-    transition_option.eps0 = TRCUT0;
+    cfac->transition_options.eps0 = TRCUT0;
   }
   if (c >= 0) {
-    transition_option.eps = c;
+    cfac->transition_options.eps = c;
   } else {
-    transition_option.eps = TRCUT;
+    cfac->transition_options.eps = TRCUT;
   }
   return 0;
 }
 
-double GetTransitionCut(void) {
-  return transition_option.eps;
+double GetTransitionCut(const cfac_t *cfac) {
+  return cfac->transition_options.eps;
 }
 
-void SetTransitionMode(int m) {
-  transition_option.mode = m;
+void SetTransitionMode(cfac_t *cfac, int m) {
+  cfac->transition_options.mode = m;
 }
 
-void SetTransitionGauge(int m) {
-  transition_option.gauge = m;
+void SetTransitionGauge(cfac_t *cfac, int m) {
+  cfac->transition_options.gauge = m;
 }
 
-void SetTransitionMaxE(int m) {
-  transition_option.max_e = m;
+void SetTransitionMaxE(cfac_t *cfac, int m) {
+  cfac->transition_options.max_e = m;
 }
 
-void SetTransitionMaxM(int m) {
-  transition_option.max_m = m;
+void SetTransitionMaxM(cfac_t *cfac, int m) {
+  cfac->transition_options.max_m = m;
 }
 
-void SetTransitionOptions(int gauge, int mode, 
+void SetTransitionOptions(cfac_t *cfac, int gauge, int mode, 
 			  int max_e, int max_m) {
-  transition_option.gauge = gauge;
-  transition_option.mode = mode;
-  transition_option.max_e = max_e;
-  transition_option.max_m = max_m;
+  cfac->transition_options.gauge = gauge;
+  cfac->transition_options.mode = mode;
+  cfac->transition_options.max_e = max_e;
+  cfac->transition_options.max_m = max_m;
 }
 
-int GetTransitionGauge(void) {
-  return transition_option.gauge;
+int GetTransitionGauge(const cfac_t *cfac) {
+  return cfac->transition_options.gauge;
 }
 
-int GetTransitionMode(void) {
-  return transition_option.mode;
+int GetTransitionMode(const cfac_t *cfac) {
+  return cfac->transition_options.mode;
 }
 
 /* If strict flag is set, calculate only if energy > 0 */
-static int _TRMultipole(double *strength, double *energy,
+static int _TRMultipole(cfac_t *cfac, double *strength, double *energy,
 		int m, int lower, int upper, int strict) {
   int m2;
   int p1, p2, j1, j2;
@@ -134,12 +114,12 @@ static int _TRMultipole(double *strength, double *energy,
 
   for (i = 0; i < nz; i++) {
     if (ang[i].k != m2) continue;
-    if (transition_option.mode == M_NR && m != 1) {
+    if (cfac->transition_options.mode == M_NR && m != 1) {
       r = MultipoleRadialNR(cfac, m, ang[i].k0, ang[i].k1, 
-			    transition_option.gauge);
+			    cfac->transition_options.gauge);
     } else {
       r = MultipoleRadialFR(cfac, aw, m, ang[i].k0, ang[i].k1,
-			    transition_option.gauge);
+			    cfac->transition_options.gauge);
     }
     s += r * ang[i].coeff;
   }
@@ -201,7 +181,7 @@ static void TRMultipole_cache_free(TRM_CACHE_T *cache)
 
 /* If energy is not NULL, it is assigned trans. energy;
    if strict flag is set, calculate only if *energy > 0 */
-int TRMultipole(double *strength, double *energy,
+int TRMultipole(cfac_t *cfac, double *strength, double *energy,
 		int m, int lower, int upper, int strict) {
   double dE = 0.0;
   
@@ -223,7 +203,7 @@ int TRMultipole(double *strength, double *energy,
     }
   }
   
-  res = _TRMultipole(strength, &dE, m, lower, upper, strict);
+  res = _TRMultipole(cfac, strength, &dE, m, lower, upper, strict);
   if (energy) {
     *energy = dE;
   }
@@ -238,7 +218,7 @@ int TRMultipole(double *strength, double *energy,
   return res;
 }  
 
-int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper) {
+int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m, int lower, int upper) {
   LEVEL *lev1, *lev2;
   int i1, m2, q;
 
@@ -277,7 +257,7 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
       plev2 = GetLevel(cfac, ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
       
-      if (TRMultipole(&r, NULL, m, ilev1, ilev2, 0) != 0) {
+      if (TRMultipole(cfac, &r, NULL, m, ilev1, ilev2, 0) != 0) {
         continue;
       }
       
@@ -297,7 +277,7 @@ int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper)
   return 0;
 }
 
-int SaveTransitionEB0(int nlow, int *low, int nup, int *up, 
+int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		      char *fn, int m) {
   int k, i, j, nq;
   double emin, emax, e0, s[101], et;
@@ -308,7 +288,7 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
   FILE *f;
   
   if (nlow <= 0 || nup <= 0) return -1;
-  if (m == 1 || transition_option.mode == M_FR) {
+  if (m == 1 || cfac->transition_options.mode == M_FR) {
     k = 0;
     emin = 1E10;
     emax = 1E-10;
@@ -347,11 +327,11 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
   DecodeBasisEB(lev1->pb, &i, &j);  
   tr_hdr.nele = GetNumElectrons(cfac, i);
   tr_hdr.multipole = m;
-  tr_hdr.gauge = GetTransitionGauge();
+  tr_hdr.gauge = GetTransitionGauge(cfac);
   if (m == 1) { /* always FR for M1 transitions */
     tr_hdr.mode = M_FR;
   } else {
-    tr_hdr.mode = GetTransitionMode();
+    tr_hdr.mode = GetTransitionMode(cfac);
   }
   nq = 2*abs(m) + 1;
   r.strength = (float *) malloc(sizeof(float)*nq);
@@ -362,7 +342,7 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
 
   for (j = 0; j < nup; j++) {
     for (i = 0; i < nlow; i++) {
-      k = TRMultipoleEB(s, &et, m, low[i], up[j]);
+      k = TRMultipoleEB(cfac, s, &et, m, low[i], up[j]);
       if (k != 0) continue;
       e0 = 0.0;
       for (k = 0; k < nq; k++) {
@@ -383,7 +363,7 @@ int SaveTransitionEB0(int nlow, int *low, int nup, int *up,
   return 0;
 }
       
-int SaveTransition0(int nlow, int *low, int nup, int *up, 
+int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		    char *fn, int m) {
   int i, j, k, jup;
   FILE *f;
@@ -431,11 +411,11 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
   fhdr.atom = GetAtomicNumber(cfac);
   tr_hdr.nele = GetNumElectrons(cfac, low[0]);
   tr_hdr.multipole = m;
-  tr_hdr.gauge = GetTransitionGauge();
+  tr_hdr.gauge = GetTransitionGauge(cfac);
   if (m == 1) { /* always FR for M1 transitions */
     tr_hdr.mode = M_FR;
   } else {
-    tr_hdr.mode = GetTransitionMode();
+    tr_hdr.mode = GetTransitionMode(cfac);
   }
   f = OpenFile(fn, &fhdr);
   InitFile(f, &fhdr, &tr_hdr);
@@ -448,7 +428,7 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
     trd = 0.0;
     for (i = 0; i < nlow; i++) {
       a[i] = 0.0;
-      k = TRMultipole(s+i, et+i, m, low[i], up[j], 1);
+      k = TRMultipole(cfac, s+i, et+i, m, low[i], up[j], 1);
       if (k != 0) continue;
       gf = OscillatorStrength(m, et[i], s[i], &(a[i]));
       a[i] /= jup+1.0;
@@ -457,7 +437,7 @@ int SaveTransition0(int nlow, int *low, int nup, int *up,
     if (trd < 1E-30) continue;
     r.upper = up[j];
     for (i = 0; i < nlow; i++) {
-      if (a[i] < (transition_option.eps * trd)) continue;
+      if (a[i] < (cfac->transition_options.eps * trd)) continue;
       r.lower = low[i];
       r.strength = s[i];
       WriteTRRecord(f, &r, NULL);
@@ -536,7 +516,7 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
   return n;
 }
   
-int SaveTransition(int nlow, int *low, int nup, int *up,
+int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 		   char *fn, int m) {
   int n, *alev = NULL, i, nc;
   
@@ -561,11 +541,11 @@ int SaveTransition(int nlow, int *low, int nup, int *up,
   if (nlow <= 0 || nup <= 0) return -1;
 
   nc = OverlapLowUp(nlow, low, nup, up);
-  SaveTransition0(nc, low+nlow-nc, nc, up+nup-nc, fn, m);
-  SaveTransition0(nc, low+nlow-nc, nup-nc, up, fn, m);
-  SaveTransition0(nup-nc, up, nc, low+nlow-nc, fn, m);
-  SaveTransition0(nlow-nc, low, nup, up, fn, m);
-  SaveTransition0(nup, up, nlow-nc, low, fn, m);
+  SaveTransition0(cfac, nc, low+nlow-nc, nc, up+nup-nc, fn, m);
+  SaveTransition0(cfac, nc, low+nlow-nc, nup-nc, up, fn, m);
+  SaveTransition0(cfac, nup-nc, up, nc, low+nlow-nc, fn, m);
+  SaveTransition0(cfac, nlow-nc, low, nup, up, fn, m);
+  SaveTransition0(cfac, nup, up, nlow-nc, low, fn, m);
 
   if (n > 0) free(alev);
   ReinitRadial(cfac, 1);
@@ -573,7 +553,7 @@ int SaveTransition(int nlow, int *low, int nup, int *up,
   return 0;
 }
   
-int GetLowUpEB(int *nlow, int **low, int *nup, int **up, 
+int GetLowUpEB(cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
 	       int nlow0, int *low0, int nup0, int *up0) {  
   int i, j, ilev, mlev, n;
   LEVEL *lev;
@@ -605,21 +585,21 @@ int GetLowUpEB(int *nlow, int **low, int *nup, int **up,
   return 0;
 }
 
-int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
+int SaveTransitionEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0,
 		     char *fn, int m) {
   int n, nlow, *low, nup, *up, nc;
 
-  n = GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
+  n = GetLowUpEB(cfac, &nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
   if (n == -1) return 0;
   
   trm_cache = TRMultipole_cache_new(GetNumLevels(cfac));
 
   nc = OverlapLowUp(nlow, low, nup, up);
-  SaveTransitionEB0(nc, low+nlow-nc, nc, up+nup-nc, fn, m);
-  SaveTransitionEB0(nc, low+nlow-nc, nup-nc, up, fn, m);
-  SaveTransitionEB0(nup-nc, up, nc, low+nlow-nc, fn, m);
-  SaveTransitionEB0(nlow-nc, low, nup, up, fn, m);
-  SaveTransitionEB0(nup, up, nlow-nc, low, fn, m);
+  SaveTransitionEB0(cfac, nc, low+nlow-nc, nc, up+nup-nc, fn, m);
+  SaveTransitionEB0(cfac, nc, low+nlow-nc, nup-nc, up, fn, m);
+  SaveTransitionEB0(cfac, nup-nc, up, nc, low+nlow-nc, fn, m);
+  SaveTransitionEB0(cfac, nlow-nc, low, nup, up, fn, m);
+  SaveTransitionEB0(cfac, nup, up, nlow-nc, low, fn, m);
 
   free(low);
   free(up);

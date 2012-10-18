@@ -123,6 +123,15 @@ struct _cfac_t {
     ANGZ_DATUM *angmz_array;  /* precalculated angular coefficients          */
 
     ANGULAR_FROZEN ang_frozen;/* angular coefficients for frozen states      */
+
+    struct {
+        int gauge;            /* gauge (Coulomb/Babushkin)                   */
+        int mode;             /* mode (relativistic/non-relativistic)        */
+        int max_e;            /* maximum rank of electric multipoles         */
+        int max_m;            /* maximum rank of magnetic multipoles         */
+        double eps0;
+        double eps;
+    } transition_options;
 };
 
 typedef struct {

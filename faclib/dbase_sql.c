@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "structure.h"
 #include "dbase.h"
@@ -16,7 +15,8 @@
 #define SQLITE3_BIND_STR(stmt, id, txt) \
         sqlite3_bind_text(stmt, id, txt, -1, SQLITE_STATIC)
 
-int StoreInit(const char *fn, int reset, sqlite3 **db, unsigned long *sid)
+int StoreInit(const cfac_t *cfac,
+    const char *fn, int reset, sqlite3 **db, unsigned long *sid)
 {
     int retval = 0;
     struct stat sb;
@@ -547,7 +547,8 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     return retval;
 }
 
-int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreRRTable(const cfac_t *cfac,
+    sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 {
     int retval = 0;
     int rc;

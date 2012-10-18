@@ -1975,7 +1975,8 @@ int GetNumElectrons(cfac_t *cfac, int k)
     }
 }
 
-int GetTransition(cfac_t *cfac, int nlo, int nup, TRANSITION *tr, int *swapped)
+int GetTransition(const cfac_t *cfac,
+    int nlo, int nup, TRANSITION *tr, int *swapped)
 {
     if (!tr) {
         return -1;

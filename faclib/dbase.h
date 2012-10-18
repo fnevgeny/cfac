@@ -451,12 +451,15 @@ FORM_FACTOR *BornFormFactor(void);
 void SetBornMass(double m);
 double BornMass(void);
 
-int StoreInit(const char *fn, int reset, sqlite3 **db, unsigned long *sid);
-int StoreTable(sqlite3 *db, unsigned long int sid, const char *ifn);
+int StoreInit(const cfac_t *cfac,
+    const char *fn, int reset, sqlite3 **db, unsigned long *sid);
+int StoreTable(const cfac_t *cfac,
+    sqlite3 *db, unsigned long int sid, const char *ifn);
 int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreRRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreRRTable(const cfac_t *cfac,
+    sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreClose(sqlite3 *db);

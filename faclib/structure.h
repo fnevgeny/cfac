@@ -163,7 +163,8 @@ int AngularZxZFreeBound(cfac_t *cfac, ANGULAR_ZxZMIX **ang, int lower, int upper
 int GetBasisTable(cfac_t *cfac, char *fn, int m);
 int ConstructLevelName(cfac_t *cfac, char *name, char *sname, char *nc, 
 		       int *vnl, STATE *basis);
-int GetTransition(cfac_t *cfac, int nlo, int nup, TRANSITION *tr, int *swapped);
+int GetTransition(const cfac_t *cfac,
+    int nlo, int nup, TRANSITION *tr, int *swapped);
 int SaveLevels(cfac_t *cfac, char *fn, int m, int n);
 int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n);
 int SetAngZOptions(cfac_t *cfac, int n, double mc, double c);

@@ -899,7 +899,7 @@ static int PStoreInit(int argc, char *argv[], int argt[],
     }
   }
   
-  return StoreInit(argv[0], reset, &db, &sid);
+  return StoreInit(cfac, argv[0], reset, &db, &sid);
 }
 
 static int PStoreTable(int argc, char *argv[], int argt[], 
@@ -912,7 +912,7 @@ static int PStoreTable(int argc, char *argv[], int argt[],
     return -1;
   }
 
-  return StoreTable(db, sid, argv[0]);
+  return StoreTable(cfac, db, sid, argv[0]);
 }
 
 static int PStoreClose(int argc, char *argv[], int argt[], 

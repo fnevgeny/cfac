@@ -3464,7 +3464,8 @@ int ISearch(int i, int n, int *ia) {
   return -1;
 }
 
-int StoreTable(sqlite3 *db, unsigned long int sid, const char *ifn)
+int StoreTable(const cfac_t *cfac,
+    sqlite3 *db, unsigned long int sid, const char *ifn)
 {
     F_HEADER fh;
     FILE *fp;
@@ -3493,7 +3494,7 @@ int StoreTable(sqlite3 *db, unsigned long int sid, const char *ifn)
         retval = StoreCETable(db, sid, fp, swp);
         break;
     case DB_RR:
-        retval = StoreRRTable(db, sid, fp, swp);
+        retval = StoreRRTable(cfac, db, sid, fp, swp);
         break;
     case DB_AI:
         retval = StoreAITable(db, sid, fp, swp);

@@ -2316,7 +2316,7 @@ static int PStructure(int argc, char *argv[], int argt[],
     if (ng0 < ng) {
       AddToLevels(cfac, ng0, kg);
     } else {
-      AddToLevels(cfac, 0, kg);
+      AddToLevels(cfac, 0, NULL);
     }
   }
 

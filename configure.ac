@@ -118,14 +118,6 @@ AC_ARG_WITH(extralib,
 	[  --with-extralib         Extra Libs],
 	[extralib=$withval])
 
-# setup libs 
-LIBS="$LIBS -lgsl -lgslcblas -lsqlite3"
-fwithm=`echo "$FLIBS " | grep " -lm"`
-if test "x$fwithm" = "x"
-then
-  LIBS="$LIBS -lm"
-fi
-
 if test "x$extrainc" != "x"
 then
   CPPFLAGS="$CPPFLAGS $extrainc"
@@ -135,11 +127,27 @@ then
   LDFLAGS="$LDFLAGS $extralib"
 fi
 
+# libm - don't look for it again if $FLIBS already include it
+fwithm=`echo "$FLIBS " | grep " -lm"`
+if test "x$fwithm" = "x"
+then
+  AC_CHECK_LIB([m],[cos])
+fi
+
+# GSL libs 
+AC_CHECK_LIB([gslcblas],[cblas_dgemm])
+AC_CHECK_LIB([gsl],[gsl_odeiv2_driver_apply],[],
+             [AC_MSG_ERROR(could not find required version of GSL)])
+
+# Sqlite3
+AC_CHECK_LIB([sqlite3],[sqlite3_open],[],
+             [AC_MSG_ERROR(could not find SQLite3 library)])
+
 # add fopt
 FFLAGSNO="$FFLAGS"
 AC_SUBST(FFLAGSNO)
 FFLAGS="$FFLAGS $fopt"
-      
+
 AC_CONFIG_FILES([Make.conf])
 
 AC_OUTPUT

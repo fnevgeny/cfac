@@ -1918,7 +1918,7 @@ int SetOrbitalRGrid(cfac_t *cfac) {
 
   gratio = pot->ratio;
   gasymp = pot->asymp;
-  z0 = GetAtomicNumber(cfac);
+  z0 = cfac_get_atomic_number(cfac);
   z = z0;
   if (pot->N > 0) z = (z - pot->N + 1);
   if (pot->flag == 0) pot->flag = -1; 
@@ -2011,7 +2011,7 @@ int SetPotentialZ(cfac_t *cfac, double c) {
 
   c = 1.0+c;
   for (i = 0; i < pot->maxrp; i++) {
-    pot->Z[i] = c*GetAtomicEffectiveZ(cfac, pot->rad[i]);
+    pot->Z[i] = c*cfac_get_atomic_effective_z(cfac, pot->rad[i]);
   }
   return 0;
 }
@@ -2305,7 +2305,7 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
     pot->uehling[i] /= pot->rad[i];
   }
   
-  rn = GetAtomicR(cfac);
+  rn = cfac_get_atomic_rn(cfac);
 
   if (rn) {
     a = -2.0*r0*FINE_STRUCTURE_CONST/3.0;

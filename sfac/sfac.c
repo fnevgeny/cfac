@@ -1089,7 +1089,7 @@ static int PSetAtom(int argc, char *argv[], int argt[],
     }
   }
   
-  if (SetAtom(cfac, argv[0], z, mass, rn) < 0) return -1;
+  if (cfac_set_atom(cfac, argv[0], z, mass, rn) < 0) return -1;
   
   return 0;
 }

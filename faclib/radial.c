@@ -2105,7 +2105,7 @@ int SlaterTotal(cfac_t *cfac,
   if (js[2] <= 0) js[2] = GetJFromKappa(orb2->kappa);
   if (js[3] <= 0) js[3] = GetJFromKappa(orb3->kappa);  
 
-  am = AMU * GetAtomicMass(cfac);
+  am = AMU * cfac_get_atomic_mass(cfac);
   if (sd) {
     d = 0.0;
     if (IsEven((kl0+kl2)/2+kk) && IsEven((kl1+kl3)/2+kk) &&
@@ -2256,14 +2256,14 @@ double QED1E(cfac_t *cfac, int k0, int k1) {
     IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
     a = -a;
     if (k0 == k1) a += orb1->energy;
-    a /= (AMU * GetAtomicMass(cfac));
+    a /= (AMU * cfac_get_atomic_mass(cfac));
     r += a;
     for (i = 0; i < potential->maxrp; i++) {
       dwork[i] = (orb1->energy - (potential->U[i] + potential->Vc[i]))*
                  (orb2->energy - (potential->U[i] + potential->Vc[i]));
     }
     IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, &a, -1);
-    a *= FINE_STRUCTURE_CONST2/(2.0 * AMU * GetAtomicMass(cfac));
+    a *= FINE_STRUCTURE_CONST2/(2.0 * AMU * cfac_get_atomic_mass(cfac));
     r += a;
   }
 

@@ -70,7 +70,7 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
     cfac->b1[2] = -cfac->b1[0];
   }
 
-  mass = GetAtomicMass(cfac);
+  mass = cfac_get_atomic_mass(cfac);
   mass = 1.0 + 5.45683e-4/mass;
   for (i = 0; i < 3; i++) {
     cfac->b1[i] *= mass;
@@ -1987,8 +1987,8 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   n0 = m;
   if (n < 0) n = cfac->n_eblevels - m;
   fhdr.type = DB_ENF;
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
   f = OpenFile(fn, &fhdr);
 
   lev = GetEBLevel(cfac, n0);
@@ -2039,8 +2039,8 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
   n0 = m;
   if (n < 0) n = cfac->n_levels - m;
   fhdr.type = DB_EN;
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
   f = OpenFile(fn, &fhdr);
 
   for (k = 0; k < n; k++) {

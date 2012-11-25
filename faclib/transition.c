@@ -320,8 +320,8 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     }
   }
   fhdr.type = DB_TRF;
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);  
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);  
   lev1 = GetEBLevel(cfac, low[0]);
   DecodeBasisEB(lev1->pb, &i, &j);  
   tr_hdr.nele = GetNumElectrons(cfac, i);
@@ -406,8 +406,8 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   }
   
   fhdr.type = DB_TR;
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
   tr_hdr.nele = GetNumElectrons(cfac, low[0]);
   tr_hdr.multipole = m;
   tr_hdr.gauge = GetTransitionGauge(cfac);

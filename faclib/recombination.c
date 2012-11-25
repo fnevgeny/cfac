@@ -1494,8 +1494,8 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   }
 
   fhdr.type = DB_RR;
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
   rr_hdr.nele = GetNumElectrons(cfac, low[0]);
   rr_hdr.qk_mode = qk_mode;
   rr_hdr.nparams = nqk;
@@ -1718,8 +1718,8 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   } else {
     fhdr.type = DB_AIM;
   }
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
   if (!msub) {
     ai_hdr.nele = GetNumElectrons(cfac, low[0]);
     ai_hdr.emin = eref;
@@ -2015,7 +2015,7 @@ int SaveAsymmetry(char *fn, char *s, int mx) {
       }
       e0 *= HARTREE_EV;
       fprintf(f, "#  %2s  %2d %2d\n", 
-	      GetAtomicSymbol(cfac), (int)GetAtomicNumber(cfac), (int)GetResidualZ(cfac));
+	      cfac_get_atomic_symbol(cfac), (int)cfac_get_atomic_number(cfac), (int)GetResidualZ(cfac));
       fprintf(f, "#  %d%s%c %d %d %d %12.5E  %d %d\n",
 	      n, sp, js, n, kl, jj, e0, n_usr, mx);
       for (i = 0; i < n_usr; i++) {

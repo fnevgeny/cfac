@@ -107,9 +107,9 @@ int StoreInit(const cfac_t *cfac,
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
     
     sqlite3_bind_int   (stmt, 1, *sid);
-    SQLITE3_BIND_STR   (stmt, 2, GetAtomicSymbol(cfac));
-    sqlite3_bind_int   (stmt, 3, GetAtomicNumber(cfac));
-    sqlite3_bind_double(stmt, 4, GetAtomicMass(cfac));
+    SQLITE3_BIND_STR   (stmt, 2, cfac_get_atomic_symbol(cfac));
+    sqlite3_bind_int   (stmt, 3, cfac_get_atomic_number(cfac));
+    sqlite3_bind_double(stmt, 4, cfac_get_atomic_mass(cfac));
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {

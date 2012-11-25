@@ -667,7 +667,7 @@ double BEScale(int k, double e) {
   double z, a, b, c;
   ORBITAL *orb;
 
-  z = GetAtomicNumber(cfac);
+  z = cfac_get_atomic_number(cfac);
   a = MeanPotential(cfac, k, k);
   b = RadialMoments(cfac, -1, k, k);
   c = -a/b;
@@ -952,8 +952,8 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
   r.params = (float *) malloc(sizeof(float)*nqk);
     
   fhdr.type = DB_CI;
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
   ci_hdr.nele = GetNumElectrons(cfac, b[0]);
   ci_hdr.qk_mode = qk_mode;
   ci_hdr.nparams = nqk;
@@ -1459,8 +1459,8 @@ int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
   }  
     
   fhdr.type = DB_CIM;
-  strcpy(fhdr.symbol, GetAtomicSymbol(cfac));
-  fhdr.atom = GetAtomicNumber(cfac);
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
   ci_hdr.nele = GetNumElectrons(cfac, b[0]);
   ci_hdr.egrid_type = egrid_type;
   ci_hdr.usr_egrid_type = usr_egrid_type;

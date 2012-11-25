@@ -30,7 +30,7 @@ static double _emass[] =
  254, 253, 256, 254, 257, 257, 260, 263, 262, 265, 266};
 
 
-int SetAtom(cfac_t *cfac, char *s, double z, double mass, double rn) {
+int cfac_set_atom(cfac_t *cfac, char *s, double z, double mass, double rn) {
   cfac_nucleus_t *atom = &cfac->nucleus;
   unsigned int i, n_elements = sizeof(_emass)/sizeof(double);
 
@@ -77,19 +77,19 @@ int SetAtom(cfac_t *cfac, char *s, double z, double mass, double rn) {
   return 0;
 }
 
-double GetAtomicMass(const cfac_t *cfac) {
+double cfac_get_atomic_mass(const cfac_t *cfac) {
   return cfac->nucleus.mass;
 }
 
-double GetAtomicNumber(const cfac_t *cfac) {
+double cfac_get_atomic_number(const cfac_t *cfac) {
   return cfac->nucleus.atomic_number;
 }
 
-const char *GetAtomicSymbol(const cfac_t *cfac) {
+const char *cfac_get_atomic_symbol(const cfac_t *cfac) {
   return cfac->nucleus.symbol;
 }
 
-double GetAtomicEffectiveZ(const cfac_t *cfac, double r) {
+double cfac_get_atomic_effective_z(const cfac_t *cfac, double r) {
   cfac_nucleus_t atom = cfac->nucleus;
   double x, y;
   if (r > atom.rn) {
@@ -102,6 +102,6 @@ double GetAtomicEffectiveZ(const cfac_t *cfac, double r) {
   }
 }
 
-double GetAtomicR(const cfac_t *cfac) {
+double cfac_get_atomic_rn(const cfac_t *cfac) {
   return cfac->nucleus.rn;
 }

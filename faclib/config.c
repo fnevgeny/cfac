@@ -2211,3 +2211,38 @@ void FreeConfigData(void *p) {
     c->nnrs = 0;
   }
 }
+
+int cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str)
+{
+    CONFIG *cfgs;
+    int j, gidx, ncfgs;
+    char *tmpstr;
+    
+    gidx = GroupIndex(cfac, gname);
+    if (gidx < 0) {
+        return -1;
+    }
+    
+    tmpstr = malloc((strlen(cfg_str) + 1)*sizeof(char));
+    strcpy(tmpstr, cfg_str);
+    
+    ncfgs = GetConfigFromString(&cfgs, tmpstr);
+    free(tmpstr);
+    for (j = 0; j < ncfgs; j++) {
+        CONFIG *cfg = &cfgs[j];
+        
+        if (Couple(cfg) < 0) {
+            return -1;
+        }
+        if (AddConfigToList(cfac, gidx, cfg) < 0) {
+            return -1;
+        }
+    }
+    
+    if (ncfgs > 0) {
+        free(cfgs);
+    }
+
+    return gidx;
+}
+

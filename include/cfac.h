@@ -24,4 +24,8 @@ cfac_get_atomic_symbol(const cfac_t *cfac);
 double
 cfac_get_atomic_effective_z(const cfac_t *cfac, double r);
 
+/* config.c */
+int
+cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str);
+
 #endif /* __CFAC_H_ */

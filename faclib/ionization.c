@@ -103,7 +103,7 @@ static struct {
   double kl[MAXNKL+1];
   double log_kl[MAXNKL];
 } pw_scratch = {IONMAXK, IONLQR, IONLMAX, IONLEJEC, 
-		IONLCB, IONTOL, 0, 0, 0, {}, {}};
+		IONLCB, IONTOL, 0, 0, 0, {0.0}, {0.0}};
 
 static MULTI *qk_array;
 

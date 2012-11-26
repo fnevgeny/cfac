@@ -57,7 +57,7 @@ static double eborn = EBORN;
 
 static FILE *fpw=NULL;
 
-static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 5E-2, 0, 0, 10, {}, {}};
+static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 5E-2, 0, 0, 10, {0.0}, {0.0}};
 
 static MULTI *pk_array;
 static MULTI *qk_array;

@@ -61,7 +61,7 @@ static struct {
   int kappa0[(MAXNKL+1)*2];
 } pw_scratch = {RECNSPEC, RECNFROZEN, 
 		RECNMAX, RECLMAX, RECLMAX,
-		0, 0, {0, RECLMAX}, {}, {}};
+		0, 0, {0, RECLMAX}, {0.0}, {0.0}};
 
 double ai_cut = AICUT;
 

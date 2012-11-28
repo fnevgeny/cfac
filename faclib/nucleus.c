@@ -52,7 +52,7 @@ int cfac_set_atom(cfac_t *cfac, char *s, double z, double mass, double rn) {
   }
   if (i == n_elements) return -1;
   
-  cfac->anum = i;
+  cfac->anum = i + 1;
 
   if (z > 0) {
     atom->atomic_number = z;

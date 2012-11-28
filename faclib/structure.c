@@ -1870,56 +1870,42 @@ int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
   }
 }
 
-int SortLevels(cfac_t *cfac, int start, int n, int m) {
+int SortLevels(cfac_t *cfac, int start, int n, int EB) {
   int i, j, i0, j0;
   LEVEL tmp, *lev1, *lev2, *levp;
+  LEVEL *(*get_a_level)(const cfac_t *cfac, int k);
 
-  if (m == 0) {
-    if (n < 0) n = cfac->n_levels-start;
-  } else {
+  if (EB) {
+    get_a_level = GetEBLevel;
     if (n < 0) n = cfac->n_eblevels-start;
+  } else {
+    get_a_level = GetLevel;
+    if (n < 0) n = cfac->n_levels-start;
   }
   while (1 < n) {
     i = start;
     j = start + n - 1;
-    if (m == 0) {
-      lev1 = GetLevel(cfac, i);
-      lev2 = GetLevel(cfac, j);
-    } else {
-      lev1 = GetEBLevel(cfac, i);
-      lev2 = GetEBLevel(cfac, j);
-    }
+    lev1 = get_a_level(cfac, i);
+    lev2 = get_a_level(cfac, j);
     levp = lev2;
     
     while (i < j) {
       while (i < j) {
 	if (CompareLevels(cfac, lev1, levp) > 0) break;
 	i++;
-	if (m == 0) {
-	  lev1 = GetLevel(cfac, i);
-	} else {
-	  lev1 = GetEBLevel(cfac, i);
-	}
+	lev1 = get_a_level(cfac, i);
       }
       while (i < j) {
 	if (CompareLevels(cfac, levp, lev2) > 0) break;
 	j--;
-	if (m == 0) {
-	  lev2 = GetLevel(cfac, j);
-	} else {
-	  lev2 = GetEBLevel(cfac, j);
-	}
+	lev2 = get_a_level(cfac, j);
       }
       if (i < j) {
 	memcpy(&tmp, lev1, sizeof(LEVEL));
 	memcpy(lev1, lev2, sizeof(LEVEL));
 	memcpy(lev2, &tmp, sizeof(LEVEL));
 	i++;
-	if (m == 0) {
-	  lev1 = GetLevel(cfac, i);
-	} else {
-	  lev1 = GetEBLevel(cfac, i);
-	}
+	lev1 = get_a_level(cfac, i);
       }
     }
     if (lev1 != levp) {
@@ -1932,12 +1918,12 @@ int SortLevels(cfac_t *cfac, int start, int n, int m) {
     j0 = n - i0 - 1;
     if (j0 < i0) {
       if (1 < j0) {
-	SortLevels(cfac, i+1, j0, m);
+	SortLevels(cfac, i+1, j0, EB);
       }
       n = i0;
     } else {
       if (1 < i0) {
-	SortLevels(cfac, start, i0, m);
+	SortLevels(cfac, start, i0, EB);
       }
       start = i+1;
       n = j0;

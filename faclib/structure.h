@@ -124,7 +124,7 @@ int GetNumElectrons(cfac_t *cfac, int k);
 int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym);
 int GetPrincipleBasis(double *mix, int d, int *kpb);
 int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2);
-int SortLevels(cfac_t *cfac, int start, int n, int m);
+int SortLevels(cfac_t *cfac, int start, int n, int EB);
 int GetBaseJ(cfac_t *cfac, STATE *s);
 void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs);
 void ClearAngularFrozen(cfac_t *cfac);

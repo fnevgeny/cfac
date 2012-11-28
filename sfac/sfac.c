@@ -2231,15 +2231,6 @@ static int PSolveBound(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSortLevels(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
-  if (argc != 0) return -1;
-
-  SortLevels(cfac, 0, 0, 0);
-  
-  return 0;
-}
-
 static int PCutMixing(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
   int nlev, n, *ilev, *kg;
@@ -3097,7 +3088,6 @@ static METHOD methods[] = {
   {"SetUsrPEGrid", PSetUsrPEGrid},
   {"SetUsrPEGridType", PSetUsrPEGridType},
   {"SolveBound", PSolveBound},
-  {"SortLevels", PSortLevels},
   {"StoreClose", PStoreClose},
   {"StoreInit", PStoreInit},
   {"StoreTable", PStoreTable},

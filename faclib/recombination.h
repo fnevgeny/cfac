@@ -40,8 +40,6 @@ int RRRadialQk(double *rqc, double te, int k0, int k1, int m);
 void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx, 
 		       double *y, double *dy, int ndy, void *extra);
 void RRRadialQkHydrogenicParams(int np, double *p, double z, int n, int klb);
-double PICrossH(double z, int n0, int kl0, double e, int os);
-double RRCrossH(double z, int n0, int kl0, double e);
 int BoundFreeMultipole(FILE *fp, int rec, int f, int m);
 int BoundFreeOS(double *rqu, double *p, 
 		double *eb, int rec, int f, int m);

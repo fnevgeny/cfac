@@ -484,43 +484,6 @@ void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx,
   }
 }
 
-double M_PICrossH(double z, int n0, int kl0, double e, int os) {
-  double hp[NPARAMS], eth;
-  double x, logx, r;
-
-  eth = 0.5*z*z/(n0*n0);
-  if (e < eth) return 0.0;
-  RRRadialQkHydrogenicParams(NPARAMS, hp, z, n0, kl0);
-  x = e/eth;
-  logx = log(x);
-  RRRadialQkFromFit(NPARAMS, hp, 1, &x, &logx, &r, NULL, 0, &kl0);
-  r *= x;
-  if (os) return r;
-  else {
-    r *= 2.0*M_PI*FINE_STRUCTURE_CONST*AREA_AU20;
-    return r;
-  }
-}
-
-double RRCrossH(double z, int n0, int kl0, double e) {
-  double hp[NPARAMS], eth;
-  double x, logx, r;
-  
-  eth = 0.5*z*z/(n0*n0);
-  RRRadialQkHydrogenicParams(NPARAMS, hp, z, n0, kl0);
-  x = 1.0 + e/eth;
-  logx = log(x);
-  RRRadialQkFromFit(NPARAMS, hp, 1, &x, &logx, &r, NULL, 0, &kl0);
-  r *= x;
-  r *= 2.0*M_PI*FINE_STRUCTURE_CONST*AREA_AU20;
-  r *= 2.0*(2.0*kl0 + 1.0);
-  x = FINE_STRUCTURE_CONST*(e+eth);
-  x = x*x;
-  r *= x/(2.0*e);
-  
-  return r;
-}
-
 int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
   int index[3], k, nqk;
   double **p, *qk;

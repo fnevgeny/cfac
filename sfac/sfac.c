@@ -2336,60 +2336,6 @@ static int PTestIntegrate(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PTestMyArray(int argc, char *argv[], int argt[], 
-			ARRAY *variables) { 
-  ARRAY a;
-  double d;
-  double *b;
-  MULTI ma;
-  int k[3] = {101, 2550, 333};
-  int block[3] = {10, 20, 50};
-  int i, j, m;
-  int dummy;
- 
-  ArrayInit(&a, sizeof(double), 100, NULL, InitDoubleData);
-  d = 0.1;
-  m = 100000;
-  printf("> ");
-  dummy = scanf("%d", &i);
-  for (i = 0; i < m; i++) {
-    ArraySet(&a, i, &d);
-  }
-  printf("> ");
-  dummy = scanf("%d", &i);
-
-  b = (double *) ArrayGet(&a, 100);
-  printf("%f ", *b);
-  b = (double *) ArrayGet(&a, 200);
-  printf("%f \n", *b);
-
-  ArrayFree(&a);
-  printf("> ");
-  dummy = scanf("%d", &i);
-
-  MultiInit(&ma, sizeof(double), 3, block, NULL, InitDoubleData);
-  printf("%d %d\n", ma.esize, ma.ndim);
-  for (i = 9; i < 15; i++) {
-    for (j = 0; j < m; j++) {
-      k[0] = i;
-      k[1] = j;
-      k[2] = 20;	
-      b = (double *) MultiSet(&ma, k, NULL);
-      *b = 0.2;
-      b = (double *) MultiGet(&ma, k);
-    }
-  }
-
-  printf("> ");
-  dummy = scanf("%d", &i);
-  MultiFree(&ma);
-
-  printf("> ");
-  dummy = scanf("%d", &i);
-
-  return 0;
-}
-
 static int PPrepAngular(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int nlow, nup, *low, *up;
@@ -3093,7 +3039,6 @@ static METHOD methods[] = {
   {"StoreTable", PStoreTable},
   {"Structure", PStructure},
   {"TestIntegrate", PTestIntegrate}, 
-  {"TestMyArray", PTestMyArray},   
   {"TransitionTable", PTransitionTable},  
   {"TRTable", PTransitionTable},  
   {"WaveFuncTable", PWaveFuncTable},

@@ -323,7 +323,7 @@
                   AI=ONE+AI*AI*EU
                   FM=FM*AI
                   IF(FM.GT.D10) THEN
-                     POW=LOG10(FM)
+                     POW=INT(LOG10(FM))
                      FM=FM/TEN**POW
                      MUL=MUL+POW
                   ENDIF
@@ -340,7 +340,7 @@
                   FP=ONE-EXP(-FP)
                   FP=SQRT(ONE/FP)
               ENDIF
-              MUL=FM
+              MUL=INT(FM)
               FM=FM-MUL
               FM=FP*TEN**FM/(REM*REM*Z*Z)
               FP = 0.D0

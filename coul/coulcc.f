@@ -250,8 +250,8 @@ C ***    evaluate CF1  =  f   =  F'(ZLL,ETA,X)/F(ZLL,ETA,X)
 C
    20 IF(AXIAL) THEN
 C                                                        REAL VERSION
-      F = CF1R(X,ETA,ZLL,ACC8,SF ,RK,  ETANE0,LIMIT,ERR,NFP,
-     X         ACCH,FPMIN,FPMAX,PR,'COULCC')
+      F = CF1R(REAL(X),REAL(ETA),REAL(ZLL),ACC8,SF ,RK,
+     X         ETANE0,LIMIT,ERR,NFP, ACCH,FPMIN,FPMAX,PR,'COULCC')
           FCL = SF
           TPK1= RK
          ELSE
@@ -416,8 +416,7 @@ C
 C
 C ***  Evaluate   CF2 : PQ1 = p + i.omega.q  at lambda = ZLM
 C
-         PQ1 = CF2(X,ETA,ZLM,PM,EPS,LIMIT,ERR,NPQ(LH),ACC8,ACCH,
-     X             PR,ACCUR,DELL,'COULCC')
+         PQ1 = CF2(X,ETA,ZLM,PM,EPS,LIMIT,ERR,NPQ(LH),ACC8,ACCH)
 C
        ERR = ERR * MAX(ONE,ABSC(PQ1)/MAX(ABSC(F-PQ1),ACC8) )
        IF(ERR.LT.ACCH)       GO TO 110
@@ -451,8 +450,7 @@ C             i.e. change to kase=4 if the 2F0 predicted to converge
 C
 C ***  Evaluate   CF2 : PQ2 = p - i.omega.q  at lambda = ZLM   (Kase 2)
 C
-     X  PQ2 = CF2(X,ETA,ZLM,-PM,EPS,LIMIT,ERR,NPQ(3-LH),ACC8,ACCH,
-     X             PR,ACCUR,DELL,'COULCC')
+     X  PQ2 = CF2(X,ETA,ZLM,-PM,EPS,LIMIT,ERR,NPQ(3-LH),ACC8,ACCH)
 C
         P     = (PQ2 + PQ1) * HALF
         Q     = (PQ2 - PQ1) * HALF*PM
@@ -607,7 +605,7 @@ C          FCM & HCL  at lambda = ZLM
 C      so determine linear transformations for Functions required :
 C
   230 IH = ABS(MODE1) / 10
-        IF(KFN.EQ.3) IH = (3-IMAG(CIK))/2  + HALF
+        IF(KFN.EQ.3) IH = INT((3-IMAG(CIK))/2  + HALF)
       P11 = ONE
       IF(IH.EQ.1) P11 = CI
       IF(IH.EQ.2) P11 = -CI
@@ -795,7 +793,7 @@ C
       FCL = ONE
       XI = ONE/X
       PK  = ZL + ONE
-      PX  = PK  + LIMIT
+      PX  = REAL(PK)  + LIMIT
    10 EK  = ETA / PK
         RK2 =          ONE + EK*EK
       F   = (EK + PK*XI)*FCL + (FCL - ONE)*XI
@@ -841,7 +839,7 @@ C              IF(PR) WRITE (6,1000) CALLER,D,DF,ACCH,PK,EK,ETA,X
         F   = F  + DF
               IF( DBLE(PK) .GT. PX ) GO TO 50
       IF(ABSC(DF) .GE. ABSC(F)*EPS)             GO TO 30
-                NFP = PK - ZL - 1
+                NFP = INT(REAL(PK - ZL - 1))
                   ERR = EPS * SQRT(DBLE(NFP))
       CF1C = F
       RETURN
@@ -853,8 +851,7 @@ C              IF(PR) WRITE (6,1000) CALLER,D,DF,ACCH,PK,EK,ETA,X
       ERR = TWO
       RETURN
       END
-      FUNCTION CF2(X,ETA,ZL,PM,EPS,LIMIT,ERR,NPQ,ACC8,ACCH,
-     X             PR,ACCUR,DELL,CALLER)
+      FUNCTION CF2(X,ETA,ZL,PM,EPS,LIMIT,ERR,NPQ,ACC8,ACCH)
       IMPLICIT COMPLEX*16(A-H,O-Z)
       LOGICAL PR
       REAL*8 EPS,ERR,ACC8,ACCH,ACCUR,TA,RK,
@@ -896,7 +893,7 @@ C
             ERR = ABSC(DL)/ABSC(PQ)
          IF(ERR.GE.MAX(EPS,ACC8*RK*HALF) .AND. RK.LE.TA) GO TO 10
 C
-         NPQ   = RK/TWO
+         NPQ   = INT(RK/TWO)
          PQ    = PQ + DL
 C           IF(PR.AND.NPQ.GE.LIMIT-1 .AND. ERR.GT.ACCUR)
 C     X             WRITE(6,1000) CALLER,INT(IMAG(PM)),NPQ,ERR,ZL+DELL
@@ -970,7 +967,7 @@ C              IF(PR) WRITE (6,1000) CALLER,D,DF,ACCH,PK,EK,ETA,X
         F   = F  + DF
               IF( PK .GT. PX ) GO TO 50
       IF(ABS(DF) .GE. ABS(F)*EPS)             GO TO 30
-                NFP = PK - ZL - 1
+                NFP = INT(PK - ZL) - 1
                   ERR = EPS * SQRT(DBLE(NFP))
       CF1R = F
       RETURN

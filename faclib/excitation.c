@@ -516,7 +516,7 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
   int j0, j1, j2, j3;
   int ko2, t, nk, ty, bnk;
   double r, c0, c1, dk;
-  double x, d, c, a, h, b0, b1, a0 = 0.0, a1 = 0.0;
+  double x, d, c, a, h, a0 = 0.0, a1 = 0.0;
   double *g1, *g2, *x1, *x2;
   double bte, bms;
   FORM_FACTOR *bform;
@@ -559,8 +559,6 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
   if (m <= 0) {
     a0 = FINE_STRUCTURE_CONST2*c0;
     a1 = FINE_STRUCTURE_CONST2*e1;
-    b0 = 1 + a0;
-    b1 = 1 + a1;
     a0 = 1.0 + 0.5*a0;
     a1 = 1.0 + 0.5*a1;
     c0 = 2.0*c0*a0;
@@ -633,7 +631,7 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   int kkp, iq, bnk;
   double xc;
   double r, c0, c1, c01, dk, a0 = 0.0, a1 = 0.0;
-  double x, d, c, a, h, b0, b1, bte, bms;  
+  double x, d, c, a, h, bte, bms;  
   double *g1, *g2, *x1, *x2;
   double gosm1[MAXMSUB][NKINT];
   double gosm2[MAXMSUB][NKINT];
@@ -677,8 +675,6 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   if (m <= 0) {
     a0 = FINE_STRUCTURE_CONST2*c0;
     a1 = FINE_STRUCTURE_CONST2*e1;
-    b0 = 1 + a0;
-    b1 = 1 + a1;
     a0 = 1.0 + 0.5*a0;
     a1 = 1.0 + 0.5*a1;
     c0 = 2.0*c0*a0;
@@ -1821,8 +1817,8 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
  */
 int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int msub,
                       double *qkt, double *params, double *bethe) {
-  int i, j, t, h, p, m, type, ty, p1, p2, gauge;  
-  double te, c, r, s3j, c1, aw;
+  int i, j, t, h, p, m, type, ty, p1, p2;  
+  double te, c, r, s3j, c1;
   ANGULAR_ZMIX *ang;
   int nz, j1, j2, ie, nq, kkp;
   double rq[MAXMSUB*(MAXNE+1)];
@@ -1838,8 +1834,6 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int m
   te = tr->e;
   if (te <= 0) return -1;
   
-  aw = te*FINE_STRUCTURE_CONST;
-
   j1 = tr->llo->pj;
   j2 = tr->lup->pj;
   DecodePJ(j1, &p1, &j1);
@@ -1862,7 +1856,6 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int m
       qkc[ie+n_egrid1] = 0.0;
     }    
   }
-  gauge = GetTransitionGauge(cfac);
   nz = AngularZMix(cfac, &ang, tr->nlo, tr->nup, -1, -1);
   if (nz <= 0) {
     return -1;

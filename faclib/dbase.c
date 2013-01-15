@@ -1726,11 +1726,9 @@ int InitFile(FILE *f, F_HEADER *fhdr, void *rhdr) {
   CI_HEADER *ci_hdr;
   CIM_HEADER *cim_hdr;
   long int p;
-  int ihdr;
 
   if (f == NULL) return 0;
   
-  ihdr = fhdr->type - 1;
   fseek(f, 0, SEEK_END);
   p = ftell(f);
 
@@ -1837,72 +1835,108 @@ int DeinitFile(FILE *f, F_HEADER *fhdr) {
     fseek(f, en_header.position, SEEK_SET);
     if (en_header.length > 0) {
       n = WriteENHeader(f, &en_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_TR:
     fseek(f, tr_header.position, SEEK_SET);
     if (tr_header.length > 0) {
       n = WriteTRHeader(f, &tr_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_CE:
     fseek(f, ce_header.position, SEEK_SET);
     if (ce_header.length > 0) {
       n = WriteCEHeader(f, &ce_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_RR:
     fseek(f, rr_header.position, SEEK_SET);
     if (rr_header.length > 0) {
       n = WriteRRHeader(f, &rr_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_AI:
     fseek(f, ai_header.position, SEEK_SET);
     if (ai_header.length > 0) {
       n = WriteAIHeader(f, &ai_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_CI:
     fseek(f, ci_header.position, SEEK_SET);
     if (ci_header.length > 0) {
       n = WriteCIHeader(f, &ci_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_AIM:
     fseek(f, aim_header.position, SEEK_SET);
     if (aim_header.length > 0) {
       n = WriteAIMHeader(f, &aim_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_CIM:
     fseek(f, cim_header.position, SEEK_SET);
     if (cim_header.length > 0) {
       n = WriteCIMHeader(f, &cim_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_ENF:
     fseek(f, enf_header.position, SEEK_SET);
     if (enf_header.length > 0) {
       n = WriteENFHeader(f, &enf_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_TRF:
     fseek(f, trf_header.position, SEEK_SET);
     if (trf_header.length > 0) {
       n = WriteTRFHeader(f, &trf_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_CEF:
     fseek(f, cef_header.position, SEEK_SET);
     if (cef_header.length > 0) {
       n = WriteCEFHeader(f, &cef_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   case DB_CEMF:
     fseek(f, cemf_header.position, SEEK_SET);
     if (cemf_header.length > 0) {
       n = WriteCEMFHeader(f, &cemf_header);
+      if (!n) {
+        return 1;
+      }
     }
     break;
   default:
@@ -2602,7 +2636,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
   CE_RECORD r;
   int n, i, t;
   int nb;
-  int k, p1, p2;
+  int k, p2;
   float a, e = 0.0;
   double bte, bms, be;
 
@@ -2667,7 +2701,6 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
       }
       
       be = (e + bte)/bms;
-      p1 = 0;
       p2 = 0;
       for (k = 0; k < r.nsub; k++) {
 	if (h.msub) {
@@ -3062,7 +3095,7 @@ int AIBranch(char *fn, int ib, int ia,
   AI_RECORD r;
   FILE *f;
   int n, i, k;
-  double a, b, c, e;
+  double a, b, c;
   int swp;
     
   if (mem_en_table == NULL) {
@@ -3095,7 +3128,6 @@ int AIBranch(char *fn, int ib, int ia,
       n = ReadAIRecord(f, &r, swp);
       if (n == 0) break;
       if (r.b == ib) {
-	e = mem_en_table[r.b].energy - mem_en_table[r.f].energy;
 	b = RATE_AU*r.rate;
 	a += b;
 	if (r.f == ia) {
@@ -3370,6 +3402,9 @@ int AppendTable(char *fn) {
   f = fopen(fn, "r");
   if (f == NULL) return -1;
   n = ReadFHeader(f, &fh, &swp);
+  if (!n) {
+    return 1;
+  }
   if (swp) {
     printf("File %s is in different byte-order\n", fn);
     fclose(f);

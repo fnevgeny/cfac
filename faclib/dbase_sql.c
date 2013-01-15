@@ -416,7 +416,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
         for (i = 0; i < h.ntransitions; i++) {
             CE_RECORD r;
             unsigned long int cid;
-            int k, p1, p2;
+            int k, p2;
             
             n = ReadCERecord(fp, &r, swp, &h);
             if (n == 0) {
@@ -433,7 +433,6 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             
             sqlite3_bind_int(stmt, 1, cid);
 
-            p1 = 0;
             p2 = 0;
             for (k = 0; k < r.nsub && retval == 0; k++) {
                 int t;

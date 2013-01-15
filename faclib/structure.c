@@ -2743,7 +2743,7 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   int kg1, kg2, kc1, kc2;
   int n_shells, i1, i2;
   int phase;
-  int j1, j2, i, n, nz, p;
+  int j1, j2, i, n, nz;
   int jmin, jmax, jf;
   int ns1, ns2, *pnz, iz;
   int ns, ks1, ks2;  
@@ -2829,7 +2829,6 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 			  sbra, sket, s, 1);
 	} else {
 	  for (i = 0; i < n_shells; i++) {
-	    p = ShellToInt(bra[i].n, bra[i].kappa);
 	    s[0].index = n_shells - i - 1;
 	    if (s[0].index == s[2].index) continue;
 	    if (s[0].index == s[3].index && s[3].nq_ket < 2) continue;
@@ -2976,7 +2975,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
   int ih1, ih2;
   int ns, isz0, isz;
   STATE *sup;
-  SYMMETRY *sym1, *sym2;
+  SYMMETRY *sym2;
   LEVEL *lev1, *lev2;
   ANGZ_DATUM *ad;
   ANGULAR_ZFB *ang_sub;
@@ -3005,7 +3004,6 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
     }
   }
 
-  sym1 = GetSymmetry(cfac, lev1->pj);
   sym2 = GetSymmetry(cfac, lev2->pj);
   j1 = lev1->pj;
   j2 = lev2->pj;
@@ -3083,7 +3081,7 @@ int GetBaseJ(cfac_t *cfac, STATE *s) {
 int AngularZMix(cfac_t *cfac,
   ANGULAR_ZMIX **ang, int lower, int upper, int mink, int maxk) {
   int i, j, j1, j2, jb1, jb2;
-  int kg1, kg2, kc1, kc2;
+  int kg1, kg2;
   int ih1, ih2, isz0, isz;
   int jlow, jup, kb1, kb2;
   int nz, n, ns, im;
@@ -3159,8 +3157,6 @@ int AngularZMix(cfac_t *cfac,
   sup = (STATE *) ArrayGet(&(sym2->states), lev2->pb);
   kg1 = slow->kgroup;
   kg2 = sup->kgroup;
-  kc1 = slow->kcfg;
-  kc2 = sup->kcfg;
 
   if (kg1 < 0) {
     kb1 = slow->kcfg;
@@ -3354,7 +3350,7 @@ int AngularZxZFreeBound(cfac_t *cfac,
   int ns, isz, jmin, jmax;
   double mix1, mix2;
   STATE *sup;
-  SYMMETRY *sym1, *sym2;
+  SYMMETRY *sym2;
   LEVEL *lev1, *lev2;
   ANGZ_DATUM *ad;
   ANGULAR_ZxZMIX *ang_sub;
@@ -3366,7 +3362,6 @@ int AngularZxZFreeBound(cfac_t *cfac,
 
   lev1 = GetLevel(cfac, lower);
   lev2 = GetLevel(cfac, upper);
-  sym1 = GetSymmetry(cfac, lev1->pj);
   sym2 = GetSymmetry(cfac, lev2->pj);
   j1 = lev1->pj;
   j2 = lev2->pj;

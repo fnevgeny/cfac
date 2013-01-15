@@ -256,9 +256,9 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
   int kf, kappaf, kf0, kappa0, kf1, kappa1;
   int kl0, kl0p, kl1, kl1p;
   int j0, j1, j1min, j1max;
-  double z, z2, r, rp, sd, se, s;
+  double z, r, rp, sd, se, s;
   double jb1;
-  int kl_max0, kl_max1, kl_max2, kl_min2, max0;
+  int kl_max0, kl_max1, kl_max2, kl_min2;
   int type;
   int one = 1;
   double logj;
@@ -276,11 +276,9 @@ int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
   
   r = GetRMax(cfac);
   z = GetResidualZ(cfac);
-  z2 = z*z;
   t = r*sqrt(e1+2.0*z/r);
   kl_max0 = pw_scratch.max_kl;
   kl_max0 = Min(kl_max0, t);
-  max0 = 12;
 
   orb = GetOrbital(cfac, kb);
   kappab = orb->kappa;
@@ -687,7 +685,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
   ORBITAL *orb;
   ANGULAR_ZFB *ang;
   double b0, qke[MAXNUSR], sigma[MAXNUSR];
-  int nz, j0, j0p, kl0 = 0, kl, kb, kbp, nq, nqk;
+  int nz, j0, j0p, kl0 = 0, kl, kb, kbp, nqk;
   double tol, x[MAXNE], logx[MAXNE];
 
   if (qk_mode == QK_CB) {
@@ -721,7 +719,6 @@ int IonizeStrength(double *qku, double *qkc, double *te,
       c = ang[i].coeff*ang[i].coeff;	
       if (c > cmax) {
 	kl0 = kl;
-	nq = orb->n;
 	cmax = c;
       }
       ip = (orb->n - 1)*orb->n/2;

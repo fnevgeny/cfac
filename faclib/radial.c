@@ -594,7 +594,7 @@ static int OptimizeLoop(cfac_t *cfac, double *vbuf) {
 int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   AVERAGE_CONFIG *acfg = &(cfac->average_config);
   double a, b, c, z, emin, smin, hxs[NXS], ehx[NXS];
-  int iter, i, j, im, md;
+  int iter, i, j, im;
   POTENTIAL *potential = cfac->potential;
   
   double vbuf[MAXRP];
@@ -662,7 +662,6 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   }
 
   if (potential->mode/10 == 1) {
-    md = potential->mode % 10;
     if (im == 0) {
       a = 1.5/(NXS-1.0);
       hxs[0] = potential->hxs - 0.75;
@@ -4011,7 +4010,7 @@ int RadialOverlaps(cfac_t *cfac, char *fn, int kappa) {
 }
 
 int TestIntegrate(cfac_t *cfac) {
-  ORBITAL *orb1, *orb2, *orb3, *orb4;
+  ORBITAL *orb3, *orb4;
   int k1, k2, k3, k4, k, i, i0=1500;
   double r, a;
   POTENTIAL *potential = cfac->potential;
@@ -4022,8 +4021,6 @@ int TestIntegrate(cfac_t *cfac) {
   k3 = OrbitalIndex(cfac, 0, -5, 3.30265398e3/HARTREE_EV);
   k4 = OrbitalIndex(cfac, 0, -4, 2.577e3/HARTREE_EV);
   printf("# %d %d %d %d\n", k1, k2, k3, k4);
-  orb1 = GetOrbital(cfac, k1);
-  orb2 = GetOrbital(cfac, k2);
   orb3 = GetOrbital(cfac, k3);
   orb4 = GetOrbital(cfac, k4);
 

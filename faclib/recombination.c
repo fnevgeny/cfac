@@ -811,7 +811,6 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   double a, b, d, amax, eb0 = 0.0, z;
   double rq[MAXNE], tq[MAXNE];
   int i, j, c;
-  int gauge, mode;
   int nkl = 0, nq = 0;
   int kb, kbp, jb, klb, jbp;
 
@@ -824,8 +823,6 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   nz = AngularZFreeBound(cfac, &ang, f, rec);
   if (nz <= 0) return -1;
 
-  gauge = GetTransitionGauge(cfac);
-  mode = GetTransitionMode(cfac);
   c = 2*abs(m) - 2;
 
   for (ie = 0; ie < n_egrid; ie++) {

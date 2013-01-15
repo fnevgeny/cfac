@@ -115,11 +115,10 @@ double HydrogenicDipole(const cfac_t *cfac,
 }
 
 double HydrogenicExpectation(double z, int m, int n, int kl) {
-  double r, n2, k, e;
+  double r, n2, k;
   
   k = kl*(kl+1.0);
   n2 = n*n;
-  e = -0.5*z*z/n2;
   r = 0.0;
   
   switch (m) {

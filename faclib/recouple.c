@@ -1296,7 +1296,6 @@ int GetInteract(cfac_t *cfac, INTERACT_DATUM **idatum,
   CONFIG *ci, *cj, cip;
   SHELL_STATE *csf_i, *csf_j, *csf_ip;
   SHELL *bra;
-  INTERACT_SHELL *s;
   int n_shells;
   int index[4];
 
@@ -1333,7 +1332,6 @@ int GetInteract(cfac_t *cfac, INTERACT_DATUM **idatum,
   if ((*idatum)->n_shells > 0) {
     n_shells = (*idatum)->n_shells;
     bra = (*idatum)->bra;
-    s = (*idatum)->s;
     i = 0;
     j = 0;
     (*sbra) = calloc(n_shells, sizeof(SHELL_STATE));

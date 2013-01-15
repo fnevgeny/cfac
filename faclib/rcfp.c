@@ -873,7 +873,7 @@ double ReducedCFP(int no_bra, int no_ket) {
 */
 double CompleteReducedW(int no_bra, int no_ket, int k_q, int k_j) {
   double coeff;
-  int jbra, jket, Jbra, Jket, Qbra, Qket, jrun, Jrun, Qrun;
+  int jbra, Jbra, Jket, Qbra, Qket, Jrun, Qrun;
   double w6j1, w6j2;
   int no_run;
   int phase;
@@ -890,7 +890,6 @@ double CompleteReducedW(int no_bra, int no_ket, int k_q, int k_j) {
   if (jbra == 9) {
     if (rcfp_min_even[no_bra] != rcfp_min_even[no_ket]) 
       return coeff;
-    jket = terms_jj[no_ket].j;
     Jbra = terms_jj[no_bra].subshellJ;
     Jket = terms_jj[no_ket].subshellJ;
     Qbra = terms_jj[no_bra].Q;
@@ -906,7 +905,6 @@ double CompleteReducedW(int no_bra, int no_ket, int k_q, int k_j) {
 	 no_run <= rcfp_max_odd[no_bra];
 	 no_run++) {
       Jrun = terms_jj[no_run].subshellJ;
-      jrun = terms_jj[no_run].j;
       Qrun = terms_jj[no_run].Q;
       if ((w6j1 = W6j(jbra, jbra, kj2, Jket, Jbra, Jrun)) &&
 	  (w6j2 = W6j(1, 1, kq2, Qket, Qbra, Qrun))) {
@@ -1368,7 +1366,7 @@ double ReducedWxW0(RCFP_STATE *bra, RCFP_STATE *ket,
   RCFP_STATE run;
   double coeff, coeff1;
   int run_nu, Jrun, jrun, Qrun, min_run, max_run;
-  int run_i, Jbra, jbra, Jket, jket, Qbra, Qket, kj2;
+  int run_i, Jbra, jbra, Jket, jket, kj2;
   double w6j1;
 
   coeff = 0.0;
@@ -1377,8 +1375,6 @@ double ReducedWxW0(RCFP_STATE *bra, RCFP_STATE *ket,
   if (bra->state < 63 && ket->state < 63) {
     Jbra = terms_jj[bra->state].subshellJ;
     Jket = terms_jj[ket->state].subshellJ;
-    Qbra = terms_jj[bra->state].Q;
-    Qket = terms_jj[ket->state].Q;
     jbra = terms_jj[bra->state].j;
     jket = terms_jj[ket->state].j;
     if (QSpaceDelta(bra) == 0) return coeff;
@@ -1474,7 +1470,7 @@ double ReducedAxW(RCFP_STATE *bra, RCFP_STATE *ket,
   int no_run;
   RCFP_STATE run;
   int run_nu, Jrun, jrun, Qrun, min_run, max_run;
-  int run_i, Jbra, jbra, Jket, jket, Qbra, Qket, kj2;
+  int run_i, Jbra, jbra, Jket, jket, Qbra, kj2;
   double w6j1;
 
   coeff = 0.0;
@@ -1484,7 +1480,6 @@ double ReducedAxW(RCFP_STATE *bra, RCFP_STATE *ket,
     Jbra = terms_jj[bra->state].subshellJ;
     Jket = terms_jj[ket->state].subshellJ;
     Qbra = terms_jj[bra->state].Q;
-    Qket = terms_jj[ket->state].Q;
     jbra = terms_jj[bra->state].j;
     jket = terms_jj[ket->state].j;
     if (!Triangle(Jbra, kk_j2, Jket)) return coeff;
@@ -1585,7 +1580,7 @@ double ReducedWxA(RCFP_STATE *bra, RCFP_STATE *ket,
   int no_run;
   RCFP_STATE run;
   int run_nu, Jrun, jrun, Qrun, min_run, max_run;
-  int run_i, Jbra, jbra, Jket, jket, Qbra, Qket, kj2;
+  int run_i, Jbra, jbra, Jket, jket, Qket, kj2;
   double w6j1;
 
   coeff = 0.0;
@@ -1594,7 +1589,6 @@ double ReducedWxA(RCFP_STATE *bra, RCFP_STATE *ket,
   if (bra->state < 63 && ket->state < 63) {    
     Jbra = terms_jj[bra->state].subshellJ;
     Jket = terms_jj[ket->state].subshellJ;
-    Qbra = terms_jj[bra->state].Q;
     Qket = terms_jj[ket->state].Q;
     jbra = terms_jj[bra->state].j;
     jket = terms_jj[ket->state].j;

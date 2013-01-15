@@ -233,8 +233,10 @@ int ShellsFromString(char *scfg, double *dnq, SHELL **shell) {
   SetParserEscape('\0');
 
   next = 0;
-  r = 0;
   r = Parse(token, 512, scfg, &next, &brkpos, &quotepos);
+  if (r) {
+    return -1;
+  }
   if (quotepos == 0) {
     nn = StrSplit(token, ',');
     if (nn > 16) {
@@ -254,6 +256,9 @@ int ShellsFromString(char *scfg, double *dnq, SHELL **shell) {
   }
   if (brkpos < 0) {
     r = Parse(token, 512, scfg, &next, &brkpos, &quotepos);
+    if (r) {
+      return -1;
+    }
   }
   if (brkpos >= 0) {
     kl[0] = brkpos;
@@ -348,8 +353,10 @@ int ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell) {
   SetParserEscape('\0');
 
   next = 0;
-  r = 0;
   r = Parse(token, 512, scfg, &next, &brkpos, &quotepos);
+  if (r) {
+    return -1;
+  }
   if (quotepos == 0) {
     nn = StrSplit(token, ',');
     if (nn > 16) {
@@ -369,6 +376,9 @@ int ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell) {
   }
   if (brkpos < 0) {
     r = Parse(token, 512, scfg, &next, &brkpos, &quotepos);
+    if (r) {
+      return -1;
+    }
   }
   if (brkpos >= 0) {
     kl[0] = brkpos;
@@ -824,7 +834,6 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
 
 int GetConfigFromStringNR(CONFIG **cfg, char *scfg) {
   CONFIG **dcfg, **p1;
-  double *dnq;
   char *s;
   int *isp, ncfg, *dnc;  
   int size, size_old, tmp;
@@ -843,7 +852,6 @@ int GetConfigFromStringNR(CONFIG **cfg, char *scfg) {
 
   dcfg = (CONFIG **) malloc(sizeof(CONFIG *)*ns);
   dnc = (int *) malloc(sizeof(int)*ns);
-  dnq = NULL;
 
   s = scfg;
   isp = (int *) malloc(sizeof(int)*ns);  

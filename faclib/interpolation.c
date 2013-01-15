@@ -49,7 +49,6 @@ void SVDFit(int np, double *coeff, double tol,
     
     if (sig) {
       weight = 1.0/sig[i];
-      printf("%g %g\n", sig[i], weight);
     } else {
       weight = 1.0;
     }
@@ -224,7 +223,7 @@ int NLSQFit(int np, double *p, double tol,
     return status;
 }
 
-double Simpson(double *x, int i0, int i1) {
+double Simpson(const double *x, int i0, int i1) {
   int i, k;
   double a, b;
 

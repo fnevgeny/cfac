@@ -10,7 +10,7 @@ int NLSQFit(int np, double *p, double tol,
 	    void Func(int np, double *p, int n, double *x, double *logx, 
 		     double *y, double *dy, int ndy, void *extra), 
 	    void *extra);
-double Simpson(double *y, int ia, int ib);
+double Simpson(const double *y, int ia, int ib);
 int NewtonCotes(double r[], const double x[], int ilast,
                 int last_only, int id);
 

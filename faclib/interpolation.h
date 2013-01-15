@@ -1,7 +1,7 @@
 #ifndef _INTERPOLATION_H_
 #define _INTERPOLATION_H_
 
-void SVDFit(int np, double *coeff, double *chisq, double tol,
+void SVDFit(int np, double *coeff, double tol,
 	    int nd, double *x, double *logx, double *y, double *sig,
 	    void Basis(int, double *, double, double));
 int NLSQFit(int np, double *p, double tol,

@@ -800,7 +800,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 	qkc[i] = 0.0;
       }
       tol = qk_fit_tolerance;
-      SVDFit(NPARAMS-1, qkc+1, NULL, tol, n_egrid, x, logx, 
+      SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx, 
 	     qke, sigma, CIRadialQkBasis);
 
       if (usr_different) {
@@ -850,10 +850,10 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       }
       tol = qk_fit_tolerance;
       if (ip < 0) {
-	SVDFit(NPARAMS-1, qkc+1, NULL, tol, n_egrid, x, logx, 
+	SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx, 
 	       qke, sigma, CIRadialQkBasis);
       } else {
-	SVDFit(NPARAMS, qkc, NULL, tol, n_egrid, x, logx, 
+	SVDFit(NPARAMS, qkc, tol, n_egrid, x, logx, 
 	       qke, sigma, CIRadialQkBasis0);
       }
       if (usr_different) {

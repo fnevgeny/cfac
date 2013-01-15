@@ -16,7 +16,7 @@ static double _CNC[5][5] = {
 };
 
 
-void SVDFit(int np, double *coeff, double *chisq, double tol,
+void SVDFit(int np, double *coeff, double tol,
 	    int nd, double *x, double *logx, double *y, double *sig,
 	    void Basis(int, double *, double, double)) {
   int i, j;

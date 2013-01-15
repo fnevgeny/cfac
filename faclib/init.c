@@ -34,7 +34,7 @@ int InitFac() {
   InitDBase();
   InitExcitation();
   InitRecombination();
-  InitIonization();
+  InitIonization(cfac);
   
   return 0;
 }

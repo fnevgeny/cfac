@@ -634,7 +634,7 @@ static int PCITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   if (nlow <= 0) return -1;
   nup = SelectLevels(&up, argv[2], argt[2], variables);
   if (nup <= 0) return -1;
-  if (SaveIonization(nlow, low, nup, up, argv[0]) < 0) return -1;
+  if (SaveIonization(cfac, nlow, low, nup, up, argv[0]) < 0) return -1;
 
   if (nlow > 0) free(low);
   if (nup > 0) free(up);
@@ -652,7 +652,7 @@ static int PCITableMSub(int argc, char *argv[], int argt[],
   if (nlow <= 0) return -1;
   nup = SelectLevels(&up, argv[2], argt[2], variables);
   if (nup <= 0) return -1;
-  if (SaveIonizationMSub(nlow, low, nup, up, argv[0]) < 0) return -1;
+  if (SaveIonizationMSub(cfac, nlow, low, nup, up, argv[0]) < 0) return -1;
 
   if (nlow > 0) free(low);
   if (nup > 0) free(up);

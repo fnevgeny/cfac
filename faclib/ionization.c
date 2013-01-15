@@ -2,7 +2,6 @@
 #include <string.h>
 #include <math.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "angular.h"
 #include "radial.h"
@@ -24,7 +23,7 @@
 #define BUFSIZE 128
 #define NCBOMAX 6
 
-static double cbo_params[(NCBOMAX+1)*NCBOMAX/2][NPARAMS+1] = {
+static const double cbo_params[(NCBOMAX+1)*NCBOMAX/2][NPARAMS+1] = {
   /* 1s */
   {1.130,	4.41,   -2.00,	3.80},
   
@@ -133,7 +132,7 @@ int SetIEGridDetail(int n, double *x) {
   return n_tegrid;
 }
 
-int SetCIMaxK(int k) {
+int SetCIMaxK(cfac_t *cfac, int k) {
   pw_scratch.max_k = GetMaxRank(cfac);
   if (k >= 0) pw_scratch.max_k = Min(k, pw_scratch.max_k);
   return 0;
@@ -246,7 +245,7 @@ int SetCIQkMode(int m, double tol) {
   return 0;
 }  
 
-int CIRadialQk(double *qk, double e1, double e2, int kb, int kbp, int k) {
+int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, int k) {
   double pk[MAXNTE][MAXNKL], pkp[MAXNTE][MAXNKL];
   double e0, te;
   ORBITAL *orb;
@@ -544,7 +543,7 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
   return 0;
 }
 
-double *CIRadialQkIntegratedTable(int kb, int kbp) {
+double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   int index[2], ie, ite, i, k, nqk, qlog;
   double **p, *qkc, e1, e2;
   double yint[NINT], integrand[NINT];
@@ -592,7 +591,7 @@ double *CIRadialQkIntegratedTable(int kb, int kbp) {
       e2 = egrid[ie]*y;
       e1 = egrid[ie]*(1.0-y/bms);
       for (k = 0; k <= pw_scratch.max_k; k += 2) {
-	CIRadialQk(qi, e1, e2, kb, kbp, k);
+	CIRadialQk(cfac, qi, e1, e2, kb, kbp, k);
 	for (ite = 0; ite < n_tegrid; ite++) {
 	  qi[ite] /= (k + 1.0);
 	  qt[ite][i] += qi[ite];
@@ -633,11 +632,11 @@ double *CIRadialQkIntegratedTable(int kb, int kbp) {
   return (*p);
 }
 
-int CIRadialQkIntegrated(double *qke, double te, int kb, int kbp) {
+int CIRadialQkIntegrated(cfac_t *cfac, double *qke, double te, int kb, int kbp) {
   int i, j, k, nd, nq;
   double *qk, qkc[MAXNTE];
 
-  qk = CIRadialQkIntegratedTable(kb, kbp);
+  qk = CIRadialQkIntegratedTable(cfac, kb, kbp);
   if (qk == NULL) {
     return -1;
   }
@@ -661,7 +660,7 @@ int CIRadialQkIntegrated(double *qke, double te, int kb, int kbp) {
   return 0;
 }
  
-double BEScale(int k, double e) {
+double BEScale(cfac_t *cfac, int k, double e) {
   double z, a, b, c;
   ORBITAL *orb;
 
@@ -678,7 +677,7 @@ double BEScale(int k, double e) {
   return b;
 }
  
-int IonizeStrength(double *qku, double *qkc, double *te, 
+int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te, 
 		   int b, int f) {
   int i, ip, ierr;
   LEVEL *lev1, *lev2;
@@ -777,7 +776,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
 	}
       }
 
-      es = BEScale(kb0, *te);
+      es = BEScale(cfac, kb0, *te);
 
       for (i = 0; i < n_egrid; i++) {
 	double c;
@@ -830,7 +829,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
 	  if (ip != i) {
 	    c *= 2.0;
 	  } 
-	  ierr = CIRadialQkIntegrated(qke, (*te), kb, kbp);
+	  ierr = CIRadialQkIntegrated(cfac, qke, (*te), kb, kbp);
 	  if (ierr < 0) continue;
 	  for (j = 0; j < n_egrid; j++) {
 	    qku[j] += c*qke[j];
@@ -872,7 +871,7 @@ int IonizeStrength(double *qku, double *qkc, double *te,
   }
 }
 
-int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
+int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   int i, j, k;
   int ie, ip;
   FILE *file;
@@ -1083,7 +1082,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
 	lev2 = GetLevel(cfac, f[j]);
 	e = lev2->energy - lev1->energy;
 	if (e < e0 || e >= e1) continue;
-	nq = IonizeStrength(qku, qk, &e, b[i], f[j]);
+	nq = IonizeStrength(cfac, qku, qk, &e, b[i], f[j]);
 	if (nq < 0) continue;
 	r.b = b[i];
 	r.f = f[j];
@@ -1123,7 +1122,7 @@ int SaveIonization(int nb, int *b, int nf, int *f, char *fn) {
   return 0;
 }
 
-double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1, 
+double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int k1, 
 		      double e1, double e2, double e0) {
   ORBITAL *orb0, *orb1;
   int jk0, jk1, t, kl1, j1, kappa1, k, ks[4];
@@ -1250,7 +1249,7 @@ double CIRadialQkMSub(int J0, int M0, int J1, int M1, int k0, int k1,
   return r;
 }
 
-double CIRadialQkIntegratedMSub(int j1, int m1, int j2, int m2,
+double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
 				int k0, int k1, double te, double e12) {
   double e0, e1, e2, d, r;
   double x[NINT0], y[NINT0], xi[NINT], yi[NINT];
@@ -1277,7 +1276,7 @@ double CIRadialQkIntegratedMSub(int j1, int m1, int j2, int m2,
     r = exp(x[i]);
     e2 = e12*r;
     e1 = e12 - e2/bms;
-    y[i] = CIRadialQkMSub(j1, m1, j2, m2, k0, k1, e1, e2, e0);
+    y[i] = CIRadialQkMSub(cfac, j1, m1, j2, m2, k0, k1, e1, e2, e0);
     y[i] *= r;
   }
 
@@ -1311,7 +1310,7 @@ double CIRadialQkIntegratedMSub(int j1, int m1, int j2, int m2,
   return r;
 }
 
-int IonizeStrengthMSub(double *qku, double *te, int b, int f) {
+int IonizeStrengthMSub(cfac_t *cfac, double *qku, double *te, int b, int f) {
   LEVEL *lev1, *lev2;
   ANGULAR_ZFB *ang;
   double c, d, x[MAXNE], logx[MAXNE];
@@ -1360,7 +1359,7 @@ int IonizeStrengthMSub(double *qku, double *te, int b, int f) {
       for (m1 = -j1; m1 <= 0; m1 += 2) {
 	for (m2 = -j2; m2 <= j2; m2 += 2) {
 	  for (ie = 0; ie < n_egrid; ie++) {
-	    d = CIRadialQkIntegratedMSub(j1, m1, j2, m2,
+	    d = CIRadialQkIntegratedMSub(cfac, j1, m1, j2, m2,
 					 kb, kbp, *te, egrid[ie]);
 	    rqk[ie] += c*d;
 	  }
@@ -1394,7 +1393,7 @@ int IonizeStrengthMSub(double *qku, double *te, int b, int f) {
   return i;
 }
 
-int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
+int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   FILE *file;
   LEVEL *lev1, *lev2;
   CIM_RECORD r;
@@ -1487,12 +1486,12 @@ int SaveIonizationMSub(int nb, int *b, int nf, int *f, char *fn) {
     for (j = 0; j < nf; j++) {
       lev2 = GetLevel(cfac, f[j]);
       e = lev2->energy - lev1->energy;
-      nq = IonizeStrengthMSub(qku, &e, b[i], f[j]);
+      nq = IonizeStrengthMSub(cfac, qku, &e, b[i], f[j]);
       if (nq < 0) continue;
       r.b = b[i];
       r.f = f[j];
       r.nsub = nq;
-      r.strength = (float *) malloc(sizeof(float)*nq*n_usr);
+      r.strength = malloc(sizeof(float)*nq*n_usr);
       for (ie = 0; ie < nq*n_usr; ie++) {
 	r.strength[ie] = qku[ie];
       }
@@ -1513,15 +1512,15 @@ int FreeIonizationQk(void) {
   return 0;
 }
 
-int InitIonization(void) {
+int InitIonization(cfac_t *cfac) {
   int blocks[2] = {MULTI_BLOCK2,MULTI_BLOCK2};
   int ndim = 2;
   
-  qk_array = (MULTI *) malloc(sizeof(MULTI));
+  qk_array = malloc(sizeof(MULTI));
   MultiInit(qk_array, sizeof(double *), ndim, blocks, 
 			    FreeIonizationQkData, InitPointerData);
   
-  SetCIMaxK(IONMAXK);
+  SetCIMaxK(cfac, IONMAXK);
   n_egrid = 0;
   n_tegrid = 0;
   n_usr = 0;

@@ -49,6 +49,7 @@ void SVDFit(int np, double *coeff, double *chisq, double tol,
     
     if (sig) {
       weight = 1.0/sig[i];
+      printf("%g %g\n", sig[i], weight);
     } else {
       weight = 1.0;
     }

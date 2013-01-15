@@ -1074,7 +1074,6 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
   int m, i, j, i0, i1, k0, k1, q0, q1;
   int na2, nb2, nab2, n_shells, vnl;
   double a, *coeff;
-  CONFIG *c0, *c1;
   STATE *s0, *s1;
   SYMMETRY *sym;
   LEVEL *lev;
@@ -1092,7 +1091,7 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
   na2 = 2*na;
   nb2 = 2*nb;
   nab2 = na2*nb2;
-  coeff = (double *) malloc(sizeof(double)*nab2*4);
+  coeff = malloc(sizeof(double)*nab2*4);
 
   for (m = 0;  m < nlevs; m++) {
     for (i = 0; i < nab2*4; i++) {
@@ -1102,13 +1101,11 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
     sym = GetSymmetry(cfac, lev->pj);
     for (i0 = 0; i0 < lev->n_basis; i0++) {
       s0 = (STATE *) ArrayGet(&(sym->states), lev->basis[i0]);
-      c0 = GetConfig(cfac, s0);
       k0 = s0->kstate;
       for (i1 = 0; i1 < lev->n_basis; i1++) {
 	a = lev->mixing[i0] * lev->mixing[i1];
 	if (fabs(a) < cfac->angz_cut) continue;
 	s1 = (STATE *) ArrayGet(&(sym->states), lev->basis[i1]);
-	c1 = GetConfig(cfac, s1);
 	k1 = s1->kstate;
 	idatum = NULL;
 	n_shells = GetInteract(cfac, &idatum, &sbra, &sket, s0->kgroup, s1->kgroup, 
@@ -1533,9 +1530,9 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg) {
       lev.iham = -1;
       lev.ilev = j;
       lev.pb = h->basis[k];
-      lev.ibasis = (short *) malloc(sizeof(short)*h->n_basis);
-      lev.basis = (int *) malloc(sizeof(int)*h->n_basis);
-      lev.mixing = (double *) malloc(sizeof(double)*h->n_basis);
+      lev.ibasis = malloc(sizeof(short)*h->n_basis);
+      lev.basis = malloc(sizeof(int)*h->n_basis);
+      lev.mixing = malloc(sizeof(double)*h->n_basis);
       lev.n_basis = h->n_basis;
       for (t = 0; t < h->n_basis; t++) {
 	lev.ibasis[t] = t;
@@ -1590,9 +1587,9 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg) {
     lev.iham = cfac->nhams-1;
     lev.ilev = i;
     lev.pb = h->basis[k];
-    lev.ibasis = (short *) malloc(sizeof(short)*h->n_basis);
-    lev.basis = (int *) malloc(sizeof(int)*h->n_basis);
-    lev.mixing = (double *) malloc(sizeof(double)*h->n_basis);
+    lev.ibasis = malloc(sizeof(short)*h->n_basis);
+    lev.basis = malloc(sizeof(int)*h->n_basis);
+    lev.mixing = malloc(sizeof(double)*h->n_basis);
     a = fabs(cfac->mix_cut * mix[k]);
     for (t = 0, m = 0; t < h->n_basis; t++) {
       if (fabs(mix[t]) < a) continue;
@@ -1603,9 +1600,9 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg) {
     }
     lev.n_basis = m;
     if (m < t) {
-      lev.ibasis = (short *) realloc(lev.ibasis, sizeof(short)*m);
-      lev.basis = (int *) realloc(lev.basis, sizeof(int)*m);
-      lev.mixing = (double *) realloc(lev.mixing, sizeof(double)*m);
+      lev.ibasis = realloc(lev.ibasis, sizeof(short)*m);
+      lev.basis = realloc(lev.basis, sizeof(int)*m);
+      lev.mixing = realloc(lev.mixing, sizeof(double)*m);
     }
     SortMixing(0, m, &lev, sym);
     GetPrincipleBasis(lev.mixing, m, lev.kpb);
@@ -1650,9 +1647,9 @@ void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c) {
     }
     if (m < lev->n_basis) {
       lev->n_basis = m;
-      lev->ibasis = (short *) realloc(lev->ibasis, sizeof(short)*m);
-      lev->basis = (int *) realloc(lev->basis, sizeof(int)*m);
-      lev->mixing = (double *) realloc(lev->mixing, sizeof(double)*m);      
+      lev->ibasis = realloc(lev->ibasis, sizeof(short)*m);
+      lev->basis = realloc(lev->basis, sizeof(int)*m);
+      lev->mixing = realloc(lev->mixing, sizeof(double)*m);      
       SortMixing(0, m, lev, sym);
       GetPrincipleBasis(lev->mixing, m, lev->kpb);
     }
@@ -2463,7 +2460,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   (*ad)->ns = ns1*ns2;
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
-  (*ad)->nz = (int *) malloc(sizeof(int)*ns);
+  (*ad)->nz = malloc(sizeof(int)*ns);
   iz = 0;
   iz1 = 0;
   iz2 = 0;
@@ -2652,7 +2649,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   (*ad)->ns = ns1 * ns2;
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
-  (*ad)->nz = (int *) malloc(sizeof(int)*ns);
+  (*ad)->nz = malloc(sizeof(int)*ns);
   
   kmax = GetMaxRank(cfac);
 
@@ -2722,7 +2719,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
 	if (IsOdd(phase+(jp+j2-k0)/2)) *r = -(*r);
 	*r /= sqrt(jp+1.0)*W6j(j1, jf, jp, k0, j2, s[1].j);
 	kb = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
-	ang = (ANGULAR_ZFB *) malloc(sizeof(ANGULAR_ZFB));
+	ang = malloc(sizeof(ANGULAR_ZFB));
 	ang->kb = kb;
 	ang->coeff = *r;
 	n = 1;
@@ -2772,7 +2769,7 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   (*ad)->ns = ns1*ns2;
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZxZMIX *)*ns);
-  (*ad)->nz = (int *) malloc(sizeof(int)*ns);
+  (*ad)->nz = malloc(sizeof(int)*ns);
   
   iz = 0;
   a = (ANGULAR_ZxZMIX **) (*ad)->angz;

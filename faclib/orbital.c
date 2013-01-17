@@ -272,7 +272,7 @@ static double DpDr(int kappa, int i1, double e, POTENTIAL *pot, double b) {
 int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {  
   double e, de, delta, emin, emax, dr, ke;
   double *p, p1, qo, qi, bqp, bqp1;
-  int n, i, k, kl, nr, nodes, niter;
+  int n, i, kl, nr, nodes, niter;
   int i2, i2m1, i2m2, i2p1, i2p2;
   int ib0, ib1;
 
@@ -424,7 +424,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
     qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m1]
 	  + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
     qo /= p[i2];
-    k = IntegrateRadial(p, e, pot, i2m2, p1, ib1, bqp1, 1);
+    IntegrateRadial(p, e, pot, i2m2, p1, ib1, bqp1, 1);
     for (i = i2m2; i <= ib1; i++) {
       p[i] *= pot->dr_drho2[i];
     }
@@ -1279,7 +1279,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
 }
   
 int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
-  int i, kl, nodes;
+  int i, kl;
   int i2;
   double *p, e;
 
@@ -1301,7 +1301,7 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
 
   i2 = pot->ib1;
   i2 = Max(i2,pot->ib) + 2;
-  nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+  IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
   for (i = i2; i >= 0; i--) {
     p[i] *= pot->dr_drho2[i];
   }

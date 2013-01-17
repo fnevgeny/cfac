@@ -2011,7 +2011,6 @@ int SlaterTotal(cfac_t *cfac,
   int t, kk, tt, maxn;
   int tmin, tmax;
   double e, a, d, a1, a2, am;
-  int err;
   int kl0, kl1, kl2, kl3;
   int k0, k1, k2, k3;
   int js[4];
@@ -2109,7 +2108,7 @@ int SlaterTotal(cfac_t *cfac,
     d = 0.0;
     if (IsEven((kl0+kl2)/2+kk) && IsEven((kl1+kl3)/2+kk) &&
 	Triangle(js[0], js[2], k) && Triangle(js[1], js[3], k)) {
-      err = Slater(cfac, &d, k0, k1, k2, k3, kk, mode);
+      Slater(cfac, &d, k0, k1, k2, k3, kk, mode);
       if (kk == 1 && cfac->qed.sms && maxn > 0) {
 	a1 = Vinti(cfac, k0, k2);
 	a2 = Vinti(cfac, k1, k3);
@@ -2157,7 +2156,7 @@ int SlaterTotal(cfac_t *cfac,
     if (fabs(a) > EPS30) {
       e = 0.0;
       if (IsEven((kl0+kl3+t)/2) && IsEven((kl1+kl2+t)/2)) {
-	err = Slater(cfac, &e, k0, k1, k3, k2, t/2, mode);
+	Slater(cfac, &e, k0, k1, k3, k2, t/2, mode);
 	if (t == 2 && cfac->qed.sms && maxn > 0) {
 	  e -= Vinti(cfac, k0, k3) * Vinti(cfac, k1, k2) / am;
 	}
@@ -2181,7 +2180,7 @@ int SlaterTotal(cfac_t *cfac,
 
 double SelfEnergyRatio(POTENTIAL *potential, ORBITAL *orb) {
   int i, npts;
-  double p[MAXRP], q[MAXRP], e, z;
+  double p[MAXRP], q[MAXRP], z;
   double *large, *small;
   double a, b;
   
@@ -2192,7 +2191,7 @@ double SelfEnergyRatio(POTENTIAL *potential, ORBITAL *orb) {
   }
   
   z = potential->Z[potential->maxrp-1];
-  e = RadialDiracCoulomb(npts, p, q, potential->rad, z, 
+  RadialDiracCoulomb(npts, p, q, potential->rad, z, 
 			 orb->n, orb->kappa);
   large = Large(orb);
   small = Small(orb);  

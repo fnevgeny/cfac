@@ -363,7 +363,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   TR_RECORD r;
   TR_HEADER tr_hdr;
   F_HEADER fhdr;
-  double *s, *et, *a, trd, gf;
+  double *s, *et, *a, trd;
   double e0, emin, emax;
 
   if (nlow <= 0 || nup <= 0) return -1;
@@ -417,7 +417,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       a[i] = 0.0;
       k = TRMultipole(cfac, s+i, et+i, m, low[i], up[j]);
       if (k != 0) continue;
-      gf = OscillatorStrength(m, et[i], s[i], &(a[i]));
+      OscillatorStrength(m, et[i], s[i], &(a[i]));
       a[i] /= jup+1.0;
       trd += a[i];
     } 

@@ -396,7 +396,6 @@ void RRRadialQkHydrogenicParams(int np, double *p,
   static double x[NNE], logx[NNE];
   int ipcp;
   static int iopt = 2;
-  int ierr;
   double fvec[NNE], fjac[NNE*NPARAMS];
   double tol;
   int i, j, k, ne;
@@ -440,7 +439,7 @@ void RRRadialQkHydrogenicParams(int np, double *p,
       t[0] = pnc[0];
       t[1] = 3.0*(i+1);
       t[2] = 1.0;
-      ierr = NLSQFit(np, t, tol, fvec, fjac, 
+      NLSQFit(np, t, tol, fvec, fjac, 
 		     ne, x, logx, pnc, pnc, RRRadialQkFromFit, &i);
       t += np;
     }

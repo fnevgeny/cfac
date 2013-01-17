@@ -1675,7 +1675,7 @@ int CollisionStrengthEBD(const cfac_cbcache_t *cbcache,
   double born_egrid, born_cross;
   int ie, i1, i2, i1p, i2p, p1, p2, p1p, p2p;
   int j1, j2, j1p, j2p, mlev1, mlev2, mlev1p, mlev2p;
-  int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k;
+  int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp;
   ANGULAR_ZMIX *ang, *angp;
   double bte, bms;
       
@@ -1730,7 +1730,7 @@ int CollisionStrengthEBD(const cfac_cbcache_t *cbcache,
 	      kkp = (ang[i].k + angp[ip].k)/2;
 	      qb = mlev1 - mlev2;
 	      qbp = mlev1p - mlev2p;
-	      k = CERadialQkMSub(cbcache, rq, te, ang[i].k0, ang[i].k1, 
+	      CERadialQkMSub(cbcache, rq, te, ang[i].k0, ang[i].k1, 
 				 angp[ip].k0, angp[ip].k1, ang[i].k, angp[ip].k);
 	      for (q = -nq; q <= nq; q++) {
 		m = abs(q);	

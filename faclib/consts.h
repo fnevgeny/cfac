@@ -189,7 +189,6 @@
 #define DMODE              M_NR
 #define ERANK              4
 #define MRANK              4
-#define TRCUT0             1E-4
 #define TRCUT              1E-4
 
 /* recouple */

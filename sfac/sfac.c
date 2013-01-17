@@ -2018,16 +2018,17 @@ static int PSetScreening(int argc, char *argv[], int argt[],
 
 static int PSetTransitionCut(int argc, char *argv[], int argt[], 
 			     ARRAY *variables) {
-  double c0, c;
+  double c;
 
   if (argc < 1) return -1;
   c = -1;
-  c0 = atof(argv[0]);
+  c = atof(argv[0]);
   if (argc > 1) {
+    /* Old 1.1.1 behaviour */
     c = atof(argv[1]);
   }
 
-  SetTransitionCut(cfac, c0, c);
+  SetTransitionCut(cfac, c);
 						  
   return 0;
 }

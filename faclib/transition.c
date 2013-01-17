@@ -16,12 +16,7 @@ typedef struct {
   int ks[2];
 } TR_DATUM;
 
-int SetTransitionCut(cfac_t *cfac, double c0, double c) {
-  if (c0 >= 0) {
-    cfac->transition_options.eps0 = c0;
-  } else {
-    cfac->transition_options.eps0 = TRCUT0;
-  }
+int SetTransitionCut(cfac_t *cfac, double c) {
   if (c >= 0) {
     cfac->transition_options.eps = c;
   } else {

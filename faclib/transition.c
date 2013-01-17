@@ -66,9 +66,8 @@ int GetTransitionMode(const cfac_t *cfac) {
   return cfac->transition_options.mode;
 }
 
-/* If strict flag is set, calculate only if energy > 0 */
 static int _TRMultipole(cfac_t *cfac, double *strength, double *energy,
-		int m, int lower, int upper, int strict) {
+		int m, int lower, int upper) {
   int m2;
   int p1, p2, j1, j2;
   LEVEL *lev1, *lev2;
@@ -89,7 +88,7 @@ static int _TRMultipole(cfac_t *cfac, double *strength, double *energy,
     return -1;
   }
   
-  if (strict && *energy <= 0.0) {
+  if (*energy < 0.0) {
     return -1;
   }
     
@@ -178,10 +177,9 @@ static void TRMultipole_cache_free(TRM_CACHE_T *cache)
   free(cache);
 }
 
-/* If energy is not NULL, it is assigned trans. energy;
-   if strict flag is set, calculate only if *energy > 0 */
+/* If energy is not NULL, it is assigned trans. energy; */
 int TRMultipole(cfac_t *cfac, double *strength, double *energy,
-		int m, int lower, int upper, int strict) {
+		int m, int lower, int upper) {
   double dE = 0.0;
   
   TRANS_T *trans = NULL;
@@ -202,7 +200,7 @@ int TRMultipole(cfac_t *cfac, double *strength, double *energy,
     }
   }
   
-  res = _TRMultipole(cfac, strength, &dE, m, lower, upper, strict);
+  res = _TRMultipole(cfac, strength, &dE, m, lower, upper);
   if (energy) {
     *energy = dE;
   }
@@ -256,7 +254,7 @@ int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m, int low
       plev2 = GetLevel(cfac, ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
       
-      if (TRMultipole(cfac, &r, NULL, m, ilev1, ilev2, 0) != 0) {
+      if (TRMultipole(cfac, &r, NULL, m, ilev1, ilev2) != 0) {
         continue;
       }
       
@@ -364,7 +362,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       
 int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		    char *fn, int m) {
-  int i, j, k, jup;
+  int i, j, jup;
   FILE *f;
   LEVEL *lev1, *lev2;
   TR_RECORD r;
@@ -374,7 +372,6 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   double e0, emin, emax;
 
   if (nlow <= 0 || nup <= 0) return -1;
-  k = 0;
   emin = 1E10;
   emax = 1E-10;
   for (i = 0; i < nlow; i++) {
@@ -382,16 +379,11 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     for (j = 0; j < nup; j++) {
       lev2 = GetLevel(cfac, up[j]);
       e0 = lev2->energy - lev1->energy;
-      if (e0 > 0) k++;
-      if (e0 < emin && e0 > 0) emin = e0;
+      if (e0 < emin) emin = e0;
       if (e0 > emax) emax = e0;
     }
   }
   
-  if (k == 0) {
-    return 0;
-  }
-    
   emin *= FINE_STRUCTURE_CONST;
   emax *= FINE_STRUCTURE_CONST;
   e0 = 2.0*(emax-emin)/(emin+emax);
@@ -426,17 +418,21 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     jup = LevelTotalJ(cfac, up[j]);
     trd = 0.0;
     for (i = 0; i < nlow; i++) {
+      int k;
       a[i] = 0.0;
-      k = TRMultipole(cfac, s+i, et+i, m, low[i], up[j], 1);
+      k = TRMultipole(cfac, s+i, et+i, m, low[i], up[j]);
       if (k != 0) continue;
       gf = OscillatorStrength(m, et[i], s[i], &(a[i]));
       a[i] /= jup+1.0;
       trd += a[i];
     } 
-    if (trd < 1E-30) continue;
     r.upper = up[j];
     for (i = 0; i < nlow; i++) {
-      if (a[i] < (cfac->transition_options.eps * trd)) continue;
+      if ((cfac->transition_options.eps && !trd) || 
+          a[i] < (cfac->transition_options.eps * trd)) {
+          continue;
+      }
+      if (fabs(s[i]) < EPS30) continue;
       r.lower = low[i];
       r.strength = s[i];
       WriteTRRecord(f, &r, NULL);

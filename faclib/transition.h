@@ -21,7 +21,7 @@ void SetTransitionOptions(cfac_t *cfac, int gauge, int mode, int max_e, int max_
 int GetTransitionGauge(const cfac_t *cfac);
 int GetTransitionMode(const cfac_t *cfac);
 int TRMultipole(cfac_t *cfac, double *strength, double *energy,
-		int m, int low, int up, int strict);
+		int m, int low, int up);
 int OverlapLowUp(int nlow, int *low, int nup, int *up);
 int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 		   char *fn, int multipole);

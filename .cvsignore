@@ -1,0 +1,4 @@
+*.db *.sqlite
+Make.dep
+cfac_schema.i
+fdemo

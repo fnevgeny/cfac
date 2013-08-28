@@ -382,6 +382,7 @@ void cfacdb_levels_(void (*sink)(int *id, double *energy, int *nele,
         double e;
         unsigned int ifac, g, vn, vl, p, nele;
         const unsigned char *sname, *name, *ncmplx;
+        int fid;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -400,7 +401,9 @@ void cfacdb_levels_(void (*sink)(int *id, double *energy, int *nele,
             ncmplx = sqlite3_column_text  (stmt, 8);
             sname  = sqlite3_column_text  (stmt, 9);
             
-            sink((int *) &ifac, &e, (int *) &nele, (int *) &g,
+            fid = i + 1;
+            
+            sink((int *) &fid, &e, (int *) &nele, (int *) &g,
                  (int *) &vn, (int *) &vl, (int *) &p,
                  (char *) name, (char *) ncmplx, (char *) sname,
                  strlen((char *) name), strlen((char *) ncmplx),
@@ -446,8 +449,9 @@ void cfacdb_rtrans_(void (*sink)(int *i, int *j, int *mpole, double *gf),
 
     do {
         double de, rme, gf;
-        unsigned int ilfac, iufac, i, j, m2;
+        unsigned int ilfac, iufac, m2;
         int mpole;
+        int fi, fj;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -465,10 +469,10 @@ void cfacdb_rtrans_(void (*sink)(int *i, int *j, int *mpole, double *gf),
             m2 = 2*abs(mpole);
             gf = SQR(rme)*de*pow(ALPHA*de, m2 - 2)/(m2 + 1);
             
-            i = cdb->lmap[ilfac - cdb->id_min];
-            j = cdb->lmap[iufac - cdb->id_min];
+            fi = cdb->lmap[ilfac - cdb->id_min] + 1;
+            fj = cdb->lmap[iufac - cdb->id_min] + 1;
             
-            sink((int *) &i, (int *) &j, &mpole, &gf);
+            sink(&fi, &fj, &mpole, &gf);
             
             break;
         default:
@@ -508,7 +512,8 @@ void cfacdb_aitrans_(void (*sink)(int *i, int *j, double *rate), int *ierr)
 
     do {
         double rate;
-        unsigned int ilfac, iufac, i, j;
+        unsigned int ilfac, iufac;
+        int fi, fj;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -520,10 +525,10 @@ void cfacdb_aitrans_(void (*sink)(int *i, int *j, double *rate), int *ierr)
             ilfac = sqlite3_column_int   (stmt, 1);
             rate  = sqlite3_column_double(stmt, 2);
             
-            i = cdb->lmap[ilfac - cdb->id_min];
-            j = cdb->lmap[iufac - cdb->id_min];
+            fi = cdb->lmap[ilfac - cdb->id_min] + 1;
+            fj = cdb->lmap[iufac - cdb->id_min] + 1;
             
-            sink((int *) &i, (int *) &j, &rate);
+            sink(&fi, &fj, &rate);
             
             break;
         default:
@@ -572,8 +577,9 @@ void cfacdb_ctrans_(void (*sink)(int *i, int *j,
     type_prev = 0;
     nd = 0;
     do {
-        unsigned int ilfac, iufac, i, j, type;
+        unsigned int ilfac, iufac, type;
         double e, strength, es[10], ds[10];
+        int fi, fj;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -594,9 +600,9 @@ void cfacdb_ctrans_(void (*sink)(int *i, int *j,
                 type != type_prev) {
 
                 if (nd) {
-                    i = cdb->lmap[ilfac - cdb->id_min];
-                    j = cdb->lmap[iufac - cdb->id_min];
-                    sink((int *) &i, (int *) &j,
+                    fi = cdb->lmap[ilfac - cdb->id_min] + 1;
+                    fj = cdb->lmap[iufac - cdb->id_min] + 1;
+                    sink(&fi, &fj,
                        (int *) &type, &ap0, &ap1, &nd, es, ds);
                 }
 

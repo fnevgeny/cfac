@@ -1,0 +1,634 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#include <sqlite3.h>
+
+#define SQR(a) ((a)*(a))
+
+/* Sommerfeld's fine-structure constant */
+#define ALPHA   7.297352570e-3
+
+#include "cfac_schema.i"
+
+typedef struct {
+    sqlite3 *db;
+    
+    int nele_min;
+    int nele_max;
+    
+    unsigned long int sid;
+    
+    unsigned long ndim;
+    unsigned long rtdim;
+    unsigned long aidim;
+    unsigned long cedim;
+    unsigned long cidim;
+    unsigned long pidim;
+    
+    unsigned int anum;
+    double mass;
+    
+    unsigned int id_min;
+    unsigned int id_max;
+
+    unsigned int *lmap;
+} cfac_db_t;
+
+
+static int sid_cb(void *udata,
+    int argc, char **argv, char **colNames)
+{
+    unsigned long int *sid = (unsigned long int *) udata;
+
+    if (argc != 1 || !argv[0]) {
+        return -1;
+    }
+    
+    *sid = atol(argv[0]);
+
+    return 0;
+}
+
+static cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
+{
+    cfac_db_t *cdb = NULL;
+    
+    sqlite3_stmt *stmt;
+    const char *sql;
+    char *errmsg;
+    int rc;
+    
+    unsigned int i;
+    unsigned long ntot;
+
+    cdb = malloc(sizeof(cfac_db_t));
+    if (!cdb) {
+        return NULL;
+    }
+    memset(cdb, 0, sizeof(cfac_db_t));   
+
+    rc = sqlite3_open_v2(fname, &cdb->db, SQLITE_OPEN_READONLY, NULL);
+    if (rc) {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    /* create temporary views etc */
+    i = 0;
+    while ((sql = schema_str[i])) {
+        rc = sqlite3_exec(cdb->db, sql, NULL, NULL, &errmsg);
+        if (rc != SQLITE_OK) {
+            fprintf(stderr, "SQL error: %s\n", errmsg);
+            sqlite3_free(errmsg);
+            sqlite3_close(cdb->db);
+            return NULL;
+        }
+        i++;
+    }
+
+    /* select latest cFAC session */
+    sql = "SELECT MAX(sid) FROM sessions";
+    
+    rc = sqlite3_exec(cdb->db, sql, sid_cb, &cdb->sid, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    /* get dimension of the database subset */
+    sql = "SELECT SUM(nlevels) AS ndim" \
+          " FROM _cstates_v" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ?";
+    
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, nele_max);
+    sqlite3_bind_int(stmt, 3, nele_min);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    cdb->ndim = sqlite3_column_int64(stmt, 0);
+    
+    sqlite3_reset(stmt);
+
+
+    sql = "SELECT COUNT(sid) AS rtdim" \
+          " FROM _rtransitions_v" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ?";
+    
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, nele_max);
+    sqlite3_bind_int(stmt, 3, nele_min);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    cdb->rtdim = sqlite3_column_int64(stmt, 0);
+    
+    sqlite3_reset(stmt);
+
+    sql = "SELECT COUNT(sid) AS aidim" \
+          " FROM _aitransitions_v" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ?";
+    
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, nele_max);
+    sqlite3_bind_int(stmt, 3, nele_min);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    cdb->aidim = sqlite3_column_int64(stmt, 0);
+    
+    sqlite3_reset(stmt);
+
+    sql = "SELECT COUNT(cid) AS cedim" \
+          " FROM _ctransitions_v" \
+          " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ? AND type = 1";
+    
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, nele_max);
+    sqlite3_bind_int(stmt, 3, nele_min);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    cdb->cedim = sqlite3_column_int64(stmt, 0);
+    
+    sqlite3_reset(stmt);
+
+    sql = "SELECT COUNT(cid) AS cidim" \
+          " FROM _ctransitions_v" \
+          " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ? AND type = 2";
+    
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, nele_max);
+    sqlite3_bind_int(stmt, 3, nele_min);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    cdb->cidim = sqlite3_column_int64(stmt, 0);
+    
+    sqlite3_reset(stmt);
+
+    sql = "SELECT COUNT(cid) AS pidim" \
+          " FROM _ctransitions_v" \
+          " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ? AND type = 3";
+    
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, nele_max);
+    sqlite3_bind_int(stmt, 3, nele_min);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    cdb->pidim = sqlite3_column_int64(stmt, 0);
+    
+    sqlite3_reset(stmt);
+
+
+    /* get element properties */
+    sql = "SELECT symbol, anum, mass, id_min, id_max" \
+          " FROM _species_v" \
+          " WHERE sid = ?";
+    
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_ROW) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+    
+    cdb->anum   = sqlite3_column_int   (stmt, 1);
+    cdb->mass   = sqlite3_column_double(stmt, 2);
+    cdb->id_min = sqlite3_column_int64 (stmt, 3);
+    cdb->id_max = sqlite3_column_int64 (stmt, 4);
+    
+    ntot = cdb->id_max - cdb->id_min + 1;
+    
+    cdb->nele_min = nele_min;
+    cdb->nele_max = nele_max;
+    
+    cdb->lmap = malloc(ntot*sizeof(unsigned int));
+    if (!cdb->lmap) {
+        fprintf(stderr, "Failed allocating memory for ndim=%lu\n", cdb->ndim);
+        sqlite3_finalize(stmt);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+    memset(cdb->lmap, 0, ntot*sizeof(unsigned int));
+
+    sqlite3_finalize(stmt);
+    
+    return cdb;
+}
+
+static char *f77char2str(const char *fstr, unsigned int fstrlen)
+{
+    char *s = malloc(fstrlen + 1);
+    if (s) {
+        unsigned int i;
+        
+        strncpy(s, fstr, fstrlen);
+        s[fstrlen] = '\0';
+        
+        for (i = fstrlen - 1; i >= 0; i--) {
+            if (s[i] == ' ') {
+                s[i] = '\0';
+            } else {
+                break;
+            }
+        }
+    }
+    
+    return s;
+}
+
+/* Fortran API functions below */
+static cfac_db_t *cdb = NULL;
+
+void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
+    int *ndim, int *rtdim, int *aidim, int *cedim, int *cidim, int *pidim,
+    int *ierr,
+    int _fnamelen)
+{
+    char *s = f77char2str(fname, _fnamelen);
+    
+    *ierr = 0;
+    
+    if (!s) {
+        *ierr = 1;
+        return;
+    }
+    
+    cdb = cdb_init(s, *nele_min, *nele_max);
+    free(s);
+    
+    if (!cdb) {
+        *ierr = 1;
+        return;
+    }
+    
+    *ndim = cdb->ndim;
+    *rtdim = cdb->rtdim;
+    *aidim = cdb->aidim;
+    *cedim = cdb->cedim;
+    *cidim = cdb->cidim;
+    *pidim = cdb->pidim;
+}
+
+void cfacdb_close_(void)
+{
+    if (cdb) {
+        if (cdb->lmap) {
+            free(cdb->lmap);
+        }
+        
+        sqlite3_close(cdb->db);
+        
+        free(cdb);
+    }
+    
+    cdb = NULL;
+}
+
+void cfacdb_species_(int *anum, double *mass, int *ierr)
+{
+    if (!cdb) {
+        *ierr = 1;
+        return;
+    } else {
+        *ierr = 0;
+    }
+
+    *anum = cdb->anum;
+    *mass = cdb->mass;
+}
+
+void cfacdb_levels_(void (*sink)(int *id, double *energy, int *nele,
+    int *g, int *vn, int *vl, int *p, char *name, char *ncmplx,
+    char *sname,  int _namelen, int _ncmplxlen, int _snamelen), int *ierr)
+{
+    sqlite3_stmt *stmt;
+    const char *sql;
+    int rc;
+    
+    unsigned int i;
+
+    if (!cdb) {
+        *ierr = 1;
+        return;
+    } else {
+        *ierr = 0;
+    }
+    
+    sql = "SELECT id, name, nele, e, g, vn, vl, p, ncomplex, sname" \
+          " FROM _levels_v" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ?" \
+          " ORDER BY zsp, e";
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
+
+    i = 0;
+    do {
+        double e;
+        unsigned int ifac, g, vn, vl, p, nele;
+        const unsigned char *sname, *name, *ncmplx;
+        
+        rc = sqlite3_step(stmt);
+        switch (rc) {
+        case SQLITE_DONE:
+        case SQLITE_OK:
+            break;
+        case SQLITE_ROW:
+            ifac   = sqlite3_column_int64 (stmt, 0);
+            name   = sqlite3_column_text  (stmt, 1);
+            nele   = sqlite3_column_int   (stmt, 2);
+            e      = sqlite3_column_double(stmt, 3);
+            g      = sqlite3_column_int   (stmt, 4);
+            vn     = sqlite3_column_int   (stmt, 5);
+            vl     = sqlite3_column_int   (stmt, 6);
+            p      = sqlite3_column_int   (stmt, 7);
+            ncmplx = sqlite3_column_text  (stmt, 8);
+            sname  = sqlite3_column_text  (stmt, 9);
+            
+            sink((int *) &ifac, &e, (int *) &nele, (int *) &g,
+                 (int *) &vn, (int *) &vl, (int *) &p,
+                 (char *) name, (char *) ncmplx, (char *) sname,
+                 strlen((char *) name), strlen((char *) ncmplx),
+                 strlen((char *) sname));
+            
+            cdb->lmap[ifac - cdb->id_min] = i; i++;
+            
+            break;
+        default:
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+            sqlite3_finalize(stmt);
+            *ierr = 2;
+            return;
+            break;
+        }
+    } while (rc == SQLITE_ROW);
+    
+    sqlite3_finalize(stmt);
+}
+
+void cfacdb_rtrans_(void (*sink)(int *i, int *j, int *mpole, double *gf),
+    int *ierr)
+{
+    sqlite3_stmt *stmt;
+    const char *sql;
+    int rc;
+    
+    if (!cdb) {
+        *ierr = 1;
+        return;
+    } else {
+        *ierr = 0;
+    }
+    
+    sql = "SELECT ini_id, fin_id, mpole, rme, de" \
+          " FROM _rtransitions_v" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ? AND de > 0" \
+          " ORDER BY ini_id, fin_id";
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
+
+    do {
+        double de, rme, gf;
+        unsigned int ilfac, iufac, i, j, m2;
+        int mpole;
+        
+        rc = sqlite3_step(stmt);
+        switch (rc) {
+        case SQLITE_DONE:
+        case SQLITE_OK:
+            break;
+        case SQLITE_ROW:
+            iufac = sqlite3_column_int   (stmt, 0);
+            ilfac = sqlite3_column_int   (stmt, 1);
+            mpole = sqlite3_column_int   (stmt, 2);
+            rme   = sqlite3_column_double(stmt, 3);
+            de    = sqlite3_column_double(stmt, 4);
+            
+    
+            m2 = 2*abs(mpole);
+            gf = SQR(rme)*de*pow(ALPHA*de, m2 - 2)/(m2 + 1);
+            
+            i = cdb->lmap[ilfac - cdb->id_min];
+            j = cdb->lmap[iufac - cdb->id_min];
+            
+            sink((int *) &i, (int *) &j, &mpole, &gf);
+            
+            break;
+        default:
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+            sqlite3_finalize(stmt);
+            *ierr = 2;
+            return;
+            break;
+        }
+    } while (rc == SQLITE_ROW);
+
+    sqlite3_finalize(stmt);
+}
+
+
+void cfacdb_aitrans_(void (*sink)(int *i, int *j, double *rate), int *ierr)
+{
+    sqlite3_stmt *stmt;
+    const char *sql;
+    int rc;
+    
+    if (!cdb) {
+        *ierr = 1;
+        return;
+    } else {
+        *ierr = 0;
+    }
+    
+    sql = "SELECT ini_id, fin_id, rate" \
+          " FROM _aitransitions_v" \
+          " WHERE sid = ? AND nele <= ? AND nele > ?" \
+          " ORDER BY ini_id, fin_id";
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
+
+    do {
+        double rate;
+        unsigned int ilfac, iufac, i, j;
+        
+        rc = sqlite3_step(stmt);
+        switch (rc) {
+        case SQLITE_DONE:
+        case SQLITE_OK:
+            break;
+        case SQLITE_ROW:
+            iufac = sqlite3_column_int   (stmt, 0);
+            ilfac = sqlite3_column_int   (stmt, 1);
+            rate  = sqlite3_column_double(stmt, 2);
+            
+            i = cdb->lmap[ilfac - cdb->id_min];
+            j = cdb->lmap[iufac - cdb->id_min];
+            
+            sink((int *) &i, (int *) &j, &rate);
+            
+            break;
+        default:
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+            sqlite3_finalize(stmt);
+            *ierr = 2;
+            return;
+            break;
+        }
+    } while (rc == SQLITE_ROW);
+
+    sqlite3_finalize(stmt);
+}
+
+void cfacdb_ctrans_(void (*sink)(int *i, int *j,
+    int *type, double *ap0, double *ap1, int *nd, double *e, double *d),
+    int *ierr)
+{
+    sqlite3_stmt *stmt;
+    const char *sql;
+    int nd, rc;
+    unsigned int ilfac_prev, iufac_prev, type_prev;
+    double ap0, ap1;
+
+    if (!cdb) {
+        *ierr = 1;
+        return;
+    } else {
+        *ierr = 0;
+    }
+    
+    sql = "SELECT ini_id, fin_id, type, e, strength, ap0, ap1" \
+          " FROM _cstrengths_v" \
+          " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
+          " ORDER BY ini_id, fin_id, type, e";
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
+    
+    ap0 = 0.0;
+    ap1 = 0.0;
+
+    ilfac_prev = 0;
+    iufac_prev = 0;
+    type_prev = 0;
+    nd = 0;
+    do {
+        unsigned int ilfac, iufac, i, j, type;
+        double e, strength, es[10], ds[10];
+        
+        rc = sqlite3_step(stmt);
+        switch (rc) {
+        case SQLITE_DONE:
+        case SQLITE_OK:
+            break;
+        case SQLITE_ROW:
+            ilfac    = sqlite3_column_int(stmt, 0);
+            iufac    = sqlite3_column_int(stmt, 1);
+            type     = sqlite3_column_int(stmt, 2);
+            e        = sqlite3_column_double(stmt, 3);
+            strength = sqlite3_column_double(stmt, 4);
+            ap0      = sqlite3_column_double(stmt, 5);
+            ap1      = sqlite3_column_double(stmt, 6);
+            
+            if (ilfac != ilfac_prev ||
+                iufac != iufac_prev ||
+                type != type_prev) {
+
+                if (nd) {
+                    i = cdb->lmap[ilfac - cdb->id_min];
+                    j = cdb->lmap[iufac - cdb->id_min];
+                    sink((int *) &i, (int *) &j,
+                       (int *) &type, &ap0, &ap1, &nd, es, ds);
+                }
+
+                nd = 0;
+
+                ilfac_prev = ilfac;
+                iufac_prev = iufac;
+                type_prev = type;
+            }
+            
+            if (strength <= 0.0) {
+                fprintf(stderr,
+                    "ignoring non-positive cstrength %g at e=%g\n",
+                        strength, e);
+                continue;
+            }
+            
+            es[nd] = e;
+            ds[nd] = strength;
+            
+            nd++;
+
+            break;
+        default:
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+            sqlite3_finalize(stmt);
+            *ierr = 2;
+            return;
+            break;
+        }
+
+    } while (rc == SQLITE_ROW);
+
+    sqlite3_finalize(stmt);
+}

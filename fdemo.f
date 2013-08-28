@@ -42,7 +42,7 @@ c     Get species properties
       write(*, 902) ndim, rtdim, aidim, cedim, cidim, pidim
       
       write(*, *) '----------------------------------------------'
-      write(*, *) '   #   id    E nele    g  vn  vl   p      name'
+      write(*, *) '   #         E nele    g  vn  vl   p      name'
       write(*, *) '----------------------------------------------'
 
       call cfacdb_levels(l_sink, ierr)

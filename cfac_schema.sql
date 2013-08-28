@@ -44,7 +44,7 @@ CREATE TEMPORARY VIEW _cstrengths_v AS
   SELECT ct.sid, ct.ini_id, ct.fin_id, ct.type,
          cs.e, cs.strength,
          li.nele AS ini_nele, lf.nele AS fin_nele,
-         ct.ap0, ct.ap1
+         li.e - lf.e AS de, ct.ap0, ct.ap1
     FROM cstrengths AS cs
       INNER JOIN ctransitions AS ct ON (cs.cid = ct.cid)
       INNER JOIN levels AS li ON (ct.sid = li.sid AND ct.ini_id = li.id)

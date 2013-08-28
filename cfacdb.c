@@ -543,24 +543,37 @@ void cfacdb_aitrans_(void (*sink)(int *i, int *j, double *rate), int *ierr)
     sqlite3_finalize(stmt);
 }
 
-void cfacdb_ctrans_(void (*sink)(int *i, int *j,
-    int *type, double *ap0, double *ap1, int *nd, double *e, double *d),
-    int *ierr)
+typedef struct {
+    unsigned int ii, fi;
+    
+    unsigned int type;
+    
+    double de;
+    double ap0, ap1;
+    
+    unsigned int nd;
+    double *e;
+    double *d;
+} ctrans_cb_data_t;
+
+typedef void (*cfac_db_ctrans_sink_t)(const cfac_db_t *cdb,
+    ctrans_cb_data_t *cbdata, void *udata);
+
+typedef void (*cfacdb_ctrans_fsink_t)(int *i, int *j,
+    int *type, double *ap0, double *ap1, int *nd, double *e, double *d);  
+
+int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
     int nd, rc;
     unsigned int ilfac_prev, iufac_prev, type_prev;
-    double ap0, ap1;
 
     if (!cdb) {
-        *ierr = 1;
-        return;
-    } else {
-        *ierr = 0;
+        return 1;
     }
     
-    sql = "SELECT ini_id, fin_id, type, e, strength, ap0, ap1" \
+    sql = "SELECT ini_id, fin_id, type, e, strength, de, ap0, ap1" \
           " FROM _cstrengths_v" \
           " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
           " ORDER BY ini_id, fin_id, type, e";
@@ -569,17 +582,14 @@ void cfacdb_ctrans_(void (*sink)(int *i, int *j,
     sqlite3_bind_int(stmt, 2, cdb->nele_max);
     sqlite3_bind_int(stmt, 3, cdb->nele_min);
     
-    ap0 = 0.0;
-    ap1 = 0.0;
-
     ilfac_prev = 0;
     iufac_prev = 0;
     type_prev = 0;
     nd = 0;
     do {
         unsigned int ilfac, iufac, type;
-        double e, strength, es[10], ds[10];
-        int fi, fj;
+        double de, ap0, ap1, e, strength, es[10], ds[10];
+        ctrans_cb_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -589,21 +599,34 @@ void cfacdb_ctrans_(void (*sink)(int *i, int *j,
         case SQLITE_ROW:
             ilfac    = sqlite3_column_int(stmt, 0);
             iufac    = sqlite3_column_int(stmt, 1);
+            
             type     = sqlite3_column_int(stmt, 2);
             e        = sqlite3_column_double(stmt, 3);
             strength = sqlite3_column_double(stmt, 4);
-            ap0      = sqlite3_column_double(stmt, 5);
-            ap1      = sqlite3_column_double(stmt, 6);
+            de       = sqlite3_column_double(stmt, 5);
+            ap0      = sqlite3_column_double(stmt, 6);
+            ap1      = sqlite3_column_double(stmt, 7);
             
             if (ilfac != ilfac_prev ||
                 iufac != iufac_prev ||
                 type != type_prev) {
 
                 if (nd) {
-                    fi = cdb->lmap[ilfac - cdb->id_min] + 1;
-                    fj = cdb->lmap[iufac - cdb->id_min] + 1;
-                    sink(&fi, &fj,
-                       (int *) &type, &ap0, &ap1, &nd, es, ds);
+                    cbdata.ii   = cdb->lmap[ilfac - cdb->id_min];
+                    cbdata.fi   = cdb->lmap[iufac - cdb->id_min];
+                    
+                    cbdata.type = type;
+                    
+                    cbdata.de   = de;
+                    
+                    cbdata.ap0  = ap0;
+                    cbdata.ap1  = ap1;
+                    
+                    cbdata.nd   = nd;
+                    cbdata.e    = es;
+                    cbdata.d    = ds;
+                    
+                    sink(cdb, &cbdata, udata);
                 }
 
                 nd = 0;
@@ -629,12 +652,43 @@ void cfacdb_ctrans_(void (*sink)(int *i, int *j,
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            *ierr = 2;
-            return;
+            return 2;
             break;
         }
 
     } while (rc == SQLITE_ROW);
 
     sqlite3_finalize(stmt);
+    
+    return 0;
+}
+
+
+static void ctrans_fsink(const cfac_db_t *cdb,
+    ctrans_cb_data_t *cbdata, void *udata)
+{
+    struct {
+        cfacdb_ctrans_fsink_t sink;
+    } *fdata = udata;
+    
+    int fi, fj;
+    
+    fi = cbdata->ii + 1;
+    fj = cbdata->fi + 1;
+    
+    fdata->sink(&fi, &fj, (int *) &cbdata->type, &cbdata->ap0, &cbdata->ap1,
+        (int *) &cbdata->nd, cbdata->e, cbdata->d);
+}
+
+void cfacdb_ctrans_(void (*sink)(int *i, int *j,
+    int *type, double *ap0, double *ap1, int *nd, double *e, double *d),
+    int *ierr)
+{
+    struct {
+        cfacdb_ctrans_fsink_t sink;
+    } fdata;
+    
+    fdata.sink = sink;
+    
+    *ierr = cfac_db_ctrans(cdb, ctrans_fsink, &fdata);
 }

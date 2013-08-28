@@ -568,6 +568,12 @@ int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
     const char *sql;
     int nd, rc;
     unsigned int ilfac_prev, iufac_prev, type_prev;
+    
+    double es[256], ds[256]; /* TODO: make truly allocatable ? */
+    ctrans_cb_data_t cbdata;
+    
+    cbdata.e = es;
+    cbdata.d = ds;
 
     if (!cdb) {
         return 1;
@@ -588,13 +594,16 @@ int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
     nd = 0;
     do {
         unsigned int ilfac, iufac, type;
-        double de, ap0, ap1, e, strength, es[10], ds[10];
-        ctrans_cb_data_t cbdata;
+        double de, ap0, ap1, e, strength;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
         case SQLITE_DONE:
-        case SQLITE_OK:
+            if (nd) {
+                cbdata.nd   = nd;
+
+                sink(cdb, &cbdata, udata);
+            }
             break;
         case SQLITE_ROW:
             ilfac    = sqlite3_column_int(stmt, 0);
@@ -609,22 +618,10 @@ int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
             
             if (ilfac != ilfac_prev ||
                 iufac != iufac_prev ||
-                type != type_prev) {
+                type  != type_prev) {
 
                 if (nd) {
-                    cbdata.ii   = cdb->lmap[ilfac - cdb->id_min];
-                    cbdata.fi   = cdb->lmap[iufac - cdb->id_min];
-                    
-                    cbdata.type = type;
-                    
-                    cbdata.de   = de;
-                    
-                    cbdata.ap0  = ap0;
-                    cbdata.ap1  = ap1;
-                    
                     cbdata.nd   = nd;
-                    cbdata.e    = es;
-                    cbdata.d    = ds;
                     
                     sink(cdb, &cbdata, udata);
                 }
@@ -633,9 +630,24 @@ int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
 
                 ilfac_prev = ilfac;
                 iufac_prev = iufac;
-                type_prev = type;
+                type_prev  = type;
             }
             
+            cbdata.ii   = cdb->lmap[ilfac - cdb->id_min];
+            cbdata.fi   = cdb->lmap[iufac - cdb->id_min];
+
+            cbdata.type = type;
+
+            cbdata.de   = de;
+
+            cbdata.ap0  = ap0;
+            cbdata.ap1  = ap1;
+
+            es[nd] = e;
+            ds[nd] = strength;
+            
+            nd++;
+
             if (strength <= 0.0) {
                 fprintf(stderr,
                     "ignoring non-positive cstrength %g at e=%g\n",
@@ -643,11 +655,6 @@ int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
                 continue;
             }
             
-            es[nd] = e;
-            ds[nd] = strength;
-            
-            nd++;
-
             break;
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));

@@ -3,15 +3,10 @@
 #include <string.h>
 #include <math.h>
 
-#include <sqlite3.h>
-
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
 
-/* TODO: include a public cfac header when it exists... */
-#define DB_SQL_CS_CE    1
-#define DB_SQL_CS_CI    2
-#define DB_SQL_CS_PI    3
+#include "cfacdb.h"
 
 #define SQR(a) ((a)*(a))
 
@@ -19,30 +14,6 @@
 #define ALPHA   7.297352570e-3
 
 #include "cfac_schema.i"
-
-typedef struct {
-    sqlite3 *db;
-    
-    int nele_min;
-    int nele_max;
-    
-    unsigned long int sid;
-    
-    unsigned long ndim;
-    unsigned long rtdim;
-    unsigned long aidim;
-    unsigned long cedim;
-    unsigned long cidim;
-    unsigned long pidim;
-    
-    unsigned int anum;
-    double mass;
-    
-    unsigned int id_min;
-    unsigned int id_max;
-
-    unsigned int *lmap;
-} cfac_db_t;
 
 
 static int sid_cb(void *udata,
@@ -59,7 +30,7 @@ static int sid_cb(void *udata,
     return 0;
 }
 
-static cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
+cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
 {
     cfac_db_t *cdb = NULL;
     
@@ -277,61 +248,7 @@ static cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     return cdb;
 }
 
-static char *f77char2str(const char *fstr, unsigned int fstrlen)
-{
-    char *s = malloc(fstrlen + 1);
-    if (s) {
-        unsigned int i;
-        
-        strncpy(s, fstr, fstrlen);
-        s[fstrlen] = '\0';
-        
-        for (i = fstrlen - 1; i >= 0; i--) {
-            if (s[i] == ' ') {
-                s[i] = '\0';
-            } else {
-                break;
-            }
-        }
-    }
-    
-    return s;
-}
-
-/* Fortran API functions below */
-static cfac_db_t *cdb = NULL;
-
-void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
-    int *ndim, int *rtdim, int *aidim, int *cedim, int *cidim, int *pidim,
-    int *ierr,
-    int _fnamelen)
-{
-    char *s = f77char2str(fname, _fnamelen);
-    
-    *ierr = 0;
-    
-    if (!s) {
-        *ierr = 1;
-        return;
-    }
-    
-    cdb = cdb_init(s, *nele_min, *nele_max);
-    free(s);
-    
-    if (!cdb) {
-        *ierr = 1;
-        return;
-    }
-    
-    *ndim = cdb->ndim;
-    *rtdim = cdb->rtdim;
-    *aidim = cdb->aidim;
-    *cedim = cdb->cedim;
-    *cidim = cdb->cidim;
-    *pidim = cdb->pidim;
-}
-
-void cfacdb_close_(void)
+void cfac_db_close(cfac_db_t *cdb)
 {
     if (cdb) {
         if (cdb->lmap) {
@@ -346,22 +263,8 @@ void cfacdb_close_(void)
     cdb = NULL;
 }
 
-void cfacdb_species_(int *anum, double *mass, int *ierr)
-{
-    if (!cdb) {
-        *ierr = 1;
-        return;
-    } else {
-        *ierr = 0;
-    }
 
-    *anum = cdb->anum;
-    *mass = cdb->mass;
-}
-
-void cfacdb_levels_(void (*sink)(int *id, double *energy, int *nele,
-    int *g, int *vn, int *vl, int *p, char *name, char *ncmplx,
-    char *sname,  int _namelen, int _ncmplxlen, int _snamelen), int *ierr)
+int cfac_db_levels(cfac_db_t *cdb, cfac_db_levels_sink_t sink, void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
@@ -370,10 +273,7 @@ void cfacdb_levels_(void (*sink)(int *id, double *energy, int *nele,
     unsigned int i;
 
     if (!cdb) {
-        *ierr = 1;
-        return;
-    } else {
-        *ierr = 0;
+        return 1;
     }
     
     sql = "SELECT id, name, nele, e, g, vn, vl, p, ncomplex, sname" \
@@ -387,10 +287,7 @@ void cfacdb_levels_(void (*sink)(int *id, double *energy, int *nele,
 
     i = 0;
     do {
-        double e;
-        unsigned int ifac, g, vn, vl, p, nele;
-        const unsigned char *sname, *name, *ncmplx;
-        int fid;
+        levels_cb_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -398,52 +295,47 @@ void cfacdb_levels_(void (*sink)(int *id, double *energy, int *nele,
         case SQLITE_OK:
             break;
         case SQLITE_ROW:
-            ifac   = sqlite3_column_int64 (stmt, 0);
-            name   = sqlite3_column_text  (stmt, 1);
-            nele   = sqlite3_column_int   (stmt, 2);
-            e      = sqlite3_column_double(stmt, 3);
-            g      = sqlite3_column_int   (stmt, 4);
-            vn     = sqlite3_column_int   (stmt, 5);
-            vl     = sqlite3_column_int   (stmt, 6);
-            p      = sqlite3_column_int   (stmt, 7);
-            ncmplx = sqlite3_column_text  (stmt, 8);
-            sname  = sqlite3_column_text  (stmt, 9);
+            cbdata.i      = i;
+            cbdata.ifac   = sqlite3_column_int64 (stmt, 0);
+            cbdata.name   = (char *) sqlite3_column_text  (stmt, 1);
+            cbdata.nele   = sqlite3_column_int   (stmt, 2);
+            cbdata.energy = sqlite3_column_double(stmt, 3);
+            cbdata.g      = sqlite3_column_int   (stmt, 4);
+            cbdata.vn     = sqlite3_column_int   (stmt, 5);
+            cbdata.vl     = sqlite3_column_int   (stmt, 6);
+            cbdata.p      = sqlite3_column_int   (stmt, 7);
+            cbdata.ncmplx = (char *) sqlite3_column_text  (stmt, 8);
+            cbdata.sname  = (char *) sqlite3_column_text  (stmt, 9);
             
-            fid = i + 1;
+            sink(cdb, &cbdata, udata);
             
-            sink((int *) &fid, &e, (int *) &nele, (int *) &g,
-                 (int *) &vn, (int *) &vl, (int *) &p,
-                 (char *) name, (char *) ncmplx, (char *) sname,
-                 strlen((char *) name), strlen((char *) ncmplx),
-                 strlen((char *) sname));
-            
-            cdb->lmap[ifac - cdb->id_min] = i; i++;
+            cdb->lmap[cbdata.ifac - cdb->id_min] = i; i++;
             
             break;
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            *ierr = 2;
-            return;
+            return 2;
             break;
         }
     } while (rc == SQLITE_ROW);
     
     sqlite3_finalize(stmt);
+    
+    return 0;
 }
 
-void cfacdb_rtrans_(void (*sink)(int *i, int *j, int *mpole, double *gf),
-    int *ierr)
+
+int cfac_db_rtrans(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, rtrans_cb_data_t *cbdata, void *udata),
+    void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
     int rc;
     
     if (!cdb) {
-        *ierr = 1;
-        return;
-    } else {
-        *ierr = 0;
+        return 1;
     }
     
     sql = "SELECT ini_id, fin_id, mpole, rme, de" \
@@ -456,10 +348,11 @@ void cfacdb_rtrans_(void (*sink)(int *i, int *j, int *mpole, double *gf),
     sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     do {
-        double de, rme, gf;
+        double de, rme;
         unsigned int ilfac, iufac, m2;
         int mpole;
-        int fi, fj;
+        
+        rtrans_cb_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -475,38 +368,39 @@ void cfacdb_rtrans_(void (*sink)(int *i, int *j, int *mpole, double *gf),
             
     
             m2 = 2*abs(mpole);
-            gf = SQR(rme)*de*pow(ALPHA*de, m2 - 2)/(m2 + 1);
+            cbdata.gf = SQR(rme)*de*pow(ALPHA*de, m2 - 2)/(m2 + 1);
+            cbdata.mpole = mpole;
             
-            fi = cdb->lmap[ilfac - cdb->id_min] + 1;
-            fj = cdb->lmap[iufac - cdb->id_min] + 1;
+            cbdata.ii = cdb->lmap[ilfac - cdb->id_min];
+            cbdata.fi = cdb->lmap[iufac - cdb->id_min];
             
-            sink(&fi, &fj, &mpole, &gf);
+            sink(cdb, &cbdata, udata);
             
             break;
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            *ierr = 2;
-            return;
+            return 2;
             break;
         }
     } while (rc == SQLITE_ROW);
 
     sqlite3_finalize(stmt);
+    
+    return 0;
 }
 
 
-void cfacdb_aitrans_(void (*sink)(int *i, int *j, double *rate), int *ierr)
+int cfac_db_aitrans(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, aitrans_cb_data_t *cbdata, void *udata),
+    void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
     int rc;
     
     if (!cdb) {
-        *ierr = 1;
-        return;
-    } else {
-        *ierr = 0;
+        return 1;
     }
     
     sql = "SELECT ini_id, fin_id, rate" \
@@ -521,7 +415,8 @@ void cfacdb_aitrans_(void (*sink)(int *i, int *j, double *rate), int *ierr)
     do {
         double rate;
         unsigned int ilfac, iufac;
-        int fi, fj;
+
+        aitrans_cb_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -533,58 +428,27 @@ void cfacdb_aitrans_(void (*sink)(int *i, int *j, double *rate), int *ierr)
             ilfac = sqlite3_column_int   (stmt, 1);
             rate  = sqlite3_column_double(stmt, 2);
             
-            fi = cdb->lmap[ilfac - cdb->id_min] + 1;
-            fj = cdb->lmap[iufac - cdb->id_min] + 1;
+            cbdata.ii = cdb->lmap[ilfac - cdb->id_min];
+            cbdata.fi = cdb->lmap[iufac - cdb->id_min];
             
-            sink(&fi, &fj, &rate);
+            cbdata.rate = rate;
+            
+            sink(cdb, &cbdata, udata);
             
             break;
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            *ierr = 2;
-            return;
+            return 2;
             break;
         }
     } while (rc == SQLITE_ROW);
 
     sqlite3_finalize(stmt);
+    
+    return 0;
 }
 
-typedef struct {
-    unsigned int ii, fi;
-    
-    unsigned int type;
-    
-    double de;
-    double ap0, ap1;
-    
-    unsigned int nd;
-    double *e;
-    double *d;
-} ctrans_cb_data_t;
-
-typedef struct {
-    unsigned int ii, fi;
-    
-    unsigned int type;
-    
-    double de;
-    
-    double ratec;
-} crates_cb_data_t;
-
-typedef void (*cfac_db_ctrans_sink_t)(const cfac_db_t *cdb,
-    ctrans_cb_data_t *cbdata, void *udata);
-
-typedef void (*cfac_db_crates_sink_t)(const cfac_db_t *cdb,
-    crates_cb_data_t *cbdata, void *udata);
-
-
-typedef void (*cfacdb_ctrans_fsink_t)(int *i, int *j,
-    int *type, double *ap0, double *ap1, int *nd, double *e, double *d);  
-typedef void (*cfacdb_crates_fsink_t)(int *i, int *j,
-    int *type, double *ratec);  
 
 int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
 {
@@ -692,36 +556,6 @@ int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
     sqlite3_finalize(stmt);
     
     return 0;
-}
-
-
-static void ctrans_fsink(const cfac_db_t *cdb,
-    ctrans_cb_data_t *cbdata, void *udata)
-{
-    struct {
-        cfacdb_ctrans_fsink_t sink;
-    } *fdata = udata;
-    
-    int fi, fj;
-    
-    fi = cbdata->ii + 1;
-    fj = cbdata->fi + 1;
-    
-    fdata->sink(&fi, &fj, (int *) &cbdata->type, &cbdata->ap0, &cbdata->ap1,
-        (int *) &cbdata->nd, cbdata->e, cbdata->d);
-}
-
-void cfacdb_ctrans_(void (*sink)(int *i, int *j,
-    int *type, double *ap0, double *ap1, int *nd, double *e, double *d),
-    int *ierr)
-{
-    struct {
-        cfacdb_ctrans_fsink_t sink;
-    } fdata;
-    
-    fdata.sink = sink;
-    
-    *ierr = cfac_db_ctrans(cdb, ctrans_fsink, &fdata);
 }
 
 
@@ -973,34 +807,4 @@ int cfac_db_crates(cfac_db_t *cdb, double T,
     gsl_integration_workspace_free(rdata.w);
     
     return rc;
-}
-
-
-static void crates_fsink(const cfac_db_t *cdb,
-    crates_cb_data_t *cbdata, void *udata)
-{
-    struct {
-        cfacdb_crates_fsink_t sink;
-    } *fdata = udata;
-    
-    int fi, fj;
-    
-    fi = cbdata->ii + 1;
-    fj = cbdata->fi + 1;
-    
-    fdata->sink(&fi, &fj, (int *) &cbdata->type, &cbdata->ratec);
-}
-
-
-void cfacdb_crates_(double *T, void (*sink)(int *i, int *j,
-    int *type, double *ratec),
-    int *ierr)
-{
-    struct {
-        cfacdb_crates_fsink_t sink;
-    } fdata;
-    
-    fdata.sink = sink;
-    
-    *ierr = cfac_db_crates(cdb, *T, crates_fsink, &fdata);
 }

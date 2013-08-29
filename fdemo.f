@@ -9,16 +9,18 @@ c     species
       double precision mass
 
       integer ndim, rtdim, aidim, cedim, cidim, pidim
+      
+      double precision T
 
       integer ierr
 
 c     Sink subroutines for handling (storing) data      
-      external l_sink, rt_sink, ai_sink, ct_sink
+      external l_sink, rt_sink, ai_sink, ct_sink, cr_sink
 
       dbname = 'Ge.db'
       
-      nele_min = 1
-      nele_max = 2
+      nele_min = 0
+      nele_max = 3
 
 c     Initialization; obtain various dimensions for dynamic allocation
       call cfacdb_init(dbname, nele_min, nele_max,
@@ -68,9 +70,14 @@ c     Get AI transitions
       endif
       
 c     Get collisional (CE, CI, PI) transitions
-      call cfacdb_ctrans(ct_sink, ierr)
+c      call cfacdb_ctrans(ct_sink, ierr)
+
+c     Get collisional (CE, CI, PI) rates
+c    (NB: the statweight of the ini state is included!!!)
+      T = 2000.0/27.211
+      call cfacdb_crates(T, cr_sink, ierr)
       if (ierr .ne. 0) then
-          print *, 'cfacdb_ctrans() failed with ierr = ', ierr
+          print *, 'cfacdb_crates() failed with ierr = ', ierr
           stop
       endif
       
@@ -130,6 +137,17 @@ c---------
       write (*,923) i, j, ctype, ap0, ap1, e(1:nd), d(1:nd)
  923  format(i5, ' -> ', i5, ', type = ', i1, ' ap0,1 = [',
      &       g10.3, g10.3, ']', 12g10.3)
+
+      return
+      end
+
+      subroutine cr_sink(i, j, ctype, ratec)
+      implicit none
+      integer i, j, ctype
+      double precision ratec
+
+      write (*,924) i, j, ctype, ratec
+ 924  format(i5, ' -> ', i5, ', type = ', i1, ' ratec = ', 12g10.3)
 
       return
       end

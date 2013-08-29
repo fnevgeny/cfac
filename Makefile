@@ -13,7 +13,7 @@ SCHEMAS =
 LOBJS = ${LSRCS:.c=.o}
 FOBJS =	${FSRCS:.f=.o}
 
-LIBS = -lsqlite3
+LIBS = -lsqlite3 -lgsl -lgslcblas
 
 SRCS  = $(LSRCS) $(CSRCS)
 

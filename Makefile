@@ -2,7 +2,7 @@ PROG =	fdemo
 
 LIBCFACDB = libcfacdb.a
 
-LSRCS = cfacdb.c cfacdb_f.c
+LSRCS = cfacdb.c rates.c cfacdb_f.c
 
 FSRCS = fdemo.f
 CSRCS = 

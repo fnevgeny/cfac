@@ -1,6 +1,5 @@
 /* F77 wrapper functions for CFACDB */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

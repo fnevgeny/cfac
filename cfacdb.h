@@ -81,12 +81,6 @@ typedef struct {
     double ratec;
 } crates_cb_data_t;
 
-typedef void (*cfac_db_levels_sink_t)(const cfac_db_t *cdb,
-    levels_cb_data_t *cbdata, void *udata);
-
-typedef void (*cfac_db_ctrans_sink_t)(const cfac_db_t *cdb,
-    ctrans_cb_data_t *cbdata, void *udata);
-
 typedef void (*cfac_db_crates_sink_t)(const cfac_db_t *cdb,
     crates_cb_data_t *cbdata, void *udata);
 
@@ -94,7 +88,9 @@ typedef void (*cfac_db_crates_sink_t)(const cfac_db_t *cdb,
 cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max);
 void cfac_db_close(cfac_db_t *cdb);
 
-int cfac_db_levels(cfac_db_t *cdb, cfac_db_levels_sink_t sink, void *udata);
+int cfac_db_levels(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, levels_cb_data_t *cbdata, void *udata),
+    void *udata);
 
 int cfac_db_rtrans(cfac_db_t *cdb,
     void (*sink)(const cfac_db_t *cdb, rtrans_cb_data_t *cbdata, void *udata),
@@ -104,9 +100,12 @@ int cfac_db_aitrans(cfac_db_t *cdb,
     void (*sink)(const cfac_db_t *cdb, aitrans_cb_data_t *cbdata, void *udata),
     void *udata);
 
-int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata);
+int cfac_db_ctrans(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
+    void *udata);
 
 int cfac_db_crates(cfac_db_t *cdb, double T,
-    cfac_db_crates_sink_t sink, void *udata);
+    cfac_db_crates_sink_t sink,
+    void *udata);
 
 #endif /* _CFACDB_H */

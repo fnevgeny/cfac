@@ -264,7 +264,9 @@ void cfac_db_close(cfac_db_t *cdb)
 }
 
 
-int cfac_db_levels(cfac_db_t *cdb, cfac_db_levels_sink_t sink, void *udata)
+int cfac_db_levels(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, levels_cb_data_t *cbdata, void *udata),
+    void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
@@ -450,7 +452,9 @@ int cfac_db_aitrans(cfac_db_t *cdb,
 }
 
 
-int cfac_db_ctrans(cfac_db_t *cdb, cfac_db_ctrans_sink_t sink, void *udata)
+int cfac_db_ctrans(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
+    void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;

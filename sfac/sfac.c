@@ -2858,28 +2858,6 @@ static int PCETableEB(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PCoulMultip(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
-  double z, te, e1;
-  int k, q0, q1, m, ierr;
-  char *fn;
-
-  if (argc < 7 || argc > 8) return -1;
-  fn = argv[0];
-  z = atof(argv[1]);
-  te = atof(argv[2]);
-  e1 = atof(argv[3]);
-  k = atoi(argv[4]);
-  q0 = atoi(argv[5]);
-  q1 = atoi(argv[6]);
-  m = 1;
-  if (argc > 7) m = atoi(argv[7]);
-  
-  ierr = CoulombMultip(fn, z, te, e1, k, q0, q1, m);
-  
-  return ierr;
-}
-
 static int PSlaterCoeff(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int nlev, *ilev, na, nb, i, *n, *kappa;
@@ -3065,7 +3043,6 @@ static METHOD methods[] = {
   {"CETableEB", PCETableEB},
   {"StructureEB", PStructureEB},
   {"PolarizeCoeff", PPolarizeCoeff}, 
-  {"CoulMultipole", PCoulMultip},
   {"", NULL}
 };
  

@@ -584,42 +584,6 @@ int PrepCoulombBethe(cfac_cbcache_t *cbcache,
   return 0;
 }
 
-int CoulombMultip(char *fn, double z, double te, double e1,
-		   int k, int q0, int q1, int m) {
-  FILE *f;
-  double *r, r0, r1, k0, k1;
-  int i, j, ierr;
-
-  k1 = sqrt(2.0*e1/HARTREE_EV);
-  k0 = sqrt(2.0*(e1+te)/HARTREE_EV);
-
-  r0 = 0.1/z;
-  r1 = -1.0;
-  r = malloc(sizeof(double)*(k+1)*(q1-q0+1));
-  CMULTIP(r0, r1, z, k0, k1, k, q0, q1, r, m, &ierr);
-  if (ierr != 0) {
-    printf("error in CMULTIP: %d\n", ierr);
-    free(r);
-    return -1;
-  }
-  f = fopen(fn, "w");
-  fprintf(f, "# %10.3E %10.3E %10.3E %15.8E %15.8E %2d\n",
-	  z, te, e1, k0, k1, k);
-  j = 0;
-  for (m = q0; m <= q1; m++) {
-    fprintf(f, "%4d", m);
-    for (i = -k; i <= k; i += 2) {
-      fprintf(f, " %17.10E", r[j]);
-      j++;
-    }
-    fprintf(f, "\n");
-  }
-  fclose(f);
-  free(r);
-  
-  return 0;
-}
-
 int cfac_init_coulomb(cfac_t *cfac) {
   SetHydrogenicNL(cfac, -1, -1, -1, -1);
 

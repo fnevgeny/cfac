@@ -13,11 +13,9 @@ void    GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm);
 
 double  HydrogenicDipole(const cfac_t *cfac, double z, int n0, int kl0, 
 			int n1, int kl1);
-double HydrogenicExpectation(double z, int m, int n, int kl);
-double HydrogenicSelfEnergy(double z, int n, int k);
+double  HydrogenicExpectation(double z, int m, int n, int kl);
+double  HydrogenicSelfEnergy(double z, int n, int k);
 double  CoulombPhaseShift(double z, double e, int kappa);
-int CoulombMultip(char *fn, double z, double te, double e1,
-		  int k, int q0, int q1, int m);
 double *GetCoulombBethe(const cfac_cbcache_t *cbcache,
     int ie2, int ite, int ie1, int t, int q);
 double  GetCoulombBetheAsymptotic(double te, double e1);

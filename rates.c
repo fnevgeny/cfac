@@ -28,6 +28,8 @@
 
 #define CFACDB_QAGI_EPS 1e-4
 
+#define SQR(a) ((a)*(a))
+#define CUBE(a) ((a)*(a)*(a))
 
 typedef struct {
     unsigned int ndata; /* number of data points */
@@ -133,19 +135,21 @@ static double rate_int_f(double e, void *params) {
     const rate_int_params_t *p = params;
     double xs, Omega;
     
-    double x1 = e/p->de;
+    double x = e/p->de, x1;
     
     switch (p->type) {
     case DB_SQL_CS_CE:
     case DB_SQL_CS_CI:
+        x1 = x;
         Omega = crac_intext(&p->intext, x1, crac_born_asymptote);
         /* convert collisional strength to cross-section */
         xs = Omega*M_PI/(2.0*(x1*p->de));
         break;
     case DB_SQL_CS_PI:
+        x1 = x + 1;
         Omega = crac_intext(&p->intext, x1, crac_rr_asymptote);
-        /* d_gf/d_E* to cross-section */
-        xs = Omega*(2*M_PI*ALPHA);
+        /* d_gf/d_E* to RR cross-section */
+        xs = Omega*(M_PI*CUBE(ALPHA))*p->de*SQR(x1)/x;
         break;
     default:
         return 0;
@@ -190,6 +194,8 @@ static void crates_sink(const cfac_db_t *cdb,
     intext->ap0 = cbdata->ap0;
     intext->ap1 = cbdata->ap1;
 
+    F.function = &rate_int_f;
+    F.params   = &params;
 
     if (cbdata->type == DB_SQL_CS_CI) {
         /* ionization cross-sections approach 0 at threshold */
@@ -208,14 +214,12 @@ static void crates_sink(const cfac_db_t *cdb,
     
     if (cbdata->type == DB_SQL_CS_PI) {
         intext->cube = 1;
+        low_limit   = 0.0;
     } else {
         intext->cube = 0;
+        low_limit   = params.de;
     }
 
-    F.function = &rate_int_f;
-    F.params   = &params;
-    
-    low_limit   = params.de;
     split_limit = 3*params.de;
     
     gsl_status = gsl_integration_qags(&F, low_limit, split_limit,
@@ -235,8 +239,6 @@ static void crates_sink(const cfac_db_t *cdb,
         return;
     }
     ratec += result;
-
-
 
     rcbdata.type  = cbdata->type;
     rcbdata.de    = cbdata->de;

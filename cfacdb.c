@@ -451,8 +451,8 @@ int cfac_db_aitrans(cfac_db_t *cdb,
             ilfac = sqlite3_column_int   (stmt, 1);
             rate  = sqlite3_column_double(stmt, 2);
             
-            cbdata.ii = cdb->lmap[ilfac - cdb->id_min];
-            cbdata.fi = cdb->lmap[iufac - cdb->id_min];
+            cbdata.ii = cdb->lmap[iufac - cdb->id_min];
+            cbdata.fi = cdb->lmap[ilfac - cdb->id_min];
             
             cbdata.rate = rate;
             

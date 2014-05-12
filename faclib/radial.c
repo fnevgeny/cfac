@@ -762,7 +762,7 @@ static double EnergyFunc(const gsl_vector *v, void *params) {
 }
 
 
-double subplx(double (* my_f) (const gsl_vector *v, void *params),
+double subplx(cfac_t *cfac, double (* my_f) (const gsl_vector *v, void *params),
     int n, double xtol, int maxfun, const gsl_vector *ss, gsl_vector *x,
     int *iter)
 {
@@ -779,7 +779,7 @@ double subplx(double (* my_f) (const gsl_vector *v, void *params),
     /* Initialize method and iterate */
     minex_func.n = n;
     minex_func.f = my_f;
-    minex_func.params = NULL;
+    minex_func.params = cfac;
 
     s = gsl_multimin_fminimizer_alloc(T, n);
     gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
@@ -827,9 +827,9 @@ int RefineRadial(cfac_t *cfac, int maxfun, int msglvl) {
     printf("%10.3E %10.3E %15.8E\n", potential->lambda, potential->a, f0);
   }
 
-  status = subplx(EnergyFunc, n, xtol, maxfun, ss, x, &nfe);
+  status = subplx(cfac, EnergyFunc, n, xtol, maxfun, ss, x, &nfe);
 
-  f = EnergyFunc(x, NULL);
+  f = EnergyFunc(x, cfac);
   if (msglvl > 0) {
     printf("%10.3E %10.3E %15.8E %d\n", potential->lambda, potential->a, f, nfe);
   }

@@ -1544,6 +1544,7 @@ double MeanPotential(cfac_t *cfac, int k0, int k1) {
   return z;
 }
 
+/* \int R(k1)R(k2)r^m */
 double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
   int index[3];
   int npts, i0, i;

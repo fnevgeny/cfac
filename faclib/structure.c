@@ -117,6 +117,32 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
   */
 }
 
+static int CompareInt(const void *a1, const void *a2) {
+  int *i1, *i2;
+  
+  i1 = (int *) a1;
+  i2 = (int *) a2;
+  return (*i1 - *i2);
+}
+
+void SetSymmetry(cfac_t *cfac, int p, int nj, int *j) {
+  if (p >= 0) {
+    cfac->sym_pp = IsOdd(p);
+  } else {
+    cfac->sym_pp = -1;
+  }
+  if (cfac->sym_jj) free(cfac->sym_jj);
+  if (nj > 0 && j[0] < 0) nj = 0;
+  cfac->sym_njj = nj;
+  if (nj > 0) {
+    cfac->sym_jj = malloc(sizeof(int)*nj);
+    if (cfac->sym_jj) {
+      memcpy(cfac->sym_jj, j, sizeof(int)*nj);
+      qsort(cfac->sym_jj, nj, sizeof(int), CompareInt);
+    }
+  }
+}
+
 void InitLevelData(void *p, int n) {
   LEVEL *lev;
   int k;
@@ -203,6 +229,8 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
   double r;
 
   DecodePJ(isym, &i, &j);
+  if (cfac->sym_pp >= 0 && i != cfac->sym_pp) return -2;
+  if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) return -3;
 
   if (k <= 0) return -1;
   sym = GetSymmetry(cfac, isym);
@@ -354,12 +382,20 @@ int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
 int ConstructHamilton(cfac_t *cfac,
     int isym, int k0, int k, int *kg, int kp, int *kgp, int md) {
   HAMILTON *h = cfac->hamiltonian;
-  int m1, m2, m3, jp;
+  int i, j, m1, m2, m3, jp;
   SHAMILTON *hs;
   ARRAY *st;
   STATE *s;
   SYMMETRY *sym;
   double r;
+
+  /* 
+  ** the return code -2, and -3, here distinguses it from the case where 
+  ** no basis exists later.
+  **/
+  DecodePJ(isym, &i, &j);
+  if (cfac->sym_pp >= 0 && i != cfac->sym_pp) return -2;
+  if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) return -3;
 
   sym = GetSymmetry(cfac, isym);
   if (sym == NULL) return -1;
@@ -521,6 +557,8 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   double r, delta;
 
   DecodePJ(isym, &i, &j);
+  if (cfac->sym_pp >= 0 && i != cfac->sym_pp) return -2;
+  if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) return -3;
 
   j = 0;
   ncs = 0;

@@ -118,6 +118,11 @@ struct _cfac_t {
     double mix_cut2;          /* _lower_ threshold for recoupling between
                                  different configurations                    */
 
+    int sym_pp;               /* symmetry parity                             */
+    int *sym_jj;              /* sorted array of user-defined 2*J symmetries */
+    int sym_njj;              /* length of the above array                   */
+
+
     ANGZ_DATUM *angz_array;   /* angular coefficients                        */
     ANGZ_DATUM *angzxz_array; /* ZxZ angular coefficients                    */
     ANGZ_DATUM *angmz_array;  /* precalculated angular coefficients          */

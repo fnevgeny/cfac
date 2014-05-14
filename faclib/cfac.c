@@ -160,6 +160,10 @@ cfac_t *cfac_new(void)
     cfac->mix_cut = MIXCUT;
     cfac->mix_cut2 = MIXCUT2;
 
+    cfac->sym_pp = -1;
+    cfac->sym_njj = 0;
+    cfac->sym_jj = NULL;
+
     /* init config groups */
     cfac->n_groups = 0;
     cfac->cfg_groups = malloc(MAX_GROUPS*sizeof(CONFIG_GROUP));
@@ -345,6 +349,10 @@ void cfac_free(cfac_t *cfac)
                 FreeAngZDatum(&(cfac->angmz_array[i]));
             }
             free(cfac->angmz_array);
+        }
+        
+        if (cfac->sym_jj) {
+            free(cfac->sym_jj);
         }
         
         free(cfac);

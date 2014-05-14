@@ -43,6 +43,29 @@ static int PPrint(int argc, char *argv[], int argt[], ARRAY *variables) {
   return 0;
 }
 
+static int IntFromList(char *argv, int tp, ARRAY *variables, int **k) {
+  int i;
+  char *v[MAXNARGS];
+  int t[MAXNARGS], n;
+  
+  if (tp == LIST) {
+    n = DecodeArgs(argv, v, t, variables);
+    if (n > 0) {
+      *k = malloc(sizeof(int)*n);
+      for (i = 0; i < n; i++) {
+        (*k)[i] = atoi(v[i]);
+        free(v[i]);
+      }
+    }
+  } else {
+    n = 1;
+    *k = malloc(sizeof(int));
+    (*k)[0] = atoi(argv);
+  }
+  
+  return n;
+}
+
 static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
 			   ARRAY *variables) {
   char *s;
@@ -2273,6 +2296,13 @@ static int PStructure(int argc, char *argv[], int argt[],
     if (argt[0] != STRING) return -1;
     ng = DecodeGroupArgs(&kg, 0, NULL, NULL, variables);
     if (ng < 0) return -1;
+  } else
+  if (argc == 2 && argt[0] == NUMBER) {
+    ip = atoi(argv[0]);
+    i = IntFromList(argv[1], argt[1], variables, &kg);
+    SetSymmetry(cfac, ip, i, kg);
+    free(kg);
+    return 0;
   } else {
     if (argc == 4) ip = atoi(argv[3]);		  
     if (argt[0] != STRING) return -1;

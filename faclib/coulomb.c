@@ -69,48 +69,45 @@ void GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm) {
   if (klm) *klm = cfac->coulomb.kl_h_max;
 }
 
+/* \int R(n0,l0)R(n1,l1)r */
 double HydrogenicDipole(const cfac_t *cfac,
-    double z, int n0, int kl0, int n1, int kl1) {
-  double anc, am;
+    double z, int n0, int l0, int n1, int l1) {
+  double dummy, am;
   double z0 = 1.0;
-  int nmax = 512;
-  double ac[1024];
-  static int iopt = 2;
+  double ac[2*NHYDROGENMAX];
   double **qk, *t;
-  int n, i;
   
-  if (n1 > 512) return 0.0;
+  if (n1 > NHYDROGENMAX) return 0.0;
   if (n0 >= n1) {
     return 0.0;
   } 
-  if (kl1 != kl0 + 1 && kl1 != kl0 - 1) {
+  if (l1 != l0 + 1 && l1 != l0 - 1) {
     return 0.0;
   }
-  qk = (double **) ArraySet(cfac->coulomb.dipole_array, n1, NULL);
+  
+  qk = ArraySet(cfac->coulomb.dipole_array, n1, NULL);
   if (*qk == NULL) {
+    int l, i;
+    
     *qk = malloc(sizeof(double)*n1*(n1-1));
     t = *qk;
-    am = 100.0;
-    if (iopt == 2) {
-      ACOFZ1(z0, am, nmax, n0, ac, &anc, n1, iopt);
-    }
-    iopt = 1;
-    for (n = 1; n < n1; n++) {
-      ACOFZ1(z0, am, n1, n, ac, &anc, n1, iopt);
-      for (i = 0; i < n; i++) {
+    am = 100.0; /* ?????? */
+    for (l = 1; l < n1; l++) {
+      ACOFZ1(z0, am, n1, l, ac, &dummy, n1, 1);
+      for (i = 0; i < l; i++) {
 	*(t++) = ac[i];
       }
-      for (i = 0; i < n; i++) {
+      for (i = 0; i < l; i++) {
 	*(t++) = ac[i+n1];
       }
     }
   }
 
   t = (*qk) + n0*(n0-1);
-  if (kl1 == kl0 - 1) {
-    return t[kl1]/z;
+  if (l1 == l0 - 1) {
+    return t[l1]/z;
   } else {
-    return t[n0 + kl0]/z;
+    return t[n0 + l0]/z;
   }
 }
 
@@ -594,6 +591,8 @@ int cfac_init_coulomb(cfac_t *cfac) {
   ArrayInit(cfac->coulomb.dipole_array, sizeof(double *), DIPOLE_BLOCK,
     NULL, InitPointerData);
 
+  ACOFZ1(0.0, 0.0, NHYDROGENMAX, 0, NULL, NULL, 0, 2);
+  
   return 0;
 }
 

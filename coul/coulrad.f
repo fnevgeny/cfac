@@ -2,7 +2,7 @@
 *
 ************************************************************************
 *
-      SUBROUTINE ACOFZ1(Z,AM,NU,NL,AC,ANC,NDL,IOPT)
+      SUBROUTINE ACOFZ1(Z,AM,NU,NL,AC,NDL,IOPT)
 *
 *  Subroutine to calculate electric dipole radial integrals and
 *  transition probabilities for hydrogenic ions.  Results are obtained
@@ -23,7 +23,6 @@
 *             AC    =  array of transition probabilities (or radial
 *                      matrix elements) for all allowable angular
 *                      momentum quantum numbers
-*             ANC   =  total transition probability from level NU to NL
 *             NDL   =  first dimension of AC array in calling program
 *             IOPT  =  option switch:
 *                   =  1,  Electric dipole radial matrix elements
@@ -40,7 +39,7 @@
       INTEGER NU,NL,IOPT,NDL
       DOUBLE PRECISION Z,AM
 *  Export
-      DOUBLE PRECISION AC,ANC
+      DOUBLE PRECISION AC
 *  Local
       INTEGER I,L,MAX
       DOUBLE PRECISION FAL,ALO,ANU,ANL,
@@ -87,7 +86,6 @@
               AC(I,1)=ZERO
               AC(I,2)=ZERO
            ENDDO
-           ANC=ZERO
 *
 *              Calculation of radial matrix elements, R
 *              ****************************************

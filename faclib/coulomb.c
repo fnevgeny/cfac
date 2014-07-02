@@ -72,7 +72,7 @@ void GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm) {
 /* \int R(n0,l0)R(n1,l1)r */
 double HydrogenicDipole(const cfac_t *cfac,
     double z, int n0, int l0, int n1, int l1) {
-  double dummy, am;
+  double am;
   double z0 = 1.0;
   double ac[2*NHYDROGENMAX];
   double **qk, *t;
@@ -93,7 +93,7 @@ double HydrogenicDipole(const cfac_t *cfac,
     t = *qk;
     am = 100.0; /* ?????? */
     for (l = 1; l < n1; l++) {
-      ACOFZ1(z0, am, n1, l, ac, &dummy, n1, 1);
+      ACOFZ1(z0, am, n1, l, ac, n1, 1);
       for (i = 0; i < l; i++) {
 	*(t++) = ac[i];
       }
@@ -591,7 +591,7 @@ int cfac_init_coulomb(cfac_t *cfac) {
   ArrayInit(cfac->coulomb.dipole_array, sizeof(double *), DIPOLE_BLOCK,
     NULL, InitPointerData);
 
-  ACOFZ1(0.0, 0.0, NHYDROGENMAX, 0, NULL, NULL, 0, 2);
+  ACOFZ1(0.0, 0.0, NHYDROGENMAX, 0, NULL, 0, 2);
   
   return 0;
 }

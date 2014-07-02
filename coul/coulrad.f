@@ -57,7 +57,7 @@
       SAVE FAL,ALO
       
       IF (IOPT.NE.1 .AND. IOPT.NE.2) THEN
-          EXIT
+          RETURN
       ENDIF
 *
 *              Initialise arrays of factorials and exponentials

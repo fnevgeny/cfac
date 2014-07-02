@@ -26,8 +26,6 @@
 *             ANC   =  total transition probability from level NU to NL
 *             NDL   =  first dimension of AC array in calling program
 *             IOPT  =  option switch:
-*                   =  0,  Electric dipole transition probabilities
-*                          in sec**(-1) are stored in AC and ANC
 *                   =  1,  Electric dipole radial matrix elements
 *                          in atomic units are stored in AC
 *                   =  2,  Initialisation of exponentials and factorials
@@ -45,7 +43,7 @@
       DOUBLE PRECISION AC,ANC
 *  Local
       INTEGER I,L,MAX
-      DOUBLE PRECISION FAL,ALO,CON,ANU,ANL,
+      DOUBLE PRECISION FAL,ALO,ANU,ANL,
      :                 AI,RP,RM,FP,FM,AL,CU,CL,BU,BL,TWOL,REM,
      :                 ZERO,ONE,TWO,FOUR,TEN,FAL1, ALO1
 *
@@ -57,6 +55,10 @@
 *              Save arrays of factorials and exponentials
 *
       SAVE FAL,ALO
+      
+      IF (IOPT.NE.1 .AND. IOPT.NE.2) THEN
+          EXIT
+      ENDIF
 *
 *              Initialise arrays of factorials and exponentials
 *
@@ -68,11 +70,11 @@
              RETURN
            ENDIF
            FAL(1) = ZERO
-           DO 2 I =2,MAX
+           DO I =2,MAX
               AI = REAL(I-1)
               ALO(I-1) = LOG10(AI)
               FAL(I) = ALO(I-1) + FAL(I-1)
-    2      CONTINUE
+           ENDDO
            RETURN
 *
       ELSE
@@ -81,10 +83,10 @@
 *
            REM=ONE/(ONE+ONE/(1822.889D0*AM))
 *
-           DO 3 I=1,NL+1
+           DO I=1,NL+1
               AC(I,1)=ZERO
               AC(I,2)=ZERO
-    3      CONTINUE
+           ENDDO
            ANC=ZERO
 *
 *              Calculation of radial matrix elements, R
@@ -98,8 +100,6 @@
 *
            ANU=REAL(NU)
            ANL=REAL(NL)
-           CON=2.6775015D9*REM**3*Z**6*
-     :               (ONE/(ANL*ANL) - ONE/(ANU*ANU))**3
 *
            IF (NU .GT. NL) THEN
               FAL1 = FAL(NU-NL)
@@ -121,40 +121,26 @@
 *               Use            R(l,l+1) and R(l+1,l)      (rm, rp)
 *               to construct   R(l-1,l) and R(l,l-1)      (fm, fp)
 *
-           DO 5 L=NL,1,-1
+           DO L=NL,1,-1
                AL=REAL(L)
                TWOL=TWO*AL
-               IF(L.EQ.NL) GO TO 6
-               CU=SQRT((ANU-AL)*(ANU+AL))/(ANU*AL)
-               CL=SQRT((ANL-AL)*(ANL+AL))/(ANL*AL)
-               FP = ( (TWOL+ONE)*BL*RP + BU*RM) / (TWOL*CU)
-               FM = ( BL*RP + (TWOL+ONE)*BU*RM) / (TWOL*CL)
-*
-*               Calculate transition probabilities
-*
-    6          AC(L,1) = AL/(TWOL-ONE)*FP*FP*CON
-               AC(L,2) = AL/(TWOL+ONE)*FM*FM*CON
-               IF(IOPT.EQ.1) THEN
-                   AC(L,1)=FP
-                   AC(L,2)=FM
+               
+               IF(L.NE.NL) THEN
+                   CU=SQRT((ANU-AL)*(ANU+AL))/(ANU*AL)
+                   CL=SQRT((ANL-AL)*(ANL+AL))/(ANL*AL)
+                   FP = ( (TWOL+ONE)*BL*RP + BU*RM) / (TWOL*CU)
+                   FM = ( BL*RP + (TWOL+ONE)*BU*RM) / (TWOL*CL)
                ENDIF
+*
+               AC(L,1)=FP
+               AC(L,2)=FM
+*
                RP=FP
                RM=FM
                BU=CU
                BL=CL
-    5      CONTINUE
+           ENDDO
 *
-*               Calculate transition probability for nu to nl
-*
-           IF(IOPT.EQ.0) THEN
-               DO 7 L=1,NL
-                   AL=REAL(L)
-                   ANC = ANC + (TWO*AL-ONE)*AC(L,1)
-     :                       + (TWO*AL+ONE)*AC(L,2)
-    7          CONTINUE
-               ANC=ANC/(ANU*ANU)
-               RETURN
-           ENDIF
       ENDIF
 *
   101 FORMAT(' INSUFFICIENT WORK SPACE IN ACOFZ1'/
@@ -233,7 +219,7 @@
       DOUBLE PRECISION PC,PCP,PNC
 *  Local
       INTEGER I,IE,L,MAX,MUL,POW
-      DOUBLE PRECISION FAL,ALO,AW,RYD,CON,KAP,ANL,EU,PCP1,PCP2,
+      DOUBLE PRECISION FAL,ALO,CON,KAP,ANL,EU,PCP1,PCP2,
      :                 AI,RP,RM,FP,FM,AL,CU,CL,BU,BL,TWOL,REM,
      :                 TM,TP,FMUL,R0,ZERO,ONE,TWO,TEN,D10,DM10
 *

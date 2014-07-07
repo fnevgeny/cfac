@@ -1560,12 +1560,8 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
   orb2 = GetOrbitalSolved(cfac, k2);
   n1 = orb1->n;
   n2 = orb2->n;
-  kl1 = orb1->kappa;
-  kl2 = orb2->kappa;
-  kl1 = GetLFromKappa(kl1);
-  kl2 = GetLFromKappa(kl2);
-  kl1 /= 2;
-  kl2 /= 2;	
+  kl1 = GetLFromKappa(orb1->kappa)/2;
+  kl2 = GetLFromKappa(orb2->kappa)/2;
 
   GetHydrogenicNL(cfac, &nh, &klh, NULL, NULL);
 
@@ -1633,7 +1629,6 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
       yk[i] = pow(potential->rad[i], m)*r;
     }
     r = Simpson(yk, i0, npts);
-    *q = r;
   } else {    
     npts = potential->maxrp-1;
     if (n1 != 0) npts = Min(npts, orb1->ilast);
@@ -1644,8 +1639,9 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
     }
     r = 0.0;
     IntegrateS(potential, yk, orb1, orb2, INT_P1P2pQ1Q2, &r, m);
-    *q = r;
   }
+  
+  *q = r;
   return r;
 }
 

@@ -1549,7 +1549,7 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
   int index[3];
   int npts, i0, i;
   ORBITAL *orb1, *orb2;
-  double *q, r, z, *p1, *p2, *q1, *q2;
+  double *q, r, *p1, *p2, *q1, *q2;
   int n1, n2;
   int kl1, kl2;
   int nh, klh;
@@ -1571,18 +1571,17 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
 	orb1->wfun == NULL || 
 	orb2->wfun == NULL) {
       if (n1 == n2 && kl1 == kl2) {
-	z = GetResidualZ(cfac);
+	double z = GetResidualZ(cfac);
 	r = HydrogenicExpectation(z, m, n1, kl1);
 	if (r) {
 	  return r;
 	}
       } else if (m == 1) {
-	z = GetResidualZ(cfac);
 	if (n1 < n2) {
-	  r = HydrogenicDipole(cfac, z, n1, kl1, n2, kl2);
+	  r = HydrogenicDipole(cfac, n1, kl1, n2, kl2);
 	  return r;
 	} else if (n2 < n1) {
-	  r = HydrogenicDipole(cfac, z, n2, kl2, n1, kl1);
+	  r = HydrogenicDipole(cfac, n2, kl2, n1, kl1);
 	  return r;
 	}
       }

@@ -71,10 +71,9 @@ void GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm) {
 }
 
 /* \int R(n0,l0)R(n1,l1)r */
-double HydrogenicDipole(const cfac_t *cfac,
-    double z, int n0, int l0, int n1, int l1) {
+double HydrogenicDipole(const cfac_t *cfac, int n0, int l0, int n1, int l1) {
     gsl_coulomb_me *r, **qk;
-    double scale;
+    double z, am, scale;
 
     if (n0 >= n1) {
         return 0.0;
@@ -83,7 +82,9 @@ double HydrogenicDipole(const cfac_t *cfac,
         return 0.0;
     }
     
-    scale = gsl_coulomb_me_scale(z, 100.0);
+    z  = GetResidualZ(cfac);
+    am = cfac_get_atomic_mass(cfac);
+    scale = gsl_coulomb_me_scale(z, am);
 
     qk = ArraySet(cfac->coulomb.dipole_array, n1, NULL);
     if (*qk == NULL) {
@@ -99,7 +100,7 @@ double HydrogenicDipole(const cfac_t *cfac,
 
     r = qk[n0 - 1];
 
-    return scale*gsl_coulomb_me_get(r, l1, l0)/z;
+    return scale*gsl_coulomb_me_get(r, l1, l0);
 }
 
 double HydrogenicExpectation(double z, int m, int n, int kl) {

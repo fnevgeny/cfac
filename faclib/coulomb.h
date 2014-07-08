@@ -11,8 +11,7 @@
 void    SetHydrogenicNL(cfac_t *cfac, int n, int kl, int nm, int klm);
 void    GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm);
 
-double  HydrogenicDipole(const cfac_t *cfac, double z, int n0, int kl0, 
-			int n1, int kl1);
+double  HydrogenicDipole(const cfac_t *cfac, int n0, int kl0, int n1, int kl1);
 double  HydrogenicExpectation(double z, int m, int n, int kl);
 double  HydrogenicSelfEnergy(double z, int n, int k);
 double  CoulombPhaseShift(double z, double e, int kappa);

@@ -10,6 +10,7 @@ CSRCS = cfac.c \
 	array.c \
 	cfp.c \
 	config.c \
+	coulrad.c \
 	coulomb.c \
 	dbase.c \
 	dbase_sql.c \

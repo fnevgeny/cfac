@@ -72,12 +72,16 @@ void GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm) {
 
 /* \int R(n0,l0)R(n1,l1)r */
 double HydrogenicDipole(const cfac_t *cfac, int n0, int l0, int n1, int l1) {
-    gsl_coulomb_me *r, **qk;
+    gsl_coulomb_me *r, ***qk;
     double z, am, scale;
 
-    if (n0 >= n1) {
-        return 0.0;
-    } 
+    if (n0 > n1) {
+        int tmp;
+        
+        tmp = n0; n0 = n1; n1 = tmp;
+        tmp = l0; l0 = l1; l1 = tmp;
+    }
+
     if (l1 != l0 + 1 && l1 != l0 - 1) {
         return 0.0;
     }
@@ -90,15 +94,15 @@ double HydrogenicDipole(const cfac_t *cfac, int n0, int l0, int n1, int l1) {
     if (*qk == NULL) {
         int np;
 
-        *qk = malloc(sizeof(gsl_coulomb_me *)*(n1-1));
+        *qk = malloc(n1*sizeof(gsl_coulomb_me *));
 
-        for (np = 1; np < n1; np++) {
+        for (np = 1; np <= n1; np++) {
             r = gsl_coulomb_me_alloc(n1, np);
-            qk[np - 1] = r;
+            (*qk)[np - 1] = r;
         }
     }
 
-    r = qk[n0 - 1];
+    r = (*qk)[n0 - 1];
 
     return scale*gsl_coulomb_me_get(r, l1, l0);
 }
@@ -580,7 +584,9 @@ int cfac_init_coulomb(cfac_t *cfac) {
   if (!cfac->coulomb.dipole_array) {
     return -1;
   }
-  ArrayInit(cfac->coulomb.dipole_array, sizeof(double *), DIPOLE_BLOCK,
+  
+  /* FIXME: correct freedata function */
+  ArrayInit(cfac->coulomb.dipole_array, sizeof(gsl_coulomb_me *), DIPOLE_BLOCK,
     NULL, InitPointerData);
   
   return 0;

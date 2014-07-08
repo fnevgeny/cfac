@@ -1577,13 +1577,8 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
 	  return r;
 	}
       } else if (m == 1) {
-	if (n1 < n2) {
-	  r = HydrogenicDipole(cfac, n1, kl1, n2, kl2);
-	  return r;
-	} else if (n2 < n1) {
-	  r = HydrogenicDipole(cfac, n2, kl2, n1, kl1);
-	  return r;
-	}
+	r = HydrogenicDipole(cfac, n1, kl1, n2, kl2);
+	return r;
       }
     }
   }

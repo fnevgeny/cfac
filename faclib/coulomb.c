@@ -11,6 +11,7 @@
 #include "cfacP.h"
 #include "consts.h"
 #include "angular.h"
+#include "coulrad.h"
 #include "coulomb.h"
 #include "interpolation.h"
 #include "cf77.h"
@@ -72,43 +73,33 @@ void GetHydrogenicNL(const cfac_t *cfac, int *n, int *kl, int *nm, int *klm) {
 /* \int R(n0,l0)R(n1,l1)r */
 double HydrogenicDipole(const cfac_t *cfac,
     double z, int n0, int l0, int n1, int l1) {
-  double am;
-  double z0 = 1.0;
-  double ac[2*NHYDROGENMAX];
-  double **qk, *t;
-  
-  if (n1 > NHYDROGENMAX) return 0.0;
-  if (n0 >= n1) {
-    return 0.0;
-  } 
-  if (l1 != l0 + 1 && l1 != l0 - 1) {
-    return 0.0;
-  }
-  
-  qk = ArraySet(cfac->coulomb.dipole_array, n1, NULL);
-  if (*qk == NULL) {
-    int l, i;
-    
-    *qk = malloc(sizeof(double)*n1*(n1-1));
-    t = *qk;
-    am = 100.0; /* ?????? */
-    for (l = 1; l < n1; l++) {
-      ACOFZ1(z0, am, n1, l, ac, n1, 1);
-      for (i = 0; i < l; i++) {
-	*(t++) = ac[i];
-      }
-      for (i = 0; i < l; i++) {
-	*(t++) = ac[i+n1];
-      }
-    }
-  }
+    gsl_coulomb_me *r, **qk;
+    double scale;
 
-  t = (*qk) + n0*(n0-1);
-  if (l1 == l0 - 1) {
-    return t[l1]/z;
-  } else {
-    return t[n0 + l0]/z;
-  }
+    if (n0 >= n1) {
+        return 0.0;
+    } 
+    if (l1 != l0 + 1 && l1 != l0 - 1) {
+        return 0.0;
+    }
+    
+    scale = gsl_coulomb_me_scale(z, 100.0);
+
+    qk = ArraySet(cfac->coulomb.dipole_array, n1, NULL);
+    if (*qk == NULL) {
+        int np;
+
+        *qk = malloc(sizeof(gsl_coulomb_me *)*(n1-1));
+
+        for (np = 1; np < n1; np++) {
+            r = gsl_coulomb_me_alloc(n1, np);
+            qk[np - 1] = r;
+        }
+    }
+
+    r = qk[n0 - 1];
+
+    return scale*gsl_coulomb_me_get(r, l1, l0)/z;
 }
 
 double HydrogenicExpectation(double z, int m, int n, int kl) {
@@ -590,8 +581,6 @@ int cfac_init_coulomb(cfac_t *cfac) {
   }
   ArrayInit(cfac->coulomb.dipole_array, sizeof(double *), DIPOLE_BLOCK,
     NULL, InitPointerData);
-
-  ACOFZ1(0.0, 0.0, NHYDROGENMAX, 0, NULL, 0, 2);
   
   return 0;
 }

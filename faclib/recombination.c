@@ -1,6 +1,9 @@
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <math.h>
 #include <gsl/gsl_sf_legendre.h>
+#include <gsl/gsl_const.h>
 
 #include "global.h"
 #include "cfacP.h"
@@ -15,7 +18,7 @@
 #include "transition.h"
 #include "dbase.h"
 #include "recombination.h"
-#include "cf77.h"
+#include "coulrad.h"
 
 static int qk_mode;
 static double qk_fit_tolerance;
@@ -390,23 +393,19 @@ void RRRadialQkHydrogenicParams(int np, double *p,
 #define NNE 12
   double **qk;
   double *t;
-  double z, am, d, eth;
-  double pc[200*NNE];
+  double d, eth;
   double pnc[NNE], e[NNE];
   static double x[NNE], logx[NNE];
-  int ipcp;
-  static int iopt = 2;
   double fvec[NNE], fjac[NNE*NPARAMS];
   double tol;
-  int i, j, k, ne;
+  int i, j, ne;
+  static int iopt = 2;
 
-  qk = (double **) ArraySet(hyd_qk_array, n, NULL);
+  qk = ArraySet(hyd_qk_array, n, NULL);
   if (*qk == NULL) {
+    gsl_coulomb_fb *rfb;
     tol = 1E-4;
-    *qk = (double *) malloc(sizeof(double)*n*np);
-    ipcp = 0;
-    z = 1.0;
-    am = 100.0;
+    *qk = malloc(sizeof(double)*n*np);
     ne = NNE;
     if (iopt == 2) {
       x[0] = 1.01;
@@ -418,8 +417,6 @@ void RRRadialQkHydrogenicParams(int np, double *p,
 	x[i] = exp(logx[i]);
       }
       i = 200;
-      PIXZ1(z, am, i, n, e, pc, NULL, pnc, 
-	    ne, n, iopt, ipcp);
       iopt = 0;
     }
     
@@ -427,14 +424,13 @@ void RRRadialQkHydrogenicParams(int np, double *p,
     for (i = 0; i < ne; i++) {
       e[i] = (x[i]-1.0)*eth;
     }
-    PIXZ1(z, am, ne, n, e, pc, NULL, pnc, 
-	  ne, n, iopt, ipcp);
+    
+    rfb = gsl_coulomb_fb_alloc(n, ne, e);
+    
     t = *qk;    
     for (i = 0; i < n; i++) {
-      k = i;
       for (j = 0; j < ne; j++) {
-	pnc[j] = pc[k]/x[j];
-	k += n;
+        pnc[j] = gsl_coulomb_fb_get_dfdE(rfb, i, -1, j)/x[j];
       }
       t[0] = pnc[0];
       t[1] = 3.0*(i+1);
@@ -443,8 +439,11 @@ void RRRadialQkHydrogenicParams(int np, double *p,
 		     ne, x, logx, pnc, pnc, RRRadialQkFromFit, &i);
       t += np;
     }
+    
+    gsl_coulomb_fb_free(rfb);
   }
 
+  /* FIXME: reduced mass */
   t = (*qk) + kl*np;
   p[0] = t[0]/(z0*z0);
   for (i = 1; i < np; i++) {
@@ -550,7 +549,7 @@ int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
 int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   int index[3], k, nqk;
   double **p, *qk, tq[MAXNE];
-  double r0, r1, tq0[MAXNE];
+  double z0, r0, r1, tq0[MAXNE];
   ORBITAL *orb;
   int kappa0, jb0, klb02, klb0;
   int kappaf, jf, klf, kf;
@@ -574,8 +573,8 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
 
   GetHydrogenicNL(cfac, &nh, &klh, NULL, NULL);
   if (m == -1) {
-    r0 = GetResidualZ(cfac);
-    RRRadialQkHydrogenicParams(NPARAMS, hparams, r0, orb->n, klb0);
+    z0 = GetResidualZ(cfac);
+    RRRadialQkHydrogenicParams(NPARAMS, hparams, z0, orb->n, klb0);
     RRRadialQkFromFit(NPARAMS, hparams, n_egrid, 
 		      xegrid, log_xegrid, tq0, NULL, 0, &klb0);
     if (klb0 > klh || orb->n > nh) {

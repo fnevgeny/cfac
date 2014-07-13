@@ -154,3 +154,156 @@ double gsl_coulomb_me_scale(double Z, double amass)
     
     return scale;
 }
+
+
+static double lnR1_fb_last0(unsigned int n)
+{
+    double lR;
+    
+    lR = 0.5*(log(M_PI/32) - gsl_sf_lnfact(2*n - 1)) + (n + 2)*log(4*n) - 2*n;
+    
+    return lR;
+}
+
+static double R1_fb_last(unsigned int n, double kappa)
+{
+    unsigned int s;
+    double lR0, R, a, b, c;
+    
+    lR0 = lnR1_fb_last0(n);
+    
+    if (kappa <= 0.0) {
+        return exp(lR0);
+    }
+    
+    a = 0;
+    for (s = 1; s <= n; s++) {
+        a += log(1 + s*s*kappa*kappa);
+    }
+    a -= log(1 - exp(-2*M_PI/kappa));
+    
+    b = 2*n - 2/kappa*atan(n*kappa);
+    c = -log(1 + n*n*kappa*kappa)*(n + 2);
+    
+    R = exp(0.5*a + b + c + lR0);
+    
+    return R;
+}
+
+static double C(double kappa, unsigned int l)
+{
+    return sqrt(1 + l*l*kappa*kappa)/l;
+}
+
+gsl_coulomb_fb *
+gsl_coulomb_fb_alloc(unsigned int nb, unsigned int ne, const  double *e)
+{
+    gsl_coulomb_fb *r;
+    unsigned int ie, l;
+    
+    r = malloc(sizeof(gsl_coulomb_fb));
+    if (!r) {
+        GSL_ERROR_VAL("failed to allocate struct", GSL_ENOMEM, NULL);
+    }
+    
+    r->nb = nb;
+    r->ne = ne;
+    r->e  = e;
+    
+    r->table = malloc((2*nb*ne)*sizeof(double));
+    if (!r->table) {
+        free(r);
+        GSL_ERROR_VAL("failed to allocate table", GSL_ENOMEM, NULL);
+    }
+
+    for (ie = 0; ie < ne; ie++) {
+        double *t = &r->table[ie*2*nb];
+        double kappa = sqrt(2*e[ie]);
+        
+        /* lp = nb - 1, lk = nb */
+        t[nb - 1]   = R1_fb_last(nb, kappa);
+        /* lp = nb, lk = nb - 1 */
+        t[2*nb - 1] = 0.0;
+
+        for (l = nb - 1; l > 0; l--) {
+            /* lp = l - 1, lk = l */
+            t[l - 1]  = ((2*l + 1)*C(kappa, l + 1)*t[l] +
+                                A(nb, l + 1)*t[nb + l])/(2*l*A(nb,l));
+            /* lp = l, lk = l - 1 */
+            t[nb + l - 1] = ((2*l + 1)*A(nb, l + 1)*t[nb + l] +
+                                C(kappa, l + 1)*t[l])/(2*l*C(kappa,l));
+        } 
+    }
+    
+    return r;
+}
+
+void gsl_coulomb_fb_free(gsl_coulomb_fb *r)
+{
+    if (r) {
+        if (r->table) {
+            free(r->table);
+        }
+        free(r);
+    }
+}
+
+double
+gsl_coulomb_fb_get(const gsl_coulomb_fb *rfb, unsigned int lp, unsigned int l,
+    unsigned int ie)
+{
+    unsigned int nb = rfb->nb;
+    double *t;
+    
+    if (lp > nb) {
+        GSL_ERROR_VAL("lp > nb", GSL_EINVAL, 0.0);
+    }
+    
+    if (l != lp + 1 && lp != l + 1) {
+        return 0.0;
+    }
+    
+    t = &rfb->table[ie*2*nb];
+    
+    if (l > lp) {
+        return t[lp];
+    } else {
+        return t[nb + l];
+    }
+}
+
+
+double gsl_coulomb_fb_get_dfdE(const gsl_coulomb_fb *rfb,
+    unsigned int lb, int lk, unsigned int ie)
+{
+    double r, S, xs, eph;
+    unsigned int nb = rfb->nb;
+    
+    if (lk >= 0) {
+        r = gsl_coulomb_fb_get(rfb, lb, lk, ie);
+    } else {
+        r = gsl_coulomb_fb_get(rfb, lb, lb + 1, ie);
+    }
+    S = (lb + 1)*r*r;
+    
+    if (lk < 0 && lb > 0) {
+        r = gsl_coulomb_fb_get(rfb, lb, lb - 1, ie);
+        
+        S += lb*r*r;
+    }
+    
+    /* photon energy */
+    eph = rfb->e[ie] + 1.0/(2*nb*nb);
+    
+    xs = 4.0/3*eph/(2*lb + 1)*S;
+    
+    return xs;
+}
+
+double gsl_coulomb_fb_get_xs(const gsl_coulomb_fb *rfb,
+    unsigned int lb, int lk, unsigned int ie)
+{
+    double dfdE = gsl_coulomb_fb_get_dfdE(rfb, lb, lk, ie);
+    
+    return 2*M_PI*GSL_CONST_NUM_FINE_STRUCTURE*dfdE;
+}

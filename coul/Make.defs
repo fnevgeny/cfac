@@ -9,7 +9,6 @@ FSRCS = clogam.f \
 	f11.f \
 	mpfun.f \
 	coulcc.f \
-	coulrad.f \
 	dcoul.f \
 	cmultip.f \
 	d1mach.f

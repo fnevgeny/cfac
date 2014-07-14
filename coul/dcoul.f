@@ -12,17 +12,16 @@ C     q1 iregular small for e > 0, ignore for e < 0
 C     ierr error code returned by coulcc
       subroutine dcoul(z, e, k, r, p, q, p1, q1, ierr)
       implicit none
-      integer k, ierr, kfn, inorm
+      integer k, ierr, kfn
       double precision z, e, r, p, q, p1, q1, c, ki, zp, gam
       double precision lambda, y, qi, x0, b1, b2, np
       complex*16 x, eta, zlmin, omega, a, pp, qq, mu, nu, IONE
       complex*16 fc(1), gc(1), fcp(1), gcp(1), sig(1), clogam, lam0
       double precision SL, SL2, TSL2, ALPHA
-      PARAMETER (SL=137.036D0,SL2=SL*SL,TSL2=SL2+SL2,ALPHA=1.0D0/SL)
+      parameter (SL=137.036D0,SL2=SL*SL,TSL2=SL2+SL2,ALPHA=1.0D0/SL)
       real*8 HALFPI
       parameter (HALFPI = 1.5707963268D0)
 
-      inorm = ierr
       IONE = dcmplx(0.0, 1.0)
       c = 1.0+0.5*e/SL2
       ki = sqrt(2.0*abs(e)*c)
@@ -35,11 +34,7 @@ C     ierr error code returned by coulcc
       x0 = ki*r
       if (e .lt. 0) then
          x = dcmplx(0.0, x0)
-         if (inorm .eq. 1) then
-            eta = dcmplx(1D-5*(0.5+y), 0.5+y)
-         else
-            eta = dcmplx(0.0, 0.5+y)
-         endif
+         eta = dcmplx(1D-5*(0.5+y), 0.5+y)
          mu = dcmplx(k - z/ki, 0.0)
          nu = dcmplx(0.5+y-x0, 0.0)
       else
@@ -50,14 +45,13 @@ C     ierr error code returned by coulcc
       endif
 
       zlmin = dcmplx(lambda, 0.0)
-      ierr = 1
       kfn = 0
 
       call coulcc(x, eta, zlmin, 1, fc, gc, fcp, gcp, sig,
      +     11, kfn, ierr)
       if (e .lt. 0) then
          omega = IONE*(HALFPI*(lambda - y - 0.5) - sig(1))
-         if (inorm .gt. 0 .and. z > 0) then
+         if (z > 0) then
             np = y - gam
             b1 = sqrt(z*c*(z/ki-k))*ki/z
             lam0 = np+1.0

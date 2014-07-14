@@ -549,7 +549,7 @@ int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
 int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   int index[3], k, nqk;
   double **p, *qk, tq[MAXNE];
-  double z0, r0, r1, tq0[MAXNE];
+  double r0, r1, tq0[MAXNE];
   ORBITAL *orb;
   int kappa0, jb0, klb02, klb0;
   int kappaf, jf, klf, kf;
@@ -557,8 +557,6 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   int ite, ie, i;
   double eb, aw, e, pref;
   int mode, gauge;
-  int nh, klh;
-  double hparams[NPARAMS];
 
   orb = GetOrbital(cfac, k0);
   kappa0 = orb->kappa;
@@ -571,14 +569,21 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
     log_xegrid[ie] = log(xegrid[ie]);
   }
 
-  GetHydrogenicNL(cfac, &nh, &klh, NULL, NULL);
   if (m == -1) {
-    z0 = GetResidualZ(cfac);
-    RRRadialQkHydrogenicParams(NPARAMS, hparams, z0, orb->n, klb0);
-    RRRadialQkFromFit(NPARAMS, hparams, n_egrid, 
-		      xegrid, log_xegrid, tq0, NULL, 0, &klb0);
+    int nh, klh;
+    GetHydrogenicNL(cfac, &nh, &klh, NULL, NULL);
     if (klb0 > klh || orb->n > nh) {
-      if (k0 != k1) return -1;
+      double hparams[NPARAMS];
+      double z;
+      
+      if (k0 != k1) {
+        return -1;
+      }
+      
+      z = GetResidualZ(cfac);
+      RRRadialQkHydrogenicParams(NPARAMS, hparams, z, orb->n, klb0);
+      RRRadialQkFromFit(NPARAMS, hparams, n_egrid, 
+		        xegrid, log_xegrid, tq0, NULL, 0, &klb0);
       for (ie = 0; ie < n_egrid; ie++) {
 	qr[ie] = tq0[ie]/eb;
       }
@@ -603,7 +608,7 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   }
 
   nqk = n_tegrid*n_egrid;
-  p = (double **) MultiSet(qk_array, index, NULL);
+  p = MultiSet(qk_array, index, NULL);
   if (*p) {
     for (i = 0; i < nqk; i++) {
       qr[i] = (*p)[i];
@@ -614,7 +619,7 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   gauge = GetTransitionGauge(cfac);
   mode = GetTransitionMode(cfac);
 
-  *p = (double *) malloc(sizeof(double)*nqk);
+  *p = malloc(sizeof(double)*nqk);
   
   qk = *p;
   /* the factor 2 comes from the conitinuum norm */

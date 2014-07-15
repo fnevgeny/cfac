@@ -143,7 +143,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	rv = -1;
 	goto END;
       }
-      nlevels = GetNumLevels(cfac);
+      nlevels = cfac_get_num_levels(cfac);
       (*t) = malloc(sizeof(int)*nlevels);
       k = 0;
       for (j = 0; j < nlevels; j++) {
@@ -188,7 +188,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
     
       nrg = ng;
       krg = malloc(sizeof(int)*nrg);
-      nlevels = GetNumLevels(cfac);
+      nlevels = cfac_get_num_levels(cfac);
       (*t) = malloc(sizeof(int)*nlevels);
       if (!(*t)) {
 	rv = -1;
@@ -2328,7 +2328,7 @@ static int PStructure(int argc, char *argv[], int argt[],
       ngp = 0;
   }
 
-  nlevels = GetNumLevels(cfac);
+  nlevels = cfac_get_num_levels(cfac);
   ns = MAX_SYMMETRIES;  
   for (isym = 0; isym < ns; isym++) {
     k = ConstructHamilton(cfac, isym, ng0, ng, kg, ngp, kgp, 111);

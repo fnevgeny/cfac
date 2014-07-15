@@ -512,7 +512,7 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   
   n = 0;
   if (nlow == 0 || nup == 0) {
-    n = GetNumLevels(cfac);
+    n = cfac_get_num_levels(cfac);
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;
@@ -582,7 +582,7 @@ int SaveTransitionEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0,
   n = GetLowUpEB(cfac, &nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
   if (n == -1) return 0;
   
-  trm_cache = TRMultipole_cache_new(GetNumLevels(cfac));
+  trm_cache = TRMultipole_cache_new(cfac_get_num_levels(cfac));
 
   nc = OverlapLowUp(nlow, low, nup, up);
   SaveTransitionEB0(cfac, nc, low+nlow-nc, nc, up+nup-nc, fn, m);

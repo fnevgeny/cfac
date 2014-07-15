@@ -2061,7 +2061,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   /* if low or up not given, assume all levels */
   alev = NULL;
   if (nlow == 0 || nup == 0) {
-    int n = GetNumLevels(cfac);
+    int n = cfac_get_num_levels(cfac);
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;

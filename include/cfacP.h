@@ -93,7 +93,7 @@ struct _cfac_t {
     
     HAMILTON *hamiltonian;    /* Hamiltonian                                 */
 
-    SHAMILTON *hams;          /* state Hamiltonians                          */
+    SHAMILTON *hams;          /* symmetry Hamiltonians                       */
     int nhams;                /* number of them in use                       */
 
     ARRAY *levels;            /* levels                                      */

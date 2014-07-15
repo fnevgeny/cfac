@@ -283,7 +283,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
     }
   }
   if (ncfgs == 0) return -1;
-  nlevels = GetNumLevels(cfac);
+  nlevels = cfac_get_num_levels(cfac);
   nsym = MAX_SYMMETRIES;
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
@@ -294,7 +294,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
     if (j < 0) return -1;
     AddToLevels(cfac, 0, NULL);
   }
-  rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;
+  rec_complex[n_complex].s1 = cfac_get_num_levels(cfac)-1;
   n_complex++;
   SortLevels(cfac, nlevels, -1, 0);
   SaveLevels(cfac, fn, nlevels, -1);
@@ -315,7 +315,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
   i0 = 0;
   if (n_complex == 0) {
     nt = 1;
-    i1 = GetNumLevels(cfac);
+    i1 = cfac_get_num_levels(cfac);
     rec_complex[0].s0 = i1;
   } else {
     nt = n_complex;
@@ -352,7 +352,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 
   if (nstates == 0) return -1;
   nsym = MAX_SYMMETRIES;
-  nlevels = GetNumLevels(cfac);
+  nlevels = cfac_get_num_levels(cfac);
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
   for (i = 0; i < nsym; i++) {
@@ -380,7 +380,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
       AddToLevels(cfac, 0, NULL);
     }
   }
-  rec_complex[n_complex].s1 = GetNumLevels(cfac)-1;
+  rec_complex[n_complex].s1 = cfac_get_num_levels(cfac)-1;
   n_complex++;
   SortLevels(cfac, nlevels, -1, 0);
   SaveLevels(cfac, fn, nlevels, -1);
@@ -1611,7 +1611,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
   /* if low or up not given, assume all levels */
   alev = NULL;
   if (nlow == 0 || nup == 0) {
-    int n = GetNumLevels(cfac);
+    int n = cfac_get_num_levels(cfac);
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;

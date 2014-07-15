@@ -119,7 +119,6 @@ LEVEL *GetLevel(const cfac_t *cfac, int k);
 LEVEL *GetEBLevel(const cfac_t *cfac, int k);
 int LevelTotalJ(cfac_t *cfac, int k);
 int GetNumEBLevels(const cfac_t *cfac);
-int GetNumLevels(const cfac_t *cfac);
 int GetLevNumElectrons(cfac_t *cfac, const LEVEL *lev);
 int GetNumElectrons(cfac_t *cfac, int k);
 int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym);

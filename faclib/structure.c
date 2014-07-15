@@ -1817,7 +1817,7 @@ int GetNumEBLevels(const cfac_t *cfac) {
   return cfac->n_eblevels;
 }
 
-int GetNumLevels(const cfac_t *cfac) {
+int cfac_get_num_levels(const cfac_t *cfac) {
   return cfac->n_levels;
 }
 

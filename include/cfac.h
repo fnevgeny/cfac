@@ -28,4 +28,8 @@ cfac_get_atomic_effective_z(const cfac_t *cfac, double r);
 int
 cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str);
 
+/* structure.c */
+int
+cfac_get_num_levels(const cfac_t *cfac);
+
 #endif /* __CFAC_H_ */

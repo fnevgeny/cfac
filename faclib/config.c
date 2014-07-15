@@ -1653,13 +1653,13 @@ int GetNumGroups(const cfac_t *cfac) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-CONFIG *GetConfig(cfac_t *cfac, STATE *s) {
+CONFIG *GetConfig(const cfac_t *cfac, STATE *s) {
   CONFIG *c;
   int i, j;
 
   i = s->kgroup;
   j = s->kcfg;
-  c = (CONFIG *) ArrayGet(&(cfac->cfg_groups[i].cfg_list), j);
+  c = ArrayGet(&(cfac->cfg_groups[i].cfg_list), j);
   return c;
 }
 
@@ -1866,7 +1866,7 @@ void DecodePJ(int i, int *p, int *j) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-SYMMETRY *GetSymmetry(cfac_t *cfac, int k) {
+SYMMETRY *GetSymmetry(const cfac_t *cfac, int k) {
   if (k < 0 || k >= MAX_SYMMETRIES) return NULL;
   return cfac->symmetry_list+k;
 }

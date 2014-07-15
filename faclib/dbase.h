@@ -356,6 +356,8 @@ void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh,
 int JFromENRecord(EN_RECORD *r);
 int IBaseFromENRecord(EN_RECORD *r);
 
+int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n);
+
 /* these are the write functions, which shouldn't be of much interest.
  * unless one needs to format the external data into FAC binary format.
  */
@@ -378,7 +380,7 @@ void SwapEndian(char *p, int size);
 int SwapEndianFHeader(F_HEADER *h);
 int InitDBase(void);
 int ReinitDBase(int m);
-FILE *OpenFile(char *fn, F_HEADER *fhdr);
+FILE *OpenFile(const char *fn, F_HEADER *fhdr);
 int CloseFile(FILE *f, F_HEADER *fhdr);
 int InitFile(FILE *f, F_HEADER *fhdr, void *rhdr);
 int DeinitFile(FILE *f, F_HEADER *fhdr);

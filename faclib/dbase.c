@@ -1663,7 +1663,7 @@ int ReadCIMRecord(FILE *f, CIM_RECORD *r, int swp, CIM_HEADER *h) {
   return m;
 } 
   
-FILE *OpenFile(char *fn, F_HEADER *fhdr) {
+FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
   int ihdr;
   FILE *f;
 
@@ -3485,6 +3485,79 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
   
   return 0;
 #undef NBUF
+}
+
+int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
+  STATE *s;
+  SYMMETRY *sym;
+  LEVEL *lev;
+  EN_RECORD r;
+  EN_HEADER en_hdr;
+  F_HEADER fhdr;
+  char name[LEVEL_NAME_LEN];
+  char sname[LEVEL_NAME_LEN];
+  char nc[LEVEL_NAME_LEN];
+  FILE *f = NULL;
+  int i, k, p, j0;
+  int nele, nele0, vnl;
+  int si;
+  
+  nele0 = -1;
+  
+  if (n < 0) {
+    n = cfac->n_levels - start;
+  }
+  
+  fhdr.type = DB_EN;
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
+  
+  f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
+
+  for (k = 0; k < n; k++) {
+    i = start + k;
+    lev = GetLevel(cfac, i);
+    si = lev->pb;
+    sym = GetSymmetry(cfac, lev->pj);
+    s = ArrayGet(&(sym->states), si);
+
+    DecodePJ(lev->pj, &p, &j0);
+    r.ilev = i;
+    r.ibase = lev->ibase;
+    r.p = p;
+    r.j = j0;
+    r.energy = lev->energy;
+
+    nele = ConstructLevelName(cfac, name, sname, nc, &vnl, s);
+    strncpy(r.name, name, LNAME);
+    strncpy(r.sname, sname, LSNAME);
+    strncpy(r.ncomplex, nc, LNCOMPLEX);
+    r.name[LNAME-1] = '\0';
+    r.sname[LSNAME-1] = '\0';
+    r.ncomplex[LNCOMPLEX-1] = '\0';
+    if (r.p == 0) {
+      r.p = vnl;
+    } else {
+      r.p = -vnl;
+    }
+    if (nele != nele0) {
+      if (nele0 >= 0) {
+	DeinitFile(f, &fhdr);
+      }
+      nele0 = nele;
+      en_hdr.nele = nele;
+      InitFile(f, &fhdr, &en_hdr);
+    }
+    WriteENRecord(f, &r);
+  }
+
+  DeinitFile(f, &fhdr);
+  CloseFile(f, &fhdr);
+  
+  return 0;
 }
 
 int ISearch(int i, int n, int *ia) {

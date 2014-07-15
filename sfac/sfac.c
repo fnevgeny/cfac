@@ -2281,7 +2281,7 @@ static int PCutMixing(int argc, char *argv[], int argt[],
 
 static int PStructure(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
-  int i, k, ng0, ng, ngp, ns;
+  int isym, k, ng0, ng, ngp, ns;
   int ip, nlevels;
   int *kg, *kgp;
 
@@ -2298,9 +2298,10 @@ static int PStructure(int argc, char *argv[], int argt[],
     if (ng < 0) return -1;
   } else
   if (argc == 2 && argt[0] == NUMBER) {
+    int nj;
     ip = atoi(argv[0]);
-    i = IntFromList(argv[1], argt[1], variables, &kg);
-    SetSymmetry(cfac, ip, i, kg);
+    nj = IntFromList(argv[1], argt[1], variables, &kg);
+    SetSymmetry(cfac, ip, nj, kg);
     free(kg);
     return 0;
   } else {
@@ -2318,21 +2319,19 @@ static int PStructure(int argc, char *argv[], int argt[],
   if (ngp < 0) return -1;
   
   ng0 = ng;
-  if (!ip) {
-    if (ngp) {
+  if (!ip && ngp) {
       ng += ngp;
-      kg = (int *) realloc(kg, sizeof(int)*ng);
+      kg = realloc(kg, sizeof(int)*ng);
       memcpy(kg+ng0, kgp, sizeof(int)*ngp);
       free(kgp);
       kgp = NULL;
       ngp = 0;
-    }
   }
 
   nlevels = GetNumLevels(cfac);
   ns = MAX_SYMMETRIES;  
-  for (i = 0; i < ns; i++) {
-    k = ConstructHamilton(cfac, i, ng0, ng, kg, ngp, kgp, 111);
+  for (isym = 0; isym < ns; isym++) {
+    k = ConstructHamilton(cfac, isym, ng0, ng, kg, ngp, kgp, 111);
     if (k < 0) continue;
     if (DiagonalizeHamilton(cfac) < 0) return -1;
     if (ng0 < ng) {
@@ -2343,6 +2342,7 @@ static int PStructure(int argc, char *argv[], int argt[],
   }
 
   SortLevels(cfac, nlevels, -1, 0);
+  FinalizeLevels(cfac, nlevels, -1);
   SaveLevels(cfac, argv[0], nlevels, -1);
 
   if (ng > 0) free(kg);

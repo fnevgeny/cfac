@@ -274,12 +274,12 @@ CONFIG_GROUP *GetNewGroup(cfac_t *cfac);
 int          GetNumGroups(const cfac_t *cfac);
 int          GetNumConfigs(const cfac_t *cfac);
 int          ConfigParity(CONFIG *c);
-CONFIG       *GetConfig(cfac_t *cfac, STATE *s);
+CONFIG       *GetConfig(const cfac_t *cfac, STATE *s);
 CONFIG       *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc);
 int          AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate, 
 				int parity, int j);
 int          AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg);
-SYMMETRY     *GetSymmetry(cfac_t *cfac, int k);
+SYMMETRY     *GetSymmetry(const cfac_t *cfac, int k);
 void         DecodePJ(int i, int *p, int *j);
 int          SpecSymbol(char *s, int kl);
 int          ConstructConfigName(char *s, int n, CONFIG *c);

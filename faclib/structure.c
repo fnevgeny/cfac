@@ -1800,11 +1800,11 @@ int AddECorrection(cfac_t *cfac, int iref, int ilev, double e, int nmin) {
 }
 
 LEVEL *GetEBLevel(const cfac_t *cfac, int k) {
-  return (LEVEL *) ArrayGet(cfac->eblevels, k);
+  return ArrayGet(cfac->eblevels, k);
 }
 
 LEVEL *GetLevel(const cfac_t *cfac, int k) {
-  return (LEVEL *) ArrayGet(cfac->levels, k);
+  return ArrayGet(cfac->levels, k);
 }
 
 int LevelTotalJ(cfac_t *cfac, int k) {
@@ -1868,27 +1868,35 @@ int GetPrincipleBasis(double *mix, int d, int *kpb) {
 int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
   STATE *s1, *s2;
   SYMMETRY *sym1, *sym2;
-  ORBITAL *orb;
   int i1, i2;
-  int p1, p2, j1, j2;
 
   if (lev1->pj < 0 || lev2->pj < 0) {
-    if (lev1->energy > lev2->energy) return 1;
-    else if (lev1->energy < lev2->energy) return -1;
-    return 0;
+    if (lev1->energy > lev2->energy) {
+      return 1;
+    } else
+    if (lev1->energy < lev2->energy) {
+      return -1;
+    } else {
+      return 0;
+    }
   }
 
   i1 = lev1->pb;
   i2 = lev2->pb;
   sym1 = GetSymmetry(cfac, lev1->pj);
   sym2 = GetSymmetry(cfac, lev2->pj);
-  s1 = (STATE *) ArrayGet(&(sym1->states), i1);
-  s2 = (STATE *) ArrayGet(&(sym2->states), i2);
+  s1 = ArrayGet(&(sym1->states), i1);
+  s2 = ArrayGet(&(sym2->states), i2);
   if (s1->kgroup < 0 && s2->kgroup < 0) {
+    int p1, p2, j1, j2;
+    ORBITAL *orb;
+    
     orb = GetOrbital(cfac, s1->kcfg);
     GetJLFromKappa(orb->kappa, &p1, &j1);
+    
     orb = GetOrbital(cfac, s2->kcfg);
     GetJLFromKappa(orb->kappa, &p2, &j2);
+    
     i1 = p1 - p2;
     if (i1) return i1;
     i1 = j1 - j2;
@@ -1901,9 +1909,14 @@ int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
     if (i1) return i1;
     return (j1 - j2);
   } else {
-    if (lev1->energy > lev2->energy) return 1;
-    else if (lev1->energy < lev2->energy) return -1;
-    else return 0;
+    if (lev1->energy > lev2->energy) {
+      return 1;
+    } else
+    if (lev1->energy < lev2->energy) {
+      return -1;
+    } else {
+      return 0;
+    }
   }
 }
 
@@ -1914,10 +1927,10 @@ int SortLevels(cfac_t *cfac, int start, int n, int EB) {
 
   if (EB) {
     get_a_level = GetEBLevel;
-    if (n < 0) n = cfac->n_eblevels-start;
+    if (n < 0) n = cfac->n_eblevels - start;
   } else {
     get_a_level = GetLevel;
-    if (n < 0) n = cfac->n_levels-start;
+    if (n < 0) n = cfac->n_levels - start;
   }
   while (1 < n) {
     i = start;
@@ -1976,7 +1989,7 @@ int GetLevNumElectrons(cfac_t *cfac, const LEVEL *lev) {
   int nele;
   
   sym = GetSymmetry(cfac, lev->pj);
-  s = (STATE *) ArrayGet(&(sym->states), lev->basis[0]);
+  s = ArrayGet(&(sym->states), lev->basis[0]);
   if (s->kgroup >= 0) {
     g = GetGroup(cfac, s->kgroup);
     nele = g->n_electrons;
@@ -2035,46 +2048,39 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   
   return 0;
 }  
-  
-int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
-  STATE *s, *s1;
-  SYMMETRY *sym, *sym1;
-  CONFIG *cfg, *cfg1;
-  SHELL_STATE *csf, *csf1;
-  LEVEL *lev, *lev1;
-  EN_RECORD r;
-  EN_HEADER en_hdr;
-  F_HEADER fhdr;
-  ECORRECTION *ec;
-  LEVEL_ION *gion, gion1;
-  ORBITAL *orb;
-  double e0, md, md1, a;
-  char name[LEVEL_NAME_LEN];
-  char sname[LEVEL_NAME_LEN];
-  char nc[LEVEL_NAME_LEN];
-  FILE *f;
-  int i, k, p, j0;
-  int nele, nele0, vnl, ib, dn, ik;
-  int si, ms, mst, t, q, nk, n0;
 
-  f = NULL;
+int FinalizeLevels(cfac_t *cfac, int start, int n) {
+  int k;
+  int nele, nele0;
+  int q, t, nk, n0;
+  LEVEL_ION *gion, gion1;
+
   nele0 = -1;
-  n0 = m;
-  if (n < 0) n = cfac->n_levels - m;
-  fhdr.type = DB_EN;
-  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
-  fhdr.atom = cfac_get_atomic_number(cfac);
-  f = OpenFile(fn, &fhdr);
+  n0 = start;
+  if (n < 0) {
+    n = cfac->n_levels - start;
+  }
 
   for (k = 0; k < n; k++) {
-    i = m + k;
+    STATE *s, *s1;
+    SYMMETRY *sym, *sym1;
+    CONFIG *cfg, *cfg1, *c;
+    SHELL_STATE *csf, *csf1;
+    LEVEL *lev, *lev1;
+    ECORRECTION *ec;
+    ORBITAL *orb;
+    double e0, md, md1, a;
+    int i, ib, dn, ik, si, ms, mst;
+    
+    i = start + k;
     lev = GetLevel(cfac, i);
     si = lev->pb;
     sym = GetSymmetry(cfac, lev->pj);
-    s = (STATE *) ArrayGet(&(sym->states), si);
+    s = ArrayGet(&(sym->states), si);
     if (cfac->ncorrections > 0) {
+      int p;
       for (p = 0; p < cfac->ecorrections->dim; p++) {
-	ec = (ECORRECTION *) ArrayGet(cfac->ecorrections, p);
+	ec = ArrayGet(cfac->ecorrections, p);
 	if (ec->ilev == i) {
 	  if (ec->ilev == ec->iref) {
 	    e0 = lev->energy;
@@ -2116,7 +2122,7 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
 	}
 	for (ib = 0; ib < NPRINCIPLE; ib++) {
 	  for (t = 0; t < cfac_get_ion_nlevels(cfac, nk); t++) {
-	    gion = (LEVEL_ION *) ArrayGet(cfac->levels_per_ion+nk, t);
+	    gion = ArrayGet(cfac->levels_per_ion+nk, t);
 	    for (q = gion->imin; q <= gion->imax; q++) {
 	      lev1 = GetLevel(cfac, q);
 	      sym1 = GetSymmetry(cfac, lev1->pj);
@@ -2136,11 +2142,12 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
 		    lev->ibase = q;
 		  }
 		} else {
-		  ik = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+		  int p;
+                  ik = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
 		  orb = GetOrbital(cfac, ik);
 		  a = lev->energy - orb->energy;
 		  for (p = 0; p < cfac->ecorrections->dim; p++) {
-		    ec = (ECORRECTION *) ArrayGet(cfac->ecorrections, p);
+		    ec = ArrayGet(cfac->ecorrections, p);
 		    if (-(q+1) == ec->ilev) {
 		      a += ec->e;
 		      break;
@@ -2162,8 +2169,9 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
       }
 
       if (lev->ibase >= 0) {
-	for (p = 0; p < cfac->ecorrections->dim; p++) {
-	  ec = (ECORRECTION *) ArrayGet(cfac->ecorrections, p);
+	int p;
+        for (p = 0; p < cfac->ecorrections->dim; p++) {
+	  ec = ArrayGet(cfac->ecorrections, p);
 	  if (-(i+1) == ec->ilev) break;
 	  if (-(lev->ibase + 1) == ec->ilev && cfg->shells[0].n >= ec->nmin) {
 	    lev->energy += ec->e;
@@ -2175,33 +2183,16 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
       lev->ibase = -(s->kgroup + 1);
     }
  
-    DecodePJ(lev->pj, &p, &j0);
-    r.ilev = i;
-    r.ibase = lev->ibase;
-    r.p = p;
-    r.j = j0;
-    r.energy = lev->energy;
+    c = GetConfig(cfac, s);
+    nele = c->n_electrons;
 
-    nele = ConstructLevelName(cfac, name, sname, nc, &vnl, s);
-    strncpy(r.name, name, LNAME);
-    strncpy(r.sname, sname, LSNAME);
-    strncpy(r.ncomplex, nc, LNCOMPLEX);
-    r.name[LNAME-1] = '\0';
-    r.sname[LSNAME-1] = '\0';
-    r.ncomplex[LNCOMPLEX-1] = '\0';
-    if (r.p == 0) {
-      r.p = vnl;
-    } else {
-      r.p = -vnl;
-    }
     if (nele != nele0) {
       if (nele0 >= 0) {
-	DeinitFile(f, &fhdr);
 	q = 0;
 	nk = nele0;
 	t = cfac_get_ion_nlevels(cfac, nk);
 	if (t > 0) {
-	  gion = (LEVEL_ION *) ArrayGet(cfac->levels_per_ion+nk, t-1);
+	  gion = ArrayGet(cfac->levels_per_ion+nk, t-1);
 	  if (gion->imax+1 == n0) {
 	    gion->imax = cfac->n_levels-1;
 	    q = 1;
@@ -2215,21 +2206,15 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
       }
       n0 = i;
       nele0 = nele;
-      en_hdr.nele = nele;
-      InitFile(f, &fhdr, &en_hdr);
     }
-    WriteENRecord(f, &r);
   }
-
-  DeinitFile(f, &fhdr);
-  CloseFile(f, &fhdr);
 
   q = 0;
   nk = nele0;
   if (nk >= 0) {
     t = cfac_get_ion_nlevels(cfac, nk);
     if (t > 0) {
-      gion = (LEVEL_ION *) ArrayGet(cfac->levels_per_ion+nk, t-1);
+      gion = ArrayGet(cfac->levels_per_ion+nk, t-1);
       if (gion->imax+1 == n0) {
 	gion->imax = cfac->n_levels-1;
 	q = 1;
@@ -2245,7 +2230,8 @@ int SaveLevels(cfac_t *cfac, char *fn, int m, int n) {
   return 0;
 }
 
-int ConstructLevelName(cfac_t *cfac, char *name, char *sname, char *nc, 
+
+int ConstructLevelName(const cfac_t *cfac, char *name, char *sname, char *nc, 
 		       int *vnl, STATE *basis) {
   int n, nq, kl, j;
   int nele, i, len;

@@ -2203,7 +2203,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
         /* ionization potential */
         sym = GetSymmetry(cfac, tr.lup->pj);
-        st = (STATE *) ArrayGet(&(sym->states), tr.lup->pb);
+        st = GetSymmetryState(sym, tr.lup->pb);
         if (st->kgroup < 0) {
 	  k = st->kcfg;
         } else {
@@ -2462,7 +2462,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   for (j = 0; j < nup0; j++) {
     lev2 = GetLevel(cfac, up0[j]);    
     sym = GetSymmetry(cfac, lev2->pj);
-    st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
+    st = GetSymmetryState(sym, lev2->pb);
     if (st->kgroup < 0) {
       k = st->kcfg;
     } else {
@@ -2715,7 +2715,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   for (j = 0; j < nup0; j++) {
     lev2 = GetLevel(cfac, up0[j]);    
     sym = GetSymmetry(cfac, lev2->pj);
-    st = (STATE *) ArrayGet(&(sym->states), lev2->pb);
+    st = GetSymmetryState(sym, lev2->pb);
     if (st->kgroup < 0) {
       k = st->kcfg;
     } else {

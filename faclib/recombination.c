@@ -326,7 +326,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
       lev = GetLevel(cfac, i);
       m = lev->pb;
       sym = GetSymmetry(cfac, lev->pj);
-      s = (STATE *) ArrayGet(&(sym->states), m);
+      s = GetSymmetryState(sym, m);
       if (!InGroups(s->kgroup, k, kg)) {
 	continue;
       }
@@ -364,7 +364,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	  lev = GetLevel(cfac, j);
 	  m = lev->pb;
 	  sym = GetSymmetry(cfac, lev->pj);
-	  s = (STATE *) ArrayGet(&(sym->states), m);
+	  s = GetSymmetryState(sym, m);
 	  if (!InGroups(s->kgroup, k, kg)) continue;
 	  m = ConstructHamiltonFrozen(cfac, i, j, NULL, n, 0, NULL);
 	  if (m < 0) continue;
@@ -950,7 +950,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   j1 = lev1->pj;
   j2 = lev2->pj;
 
-  st = (STATE *) ArrayGet(&(GetSymmetry(cfac, j1)->states), i);
+  st = GetSymmetryState(GetSymmetry(cfac, j1), i);
   if (st->kgroup < 0) {
     k = GetOrbital(cfac, st->kcfg)->kappa;
   } else {

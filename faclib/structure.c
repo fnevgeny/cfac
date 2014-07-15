@@ -382,7 +382,6 @@ int ConstructHamilton(cfac_t *cfac,
   HAMILTON *h = cfac->hamiltonian;
   int i, j, m1, m2, m3, jp;
   SHAMILTON *hs;
-  ARRAY *st;
   STATE *s;
   SYMMETRY *sym;
   double r;
@@ -412,11 +411,10 @@ int ConstructHamilton(cfac_t *cfac,
     if (cfac->confint == -1) {
       return ConstructHamiltonDiagonal(cfac, isym, k, kg, 1);
     }
-    st = &(sym->states);
     j = 0;
     j0 = 0;
     for (i = 0; i < sym->n_states; i++) {
-      s = (STATE *) ArrayGet(st, i);
+      s = GetSymmetryState(sym, i);
       if (InGroups(s->kgroup, k0, kg)) j0++;
       if (InGroups(s->kgroup, k, kg)) j++;
     }
@@ -424,7 +422,7 @@ int ConstructHamilton(cfac_t *cfac,
 
     if (kp > 0) {
       for (i = 0; i < sym->n_states; i++) {
-	s = (STATE *) ArrayGet(st, i);
+	s = GetSymmetryState(sym, i);
 	if (InGroups(s->kgroup, kp, kgp)) jp++;
       }
     }    
@@ -433,7 +431,7 @@ int ConstructHamilton(cfac_t *cfac,
     
     j = 0;  
     for (i = 0; i < sym->n_states; i++) {
-      s = (STATE *) ArrayGet(st, i);
+      s = GetSymmetryState(sym, i);
       if (InGroups(s->kgroup, k, kg)) {
 	h->basis[j] = i;
 	j++;
@@ -441,7 +439,7 @@ int ConstructHamilton(cfac_t *cfac,
     }
     if (jp > 0) {  
       for (i = 0; i < sym->n_states; i++) {
-	s = (STATE *) ArrayGet(st, i);
+	s = GetSymmetryState(sym, i);
 	if (kp > 0 && InGroups(s->kgroup, kp, kgp)) {
 	  h->basis[j] = i;
 	  j++;
@@ -549,7 +547,6 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   HAMILTON *h = cfac->hamiltonian;
   int i, j, t, ncs;
   LEVEL *lev;
-  ARRAY *st;
   STATE *s;
   SYMMETRY *sym;
   double r, delta;
@@ -561,9 +558,8 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   j = 0;
   ncs = 0;
   sym = GetSymmetry(cfac, isym);
-  st = &(sym->states);
   for (t = 0; t < sym->n_states; t++) { 
-    s = (STATE *) ArrayGet(st, t);
+    s = GetSymmetryState(sym, t);
     if (ValidBasis(cfac, s, k, kg, n)) {
       j++;
     } else if (nc > 0) {
@@ -583,7 +579,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   j = 0;
   if (ncs > 0) {
     for (t = 0; t < sym->n_states; t++) { 
-      s = (STATE *) ArrayGet(st, t);
+      s = GetSymmetryState(sym, t);
       if (ValidBasis(cfac, s, nc, kc, 0)) {
 	h->basis[j] = t;
 	j++;
@@ -591,7 +587,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
     }
   }
   for (t = 0; t < sym->n_states; t++) { 
-    s = (STATE *) ArrayGet(st, t);
+    s = GetSymmetryState(sym, t);
     if (ValidBasis(cfac, s, k, kg, n)) {
       h->basis[j] = t;
       j++;
@@ -615,7 +611,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
     for (i = 0; i < j; i++) {
       h->hamilton[i+t] = 0.0;
     }
-    s = (STATE *) ArrayGet(st, h->basis[j]);
+    s = GetSymmetryState(sym, h->basis[j]);
     lev = GetLevel(cfac, -(s->kgroup+1));
     h->hamilton[j+t] = lev->energy;
   }
@@ -3028,7 +3024,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
   DecodePJ(j1, NULL, &j1);
   DecodePJ(j2, NULL, &j2);
   
-  sup = (STATE *) ArrayGet(&(sym2->states), lev2->pb);
+  sup = GetSymmetryState(sym2, lev2->pb);
   if (sup->kgroup < 0) {
     sqrt_j2 = sqrt(j2 + 1.0);
     n = 0;
@@ -3039,7 +3035,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
       if (fabs(mix2) < cfac->angz_cut) {
 	break;
       }
-      sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
+      sup = GetSymmetryState(sym2, lev2->basis[j]);
       kg = sup->kgroup;
       kg = -kg-1;
       if (kg == lower) {
@@ -3171,8 +3167,8 @@ int AngularZMix(cfac_t *cfac,
     return 0;
   }
 
-  slow = (STATE *) ArrayGet(&(sym1->states), lev1->pb);
-  sup = (STATE *) ArrayGet(&(sym2->states), lev2->pb);
+  slow = GetSymmetryState(sym1, lev1->pb);
+  sup = GetSymmetryState(sym2, lev2->pb);
   kg1 = slow->kgroup;
   kg2 = sup->kgroup;
 
@@ -3201,7 +3197,7 @@ int AngularZMix(cfac_t *cfac,
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
-      slow = (STATE *) ArrayGet(&(sym1->states), lev1->basis[i]);
+      slow = GetSymmetryState(sym1, lev1->basis[i]);
       jlow = GetBaseJ(cfac, slow);
       kg1 = slow->kgroup;
       kg1 = -kg1-1;
@@ -3213,7 +3209,7 @@ int AngularZMix(cfac_t *cfac,
 	if (fabs(mix2) < cfac->angz_cut) continue;
 	a = mix1*mix2;
 	if (fabs(a) < cfac->angz_cut) continue;
-	sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
+	sup = GetSymmetryState(sym2, lev2->basis[j]);
 	jup = GetBaseJ(cfac, sup);
 	kg2 = sup->kgroup;
 	kg2 = -kg2-1;
@@ -3259,7 +3255,7 @@ int AngularZMix(cfac_t *cfac,
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
-      slow = (STATE *) ArrayGet(&(sym1->states), lev1->basis[i]);
+      slow = GetSymmetryState(sym1, lev1->basis[i]);
       kb1 = slow->kcfg;
       jb1 = GetOrbital(cfac, kb1)->kappa;
       jb1 = GetJFromKappa(jb1);
@@ -3286,7 +3282,7 @@ int AngularZMix(cfac_t *cfac,
     for (j = 0; j < lev2->n_basis; j++) {
       mix2 = lev2->mixing[j];
       if (fabs(mix2) < cfac->angz_cut) continue;
-      sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
+      sup = GetSymmetryState(sym2, lev2->basis[j]);
       kb2 = sup->kcfg;
       jb2 = GetOrbital(cfac, kb2)->kappa;
       jb2 = GetJFromKappa(jb2);
@@ -3392,12 +3388,12 @@ int AngularZxZFreeBound(cfac_t *cfac,
   (*ang) = malloc(sizeof(ANGULAR_ZxZMIX)*nz);
   if (!(*ang)) return -1;
     
-  sup = (STATE *) ArrayGet(&(sym2->states), lev2->pb);
+  sup = GetSymmetryState(sym2, lev2->pb);
   if (sup->kgroup < 0) {  
     for (j = 0; j < lev2->n_basis; j++) {
       mix2 = lev2->mixing[j];
       if (fabs(mix2) < cfac->angz_cut) continue;
-      sup = (STATE *) ArrayGet(&(sym2->states), lev2->basis[j]);
+      sup = GetSymmetryState(sym2, lev2->basis[j]);
       kb = sup->kcfg;
       jb = GetOrbital(cfac, kb)->kappa;
       jb = GetJFromKappa(jb);

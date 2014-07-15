@@ -274,7 +274,7 @@ CONFIG_GROUP *GetNewGroup(cfac_t *cfac);
 int          GetNumGroups(const cfac_t *cfac);
 int          GetNumConfigs(const cfac_t *cfac);
 int          ConfigParity(CONFIG *c);
-CONFIG       *GetConfig(const cfac_t *cfac, STATE *s);
+CONFIG       *GetConfig(const cfac_t *cfac, const STATE *s);
 CONFIG       *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc);
 int          AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate, 
 				int parity, int j);

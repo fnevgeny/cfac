@@ -3522,7 +3522,7 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     lev = GetLevel(cfac, i);
     si = lev->pb;
     sym = GetSymmetry(cfac, lev->pj);
-    s = ArrayGet(&(sym->states), si);
+    s = GetSymmetryState(sym, si);
 
     DecodePJ(lev->pj, &p, &j0);
     r.ilev = i;
@@ -3531,7 +3531,7 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     r.j = j0;
     r.energy = lev->energy;
 
-    nele = ConstructLevelName(cfac, name, sname, nc, &vnl, s);
+    nele = ConstructLevelName(cfac, s, name, sname, nc, &vnl);
     strncpy(r.name, name, LNAME);
     strncpy(r.sname, sname, LSNAME);
     strncpy(r.ncomplex, nc, LNCOMPLEX);

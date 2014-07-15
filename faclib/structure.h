@@ -155,8 +155,8 @@ int AddToAngularZFB(int *n, int *nz, ANGULAR_ZFB **ang,
 		    int kb, double coeff);
 int AngularZxZFreeBound(cfac_t *cfac, ANGULAR_ZxZMIX **ang, int lower, int upper);
 int GetBasisTable(cfac_t *cfac, char *fn, int m);
-int ConstructLevelName(const cfac_t *cfac, char *name, char *sname, char *nc, 
-		       int *vnl, STATE *basis);
+int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
+                       char *name, char *sname, char *nc, int *vnl);
 int FinalizeLevels(cfac_t *cfac, int start, int n);
 
 int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n);

@@ -1653,7 +1653,7 @@ int GetNumGroups(const cfac_t *cfac) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-CONFIG *GetConfig(const cfac_t *cfac, STATE *s) {
+CONFIG *GetConfig(const cfac_t *cfac, const STATE *s) {
   CONFIG *c;
   int i, j;
 

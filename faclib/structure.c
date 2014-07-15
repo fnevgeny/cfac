@@ -1258,7 +1258,7 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
     a = sqrt(j+1.0);
 
     s0 = GetSymmetryState(sym, lev->pb);
-    ConstructLevelName(cfac, name, sname, nc, &vnl, s0);
+    ConstructLevelName(cfac, s0, name, sname, nc, &vnl);
     fprintf(f, "# %6d %1d %3d   %-s\n",
 	    ilevs[m], i, j, name);
     for (i0 = 0; i0 < na; i0++) {
@@ -2230,8 +2230,8 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
 }
 
 
-int ConstructLevelName(const cfac_t *cfac, char *name, char *sname, char *nc, 
-		       int *vnl, STATE *basis) {
+int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
+    char *name, char *sname, char *nc, int *vnl) {
   int n, nq, kl, j;
   int nele, i, len;
   char symbol[20];
@@ -2254,7 +2254,7 @@ int ConstructLevelName(const cfac_t *cfac, char *name, char *sname, char *nc,
       si = lev->pb;
       sym = GetSymmetry(cfac, lev->pj);
       basis = ArrayGet(&(sym->states), si);
-      nele = ConstructLevelName(cfac, name, sname, nc, vnl, basis);
+      nele = ConstructLevelName(cfac, basis, name, sname, nc, vnl);
       return nele;
     } else {
       orb = GetOrbital(cfac, basis->kcfg);
@@ -2276,7 +2276,7 @@ int ConstructLevelName(const cfac_t *cfac, char *name, char *sname, char *nc,
       sym = GetSymmetry(cfac, lev->pj);
       basis = GetSymmetryState(sym, si);
       if (sname || nc) {
-	nele = ConstructLevelName(cfac, NULL, sname, nc, NULL, basis);
+	nele = ConstructLevelName(cfac, basis, NULL, sname, nc, NULL);
 	if (nc) {
 	  if (nele == 0) {
 	    nc[0] = '\0';
@@ -2285,7 +2285,7 @@ int ConstructLevelName(const cfac_t *cfac, char *name, char *sname, char *nc,
 	  strcat(nc, ashell);
 	}
       } else {
-	nele = ConstructLevelName(cfac, NULL, NULL, NULL, NULL, basis);
+	nele = ConstructLevelName(cfac, basis, NULL, NULL, NULL, NULL);
       }
       return nele+1;
     }
@@ -2384,7 +2384,6 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
   char nc[LEVEL_NAME_LEN];
   char name[LEVEL_NAME_LEN];
   char sname[LEVEL_NAME_LEN];
-  ARRAY *st;
   STATE *s;
   LEVEL *lev;
   SYMMETRY *sym;
@@ -2407,11 +2406,10 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
     for (i = 0; i < nsym; i++) {
       sym = GetSymmetry(cfac, i);
       DecodePJ(i, &p, &j);
-      st = &(sym->states);
       if (sym->n_states <= 0) continue;
       for (k = 0; k < sym->n_states; k++) {
-	s = (STATE *) ArrayGet(st, k);
-	ConstructLevelName(cfac, name, sname, nc, NULL, s);
+	s = GetSymmetryState(sym, k);
+	ConstructLevelName(cfac, s, name, sname, nc, NULL);
 	fprintf(f, "%6d   %2d %2d   %5d %3d %5d %5d   %-20s %-20s %-20s\n",
 		i, p, j, k, s->kgroup, s->kcfg, s->kstate, nc, sname, name);
       }

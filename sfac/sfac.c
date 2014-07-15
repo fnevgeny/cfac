@@ -2341,8 +2341,8 @@ static int PStructure(int argc, char *argv[], int argt[],
     }
   }
 
-  SortLevels(cfac, nlevels, -1, 0);
   FinalizeLevels(cfac, nlevels, -1);
+  SortLevels(cfac, nlevels, -1, 0);
   SaveLevels(cfac, argv[0], nlevels, -1);
 
   if (ng > 0) free(kg);

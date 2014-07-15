@@ -1864,7 +1864,7 @@ int GetPrincipleBasis(double *mix, int d, int *kpb) {
   return k;
 }
 
-int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
+static int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
   STATE *s1, *s2;
   SYMMETRY *sym1, *sym2;
   int i1, i2;

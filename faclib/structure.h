@@ -123,7 +123,6 @@ int GetLevNumElectrons(cfac_t *cfac, const LEVEL *lev);
 int GetNumElectrons(cfac_t *cfac, int k);
 int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym);
 int GetPrincipleBasis(double *mix, int d, int *kpb);
-int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2);
 int SortLevels(cfac_t *cfac, int start, int n, int EB);
 void SetSymmetry(cfac_t *cfac, int p, int n, int *j);
 int GetBaseJ(cfac_t *cfac, STATE *s);

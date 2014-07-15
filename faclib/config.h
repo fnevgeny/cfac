@@ -280,6 +280,7 @@ int          AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate,
 				int parity, int j);
 int          AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg);
 SYMMETRY     *GetSymmetry(const cfac_t *cfac, int k);
+STATE        *GetSymmetryState(SYMMETRY *sym, int isym);
 void         DecodePJ(int i, int *p, int *j);
 int          SpecSymbol(char *s, int kl);
 int          ConstructConfigName(char *s, int n, CONFIG *c);

@@ -147,7 +147,7 @@ void InitLevelData(void *p, int n) {
   LEVEL *lev;
   int k;
 
-  lev = (LEVEL *) p;
+  lev = p;
   for (k = 0; k < n; k++, lev++) {
     lev->n_basis = 0;
   }
@@ -223,7 +223,6 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
   HAMILTON *h = cfac->hamiltonian;
   int i, j, t;
   SHAMILTON *hs;
-  ARRAY *st;
   STATE *s;
   SYMMETRY *sym;
   double r;
@@ -235,10 +234,9 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
   if (k <= 0) return -1;
   sym = GetSymmetry(cfac, isym);
   if (sym == NULL) return -1;
-  st = &(sym->states);
   j = 0;
   for (t = 0; t < sym->n_states; t++) {
-    s = (STATE *) ArrayGet(st, t);
+    s = GetSymmetryState(sym, t);
     if (InGroups(s->kgroup, k, kg)) j++;
   }
   if (j == 0) return -1;
@@ -271,7 +269,7 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
 
   j = 0;  
   for (t = 0; t < sym->n_states; t++) {
-    s = (STATE *) ArrayGet(st, t);
+    s = GetSymmetryState(sym, t);
     if (InGroups(s->kgroup, k, kg)) {
       h->basis[j] = t;
       j++;
@@ -279,7 +277,7 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
   }
 
   for (j = 0; j < h->dim; j++) {
-    s = ArrayGet(st, h->basis[j]);
+    s = GetSymmetryState(sym, h->basis[j]);
     if (m == 0) {
       r = ZerothEnergyConfig(cfac, GetConfig(cfac, s));
     } else {
@@ -300,7 +298,7 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
     hs->nbasis = h->n_basis;
     hs->basis = malloc(sizeof(STATE *)*hs->nbasis);
     for (t = 0; t < h->n_basis; t++) {
-      s = (STATE *) ArrayGet(&(sym->states), h->basis[t]);
+      s = GetSymmetryState(sym, h->basis[t]);
       hs->basis[t] = s;
     }
     FlagClosed(cfac, hs);
@@ -492,7 +490,7 @@ int ConstructHamilton(cfac_t *cfac,
     hs->nbasis = h->n_basis;
     hs->basis = malloc(sizeof(STATE *)*hs->nbasis);
     for (i = 0; i < h->n_basis; i++) {
-      s = (STATE *) ArrayGet(&(sym->states), h->basis[i]);
+      s = GetSymmetryState(sym, h->basis[i]);
       hs->basis[i] = s;
     }
     FlagClosed(cfac, hs);
@@ -537,7 +535,7 @@ int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n) {
     lev = GetLevel(cfac, t);
     m = lev->pb;
     sym = GetSymmetry(cfac, lev->pj);
-    sp = (STATE *) ArrayGet(&(sym->states), m);
+    sp = GetSymmetryState(sym, m);
     t = sp->kgroup;
     return InGroups(t, k, kg);
   } else {
@@ -810,6 +808,7 @@ double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
   return r;
 }
 
+
 double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
   STATE *si, *sj;
   double r, sd, se, a;
@@ -822,8 +821,8 @@ double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
   LEVEL *lev1, *lev2;
 
   sym = GetSymmetry(cfac, isym);
-  si = (STATE *) ArrayGet(&(sym->states), isi);
-  sj = (STATE *) ArrayGet(&(sym->states), isj);
+  si = GetSymmetryState(sym, isi);
+  sj = GetSymmetryState(sym, isj);
   r = 0.0;
   ti = si->kgroup;
   k0 = si->kcfg;
@@ -895,8 +894,8 @@ double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
   LEVEL *lev1, *lev2;
 
   sym = GetSymmetry(cfac, isym);
-  si = (STATE *) ArrayGet(&(sym->states), isi);
-  sj = (STATE *) ArrayGet(&(sym->states), isj);
+  si = GetSymmetryState(sym, isi);
+  sj = GetSymmetryState(sym, isj);
   r = 0.0;
   ti = si->kgroup;
   tj = sj->kgroup;
@@ -985,8 +984,8 @@ void HamiltonElement1E2E(cfac_t *cfac,
   *x1 = 0.0;
   *x2 = 0.0;
   sym = GetSymmetry(cfac, isym);
-  si = (STATE *) ArrayGet(&(sym->states), isi);
-  sj = (STATE *) ArrayGet(&(sym->states), isj);
+  si = GetSymmetryState(sym, isi);
+  sj = GetSymmetryState(sym, isj);
   
   ci = GetConfig(cfac, si);
   if (ci->n_shells == 0) return;
@@ -1138,12 +1137,12 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
     lev = GetLevel(cfac, ilevs[m]);
     sym = GetSymmetry(cfac, lev->pj);
     for (i0 = 0; i0 < lev->n_basis; i0++) {
-      s0 = (STATE *) ArrayGet(&(sym->states), lev->basis[i0]);
+      s0 = GetSymmetryState(sym, lev->basis[i0]);
       k0 = s0->kstate;
       for (i1 = 0; i1 < lev->n_basis; i1++) {
 	a = lev->mixing[i0] * lev->mixing[i1];
 	if (fabs(a) < cfac->angz_cut) continue;
-	s1 = (STATE *) ArrayGet(&(sym->states), lev->basis[i1]);
+	s1 = GetSymmetryState(sym, lev->basis[i1]);
 	k1 = s1->kstate;
 	idatum = NULL;
 	n_shells = GetInteract(cfac, &idatum, &sbra, &sket, s0->kgroup, s1->kgroup, 
@@ -1258,7 +1257,7 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
     DecodePJ(lev->pj, &i, &j);
     a = sqrt(j+1.0);
 
-    s0 = (STATE *) ArrayGet(&(sym->states), lev->pb);
+    s0 = GetSymmetryState(sym, lev->pb);
     ConstructLevelName(cfac, name, sname, nc, &vnl, s0);
     fprintf(f, "# %6d %1d %3d   %-s\n",
 	    ilevs[m], i, j, name);
@@ -1598,7 +1597,7 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg) {
   sym = GetSymmetry(cfac, h->pj);  
   for (i = 0; i < d; i++) {
     k = GetPrincipleBasis(mix, d, NULL);
-    s = (STATE *) ArrayGet(&(sym->states), h->basis[k]);
+    s = GetSymmetryState(sym, h->basis[k]);
     if (ng > 0) {      
       if (!InGroups(s->kgroup, ng, kg)) {
 	m = 0;
@@ -1606,7 +1605,7 @@ int AddToLevels(cfac_t *cfac, int ng, int *kg) {
 	  a = fabs(cfac->mix_cut2*mix[k]);
 	  for (t = 0; t < h->n_basis; t++) {
 	    if (fabs(mix[t]) >= a && t != k) {
-	      s1 = (STATE *) ArrayGet(&(sym->states), h->basis[t]);
+	      s1 = GetSymmetryState(sym, h->basis[t]);
 	      if (InGroups(s1->kgroup, ng, kg)) {
 		m = 1;
 		break;
@@ -1676,7 +1675,7 @@ void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c) {
     sym = GetSymmetry(cfac, lev->pj);
     for (t = 0; t < lev->n_basis; t++) {
       if (fabs(lev->mixing[t]) < c) continue;
-      s = (STATE *) ArrayGet(&(sym->states), lev->basis[t]);
+      s = GetSymmetryState(sym, lev->basis[t]);
       if (n > 0 && !InGroups(s->kgroup, n, kg)) continue;
       lev->ibasis[m] = lev->ibasis[t];
       lev->basis[m] = lev->basis[t];
@@ -2275,7 +2274,7 @@ int ConstructLevelName(const cfac_t *cfac, char *name, char *sname, char *nc,
       lev = GetLevel(cfac, i);
       si = lev->pb;
       sym = GetSymmetry(cfac, lev->pj);
-      basis = (STATE *) ArrayGet(&(sym->states), si);
+      basis = GetSymmetryState(sym, si);
       if (sname || nc) {
 	nele = ConstructLevelName(cfac, NULL, sname, nc, NULL, basis);
 	if (nc) {
@@ -2426,7 +2425,7 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
       DecodePJ(lev->pj, &p, &j);
       for (k = 0; k < lev->n_basis; k++) {
 	si = lev->basis[k];
-	s = (STATE *) ArrayGet(&(sym->states), si);
+	s = GetSymmetryState(sym, si);
 	fprintf(f, "%6d   %2d %2d   %5d %3d %5d %5d   %15.8E\n", 
 		i, p, j, si, s->kgroup, s->kcfg, s->kstate, lev->mixing[k]);
       }

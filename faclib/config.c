@@ -1871,6 +1871,11 @@ SYMMETRY *GetSymmetry(const cfac_t *cfac, int k) {
   return cfac->symmetry_list+k;
 }
 
+STATE *GetSymmetryState(SYMMETRY *sym, int isym)
+{
+  return ArrayGet(&(sym->states), isym);
+}
+
 int ShellIndex(int n, int kappa, int ns, SHELL *s) {
   int i;
 

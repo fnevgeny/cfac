@@ -3,51 +3,11 @@
 
 /*************************************************************
   Header for module "config".
-  This module generates electron configuations and 
+  This module generates electron configurations and 
   carries out the angular momentum coupling. 
 
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
-
-/* 
-<** The following format is used for documenting the source **>
-*/
-
-/* documenting a struct */
-/*
-** STRUCT:      
-** PURPOSE:     
-** FIELDS:      
-** NOTE:        
-*/
-
-/* documenting a function */
-/* 
-** FUNCTION:    
-** PURPOSE:     
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
-*/
-
-/* documenting a macro function */
-/* 
-** MACRO:       
-** PURPOSE:     
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
-*/
-
-/* documenting a global, static varialbe or a macro constant */
-/*
-** VARIABLE:    
-** TYPE:        
-** PURPOSE:     
-** NOTE:        
-*/
 
 #include "cfacP.h"
 #include "consts.h"
@@ -57,9 +17,9 @@
 ** STRUCT:      SHELL
 ** PURPOSE:     a relativistic subshell.
 ** FIELDS:      {int n},
-**              the principle quantum number.
+**              the principal quantum number.
 **              {int kappa},
-**              the relativistic angular quantum nubmer.
+**              the relativistic angular quantum number.
 **              {int nq},
 **              the occupation number.
 ** NOTE:        
@@ -79,7 +39,7 @@ typedef struct _SHELL_ {
 **              {int totalJ},
 **              the total angular momentum of the shell after coupling.
 **              {int nu},
-**              the seneority of the state.
+**              the seniority of the state.
 **              {int Nr},
 **              any additional quantum numbers.
 ** NOTE:        a SHELL_STATE specify the seniority and the total 
@@ -132,7 +92,7 @@ typedef struct _SHELL_RESTRICTION_ {
 **              {SHELL_STATE *csfs},
 **              a list specifying all states.
 ** NOTE:        shells and csfs have the shells in reverse order,
-**              i.e., the outmost shell is in the beginning of the list.
+**              i.e., the outermost shell is in the beginning of the list.
 */
 typedef struct _CONFIG_ {
   int n_electrons;
@@ -150,7 +110,7 @@ typedef struct _CONFIG_ {
 
 /*
 ** STRUCT:      AVERAGE_CONFIG
-** PURPOSE:     the mean configuration for the determinaiton 
+** PURPOSE:     the mean configuration for the determination 
 **              of the central potential.
 ** FIELDS:      {int n_cfgs},
 **              the number of actual configurations which determined 
@@ -158,7 +118,7 @@ typedef struct _CONFIG_ {
 **              {int n_shells},
 **              the number of subshells in the mean configuration.
 **              {int *n, *kappa, *nq},
-**              lists specifing all the shells.
+**              lists specifying all the shells.
 ** NOTE:        
 */
 typedef struct _AVERAGE_CONFIG_ {

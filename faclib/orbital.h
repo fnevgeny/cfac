@@ -9,10 +9,10 @@ typedef struct _POTENTIAL_ {
   int r_core;
   int maxrp;
   double hxs, ratio, asymp, rmin;
-  double Z[MAXRP]; /*effective atomic number*/
-  double N; /*number of electrons*/
-  double lambda, a; /* parameter for the Vc */
-  double ar, br; /* parameter for the transformation */
+  double Z[MAXRP]; /* effective atomic number */
+  double N; /* number of electrons */
+  double lambda, a; /* parameters for the Vc */
+  double ar, br; /* parameters for the transformation */
   int ib, nb, ib1; 
   double bqp; /* boundary condition */
   double rad[MAXRP];
@@ -29,7 +29,7 @@ typedef struct _POTENTIAL_ {
   double dW2[MAXRP];
   double uehling[MAXRP];
   
-  unsigned int nmax;
+  unsigned int nmax; /* above this n, Coulomb WF for r > r_core are assumed */
   double veff[MAXRP];
 } POTENTIAL;
 
@@ -65,5 +65,3 @@ int SetPotentialW (POTENTIAL *pot, double e, int kappa);
 int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot);
 
 #endif
-
-

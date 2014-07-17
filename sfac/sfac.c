@@ -246,6 +246,23 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
   return rv;
 }
 
+static int SelectNeleLevels(cfac_t *cfac, int nele, int **levels)
+{
+    int i, j, n;
+    
+    n = cfac_get_num_levels(cfac);
+    *levels = malloc(n*sizeof(int));
+    
+    j = 0;
+    for (i = 0; i < n; i++) {
+        if (GetNumElectrons(cfac, i) == nele) {
+            (*levels)[j++] = i;
+        }
+    }
+    
+    return j;
+}
+
 static int ConfigListToC(char *clist, CONFIG **cfg, ARRAY *variables) {
   SHELL *shells;
   int i, j, k, m;
@@ -512,10 +529,12 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   int nlow = 0, *low = NULL, nup = 0, *up = NULL;
   double c = 0.0;
   char *fname;
+  int nele;
 
-  if (argc > 0 && argt[0] != STRING) {
+  if (argc < 1 || argt[0] != STRING) {
     return -1; 
   }
+  fname = argv[0];
 
   switch (argc) {
   case 4:
@@ -526,8 +545,14 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   case 3:
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
     nup  = SelectLevels(&up, argv[2], argt[2], variables);
-  case 1:
-    fname = argv[0];
+    break;
+  case 2:
+    nele = atoi(argv[1]);
+    if (nele < 1) {
+      return -1;
+    }
+    nlow = SelectNeleLevels(cfac, nele, &low);
+    nup = SelectNeleLevels(cfac, nele - 1, &up);
     break;
   default:
     return -1;
@@ -589,17 +614,28 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
   low = NULL;
   up = NULL;
   
+  if (argc < 1 || argc > 3) {
+    return -1;
+  }
+  if (argt[0] != STRING ) {
+    return -1;
+  }
+  
   if (argc == 1) {
-    if (argt[0] != STRING ) return -1;
     SaveExcitation(nlow, low, nup, up, 0, argv[0]);
   } else if (argc == 2) {
-    if (argt[0] != STRING) return -1;
-    nlow = SelectLevels(&low, argv[1], argt[1], variables);
+    if (argt[1] == STRING) {
+      nlow = SelectLevels(&low, argv[1], argt[1], variables);
+    } else {
+      int nele = atoi(argv[1]);
+      nlow = SelectNeleLevels(cfac, nele, &low);
+      nup = nlow;
+      up = low;
+    }
     if (nlow <= 0) return -1;
     SaveExcitation(nlow, low, nlow, low, 0, argv[0]);
     free(low);
   } else if (argc == 3) {
-    if (argt[0] != STRING) return -1;
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
     if (nlow <= 0) return -1;
     nup = SelectLevels(&up, argv[2], argt[2], variables);
@@ -651,12 +687,27 @@ static int PCETableMSub(int argc, char *argv[], int argt[],
 static int PCITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   int nlow, *low, nup, *up;
   
-  if (argc != 3) return -1;
+  if (argc < 2 || argc > 3) return -1;
   if (argt[0] != STRING) return -1;
-  nlow = SelectLevels(&low, argv[1], argt[1], variables);
-  if (nlow <= 0) return -1;
-  nup = SelectLevels(&up, argv[2], argt[2], variables);
-  if (nup <= 0) return -1;
+  
+  if (argc == 2) {
+    if (argt[1] == NUMBER) {
+      int nele = atoi(argv[1]);
+      if (nele < 1) {
+        return -1;
+      }
+      nlow = SelectNeleLevels(cfac, nele, &low);
+      nup = SelectNeleLevels(cfac, nele - 1, &up);
+    } else {
+      return -1;
+    }
+  } else {
+    nlow = SelectLevels(&low, argv[1], argt[1], variables);
+    if (nlow <= 0) return -1;
+    nup = SelectLevels(&up, argv[2], argt[2], variables);
+    if (nup <= 0) return -1;
+  }
+  
   if (SaveIonization(cfac, nlow, low, nup, up, argv[0]) < 0) return -1;
 
   if (nlow > 0) free(low);
@@ -1004,21 +1055,55 @@ static int PRRTable(int argc, char *argv[], int argt[],
   int nlow, *low, nup, *up, m;
   
   m = -1;
-  if (argc != 3 && argc != 4) return -1;
-  if (argt[0] != STRING) return -1;
-
-  nlow = SelectLevels(&low, argv[1], argt[1], variables);
-  if (nlow <= 0) return -1;
-  nup = SelectLevels(&up, argv[2], argt[2], variables);
-  if (nup <= 0) return -1;
-  if (argc == 4) {
-    if (argt[3] != NUMBER) return -1;
-    m = atoi(argv[3]);
+  
+  if (argc < 2 || argc > 4 || argt[0] != STRING) {
+    return -1;
   }
+  
+  if (argt[1] == NUMBER) {
+    int nele = atoi(argv[1]);
+    if (nele < 1) {
+      return -1;
+    }
+    
+    if (argc > 3) {
+      return -1;
+    }
+
+    if (argc == 3) {
+      if (argt[2] == NUMBER) {
+        m = atoi(argv[2]);
+      } else {
+        return -1;
+      }
+    }
+    
+    nlow = SelectNeleLevels(cfac, nele, &low);
+    nup = SelectNeleLevels(cfac, nele - 1, &up);
+  } else {
+    if (argc < 3) {
+      return -1;
+    }
+    
+    nlow = SelectLevels(&low, argv[1], argt[1], variables);
+    if (nlow <= 0) return -1;
+    nup = SelectLevels(&up, argv[2], argt[2], variables);
+    if (nup <= 0) return -1;
+    
+    if (argc == 4) {
+      if (argt[3] != NUMBER) return -1;
+      m = atoi(argv[3]);
+    }
+  }
+
   SaveRecRR(nlow, low, nup, up, argv[0], m);
 
-  free(low);
-  free(up);
+  if (nlow) {
+    free(low);
+  }
+  if (nup) {
+    free(up);
+  }
 
   return 0;
 }
@@ -2424,8 +2509,16 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
     }
     m = atoi(argv[3]);
   case 3:
-    nlow = SelectLevels(&low, argv[1], argt[1], variables);
-    nup  = SelectLevels(&up, argv[2], argt[2], variables);
+    if (argt[1] == NUMBER && argt[2] == NUMBER) {
+      int nele = atoi(argv[1]);
+      m = atoi(argv[2]);
+      nlow = SelectNeleLevels(cfac, nele, &low);
+      nup = nlow;
+      up = low;
+    } else {
+      nlow = SelectLevels(&low, argv[1], argt[1], variables);
+      nup  = SelectLevels(&up, argv[2], argt[2], variables);
+    }
     if (nlow <= 0 || nup <= 0) {
       return -1;
     }
@@ -2439,7 +2532,7 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
 
   SaveTransition(cfac, nlow, low, nup, up, argv[0], m);
   
-  if (low) {
+  if (low != up) {
     free(low);
   }
   if (up) {

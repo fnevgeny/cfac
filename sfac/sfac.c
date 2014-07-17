@@ -273,7 +273,7 @@ static int ConfigListToC(char *clist, CONFIG **cfg, ARRAY *variables) {
   na = 0;
   ns = 0;
 
-  (*cfg) = (CONFIG *) malloc(sizeof(CONFIG));
+  (*cfg) = malloc(sizeof(CONFIG));
   n_shells = DecodeArgs(clist, argv, argt, variables);
   na = n_shells;
   (*cfg)->n_shells = n_shells;
@@ -874,7 +874,7 @@ static int POptimizeRadial(int argc, char *argv[], int argt[],
 	printf("weights must be a sequence\n");
 	return -1;
       } 
-      weight = (double *) malloc(sizeof(double)*ng);
+      weight = malloc(sizeof(double)*ng);
       z = 0.0;
       for (i = 0; i < k; i++) {
 	if (iw[i] != NUMBER) {
@@ -1461,8 +1461,8 @@ static int PSetCEPWGrid(int argc, char *argv[], int argt[],
     ns = DecodeArgs(argv[0], v1, t1, variables);
     if (ns <= 0) return -1;
     if (ns != DecodeArgs(argv[1], v2, t2, variables)) return -1;
-    m = (int *) malloc(ns*sizeof(int));
-    step = (int *) malloc(ns*sizeof(int));
+    m = malloc(ns*sizeof(int));
+    step = malloc(ns*sizeof(int));
     for (i = 0; i < ns; i++) {
       if (t1[i] != NUMBER || t2[i] != NUMBER) return -1;
       m[i] = atoi(v1[i]);
@@ -1703,8 +1703,8 @@ static int PSetCIPWGrid(int argc, char *argv[], int argt[],
     ns = DecodeArgs(argv[0], v1, t1, variables);
     if (ns <= 0) return -1;
     if (ns != DecodeArgs(argv[1], v2, t2, variables)) return -1;
-    m = (int *) malloc(ns*sizeof(int));
-    step = (int *) malloc(ns*sizeof(int));
+    m = malloc(ns*sizeof(int));
+    step = malloc(ns*sizeof(int));
     for (i = 0; i < ns; i++) {
       if (t1[i] != NUMBER || t2[i] != NUMBER) return -1;
       m[i] = atoi(v1[i]);

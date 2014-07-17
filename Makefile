@@ -36,14 +36,14 @@ texts : ChangeLog
 ChangeLog : dummy
 	cvs2cl -F trunk
 
-Make.conf : Make.conf.in configure
+Make.conf : ac-tools/Make.conf.in configure
 	@echo
 	@echo 'Please re-run ./configure'
 	@echo
 	@exit 1
 
-configure : configure.ac
-	autoconf -o $@ configure.ac
+configure : ac-tools/configure.ac
+	autoconf -o $@ $<
 	chmod +x $@
 
 dummy :

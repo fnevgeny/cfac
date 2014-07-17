@@ -1,7 +1,9 @@
 # Process this file with autoconf to produce a configure script.
 AC_INIT
 
-AC_CONFIG_HEADERS([sysdef.h:sysdef.h.in])
+AC_CONFIG_AUX_DIR(ac-tools)
+
+AC_CONFIG_HEADERS([sysdef.h:ac-tools/sysdef.h.in])
 AC_PREFIX_DEFAULT("/usr/local")
 
 AC_CANONICAL_HOST
@@ -148,6 +150,6 @@ FFLAGSNO="$FFLAGS"
 AC_SUBST(FFLAGSNO)
 FFLAGS="$FFLAGS $fopt"
 
-AC_CONFIG_FILES([Make.conf])
+AC_CONFIG_FILES([Make.conf:ac-tools/Make.conf.in])
 
 AC_OUTPUT

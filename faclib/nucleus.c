@@ -30,7 +30,8 @@ static double _emass[] =
  254, 253, 256, 254, 257, 257, 260, 263, 262, 265, 266};
 
 
-int cfac_set_atom(cfac_t *cfac, char *s, double z, double mass, double rn) {
+int cfac_set_atom(cfac_t *cfac, const char *s,
+    double z, double mass, double rn) {
   cfac_nucleus_t *atom = &cfac->nucleus;
   unsigned int i, n_elements = sizeof(_emass)/sizeof(double);
 

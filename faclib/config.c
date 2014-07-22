@@ -1545,14 +1545,12 @@ void PackShellState(SHELL_STATE *s, int J, int j, int nu, int Nr){
 ** NOTE:        
 */
 int GroupIndex(cfac_t *cfac, const char *name) {
-  int i;
+    int gid = cfac_get_config_gid(cfac, name);
 
-  for (i = cfac->n_groups - 1; i >= 0; i--) {
-    if (strncmp(name, cfac->cfg_groups[i].name, GROUP_NAME_LEN) == 0) 
-      break;
-  }
-  if (i < 0) i = AddGroup(cfac, name);
-  return i;
+    if (gid < 0) {
+        gid = AddGroup(cfac, name);
+    }
+    return gid;
 }
 
 /* 
@@ -2223,6 +2221,18 @@ void FreeConfigData(void *p) {
     free(c->nrs);
     c->nnrs = 0;
   }
+}
+
+int cfac_get_config_gid(cfac_t *cfac, const char *cname) {
+    int i;
+
+    for (i = cfac->n_groups - 1; i >= 0; i--) {
+        if (!strncmp(cname, cfac->cfg_groups[i].name, GROUP_NAME_LEN)) {
+            return i;
+        }
+    }
+    
+    return -1;
 }
 
 int cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str)

@@ -27,6 +27,8 @@ cfac_get_atomic_effective_z(const cfac_t *cfac, double r);
 /* config.c */
 int
 cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str);
+int
+cfac_get_config_gid(cfac_t *cfac, const char *cname);
 
 /* structure.c */
 int

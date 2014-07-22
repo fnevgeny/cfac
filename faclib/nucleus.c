@@ -35,7 +35,7 @@ int cfac_set_atom(cfac_t *cfac, const char *s,
   cfac_nucleus_t *atom = &cfac->nucleus;
   unsigned int i, n_elements = sizeof(_emass)/sizeof(double);
 
-  if (s == NULL) return -1;
+  if (!cfac || !s) return -1;
   if (strlen(s) == 0) {
     if (z <= 0) {
       printf("atomic symbol and z cannot be both unset\n");

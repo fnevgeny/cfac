@@ -219,7 +219,7 @@ static int IsClosedShell(const cfac_t *cfac, int ih, int k) {
 }
 
 static int ConstructHamiltonDiagonal(cfac_t *cfac,
-  int isym, int k, const int *kg, int m) {
+  int isym, int k, const int *kg) {
   HAMILTON *h = cfac->hamiltonian;
   int i, j, t;
   SHAMILTON *hs;
@@ -278,31 +278,25 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
 
   for (j = 0; j < h->dim; j++) {
     s = GetSymmetryState(sym, h->basis[j]);
-    if (m == 0) {
-      r = ZerothEnergyConfig(cfac, GetConfig(cfac, s));
-    } else {
-      r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
-    }
+    r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
     h->hamilton[j] = r;
   }
 
-  if (m > 0) {
-    if (cfac->nhams >= MAX_HAMS) {
-      printf("Number of hamiltons exceeded the maximum %d\n", MAX_HAMS);
-      exit(1);
-    }
-    hs = &cfac->hams[cfac->nhams];
-    cfac->nhams++;
-    hs->pj = h->pj;
-    hs->nlevs = h->dim;
-    hs->nbasis = h->n_basis;
-    hs->basis = malloc(sizeof(STATE *)*hs->nbasis);
-    for (t = 0; t < h->n_basis; t++) {
-      s = GetSymmetryState(sym, h->basis[t]);
-      hs->basis[t] = s;
-    }
-    FlagClosed(cfac, hs);
+  if (cfac->nhams >= MAX_HAMS) {
+    printf("Number of Hamiltonians exceeded the maximum %d\n", MAX_HAMS);
+    exit(1);
   }
+  hs = &cfac->hams[cfac->nhams];
+  cfac->nhams++;
+  hs->pj = h->pj;
+  hs->nlevs = h->dim;
+  hs->nbasis = h->n_basis;
+  hs->basis = malloc(sizeof(STATE *)*hs->nbasis);
+  for (t = 0; t < h->n_basis; t++) {
+    s = GetSymmetryState(sym, h->basis[t]);
+    hs->basis[t] = s;
+  }
+  FlagClosed(cfac, hs);
 
   return 0;
 
@@ -387,7 +381,7 @@ int ConstructHamilton(cfac_t *cfac,
     double r;
 
     if (cfac->confint == -1) {
-        return ConstructHamiltonDiagonal(cfac, isym, k, kg, 1);
+        return ConstructHamiltonDiagonal(cfac, isym, k, kg);
     }
     
     DecodePJ(isym, &p, &j);

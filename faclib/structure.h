@@ -99,7 +99,7 @@ typedef struct _ECORRECTION_ {
 } ECORRECTION;
 
 int ConstructHamilton(cfac_t *cfac,
-    int isym, int k, int *kg, int kp, int *kgp, int md);
+    int isym, int k, const int *kg, int kp, const int *kgp);
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n);
 int ConstructHamiltonFrozen(cfac_t *cfac,
     int isym, int k, int *kg, int n, int nc, int *kc);

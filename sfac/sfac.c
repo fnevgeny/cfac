@@ -2416,7 +2416,7 @@ static int PStructure(int argc, char *argv[], int argt[],
   nlevels = cfac_get_num_levels(cfac);
   ns = MAX_SYMMETRIES;  
   for (isym = 0; isym < ns; isym++) {
-    k = ConstructHamilton(cfac, isym, ng, kg, ngp, kgp, 111);
+    k = ConstructHamilton(cfac, isym, ng, kg, ngp, kgp);
     if (k < 0) continue;
     if (DiagonalizeHamilton(cfac) < 0) return -1;
     if (ng0 < ng) {

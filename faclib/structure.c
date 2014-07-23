@@ -219,7 +219,7 @@ static int IsClosedShell(const cfac_t *cfac, int ih, int k) {
 }
 
 static int ConstructHamiltonDiagonal(cfac_t *cfac,
-  int isym, int k, int *kg, int m) {
+  int isym, int k, const int *kg, int m) {
   HAMILTON *h = cfac->hamiltonian;
   int i, j, t;
   SHAMILTON *hs;
@@ -249,21 +249,21 @@ static int ConstructHamiltonDiagonal(cfac_t *cfac,
 
   if (h->basis == NULL) {
     h->n_basis0 = h->n_basis;
-    h->basis = (int *) malloc(sizeof(int)*(h->n_basis));
+    h->basis = malloc(sizeof(int)*(h->n_basis));
   } else if (h->n_basis > h->n_basis0) {
     h->n_basis0 = h->n_basis;
     free(h->basis);
-    h->basis = (int *) malloc(sizeof(int)*h->n_basis);
+    h->basis = malloc(sizeof(int)*h->n_basis);
   }
   if (!(h->basis)) goto ERROR;
 
   if (h->hamilton == NULL) {
     h->hsize0 = h->hsize;
-    h->hamilton = (double *) malloc(sizeof(double)*h->hsize);
+    h->hamilton = malloc(sizeof(double)*h->hsize);
   } else if (h->hsize > h->hsize0) {
     h->hsize0 = h->hsize;
     free(h->hamilton);
-    h->hamilton = (double *) malloc(sizeof(double)*h->hsize);
+    h->hamilton = malloc(sizeof(double)*h->hsize);
   }
   if (!(h->hamilton)) goto ERROR;
 
@@ -378,121 +378,121 @@ int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
  * no basis exists later.
  */
 int ConstructHamilton(cfac_t *cfac,
-    int isym, int k, int *kg, int kp, int *kgp, int md) {
-  HAMILTON *h = cfac->hamiltonian;
-  int i, j, m1, m2, m3, jp;
-  SHAMILTON *hs;
-  STATE *s;
-  SYMMETRY *sym;
-  double r;
+    int isym, int k, const int *kg, int kp, const int *kgp) {
+    HAMILTON *h = cfac->hamiltonian;
+    int i, j, p, n, np;
+    SHAMILTON *hs;
+    STATE *s;
+    SYMMETRY *sym;
+    double r;
 
-  DecodePJ(isym, &i, &j);
-  if (cfac->sym_pp >= 0 && i != cfac->sym_pp) return -2;
-  if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) return -3;
-
-  sym = GetSymmetry(cfac, isym);
-  if (sym == NULL) return -1;
-  h->pj = isym;
-
-  m3 = md%10; md /= 10;
-  m2 = md%10; md /= 10;
-  m1 = md%10;
-  
-  jp = 0;
-  
-  if (m1) {
-    unsigned int i, j;
-    
-    if (k <= 0) return -1;
     if (cfac->confint == -1) {
-      return ConstructHamiltonDiagonal(cfac, isym, k, kg, 1);
+        return ConstructHamiltonDiagonal(cfac, isym, k, kg, 1);
     }
-    j = 0;
-    for (i = 0; i < sym->n_states; i++) {
-      s = GetSymmetryState(sym, i);
-      if (InGroups(s->kgroup, k, kg)) j++;
-    }
-    if (j == 0) return -1;
-
-    if (kp > 0) {
-      for (i = 0; i < sym->n_states; i++) {
-	s = GetSymmetryState(sym, i);
-	if (InGroups(s->kgroup, kp, kgp)) jp++;
-      }
-    }    
-
-    if (AllocHamMem(h, j, jp+j) == -1) goto ERROR;
     
-    j = 0;  
+    DecodePJ(isym, &p, &j);
+    if (cfac->sym_pp >= 0 && p != cfac->sym_pp) {
+        return -2;
+    }
+    if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) {
+        return -3;
+    }
+    
+    if (k <= 0) {
+        return -1;
+    }
+
+    sym = GetSymmetry(cfac, isym);
+    if (sym == NULL) {
+        return -1;
+    }
+    
+    h->pj = isym;
+
+    n = 0;
+    np = 0;
     for (i = 0; i < sym->n_states; i++) {
-      s = GetSymmetryState(sym, i);
-      if (InGroups(s->kgroup, k, kg)) {
-	h->basis[j] = i;
-	j++;
-      }
+        s = GetSymmetryState(sym, i);
+        if (InGroups(s->kgroup, k, kg)) {
+            n++;
+        }
+        if (kp && InGroups(s->kgroup, kp, kgp)) {
+            np++;
+        }
     }
-    if (jp > 0) {  
-      for (i = 0; i < sym->n_states; i++) {
-	s = GetSymmetryState(sym, i);
-	if (kp > 0 && InGroups(s->kgroup, kp, kgp)) {
-	  h->basis[j] = i;
-	  j++;
-	}
-      }
+    if (n == 0) {
+        return -1;
     }
-  }
-  if (m2) {
-    unsigned int i, j, dim;
-    for (j = 0; j < h->dim; j++) {
-      dim = j*(j+1)/2;
-      for (i = 0; i <= j; i++) {
-	r = HamiltonElement(cfac, isym, h->basis[i], h->basis[j]);
-	h->hamilton[i+dim] = r;
-      }
+
+    if (AllocHamMem(h, n, n + np) == -1) {
+        printf("ConstructHamilton allocation error\n");
+        return -1;
+    }
+    
+    n = 0;  
+    for (i = 0; i < sym->n_states; i++) {
+        s = GetSymmetryState(sym, i);
+        if (InGroups(s->kgroup, k, kg)) {
+	    h->basis[n++] = i;
+        }
+    }
+    if (np > 0) {  
+        for (i = 0; i < sym->n_states; i++) {
+	    s = GetSymmetryState(sym, i);
+	    if (kp > 0 && InGroups(s->kgroup, kp, kgp)) {
+	        h->basis[n++] = i;
+	    }
+        }
+    }
+
+    for (n = 0; n < h->dim; n++) {
+        int dim = n*(n+1)/2;
+        for (i = 0; i <= n; i++) {
+	    r = HamiltonElement(cfac, isym, h->basis[i], h->basis[n]);
+	    h->hamilton[i+dim] = r;
+        }
     } 
     
-    if (jp > 0) {
-      dim = ((h->dim+1)*(h->dim))/2;
-      for (i = 0; i < h->dim; i++) {
-	for (j = h->dim; j < h->n_basis; j++) {
-	  r = HamiltonElement(cfac, isym, h->basis[i], h->basis[j]);
-	  h->hamilton[dim++] = r;
-	}
-	ReinitRecouple(cfac);
-	ReinitRadial(cfac, 1);
-      }
-      for (j = h->dim; j < h->n_basis; j++) {
-	r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
-	h->hamilton[dim++] = r;
-      }
-      ReinitRecouple(cfac);
-      ReinitRadial(cfac, 1);
+    if (np > 0) {
+        int dim = (h->dim+1)*(h->dim)/2;
+        for (i = 0; i < h->dim; i++) {
+	    for (n = h->dim; n < h->n_basis; n++) {
+	        r = HamiltonElement(cfac, isym, h->basis[i], h->basis[n]);
+	        h->hamilton[dim++] = r;
+	    }
+	    ReinitRecouple(cfac);
+	    ReinitRadial(cfac, 1);
+        }
+        for (n = h->dim; n < h->n_basis; n++) {
+	    r = HamiltonElement(cfac, isym, h->basis[n], h->basis[n]);
+	    h->hamilton[dim++] = r;
+        }
+        ReinitRecouple(cfac);
+        ReinitRadial(cfac, 1);
     }
-  }
-  if (m3) {
-    unsigned int i;
+
     if (cfac->nhams >= MAX_HAMS) {
-      printf("Number of hamiltons exceeded the maximum %d\n", MAX_HAMS);
-      exit(1);
+        printf("Number of Hamiltonians exceeded the maximum %d\n", MAX_HAMS);
+        exit(1);
     }
+    
     hs = &cfac->hams[cfac->nhams];
     cfac->nhams++;
+    
     hs->pj = h->pj;
     hs->nlevs = h->dim;
     hs->nbasis = h->n_basis;
+    
     hs->basis = malloc(sizeof(STATE *)*hs->nbasis);
+    
     for (i = 0; i < h->n_basis; i++) {
-      s = GetSymmetryState(sym, h->basis[i]);
-      hs->basis[i] = s;
+        s = GetSymmetryState(sym, h->basis[i]);
+        hs->basis[i] = s;
     }
+    
     FlagClosed(cfac, hs);
-  }
 
-  return 0;
-
- ERROR:
-  printf("ConstructHamilton Error\n");
-  return -1;
+    return 0;
 }
 
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n) {

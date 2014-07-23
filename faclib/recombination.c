@@ -288,7 +288,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
   for (i = 0; i < nsym; i++) {
-    m = ConstructHamilton(cfac, i, k, k, kg, 0, NULL, 111);
+    m = ConstructHamilton(cfac, i, k, kg, 0, NULL, 111);
     if (m < 0) continue;
     j = DiagonalizeHamilton(cfac);
     if (j < 0) return -1;

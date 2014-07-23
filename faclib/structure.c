@@ -378,7 +378,7 @@ int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
  * no basis exists later.
  */
 int ConstructHamilton(cfac_t *cfac,
-    int isym, int k0, int k, int *kg, int kp, int *kgp, int md) {
+    int isym, int k, int *kg, int kp, int *kgp, int md) {
   HAMILTON *h = cfac->hamiltonian;
   int i, j, m1, m2, m3, jp;
   SHAMILTON *hs;
@@ -386,10 +386,6 @@ int ConstructHamilton(cfac_t *cfac,
   SYMMETRY *sym;
   double r;
 
-  /* 
-  ** the return code -2, and -3, here distinguses it from the case where 
-  ** no basis exists later.
-  **/
   DecodePJ(isym, &i, &j);
   if (cfac->sym_pp >= 0 && i != cfac->sym_pp) return -2;
   if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) return -3;
@@ -405,20 +401,18 @@ int ConstructHamilton(cfac_t *cfac,
   jp = 0;
   
   if (m1) {
-    unsigned int i, j, j0;
+    unsigned int i, j;
     
     if (k <= 0) return -1;
     if (cfac->confint == -1) {
       return ConstructHamiltonDiagonal(cfac, isym, k, kg, 1);
     }
     j = 0;
-    j0 = 0;
     for (i = 0; i < sym->n_states; i++) {
       s = GetSymmetryState(sym, i);
-      if (InGroups(s->kgroup, k0, kg)) j0++;
       if (InGroups(s->kgroup, k, kg)) j++;
     }
-    if (j0 == 0) return -1;
+    if (j == 0) return -1;
 
     if (kp > 0) {
       for (i = 0; i < sym->n_states; i++) {
@@ -464,14 +458,14 @@ int ConstructHamilton(cfac_t *cfac,
 	  r = HamiltonElement(cfac, isym, h->basis[i], h->basis[j]);
 	  h->hamilton[dim++] = r;
 	}
-	ReinitRecouple(0);
+	ReinitRecouple(cfac);
 	ReinitRadial(cfac, 1);
       }
       for (j = h->dim; j < h->n_basis; j++) {
 	r = HamiltonElement(cfac, isym, h->basis[j], h->basis[j]);
 	h->hamilton[dim++] = r;
       }
-      ReinitRecouple(0);
+      ReinitRecouple(cfac);
       ReinitRadial(cfac, 1);
     }
   }
@@ -1476,24 +1470,21 @@ int DiagonalizeHamilton(cfac_t *cfac) {
   double *w;
   double *z;
   double *mixing = NULL;
-  int n, m;
   int info;
   int i, j;
 
-  n = h->dim;
-  m = h->n_basis;
-  
-  if (m > n) {
-    printf("m > n in DiagonalizeHamilton(), %d %d\n", m, n);
+  if (h->n_basis < h->dim) {
+    printf("h->n_basis < h->dim in DiagonalizeHamilton(), %d %d\n",
+        h->n_basis, h->dim);
     abort();
   }
   
   if (cfac->confint == -1) {
     /* no configuration interaction at all */
-    mixing = h->mixing+n;
-    for (i = 0; i < n; i++) {
+    mixing = h->mixing + h->dim;
+    for (i = 0; i < h->dim; i++) {
       h->mixing[i] = h->hamilton[i];
-      for (j = 0; j < n; j++) {
+      for (j = 0; j < h->dim; j++) {
 	if (i == j) *mixing = 1.0;
 	else *mixing = 0.0;
 	mixing++;
@@ -1504,12 +1495,12 @@ int DiagonalizeHamilton(cfac_t *cfac) {
 
   mixing = h->mixing;
   w = mixing;
-  z = mixing + n;
+  z = mixing + h->dim;
 
-  wsp = gsl_eigen_symmv_alloc(n);
+  wsp = gsl_eigen_symmv_alloc(h->dim);
 
-  am   = gsl_matrix_alloc(n, n);
-  evec = gsl_matrix_alloc(n, n);
+  am   = gsl_matrix_alloc(h->dim, h->dim);
+  evec = gsl_matrix_alloc(h->dim, h->dim);
 
   for (j = 0; j < h->dim; j++) {
     int t = j*(j+1)/2;
@@ -1518,7 +1509,7 @@ int DiagonalizeHamilton(cfac_t *cfac) {
     }
   }
 
-  vv = gsl_vector_view_array(w, n);
+  vv = gsl_vector_view_array(w, h->dim);
 
   info = gsl_eigen_symmv(am, &vv.vector, evec, wsp);
   gsl_eigen_symmv_free(wsp);
@@ -1541,6 +1532,8 @@ int DiagonalizeHamilton(cfac_t *cfac) {
   }
 }
 
+/* If ng !=0, states NOT in kg are treated approximately
+   (non-diagonal mixings are ignored) */
 int AddToLevels(cfac_t *cfac, int ng, int *kg) {
   HAMILTON *h = cfac->hamiltonian;
   int i, d, j, k, t, m;

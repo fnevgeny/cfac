@@ -14,11 +14,6 @@ typedef struct _HAMILTON_ {
   int     msize;     /* size of the mixing coefficients (.mixing),
                         n_basis*(dim+1)                                  */
 
-  int     dim0;      /* factually allocated dim, dim0 >= dim             */
-  int     n_basis0;  /* same for n_basis                                 */
-  int     hsize0;    /* same for hsize                                   */
-  int     msize0;    /* same for msize                                   */
-
   int    *basis;     /* basis                                            */
   double *hamilton;  /* matrix elements of H,
                         H1[dim*dim] &

@@ -220,41 +220,40 @@ static int IsClosedShell(const cfac_t *cfac, int ih, int k) {
 
 /* (Re)allocate Hamiltonian */
 static int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
-  int jp, t;
+    int np, tdim, hsize, msize;
 
-  jp = nbasis - hdim;
-  if (jp < 0) return -1;
+    np = nbasis - hdim;
+    if (np < 0) return -1;
+    
+    /* start reallocations as needed */
+    if (nbasis > h->n_basis) {
+        h->basis = realloc(h->basis, sizeof(int)*(nbasis));
+    }
+    if (!h->basis) return -1;
+    h->n_basis = nbasis;
 
-  h->dim     = hdim;
-  h->n_basis = nbasis;
-  
-  /* size of the triangular matrix, including diagonal elements */
-  t = hdim*(hdim+1)/2;
-  
-  /* matrix partitioned as: H1[t] + B[hdim*jp] + H2[jp] */
-  h->hsize = t + hdim*jp + jp;
-  
-  /* start reallocations as needed */
-  if (h->n_basis > h->n_basis0) {
-    h->basis = realloc(h->basis, sizeof(int)*(h->n_basis));
-    h->n_basis0 = h->n_basis;
-  }
-  if (!h->basis) return -1;
-  
-  if (h->hsize > h->hsize0) {
-    h->hsize0 = h->hsize;
-    h->hamilton = realloc(h->hamilton, sizeof(double)*h->hsize);
-  }
-  if (!h->hamilton) return -1;
+    /* size of the triangular matrix, including diagonal elements */
+    tdim = hdim*(hdim+1)/2;
 
-  h->msize = h->dim * h->n_basis + h->dim;  
-  if (h->msize > h->msize0) {
-    h->msize0 = h->msize;
-    h->mixing = realloc(h->mixing, sizeof(double)*h->msize);
-  }
-  if (!h->mixing) return -1;
+    /* matrix partitioned as: H1[tdim] + B[hdim*np] + H2[np] */
+    hsize = tdim + hdim*np + np;
+    if (hsize > h->hsize) {
+        h->hamilton = realloc(h->hamilton, sizeof(double)*hsize);
+    }
+    if (!h->hamilton) return -1;
+    h->hsize = hsize;
 
-  return 0;
+    /* length of the mixings array */
+    msize = hdim*nbasis + hdim;  
+    if (msize > h->msize) {
+        h->mixing = realloc(h->mixing, sizeof(double)*msize);
+    }
+    if (!h->mixing) return -1;
+    h->msize = msize;
+
+    h->dim = hdim;
+
+    return 0;
 }
 
 /* 

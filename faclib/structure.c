@@ -218,18 +218,48 @@ static int IsClosedShell(const cfac_t *cfac, int ih, int k) {
   return (cfac->hams[ih].closed[i] & (1 << j));
 }
 
+
+void cfac_hamiltonian_free(HAMILTON *h) {
+    if (h) {
+        if (h->basis) {
+            free(h->basis);
+        }
+        if (h->hamilton) {
+            free(h->hamilton);
+        }
+        if (h->mixing) {
+            free(h->mixing);
+        }
+
+        free(h);
+    }
+}        
+
 /* (Re)allocate Hamiltonian */
-static int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
+static HAMILTON *AllocHamMem(int hdim, int nbasis) {
     int np, tdim, hsize, msize;
+    HAMILTON *h;
 
     np = nbasis - hdim;
-    if (np < 0) return -1;
+    if (np < 0) {
+        return NULL;
+    }
+    
+    /* allocate Hamiltonian structure */
+    h = malloc(sizeof(HAMILTON));
+    if (!h) {
+        return NULL;
+    }
+    memset(h, 0, sizeof(HAMILTON));
     
     /* start reallocations as needed */
     if (nbasis > h->n_basis) {
         h->basis = realloc(h->basis, sizeof(int)*(nbasis));
     }
-    if (!h->basis) return -1;
+    if (!h->basis) {
+        cfac_hamiltonian_free(h);
+        return NULL;
+    }
     h->n_basis = nbasis;
 
     /* size of the triangular matrix, including diagonal elements */
@@ -240,7 +270,10 @@ static int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
     if (hsize > h->hsize) {
         h->hamilton = realloc(h->hamilton, sizeof(double)*hsize);
     }
-    if (!h->hamilton) return -1;
+    if (!h->hamilton) {
+        cfac_hamiltonian_free(h);
+        return NULL;
+    }
     h->hsize = hsize;
 
     /* length of the mixings array */
@@ -248,46 +281,44 @@ static int AllocHamMem(HAMILTON *h, int hdim, int nbasis) {
     if (msize > h->msize) {
         h->mixing = realloc(h->mixing, sizeof(double)*msize);
     }
-    if (!h->mixing) return -1;
+    if (!h->mixing) {
+        cfac_hamiltonian_free(h);
+        return NULL;
+    }
     h->msize = msize;
 
     h->dim = hdim;
 
-    return 0;
+    return h;
 }
 
-/* 
- * the return code -2, and -3, here distinguishes it from the case where 
- * no basis exists later.
- */
-int ConstructHamilton(cfac_t *cfac,
+HAMILTON *ConstructHamilton(cfac_t *cfac,
     int isym, int k, const int *kg, int kp, const int *kgp) {
-    HAMILTON *h = cfac->hamiltonian;
+    HAMILTON *h;
     int i, j, p, n, np, n_basis;
     SHAMILTON *hs;
     STATE *s;
     SYMMETRY *sym;
     double r;
 
+
     DecodePJ(isym, &p, &j);
     if (cfac->sym_pp >= 0 && p != cfac->sym_pp) {
-        return -2;
+        return NULL;
     }
     if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) {
-        return -3;
+        return NULL;
     }
     
     if (k <= 0) {
-        return -1;
+        return NULL;
     }
 
     sym = GetSymmetry(cfac, isym);
     if (sym == NULL) {
-        return -1;
+        return NULL;
     }
     
-    h->pj = isym;
-
     n = 0;
     np = 0;
     for (i = 0; i < sym->n_states; i++) {
@@ -300,7 +331,7 @@ int ConstructHamilton(cfac_t *cfac,
         }
     }
     if (n == 0) {
-        return -1;
+        return NULL;
     }
 
     if (cfac->confint == -1) {
@@ -309,10 +340,14 @@ int ConstructHamilton(cfac_t *cfac,
         n_basis = n + np;
     }
     
-    if (AllocHamMem(h, n, n_basis) == -1) {
+    h = AllocHamMem(n, n_basis);
+    if (!h) {
         printf("ConstructHamilton allocation error\n");
-        return -1;
+        return NULL;
     }
+    
+    h->pj = isym;
+
     
     n = 0;  
     for (i = 0; i < sym->n_states; i++) {
@@ -393,7 +428,7 @@ int ConstructHamilton(cfac_t *cfac,
     
     FlagClosed(cfac, hs);
 
-    return 0;
+    return h;
 }
 
 int CodeBasisEB(int s, int m) {
@@ -411,14 +446,13 @@ void DecodeBasisEB(int k, int *s, int *m) {
   if (k < 0) *m = -(*m);
 }
 
-int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
-  HAMILTON *h = cfac->hamiltonian;
+HAMILTON *ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
   int i, j, p, k, t, m;
   double r;
   LEVEL *lev;
   int n_basis;
+  HAMILTON *h;
 
-  h->pj = -1;
   ClearAngularFrozen(cfac);
   AngularFrozen(cfac, n, ilev, 0, NULL);
 
@@ -429,7 +463,14 @@ int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
     n_basis += j+1;
   }
 
-  if (AllocHamMem(h, n_basis, n_basis) == -1) goto ERROR;
+  h = AllocHamMem(n_basis, n_basis);
+  if (!h) {
+    printf("ConstructHamiltonEB Error\n");
+    return NULL;
+  }
+
+  h->pj = -1;
+
   k = 0;
   for (i = 0; i < n; i++) {
     lev = GetLevel(cfac, ilev[i]);
@@ -443,7 +484,7 @@ int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
   for (j = 0; j < h->dim; j++) {
     t = j*(j+1)/2;
     for (i = 0; i <= j; i++) {
-      r = HamiltonElementEB(cfac, i, j);
+      r = HamiltonElementEB(cfac, h, i, j);
       /*
       printf("HAM: %8d %8d %15.8E\n", h->basis[i], h->basis[j], r);
       */
@@ -451,11 +492,7 @@ int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
     }
   }
 
-  return 0;
-
- ERROR:
-  printf("ConstructHamiltonEB Error\n");
-  return -1;
+  return h;
 }
 
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n) {
@@ -499,9 +536,9 @@ int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n) {
   }
 }
 
-int ConstructHamiltonFrozen(cfac_t *cfac,
+HAMILTON *ConstructHamiltonFrozen(cfac_t *cfac,
     int isym, int k, int *kg, int n, int nc, int *kc) {
-  HAMILTON *h = cfac->hamiltonian;
+  HAMILTON *h;
   int i, j, t, ncs;
   LEVEL *lev;
   STATE *s;
@@ -509,8 +546,12 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
   double r, delta;
 
   DecodePJ(isym, &i, &j);
-  if (cfac->sym_pp >= 0 && i != cfac->sym_pp) return -2;
-  if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) return -3;
+  if (cfac->sym_pp >= 0 && i != cfac->sym_pp) {
+    return NULL;
+  }
+  if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) {
+    return NULL;
+  }
 
   j = 0;
   ncs = 0;
@@ -527,12 +568,15 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
     }
   }
   
-  if (j == ncs) return -1;
+  if (j == ncs) return NULL;
 
+  h = AllocHamMem(j, j);
+  if (!h) {
+    return NULL;
+  }
+      
   h->pj = isym;
 
-  if (AllocHamMem(h, j, j) == -1) goto ERROR;
-      
   j = 0;
   if (ncs > 0) {
     for (t = 0; t < sym->n_states; t++) { 
@@ -580,10 +624,7 @@ int ConstructHamiltonFrozen(cfac_t *cfac,
     }
   }
 
-  return 0;
-
- ERROR:
-  return -1;
+  return h;
 }
 
 void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs) {
@@ -626,8 +667,7 @@ void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs) {
   }
 }
 
-double HamiltonElementEB(const cfac_t *cfac, int i0, int j0) {
-  HAMILTON *h = cfac->hamiltonian;
+double HamiltonElementEB(const cfac_t *cfac, HAMILTON *h, int i0, int j0) {
   int ib, jb;
   int si, sj, mi, mj, pi, pj, ji, jj, ti, tj, kz, nz;
   int i, m, q, q2, jorb0, korb0, jorb1, korb1;
@@ -1425,8 +1465,7 @@ int TestHamilton(cfac_t *cfac) {
   return 0;
 }
 
-int DiagonalizeHamilton(cfac_t *cfac) {
-  HAMILTON *h = cfac->hamiltonian;
+int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h) {
   gsl_matrix *am, *evec;
   gsl_vector_view vv;
   gsl_eigen_symmv_workspace *wsp;
@@ -1497,8 +1536,7 @@ int DiagonalizeHamilton(cfac_t *cfac) {
 
 /* If ng !=0, states NOT in kg are treated approximately
    (non-diagonal mixings are ignored) */
-int AddToLevels(cfac_t *cfac, int ng, int *kg) {
-  HAMILTON *h = cfac->hamiltonian;
+int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, int *kg) {
   int i, d, j, k, t, m;
   LEVEL lev;
   SYMMETRY *sym;
@@ -2389,12 +2427,12 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
 void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
   int k;
   
-  ConstructHamiltonEB(cfac, n, ilev);
+  HAMILTON *h = ConstructHamiltonEB(cfac, n, ilev);
 
-  DiagonalizeHamilton(cfac);
+  DiagonalizeHamilton(cfac, h);
   
   k = cfac->n_eblevels;
-  AddToLevels(cfac, 0, NULL);
+  AddToLevels(cfac, h, 0, NULL);
   SortLevels(cfac, k, -1, 1);
   SaveEBLevels(cfac, fn, k, -1);
 }

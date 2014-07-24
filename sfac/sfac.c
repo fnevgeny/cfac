@@ -2366,7 +2366,7 @@ static int PCutMixing(int argc, char *argv[], int argt[],
 
 static int PStructure(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
-  int isym, k, ng0, ng, ngp, ns;
+  int isym, ng0, ng, ngp, ns;
   int ip, nlevels;
   int *kg, *kgp;
 
@@ -2416,13 +2416,18 @@ static int PStructure(int argc, char *argv[], int argt[],
   nlevels = cfac_get_num_levels(cfac);
   ns = MAX_SYMMETRIES;  
   for (isym = 0; isym < ns; isym++) {
-    k = ConstructHamilton(cfac, isym, ng, kg, ngp, kgp);
-    if (k < 0) continue;
-    if (DiagonalizeHamilton(cfac) < 0) return -1;
-    if (ng0 < ng) {
-      AddToLevels(cfac, ng0, kg);
+    HAMILTON *h = ConstructHamilton(cfac, isym, ng, kg, ngp, kgp);
+    if (!h) continue;
+    if (DiagonalizeHamilton(cfac, h) == 0) {
+      if (ng0 < ng) {
+        AddToLevels(cfac, h, ng0, kg);
+      } else {
+        AddToLevels(cfac, h, 0, NULL);
+      }
+      cfac_hamiltonian_free(h);
     } else {
-      AddToLevels(cfac, 0, NULL);
+      cfac_hamiltonian_free(h);
+      return -1;
     }
   }
 

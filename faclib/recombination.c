@@ -288,11 +288,14 @@ int RecStates(int n, int k, int *kg, char *fn) {
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
   for (i = 0; i < nsym; i++) {
-    m = ConstructHamilton(cfac, i, k, kg, 0, NULL);
-    if (m < 0) continue;
-    j = DiagonalizeHamilton(cfac);
+    HAMILTON *h = ConstructHamilton(cfac, i, k, kg, 0, NULL);
+    if (!h) continue;
+    j = DiagonalizeHamilton(cfac, h);
+    if (!j) {
+      AddToLevels(cfac, h, 0, NULL);
+    }
+    cfac_hamiltonian_free(h);
     if (j < 0) return -1;
-    AddToLevels(cfac, 0, NULL);
   }
   rec_complex[n_complex].s1 = cfac_get_num_levels(cfac)-1;
   n_complex++;
@@ -356,6 +359,7 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
   rec_complex[n_complex].n = n;
   rec_complex[n_complex].s0 = nlevels;
   for (i = 0; i < nsym; i++) {
+    HAMILTON *h;
     if (n >= pw_scratch.n_frozen) {
       i0 = 0;
       for (t = 0; t < nt; t++) {
@@ -366,18 +370,23 @@ int RecStatesFrozen(int n, int k, int *kg, char *fn) {
 	  sym = GetSymmetry(cfac, lev->pj);
 	  s = GetSymmetryState(sym, m);
 	  if (!InGroups(s->kgroup, k, kg)) continue;
-	  m = ConstructHamiltonFrozen(cfac, i, j, NULL, n, 0, NULL);
-	  if (m < 0) continue;
-	  if (DiagonalizeHamilton(cfac) < 0) return -2;
-	  AddToLevels(cfac, 0, NULL);
+	  h = ConstructHamiltonFrozen(cfac, i, j, NULL, n, 0, NULL);
+	  if (!h) continue;
+	  if (DiagonalizeHamilton(cfac, h) < 0) return -2;
+	  AddToLevels(cfac, h, 0, NULL);
 	}
 	i0 = rec_complex[t].s1+1;
       }
     } else {
-      m = ConstructHamiltonFrozen(cfac, i, k, kg, n, 0, NULL);
-      if (m < 0) continue;
-      if (DiagonalizeHamilton(cfac) < 0) return -2;
-      AddToLevels(cfac, 0, NULL);
+      h = ConstructHamiltonFrozen(cfac, i, k, kg, n, 0, NULL);
+      if (!h) continue;
+      if (DiagonalizeHamilton(cfac, h) == 0) {
+        AddToLevels(cfac, h, 0, NULL);
+        cfac_hamiltonian_free(h);
+      } else {
+        cfac_hamiltonian_free(h);
+        return -2;
+      }
     }
   }
   rec_complex[n_complex].s1 = cfac_get_num_levels(cfac)-1;

@@ -93,10 +93,10 @@ typedef struct _ECORRECTION_ {
   STATE *s;
 } ECORRECTION;
 
-int ConstructHamilton(cfac_t *cfac,
+HAMILTON *ConstructHamilton(cfac_t *cfac,
     int isym, int k, const int *kg, int kp, const int *kgp);
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n);
-int ConstructHamiltonFrozen(cfac_t *cfac,
+HAMILTON *ConstructHamiltonFrozen(cfac_t *cfac,
     int isym, int k, int *kg, int n, int nc, int *kc);
 void HamiltonElement1E2E(cfac_t *cfac,
     int isym, int isi, int isj, double *r1, double *r2);
@@ -107,8 +107,8 @@ double Hamilton2E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra,
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, 
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
-int DiagonalizeHamilton(cfac_t *cfac);
-int AddToLevels(cfac_t *cfac, int ng, int *kg);
+int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h);
+int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, int *kg);
 int AddECorrection(cfac_t *cfac, int kref, int k, double e, int nmin);
 LEVEL *GetLevel(const cfac_t *cfac, int k);
 LEVEL *GetEBLevel(const cfac_t *cfac, int k);
@@ -163,9 +163,9 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m);
 void GetFields(const cfac_t *cfac, double *b, double *e, double *a);
 int CodeBasisEB(int s, int m);
 void DecodeBasisEB(int k, int *s, int *m);
-int ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev);
+HAMILTON *ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev);
 void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev);
-double HamiltonElementEB(const cfac_t *cfac, int i, int j);
+double HamiltonElementEB(const cfac_t *cfac, HAMILTON *h, int i0, int j0);
 
 int SlaterCoeff(cfac_t *cfac,
     char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 

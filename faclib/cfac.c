@@ -215,14 +215,6 @@ cfac_t *cfac_new(void)
         return NULL;
     }
     
-    /* allocate Hamiltonian structure */
-    cfac->hamiltonian = malloc(sizeof(HAMILTON));
-    if (!cfac->hamiltonian) {
-        cfac_free(cfac);
-        return NULL;
-    }
-    memset(cfac->hamiltonian, 0, sizeof(HAMILTON));
-    
     cfac->nhams = 0;
     cfac->hams = malloc(MAX_HAMS*sizeof(SHAMILTON));
     if (!cfac->hams) {
@@ -318,14 +310,6 @@ void cfac_free(cfac_t *cfac)
         cfac_free_recouple(cfac);
         
         cfac_free_coulomb(cfac);
-        
-        if (cfac->hamiltonian) {
-            free(cfac->hamiltonian->basis);
-            free(cfac->hamiltonian->hamilton);
-            free(cfac->hamiltonian->mixing);
-            
-            free(cfac->hamiltonian);
-        }
         
         FreeHamsArray(cfac);
         free(cfac->hams);

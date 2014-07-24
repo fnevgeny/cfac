@@ -91,8 +91,6 @@ struct _cfac_t {
         ARRAY *dipole_array;
     } coulomb;
     
-    HAMILTON *hamiltonian;    /* Hamiltonian                                 */
-
     SHAMILTON *hams;          /* symmetry Hamiltonians                       */
     int nhams;                /* number of them in use                       */
 
@@ -186,5 +184,7 @@ void
 FreeAngZDatum(ANGZ_DATUM *ap);
 void
 InitLevelData(void *p, int n);
+void
+cfac_hamiltonian_free(HAMILTON *h);
 
 #endif /* __CFACP_H_ */

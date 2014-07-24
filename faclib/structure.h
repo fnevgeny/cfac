@@ -164,7 +164,6 @@ int SetCILevel(cfac_t *cfac, int m);
 int SetMixCut(cfac_t *cfac, double c, double c2);
 int TestHamilton(cfac_t *cfac);
 void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c);
-int AllocHamMem(HAMILTON *h, int hdim, int nbasis);
 void SetFields(cfac_t *cfac, double b, double e, double a, int m);
 void GetFields(const cfac_t *cfac, double *b, double *e, double *a);
 int CodeBasisEB(int s, int m);

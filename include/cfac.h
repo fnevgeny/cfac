@@ -33,5 +33,8 @@ cfac_get_config_gid(const cfac_t *cfac, const char *cname);
 /* structure.c */
 int
 cfac_get_num_levels(const cfac_t *cfac);
+int
+cfac_calculate_structure(cfac_t *cfac,
+    int ng, const int *gids, int npg, const int *pgids, int no_ci);
 
 #endif /* __CFAC_H_ */

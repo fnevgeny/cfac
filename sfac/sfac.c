@@ -2366,7 +2366,7 @@ static int PCutMixing(int argc, char *argv[], int argt[],
 
 static int PStructure(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
-  int isym, ng0, ng, ngp, ns;
+  int ng, ngp;
   int ip, nlevels;
   int *kg, *kgp;
 
@@ -2403,36 +2403,10 @@ static int PStructure(int argc, char *argv[], int argt[],
   
   if (ngp < 0) return -1;
   
-  ng0 = ng;
-  if (!ip && ngp) {
-      ng += ngp;
-      kg = realloc(kg, sizeof(int)*ng);
-      memcpy(kg+ng0, kgp, sizeof(int)*ngp);
-      free(kgp);
-      kgp = NULL;
-      ngp = 0;
-  }
-
   nlevels = cfac_get_num_levels(cfac);
-  ns = MAX_SYMMETRIES;  
-  for (isym = 0; isym < ns; isym++) {
-    HAMILTON *h = ConstructHamilton(cfac, isym, ng, kg, ngp, kgp);
-    if (!h) continue;
-    if (DiagonalizeHamilton(cfac, h) == 0) {
-      if (ng0 < ng) {
-        AddToLevels(cfac, h, ng0, kg);
-      } else {
-        AddToLevels(cfac, h, 0, NULL);
-      }
-      cfac_hamiltonian_free(h);
-    } else {
-      cfac_hamiltonian_free(h);
-      return -1;
-    }
-  }
-
-  FinalizeLevels(cfac, nlevels, -1);
-  SortLevels(cfac, nlevels, -1, 0);
+  
+  cfac_calculate_structure(cfac, ng, kg, ngp, kgp, ip);
+  
   SaveLevels(cfac, argv[0], nlevels, -1);
 
   if (ng > 0) free(kg);

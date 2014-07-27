@@ -3805,3 +3805,61 @@ void ClearAngularFrozen(cfac_t *cfac) {
   cfac->ang_frozen.nts = 0;
   cfac->ang_frozen.ncs = 0;
 }
+
+int cfac_calculate_structure(cfac_t *cfac,
+    int ng, const int *gids, int npg, const int *pgids, int no_ci) {
+    int isym, nlevels_old;
+    int int_ng, extra_ng, *int_gids;
+    const int *extra_gids;
+    
+    if (!ng || !gids) {
+        return -1;
+    }
+    
+    if (npg && !no_ci) {
+        int_ng = ng + npg;
+        int_gids = malloc(sizeof(int)*int_ng);
+        if (!int_gids) {
+            return -1;
+        }
+        memcpy(int_gids, gids, sizeof(int)*ng);
+        memcpy(int_gids + ng, pgids, sizeof(int)*npg);
+        extra_ng   = 0;
+        extra_gids = NULL;
+    } else {
+        int_ng     = ng;
+        int_gids   = (int *) gids;
+        extra_ng   = npg;
+        extra_gids = pgids;
+    }
+    
+    nlevels_old = cfac_get_num_levels(cfac);
+    for (isym = 0; isym < MAX_SYMMETRIES; isym++) {
+        int res;
+        HAMILTON *h = ConstructHamilton(cfac, isym,
+            int_ng, int_gids, extra_ng, extra_gids);
+        if (!h) {
+            continue;
+        }
+        
+        res = DiagonalizeHamilton(cfac, h);
+        if (res < 0) {
+            return -1;
+        }
+        
+        if (int_ng != ng) {
+            AddToLevels(cfac, h, ng, gids);
+        } else {
+            AddToLevels(cfac, h, 0, NULL);
+        }
+    }
+    
+    if (int_gids != gids) {
+        free(int_gids);
+    }
+
+    FinalizeLevels(cfac, nlevels_old, -1);
+    SortLevels(cfac, nlevels_old, -1, 0);
+    
+    return 0;
+}

@@ -108,7 +108,7 @@ double Hamilton2E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra,
 double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, 
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h);
-int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, int *kg);
+int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg);
 int AddECorrection(cfac_t *cfac, int kref, int k, double e, int nmin);
 LEVEL *GetLevel(const cfac_t *cfac, int k);
 LEVEL *GetEBLevel(const cfac_t *cfac, int k);

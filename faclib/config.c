@@ -2223,7 +2223,7 @@ void FreeConfigData(void *p) {
   }
 }
 
-int cfac_get_config_gid(cfac_t *cfac, const char *cname) {
+int cfac_get_config_gid(const cfac_t *cfac, const char *cname) {
     int i;
 
     for (i = cfac->n_groups - 1; i >= 0; i--) {

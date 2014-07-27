@@ -1536,7 +1536,7 @@ int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h) {
 
 /* If ng !=0, states NOT in kg are treated approximately
    (non-diagonal mixings are ignored) */
-int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, int *kg) {
+int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
   int i, d, j, k, t, m;
   LEVEL lev;
   SYMMETRY *sym;

@@ -2415,16 +2415,6 @@ static int PStructure(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetTRF(int argc, char *argv[], int argt[], 
-		   ARRAY *variables) {
-  
-  if (argc != 1 || argt[0] != NUMBER) return -1;
-  
-  SetTRF(atoi(argv[0]));
-  
-  return 0;
-}
-
 static int PTestIntegrate(int argc, char *argv[], int argt[], 
 			  ARRAY *variables) {
   TestIntegrate(cfac);  
@@ -3026,7 +3016,6 @@ static int PGeneralizedMoment(int argc, char *argv[], int argt[],
 static METHOD methods[] = {
   {"GeneralizedMoment", PGeneralizedMoment},
   {"SlaterCoeff", PSlaterCoeff},
-  {"SetTRF", PSetTRF}, 
   {"SetCEPWFile", PSetCEPWFile}, 
   {"AppendTable", PAppendTable}, 
   {"JoinTable", PJoinTable}, 

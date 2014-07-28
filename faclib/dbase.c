@@ -28,7 +28,6 @@ static int mem_en_table_size = 0;
 static EN_SRECORD *mem_enf_table = NULL;
 static int mem_enf_table_size = 0;
 static int iground;
-static int itrf = 0;
 
 static double born_mass = 1.0;
 static FORM_FACTOR bform = {0.0, -1, NULL, NULL, NULL};
@@ -132,10 +131,6 @@ FORM_FACTOR *BornFormFactor(void) {
 
 void SetVersionRead(int t, int v) {
   version_read[t-1] = v;
-}
-
-void SetTRF(int m) {
-  itrf = m;
 }
 
 int CheckEndian(F_HEADER *fh) {
@@ -477,7 +472,6 @@ int InitDBase(void) {
   mem_enf_table = NULL;
   mem_enf_table_size = 0;
   iground = 0;
-  itrf = 0;
 
   return 0;
 }
@@ -500,7 +494,6 @@ int ReinitDBase(int m) {
     return InitDBase();
   } else {
     iground = 0;
-    itrf = 0;
     if (m > NDB) return -1;
     i = m-1;
     fheader[i].tsession = (long int) time(0);
@@ -550,10 +543,6 @@ int ReadFHeader(FILE *f, F_HEADER *fh, int *swp) {
   }
 
   SetVersionRead(fh->type, fh->version*100+fh->sversion*10+fh->ssversion);
-  if (fh->type == DB_TR && itrf >= 0) {
-    if (VersionLE(fh, 1, 0, 6)) itrf = 1;
-    else itrf = 0;
-  }
 
   return m;
 }
@@ -2456,7 +2445,7 @@ double OscillatorStrength(int m, double e, double s, double *ga) {
   double aw, x;
 
   aw = FINE_STRUCTURE_CONST * e;
-  if (itrf == 0 && m != 0) {
+  if (m != 0) {
     m2 = 2*abs(m);
     x = s*s*e*pow(aw, m2 - 2)/(m2 + 1);
   } else {

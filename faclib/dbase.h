@@ -439,7 +439,6 @@ int WriteCIMRecord(FILE *f, CIM_RECORD *r);
 int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp);
 int SwapEndianCIMHeader(CIM_HEADER *h);
 int SwapEndianCIMRecord(CIM_RECORD *r);
-void SetTRF(int m);
 int AppendTable(char *fn);
 int JoinTable(char *fn1, char *fn2, char *fn);
 int TRBranch(char *fn, int i, int j, double *te, double *pa, double *ta);

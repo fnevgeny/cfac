@@ -7,6 +7,7 @@
 #include "consts.h"
 #include "dbase.h"
 #include "structure.h"
+#include "transition.h"
 
 static int version_read[NDB];
 static F_HEADER fheader[NDB];
@@ -2440,24 +2441,6 @@ int PrintENFTable(FILE *f1, FILE *f2, int v, int swp) {
   return nb;
 }
     
-double OscillatorStrength(int m, double e, double s, double *ga) {
-  int m2;
-  double aw, x;
-
-  aw = FINE_STRUCTURE_CONST * e;
-  if (m != 0) {
-    m2 = 2*abs(m);
-    x = s*s*e*pow(aw, m2 - 2)/(m2 + 1);
-  } else {
-    x = s;
-  }
-  if (ga) {
-    *ga = x*2.0*pow(aw,2)*FINE_STRUCTURE_CONST;
-  }  
-
-  return x;
-}  
-
 int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
   TR_HEADER h;
   TR_RECORD r;

@@ -23,6 +23,7 @@ int GetTransitionMode(const cfac_t *cfac);
 int TRMultipole(cfac_t *cfac, double *strength, double *energy,
 		int m, int low, int up);
 int OverlapLowUp(int nlow, int *low, int nup, int *up);
+double OscillatorStrength(int m, double e, double s, double *ga);
 int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 		   char *fn, int multipole);
 int SaveTransitionEB(cfac_t *cfac, int nlow, int *low, int nup, int *up,

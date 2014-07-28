@@ -354,7 +354,25 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 
   return 0;
 }
-      
+
+double OscillatorStrength(int m, double e, double s, double *ga) {
+  int m2;
+  double aw, x;
+
+  aw = FINE_STRUCTURE_CONST * e;
+  if (m != 0) {
+    m2 = 2*abs(m);
+    x = s*s*e*pow(aw, m2 - 2)/(m2 + 1);
+  } else {
+    x = s;
+  }
+  if (ga) {
+    *ga = x*2.0*pow(aw,2)*FINE_STRUCTURE_CONST;
+  }  
+
+  return x;
+}  
+
 int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		    char *fn, int m) {
   int i, j;

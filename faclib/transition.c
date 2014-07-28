@@ -357,25 +357,26 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       
 int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		    char *fn, int m) {
-  int i, j, jup;
+  int i, j;
   FILE *f;
   LEVEL *lev1, *lev2;
   TR_RECORD r;
   TR_HEADER tr_hdr;
   F_HEADER fhdr;
-  double *s, *et, *a, trd;
+  double *s, et, *a;
   double e0, emin, emax;
 
   if (nlow <= 0 || nup <= 0) return -1;
-  emin = 1E10;
-  emax = 1E-10;
+  emin = 0.0;
+  emax = 0.0;
   for (i = 0; i < nlow; i++) {
     lev1 = GetLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
+      double dE;
       lev2 = GetLevel(cfac, up[j]);
-      e0 = lev2->energy - lev1->energy;
-      if (e0 < emin) emin = e0;
-      if (e0 > emax) emax = e0;
+      dE = lev2->energy - lev1->energy;
+      if (!emin || dE < emin) emin = dE;
+      if (dE > emax) emax = dE;
     }
   }
   
@@ -408,19 +409,23 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     
   a = malloc(sizeof(double)*nlow);
   s = malloc(sizeof(double)*nlow);
-  et = malloc(sizeof(double)*nlow);
+  
   for (j = 0; j < nup; j++) {
-    jup = LevelTotalJ(cfac, up[j]);
-    trd = 0.0;
+    int jup = LevelTotalJ(cfac, up[j]);
+    double trd = 0.0;
     for (i = 0; i < nlow; i++) {
-      int k;
       a[i] = 0.0;
-      k = TRMultipole(cfac, s+i, et+i, m, low[i], up[j]);
-      if (k != 0) continue;
-      OscillatorStrength(m, et[i], s[i], &(a[i]));
+      
+      if (TRMultipole(cfac, s+i, &et, m, low[i], up[j]) != 0) {
+        continue;
+      }
+      
+      OscillatorStrength(m, et, s[i], &(a[i]));
       a[i] /= jup+1.0;
+      
       trd += a[i];
-    } 
+    }
+
     r.upper = up[j];
     for (i = 0; i < nlow; i++) {
       if ((cfac->transition_options.eps && !trd) || 
@@ -436,7 +441,6 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 
   free(a);
   free(s);
-  free(et);
 
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);
@@ -531,6 +535,7 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   if (nlow <= 0 || nup <= 0) return -1;
 
   nc = OverlapLowUp(nlow, low, nup, up);
+  
   SaveTransition0(cfac, nc, low+nlow-nc, nc, up+nup-nc, fn, m);
   SaveTransition0(cfac, nc, low+nlow-nc, nup-nc, up, fn, m);
   SaveTransition0(cfac, nup-nc, up, nc, low+nlow-nc, fn, m);

@@ -375,9 +375,8 @@ double OscillatorStrength(int m, double e, double s, double *ga) {
 
 int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		    char *fn, int m) {
-  int i, j;
+  int i, j, ntr, mode;
   FILE *f;
-  LEVEL *lev1, *lev2;
   TR_RECORD r;
   TR_HEADER tr_hdr;
   F_HEADER fhdr;
@@ -385,17 +384,37 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   double e0, emin, emax;
 
   if (nlow <= 0 || nup <= 0) return -1;
+
   emin = 0.0;
   emax = 0.0;
+  ntr = 0;
   for (i = 0; i < nlow; i++) {
-    lev1 = GetLevel(cfac, low[i]);
+    LEVEL *lev1 = GetLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      double dE;
-      lev2 = GetLevel(cfac, up[j]);
-      dE = lev2->energy - lev1->energy;
-      if (!emin || dE < emin) emin = dE;
-      if (dE > emax) emax = dE;
+      LEVEL *lev2 = GetLevel(cfac, up[j]);
+      double dE = lev2->energy - lev1->energy;
+      
+      if (dE < 0) {
+        continue;
+      }
+      if (!emin || dE < emin) {
+        emin = dE;
+      }
+      if (dE > emax) {
+        emax = dE;
+      }
+      ntr++;
     }
+  }
+  
+  if (!ntr) {
+    return 0;
+  }
+
+  if (m == 1) { /* always FR for M1 transitions */
+    mode = M_FR;
+  } else {
+    mode = GetTransitionMode(cfac);
   }
   
   emin *= FINE_STRUCTURE_CONST;
@@ -414,14 +433,12 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   fhdr.type = DB_TR;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
+  
   tr_hdr.nele = GetNumElectrons(cfac, low[0]);
   tr_hdr.multipole = m;
   tr_hdr.gauge = GetTransitionGauge(cfac);
-  if (m == 1) { /* always FR for M1 transitions */
-    tr_hdr.mode = M_FR;
-  } else {
-    tr_hdr.mode = GetTransitionMode(cfac);
-  }
+  tr_hdr.mode = mode;
+  
   f = OpenFile(fn, &fhdr);
   InitFile(f, &fhdr, &tr_hdr);
     
@@ -530,11 +547,14 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
   
 int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 		   char *fn, int m) {
-  int n, *alev = NULL, i, nc;
+  int *alev = NULL, nc;
   
-  n = 0;
+  if (nlow < 0 || nup < 0) {
+    return -1;
+  }
+
   if (nlow == 0 || nup == 0) {
-    n = cfac_get_num_levels(cfac);
+    int i, n = cfac_get_num_levels(cfac);
     if (n <= 0) return -1;
     alev = malloc(sizeof(int)*n);
     if (!alev) return -1;
@@ -550,8 +570,7 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       up = alev;
     }
   }
-  if (nlow <= 0 || nup <= 0) return -1;
-
+  
   nc = OverlapLowUp(nlow, low, nup, up);
   
   SaveTransition0(cfac, nc, low+nlow-nc, nc, up+nup-nc, fn, m);
@@ -560,7 +579,9 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   SaveTransition0(cfac, nlow-nc, low, nup, up, fn, m);
   SaveTransition0(cfac, nup, up, nlow-nc, low, fn, m);
 
-  if (n > 0) free(alev);
+  if (alev) {
+    free(alev);
+  }
   ReinitRadial(cfac, 1);
 
   return 0;

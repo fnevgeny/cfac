@@ -1662,22 +1662,19 @@ double MultipoleRadialNR(cfac_t *cfac, int m, int k1, int k2, int gauge) {
       r *= p*t;
       r /= sqrt(m*(m+1.0));
       r *= -0.5 * FINE_STRUCTURE_CONST;
-      for (i = 2*m - 1; i > 0; i -= 2) r /= (double) i;
+      for (i = 2*m - 1; i > 0; i -= 2) r /= i;
       r *= ReducedCL(GetJFromKappa(kappa1), 2*m, GetJFromKappa(kappa2));
     }
   } else if (m < 0) {
     m = -m;
-    if (gauge == G_BABUSHKIN) {
-      r = RadialMoments(cfac, m, k1, k2);
-      r *= sqrt((m+1.0)/m);
-      for (i = 2*m - 1; i > 1; i -= 2) r /= (double) i;
-    } else {
-      /* the velocity form is not implemented yet. 
-	 the following is still the length form */
-      r = RadialMoments(cfac, m, k1, k2);
-      r *= sqrt((m+1.0)/m);
-      for (i = 2*m - 1; i > 1; i -= 2) r /= (double) i;
+    if (gauge != G_BABUSHKIN) {
+      printf("the velocity form is not implemented yet\n");
+      abort();
     }
+
+    r = RadialMoments(cfac, m, k1, k2);
+    r *= sqrt((m+1.0)/m);
+    for (i = 2*m - 1; i > 1; i -= 2) r /= i;
     r *= ReducedCL(GetJFromKappa(kappa1), 2*m, GetJFromKappa(kappa2));
   }
 

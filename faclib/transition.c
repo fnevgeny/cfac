@@ -381,7 +381,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   TR_HEADER tr_hdr;
   F_HEADER fhdr;
   double *s, et, *a;
-  double e0, emin, emax;
+  double emin, emax;
 
   if (nlow <= 0 || nup <= 0) return -1;
 
@@ -417,17 +417,20 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     mode = GetTransitionMode(cfac);
   }
   
-  emin *= FINE_STRUCTURE_CONST;
-  emax *= FINE_STRUCTURE_CONST;
-  e0 = 2.0*(emax-emin)/(emin+emax);
-    
-  FreeMultipoleArray(cfac);
-  if (e0 < EPS3) {
-    SetAWGrid(cfac, 1, emin, emax);
-  } else if (e0 < 1.0) {
-    SetAWGrid(cfac, 2, emin, emax);
-  } else {
-    SetAWGrid(cfac, 3, emin, emax);
+  if (mode == M_FR) {
+      double e0;
+      emin *= FINE_STRUCTURE_CONST;
+      emax *= FINE_STRUCTURE_CONST;
+      e0 = 2.0*(emax-emin)/(emin+emax);
+
+      FreeMultipoleArray(cfac);
+      if (e0 < EPS3) {
+        SetAWGrid(cfac, 1, emin, emax);
+      } else if (e0 < 1.0) {
+        SetAWGrid(cfac, 2, emin, emax);
+      } else {
+        SetAWGrid(cfac, 3, emin, emax);
+      }
   }
   
   fhdr.type = DB_TR;
@@ -448,7 +451,10 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   for (j = 0; j < nup; j++) {
     int jup = LevelTotalJ(cfac, up[j]);
     double trd = 0.0;
+    LEVEL *lev2 = GetLevel(cfac, up[j]);
     for (i = 0; i < nlow; i++) {
+      LEVEL *lev1 = GetLevel(cfac, low[i]);
+      double dE = lev2->energy - lev1->energy;
       a[i] = 0.0;
       
       if (TRMultipole(cfac, s+i, &et, m, low[i], up[j]) != 0) {

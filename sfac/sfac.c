@@ -2415,12 +2415,6 @@ static int PStructure(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PTestIntegrate(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
-  TestIntegrate(cfac);  
-  return 0;
-}
-
 static int PPrepAngular(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int nlow, nup, *low, *up;
@@ -3108,7 +3102,6 @@ static METHOD methods[] = {
   {"StoreInit", PStoreInit},
   {"StoreTable", PStoreTable},
   {"Structure", PStructure},
-  {"TestIntegrate", PTestIntegrate}, 
   {"TransitionTable", PTransitionTable},  
   {"TRTable", PTransitionTable},  
   {"WaveFuncTable", PWaveFuncTable},

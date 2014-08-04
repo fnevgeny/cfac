@@ -122,7 +122,6 @@ int FreeContinua(cfac_t *cfac, double e);
 int ClearOrbitalTable(cfac_t *cfac, int m);
 int InitRadial(cfac_t *cfac);
 int ReinitRadial(cfac_t *cfac, int m);
-int TestIntegrate(cfac_t *cfac);
 
 #endif
 

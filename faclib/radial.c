@@ -3995,38 +3995,3 @@ int RadialOverlaps(cfac_t *cfac, char *fn, int kappa) {
 
   return 0;
 }
-
-int TestIntegrate(cfac_t *cfac) {
-  ORBITAL *orb3, *orb4;
-  int k1, k2, k3, k4, k, i, i0=1500;
-  double r, a;
-  POTENTIAL *potential = cfac->potential;
-  double dwork1[MAXRP], dwork2[MAXRP];
- 
-  k1 = OrbitalIndex(cfac, 2, -2, 0);
-  k2 = OrbitalIndex(cfac, 3, -1, 0);
-  k3 = OrbitalIndex(cfac, 0, -5, 3.30265398e3/HARTREE_EV);
-  k4 = OrbitalIndex(cfac, 0, -4, 2.577e3/HARTREE_EV);
-  printf("# %d %d %d %d\n", k1, k2, k3, k4);
-  orb3 = GetOrbital(cfac, k3);
-  orb4 = GetOrbital(cfac, k4);
-
-  for (k = 1; k < 7; k++) {    
-    for (i = 0; i < potential->maxrp; i++) {
-      dwork1[i] = pow(potential->rad[i],k);
-      dwork1[i+i0] = 1.0/dwork1[i];
-    }
-    IntegrateF(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, dwork2, 0);
-    IntegrateF(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, dwork2+i0, -1);
-    for (i = 0; i < potential->maxrp; i++) {
-      printf("%d %4d %15.8E %15.8E %15.8E %15.8E %15.8E\n", 
-	     k, i, potential->rad[i], dwork1[i], dwork2[i], dwork1[i+i0], dwork2[i+i0]);
-    }
-    IntegrateS(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, &r, 0);
-    IntegrateS(potential, dwork1+i0, orb3, orb4, INT_P1P2pQ1Q2, &a, -1);
-    printf("# %15.8E %15.8E\n", r, a);
-    printf("\n\n");
-  }
-  
-  return 0;
-}

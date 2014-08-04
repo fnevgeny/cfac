@@ -29,7 +29,6 @@ void SetVP(cfac_t *cfac, int n);
 void SetBreit(cfac_t *cfac, int n);
 void SetMS(cfac_t *cfac, int nms, int sms);
 int SetAWGrid(cfac_t *cfac, int n, double min, double max);
-int GetAWGrid(cfac_t *cfac, double **a);
 int SetRadialGrid(cfac_t *cfac,
     int maxrp, double ratio, double asymp, double rmin);
 double SetPotential(cfac_t *cfac, int iter, double *vbuf);

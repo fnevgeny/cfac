@@ -221,11 +221,6 @@ int SetAWGrid(cfac_t *cfac, int n, double awmin, double awmax) {
   return 0;
 }
 
-int GetAWGrid(cfac_t *cfac, double **a) {
-  *a = cfac->awgrid;
-  return cfac->n_awgrid;
-}
-
 void SetOptimizeMaxIter(cfac_t *cfac, int m) {
   cfac->optimize_control.maxiter = m;
 }
@@ -1681,7 +1676,8 @@ double MultipoleRadialNR(cfac_t *cfac, int m, int k1, int k2, int gauge) {
   return r;
 }
 
-int MultipoleRadialFRGrid(cfac_t *cfac, double **p0, int m, int k1, int k2, int gauge) {
+int MultipoleRadialFRGrid(cfac_t *cfac,
+    double **p0, int m, int k1, int k2, int gauge) {
   double q, ip, ipm, im, imm;
   int kappa1, kappa2;
   int am, t;
@@ -1705,7 +1701,7 @@ int MultipoleRadialFRGrid(cfac_t *cfac, double **p0, int m, int k1, int k2, int 
   index[1] = k1;
   index[2] = k2;
 
-  p1 = (double **) MultiSet(cfac->multipole_array, index, NULL);
+  p1 = MultiSet(cfac->multipole_array, index, NULL);
   if (*p1) {
     *p0 = *p1;
     return cfac->n_awgrid;
@@ -1839,6 +1835,8 @@ double MultipoleRadialFR(cfac_t *cfac,
   if (cfac->n_awgrid > 1) {
     if (ef > 0) aw += ef;
   }
+  
+  printf("aw = %g\n", aw);
 
   r = InterpolateMultipole(aw, n, cfac->awgrid, y);
   if (gauge == G_COULOMB && m < 0) r /= aw;
@@ -3957,10 +3955,12 @@ int ReinitRadial(cfac_t *cfac, int m) {
 	cfac->optimize_control.n_screen = 0;
       }
       cfac->potential->flag = 0;
-      cfac->n_awgrid = 1;
-      cfac->awgrid[0] = EPS3;
+      
       SetRadialGrid(cfac, DMAXRP, -1.0, -1.0, -1.0);
       cfac->potential->uehling[0] = 0.0;
+      
+      cfac->n_awgrid = 1;
+      cfac->awgrid[0] = EPS3;
     }
   }
   return 0;

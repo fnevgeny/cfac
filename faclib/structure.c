@@ -1971,7 +1971,7 @@ int SortLevels(cfac_t *cfac, int start, int n, int EB) {
   return 0;
 }
 
-int GetLevNumElectrons(cfac_t *cfac, const LEVEL *lev) {
+int GetLevNumElectrons(const cfac_t *cfac, const LEVEL *lev) {
   SYMMETRY *sym;
   STATE *s;
   CONFIG_GROUP *g;
@@ -1989,7 +1989,7 @@ int GetLevNumElectrons(cfac_t *cfac, const LEVEL *lev) {
   return nele;
 }
 
-int GetNumElectrons(cfac_t *cfac, int k)
+int GetNumElectrons(const cfac_t *cfac, int k)
 {
     LEVEL *lev = GetLevel(cfac, k);
     

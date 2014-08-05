@@ -20,7 +20,7 @@ void SetTransitionMaxM(cfac_t *cfac, int m);
 void SetTransitionOptions(cfac_t *cfac, int gauge, int mode, int max_e, int max_m);
 int GetTransitionGauge(const cfac_t *cfac);
 int GetTransitionMode(const cfac_t *cfac);
-int TRMultipole(cfac_t *cfac, double *strength, double *energy,
+int TRMultipole(cfac_t *cfac, double *rme, double *energy,
 		int m, int low, int up);
 int OverlapLowUp(int nlow, int *low, int nup, int *up);
 double OscillatorStrength(int m, double e, double s, double *ga);

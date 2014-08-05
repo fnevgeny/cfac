@@ -113,7 +113,7 @@ typedef struct _TRF_HEADER_ {
 typedef struct _TR_RECORD_ {
   int lower;
   int upper;
-  float strength;
+  float rme;
 } TR_RECORD;
 #define SIZE_TR_RECORD (sizeof(int)+sizeof(int)+sizeof(float))
 

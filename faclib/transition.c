@@ -61,7 +61,7 @@ int GetTransitionMode(const cfac_t *cfac) {
   return cfac->transition_options.mode;
 }
 
-static int _TRMultipole(cfac_t *cfac, double *strength, double *energy,
+static int _TRMultipole(cfac_t *cfac, double *rme, double *energy,
 		int m, int lower, int upper) {
   int m2;
   int p1, p2, j1, j2;
@@ -70,7 +70,7 @@ static int _TRMultipole(cfac_t *cfac, double *strength, double *energy,
   int nz, i;
   ANGULAR_ZMIX *ang;
   
-  *strength = 0.0;
+  *rme = 0.0;
 
   lev1 = GetLevel(cfac, lower);
   if (lev1 == NULL) return -1;
@@ -120,7 +120,7 @@ static int _TRMultipole(cfac_t *cfac, double *strength, double *energy,
     free(ang);	
   }  
 
-  *strength = s;
+  *rme = s;
   
   return 0;
 }
@@ -129,7 +129,7 @@ typedef struct {
   int m;
   int valid;
   double energy;
-  double strength;
+  double rme;
 } TRANS_T;
 
 typedef struct {
@@ -173,7 +173,7 @@ static void TRMultipole_cache_free(TRM_CACHE_T *cache)
 }
 
 /* If energy is not NULL, it is assigned trans. energy; */
-int TRMultipole(cfac_t *cfac, double *strength, double *energy,
+int TRMultipole(cfac_t *cfac, double *rme, double *energy,
 		int m, int lower, int upper) {
   double dE = 0.0;
   
@@ -189,22 +189,22 @@ int TRMultipole(cfac_t *cfac, double *strength, double *energy,
       if (energy) {
         *energy = trans->energy;
       }
-      *strength = trans->strength;
+      *rme = trans->rme;
       
       return 0;
     }
   }
   
-  res = _TRMultipole(cfac, strength, &dE, m, lower, upper);
+  res = _TRMultipole(cfac, rme, &dE, m, lower, upper);
   if (energy) {
     *energy = dE;
   }
   
   if (trans) {
-    trans->m        = m;
-    trans->energy   = dE;
-    trans->strength = *strength;
-    trans->valid    = 1;
+    trans->m      = m;
+    trans->energy = dE;
+    trans->rme    = *rme;
+    trans->valid  = 1;
   }
   
   return res;
@@ -475,7 +475,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       }
       if (fabs(s[i]) < EPS30) continue;
       r.lower = low[i];
-      r.strength = s[i];
+      r.rme = s[i];
       WriteTRRecord(f, &r, NULL);
     }
   }

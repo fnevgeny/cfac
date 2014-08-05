@@ -248,7 +248,7 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             sqlite3_bind_int   (stmt,  2, r.upper);
             sqlite3_bind_int   (stmt,  3, r.lower);
             sqlite3_bind_int   (stmt,  4, h.multipole);
-            sqlite3_bind_double(stmt,  5, r.strength);
+            sqlite3_bind_double(stmt,  5, r.rme);
             sqlite3_bind_int   (stmt,  6, h.mode);
 
             rc = sqlite3_step(stmt);

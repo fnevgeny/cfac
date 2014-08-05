@@ -1836,8 +1836,6 @@ double MultipoleRadialFR(cfac_t *cfac,
     if (ef > 0) aw += ef;
   }
   
-  printf("aw = %g\n", aw);
-
   r = InterpolateMultipole(aw, n, cfac->awgrid, y);
   if (gauge == G_COULOMB && m < 0) r /= aw;
 

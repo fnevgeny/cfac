@@ -440,7 +440,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       r.upper = up[j];
       r.lower = low[i];
       r.rme = rme;
-      WriteTRRecord(f, &r, NULL);
+      WriteTRRecord(f, &r);
     }
   }
 

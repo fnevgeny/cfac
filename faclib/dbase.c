@@ -222,7 +222,7 @@ int SwapEndianTRHeader(TR_HEADER *h) {
   return 0;
 }
 
-int SwapEndianTRRecord(TR_RECORD *r, TR_EXTRA *rx) {
+int SwapEndianTRRecord(TR_RECORD *r) {
   SwapEndian((char *) &(r->lower), sizeof(int));
   SwapEndian((char *) &(r->upper), sizeof(int));
   SwapEndian((char *) &(r->rme), sizeof(float));
@@ -815,7 +815,7 @@ int WriteENFRecord(FILE *f, ENF_RECORD *r) {
   return m;
 }
 
-int WriteTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx) {
+int WriteTRRecord(FILE *f, TR_RECORD *r) {
   int n, m = 0;
 
   if (tr_header.length == 0) {
@@ -1128,14 +1128,14 @@ int ReadTRFHeader(FILE *f, TRF_HEADER *h, int swp) {
   return m;
 }
 
-int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp) {
+int ReadTRRecord(FILE *f, TR_RECORD *r, int swp) {
   int n, m = 0;
     
   RSF0(r->lower);
   RSF0(r->upper);
   RSF0(r->rme);
 
-  if (swp) SwapEndianTRRecord(r, rx);
+  if (swp) SwapEndianTRRecord(r);
 
   return m;
 }
@@ -2444,7 +2444,6 @@ int PrintENFTable(FILE *f1, FILE *f2, int v, int swp) {
 int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
   TR_HEADER h;
   TR_RECORD r;
-  TR_EXTRA rx;
   int n, i;
   int nb;
   double e, a, gf;
@@ -2463,7 +2462,7 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "MODE\t= %d\n", (int)h.mode);
 
     for (i = 0; i < h.ntransitions; i++) {
-      n = ReadTRRecord(f1, &r, &rx, swp);
+      n = ReadTRRecord(f1, &r, swp);
       if (n == 0) break;
       if (v) {
 	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
@@ -2541,7 +2540,6 @@ int TRBranch(char *fn, int upper, int lower,
   F_HEADER fh;
   TR_HEADER h;
   TR_RECORD r;
-  TR_EXTRA rx;
   FILE *f;
   int n, i, k;
   double a, b, c, e;
@@ -2574,7 +2572,7 @@ int TRBranch(char *fn, int upper, int lower,
     n = ReadTRHeader(f, &h, swp);
     if (n == 0) break;
     for (k = 0; k < h.ntransitions; k++) {
-      n = ReadTRRecord(f, &r, &rx, swp);
+      n = ReadTRRecord(f, &r, swp);
       if (n == 0) break;
       if (r.upper == upper) {
 	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;

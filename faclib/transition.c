@@ -10,25 +10,6 @@
 #include "dbase.h"
 #include "transition.h"
 
-typedef struct {
-  TR_RECORD r;
-  TR_EXTRA rx;
-  int ks[2];
-} TR_DATUM;
-
-int SetTransitionCut(cfac_t *cfac, double c) {
-  if (c >= 0) {
-    cfac->transition_options.eps = c;
-  } else {
-    cfac->transition_options.eps = TRCUT;
-  }
-  return 0;
-}
-
-double GetTransitionCut(const cfac_t *cfac) {
-  return cfac->transition_options.eps;
-}
-
 void SetTransitionMode(cfac_t *cfac, int m) {
   cfac->transition_options.mode = m;
 }
@@ -380,7 +361,6 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   TR_RECORD r;
   TR_HEADER tr_hdr;
   F_HEADER fhdr;
-  double *s, et, *a;
   double emin, emax;
 
   if (nlow <= 0 || nup <= 0) return -1;
@@ -445,43 +425,24 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   f = OpenFile(fn, &fhdr);
   InitFile(f, &fhdr, &tr_hdr);
     
-  a = malloc(sizeof(double)*nlow);
-  s = malloc(sizeof(double)*nlow);
-  
   for (j = 0; j < nup; j++) {
-    int jup = LevelTotalJ(cfac, up[j]);
-    double trd = 0.0;
     LEVEL *lev2 = GetLevel(cfac, up[j]);
     for (i = 0; i < nlow; i++) {
+      double rme;
       LEVEL *lev1 = GetLevel(cfac, low[i]);
       double dE = lev2->energy - lev1->energy;
-      a[i] = 0.0;
       
-      if (TRMultipole(cfac, s+i, &et, m, low[i], up[j]) != 0) {
+      if (TRMultipole(cfac, &rme, NULL, m, low[i], up[j]) != 0) {
         continue;
       }
+      if (fabs(rme) < EPS30) continue;
       
-      OscillatorStrength(m, et, s[i], &(a[i]));
-      a[i] /= jup+1.0;
-      
-      trd += a[i];
-    }
-
-    r.upper = up[j];
-    for (i = 0; i < nlow; i++) {
-      if ((cfac->transition_options.eps && !trd) || 
-          a[i] < (cfac->transition_options.eps * trd)) {
-          continue;
-      }
-      if (fabs(s[i]) < EPS30) continue;
+      r.upper = up[j];
       r.lower = low[i];
-      r.rme = s[i];
+      r.rme = rme;
       WriteTRRecord(f, &r, NULL);
     }
   }
-
-  free(a);
-  free(s);
 
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);

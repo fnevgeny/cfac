@@ -11,8 +11,6 @@ typedef struct _TRANSITION_ {
 
 int GetTransition(const cfac_t *cfac,
     int nlo, int nup, TRANSITION *tr, int *swapped);
-int SetTransitionCut(cfac_t *cfac, double c);
-double GetTransitionCut(const cfac_t *cfac);
 void SetTransitionMode(cfac_t *cfac, int m);
 void SetTransitionGauge(cfac_t *cfac, int m);
 void SetTransitionMaxE(cfac_t *cfac, int m);

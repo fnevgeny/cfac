@@ -115,7 +115,6 @@ typedef struct _TR_RECORD_ {
   int upper;
   float rme;
 } TR_RECORD;
-#define SIZE_TR_RECORD (sizeof(int)+sizeof(int)+sizeof(float))
 
 typedef struct _TR_EXTRA_ {
   float energy;

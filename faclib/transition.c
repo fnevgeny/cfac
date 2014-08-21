@@ -369,10 +369,10 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   emax = 0.0;
   ntr = 0;
   for (i = 0; i < nlow; i++) {
-    LEVEL *lev1 = GetLevel(cfac, low[i]);
+    LEVEL *llev = GetLevel(cfac, low[i]);
     for (j = 0; j < nup; j++) {
-      LEVEL *lev2 = GetLevel(cfac, up[j]);
-      double dE = lev2->energy - lev1->energy;
+      LEVEL *ulev = GetLevel(cfac, up[j]);
+      double dE = ulev->energy - llev->energy;
       
       if (dE < 0) {
         continue;
@@ -397,7 +397,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     mode = GetTransitionMode(cfac);
   }
   
-  if (mode == M_FR) {
+  if (mode == M_FR && cfac->transition_options.fr_interpolate) {
       double e0;
       emin *= FINE_STRUCTURE_CONST;
       emax *= FINE_STRUCTURE_CONST;
@@ -426,11 +426,17 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   InitFile(f, &fhdr, &tr_hdr);
     
   for (j = 0; j < nup; j++) {
-    LEVEL *lev2 = GetLevel(cfac, up[j]);
+    LEVEL *ulev = GetLevel(cfac, up[j]);
     for (i = 0; i < nlow; i++) {
       double rme;
-      LEVEL *lev1 = GetLevel(cfac, low[i]);
-      double dE = lev2->energy - lev1->energy;
+
+      if (mode == M_FR && !cfac->transition_options.fr_interpolate) {
+        LEVEL *llev = GetLevel(cfac, low[i]);
+        double dE = ulev->energy - llev->energy;
+        
+        FreeMultipoleArray(cfac);
+        SetAWGrid(cfac, 1, dE*FINE_STRUCTURE_CONST, dE*FINE_STRUCTURE_CONST);
+      }
       
       if (TRMultipole(cfac, &rme, NULL, m, low[i], up[j]) != 0) {
         continue;

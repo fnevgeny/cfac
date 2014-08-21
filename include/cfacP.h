@@ -132,6 +132,7 @@ struct _cfac_t {
         int mode;             /* mode (relativistic/non-relativistic)        */
         int max_e;            /* maximum rank of electric multipoles         */
         int max_m;            /* maximum rank of magnetic multipoles         */
+        int fr_interpolate;   /* use interpolation for FR m. elements        */
     } transition_options;
 };
 

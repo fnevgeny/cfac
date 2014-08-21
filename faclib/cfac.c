@@ -266,6 +266,7 @@ cfac_t *cfac_new(void)
     cfac->transition_options.mode  = DMODE;
     cfac->transition_options.max_e = ERANK;
     cfac->transition_options.max_m = MRANK;
+    cfac->transition_options.fr_interpolate = 1;
 
     return cfac;
 }

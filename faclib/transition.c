@@ -11,35 +11,35 @@
 #include "transition.h"
 
 void SetTransitionMode(cfac_t *cfac, int m) {
-  cfac->transition_options.mode = m;
+  cfac->tr_opts.mode = m;
 }
 
 void SetTransitionGauge(cfac_t *cfac, int m) {
-  cfac->transition_options.gauge = m;
+  cfac->tr_opts.gauge = m;
 }
 
 void SetTransitionMaxE(cfac_t *cfac, int m) {
-  cfac->transition_options.max_e = m;
+  cfac->tr_opts.max_e = m;
 }
 
 void SetTransitionMaxM(cfac_t *cfac, int m) {
-  cfac->transition_options.max_m = m;
+  cfac->tr_opts.max_m = m;
 }
 
 void SetTransitionOptions(cfac_t *cfac, int gauge, int mode, 
 			  int max_e, int max_m) {
-  cfac->transition_options.gauge = gauge;
-  cfac->transition_options.mode = mode;
-  cfac->transition_options.max_e = max_e;
-  cfac->transition_options.max_m = max_m;
+  cfac->tr_opts.gauge = gauge;
+  cfac->tr_opts.mode = mode;
+  cfac->tr_opts.max_e = max_e;
+  cfac->tr_opts.max_m = max_m;
 }
 
 int GetTransitionGauge(const cfac_t *cfac) {
-  return cfac->transition_options.gauge;
+  return cfac->tr_opts.gauge;
 }
 
 int GetTransitionMode(const cfac_t *cfac) {
-  return cfac->transition_options.mode;
+  return cfac->tr_opts.mode;
 }
 
 static int _TRMultipole(cfac_t *cfac, double *rme, double *energy,
@@ -88,12 +88,12 @@ static int _TRMultipole(cfac_t *cfac, double *rme, double *energy,
 
   for (i = 0; i < nz; i++) {
     if (ang[i].k != m2) continue;
-    if (cfac->transition_options.mode == M_NR && m != 1) {
+    if (cfac->tr_opts.mode == M_NR && m != 1) {
       r = MultipoleRadialNR(cfac, m, ang[i].k0, ang[i].k1, 
-			    cfac->transition_options.gauge);
+			    cfac->tr_opts.gauge);
     } else {
       r = MultipoleRadialFR(cfac, aw, m, ang[i].k0, ang[i].k1,
-			    cfac->transition_options.gauge);
+			    cfac->tr_opts.gauge);
     }
     s += r * ang[i].coeff;
   }
@@ -261,7 +261,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   FILE *f;
   
   if (nlow <= 0 || nup <= 0) return -1;
-  if (m == 1 || cfac->transition_options.mode == M_FR) {
+  if (m == 1 || cfac->tr_opts.mode == M_FR) {
     k = 0;
     emin = 1E10;
     emax = 1E-10;
@@ -397,7 +397,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     mode = GetTransitionMode(cfac);
   }
   
-  if (mode == M_FR && cfac->transition_options.fr_interpolate) {
+  if (mode == M_FR && cfac->tr_opts.fr_interpolate) {
       double e0;
       emin *= FINE_STRUCTURE_CONST;
       emax *= FINE_STRUCTURE_CONST;
@@ -430,7 +430,7 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     for (i = 0; i < nlow; i++) {
       double rme;
 
-      if (mode == M_FR && !cfac->transition_options.fr_interpolate) {
+      if (mode == M_FR && !cfac->tr_opts.fr_interpolate) {
         LEVEL *llev = GetLevel(cfac, low[i]);
         double dE = ulev->energy - llev->energy;
         

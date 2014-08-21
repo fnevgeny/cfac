@@ -262,11 +262,11 @@ cfac_t *cfac_new(void)
     }
     memset(cfac->angzxz_array, 0, sizeof(ANGZ_DATUM)*MAX_HAMS2);
     
-    cfac->transition_options.gauge = DGAUGE;
-    cfac->transition_options.mode  = DMODE;
-    cfac->transition_options.max_e = ERANK;
-    cfac->transition_options.max_m = MRANK;
-    cfac->transition_options.fr_interpolate = 1;
+    cfac->tr_opts.gauge = DGAUGE;
+    cfac->tr_opts.mode  = DMODE;
+    cfac->tr_opts.max_e = ERANK;
+    cfac->tr_opts.max_m = MRANK;
+    cfac->tr_opts.fr_interpolate = 1;
 
     return cfac;
 }

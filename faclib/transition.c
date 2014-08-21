@@ -337,12 +337,11 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 }
 
 double OscillatorStrength(int m, double e, double s, double *ga) {
-  int m2;
   double aw, x;
 
-  aw = FINE_STRUCTURE_CONST * e;
+  aw = FINE_STRUCTURE_CONST*e;
   if (m != 0) {
-    m2 = 2*abs(m);
+    int m2 = 2*abs(m);
     x = s*s*e*pow(aw, m2 - 2)/(m2 + 1);
   } else {
     x = s;
@@ -354,7 +353,69 @@ double OscillatorStrength(int m, double e, double s, double *ga) {
   return x;
 }  
 
-int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
+static int CompareInt(const void *a1, const void *a2) {
+  int *i1, *i2;
+  
+  i1 = (int *) a1;
+  i2 = (int *) a2;
+  return (*i1 - *i2);
+}
+
+int OverlapLowUp(int nlow, int *low, int nup, int *up) {
+  int i, j, n;
+  int *lowinup, *upinlow, *icom;
+
+  lowinup = (int *) malloc(sizeof(int)*nlow);
+  upinlow = (int *) malloc(sizeof(int)*nup);
+
+  for (i = 0; i < nlow; i++) {
+    lowinup[i] = -1;
+  }
+  for (i = 0; i < nup; i++) {
+    upinlow[i] = -1;
+  }
+  qsort(low, nlow, sizeof(int), CompareInt);
+  if (up != low) {
+    qsort(up, nup, sizeof(int), CompareInt);
+  }
+  for (i = 0; i < nlow; i++) {
+    lowinup[i] = IBisect(low[i], nup, up);    
+    if (lowinup[i] >= 0) {
+      upinlow[lowinup[i]] = i;
+    }
+  }
+  icom = (int *) malloc(sizeof(int)*nlow);
+  n = 0;
+  for (i = 0; i < nlow; i++) {
+    if (lowinup[i] >= 0) icom[n++] = low[i];
+  }
+  j = 0;
+  for (i = 0; i < nlow; i++) {
+    if (lowinup[i] < 0) {
+      low[j++] = low[i];
+    }
+  }
+  for (i = 0; i < n; i++) {
+    low[j++] = icom[i];
+  }
+  j = 0;
+  for (i = 0; i < nup; i++) {
+    if (upinlow[i] < 0) {
+      up[j++] = up[i];
+    }
+  }
+  for (i = 0; i < n; i++) {
+    up[j++] = icom[i];
+  }
+  
+  free(lowinup);
+  free(upinlow);
+  free(icom);
+
+  return n;
+}
+
+static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		    char *fn, int m) {
   int i, j, ntr, mode;
   FILE *f;
@@ -456,68 +517,6 @@ int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   return 0;
 }
 
-static int CompareInt(const void *a1, const void *a2) {
-  int *i1, *i2;
-  
-  i1 = (int *) a1;
-  i2 = (int *) a2;
-  return (*i1 - *i2);
-}
-
-int OverlapLowUp(int nlow, int *low, int nup, int *up) {
-  int i, j, n;
-  int *lowinup, *upinlow, *icom;
-
-  lowinup = (int *) malloc(sizeof(int)*nlow);
-  upinlow = (int *) malloc(sizeof(int)*nup);
-
-  for (i = 0; i < nlow; i++) {
-    lowinup[i] = -1;
-  }
-  for (i = 0; i < nup; i++) {
-    upinlow[i] = -1;
-  }
-  qsort(low, nlow, sizeof(int), CompareInt);
-  if (up != low) {
-    qsort(up, nup, sizeof(int), CompareInt);
-  }
-  for (i = 0; i < nlow; i++) {
-    lowinup[i] = IBisect(low[i], nup, up);    
-    if (lowinup[i] >= 0) {
-      upinlow[lowinup[i]] = i;
-    }
-  }
-  icom = (int *) malloc(sizeof(int)*nlow);
-  n = 0;
-  for (i = 0; i < nlow; i++) {
-    if (lowinup[i] >= 0) icom[n++] = low[i];
-  }
-  j = 0;
-  for (i = 0; i < nlow; i++) {
-    if (lowinup[i] < 0) {
-      low[j++] = low[i];
-    }
-  }
-  for (i = 0; i < n; i++) {
-    low[j++] = icom[i];
-  }
-  j = 0;
-  for (i = 0; i < nup; i++) {
-    if (upinlow[i] < 0) {
-      up[j++] = up[i];
-    }
-  }
-  for (i = 0; i < n; i++) {
-    up[j++] = icom[i];
-  }
-  
-  free(lowinup);
-  free(upinlow);
-  free(icom);
-
-  return n;
-}
-  
 int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 		   char *fn, int m) {
   int *alev = NULL, nc;
@@ -560,10 +559,9 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   return 0;
 }
   
-int GetLowUpEB(cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
-	       int nlow0, int *low0, int nup0, int *up0) {  
-  int i, j, ilev, mlev, n;
-  LEVEL *lev;
+int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
+	       int nlow0, const int *low0, int nup0, const int *up0) {
+  int i, n;
  
   n = GetNumEBLevels(cfac);
   if (n == 0) return -1;
@@ -572,8 +570,10 @@ int GetLowUpEB(cfac_t *cfac, int *nlow, int **low, int *nup, int **up,
   *up = malloc(sizeof(int)*n);
   *nlow = 0;
   *nup = 0;
+  
   for (i = 0; i < n; i++) {
-    lev = GetEBLevel(cfac, i);
+    int j, ilev, mlev;
+    LEVEL *lev = GetEBLevel(cfac, i);
     DecodeBasisEB(lev->pb, &ilev, &mlev);
     for (j = 0; j < nlow0; j++) {
       if (low0[j] == ilev) {

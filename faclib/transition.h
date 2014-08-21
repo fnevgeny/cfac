@@ -26,8 +26,8 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 		   char *fn, int multipole);
 int SaveTransitionEB(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 		     char *fn, int multipole);
-int GetLowUpEB(cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
-	       int nlow0, int *low0, int nup0, int *up0);
+int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
+	       int nlow0, const int *low0, int nup0, const int *up0);
 int PolarizeCoeff(char *ifn, char *ofn, int i0, int i1);
 
 int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m,

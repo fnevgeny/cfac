@@ -415,6 +415,125 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
   return n;
 }
 
+/* 
+ * Find complements and intersection of unsorted sets I and F:
+ * K = I\F; L = F\I; M = I*F.
+ * Return bool flag whether an allocation occured (and hence resultant
+ * sets need to be free'd.)
+ */
+int cfac_overlap_if(unsigned int ni, int *i, unsigned int nf, int *f,
+    unsigned int *nk, int **k, unsigned int *nl, int **l,
+    unsigned int *nm, int **m)
+{
+    int j;
+    int i_min, i_max, f_min, f_max, sn_min, sn_max;
+    unsigned n_k = 0, n_l = 0, n_m = 0;
+    char *s;
+    int allocated = 0;
+    
+    *nm = *nk = *nl = 0;
+    
+    if (ni == 0 || nf == 0) {
+        return allocated;
+    }
+    
+    if (ni == nf && i == f) {
+        /* degenerate case I = F */
+        
+        *nm = ni;
+        *m  = i;
+        
+        return allocated;
+    }
+    
+    i_min = i_max = i[0];
+    f_min = f_max = f[0];
+    
+    for (j = 1; j < ni; j++) {
+        if (i[j] < i_min) {
+            i_min = i[j];
+        }
+        if (i[j] > i_max) {
+            i_max = i[j];
+        }
+    }
+    
+    for (j = 1; j < nf; j++) {
+        if (f[j] < f_min) {
+            f_min = f[j];
+        }
+        if (f[j] > f_max) {
+            f_max = f[j];
+        }
+    }
+    
+    if (i_max < f_min || i_min > f_max) {
+        /* no overlap */
+        
+        *nk = ni;
+        *k  = i;
+        *nl = nf;
+        *l  = f;
+        
+        return allocated;
+    }
+    
+    sn_min = (i_min < f_min) ? i_min:f_min;
+    sn_max = (i_max > f_max) ? i_max:f_max;
+    
+    s = calloc(sn_max - sn_min + 1, 1);
+    
+    for (j = 0; j < ni; j++) {
+        s[i[j] - sn_min] |= 1;
+    }
+    for (j = 0; j < nf; j++) {
+        s[f[j] - sn_min] |= 2;
+    }
+    
+    for (j = sn_min; j <= sn_max; j++) {
+        switch (s[j - sn_min]) {
+        case 1:
+            n_k++;
+            break;
+        case 2:
+            n_l++;
+            break;
+        case 3:
+            n_m++;
+            break;
+        }
+    }
+    
+    *nk = n_k;
+    *nl = n_l;
+    *nm = n_m;
+
+    *k = malloc(sizeof(int)*(*nk));
+    *l = malloc(sizeof(int)*(*nl));
+    *m = malloc(sizeof(int)*(*nm));
+    
+    allocated = 1;
+
+    n_k = n_m = n_l = 0;
+    for (j = sn_min; j <= sn_max; j++) {
+        switch (s[j - sn_min]) {
+        case 1:
+            (*k)[n_k++] = j;
+            break;
+        case 2:
+            (*l)[n_l++] = j;
+            break;
+        case 3:
+            (*m)[n_m++] = j;
+            break;
+        }
+    }
+
+    free(s);
+    
+    return allocated;
+}
+
 static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 		    char *fn, int m) {
   int i, j, ntr, mode;
@@ -518,8 +637,10 @@ static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 }
 
 int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
-		   char *fn, int m) {
-  int *alev = NULL, nc;
+		   char *fn, int M) {
+  int *alev = NULL;
+  unsigned int nk, nl, nm;
+  int allocated, *k, *l, *m;
   
   if (nlow < 0 || nup < 0) {
     return -1;
@@ -543,14 +664,23 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     }
   }
   
-  nc = OverlapLowUp(nlow, low, nup, up);
+  allocated = cfac_overlap_if(nlow, low, nup, up, &nk, &k, &nl, &l, &nm, &m);
   
-  SaveTransition0(cfac, nc, low+nlow-nc, nc, up+nup-nc, fn, m);
-  SaveTransition0(cfac, nc, low+nlow-nc, nup-nc, up, fn, m);
-  SaveTransition0(cfac, nup-nc, up, nc, low+nlow-nc, fn, m);
-  SaveTransition0(cfac, nlow-nc, low, nup, up, fn, m);
-  SaveTransition0(cfac, nup, up, nlow-nc, low, fn, m);
-
+  /* K <-> F */
+  SaveTransition0(cfac, nk, k, nup, up, fn, M);
+  SaveTransition0(cfac, nup, up, nk, k, fn, M);
+  /* M <-> M */
+  SaveTransition0(cfac, nm, m, nm, m, fn, M);
+  /* M <-> L */
+  SaveTransition0(cfac, nm, m, nl, l, fn, M);
+  SaveTransition0(cfac, nl, l, nm, m, fn, M);
+  
+  if (allocated) {
+    free(k);
+    free(l);
+    free(m);
+  }
+  
   if (alev) {
     free(alev);
   }

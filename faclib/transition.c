@@ -534,8 +534,8 @@ int cfac_overlap_if(unsigned int ni, int *i, unsigned int nf, int *f,
     return allocated;
 }
 
-static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
-		    char *fn, int m) {
+static int SaveTransition0(cfac_t *cfac, unsigned int nlow, const int *low,
+    unsigned int nup, const int *up, const char *fn, int mpole) {
   int i, j, ntr, mode;
   FILE *f;
   TR_RECORD r;
@@ -571,7 +571,7 @@ static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     return 0;
   }
 
-  if (m == 1) { /* always FR for M1 transitions */
+  if (mpole == 1) { /* always FR for M1 transitions */
     mode = M_FR;
   } else {
     mode = GetTransitionMode(cfac);
@@ -598,7 +598,7 @@ static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   fhdr.atom = cfac_get_atomic_number(cfac);
   
   tr_hdr.nele = GetNumElectrons(cfac, low[0]);
-  tr_hdr.multipole = m;
+  tr_hdr.multipole = mpole;
   tr_hdr.gauge = GetTransitionGauge(cfac);
   tr_hdr.mode = mode;
   
@@ -621,7 +621,7 @@ static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
         SetAWGrid(cfac, 1, dE*FINE_STRUCTURE_CONST, dE*FINE_STRUCTURE_CONST);
       }
       
-      if (TRMultipole(cfac, &rme, NULL, m, low[i], up[j]) != 0) {
+      if (TRMultipole(cfac, &rme, NULL, mpole, low[i], up[j]) != 0) {
         continue;
       }
       if (fabs(rme) < EPS30) continue;
@@ -639,44 +639,26 @@ static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   return 0;
 }
 
-int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
-		   char *fn, int M) {
-  int *alev = NULL;
+int SaveTransition(cfac_t *cfac,
+    unsigned int nlow, int *low, unsigned int nup, int *up,
+    const char *fn, int mpole) {
   unsigned int nk, nl, nm;
   int allocated, *k, *l, *m;
   
-  if (nlow < 0 || nup < 0) {
+  if (nlow <= 0 || nup <= 0) {
     return -1;
   }
 
-  if (nlow == 0 || nup == 0) {
-    int i, n = cfac_get_num_levels(cfac);
-    if (n <= 0) return -1;
-    alev = malloc(sizeof(int)*n);
-    if (!alev) return -1;
-    
-    for (i = 0; i < n; i++) alev[i] = i;
-
-    if (nlow == 0) {
-      nlow = n; 
-      low = alev;
-    }
-    if (nup == 0) {
-      nup = n;
-      up = alev;
-    }
-  }
-  
   allocated = cfac_overlap_if(nlow, low, nup, up, &nk, &k, &nl, &l, &nm, &m);
   
   /* K <-> F */
-  SaveTransition0(cfac, nk, k, nup, up, fn, M);
-  SaveTransition0(cfac, nup, up, nk, k, fn, M);
+  SaveTransition0(cfac, nk, k, nup, up, fn, mpole);
+  SaveTransition0(cfac, nup, up, nk, k, fn, mpole);
   /* M <-> M */
-  SaveTransition0(cfac, nm, m, nm, m, fn, M);
+  SaveTransition0(cfac, nm, m, nm, m, fn, mpole);
   /* M <-> L */
-  SaveTransition0(cfac, nm, m, nl, l, fn, M);
-  SaveTransition0(cfac, nl, l, nm, m, fn, M);
+  SaveTransition0(cfac, nm, m, nl, l, fn, mpole);
+  SaveTransition0(cfac, nl, l, nm, m, fn, mpole);
   
   if (allocated) {
     free(k);
@@ -684,9 +666,6 @@ int SaveTransition(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     free(m);
   }
   
-  if (alev) {
-    free(alev);
-  }
   ReinitRadial(cfac, 1);
 
   return 0;

@@ -613,6 +613,9 @@ static int SaveTransition0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       if (mode == M_FR && !cfac->tr_opts.fr_interpolate) {
         LEVEL *llev = GetLevel(cfac, low[i]);
         double dE = ulev->energy - llev->energy;
+        if (dE < 0) {
+          continue;
+        }
         
         FreeMultipoleArray(cfac);
         SetAWGrid(cfac, 1, dE*FINE_STRUCTURE_CONST, dE*FINE_STRUCTURE_CONST);

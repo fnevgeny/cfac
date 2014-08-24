@@ -252,10 +252,13 @@ static int SelectNeleLevels(cfac_t *cfac, int nele, int **levels)
     
     n = cfac_get_num_levels(cfac);
     *levels = malloc(n*sizeof(int));
+    if (!(*levels)) {
+        return -1;
+    }
     
     j = 0;
     for (i = 0; i < n; i++) {
-        if (GetNumElectrons(cfac, i) == nele) {
+        if (nele < 0 || GetNumElectrons(cfac, i) == nele) {
             (*levels)[j++] = i;
         }
     }
@@ -2481,6 +2484,14 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
   if (m == 0) {
     printf("m cannot be zero\n");
     return -1;
+  }
+
+  if (argc < 3) {
+    nup = SelectNeleLevels(cfac, -1, &up);
+    if (nup <= 0) return -1;
+    
+    low = up;
+    nlow = nup;
   }
 
   SaveTransition(cfac, nlow, low, nup, up, argv[0], m);

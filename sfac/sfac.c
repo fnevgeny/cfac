@@ -625,6 +625,9 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
   }
   
   if (argc == 1) {
+    nlow = SelectNeleLevels(cfac, -1, &low);
+    nup = nlow;
+    up = low;
     SaveExcitation(nlow, low, nup, up, 0, argv[0]);
   } else if (argc == 2) {
     if (argt[1] == STRING) {

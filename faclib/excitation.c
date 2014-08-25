@@ -2045,7 +2045,6 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int m
 int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   int i, j, m;
   FILE *f;
-  int *alev;
   int nsub;
   F_HEADER fhdr;
   ARRAY subte;
@@ -2057,26 +2056,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   cfac_cbcache_t cbcache;
   
   cfac_cbcache_init(&cbcache);
-
-  /* if low or up not given, assume all levels */
-  alev = NULL;
-  if (nlow == 0 || nup == 0) {
-    int n = cfac_get_num_levels(cfac);
-    if (n <= 0) return -1;
-    alev = malloc(sizeof(int)*n);
-    if (!alev) return -1;
-    
-    for (i = 0; i < n; i++) alev[i] = i;
-
-    if (nlow == 0) {
-      nlow = n; 
-      low = alev;
-    }
-    if (nup == 0) {
-      nup = n;
-      up = alev;
-    }
-  }
 
   nc = OverlapLowUp(nlow, low, nup, up);
 
@@ -2399,7 +2378,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   ReinitExcitation(1);
 
   ArrayFree(&subte);
-  if (alev) free(alev);
   
   CloseFile(f, &fhdr);
 

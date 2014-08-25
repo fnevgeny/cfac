@@ -421,9 +421,9 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
  * Return bool flag whether an allocation occured (and hence resultant
  * sets need to be free'd.)
  */
-int cfac_overlap_if(unsigned int ni, int *i, unsigned int nf, int *f,
-    unsigned int *nk, int **k, unsigned int *nl, int **l,
-    unsigned int *nm, int **m)
+int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
+    unsigned *nk, unsigned **k, unsigned *nl, unsigned **l,
+    unsigned *nm, unsigned **m)
 {
     int j;
     int i_min, i_max, f_min, f_max, sn_min, sn_max;
@@ -534,25 +534,31 @@ int cfac_overlap_if(unsigned int ni, int *i, unsigned int nf, int *f,
     return allocated;
 }
 
-static int SaveTransition0(cfac_t *cfac, unsigned int nlow, const int *low,
-    unsigned int nup, const int *up, const char *fn, int mpole) {
-  int i, j, ntr, mode;
-  FILE *f;
-  TR_RECORD r;
-  TR_HEADER tr_hdr;
-  F_HEADER fhdr;
+/* save radiative transitions; low & up are assumed NOT overlapping */
+static int crac_save_rtrans0(cfac_t *cfac,
+    unsigned nlow, const unsigned *low, unsigned nup, const unsigned *up,
+    int mpole, int mode,
+    cfac_tr_sink_t sink, void *udata) {
+  unsigned i, j, ntr;
   double emin, emax;
 
-  if (nlow <= 0 || nup <= 0) return -1;
+  if (!nlow || !nup) return 0;
 
   emin = 0.0;
   emax = 0.0;
   ntr = 0;
   for (i = 0; i < nlow; i++) {
     LEVEL *llev = GetLevel(cfac, low[i]);
+    if (!llev) {
+      return -1;
+    }
     for (j = 0; j < nup; j++) {
+      double dE;
       LEVEL *ulev = GetLevel(cfac, up[j]);
-      double dE = ulev->energy - llev->energy;
+      if (!ulev) {
+        return -1;
+      }
+      dE = ulev->energy - llev->energy;
       
       if (dE < 0) {
         continue;
@@ -571,12 +577,6 @@ static int SaveTransition0(cfac_t *cfac, unsigned int nlow, const int *low,
     return 0;
   }
 
-  if (mpole == 1) { /* always FR for M1 transitions */
-    mode = M_FR;
-  } else {
-    mode = GetTransitionMode(cfac);
-  }
-  
   if (mode == M_FR && cfac->tr_opts.fr_interpolate) {
       double e0;
       emin *= FINE_STRUCTURE_CONST;
@@ -593,22 +593,11 @@ static int SaveTransition0(cfac_t *cfac, unsigned int nlow, const int *low,
       }
   }
   
-  fhdr.type = DB_TR;
-  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
-  fhdr.atom = cfac_get_atomic_number(cfac);
-  
-  tr_hdr.nele = GetNumElectrons(cfac, low[0]);
-  tr_hdr.multipole = mpole;
-  tr_hdr.gauge = GetTransitionGauge(cfac);
-  tr_hdr.mode = mode;
-  
-  f = OpenFile(fn, &fhdr);
-  InitFile(f, &fhdr, &tr_hdr);
-    
   for (j = 0; j < nup; j++) {
     LEVEL *ulev = GetLevel(cfac, up[j]);
     for (i = 0; i < nlow; i++) {
       double rme;
+      cfac_rtrans_data_t rtdata;
 
       if (mode == M_FR && !cfac->tr_opts.fr_interpolate) {
         LEVEL *llev = GetLevel(cfac, low[i]);
@@ -626,51 +615,66 @@ static int SaveTransition0(cfac_t *cfac, unsigned int nlow, const int *low,
       }
       if (fabs(rme) < EPS30) continue;
       
-      r.upper = up[j];
-      r.lower = low[i];
-      r.rme = rme;
-      WriteTRRecord(f, &r);
+      rtdata.fi = low[i];
+      rtdata.ii = up[j];
+      rtdata.rme = rme;
+      if (sink(cfac, &rtdata, udata) != 0) {
+        return -1;
+      }
     }
   }
 
-  DeinitFile(f, &fhdr);
-  CloseFile(f, &fhdr);
-
   return 0;
 }
 
-int SaveTransition(cfac_t *cfac,
-    unsigned int nlow, int *low, unsigned int nup, int *up,
-    const char *fn, int mpole) {
-  unsigned int nk, nl, nm;
-  int allocated, *k, *l, *m;
-  
-  if (nlow <= 0 || nup <= 0) {
-    return -1;
-  }
+int crac_calculate_rtrans(cfac_t *cfac,
+    unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
+    int mpole, int mode,
+    cfac_tr_sink_t sink, void *udata) {
+    
+    unsigned int nk, nl, nm;
+    unsigned int *k, *l, *m;
+    int allocated, res;
 
-  allocated = cfac_overlap_if(nlow, low, nup, up, &nk, &k, &nl, &l, &nm, &m);
-  
-  /* K <-> F */
-  SaveTransition0(cfac, nk, k, nup, up, fn, mpole);
-  SaveTransition0(cfac, nup, up, nk, k, fn, mpole);
-  /* M <-> M */
-  SaveTransition0(cfac, nm, m, nm, m, fn, mpole);
-  /* M <-> L */
-  SaveTransition0(cfac, nm, m, nl, l, fn, mpole);
-  SaveTransition0(cfac, nl, l, nm, m, fn, mpole);
-  
-  if (allocated) {
-    free(k);
-    free(l);
-    free(m);
-  }
-  
-  ReinitRadial(cfac, 1);
+    if (nlow <= 0 || nup <= 0) {
+        return -1;
+    }
 
-  return 0;
+    allocated = cfac_overlap_if(nlow, low, nup, up, &nk, &k, &nl, &l, &nm, &m);
+
+    /* K <-> F */
+    res = crac_save_rtrans0(cfac, nk, k, nup, up, mpole, mode, sink, udata);
+    if (res != 0) {
+        return -1;
+    }
+    res = crac_save_rtrans0(cfac, nup, up, nk, k, mpole, mode, sink, udata);
+    if (res != 0) {
+        return -1;
+    }
+    /* M <-> M */
+    res = crac_save_rtrans0(cfac, nm, m, nm, m, mpole, mode, sink, udata);
+    if (res != 0) {
+        return -1;
+    }
+    /* M <-> L */
+    res = crac_save_rtrans0(cfac, nm, m, nl, l, mpole, mode, sink, udata);
+    if (res != 0) {
+        return -1;
+    }
+    res = crac_save_rtrans0(cfac, nl, l, nm, m, mpole, mode, sink, udata);
+    if (res != 0) {
+        return -1;
+    }
+
+    if (allocated) {
+        free(k);
+        free(l);
+        free(m);
+    }
+    
+    return 0;
 }
-  
+
 int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
 	       int nlow0, const int *low0, int nup0, const int *up0) {
   int i, n;

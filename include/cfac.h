@@ -37,4 +37,20 @@ int
 cfac_calculate_structure(cfac_t *cfac,
     int ng, const int *gids, int npg, const int *pgids, int no_ci);
 
+/* transition.c */
+typedef struct {
+    unsigned int ii, fi; /* initial (upper) and final (lower) level indices */
+    double rme;          /* reduced matrix element                          */
+} cfac_rtrans_data_t;
+
+typedef int
+(*cfac_tr_sink_t)(const cfac_t *cfac,
+    const cfac_rtrans_data_t *rtdata, void *udata);
+
+int
+crac_calculate_rtrans(cfac_t *cfac,
+    unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
+    int mpole, int mode,
+    cfac_tr_sink_t sink, void *udata);
+
 #endif /* __CFAC_H_ */

@@ -3542,6 +3542,61 @@ int ISearch(int i, int n, int *ia) {
   return -1;
 }
 
+  
+static int tr_sink(const cfac_t *cfac,
+    const cfac_rtrans_data_t *rtdata, void *udata)
+{
+    TR_RECORD r;
+    FILE *f = udata;
+
+    r.upper = rtdata->ii;
+    r.lower = rtdata->fi;
+    r.rme   = rtdata->rme;
+    WriteTRRecord(f, &r);
+    
+    return 0;
+}
+
+int SaveTransition(cfac_t *cfac,
+    unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
+    const char *fn, int mpole) {
+  int mode;
+  TR_HEADER tr_hdr;
+  F_HEADER fhdr;
+  FILE *f;
+  
+  if (nlow <= 0 || nup <= 0) {
+    return -1;
+  }
+
+  if (mpole == 1) { /* always FR for M1 transitions */
+    mode = M_FR;
+  } else {
+    mode = GetTransitionMode(cfac);
+  }
+  
+  fhdr.type = DB_TR;
+  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
+  fhdr.atom = cfac_get_atomic_number(cfac);
+  
+  tr_hdr.nele = GetNumElectrons(cfac, low[0]);
+  tr_hdr.multipole = mpole;
+  tr_hdr.gauge = GetTransitionGauge(cfac);
+  tr_hdr.mode = mode;
+  
+  f = OpenFile(fn, &fhdr);
+  InitFile(f, &fhdr, &tr_hdr);
+  
+  crac_calculate_rtrans(cfac, nlow, low, nup, up, mpole, mode, tr_sink, f);
+    
+  DeinitFile(f, &fhdr);
+  CloseFile(f, &fhdr);
+
+  ReinitRadial(cfac, 1);
+
+  return 0;
+}
+
 int StoreTable(const cfac_t *cfac,
     sqlite3 *db, unsigned long int sid, const char *ifn)
 {

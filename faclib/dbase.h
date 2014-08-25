@@ -351,6 +351,10 @@ int IBaseFromENRecord(EN_RECORD *r);
 
 int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n);
 
+int SaveTransition(cfac_t *cfac,
+    unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
+    const char *fn, int mpole);
+
 /* these are the write functions, which shouldn't be of much interest.
  * unless one needs to format the external data into FAC binary format.
  */

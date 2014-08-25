@@ -25,7 +25,6 @@ typedef struct _CEPK_ {
   double *pke;
 } CEPK;
 
-CEPW_SCRATCH *GetCEPWScratch(void);
 int FreeExcitationQk(void);
 int InitExcitation(void);
 int ReinitExcitation(int m);

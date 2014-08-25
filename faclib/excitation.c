@@ -91,10 +91,6 @@ void FreeExcitationQkData(void *p) {
   *((double **) p) = NULL;
 }
 
-CEPW_SCRATCH *GetCEPWScratch(void) {
-  return &pw_scratch;
-}
-
 int SetCEBorn(double eb, double x, double x1, double x0) {
   xborn = x;
   xborn1 = x1;

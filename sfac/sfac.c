@@ -2497,7 +2497,8 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
     nlow = nup;
   }
 
-  SaveTransition(cfac, nlow, low, nup, up, argv[0], m);
+  SaveTransition(cfac, nlow, (unsigned int*) low, nup, (unsigned int*) up,
+    argv[0], m);
   
   if (low != up) {
     free(low);

@@ -55,8 +55,6 @@ static double xborn0 = XBORN0;
 static double xborn1 = XBORN1;
 static double eborn = EBORN;
 
-static FILE *fpw=NULL;
-
 static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 5E-2, 0, 0, 10, {0.0}, {0.0}};
 
 static MULTI *pk_array;
@@ -95,11 +93,6 @@ void FreeExcitationQkData(void *p) {
 
 CEPW_SCRATCH *GetCEPWScratch(void) {
   return &pw_scratch;
-}
-
-int SetCEPWFile(char *fn) {
-  fpw = fopen(fn, "w");
-  return 0;
 }
 
 int SetCEBorn(double eb, double x, double x1, double x0) {
@@ -906,13 +899,7 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
 	  }
 	  ipk += n_tegrid;
 	}
-	if (fpw) {
-	  for (i = 0; i < nkl; i++) {
-	    kl0 = pw_scratch.kl[i];
-	    fprintf(fpw, "%12.5E %12.5E %3d %3d %12.5E %12.5E\n",
-		    te*HARTREE_EV, e1*HARTREE_EV, i, kl0, qk[i], dqk[i]);
-	  }
-	}
+
 	r = qk[0];
 	rd = dqk[0];
 	for (i = 1; i < nkl; i++) {
@@ -1870,17 +1857,10 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int m
       if (!msub) {
 	if (ang[i].k != ang[j].k) continue;
 	c /= ang[i].k + 1.0;
-	if (fpw) {
-	  fprintf(fpw, "# %3d %3d %12.5E %12.5E %2d %2d %2d\n", 
-		  tr->nlo, tr->nup, te*HARTREE_EV, 8.0*c, ang[i].k, n_tegrid, n_egrid);
-	}
 	ty = CERadialQk(cbcache, rq, te, ang[i].k0, ang[i].k1,
 			ang[j].k0, ang[j].k1, ang[i].k);
 	t = ang[i].k/2;
 	c1 = c;
-	if (fpw) {
-	  fprintf(fpw, "\n\n");
-	}
 	if (ty > type) type = ty;	  
 	for (ie = 0; ie < n_egrid1; ie++) {
 	  qkc[ie] += c*rq[ie];
@@ -2381,11 +2361,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   
   CloseFile(f, &fhdr);
 
-  if (fpw) {
-    fclose(fpw);
-    fpw = NULL;
-  }
-
   return 0;
 }
 
@@ -2632,11 +2607,6 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   free(up);
 
   CloseFile(f, &fhdr);
-
-  if (fpw) {
-    fclose(fpw);
-    fpw = NULL;
-  }
 
   return 0;
 }
@@ -2906,11 +2876,6 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 
   CloseFile(f, &fhdr);
 
-  if (fpw) {
-    fclose(fpw);
-    fpw = NULL;
-  }
-
   return 0;
 }
 
@@ -2937,10 +2902,6 @@ int InitExcitation(void) {
   MultiInit(qk_array, sizeof(double *), ndim, blocks2, 
     FreeExcitationQkData, InitPointerData);
 
-  if (fpw) {
-    fclose(fpw);
-    fpw = NULL;
-  }
   n_egrid = 0;
   n_tegrid = 0;
   n_usr = 0;
@@ -2962,11 +2923,6 @@ int ReinitExcitation(int m) {
   
   FreeExcitationQk(); 
    
-  if (fpw) {
-    fclose(fpw);
-    fpw = NULL;
-  }
-  
   n_tegrid = 0;
   egrid[0] = -1.0;
   usr_egrid[0] = -1.0;

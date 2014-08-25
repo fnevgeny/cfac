@@ -33,7 +33,6 @@ int SetCETEGrid(int n, double emin, double emax);
 int SetCETEGridDetail(int n, double *x);
 int SetAngleGrid(int m, int n, double xmin, double xmax);
 int SetAngleGridDetail(int m, int n, double *xg);
-int SetCEPWFile(char *fn);
 int SetCEBorn(double e, double x, double x1, double x0);
 void SetCELQR(int m);
 void SetCELMax(int m);

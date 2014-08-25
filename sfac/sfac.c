@@ -2813,15 +2813,6 @@ static int PSetSlaterCut(int argc, char *argv[], int argt[],
 }
 
 
-static int PSetCEPWFile(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
-  if (argc != 1) return -1;
-
-  SetCEPWFile(argv[0]);
-  
-  return 0;
-}
-
 static int PAppendTable(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {  
   if (argc != 1) return -1;
@@ -3015,7 +3006,6 @@ static int PGeneralizedMoment(int argc, char *argv[], int argt[],
 static METHOD methods[] = {
   {"GeneralizedMoment", PGeneralizedMoment},
   {"SlaterCoeff", PSlaterCoeff},
-  {"SetCEPWFile", PSetCEPWFile}, 
   {"AppendTable", PAppendTable}, 
   {"JoinTable", PJoinTable}, 
   {"SetSlaterCut", PSetSlaterCut}, 

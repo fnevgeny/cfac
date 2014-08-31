@@ -55,9 +55,11 @@ CREATE TABLE ctransitions (
     fin_id   INTEGER NOT NULL,
     type     INTEGER NOT NULL,
     qk_mode  INTEGER NOT NULL,
+    kl       INTEGER NOT NULL,
     ap0      REAL    NOT NULL,
     ap1      REAL    NOT NULL,
-    a_e      REAL    NOT NULL,
+    ap2      REAL    NOT NULL,
+    ap3      REAL    NOT NULL,
     FOREIGN KEY(sid, ini_id) REFERENCES levels(sid, id) ON DELETE CASCADE,
     FOREIGN KEY(sid, fin_id) REFERENCES levels(sid, id) ON DELETE CASCADE
 );

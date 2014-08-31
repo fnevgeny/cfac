@@ -338,8 +338,8 @@ static int StoreCTransitionCB(void *udata,
 }
 
 static int StoreCTransition(sqlite3 *db, unsigned long int sid,
-    int type, int qk_mode, int ini_id, int fin_id,
-    double ap0, double ap1, double a_e,
+    int type, int qk_mode, int ini_id, int fin_id, int kl,
+    double ap0, double ap1, double ap2, double ap3,
     unsigned long int *cid)
 {
     int retval = 0;
@@ -352,8 +352,8 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
     *cid = 0;
 
     sql = "INSERT INTO ctransitions" \
-          " (sid, type, qk_mode, ini_id, fin_id, ap0, ap1, a_e)" \
-          " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+          " (sid, type, qk_mode, ini_id, fin_id, kl, ap0, ap1, ap2, ap3)" \
+          " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
@@ -362,10 +362,13 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
     sqlite3_bind_int(stmt, 3, qk_mode);
     sqlite3_bind_int(stmt, 4, ini_id);
     sqlite3_bind_int(stmt, 5, fin_id);
+
+    sqlite3_bind_int(stmt, 6, kl);
     
-    sqlite3_bind_double(stmt, 6, ap0);
-    sqlite3_bind_double(stmt, 7, ap1);
-    sqlite3_bind_double(stmt, 8, a_e);
+    sqlite3_bind_double(stmt, 7, ap0);
+    sqlite3_bind_double(stmt, 8, ap1);
+    sqlite3_bind_double(stmt, 9, ap2);
+    sqlite3_bind_double(stmt, 10, ap3);
     
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
@@ -424,7 +427,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
             retval = StoreCTransition(db, sid,
                 DB_SQL_CS_CE, QK_EXACT, r.lower, r.upper,
-                r.bethe, r.born[0], r.born[1],
+                0, r.bethe, r.born[0], r.born[1], 0.0,
                 &cid);
             if (retval != 0) {
                 break;
@@ -504,11 +507,9 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                 break;
             }
 
-            /* TODO: r.kl; full fit? */
-
             retval = StoreCTransition(db, sid,
                 DB_SQL_CS_CI, h.qk_mode, r.b, r.f,
-                r.params[0], r.params[1], 0.0,
+                r.kl, r.params[0], r.params[1], r.params[2], r.params[3],
                 &cid);
             if (retval != 0) {
                 break;
@@ -580,37 +581,27 @@ int StoreRRTable(const cfac_t *cfac,
             RR_RECORD r;
             unsigned long int cid;
             int t;
-            double ap0, ap1;
-            TRANSITION tr;
-            int swapped;
-            double dE;
+            double ap0, ap1, ap2, ap3;
             
             n = ReadRRRecord(fp, &r, swp, &h);
             if (n == 0) {
                 break;
             }
             
-            GetTransition(cfac, r.b, r.f, &tr, &swapped);
-            dE = fabs(tr.e);
-
-            /* TODO: full fit ? */
-            
             if (h.qk_mode == QK_FIT && r.params[0]) {
-                double p0, p1, p2, p3;
-                p0 = r.params[0];
-                p1 = r.params[1];
-                p2 = r.params[2];
-                p3 = r.params[3];
-                ap0 = p0*pow(1.0 + p2, p1)*pow(p3/dE, 3.5 + r.kl);
+                ap0 = r.params[0];
+                ap1 = r.params[1];
+                ap2 = r.params[2];
+                ap3 = r.params[3];
             } else {
                 ap0 = r.strength[h.n_usr - 1]*
                     pow(h.usr_egrid[h.n_usr - 1], 3.5 + r.kl);
+                ap1 = ap2 = ap3 = 0.0;
             }
-            ap1 = (double) r.kl;
 
             retval = StoreCTransition(db, sid,
                 DB_SQL_CS_RR, h.qk_mode, r.b, r.f,
-                ap0, ap1, 0.0,
+                r.kl, ap0, ap1, ap2, ap3,
                 &cid);
             if (retval != 0) {
                 break;

@@ -58,12 +58,11 @@ static int _TRMultipole(cfac_t *cfac, double *rme, double *energy,
   lev2 = GetLevel(cfac, upper);
   if (lev2 == NULL) return -1;
   
-  *energy = lev2->energy - lev1->energy;
-  
   if (GetNumElectrons(cfac, lower) != GetNumElectrons(cfac, upper)) {
     return -1;
   }
   
+  *energy = lev2->energy - lev1->energy;
   if (*energy < 0.0) {
     return -1;
   }

@@ -36,8 +36,8 @@ typedef struct {
     double      *e;     /* energy grid           */
     double      *d;     /* data                  */
 
-    double       ap0;   /* asymtote parameter #1 */
-    double       ap1;   /* asymtote parameter #2 */
+    double       ap0;   /* asymptote parameter #1 */
+    double       ap1;   /* asymptote parameter #2 */
 
     double       d0;    /* threshold limit       */
     double       let;   /* low-e tangent         */

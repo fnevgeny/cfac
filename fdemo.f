@@ -147,14 +147,15 @@ c---------
       return
       end
 
-      subroutine ct_sink(i, j, ctype, ap0, ap1, nd, e, d)
+      subroutine ct_sink(i, j, ctype, kl, ap0, ap1, ap2, ap3, nd, e, d)
       implicit none
-      integer i, j, ctype, nd
-      double precision e(*), d(*), ap0, ap1
+      integer i, j, ctype, kl, nd
+      double precision e(*), d(*), ap0, ap1, ap2, ap3
 
-      write (*,923) i, j, ctype, ap0, ap1, e(1:nd), d(1:nd)
- 923  format(i5, ' -> ', i5, ', type = ', i1, ' ap0,1 = [',
-     &       g10.3, g10.3, ']', 12g10.3)
+      write (*,923) i, j, ctype, kl, ap0, ap1, ap2, ap3,
+     &              e(1:nd), d(1:nd)
+ 923  format(i5, ' -> ', i5, ', type = ', i1, ', kl = ', i1,
+     &       ' ap0-3 = [', 4g10.3, ']', 12g10.3)
 
       return
       end

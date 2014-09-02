@@ -35,7 +35,8 @@ typedef void (*cfacdb_aitrans_fsink_t)(int *i, int *j,
     double *rate);  
 
 typedef void (*cfacdb_ctrans_fsink_t)(int *i, int *j,
-    int *type, double *ap0, double *ap1, int *nd, double *e, double *d);  
+    int *type, int *kl, double *ap0, double *ap1, double *ap2, double *ap3,
+    int *nd, double *e, double *d);  
 
 typedef void (*cfacdb_crates_fsink_t)(int *i, int *j,
     int *type, double *ratec);  
@@ -212,7 +213,8 @@ static void ctrans_fsink(const cfac_db_t *cdb,
     fi = cbdata->ii + 1;
     fj = cbdata->fi + 1;
     
-    fdata->sink(&fi, &fj, (int *) &cbdata->type, &cbdata->ap0, &cbdata->ap1,
+    fdata->sink(&fi, &fj, (int *) &cbdata->type, (int *) &cbdata->kl,
+        &cbdata->ap0, &cbdata->ap1, &cbdata->ap2, &cbdata->ap3,
         (int *) &cbdata->nd, cbdata->e, cbdata->d);
 }
 

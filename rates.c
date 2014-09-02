@@ -1,7 +1,7 @@
 /* Calculation of rate coefficients. Mostly copied from CRaC */
 
 /* 
- * Copyright (C) 2013 Evgeny Stambulchik
+ * Copyright (C) 2013-2014 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,7 @@ typedef struct {
     double      *e;     /* energy grid           */
     double      *d;     /* data                  */
 
-    double       ap0;   /* asymptote parameter #1 */
-    double       ap1;   /* asymptote parameter #2 */
+    double       ap[5]; /* asymptote parameters  */
 
     double       d0;    /* threshold limit       */
     double       let;   /* low-e tangent         */
@@ -49,11 +48,12 @@ typedef struct {
     double T;
     double de;
     int type;
+    int db_format;
     crac_intext_t intext;
 } rate_int_params_t;
 
 static double crac_intext(const crac_intext_t *intext, double x,
-    double (*f_asymptote)(double x, double ap0, double ap1))
+    double (*f_asymptote)(double x, const double *ap))
 {
     double Omega = 0.0;
     unsigned int i, n;
@@ -97,13 +97,13 @@ static double crac_intext(const crac_intext_t *intext, double x,
     } else {
         /* high-e extrapolation */
         double c = dx[n - 1]/x;
-        double a_n = f_asymptote(dx[n - 1], intext->ap0, intext->ap1);
+        double a_n = f_asymptote(dx[n - 1], intext->ap);
         if (a_n <= 0.0) {
             /* 1/e */
             Omega = dd[n - 1]*c;
         } else {
             double beta0 = dd[n - 1]/a_n;
-            Omega = f_asymptote(x, intext->ap0, intext->ap1)*pow(beta0, c);
+            Omega = f_asymptote(x, intext->ap)*pow(beta0, c);
         }
     }
     
@@ -115,8 +115,9 @@ static double get_e_MB_vf(double T, double E)
     return 2*sqrt(2/M_PI)*E/pow(T, 1.5)*exp(-E/T);
 }
 
-static double crac_born_asymptote(double x1, double b0, double b1)
+static double crac_born_asymptote(double x1, const double *ap)
 {
+    double b0 = ap[0], b1 = ap[1];
     /* negative b0 corresponds to spin-forbidden transition */
     if (b0 > 0) {
         return b0*log(x1) + b1;
@@ -125,9 +126,30 @@ static double crac_born_asymptote(double x1, double b0, double b1)
     }
 }
 
-static double crac_rr_asymptote(double x1, double p0, double kl)
+static double crac_ci_asymptote(double x1, const double *ap)
 {
-    return p0*pow(x1, -(3.5 + kl));
+    double y = 1.0 - 1.0/x1;
+    
+    return ap[0]*log(x1) + ap[1]*y*y + y*(ap[2]/x1 + ap[3]/(x1*x1));
+}
+
+static double crac_rr_asymptote_v1(double x1, const double *ap)
+{
+    int kl = (int) rint(ap[1]);
+    return ap[0]*pow(x1, -(3.5 + kl));
+}
+
+static double crac_rr_asymptote_v2(double x1, const double *ap)
+{
+    int kl = (int) rint(ap[4]);
+    double x, y, res;
+    
+    x = (x1 - 1)/ap[3] + 1;
+    y = (1 + ap[2])/(sqrt(x) + ap[2]);
+    
+    res = x1/(x1 - 1 + ap[3])*ap[0]*pow(x, -3.5 - kl + 0.5*ap[1])*pow(y, ap[1]);
+    
+    return res;
 }
 
 /* NB: rates include the degeneracy of the initial level!!! */
@@ -139,15 +161,24 @@ static double rate_int_f(double e, void *params) {
     
     switch (p->type) {
     case DB_SQL_CS_CE:
-    case DB_SQL_CS_CI:
         x1 = x;
         Omega = crac_intext(&p->intext, x1, crac_born_asymptote);
         /* convert collisional strength to cross-section */
         xs = Omega*M_PI/(2.0*(x1*p->de));
         break;
+    case DB_SQL_CS_CI:
+        x1 = x;
+        Omega = crac_intext(&p->intext, x1, crac_ci_asymptote);
+        /* convert collisional strength to cross-section */
+        xs = Omega*M_PI/(2.0*(x1*p->de));
+        break;
     case DB_SQL_CS_PI:
         x1 = x + 1;
-        Omega = crac_intext(&p->intext, x1, crac_rr_asymptote);
+        if (p->db_format == 1) {
+            Omega = crac_intext(&p->intext, x1, crac_rr_asymptote_v1);
+        } else {
+            Omega = crac_intext(&p->intext, x1, crac_rr_asymptote_v2);
+        }
         /* d_gf/d_E* to RR cross-section */
         xs = Omega*(M_PI*CUBE(ALPHA))*p->de*SQR(x1)/x;
         break;
@@ -186,13 +217,18 @@ static void crates_sink(const cfac_db_t *cdb,
     params.de   = cbdata->de;
     params.type = cbdata->type;
     
+    params.db_format = cdb->db_format;
+    
     intext = &params.intext;
     
     intext->ndata = cbdata->nd;
-    intext->e = cbdata->e;
-    intext->d = cbdata->d;
-    intext->ap0 = cbdata->ap0;
-    intext->ap1 = cbdata->ap1;
+    intext->e     = cbdata->e;
+    intext->d     = cbdata->d;
+    intext->ap[0] = cbdata->ap0;
+    intext->ap[1] = cbdata->ap1;
+    intext->ap[2] = cbdata->ap2;
+    intext->ap[3] = cbdata->ap3/cbdata->de;
+    intext->ap[4] = (double) cbdata->kl;
 
     F.function = &rate_int_f;
     F.params   = &params;

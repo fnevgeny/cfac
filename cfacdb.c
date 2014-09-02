@@ -5,7 +5,7 @@
  */
 
 /* 
- * Copyright (C) 2013 Evgeny Stambulchik
+ * Copyright (C) 2013-2014 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,8 @@
 #define SQR(a) ((a)*(a))
 
 #include "cfac_schema.i"
-
+#include "cfac_schema_v1.i"
+#include "cfac_schema_v2.i"
 
 static int sid_cb(void *udata,
     int argc, char **argv, char **colNames)
@@ -51,6 +52,20 @@ static int sid_cb(void *udata,
     return 0;
 }
 
+static int format_cb(void *udata,
+    int argc, char **argv, char **colNames)
+{
+    int *db_format = udata;
+
+    if (argc != 1 || !argv[0]) {
+        return -1;
+    }
+    
+    *db_format = atol(argv[0]);
+
+    return 0;
+}
+
 cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
 {
     cfac_db_t *cdb = NULL;
@@ -60,8 +75,10 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     char *errmsg;
     int rc;
     
-    unsigned int i;
+    unsigned int i, ns;
     unsigned long ntot;
+    
+    const char **schemas[2];
 
     cdb = malloc(sizeof(cfac_db_t));
     if (!cdb) {
@@ -76,17 +93,42 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
         return NULL;
     }
 
+    /* verify the version/format is compatible */
+    sql = "SELECT value FROM cfacdb WHERE property = 'format'";
+    
+    rc = sqlite3_exec(cdb->db, sql, format_cb, &cdb->db_format, &errmsg);
+    if (rc != SQLITE_OK) {
+        /* assume the first version, without the cfacdb table */
+        cdb->db_format = 1;
+    }
+    
+    if (cdb->db_format != 1 && cdb->db_format != 2) {
+        fprintf(stderr, "Unsupported database format %d\n", cdb->db_format);
+        sqlite3_close(cdb->db);
+        return NULL;
+    }
+
+    schemas[0] = cfac_schema;
+    if (cdb->db_format == 1) {
+        schemas[1] = cfac_schema_v1;
+    } else {
+        schemas[1] = cfac_schema_v2;
+    }
+    
     /* create temporary views etc */
-    i = 0;
-    while ((sql = schema_str[i])) {
-        rc = sqlite3_exec(cdb->db, sql, NULL, NULL, &errmsg);
-        if (rc != SQLITE_OK) {
-            fprintf(stderr, "SQL error: %s\n", errmsg);
-            sqlite3_free(errmsg);
-            sqlite3_close(cdb->db);
-            return NULL;
+    for (ns = 0; ns < 2; ns++) {
+        const char **schema = schemas[ns];
+        i = 0;
+        while ((sql = schema[i])) {
+            rc = sqlite3_exec(cdb->db, sql, NULL, NULL, &errmsg);
+            if (rc != SQLITE_OK) {
+                fprintf(stderr, "SQL error: %s\n", errmsg);
+                sqlite3_free(errmsg);
+                sqlite3_close(cdb->db);
+                return NULL;
+            }
+            i++;
         }
-        i++;
     }
 
     /* select latest cFAC session */
@@ -492,10 +534,19 @@ int cfac_db_ctrans(cfac_db_t *cdb,
         return 1;
     }
     
-    sql = "SELECT ini_id, fin_id, type, e, strength, de, ap0, ap1" \
-          " FROM _cstrengths_v" \
-          " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
-          " ORDER BY ini_id, fin_id, type, e";
+    if (cdb->db_format == 1) {
+        sql = "SELECT ini_id, fin_id, type, e, strength, de, ap0, ap1" \
+              " FROM _cstrengths_v" \
+              " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
+              " ORDER BY ini_id, fin_id, type, e";
+    } else {
+        sql = "SELECT ini_id, fin_id, type, e, strength, de," \
+              "       kl, ap0, ap1, ap2, ap3" \
+              " FROM _cstrengths_v" \
+              " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
+              " ORDER BY ini_id, fin_id, type, e";
+    }
+    
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
     sqlite3_bind_int(stmt, 2, cdb->nele_max);
@@ -506,8 +557,8 @@ int cfac_db_ctrans(cfac_db_t *cdb,
     type_prev = 0;
     nd = 0;
     do {
-        unsigned int ilfac, iufac, type;
-        double de, ap0, ap1, e, strength;
+        unsigned int ilfac, iufac, type, kl;
+        double de, ap0, ap1, ap2, ap3, e, strength;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -526,8 +577,19 @@ int cfac_db_ctrans(cfac_db_t *cdb,
             e        = sqlite3_column_double(stmt, 3);
             strength = sqlite3_column_double(stmt, 4);
             de       = sqlite3_column_double(stmt, 5);
-            ap0      = sqlite3_column_double(stmt, 6);
-            ap1      = sqlite3_column_double(stmt, 7);
+            if (cdb->db_format == 1) {
+                kl   = 0;
+                ap0  = sqlite3_column_double(stmt, 6);
+                ap1  = sqlite3_column_double(stmt, 7);
+                ap2  = 0.0;
+                ap3  = 0.0;
+            } else {
+                kl   = sqlite3_column_int(stmt, 6);
+                ap0  = sqlite3_column_double(stmt, 7);
+                ap1  = sqlite3_column_double(stmt, 8);
+                ap2  = sqlite3_column_double(stmt, 9);
+                ap3  = sqlite3_column_double(stmt,10);
+            }
             
             if (ilfac != ilfac_prev ||
                 iufac != iufac_prev ||
@@ -553,8 +615,11 @@ int cfac_db_ctrans(cfac_db_t *cdb,
 
             cbdata.de   = de;
 
+            cbdata.kl   = kl;
             cbdata.ap0  = ap0;
             cbdata.ap1  = ap1;
+            cbdata.ap2  = ap2;
+            cbdata.ap3  = ap3;
 
             es[nd] = 1 + e/de;
             ds[nd] = strength;

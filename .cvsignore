@@ -1,4 +1,4 @@
-*.db *.sqlite
+*.db *.sqlite *.i
 Make.dep
-cfac_schema.i
 fdemo
+.gdb_history

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013 Evgeny Stambulchik
+ * Copyright (C) 2013-2014 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 
 typedef struct {
     sqlite3 *db;
+    int db_format;
     
     int nele_min;
     int nele_max;
@@ -82,7 +83,8 @@ typedef struct {
     unsigned int type;
     
     double de;
-    double ap0, ap1;
+    unsigned int kl;
+    double ap0, ap1, ap2, ap3;
     
     unsigned int nd;
     double *e;

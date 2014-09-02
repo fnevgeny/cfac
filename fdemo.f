@@ -166,7 +166,7 @@ c---------
       double precision ratec
 
       write (*,924) i, j, ctype, ratec
- 924  format(i5, ' -> ', i5, ', type = ', i1, ' ratec = ', 12g10.3)
+ 924  format(i5, ' -> ', i5, ', type = ', i1, ' ratec = ', g10.3)
 
       return
       end

@@ -1955,6 +1955,11 @@ int PrintTable(char *ifn, char *ofn, int v) {
     goto DONE;
   }
 
+  if (v && fh.type == DB_EN && mem_en_table == NULL) {
+    printf("Field dependent energy table has not been built in memory.\n");
+    return -1;
+  }
+
   if (v && fh.type > DB_CIM) {
     if (mem_enf_table == NULL) {
       printf("Field dependent energy table has not been built in memory.\n");

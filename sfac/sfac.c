@@ -118,6 +118,27 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
   return ng;
 }
 
+static int SelectNeleGroups(int nele, int **kg) {
+    int i, j, ng = GetNumGroups(cfac);
+    
+    (*kg) = malloc(sizeof(int)*ng);
+    if (!*kg) {
+        return 0;
+    }
+    
+    j = 0;
+    for (i = 0; i < ng; i++) {
+        CONFIG_GROUP *cg = GetGroup(cfac, i);
+        if (cg->n_electrons == nele) {
+            (*kg)[j++] = i;
+        }
+    }
+    
+    (*kg) = realloc(*kg, sizeof(int)*j);
+    
+    return j;
+}
+
 static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
   int n, ng, *kg, i, j, k, im, m, m0;
   int nrg, *krg, nrec;
@@ -2385,6 +2406,10 @@ static int PStructure(int argc, char *argv[], int argt[],
     SetSymmetry(cfac, ip, nj, kg);
     free(kg);
     return 0;
+  } else
+  if (argc == 2 && argt[0] == STRING && argt[1] == NUMBER) {
+    int nele = atoi(argv[1]);
+    ng = SelectNeleGroups(nele, &kg);
   } else {
     if (argc == 4) ip = atoi(argv[3]);		  
     if (argt[0] != STRING) return -1;

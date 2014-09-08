@@ -553,7 +553,7 @@ int cfac_db_aitrans(cfac_db_t *cdb,
     
     sql = "SELECT ini_id, fin_id, rate" \
           " FROM _aitransitions_v" \
-          " WHERE sid = ? AND nele <= ? AND nele > ?" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ?" \
           " ORDER BY ini_id, fin_id";
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);

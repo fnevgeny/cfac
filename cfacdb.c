@@ -306,6 +306,40 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     }
     memset(cdb->lmap, 0, ntot*sizeof(unsigned int));
 
+    sqlite3_reset(stmt);
+
+    sql = "SELECT id" \
+          " FROM levels" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ?" \
+          " ORDER BY nele DESC, e ASC";
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
+
+    i = 0;
+    do {
+        int ifac;
+        
+        rc = sqlite3_step(stmt);
+        switch (rc) {
+        case SQLITE_DONE:
+        case SQLITE_OK:
+            break;
+        case SQLITE_ROW:
+            ifac = sqlite3_column_int64(stmt, 0);
+            
+            cdb->lmap[ifac - cdb->id_min] = i; i++;
+            break;
+        default:
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+            sqlite3_finalize(stmt);
+            sqlite3_close(cdb->db);
+            return NULL;
+            break;
+        }
+    } while (rc == SQLITE_ROW);
+
     sqlite3_finalize(stmt);
     
     return cdb;
@@ -423,8 +457,7 @@ int cfac_db_levels(cfac_db_t *cdb,
             cbdata.sname  = (char *) sqlite3_column_text  (stmt, 9);
             
             sink(cdb, &cbdata, udata);
-            
-            cdb->lmap[cbdata.ifac - cdb->id_min] = i; i++;
+            i++;
             
             break;
         default:

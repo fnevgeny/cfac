@@ -52,6 +52,12 @@ typedef struct {
 } cfac_db_t;
 
 typedef struct {
+    unsigned int nele;
+    double e_gs;
+    unsigned long nlevels;
+} cstates_cb_data_t;
+
+typedef struct {
     unsigned int i;
     
     unsigned int ifac;
@@ -107,6 +113,10 @@ typedef void (*cfac_db_crates_sink_t)(const cfac_db_t *cdb,
 
 cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max);
 void cfac_db_close(cfac_db_t *cdb);
+
+int cfac_db_cstates(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, cstates_cb_data_t *cbdata, void *udata),
+    void *udata);
 
 int cfac_db_levels(cfac_db_t *cdb,
     void (*sink)(const cfac_db_t *cdb, levels_cb_data_t *cbdata, void *udata),

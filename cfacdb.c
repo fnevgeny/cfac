@@ -327,6 +327,56 @@ void cfac_db_close(cfac_db_t *cdb)
 }
 
 
+int cfac_db_cstates(cfac_db_t *cdb,
+    void (*sink)(const cfac_db_t *cdb, cstates_cb_data_t *cbdata, void *udata),
+    void *udata)
+{
+    sqlite3_stmt *stmt;
+    const char *sql;
+    int rc;
+    
+    if (!cdb) {
+        return 1;
+    }
+    
+    sql = "SELECT nele, e_gs, nlevels" \
+          " FROM _cstates_v" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ?" \
+          " ORDER BY nele DESC";
+    sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+    sqlite3_bind_int(stmt, 1, cdb->sid);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
+    
+    do {
+        cstates_cb_data_t cbdata;
+        
+        rc = sqlite3_step(stmt);
+        switch (rc) {
+        case SQLITE_DONE:
+        case SQLITE_OK:
+            break;
+        case SQLITE_ROW:
+            cbdata.nele    = sqlite3_column_int   (stmt, 0);
+            cbdata.e_gs    = sqlite3_column_double(stmt, 1);
+            cbdata.nlevels = sqlite3_column_int   (stmt, 2);
+            
+            sink(cdb, &cbdata, udata);
+            
+            break;
+        default:
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+            sqlite3_finalize(stmt);
+            return 2;
+            break;
+        }
+    } while (rc == SQLITE_ROW);
+    
+    sqlite3_finalize(stmt);
+    
+    return 0;
+}
+
 int cfac_db_levels(cfac_db_t *cdb,
     void (*sink)(const cfac_db_t *cdb, levels_cb_data_t *cbdata, void *udata),
     void *udata)

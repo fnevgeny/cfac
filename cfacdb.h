@@ -49,7 +49,7 @@ typedef struct {
     unsigned int id_max;
 
     unsigned int *lmap;
-} cfac_db_t;
+} cfacdb_t;
 
 typedef struct {
     unsigned int nele;
@@ -119,41 +119,41 @@ typedef struct {
 
     int          cube;  /* cubic interpolation   */
     double     (*f_asymptote)(double x, const double *ap);
-} cfac_db_intext_t;
+} cfacdb_intext_t;
 
-typedef void (*cfac_db_crates_sink_t)(const cfac_db_t *cdb,
+typedef void (*cfacdb_crates_sink_t)(const cfacdb_t *cdb,
     crates_cb_data_t *cbdata, void *udata);
 
 
-cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max);
-void cfac_db_close(cfac_db_t *cdb);
+cfacdb_t *cdb_init(const char *fname, int nele_min, int nele_max);
+void cfacdb_close(cfacdb_t *cdb);
 
-int cfac_db_cstates(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, cstates_cb_data_t *cbdata, void *udata),
+int cfacdb_cstates(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, cstates_cb_data_t *cbdata, void *udata),
     void *udata);
 
-int cfac_db_levels(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, levels_cb_data_t *cbdata, void *udata),
+int cfacdb_levels(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, levels_cb_data_t *cbdata, void *udata),
     void *udata);
 
-int cfac_db_rtrans(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, rtrans_cb_data_t *cbdata, void *udata),
+int cfacdb_rtrans(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, rtrans_cb_data_t *cbdata, void *udata),
     void *udata);
 
-int cfac_db_aitrans(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, aitrans_cb_data_t *cbdata, void *udata),
+int cfacdb_aitrans(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, aitrans_cb_data_t *cbdata, void *udata),
     void *udata);
 
-int cfac_db_ctrans(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
+int cfacdb_ctrans(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
     void *udata);
 
-int cfac_db_prepare_intext(const cfac_db_t *cdb,
-    const ctrans_cb_data_t *cbdata, cfac_db_intext_t *intext);
-double cfac_db_intext(const cfac_db_intext_t *intext, double x);
+int cfacdb_prepare_intext(const cfacdb_t *cdb,
+    const ctrans_cb_data_t *cbdata, cfacdb_intext_t *intext);
+double cfacdb_intext(const cfacdb_intext_t *intext, double x);
 
-int cfac_db_crates(cfac_db_t *cdb, double T,
-    cfac_db_crates_sink_t sink,
+int cfacdb_crates(cfacdb_t *cdb, double T,
+    cfacdb_crates_sink_t sink,
     void *udata);
 
 #endif /* _CFACDB_H */

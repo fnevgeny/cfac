@@ -36,10 +36,10 @@ typedef struct {
     double de;
     int type;
     int db_format;
-    cfac_db_intext_t intext;
+    cfacdb_intext_t intext;
 } rate_int_params_t;
 
-double cfac_db_intext(const cfac_db_intext_t *intext, double x)
+double cfacdb_intext(const cfacdb_intext_t *intext, double x)
 {
     double Omega = 0.0;
     unsigned int i, n;
@@ -142,8 +142,8 @@ static double crac_rr_asymptote_v2(double x1, const double *ap)
     return res;
 }
 
-int cfac_db_prepare_intext(const cfac_db_t *cdb,
-    const ctrans_cb_data_t *cbdata, cfac_db_intext_t *intext)
+int cfacdb_prepare_intext(const cfacdb_t *cdb,
+    const ctrans_cb_data_t *cbdata, cfacdb_intext_t *intext)
 {
     intext->ndata = cbdata->nd;
     intext->e     = cbdata->e;
@@ -222,17 +222,17 @@ static double rate_int_f(double e, void *params) {
         break;
     }
     
-    Omega = cfac_db_intext(&p->intext, x1);
+    Omega = cfacdb_intext(&p->intext, x1);
     xs = Omega*conv;
 
     return xs*get_e_MB_vf(p->T, e);
 }
 
-static void crates_sink(const cfac_db_t *cdb,
+static void crates_sink(const cfacdb_t *cdb,
     ctrans_cb_data_t *cbdata, void *udata)
 {
     crates_cb_data_t rcbdata;
-    cfac_db_intext_t *intext;
+    cfacdb_intext_t *intext;
     
     int gsl_status;
     double low_limit, split_limit, result, error;
@@ -245,7 +245,7 @@ static void crates_sink(const cfac_db_t *cdb,
     
     struct {
         double T;
-        cfac_db_crates_sink_t sink;
+        cfacdb_crates_sink_t sink;
         void *udata;
         gsl_integration_workspace *w;
     } *rdata = udata;
@@ -258,7 +258,7 @@ static void crates_sink(const cfac_db_t *cdb,
     
     intext = &params.intext;
     
-    cfac_db_prepare_intext(cdb, cbdata, intext);
+    cfacdb_prepare_intext(cdb, cbdata, intext);
     
     F.function = &rate_int_f;
     F.params   = &params;
@@ -299,14 +299,14 @@ static void crates_sink(const cfac_db_t *cdb,
     rdata->sink(cdb, &rcbdata, rdata->udata);
 }
 
-int cfac_db_crates(cfac_db_t *cdb, double T,
-    cfac_db_crates_sink_t sink, void *udata)
+int cfacdb_crates(cfacdb_t *cdb, double T,
+    cfacdb_crates_sink_t sink, void *udata)
 {
     int rc;
 
     struct {
         double T;
-        cfac_db_crates_sink_t sink;
+        cfacdb_crates_sink_t sink;
         void *udata;
         gsl_integration_workspace *w;
     } rdata;
@@ -320,7 +320,7 @@ int cfac_db_crates(cfac_db_t *cdb, double T,
         return 2;
     }
     
-    rc = cfac_db_ctrans(cdb, crates_sink, &rdata);
+    rc = cfacdb_ctrans(cdb, crates_sink, &rdata);
     
     gsl_integration_workspace_free(rdata.w);
     

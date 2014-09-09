@@ -66,9 +66,9 @@ static int format_cb(void *udata,
     return 0;
 }
 
-cfac_db_t *cdb_open(const char *fname)
+cfacdb_t *cdb_open(const char *fname)
 {
-    cfac_db_t *cdb = NULL;
+    cfacdb_t *cdb = NULL;
     
     const char *sql;
     char *errmsg;
@@ -78,11 +78,11 @@ cfac_db_t *cdb_open(const char *fname)
     
     const char **schemas[2];
 
-    cdb = malloc(sizeof(cfac_db_t));
+    cdb = malloc(sizeof(cfacdb_t));
     if (!cdb) {
         return NULL;
     }
-    memset(cdb, 0, sizeof(cfac_db_t));   
+    memset(cdb, 0, sizeof(cfacdb_t));   
 
     rc = sqlite3_open_v2(fname, &cdb->db, SQLITE_OPEN_READONLY, NULL);
     if (rc) {
@@ -132,9 +132,9 @@ cfac_db_t *cdb_open(const char *fname)
     return cdb;
 }
 
-cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
+cfacdb_t *cdb_init(const char *fname, int nele_min, int nele_max)
 {
-    cfac_db_t *cdb;
+    cfacdb_t *cdb;
     
     sqlite3_stmt *stmt;
     const char *sql;
@@ -153,7 +153,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_OK) {
         fprintf(stderr, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
 
@@ -171,7 +171,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_ROW) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
 
@@ -193,7 +193,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_ROW) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
 
@@ -214,7 +214,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_ROW) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
 
@@ -235,7 +235,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_ROW) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
 
@@ -256,7 +256,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_ROW) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
 
@@ -277,7 +277,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_ROW) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
 
@@ -298,7 +298,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (rc != SQLITE_ROW) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
     
@@ -316,7 +316,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     if (!cdb->lmap) {
         fprintf(stderr, "Failed allocating memory for ndim=%lu\n", cdb->ndim);
         sqlite3_finalize(stmt);
-        cfac_db_close(cdb);
+        cfacdb_close(cdb);
         return NULL;
     }
     memset(cdb->lmap, 0, ntot*sizeof(unsigned int));
@@ -349,7 +349,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            cfac_db_close(cdb);
+            cfacdb_close(cdb);
             return NULL;
             break;
         }
@@ -360,7 +360,7 @@ cfac_db_t *cdb_init(const char *fname, int nele_min, int nele_max)
     return cdb;
 }
 
-void cfac_db_close(cfac_db_t *cdb)
+void cfacdb_close(cfacdb_t *cdb)
 {
     if (cdb) {
         if (cdb->lmap) {
@@ -376,8 +376,8 @@ void cfac_db_close(cfac_db_t *cdb)
 }
 
 
-int cfac_db_cstates(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, cstates_cb_data_t *cbdata, void *udata),
+int cfacdb_cstates(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, cstates_cb_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -426,8 +426,8 @@ int cfac_db_cstates(cfac_db_t *cdb,
     return 0;
 }
 
-int cfac_db_levels(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, levels_cb_data_t *cbdata, void *udata),
+int cfacdb_levels(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, levels_cb_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -489,8 +489,8 @@ int cfac_db_levels(cfac_db_t *cdb,
 }
 
 
-int cfac_db_rtrans(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, rtrans_cb_data_t *cbdata, void *udata),
+int cfacdb_rtrans(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, rtrans_cb_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -554,8 +554,8 @@ int cfac_db_rtrans(cfac_db_t *cdb,
 }
 
 
-int cfac_db_aitrans(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, aitrans_cb_data_t *cbdata, void *udata),
+int cfacdb_aitrans(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, aitrans_cb_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -613,8 +613,8 @@ int cfac_db_aitrans(cfac_db_t *cdb,
 }
 
 
-int cfac_db_ctrans(cfac_db_t *cdb,
-    void (*sink)(const cfac_db_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
+int cfacdb_ctrans(cfacdb_t *cdb,
+    void (*sink)(const cfacdb_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;

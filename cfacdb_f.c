@@ -65,7 +65,7 @@ static char *f77char2str(const char *fstr, unsigned int fstrlen)
 
 
 /* Fortran API functions below */
-static cfac_db_t *cdb = NULL;
+static cfacdb_t *cdb = NULL;
 
 
 void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
@@ -101,7 +101,7 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
 
 void cfacdb_close_(void)
 {
-    cfac_db_close(cdb);
+    cfacdb_close(cdb);
     cdb = NULL;
 }
 
@@ -120,7 +120,7 @@ void cfacdb_species_(int *anum, double *mass, int *ierr)
 }
 
 
-static void levels_fsink(const cfac_db_t *cdb,
+static void levels_fsink(const cfacdb_t *cdb,
     levels_cb_data_t *cbdata, void *udata)
 {
     struct {
@@ -145,11 +145,11 @@ void cfacdb_levels_(cfacdb_levels_fsink_t sink, int *ierr)
     
     fdata.sink = sink;
     
-    *ierr = cfac_db_levels(cdb, levels_fsink, &fdata);
+    *ierr = cfacdb_levels(cdb, levels_fsink, &fdata);
 }
 
 
-static void rtrans_fsink(const cfac_db_t *cdb,
+static void rtrans_fsink(const cfacdb_t *cdb,
     rtrans_cb_data_t *cbdata, void *udata)
 {
     struct {
@@ -171,11 +171,11 @@ void cfacdb_rtrans_(cfacdb_rtrans_fsink_t sink, int *ierr)
     
     fdata.sink = sink;
     
-    *ierr = cfac_db_rtrans(cdb, rtrans_fsink, &fdata);
+    *ierr = cfacdb_rtrans(cdb, rtrans_fsink, &fdata);
 }
 
 
-static void aitrans_fsink(const cfac_db_t *cdb,
+static void aitrans_fsink(const cfacdb_t *cdb,
     aitrans_cb_data_t *cbdata, void *udata)
 {
     struct {
@@ -197,11 +197,11 @@ void cfacdb_aitrans_(cfacdb_aitrans_fsink_t sink, int *ierr)
     
     fdata.sink = sink;
     
-    *ierr = cfac_db_aitrans(cdb, aitrans_fsink, &fdata);
+    *ierr = cfacdb_aitrans(cdb, aitrans_fsink, &fdata);
 }
 
 
-static void ctrans_fsink(const cfac_db_t *cdb,
+static void ctrans_fsink(const cfacdb_t *cdb,
     ctrans_cb_data_t *cbdata, void *udata)
 {
     struct {
@@ -226,11 +226,11 @@ void cfacdb_ctrans_(cfacdb_ctrans_fsink_t sink, int *ierr)
     
     fdata.sink = sink;
     
-    *ierr = cfac_db_ctrans(cdb, ctrans_fsink, &fdata);
+    *ierr = cfacdb_ctrans(cdb, ctrans_fsink, &fdata);
 }
 
 
-static void crates_fsink(const cfac_db_t *cdb,
+static void crates_fsink(const cfacdb_t *cdb,
     crates_cb_data_t *cbdata, void *udata)
 {
     struct {
@@ -254,5 +254,5 @@ void cfacdb_crates_(double *T, cfacdb_crates_fsink_t sink, int *ierr)
     
     fdata.sink = sink;
     
-    *ierr = cfac_db_crates(cdb, *T, crates_fsink, &fdata);
+    *ierr = cfacdb_crates(cdb, *T, crates_fsink, &fdata);
 }

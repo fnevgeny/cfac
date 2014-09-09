@@ -154,7 +154,7 @@ int cfacdb_prepare_intext(const cfacdb_t *cdb,
     intext->ap[3] = cbdata->ap3/cbdata->de;
     intext->ap[4] = (double) cbdata->kl;
 
-    if (cbdata->type == DB_SQL_CS_CI) {
+    if (cbdata->type == CFACDB_CS_CI) {
         /* ionization cross-sections approach 0 at threshold */
         intext->let = (intext->d[0])/(intext->e[0] - 1.0);
         intext->d0  = 0.0;
@@ -169,20 +169,20 @@ int cfacdb_prepare_intext(const cfacdb_t *cdb,
         }
     }
     
-    if (cbdata->type == DB_SQL_CS_PI) {
+    if (cbdata->type == CFACDB_CS_PI) {
         intext->cube = 1;
     } else {
         intext->cube = 0;
     }
     
     switch (cbdata->type) {
-    case DB_SQL_CS_CE:
+    case CFACDB_CS_CE:
         intext->f_asymptote = crac_born_asymptote;
         break;
-    case DB_SQL_CS_CI:
+    case CFACDB_CS_CI:
         intext->f_asymptote = crac_ci_asymptote;
         break;
-    case DB_SQL_CS_PI:
+    case CFACDB_CS_PI:
         if (cdb->db_format == 1) {
             intext->f_asymptote = crac_rr_asymptote_v1;
         } else {
@@ -206,13 +206,13 @@ static double rate_int_f(double e, void *params) {
     double x = e/p->de, x1, conv;
     
     switch (p->type) {
-    case DB_SQL_CS_CE:
-    case DB_SQL_CS_CI:
+    case CFACDB_CS_CE:
+    case CFACDB_CS_CI:
         x1 = x;
         /* convert collisional strength to cross-section */
         conv = M_PI/(2*e);
         break;
-    case DB_SQL_CS_PI:
+    case CFACDB_CS_PI:
         x1 = x + 1;
         /* d_gf/d_E* to RR cross-section */
         conv = M_PI*CUBE(ALPHA)*p->de*SQR(x1)/x;
@@ -263,7 +263,7 @@ static void crates_sink(const cfacdb_t *cdb,
     F.function = &rate_int_f;
     F.params   = &params;
 
-    if (cbdata->type == DB_SQL_CS_PI) {
+    if (cbdata->type == CFACDB_CS_PI) {
         low_limit   = 0.0;
     } else {
         low_limit   = params.de;

@@ -26,9 +26,9 @@
 #define CFACDB_FAILURE 1
 
 /* TODO: include a public cfac header when it exists... */
-#define DB_SQL_CS_CE    1
-#define DB_SQL_CS_CI    2
-#define DB_SQL_CS_PI    3
+#define CFACDB_CS_CE    1
+#define CFACDB_CS_CI    2
+#define CFACDB_CS_PI    3
 
 typedef struct _cfacdb_t cfacdb_t;
 

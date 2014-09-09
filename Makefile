@@ -21,7 +21,7 @@ FOBJS =	${FSRCS:.f=.o}
 
 SQLIS =	${SQLS:.sql=.i}
 
-LIBS = -lsqlite3 -lgsl -lgslcblas
+LIBS = -lsqlite3 -lgsl -lgslcblas -lm
 
 SRCS  = $(LSRCS) $(CSRCS)
 

@@ -62,36 +62,4 @@ depend: Make.dep
 
 tags: $(SRCS) $(CHDRS)
 	ctags -f $@ $(SRCS) $(CHDRS)
-# DO NOT DELETE
 
-rates.o: /usr/include/gsl/gsl_errno.h /usr/include/stdio.h
-rates.o: /usr/include/features.h /usr/include/sys/cdefs.h
-rates.o: /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h
-rates.o: /usr/include/gnu/stubs-64.h /usr/include/bits/types.h
-rates.o: /usr/include/bits/typesizes.h /usr/include/libio.h
-rates.o: /usr/include/_G_config.h /usr/include/wchar.h
-rates.o: /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h
-rates.o: /usr/include/errno.h /usr/include/bits/errno.h
-rates.o: /usr/include/linux/errno.h /usr/include/asm/errno.h
-rates.o: /usr/include/asm-generic/errno.h
-rates.o: /usr/include/asm-generic/errno-base.h /usr/include/gsl/gsl_types.h
-rates.o: /usr/include/gsl/gsl_integration.h /usr/include/stdlib.h
-rates.o: /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h
-rates.o: /usr/include/endian.h /usr/include/bits/endian.h
-rates.o: /usr/include/bits/byteswap.h /usr/include/sys/types.h
-rates.o: /usr/include/time.h /usr/include/sys/select.h
-rates.o: /usr/include/bits/select.h /usr/include/bits/sigset.h
-rates.o: /usr/include/bits/time.h /usr/include/sys/sysmacros.h
-rates.o: /usr/include/bits/pthreadtypes.h /usr/include/alloca.h
-rates.o: /usr/include/gsl/gsl_math.h /usr/include/math.h
-rates.o: /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h
-rates.o: /usr/include/bits/huge_vall.h /usr/include/bits/inf.h
-rates.o: /usr/include/bits/nan.h /usr/include/bits/mathdef.h
-rates.o: /usr/include/bits/mathcalls.h /usr/include/gsl/gsl_sys.h
-rates.o: /usr/include/gsl/gsl_inline.h /usr/include/gsl/gsl_machine.h
-rates.o: /usr/include/limits.h /usr/include/bits/posix1_lim.h
-rates.o: /usr/include/bits/local_lim.h /usr/include/linux/limits.h
-rates.o: /usr/include/bits/posix2_lim.h /usr/include/gsl/gsl_precision.h
-rates.o: /usr/include/gsl/gsl_nan.h /usr/include/gsl/gsl_pow_int.h
-rates.o: /usr/include/gsl/gsl_minmax.h /usr/include/gsl/gsl_const_num.h
-rates.o: cfacdb.h /usr/include/sqlite3.h

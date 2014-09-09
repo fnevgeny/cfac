@@ -1,7 +1,7 @@
 /* F77 wrapper functions for CFACDB */
 
 /* 
- * Copyright (C) 2013 Evgeny Stambulchik
+ * Copyright (C) 2013-2014 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,6 +74,7 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
     int _fnamelen)
 {
     char *s = f77char2str(fname, _fnamelen);
+    cfacdb_stats_t stats;
     
     *ierr = 0;
     
@@ -90,12 +91,14 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
         return;
     }
     
-    *ndim = cdb->ndim;
-    *rtdim = cdb->rtdim;
-    *aidim = cdb->aidim;
-    *cedim = cdb->cedim;
-    *cidim = cdb->cidim;
-    *pidim = cdb->pidim;
+    if (cfacdb_get_stats(cdb, &stats) == 0) {
+        *ndim  = stats.ndim;
+        *rtdim = stats.rtdim;
+        *aidim = stats.aidim;
+        *cedim = stats.cedim;
+        *cidim = stats.cidim;
+        *pidim = stats.pidim;
+    }
 }
 
 
@@ -114,9 +117,12 @@ void cfacdb_species_(int *anum, double *mass, int *ierr)
     } else {
         *ierr = 0;
     }
-
-    *anum = cdb->anum;
-    *mass = cdb->mass;
+    
+    if (cfacdb_get_species(cdb, (unsigned int *) anum, mass) != 0) {
+        *ierr = 1;
+    } else {
+        *ierr = 0;
+    }
 }
 
 

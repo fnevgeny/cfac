@@ -19,37 +19,21 @@
 #ifndef _CFACDB_H
 #define _CFACDB_H
 
-#include <sqlite3.h>
-
 /* TODO: include a public cfac header when it exists... */
 #define DB_SQL_CS_CE    1
 #define DB_SQL_CS_CI    2
 #define DB_SQL_CS_PI    3
 
-typedef struct {
-    sqlite3 *db;
-    int db_format;
-    
-    int nele_min;
-    int nele_max;
-    
-    unsigned long int sid;
-    
-    unsigned long ndim;
-    unsigned long rtdim;
-    unsigned long aidim;
-    unsigned long cedim;
-    unsigned long cidim;
-    unsigned long pidim;
-    
-    unsigned int anum;
-    double mass;
-    
-    unsigned int id_min;
-    unsigned int id_max;
+typedef struct _cfacdb_t cfacdb_t;
 
-    unsigned int *lmap;
-} cfacdb_t;
+typedef struct {
+    unsigned long ndim;     /* number of levels                */
+    unsigned long rtdim;    /* number of radiative transitions */
+    unsigned long aidim;    /* number of AI transitions        */
+    unsigned long cedim;    /* number of CE transitions        */
+    unsigned long cidim;    /* number of CI transitions        */
+    unsigned long pidim;    /* number of PI transitions        */
+} cfacdb_stats_t;
 
 typedef struct {
     unsigned int nele;
@@ -127,6 +111,9 @@ typedef void (*cfacdb_crates_sink_t)(const cfacdb_t *cdb,
 
 cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max);
 void cfacdb_close(cfacdb_t *cdb);
+
+int cfacdb_get_species(const cfacdb_t *cdb, unsigned int *anum, double *mass);
+int cfacdb_get_stats(const cfacdb_t *cdb, cfacdb_stats_t *stats);
 
 int cfacdb_cstates(cfacdb_t *cdb,
     void (*sink)(const cfacdb_t *cdb, cfacdb_cstates_data_t *cbdata, void *udata),

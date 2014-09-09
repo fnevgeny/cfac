@@ -24,7 +24,7 @@
 #include <gsl/gsl_const_num.h>
 #define ALPHA GSL_CONST_NUM_FINE_STRUCTURE
 
-#include "cfacdb.h"
+#include "cfacdbP.h"
 
 #define CFACDB_QAGI_EPS 1e-4
 

@@ -30,7 +30,7 @@
 #include <gsl/gsl_const_num.h>
 #define ALPHA GSL_CONST_NUM_FINE_STRUCTURE
 
-#include "cfacdb.h"
+#include "cfacdbP.h"
 
 #define SQR(a) ((a)*(a))
 
@@ -175,7 +175,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
         return NULL;
     }
 
-    cdb->ndim = sqlite3_column_int64(stmt, 0);
+    cdb->stats.ndim = sqlite3_column_int64(stmt, 0);
     
     sqlite3_reset(stmt);
 
@@ -197,7 +197,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
         return NULL;
     }
 
-    cdb->rtdim = sqlite3_column_int64(stmt, 0);
+    cdb->stats.rtdim = sqlite3_column_int64(stmt, 0);
     
     sqlite3_reset(stmt);
 
@@ -218,7 +218,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
         return NULL;
     }
 
-    cdb->aidim = sqlite3_column_int64(stmt, 0);
+    cdb->stats.aidim = sqlite3_column_int64(stmt, 0);
     
     sqlite3_reset(stmt);
 
@@ -239,7 +239,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
         return NULL;
     }
 
-    cdb->cedim = sqlite3_column_int64(stmt, 0);
+    cdb->stats.cedim = sqlite3_column_int64(stmt, 0);
     
     sqlite3_reset(stmt);
 
@@ -260,7 +260,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
         return NULL;
     }
 
-    cdb->cidim = sqlite3_column_int64(stmt, 0);
+    cdb->stats.cidim = sqlite3_column_int64(stmt, 0);
     
     sqlite3_reset(stmt);
 
@@ -281,7 +281,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
         return NULL;
     }
 
-    cdb->pidim = sqlite3_column_int64(stmt, 0);
+    cdb->stats.pidim = sqlite3_column_int64(stmt, 0);
     
     sqlite3_reset(stmt);
 
@@ -314,7 +314,8 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
     
     cdb->lmap = malloc(ntot*sizeof(unsigned int));
     if (!cdb->lmap) {
-        fprintf(stderr, "Failed allocating memory for ndim=%lu\n", cdb->ndim);
+        fprintf(stderr, "Failed allocating memory for ndim=%lu\n",
+            cdb->stats.ndim);
         sqlite3_finalize(stmt);
         cfacdb_close(cdb);
         return NULL;
@@ -357,6 +358,8 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
 
     sqlite3_finalize(stmt);
     
+    cdb->initialized = 1;
+    
     return cdb;
 }
 
@@ -375,6 +378,26 @@ void cfacdb_close(cfacdb_t *cdb)
     cdb = NULL;
 }
 
+int cfacdb_get_species(const cfacdb_t *cdb, unsigned int *anum, double *mass)
+{
+    if (cdb->initialized) {
+        *anum = cdb->anum;
+        *mass = cdb->mass;
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+int cfacdb_get_stats(const cfacdb_t *cdb, cfacdb_stats_t *stats)
+{
+    if (cdb->initialized) {
+        *stats = cdb->stats;
+        return 0;
+    } else {
+        return 1;
+    }
+}
 
 int cfacdb_cstates(cfacdb_t *cdb,
     void (*sink)(const cfacdb_t *cdb, cfacdb_cstates_data_t *cbdata, void *udata),

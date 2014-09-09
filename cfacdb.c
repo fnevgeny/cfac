@@ -399,9 +399,7 @@ int cfacdb_get_stats(const cfacdb_t *cdb, cfacdb_stats_t *stats)
     }
 }
 
-int cfacdb_cstates(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, cfacdb_cstates_data_t *cbdata, void *udata),
-    void *udata)
+int cfacdb_cstates(cfacdb_t *cdb, cfacdb_cstates_sink_t sink, void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
@@ -449,9 +447,7 @@ int cfacdb_cstates(cfacdb_t *cdb,
     return CFACDB_SUCCESS;
 }
 
-int cfacdb_levels(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, cfacdb_levels_data_t *cbdata, void *udata),
-    void *udata)
+int cfacdb_levels(cfacdb_t *cdb, cfacdb_levels_sink_t sink, void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
@@ -512,9 +508,7 @@ int cfacdb_levels(cfacdb_t *cdb,
 }
 
 
-int cfacdb_rtrans(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, cfacdb_rtrans_data_t *cbdata, void *udata),
-    void *udata)
+int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
@@ -577,9 +571,7 @@ int cfacdb_rtrans(cfacdb_t *cdb,
 }
 
 
-int cfacdb_aitrans(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, cfacdb_aitrans_data_t *cbdata, void *udata),
-    void *udata)
+int cfacdb_aitrans(cfacdb_t *cdb, cfacdb_aitrans_sink_t sink, void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;
@@ -636,9 +628,7 @@ int cfacdb_aitrans(cfacdb_t *cdb,
 }
 
 
-int cfacdb_ctrans(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, cfacdb_ctrans_data_t *cbdata, void *udata),
-    void *udata)
+int cfacdb_ctrans(cfacdb_t *cdb, cfacdb_ctrans_sink_t sink, void *udata)
 {
     sqlite3_stmt *stmt;
     const char *sql;

@@ -190,11 +190,11 @@ int cfacdb_prepare_intext(const cfacdb_t *cdb,
         }
         break;
     default:
-        return 1;
+        return CFACDB_FAILURE;
         break;
     }
     
-    return 0;
+    return CFACDB_SUCCESS;
 }
     
 /* NB: rates include the degeneracy of the initial level!!! */
@@ -218,7 +218,7 @@ static double rate_int_f(double e, void *params) {
         conv = M_PI*CUBE(ALPHA)*p->de*SQR(x1)/x;
         break;
     default:
-        return 0;
+        return 0.0;
         break;
     }
     
@@ -317,7 +317,7 @@ int cfacdb_crates(cfacdb_t *cdb, double T,
     
     rdata.w = gsl_integration_workspace_alloc(1000);
     if (!rdata.w) {
-        return 2;
+        return CFACDB_FAILURE;
     }
     
     rc = cfacdb_ctrans(cdb, crates_sink, &rdata);

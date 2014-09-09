@@ -358,7 +358,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
 
     sqlite3_finalize(stmt);
     
-    cdb->initialized = 1;
+    cdb->initialized = CFACDB_TRUE;
     
     return cdb;
 }
@@ -383,9 +383,9 @@ int cfacdb_get_species(const cfacdb_t *cdb, unsigned int *anum, double *mass)
     if (cdb->initialized) {
         *anum = cdb->anum;
         *mass = cdb->mass;
-        return 0;
+        return CFACDB_SUCCESS;
     } else {
-        return 1;
+        return CFACDB_FAILURE;
     }
 }
 
@@ -393,9 +393,9 @@ int cfacdb_get_stats(const cfacdb_t *cdb, cfacdb_stats_t *stats)
 {
     if (cdb->initialized) {
         *stats = cdb->stats;
-        return 0;
+        return CFACDB_SUCCESS;
     } else {
-        return 1;
+        return CFACDB_FAILURE;
     }
 }
 
@@ -408,7 +408,7 @@ int cfacdb_cstates(cfacdb_t *cdb,
     int rc;
     
     if (!cdb) {
-        return 1;
+        return CFACDB_FAILURE;
     }
     
     sql = "SELECT nele, e_gs, nlevels" \
@@ -439,14 +439,14 @@ int cfacdb_cstates(cfacdb_t *cdb,
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            return 2;
+            return CFACDB_FAILURE;
             break;
         }
     } while (rc == SQLITE_ROW);
     
     sqlite3_finalize(stmt);
     
-    return 0;
+    return CFACDB_SUCCESS;
 }
 
 int cfacdb_levels(cfacdb_t *cdb,
@@ -460,7 +460,7 @@ int cfacdb_levels(cfacdb_t *cdb,
     unsigned int i;
 
     if (!cdb) {
-        return 1;
+        return CFACDB_FAILURE;
     }
     
     sql = "SELECT id, name, nele, e, g, vn, vl, p, ncomplex, sname" \
@@ -501,14 +501,14 @@ int cfacdb_levels(cfacdb_t *cdb,
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            return 2;
+            return CFACDB_FAILURE;
             break;
         }
     } while (rc == SQLITE_ROW);
     
     sqlite3_finalize(stmt);
     
-    return 0;
+    return CFACDB_SUCCESS;
 }
 
 
@@ -521,7 +521,7 @@ int cfacdb_rtrans(cfacdb_t *cdb,
     int rc;
     
     if (!cdb) {
-        return 1;
+        return CFACDB_FAILURE;
     }
     
     sql = "SELECT ini_id, fin_id, mpole, rme, de" \
@@ -566,14 +566,14 @@ int cfacdb_rtrans(cfacdb_t *cdb,
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            return 2;
+            return CFACDB_FAILURE;
             break;
         }
     } while (rc == SQLITE_ROW);
 
     sqlite3_finalize(stmt);
     
-    return 0;
+    return CFACDB_SUCCESS;
 }
 
 
@@ -586,7 +586,7 @@ int cfacdb_aitrans(cfacdb_t *cdb,
     int rc;
     
     if (!cdb) {
-        return 1;
+        return CFACDB_FAILURE;
     }
     
     sql = "SELECT ini_id, fin_id, rate" \
@@ -625,14 +625,14 @@ int cfacdb_aitrans(cfacdb_t *cdb,
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            return 2;
+            return CFACDB_FAILURE;
             break;
         }
     } while (rc == SQLITE_ROW);
 
     sqlite3_finalize(stmt);
     
-    return 0;
+    return CFACDB_SUCCESS;
 }
 
 
@@ -652,7 +652,7 @@ int cfacdb_ctrans(cfacdb_t *cdb,
     cbdata.d = ds;
 
     if (!cdb) {
-        return 1;
+        return CFACDB_FAILURE;
     }
     
     if (cdb->db_format == 1) {
@@ -758,7 +758,7 @@ int cfacdb_ctrans(cfacdb_t *cdb,
         default:
             fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
             sqlite3_finalize(stmt);
-            return 2;
+            return CFACDB_FAILURE;
             break;
         }
 
@@ -766,5 +766,5 @@ int cfacdb_ctrans(cfacdb_t *cdb,
 
     sqlite3_finalize(stmt);
     
-    return 0;
+    return CFACDB_SUCCESS;
 }

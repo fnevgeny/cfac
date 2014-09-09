@@ -91,7 +91,7 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
         return;
     }
     
-    if (cfacdb_get_stats(cdb, &stats) == 0) {
+    if (cfacdb_get_stats(cdb, &stats) == CFACDB_SUCCESS) {
         *ndim  = stats.ndim;
         *rtdim = stats.rtdim;
         *aidim = stats.aidim;
@@ -118,7 +118,8 @@ void cfacdb_species_(int *anum, double *mass, int *ierr)
         *ierr = 0;
     }
     
-    if (cfacdb_get_species(cdb, (unsigned int *) anum, mass) != 0) {
+    if (cfacdb_get_species(cdb, (unsigned int *) anum, mass)
+        != CFACDB_SUCCESS) {
         *ierr = 1;
     } else {
         *ierr = 0;

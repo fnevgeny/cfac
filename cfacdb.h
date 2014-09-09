@@ -19,6 +19,12 @@
 #ifndef _CFACDB_H
 #define _CFACDB_H
 
+#define CFACDB_FALSE 0
+#define CFACDB_TRUE  1
+
+#define CFACDB_SUCCESS 0
+#define CFACDB_FAILURE 1
+
 /* TODO: include a public cfac header when it exists... */
 #define DB_SQL_CS_CE    1
 #define DB_SQL_CS_CI    2

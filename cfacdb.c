@@ -132,7 +132,7 @@ cfacdb_t *cdb_open(const char *fname)
     return cdb;
 }
 
-cfacdb_t *cdb_init(const char *fname, int nele_min, int nele_max)
+cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
 {
     cfacdb_t *cdb;
     
@@ -377,7 +377,7 @@ void cfacdb_close(cfacdb_t *cdb)
 
 
 int cfacdb_cstates(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, cstates_cb_data_t *cbdata, void *udata),
+    void (*sink)(const cfacdb_t *cdb, cfacdb_cstates_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -398,7 +398,7 @@ int cfacdb_cstates(cfacdb_t *cdb,
     sqlite3_bind_int(stmt, 3, cdb->nele_min);
     
     do {
-        cstates_cb_data_t cbdata;
+        cfacdb_cstates_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -427,7 +427,7 @@ int cfacdb_cstates(cfacdb_t *cdb,
 }
 
 int cfacdb_levels(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, levels_cb_data_t *cbdata, void *udata),
+    void (*sink)(const cfacdb_t *cdb, cfacdb_levels_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -451,7 +451,7 @@ int cfacdb_levels(cfacdb_t *cdb,
 
     i = 0;
     do {
-        levels_cb_data_t cbdata;
+        cfacdb_levels_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -490,7 +490,7 @@ int cfacdb_levels(cfacdb_t *cdb,
 
 
 int cfacdb_rtrans(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, rtrans_cb_data_t *cbdata, void *udata),
+    void (*sink)(const cfacdb_t *cdb, cfacdb_rtrans_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -515,7 +515,7 @@ int cfacdb_rtrans(cfacdb_t *cdb,
         unsigned int ilfac, iufac, m2;
         int mpole;
         
-        rtrans_cb_data_t cbdata;
+        cfacdb_rtrans_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -555,7 +555,7 @@ int cfacdb_rtrans(cfacdb_t *cdb,
 
 
 int cfacdb_aitrans(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, aitrans_cb_data_t *cbdata, void *udata),
+    void (*sink)(const cfacdb_t *cdb, cfacdb_aitrans_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -579,7 +579,7 @@ int cfacdb_aitrans(cfacdb_t *cdb,
         double rate;
         unsigned int ilfac, iufac;
 
-        aitrans_cb_data_t cbdata;
+        cfacdb_aitrans_data_t cbdata;
         
         rc = sqlite3_step(stmt);
         switch (rc) {
@@ -614,7 +614,7 @@ int cfacdb_aitrans(cfacdb_t *cdb,
 
 
 int cfacdb_ctrans(cfacdb_t *cdb,
-    void (*sink)(const cfacdb_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
+    void (*sink)(const cfacdb_t *cdb, cfacdb_ctrans_data_t *cbdata, void *udata),
     void *udata)
 {
     sqlite3_stmt *stmt;
@@ -623,7 +623,7 @@ int cfacdb_ctrans(cfacdb_t *cdb,
     unsigned int ilfac_prev, iufac_prev, type_prev;
     
     double es[256], ds[256]; /* TODO: make truly allocatable ? */
-    ctrans_cb_data_t cbdata;
+    cfacdb_ctrans_data_t cbdata;
     
     cbdata.e = es;
     cbdata.d = ds;

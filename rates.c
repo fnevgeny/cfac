@@ -143,7 +143,7 @@ static double crac_rr_asymptote_v2(double x1, const double *ap)
 }
 
 int cfacdb_prepare_intext(const cfacdb_t *cdb,
-    const ctrans_cb_data_t *cbdata, cfacdb_intext_t *intext)
+    const cfacdb_ctrans_data_t *cbdata, cfacdb_intext_t *intext)
 {
     intext->ndata = cbdata->nd;
     intext->e     = cbdata->e;
@@ -229,9 +229,9 @@ static double rate_int_f(double e, void *params) {
 }
 
 static void crates_sink(const cfacdb_t *cdb,
-    ctrans_cb_data_t *cbdata, void *udata)
+    cfacdb_ctrans_data_t *cbdata, void *udata)
 {
-    crates_cb_data_t rcbdata;
+    cfacdb_crates_data_t rcbdata;
     cfacdb_intext_t *intext;
     
     int gsl_status;

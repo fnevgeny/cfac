@@ -82,7 +82,7 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
         return;
     }
     
-    cdb = cdb_init(s, *nele_min, *nele_max);
+    cdb = cfacdb_init(s, *nele_min, *nele_max);
     free(s);
     
     if (!cdb) {
@@ -121,7 +121,7 @@ void cfacdb_species_(int *anum, double *mass, int *ierr)
 
 
 static void levels_fsink(const cfacdb_t *cdb,
-    levels_cb_data_t *cbdata, void *udata)
+    cfacdb_levels_data_t *cbdata, void *udata)
 {
     struct {
         cfacdb_levels_fsink_t sink;
@@ -150,7 +150,7 @@ void cfacdb_levels_(cfacdb_levels_fsink_t sink, int *ierr)
 
 
 static void rtrans_fsink(const cfacdb_t *cdb,
-    rtrans_cb_data_t *cbdata, void *udata)
+    cfacdb_rtrans_data_t *cbdata, void *udata)
 {
     struct {
         cfacdb_rtrans_fsink_t sink;
@@ -176,7 +176,7 @@ void cfacdb_rtrans_(cfacdb_rtrans_fsink_t sink, int *ierr)
 
 
 static void aitrans_fsink(const cfacdb_t *cdb,
-    aitrans_cb_data_t *cbdata, void *udata)
+    cfacdb_aitrans_data_t *cbdata, void *udata)
 {
     struct {
         cfacdb_aitrans_fsink_t sink;
@@ -202,7 +202,7 @@ void cfacdb_aitrans_(cfacdb_aitrans_fsink_t sink, int *ierr)
 
 
 static void ctrans_fsink(const cfacdb_t *cdb,
-    ctrans_cb_data_t *cbdata, void *udata)
+    cfacdb_ctrans_data_t *cbdata, void *udata)
 {
     struct {
         cfacdb_ctrans_fsink_t sink;
@@ -231,7 +231,7 @@ void cfacdb_ctrans_(cfacdb_ctrans_fsink_t sink, int *ierr)
 
 
 static void crates_fsink(const cfacdb_t *cdb,
-    crates_cb_data_t *cbdata, void *udata)
+    cfacdb_crates_data_t *cbdata, void *udata)
 {
     struct {
         cfacdb_crates_fsink_t sink;

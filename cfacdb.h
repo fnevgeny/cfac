@@ -107,6 +107,20 @@ typedef struct {
     double ratec;
 } crates_cb_data_t;
 
+typedef struct {
+    unsigned int ndata; /* number of data points */
+    double      *e;     /* energy grid           */
+    double      *d;     /* data                  */
+
+    double       ap[5]; /* asymptote parameters  */
+
+    double       d0;    /* threshold limit       */
+    double       let;   /* low-e tangent         */
+
+    int          cube;  /* cubic interpolation   */
+    double     (*f_asymptote)(double x, const double *ap);
+} cfac_db_intext_t;
+
 typedef void (*cfac_db_crates_sink_t)(const cfac_db_t *cdb,
     crates_cb_data_t *cbdata, void *udata);
 
@@ -133,6 +147,10 @@ int cfac_db_aitrans(cfac_db_t *cdb,
 int cfac_db_ctrans(cfac_db_t *cdb,
     void (*sink)(const cfac_db_t *cdb, ctrans_cb_data_t *cbdata, void *udata),
     void *udata);
+
+int cfac_db_prepare_intext(const cfac_db_t *cdb,
+    const ctrans_cb_data_t *cbdata, cfac_db_intext_t *intext);
+double cfac_db_intext(const cfac_db_intext_t *intext, double x);
 
 int cfac_db_crates(cfac_db_t *cdb, double T,
     cfac_db_crates_sink_t sink,

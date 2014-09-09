@@ -105,7 +105,7 @@ static double get_e_MB_vf(double T, double E)
     return 2*sqrt(2/M_PI)*E/pow(T, 1.5)*exp(-E/T);
 }
 
-static double crac_born_asymptote(double x1, const double *ap)
+static double cfacdb_born_asymptote(double x1, const double *ap)
 {
     double b0 = ap[0], b1 = ap[1];
     /* negative b0 corresponds to spin-forbidden transition */
@@ -116,20 +116,20 @@ static double crac_born_asymptote(double x1, const double *ap)
     }
 }
 
-static double crac_ci_asymptote(double x1, const double *ap)
+static double cfacdb_ci_asymptote(double x1, const double *ap)
 {
     double y = 1.0 - 1.0/x1;
     
     return ap[0]*log(x1) + ap[1]*y*y + y*(ap[2]/x1 + ap[3]/(x1*x1));
 }
 
-static double crac_rr_asymptote_v1(double x1, const double *ap)
+static double cfacdb_rr_asymptote_v1(double x1, const double *ap)
 {
     int kl = (int) rint(ap[1]);
     return ap[0]*pow(x1, -(3.5 + kl));
 }
 
-static double crac_rr_asymptote_v2(double x1, const double *ap)
+static double cfacdb_rr_asymptote_v2(double x1, const double *ap)
 {
     int kl = (int) rint(ap[4]);
     double x, y, res;
@@ -177,16 +177,16 @@ int cfacdb_prepare_intext(const cfacdb_t *cdb,
     
     switch (cbdata->type) {
     case CFACDB_CS_CE:
-        intext->f_asymptote = crac_born_asymptote;
+        intext->f_asymptote = cfacdb_born_asymptote;
         break;
     case CFACDB_CS_CI:
-        intext->f_asymptote = crac_ci_asymptote;
+        intext->f_asymptote = cfacdb_ci_asymptote;
         break;
     case CFACDB_CS_PI:
         if (cdb->db_format == 1) {
-            intext->f_asymptote = crac_rr_asymptote_v1;
+            intext->f_asymptote = cfacdb_rr_asymptote_v1;
         } else {
-            intext->f_asymptote = crac_rr_asymptote_v2;
+            intext->f_asymptote = cfacdb_rr_asymptote_v2;
         }
         break;
     default:

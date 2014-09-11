@@ -182,7 +182,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
 
     sql = "SELECT COUNT(sid) AS rtdim" \
           " FROM _rtransitions_v" \
-          " WHERE sid = ? AND nele <= ? AND nele >= ?";
+          " WHERE sid = ? AND nele <= ? AND nele >= ? AND de > 0";
     
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);

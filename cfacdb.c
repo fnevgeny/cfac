@@ -145,6 +145,9 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
     unsigned long ntot;
     
     cdb = cdb_open(fname);
+    if (!cdb) {
+        return NULL;
+    }
 
     /* select latest cFAC session */
     sql = "SELECT MAX(sid) FROM sessions";

@@ -1,3 +1,8 @@
+CREATE TABLE cfacdb (
+    property TEXT UNIQUE NOT NULL,
+    value INTEGER NOT NULL
+);
+
 CREATE TABLE sessions (
     sid     INTEGER PRIMARY KEY NOT NULL,
     version INTEGER NOT NULL,

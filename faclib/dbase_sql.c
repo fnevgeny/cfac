@@ -12,8 +12,24 @@
 
 #include "schema.i"
 
+#define CFACDB_FORMAT_VERSION   2
+
 #define SQLITE3_BIND_STR(stmt, id, txt) \
         sqlite3_bind_text(stmt, id, txt, -1, SQLITE_STATIC)
+
+static int format_cb(void *udata,
+    int argc, char **argv, char **colNames)
+{
+    int *db_format = udata;
+
+    if (argc != 1 || !argv[0]) {
+        return -1;
+    }
+    
+    *db_format = atol(argv[0]);
+
+    return 0;
+}
 
 int StoreInit(const cfac_t *cfac,
     const char *fn, int reset, sqlite3 **db, unsigned long *sid)
@@ -82,6 +98,40 @@ int StoreInit(const cfac_t *cfac,
                 break;
             }
             i++;
+        }
+        
+        sql = "INSERT INTO cfacdb" \
+              " (property, value)" \
+              " VALUES ('format', ?)";
+
+        sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
+
+        sqlite3_bind_int(stmt, 1, CFACDB_FORMAT_VERSION);
+
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_DONE) {
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(*db));
+            sqlite3_close(*db);
+            retval = -1;
+        }
+        sqlite3_reset(stmt);
+    } else {
+        int db_format;
+        sql = "SELECT value FROM cfacdb WHERE property = 'format'";
+        rc = sqlite3_exec(*db, sql, format_cb, &db_format, &errmsg);
+        if (rc != SQLITE_OK) {
+            fprintf(stderr, "SQL error: %s\n", errmsg);
+            sqlite3_free(errmsg);
+            sqlite3_close(*db);
+            return -1;
+        }
+        
+        if (db_format != CFACDB_FORMAT_VERSION) {
+            fprintf(stderr, "Incompatible DB format %d, expected %d\n",
+                db_format, CFACDB_FORMAT_VERSION);
+            sqlite3_free(errmsg);
+            sqlite3_close(*db);
+            return -1;
         }
     }
 
@@ -244,8 +294,8 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                 break;
             }
             
-            sqlite3_bind_int   (stmt,  2, r.upper);
-            sqlite3_bind_int   (stmt,  3, r.lower);
+            sqlite3_bind_int   (stmt,  2, r.lower);
+            sqlite3_bind_int   (stmt,  3, r.upper);
             sqlite3_bind_int   (stmt,  4, h.multipole);
             sqlite3_bind_double(stmt,  5, r.rme);
             sqlite3_bind_int   (stmt,  6, h.mode);

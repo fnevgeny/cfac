@@ -182,7 +182,7 @@ cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max)
 
     sql = "SELECT COUNT(sid) AS rtdim" \
           " FROM _rtransitions_v" \
-          " WHERE sid = ? AND nele <= ? AND nele >= ? AND de > 0";
+          " WHERE sid = ? AND nele <= ? AND nele >= ? AND de <> 0";
     
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
@@ -520,7 +520,7 @@ int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
     
     sql = "SELECT ini_id, fin_id, mpole, rme, de" \
           " FROM _rtransitions_v" \
-          " WHERE sid = ? AND nele <= ? AND nele >= ? AND de > 0" \
+          " WHERE sid = ? AND nele <= ? AND nele >= ? AND de <> 0" \
           " ORDER BY ini_id, fin_id";
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
@@ -540,12 +540,18 @@ int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
         case SQLITE_OK:
             break;
         case SQLITE_ROW:
-            iufac = sqlite3_column_int   (stmt, 0);
-            ilfac = sqlite3_column_int   (stmt, 1);
+            ilfac = sqlite3_column_int   (stmt, 0);
+            iufac = sqlite3_column_int   (stmt, 1);
             mpole = sqlite3_column_int   (stmt, 2);
             rme   = sqlite3_column_double(stmt, 3);
             de    = sqlite3_column_double(stmt, 4);
             
+            /* in the original DB format, ini/fin levels were swapped */
+            if (cdb->db_format < 2) {
+                unsigned int ibuf;
+                ibuf = ilfac; ilfac = iufac; iufac = ibuf;
+                de = -de;
+            }
     
             m2 = 2*abs(mpole);
             cbdata.gf = SQR(rme)*de*pow(ALPHA*de, m2 - 2)/(m2 + 1);

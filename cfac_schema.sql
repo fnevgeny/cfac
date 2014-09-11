@@ -19,7 +19,7 @@ CREATE TEMPORARY VIEW _levels_v AS
 
 CREATE TEMPORARY VIEW _rtransitions_v AS
   SELECT rt.sid, rt.ini_id, rt.fin_id, rt.mpole, rt.rme,
-         li.nele, li.e - lf.e AS de
+         li.nele, lf.e - li.e AS de
     FROM rtransitions AS rt
       INNER JOIN levels AS li ON (rt.sid = li.sid AND rt.ini_id = li.id)
       INNER JOIN levels AS lf ON (rt.sid = lf.sid AND rt.fin_id = lf.id);

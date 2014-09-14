@@ -1,4 +1,4 @@
-PROG =	fdemo
+PROGS = cfacdbu	fdemo
 
 # Suffixes
 .SUFFIXES : .c .f .sql .i
@@ -12,11 +12,12 @@ LIBCFACDB = libcfacdb.a
 LSRCS = cfacdb.c rates.c cfacdb_f.c
 SQLS  = cfac_schema.sql cfac_schema_v1.sql cfac_schema_v2.sql
 
-FSRCS = fdemo.f
-CSRCS = 
+CSRCS = cfacdbu.c
 CHDRS = 
+FSRCS = fdemo.f
 
 LOBJS = ${LSRCS:.c=.o}
+COBJS =	${CSRCS:.c=.o}
 FOBJS =	${FSRCS:.f=.o}
 
 SQLIS =	${SQLS:.sql=.i}
@@ -31,15 +32,16 @@ CFLAGS = $(DEBUG) $(LINT) $(OPTIMIZE) $(TCOVERAGE) $(PROFILING)
 FFLAGS = $(DEBUG) $(OPTIMIZE)
 LDFLAGS = $(DEBUG) 
 
-all: $(PROG)
+all: $(PROGS)
 
 $(LIBCFACDB): $(LOBJS)
 	$(RM) $@ && $(AR) $@ ${LOBJS} && $(RANLIB) $@
 
+cfacdbu: $(COBJS) $(LIBCFACDB)
+	$(CC) $(LDFLAGS) -o $@ $(COBJS) $(LIBCFACDB) $(LIBS)
+
 fdemo: $(FOBJS) $(LIBCFACDB)
 	$(FC) $(LDFLAGS) -o $@ $(FOBJS) $(LIBCFACDB) $(LIBS)
-
-parse_cfac.o : $(SQLIS)
 
 include Make.dep
 
@@ -49,11 +51,11 @@ Make.dep: $(SRCS) $(SQLIS)
 	@$(CC) $(CFLAGS) -MM $(SRCS) >> $@
 	@echo "done"
 
-install: $(PROG)
-	install $(PROG) $(DESTBIN)
+install: $(PROGS)
+	install $(PROGS) $(DESTBIN)
 
 clean:
-	rm -f $(PROG) $(LIBCFACDB) \
+	rm -f $(PROGS) $(LIBCFACDB) \
 	$(LOBJS) $(FOBJS) $(SQLIS) Make.dep \
 	tags ChangeLog *.bak \
 	*.bb *.bbg *.da *.gcda *.gcno *.gcov
@@ -62,4 +64,3 @@ depend: Make.dep
 
 tags: $(SRCS) $(CHDRS)
 	ctags -f $@ $(SRCS) $(CHDRS)
-

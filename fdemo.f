@@ -16,7 +16,7 @@ c You should have received a copy of the GNU General Public License
 c along with this program; if not, write to the Free Software
 c Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 c
-      program dummy
+      program fdemo
       implicit none
 
 c     DB filename

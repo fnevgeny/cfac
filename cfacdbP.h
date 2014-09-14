@@ -26,6 +26,8 @@ struct _cfacdb_t {
     sqlite3 *db;
     int db_format;
     
+    unsigned int nsessions;
+    
     int nele_min;
     int nele_max;
     

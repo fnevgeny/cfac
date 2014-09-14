@@ -83,11 +83,16 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
         return;
     }
     
-    cdb = cfacdb_init(s, *nele_min, *nele_max);
+    cdb = cfacdb_open(s);
     free(s);
     
     if (!cdb) {
         *ierr = 1;
+        return;
+    }
+    
+    if (cfacdb_init(cdb, 0, *nele_min, *nele_max) != CFACDB_SUCCESS) {
+        *ierr = 2;
         return;
     }
     
@@ -98,6 +103,8 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
         *cedim = stats.cedim;
         *cidim = stats.cidim;
         *pidim = stats.pidim;
+    } else {
+        *ierr = 3;
     }
 }
 

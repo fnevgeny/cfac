@@ -42,6 +42,15 @@ typedef struct {
 } cfacdb_stats_t;
 
 typedef struct {
+    unsigned long int sid;
+    const char *sym;
+    unsigned int anum;
+    double mass;
+    unsigned int nele_min;
+    unsigned int nele_max;
+} cfacdb_sessions_data_t;
+
+typedef struct {
     unsigned int nele;
     double e_gs;
     unsigned long nlevels;
@@ -111,6 +120,8 @@ typedef struct {
     double     (*f_asymptote)(double x, const double *ap);
 } cfacdb_intext_t;
 
+typedef void (*cfacdb_sessions_sink_t)(const cfacdb_t *cdb,
+    cfacdb_sessions_data_t *cbdata, void *udata);
 typedef void (*cfacdb_cstates_sink_t)(const cfacdb_t *cdb,
     cfacdb_cstates_data_t *cbdata, void *udata);
 typedef void (*cfacdb_levels_sink_t)(const cfacdb_t *cdb,
@@ -125,8 +136,14 @@ typedef void (*cfacdb_crates_sink_t)(const cfacdb_t *cdb,
     cfacdb_crates_data_t *cbdata, void *udata);
 
 
-cfacdb_t *cfacdb_init(const char *fname, int nele_min, int nele_max);
+cfacdb_t *cfacdb_open(const char *fname);
 void cfacdb_close(cfacdb_t *cdb);
+int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max);
+
+unsigned int cfacdb_get_nsessions(const cfacdb_t *cdb);
+
+int cfacdb_sessions(const cfacdb_t *cdb,
+    cfacdb_sessions_sink_t sink, void *udata);
 
 int cfacdb_get_species(const cfacdb_t *cdb, unsigned int *anum, double *mass);
 int cfacdb_get_stats(const cfacdb_t *cdb, cfacdb_stats_t *stats);

@@ -13,7 +13,7 @@ LSRCS = cfacdb.c rates.c cfacdb_f.c
 SQLS  = cfac_schema.sql cfac_schema_v1.sql cfac_schema_v2.sql
 
 CSRCS = cfacdbu.c
-CHDRS = 
+CHDRS = cfacdb.h cfacdbP.h
 FSRCS = fdemo.f
 
 LOBJS = ${LSRCS:.c=.o}
@@ -64,3 +64,7 @@ depend: Make.dep
 
 tags: $(SRCS) $(CHDRS)
 	ctags -f $@ $(SRCS) $(CHDRS)
+
+count:
+	@sloccount . | \
+	egrep --color 'Total ((Estimated Cost)|(Physical Source Lines)).*'

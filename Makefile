@@ -56,7 +56,7 @@ install: $(PROGS)
 
 clean:
 	rm -f $(PROGS) $(LIBCFACDB) \
-	$(LOBJS) $(FOBJS) $(SQLIS) Make.dep \
+	$(LOBJS) $(COBJS) $(FOBJS) $(SQLIS) Make.dep \
 	tags ChangeLog *.bak \
 	*.bb *.bbg *.da *.gcda *.gcno *.gcov
 

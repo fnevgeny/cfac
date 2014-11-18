@@ -42,7 +42,18 @@ var cfacdb = {
     
     init: function(db_path)
     {
-        var dsources = "file://" + db_path;
+        var Cc = Components.classes;
+        var Ci = Components.interfaces;
+        
+        var osString = Cc["@mozilla.org/xre/app-info;1"]
+                         .getService(Ci.nsIXULRuntime).OS;
+                   
+        var dsources;
+        if (osString == "WINNT") {
+            dsources = "file:///" + db_path.replace(/\\/g, "/");
+        } else {
+            dsources = "file://" + db_path;
+        }
 
         var e;
         e = document.getElementById("levels-ini");

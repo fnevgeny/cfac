@@ -1,0 +1,258 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+
+<window id="cfacdbDialog"
+        title="CFACDB"
+        width="800"
+        height="600"
+        persist="screenX screenY width height"
+        onclose="return cfacdb.oncloseCB();"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml">
+
+  <script type="application/x-javascript"
+      src="chrome://cfacdb/content/cfacdb.js" />
+
+  <toolbox>
+    <menubar>
+      <menu id="file-menu" label="File">
+        <menupopup id="file-popup">
+          <menuitem id="file-import"
+                    class="menuitem-iconic"
+                    label="Open Database..."
+                    image="chrome://cfacdb/skin/open.png"
+                    oncommand="cfacdb.openCB();"/>
+          <menuitem class="menuitem-iconic"
+                    label="Reload all data"
+                    image="chrome://cfacdb/skin/refresh.png"
+                    oncommand="cfacdb.refreshCB();"/>
+          <menuseparator/>
+          <menuitem class="menuitem-iconic"
+                    label="Exit"
+                    image="chrome://cfacdb/skin/exit.png"
+                    oncommand="cfacdb.closeCB();"/>
+        </menupopup>
+      </menu>
+
+      <menu id="help-menu" label="Help">
+        <menupopup id="edit-popup">
+          <menuitem class="menuitem-iconic"
+              label="Help contents"
+              image="chrome://cfacdb/skin/help.png"
+              oncommand="cfacdb.helpCB();"/>
+          <menuseparator/>
+          <menuitem class="menuitem-iconic"
+              label="About this tool"
+              image="chrome://cfacdb/skin/about.png"
+              oncommand="cfacdb.aboutCB();"/>
+        </menupopup>
+      </menu>
+    </menubar>
+  </toolbox>
+
+  <hbox flex="1">
+    <tree id="species"
+          flex="1"
+          seltype="single"
+          onselect="cfacdb.sessionSelectCB(event);"
+          datasources="rdf:null"
+          ref="*"
+          querytype="storage" flags="dont-build-content">
+
+      <treecols>
+        <treecol label="SID"     flex="1" primary="true"/>
+        <splitter class="tree-splitter"/>
+        <treecol label="Species" flex="1"/>
+        <splitter class="tree-splitter"/>
+        <treecol label="Anum" flex="1"/>
+        <splitter class="tree-splitter"/>
+        <treecol label="Mass" flex="1"/>
+      </treecols>
+
+      <template>
+        <query>
+          SELECT sid, symbol, anum, mass FROM species
+        </query>
+        <action>
+          <treechildren>
+           <treeitem uri="?">
+             <treerow>
+               <treecell label="?sid"/>
+               <treecell label="?symbol"/>
+               <treecell label="?anum"/>
+               <treecell label="?mass"/>
+              </treerow>
+           </treeitem>
+          </treechildren>
+        </action>
+
+      </template>
+    </tree>
+  </hbox>
+
+  <splitter />
+  
+  <hbox>
+    <label value="Number of electrons:"/>
+    <textbox type="number"
+             size="1"
+             onchange="cfacdb.neleSelectCB(event);"
+             min="0" max="20" value="1"/>
+
+    <label value="&#916; Nele:"/>
+    <radiogroup orient="horizontal" onselect="cfacdb.deltaNeleCB(event);">
+      <radio label="0" value="0" selected="true"/>
+      <radio label="1" value="1"/>
+    </radiogroup>
+
+    <spacer flex="1"/>
+  </hbox>
+  
+  <hbox flex="10">
+    <vbox flex="1">
+      <label control="levels-ini" value="Initial level" />
+      <tree id="levels-ini"
+            flex="1"
+            seltype="single"
+            onselect="cfacdb.levelSelectCB(event);"
+            datasources="rdf:null"
+            ref="*"
+            querytype="storage" flags="dont-build-content">
+
+        <treecols>
+          <treecol label="ID"     flex="1" primary="true" sort="?id"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Nele"   flex="1" hidden="true"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Name"   flex="5" sort="?name"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Energy" flex="5" sort="?e"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="g"      flex="1" hidden="true"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="P"      flex="1" hidden="true" sort="?p"/>
+        </treecols>
+
+        <template>
+         <query>
+            SELECT id, name, e, nele, g, p
+             FROM levels
+             WHERE sid = :sid AND nele = :nele
+             <param class="sid" name="sid">0</param>
+             <param class="nele" name="nele">1</param>
+          </query>
+          <action>
+            <treechildren>
+             <treeitem uri="?">
+               <treerow>
+                 <treecell label="?id"/>
+                 <treecell label="?nele"/>
+                 <treecell label="?name"/>
+                 <treecell label="?e"/>
+                 <treecell label="?g"/>
+                 <treecell label="?p"/>
+                </treerow>
+             </treeitem>
+            </treechildren>
+          </action>
+
+        </template>
+      </tree>
+    </vbox>
+
+    <splitter />
+    
+    <vbox flex="1">
+      <label control="levels-fin" value="Final level" />
+      <tree id="levels-fin"
+            flex="1"
+            seltype="single"
+            onselect="cfacdb.levelSelectCB(event);"
+            datasources="rdf:null"
+            ref="*"
+            querytype="storage" flags="dont-build-content">
+
+        <treecols>
+          <treecol label="ID"     flex="1" primary="true"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Name"   flex="5"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Energy" flex="5"/>
+        </treecols>
+
+        <template>
+         <query>
+            SELECT id, name, e FROM levels
+             WHERE sid = :sid AND nele = :nele - :dnele
+             <param class="sid" name="sid">0</param>
+             <param class="nele" name="nele">1</param>
+             <param class="dnele" name="dnele">0</param>
+          </query>
+          <action>
+            <treechildren>
+             <treeitem uri="?">
+               <treerow>
+                 <treecell label="?id"/>
+                 <treecell label="?name"/>
+                 <treecell label="?e"/>
+                </treerow>
+             </treeitem>
+            </treechildren>
+          </action>
+
+        </template>
+      </tree>
+    </vbox>
+  </hbox>
+    
+  <splitter />
+
+  <vbox flex="4">
+      <label control="rtransitions" value="Radiative transitions" />
+      <tree id="rtransitions"
+            flex="1"
+            seltype="single"
+            datasources="rdf:null"
+            ref="*"
+            querytype="storage" flags="dont-build-content">
+
+        <treecols>
+          <treecol label="Multipole"   flex="1" sort="?mpole"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Reduced matrix element" flex="1"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Calculation mode" flex="1"/>
+        </treecols>
+
+        <template>
+         <query>
+            SELECT mpole, rme, mode,
+              CASE WHEN mpole > 0 THEN 'M' || mpole
+                 ELSE 'E' || -mpole
+              END AS mps,
+              CASE WHEN mode = 0 THEN 'FR'
+                 ELSE 'NR'
+              END AS ms
+             FROM rtransitions
+             WHERE sid = :sid AND fin_id = :fin_id AND ini_id = :ini_id
+             <param class="sid" name="sid">0</param>
+             <param class="ini_id" name="ini_id">-1</param>
+             <param class="fin_id" name="fin_id">-1</param>
+          </query>
+          <action>
+            <treechildren>
+             <treeitem uri="?">
+               <treerow>
+                 <treecell label="?mpole ( ?mps )"/>
+                 <treecell label="?rme"/>
+                 <treecell label="?mode ( ?ms )"/>
+                </treerow>
+             </treeitem>
+            </treechildren>
+          </action>
+
+        </template>
+      </tree>
+  </vbox>
+    
+</window>

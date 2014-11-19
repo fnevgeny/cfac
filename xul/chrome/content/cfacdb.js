@@ -85,7 +85,9 @@ var cfacdb = {
             dsources = "file://" + db_path;
         }
         
-        this.refresh(dsources);
+        if (!this.refresh(dsources)) {
+            this.alert("Invalid or inaccessible database!");
+        }
     },
 
     openCB: function()

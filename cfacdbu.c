@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "cfacdb.h"
 
@@ -32,6 +33,8 @@ int main(int argc, const char *argv[])
     cfacdb_t *cdb;
     cfacdbu_t cdu;
     cfacdb_stats_t stats;
+    
+    memset(&cdu, 0, sizeof(cdu));
     
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <file.db>\n", argv[0]);

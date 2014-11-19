@@ -4,6 +4,8 @@ var cfacdb = {
     ini_id: -1,
     fin_id: -1,
     
+    dsources: null,
+    
     logger: function(level, msg)
     {
         var prefix;
@@ -39,8 +41,36 @@ var cfacdb = {
             es[i].textContent = value;
         }
     },
+        
+    refresh: function(dsources)
+    {
+        if (!dsources) {
+            return false;
+        }
+        
+        var e;
+        e = document.getElementById("levels-ini");
+        e.datasources = dsources;
+        
+        e = document.getElementById("levels-fin");
+        e.datasources = dsources;
+        
+        e = document.getElementById("rtransitions");
+        e.datasources = dsources;
+        
+        e = document.getElementById("species");
+        e.datasources = dsources;
+        
+        if (e.view && e.view.rowCount) {
+            this.dsources = dsources;
+            e.view.selection.select(0);
+            return true;
+        } else {
+            return false;
+        }
+    },
     
-    init: function(db_path)
+    open: function(db_path)
     {
         var Cc = Components.classes;
         var Ci = Components.interfaces;
@@ -54,20 +84,8 @@ var cfacdb = {
         } else {
             dsources = "file://" + db_path;
         }
-
-        var e;
-        e = document.getElementById("levels-ini");
-        e.datasources = dsources;
         
-        e = document.getElementById("levels-fin");
-        e.datasources = dsources;
-        
-        e = document.getElementById("rtransitions");
-        e.datasources = dsources;
-        
-        e = document.getElementById("species");
-        e.datasources = dsources;
-        e.view.selection.select(0);
+        this.refresh(dsources);
     },
 
     openCB: function()
@@ -100,7 +118,7 @@ var cfacdb = {
             var file = fp.file;
             this.lastDir = file.parent;
             
-            this.init(file.path);
+            this.open(file.path);
             
             this.setBusyCursor(false);
             
@@ -155,8 +173,6 @@ var cfacdb = {
             class_name = "fin_id";
         }
         
-        console.log(this.ini_id + " -> " + this.fin_id);
-        
         this.setClassParams(class_name, id);
         
         document.getElementById("rtransitions").builder.rebuild();
@@ -179,7 +195,40 @@ var cfacdb = {
         var dnele = parseInt(el.value);
         this.setClassParams("dnele", dnele);
         
-        document.getElementById("levels-fin").builder.rebuild();
+        if (this.dsources) {
+            document.getElementById("levels-fin").builder.rebuild();
+        }
+    },
+    
+    refreshCB: function()
+    {
+        this.refresh(this.dsources);
+    },
+    
+    closeCB: function()
+    {
+        window.close();
+    },
+
+    alert: function(text)
+    {
+        var Cc = Components.classes;
+        var Ci = Components.interfaces;
+
+        var prompts = Cc["@mozilla.org/embedcomp/prompt-service;1"]
+                        .getService(Ci.nsIPromptService);
+        return prompts.alert(null, "CFACDB - Alert", text);
+    },
+
+    aboutCB: function()
+    {
+        var httpBASE = this.httpBASE;
+        AddonManager.getAddonByID("cfacdb@plasma-gate.weizmann.ac.il",
+            function(aAddon) {
+                var str = aAddon.name + " version: " + aAddon.version;
+                str += "\nCreated by: " + aAddon.creator.name;
+                cfacdb.alert(str);
+            });
     },
     
     helpCB: function()

@@ -6,7 +6,6 @@
         width="800"
         height="600"
         persist="screenX screenY width height"
-        onclose="return cfacdb.oncloseCB();"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:html="http://www.w3.org/1999/xhtml">
 
@@ -19,11 +18,11 @@
         <menupopup id="file-popup">
           <menuitem id="file-import"
                     class="menuitem-iconic"
-                    label="Open Database..."
+                    label="Open database..."
                     image="chrome://cfacdb/skin/open.png"
                     oncommand="cfacdb.openCB();"/>
           <menuitem class="menuitem-iconic"
-                    label="Reload all data"
+                    label="Reload database"
                     image="chrome://cfacdb/skin/refresh.png"
                     oncommand="cfacdb.refreshCB();"/>
           <menuseparator/>

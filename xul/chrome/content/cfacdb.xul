@@ -59,18 +59,25 @@
           querytype="storage" flags="dont-build-content">
 
       <treecols>
-        <treecol label="SID"     flex="1" primary="true"/>
+        <treecol id="sid" label="SID" flex="1" hidden="true"/>
         <splitter class="tree-splitter"/>
         <treecol label="Species" flex="1"/>
         <splitter class="tree-splitter"/>
-        <treecol label="Anum" flex="1"/>
+        <treecol label="Atomic number" flex="1"/>
         <splitter class="tree-splitter"/>
         <treecol label="Mass" flex="1"/>
+        <splitter class="tree-splitter"/>
+        <treecol id="nele_min" label="Nele min" flex="1" hidden="true"/>
+        <splitter class="tree-splitter"/>
+        <treecol id="nele_max" label="Nele max" flex="1" hidden="true"/>
       </treecols>
 
       <template>
         <query>
-          SELECT sid, symbol, anum, mass FROM species
+          SELECT s.sid, s.symbol, s.anum, s.mass,
+                 MIN(l.nele) AS nele_min, MAX(nele) AS nele_max
+           FROM species AS s
+            INNER JOIN levels AS l ON (l.sid = s.sid)
         </query>
         <action>
           <treechildren>
@@ -80,6 +87,8 @@
                <treecell label="?symbol"/>
                <treecell label="?anum"/>
                <treecell label="?mass"/>
+               <treecell label="?nele_min"/>
+               <treecell label="?nele_max"/>
               </treerow>
            </treeitem>
           </treechildren>
@@ -94,6 +103,7 @@
   <hbox>
     <label value="Number of electrons:"/>
     <textbox type="number"
+             id="nele"
              size="1"
              onchange="cfacdb.neleSelectCB(event);"
              min="0" max="20" value="1"/>
@@ -104,7 +114,29 @@
       <radio label="1" value="1"/>
     </radiogroup>
 
+    <hbox id="dE"
+          datasources="rdf:null"
+          ref="*"
+          querytype="storage">
+      <label value="Transition &#916;E = "/>
+      <template>
+        <query>
+            SELECT lf.e - li.e AS de
+             FROM levels AS li
+              INNER JOIN levels AS lf ON (li.sid = lf.sid)
+             WHERE li.sid = :sid AND lf.id = :fin_id AND li.id = :ini_id
+             <param class="sid" name="sid">0</param>
+             <param class="ini_id" name="ini_id">-1</param>
+             <param class="fin_id" name="fin_id">-1</param>
+        </query>
+        <action>
+          <label uri="?" value="?de"/>
+        </action>
+      </template>
+    </hbox>
+
     <spacer flex="1"/>
+    
   </hbox>
   
   <hbox flex="10">
@@ -205,7 +237,7 @@
   </hbox>
     
   <splitter />
-
+    
   <vbox flex="6">
       <deck id="transitions-deck"
             flex="1"

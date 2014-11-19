@@ -64,6 +64,9 @@ var cfacdb = {
         e = document.getElementById("ctransitions");
         e.datasources = dsources;
         
+        e = document.getElementById("dE");
+        e.datasources = dsources;
+        
         e = document.getElementById("species");
         e.datasources = dsources;
         
@@ -142,16 +145,39 @@ var cfacdb = {
         var tree = e.target;
        
         var selection = tree.view.selection;
-        var cellText = tree.view.getCellText(tree.currentIndex,  
-                            tree.columns.getColumnAt(0));
+        var cell_text;
+        
+        cell_text = tree.view.getCellText(tree.currentIndex,  
+                            tree.columns.getNamedColumn("sid"));
         var sid;
-        if (cellText) {
-            sid = parseInt(cellText);
+        
+        if (cell_text) {
+            sid = parseInt(cell_text);
         } else {
             sid = 0;
         }
         
         this.setClassParams("sid", sid);
+        
+        var nele_min, nele_max;
+        cell_text = tree.view.getCellText(tree.currentIndex,  
+                            tree.columns.getNamedColumn("nele_min"));
+        if (cell_text) {
+            nele_min = parseInt(cell_text);
+        } else {
+            nele_min = 0;
+        }
+        cell_text = tree.view.getCellText(tree.currentIndex,  
+                            tree.columns.getNamedColumn("nele_max"));
+        if (cell_text) {
+            nele_max = parseInt(cell_text);
+        } else {
+            nele_max = 0;
+        }
+        
+        var nele_e = document.getElementById("nele");
+        nele_e.min = nele_min;
+        nele_e.max = nele_max;
         
         document.getElementById("levels-ini").builder.rebuild();
         document.getElementById("levels-fin").builder.rebuild();
@@ -163,7 +189,7 @@ var cfacdb = {
        
         var selection = tree.view.selection;
         var cellText = tree.view.getCellText(tree.currentIndex,  
-                            tree.columns.getColumnAt(0));
+                            tree.columns.getPrimaryColumn());
         var id;
         if (cellText) {
             id = parseInt(cellText);
@@ -185,6 +211,7 @@ var cfacdb = {
         
         this.setClassParams(class_name, id);
         
+        document.getElementById("dE").builder.rebuild();
         document.getElementById("rtransitions").builder.rebuild();
         document.getElementById("aitransitions").builder.rebuild();
         document.getElementById("ctransitions").builder.rebuild();

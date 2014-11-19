@@ -4,6 +4,8 @@ var cfacdb = {
     ini_id: -1,
     fin_id: -1,
     
+    dnele: 0,
+    
     dsources: null,
     
     logger: function(level, msg)
@@ -212,8 +214,11 @@ var cfacdb = {
         this.setClassParams(class_name, id);
         
         document.getElementById("dE").builder.rebuild();
-        document.getElementById("rtransitions").builder.rebuild();
-        document.getElementById("aitransitions").builder.rebuild();
+        if (this.dnele == 0) {
+            document.getElementById("rtransitions").builder.rebuild();
+        } else {
+            document.getElementById("aitransitions").builder.rebuild();
+        }
         document.getElementById("ctransitions").builder.rebuild();
         
         this.setBusyCursor(false);
@@ -233,10 +238,10 @@ var cfacdb = {
     deltaNeleCB: function(e)
     {
         var el = e.target;
-        var dnele = parseInt(el.value);
-        this.setClassParams("dnele", dnele);
+        this.dnele = parseInt(el.value);
+        this.setClassParams("dnele", this.dnele);
         
-        document.getElementById("transitions-deck").selectedIndex = dnele;
+        document.getElementById("transitions-deck").selectedIndex = this.dnele;
         
         if (this.dsources) {
             document.getElementById("levels-fin").builder.rebuild();

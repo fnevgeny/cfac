@@ -37,11 +37,9 @@ CREATE TEMPORARY VIEW _aitransitions_v AS
       INNER JOIN levels AS li ON (at.sid = li.sid AND at.ini_id = li.id);
 
 CREATE TEMPORARY VIEW _ctransitions_v AS
-  SELECT t.sid, t.ini_id, t.fin_id, t.type, t.cid, COUNT(s.cid) AS ndata,
+  SELECT t.sid, t.ini_id, t.fin_id, t.type, t.cid,
          li.nele AS ini_nele, lf.nele AS fin_nele, lf.e - li.e AS de
     FROM ctransitions AS t
-      INNER JOIN cstrengths AS s ON (s.cid = t.cid)
       INNER JOIN levels AS li ON (t.sid = li.sid AND t.ini_id = li.id)
       INNER JOIN levels AS lf ON (t.sid = lf.sid AND t.fin_id = lf.id)
-    WHERE s.strength > 0
     GROUP BY t.cid;

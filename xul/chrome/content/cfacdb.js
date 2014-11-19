@@ -276,7 +276,7 @@ var cfacdb = {
     
     helpCB: function()
     {
-        var url = "http://plasma-gate.weizmann.ac.il/cfacdb/xul/";
+        var url = "https://www-amdis.iaea.org/CFACDB/";
         var gBrowser = window.opener.gBrowser;
 
         if (gBrowser) {

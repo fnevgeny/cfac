@@ -7,7 +7,7 @@ xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
         <em:id>cfacdb@plasma-gate.weizmann.ac.il</em:id>
         <em:unpack>true</em:unpack>
-        <em:version>0.0.1</em:version>
+        <em:version>0.1</em:version>
         <em:type>2</em:type>
 
         <em:targetApplication>
@@ -21,7 +21,7 @@ xmlns:em="http://www.mozilla.org/2004/em-rdf#">
         <em:name>CFACDB</em:name>
         <em:description>CFACDB browser.</em:description>
         <em:creator>Evgeny Stambulchik</em:creator>
-        <em:homepageURL>http://plasma-gate.weizmann.ac.il/cfacdb/xul/</em:homepageURL>
+        <em:homepageURL>https://www-amdis.iaea.org/CFACDB/</em:homepageURL>
 
         <em:updateURL>http://plasma-gate.weizmann.ac.il/cfacdb/xul/update.rdf</em:updateURL>
         <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDbX1ENJb8eNLYLt/VhYndVHBV0

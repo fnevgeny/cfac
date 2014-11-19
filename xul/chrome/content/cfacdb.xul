@@ -207,52 +207,95 @@
   <splitter />
 
   <vbox flex="6">
-      <label control="rtransitions" value="Radiative transitions" />
-      <tree id="rtransitions"
+      <deck id="transitions-deck"
             flex="1"
-            seltype="single"
-            datasources="rdf:null"
-            ref="*"
-            querytype="storage" flags="dont-build-content">
+            selectedIndex="0">
+        <vbox>
+          <label control="rtransitions" value="Radiative transitions" />
+          <tree id="rtransitions"
+                flex="1"
+                seltype="single"
+                datasources="rdf:null"
+                ref="*"
+                querytype="storage" flags="dont-build-content">
 
-        <treecols>
-          <treecol label="Multipole"   flex="1" sort="?mpole"/>
-          <splitter class="tree-splitter"/>
-          <treecol label="Reduced matrix element" flex="1"/>
-          <splitter class="tree-splitter"/>
-          <treecol label="Calculation mode" flex="1"/>
-        </treecols>
+            <treecols>
+              <treecol label="Multipole"   flex="1" sort="?mpole"/>
+              <splitter class="tree-splitter"/>
+              <treecol label="Reduced matrix element" flex="1"/>
+              <splitter class="tree-splitter"/>
+              <treecol label="Calculation mode" flex="1"/>
+            </treecols>
 
-        <template>
-         <query>
-            SELECT mpole, rme, mode,
-              CASE WHEN mpole > 0 THEN 'M' || mpole
-                 ELSE 'E' || -mpole
-              END AS mps,
-              CASE WHEN mode = 0 THEN 'FR'
-                 ELSE 'NR'
-              END AS ms
-             FROM rtransitions
-             WHERE sid = :sid AND fin_id = :fin_id AND ini_id = :ini_id
-             <param class="sid" name="sid">0</param>
-             <param class="ini_id" name="ini_id">-1</param>
-             <param class="fin_id" name="fin_id">-1</param>
-          </query>
-          <action>
-            <treechildren>
-             <treeitem uri="?">
-               <treerow>
-                 <treecell label="?mpole ( ?mps )"/>
-                 <treecell label="?rme"/>
-                 <treecell label="?mode ( ?ms )"/>
-                </treerow>
-             </treeitem>
-            </treechildren>
-          </action>
+            <template>
+             <query>
+                SELECT mpole, rme, mode,
+                  CASE WHEN mpole > 0 THEN 'M' || mpole
+                     ELSE 'E' || -mpole
+                  END AS mps,
+                  CASE WHEN mode = 0 THEN 'FR'
+                     ELSE 'NR'
+                  END AS ms
+                 FROM rtransitions
+                 WHERE sid = :sid AND fin_id = :fin_id AND ini_id = :ini_id
+                 <param class="sid" name="sid">0</param>
+                 <param class="ini_id" name="ini_id">-1</param>
+                 <param class="fin_id" name="fin_id">-1</param>
+              </query>
+              <action>
+                <treechildren>
+                 <treeitem uri="?">
+                   <treerow>
+                     <treecell label="?mpole ( ?mps )"/>
+                     <treecell label="?rme"/>
+                     <treecell label="?mode ( ?ms )"/>
+                    </treerow>
+                 </treeitem>
+                </treechildren>
+              </action>
 
-        </template>
-      </tree>
+            </template>
+          </tree>
+        </vbox>
 
+        <vbox>
+          <label control="aitransitions" value="Autoionization transitions" />
+          <tree id="aitransitions"
+                flex="1"
+                seltype="single"
+                datasources="rdf:null"
+                ref="*"
+                querytype="storage" flags="dont-build-content">
+
+            <treecols>
+             <treecol label="Rate" flex="1"/>
+            </treecols>
+
+            <template>
+             <query>
+                SELECT rate
+                 FROM aitransitions
+                 WHERE sid = :sid AND fin_id = :fin_id AND ini_id = :ini_id
+                 <param class="sid" name="sid">0</param>
+                 <param class="ini_id" name="ini_id">-1</param>
+                 <param class="fin_id" name="fin_id">-1</param>
+              </query>
+              <action>
+                <treechildren>
+                 <treeitem uri="?">
+                   <treerow>
+                     <treecell label="?rate"/>
+                   </treerow>
+                 </treeitem>
+                </treechildren>
+              </action>
+
+            </template>
+          </tree>
+        </vbox>
+
+      </deck>
+      
       <label control="ctransitions" value="Collisional processes" />
       <tree id="ctransitions"
             flex="2"

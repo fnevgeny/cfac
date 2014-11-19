@@ -58,6 +58,9 @@ var cfacdb = {
         e = document.getElementById("rtransitions");
         e.datasources = dsources;
         
+        e = document.getElementById("aitransitions");
+        e.datasources = dsources;
+        
         e = document.getElementById("ctransitions");
         e.datasources = dsources;
         
@@ -178,10 +181,15 @@ var cfacdb = {
             class_name = "fin_id";
         }
         
+        this.setBusyCursor(true);
+        
         this.setClassParams(class_name, id);
         
         document.getElementById("rtransitions").builder.rebuild();
+        document.getElementById("aitransitions").builder.rebuild();
         document.getElementById("ctransitions").builder.rebuild();
+        
+        this.setBusyCursor(false);
     },
     
     neleSelectCB: function(e)
@@ -200,6 +208,8 @@ var cfacdb = {
         var el = e.target;
         var dnele = parseInt(el.value);
         this.setClassParams("dnele", dnele);
+        
+        document.getElementById("transitions-deck").selectedIndex = dnele;
         
         if (this.dsources) {
             document.getElementById("levels-fin").builder.rebuild();
@@ -258,6 +268,7 @@ var cfacdb = {
                 cfacdb.alert(str);
             });
     },
+    
     setBusyCursor: function(onoff)
     {
         window.setCursor(onoff ? "wait" : "auto");

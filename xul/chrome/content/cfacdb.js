@@ -58,6 +58,9 @@ var cfacdb = {
         e = document.getElementById("rtransitions");
         e.datasources = dsources;
         
+        e = document.getElementById("ctransitions");
+        e.datasources = dsources;
+        
         e = document.getElementById("species");
         e.datasources = dsources;
         
@@ -178,6 +181,7 @@ var cfacdb = {
         this.setClassParams(class_name, id);
         
         document.getElementById("rtransitions").builder.rebuild();
+        document.getElementById("ctransitions").builder.rebuild();
     },
     
     neleSelectCB: function(e)

@@ -206,7 +206,7 @@
     
   <splitter />
 
-  <vbox flex="4">
+  <vbox flex="6">
       <label control="rtransitions" value="Radiative transitions" />
       <tree id="rtransitions"
             flex="1"
@@ -245,6 +245,57 @@
                  <treecell label="?mpole ( ?mps )"/>
                  <treecell label="?rme"/>
                  <treecell label="?mode ( ?ms )"/>
+                </treerow>
+             </treeitem>
+            </treechildren>
+          </action>
+
+        </template>
+      </tree>
+
+      <label control="ctransitions" value="Collisional processes" />
+      <tree id="ctransitions"
+            flex="2"
+            datasources="rdf:null"
+            ref="*"
+            querytype="storage" flags="dont-build-content">
+
+        <treecols>
+          <treecol label="Type"   flex="1" sort="?type"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Energy" flex="1" sort="?e"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="Strength" flex="1"/>
+        </treecols>
+
+        <template>
+         <query>
+           SELECT ct.type, cs.e, cs.strength,
+                  lf.e - li.e AS de, ct.kl, ct.ap0, ct.ap1, ct.ap2, ct.ap3,
+                  CASE ct.type 
+                   WHEN 1 THEN 'CE'
+                   WHEN 2 THEN 'CI'
+                   WHEN 3 THEN 'PI'
+                   ELSE '?!'
+                  END AS types
+             FROM cstrengths AS cs
+               INNER JOIN ctransitions AS ct ON (cs.cid = ct.cid)
+               INNER JOIN levels AS li ON (ct.sid = li.sid AND ct.ini_id = li.id)
+               INNER JOIN levels AS lf ON (ct.sid = lf.sid AND ct.fin_id = lf.id)
+             WHERE cs.strength > 0 AND
+                   ct.sid = :sid AND ct.fin_id = :fin_id AND ct.ini_id = :ini_id
+             ORDER BY ct.type
+             <param class="sid" name="sid">0</param>
+             <param class="ini_id" name="ini_id">-1</param>
+             <param class="fin_id" name="fin_id">-1</param>
+          </query>
+          <action>
+            <treechildren>
+             <treeitem uri="?">
+               <treerow>
+                 <treecell label="?type ( ?types )"/>
+                 <treecell label="?e"/>
+                 <treecell label="?strength"/>
                 </treerow>
              </treeitem>
             </treechildren>

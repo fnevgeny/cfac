@@ -11,7 +11,12 @@ CHROME_SRC = \
 	$(CONTENT_DIR)/overlay.xul \
 	$(CONTENT_DIR)/overlay.js \
 	$(CONTENT_DIR)/cfacdb.xul \
-	$(CONTENT_DIR)/cfacdb.js
+	$(CONTENT_DIR)/cfacdb.js \
+	$(SKIN_DIR)/about.png \
+	$(SKIN_DIR)/exit.png \
+	$(SKIN_DIR)/open.png \
+	$(SKIN_DIR)/help.png \
+	$(SKIN_DIR)/refresh.png
 
 all : $(XPI)
 

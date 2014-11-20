@@ -181,22 +181,31 @@ var cfacdb = {
         nele_e.min = nele_min;
         nele_e.max = nele_max;
         
-        document.getElementById("levels-ini").builder.rebuild();
-        document.getElementById("levels-fin").builder.rebuild();
+        var el;
+        el = document.getElementById("levels-ini");
+        el.view.selection.clearSelection();
+        el.builder.rebuild();
+        el = document.getElementById("levels-fin");
+        el.view.selection.clearSelection();
+        el.builder.rebuild();
     },
     
     levelSelectCB: function(e)
     {
         var tree = e.target;
        
-        var selection = tree.view.selection;
-        var cellText = tree.view.getCellText(tree.currentIndex,  
-                            tree.columns.getPrimaryColumn());
         var id;
-        if (cellText) {
-            id = parseInt(cellText);
-        } else {
+        if (tree.currentIndex < 0) {
             id = -1;
+        } else {
+            var selection = tree.view.selection;
+            var cellText = tree.view.getCellText(tree.currentIndex,  
+                                tree.columns.getPrimaryColumn());
+            if (cellText) {
+                id = parseInt(cellText);
+            } else {
+                id = -1;
+            }
         }
         
         var class_name;
@@ -213,13 +222,35 @@ var cfacdb = {
         
         this.setClassParams(class_name, id);
         
-        document.getElementById("dE").builder.rebuild();
+        var el;
+        var els = [];
+        
+        el = document.getElementById("dE");
+        el.builder.rebuild();
+        
         if (this.dnele == 0) {
-            document.getElementById("rtransitions").builder.rebuild();
+            el = document.getElementById("rtransitions");
         } else {
-            document.getElementById("aitransitions").builder.rebuild();
+            el = document.getElementById("aitransitions");
         }
-        document.getElementById("ctransitions").builder.rebuild();
+        els.push(el);
+        el = document.getElementById("ctransitions");
+        els.push(el);
+        
+        for (var i in els) {
+            el = els[i];
+            if (this.fin_id < 0 || this.ini_id < 0) {
+                el.datasources = "rdf:null";
+            } else {
+                if (el.datasources != this.dsources) {
+                    el.datasources = this.dsources;
+                } else {
+                    // explicitly call rebuild() if the datasources haven't
+                    // changed
+                    el.builder.rebuild();
+                }
+            }
+        }
         
         this.setBusyCursor(false);
     },
@@ -244,7 +275,9 @@ var cfacdb = {
         document.getElementById("transitions-deck").selectedIndex = this.dnele;
         
         if (this.dsources) {
-            document.getElementById("levels-fin").builder.rebuild();
+            var el = document.getElementById("levels-fin");
+            el.selection.clearSelection();
+            el.builder.rebuild();
         }
     },
     

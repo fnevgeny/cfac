@@ -7,7 +7,7 @@ xmlns:em="http://www.mozilla.org/2004/em-rdf#">
 
         <em:id>cfacdb@plasma-gate.weizmann.ac.il</em:id>
         <em:unpack>true</em:unpack>
-        <em:version>0.1</em:version>
+        <em:version>0.2</em:version>
         <em:type>2</em:type>
 
         <em:targetApplication>

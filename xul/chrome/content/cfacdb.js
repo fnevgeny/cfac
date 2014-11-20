@@ -146,40 +146,43 @@ var cfacdb = {
     {
         var tree = e.target;
        
-        var selection = tree.view.selection;
-        var cell_text;
+        var sid = 0;
+        var nele_min = 0, nele_max = 1;
         
-        cell_text = tree.view.getCellText(tree.currentIndex,  
-                            tree.columns.getNamedColumn("sid"));
-        var sid;
-        
-        if (cell_text) {
-            sid = parseInt(cell_text);
-        } else {
-            sid = 0;
+        if (tree.currentIndex >= 0) {
+            var selection = tree.view.selection;
+            var cell_text;
+
+            cell_text = tree.view.getCellText(tree.currentIndex,  
+                                tree.columns.getNamedColumn("sid"));
+
+            if (cell_text) {
+                sid = parseInt(cell_text);
+            } else {
+                sid = 0;
+            }
+
+            cell_text = tree.view.getCellText(tree.currentIndex,  
+                                tree.columns.getNamedColumn("nele_min"));
+            if (cell_text) {
+                nele_min = parseInt(cell_text);
+            } else {
+                nele_min = 0;
+            }
+            cell_text = tree.view.getCellText(tree.currentIndex,  
+                                tree.columns.getNamedColumn("nele_max"));
+            if (cell_text) {
+                nele_max = parseInt(cell_text);
+            } else {
+                nele_max = 1;
+            }
+
+            var nele_e = document.getElementById("nele");
+            nele_e.min = nele_min;
+            nele_e.max = nele_max;
         }
         
         this.setClassParams("sid", sid);
-        
-        var nele_min, nele_max;
-        cell_text = tree.view.getCellText(tree.currentIndex,  
-                            tree.columns.getNamedColumn("nele_min"));
-        if (cell_text) {
-            nele_min = parseInt(cell_text);
-        } else {
-            nele_min = 0;
-        }
-        cell_text = tree.view.getCellText(tree.currentIndex,  
-                            tree.columns.getNamedColumn("nele_max"));
-        if (cell_text) {
-            nele_max = parseInt(cell_text);
-        } else {
-            nele_max = 0;
-        }
-        
-        var nele_e = document.getElementById("nele");
-        nele_e.min = nele_min;
-        nele_e.max = nele_max;
         
         var el;
         el = document.getElementById("levels-ini");
@@ -276,7 +279,9 @@ var cfacdb = {
         
         if (this.dsources) {
             var el = document.getElementById("levels-fin");
-            el.selection.clearSelection();
+            if (el.selection) {
+                el.selection.clearSelection();
+            }
             el.builder.rebuild();
         }
     },

@@ -51,8 +51,10 @@ Make.dep: $(SRCS) $(SQLIS)
 	@$(CC) $(CFLAGS) -MM $(SRCS) >> $@
 	@echo "done"
 
-install: $(PROGS)
-	install $(PROGS) $(DESTBIN)
+install: cfacdbu cfacdb.h $(LIBCFACDB)
+	mkdir -p $(DESTBIN) && install -m 755 cfacdbu $(DESTBIN)
+	mkdir -p $(DESTINC) && install -m 644 cfacdb.h $(DESTINC)
+	mkdir -p $(DESTLIB) && install -m 644 $(LIBCFACDB) $(DESTLIB)
 
 clean:
 	rm -f $(PROGS) $(LIBCFACDB) \

@@ -47,8 +47,12 @@ C     ierr error code returned by coulcc
       zlmin = dcmplx(lambda, 0.0)
       kfn = 0
 
+      ierr = 0
       call coulcc(x, eta, zlmin, 1, fc, gc, fcp, gcp, sig,
      +     11, kfn, ierr)
+      if (ierr .ne. 0) then
+          return
+      endif
       if (e .lt. 0) then
          omega = IONE*(HALFPI*(lambda - y - 0.5) - sig(1))
          if (z > 0) then

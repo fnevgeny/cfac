@@ -171,6 +171,8 @@ C                       initialise the log-gamma function :
       ACCH  = SQRT(ACCUR)
       ACCB  = SQRT(ACCH)
       RERR = ACCT
+      
+      SIG = (0.0, 0.0)
 C
       CIK = ONE
          IF(KFN.GE.3) CIK = CI * SIGN(ONE,ACC8-IMAG(XX))

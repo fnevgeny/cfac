@@ -1218,16 +1218,20 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       qo /= p2;
       x0 = pot->rad[i2];
       DCOUL(z, e, orb->kappa, x0, &pp, &qq, &ppi, &qqi, &ierr);
+      if (ierr) {
+        printf("DCOUL failed with ierr = %d\n", ierr);
+        return -4;
+      }
       p1 = (qq/pp)*2.0*x0/FINE_STRUCTURE_CONST - orb->kappa;
       qi = DpDr(orb->kappa, i2, e, pot, p1);
       delta = qo-qi;
       dq[j] = delta;
     }
-    for (j = 0; j < ME; j++) {
+    for (j = 0; j < ME - 1; j++) {
       if (dq[j] > 0 && dq[j+1] < dq[j]) break;
     }
     i = j;
-    for (; j < ME; j++) {
+    for (; j < ME - 1; j++) {
       if (dq[j+1] >= dq[j]) break;
     }
     nme = j - i + 1;

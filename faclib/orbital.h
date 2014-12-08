@@ -71,7 +71,7 @@ double GetRFromRho(double rho, double a, double b, double r0);
 int SetPotentialZ(cfac_t *cfac, double c);
 int SetPotentialUehling(cfac_t *cfac, int vp);
 int SetPotentialVc(POTENTIAL *pot);
-int SetPotentialU(POTENTIAL *pot, int n, double *u);
+int SetPotentialU(POTENTIAL *pot, int n);
 int SetPotentialW (POTENTIAL *pot, double e, int kappa);
 int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot);
 

@@ -244,7 +244,7 @@ void Differential(double *p, double *dp, int i1, int i2) {
   }
 }    
 
-static double DpDr(int kappa, int i1, double e, POTENTIAL *pot, double b) {
+static double DpDr(int kappa, int i1, double e, const POTENTIAL *pot, double b) {
   double p[MAXRP], bqp, p1, p2 = 0.0;
   int k;
   
@@ -1932,7 +1932,7 @@ int SetPotentialVc(POTENTIAL *pot) {
   return 0;
 }
 
-int SetPotentialU(POTENTIAL *pot, int n, double *u) {
+int SetPotentialU(POTENTIAL *pot, int n) {
   int i;
   
   if (n < 0) {
@@ -1942,12 +1942,6 @@ int SetPotentialU(POTENTIAL *pot, int n, double *u) {
       pot->dU2[i] = 0.0;
     }
     return 0;
-  }
-
-  if (u) {
-    for (i = 0; i < n; i++) {
-      pot->U[i] = u[i];    
-    }
   }
 
   Differential(pot->U, pot->dU, 0, pot->maxrp-1);

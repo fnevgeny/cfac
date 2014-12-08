@@ -315,11 +315,11 @@ static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
       u[j] = a - b;
       u[j] /= potential->rad[j];
     }
-    SetPotentialU(potential, 0, NULL);
+    SetPotentialU(potential, 0);
   } else {
     if (potential->N < 1.0+EPS3) {
       SetPotentialVc(potential);
-      SetPotentialU(potential, -1, NULL);
+      SetPotentialU(potential, -1);
       return 0.0;
     }
     r = potential->Z[potential->maxrp-1];
@@ -340,7 +340,7 @@ static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
       u[j] = a - b;
       u[j] /= potential->rad[j];
     }
-    SetPotentialU(potential, 0, NULL);
+    SetPotentialU(potential, 0);
     r = 1.0;
   }
   

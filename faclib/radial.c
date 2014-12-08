@@ -90,20 +90,6 @@ void SetSlaterCut(cfac_t *cfac, int k0, int k1) {
   }
 }
 
-void SetPotentialMode(cfac_t *cfac, int m, double h) {
-  POTENTIAL *potential = cfac->potential;
-  potential->mode = m;
-  if (h > 1e10) {
-    if ((m % 10) == 0) {
-      potential->hxs = 0.0;
-    } else {
-      potential->hxs = 0.65;
-    }
-  } else {
-    potential->hxs = h;
-  }
-}
-
 int SetBoundary(cfac_t *cfac, int nmax, double p, double bqp) {
   ORBITAL *orb;
   int i = 0, j, n, kl, kl2, kappa, k;
@@ -295,7 +281,7 @@ static void AdjustScreeningParams(POTENTIAL *potential, double *u) {
 }
 
 static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
-  int i, j, k1, jmax, m, jm, md;
+  int i, j, k1, jmax, m, jm;
   ORBITAL *orb1;
   double large, small, a, b, c, d0, d1, d;
   POTENTIAL *potential = cfac->potential;
@@ -303,7 +289,6 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
   double yk[MAXRP];
   
   if (potential->N < 1+EPS3) return -1;
-  md = potential->mode % 10;
 
   for (m = 0; m < potential->maxrp; m++) {
     u[m] = 0.0;
@@ -334,7 +319,7 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
     GetYk(cfac, 0, yk, orb1, orb1, k1, k1, 1);
     for (m = 0; m <= jmax; m++) {    
       u[m] += acfg->nq[i] * yk[m];
-      if (w[m] && md == 0) {
+      if (w[m]) {
 	large = Large(orb1)[m];
 	small = Small(orb1)[m];  
 	b = large*large + small*small;
@@ -353,8 +338,7 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
     }
   }
 
-  if (md == 0) c = potential->N-1.0;
-  else c = potential->N;
+  c = potential->N-1.0;
   for (jm = jmax; jm >= 10; jm--) {
     if (fabs(w[jm]) > EPS6 && 
 	c > u[jm] &&
@@ -471,7 +455,6 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   fprintf(f, "#    rb1 = %10.3E\n", potential->rad[potential->ib1]);
   fprintf(f, "#    bqp = %10.3E\n", potential->bqp);
   fprintf(f, "#     nb = %d\n", potential->nb);
-  fprintf(f, "#   mode = %d\n", potential->mode);
   fprintf(f, "#    HXS = %10.3E\n", potential->hxs);
 
   PotentialHX(cfac, u, v, w);
@@ -586,8 +569,8 @@ static int OptimizeLoop(cfac_t *cfac, double *vbuf) {
 #define NXS 5
 int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   AVERAGE_CONFIG *acfg = &(cfac->average_config);
-  double a, b, c, z, emin, smin, hxs[NXS], ehx[NXS];
-  int iter, i, j, im;
+  double a, z;
+  int iter, i;
   POTENTIAL *potential = cfac->potential;
   
   double vbuf[MAXRP];
@@ -634,9 +617,6 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   /* setup the radial grid if not yet */
   if (potential->flag == 0) {
     SetOrbitalRGrid(cfac);
-    im = 0;
-  } else {
-    im = 1;
   }
 
   SetPotentialZ(cfac, 0.0);
@@ -654,73 +634,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
     cfac->optimize_control.stabilizer = 0.25 + 0.75*(z/potential->Z[potential->maxrp-1]);
   }
 
-  if (potential->mode/10 == 1) {
-    if (im == 0) {
-      a = 1.5/(NXS-1.0);
-      hxs[0] = potential->hxs - 0.75;
-      for (i = 1; i < NXS; i++) {
-	hxs[i] = hxs[i-1] + a;
-      }      
-      for (i = 0; i < NXS; i++) {
-	ReinitRadial(cfac, 1);
-	potential->hxs = hxs[i];
-	iter = OptimizeLoop(cfac, vbuf);
-	if (iter > cfac->optimize_control.maxiter) {
-	  printf("Maximum iteration reached in OptimizeRadial %d %d\n", i, iter);
-	  return -1;
-	}
-	if (ng > 0) {
-	  ehx[i] = 0.0;
-	  for (j = 0; j < ng; j++) {
-	    ehx[i] += TotalEnergyGroup(cfac, kg[j]);
-	  }
-	} else {
-	  ehx[i] = AverageEnergyAvgConfig(cfac);
-	}
-      }    
-    } else {
-      a = 0.5/(NXS-1.0);
-      b = potential->hxs;
-      hxs[0] = b - 0.25;
-      for (i = 1; i < NXS; i++) {
-	hxs[i] = hxs[i-1] + a;
-      }
-      iter = OptimizeLoop(cfac, vbuf);
-      for (i = 0; i < NXS; i++) {
-	potential->hxs = hxs[i];
-	SetPotential(cfac, iter, vbuf);
-	ReinitRadial(cfac, 1);
-	ClearOrbitalTable(cfac, 0);
-	if (ng > 0) {
-	  ehx[i] = 0.0;
-	  for (j = 0; j < ng; j++) {
-	    ehx[i] += TotalEnergyGroup(cfac, kg[j]);
-	  }
-	} else {
-	  ehx[i] = AverageEnergyAvgConfig(cfac);
-	}
-      }
-    }
-    
-    b = 0.001;
-    a = hxs[0];
-    emin = 1e10;
-    smin = 0.0;
-    while (a <= hxs[NXS-1]) {
-      UVIP3P(NXS, hxs, ehx, 1, &a, &c);
-      if (c < emin) {
-	emin = c;
-	smin = a;
-      }
-      a += b;
-    }
-    
-    ReinitRadial(cfac, 1);
-    potential->hxs = smin;
-    iter = OptimizeLoop(cfac, vbuf);
-  } else {
-    iter = OptimizeLoop(cfac, vbuf);
-  }
+  iter = OptimizeLoop(cfac, vbuf);
 
   if (potential->uehling[0] == 0.0) {
     SetPotentialUehling(cfac, cfac->qed.vp);

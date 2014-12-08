@@ -4,8 +4,6 @@
 #include "consts.h"
 
 typedef struct _POTENTIAL_ {
-  int mode;
-  
   int flag;               /* radial grid completeness             */
   
   int maxrp;              /* used length of the [MAXRP] arrays    */

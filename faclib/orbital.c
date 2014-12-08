@@ -187,6 +187,11 @@ int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
 int LastMaximum(double *p, int i1, int i2) {
   int i;
 
+  /* skip equal last points */
+  while (i2 > i1 && p[i2] == p[i2 - 1]) {
+    i2--;
+  }
+  
   if (p[i2] > p[i2-1]) {
     for (i = i2-1; i > i1; i--) {
       if (p[i-1] > p[i]) break;

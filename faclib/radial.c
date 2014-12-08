@@ -363,7 +363,6 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   fprintf(f, "#     br = %10.3E\n", potential->br);
   fprintf(f, "#     rb = %10.3E\n", potential->rad[potential->ib]);
   fprintf(f, "#    rb1 = %10.3E\n", potential->rad[potential->ib1]);
-  fprintf(f, "#    bqp = %10.3E\n", potential->bqp);
   fprintf(f, "#     nb = %d\n", potential->nb);
   fprintf(f, "#    HXS = %10.3E\n", potential->hxs);
 

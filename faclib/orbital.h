@@ -7,17 +7,16 @@ typedef struct _POTENTIAL_ {
   int flag;               /* radial grid completeness             */
   
   int maxrp;              /* used length of the [MAXRP] arrays    */
+  double rmin;            /* starting point of the radial mesh    */
   double ratio;           /* incr. ratio of radial mesh near 0    */
   double asymp;           /* number of mesh points per oscillation
                              wavelength for high-n orbitals       */
-  double rmin;            /* starting point of the radial mesh    */
   
   double hxs;
   double N;               /* effective number of electrons        */
   double lambda, a;       /* optimization parameters for Vc       */
   double ar, br;          /* parameters for the transformation    */
   int ib, nb, ib1; 
-  double bqp;             /* boundary condition                   */
   
   int r_core;             /* core radius index                    */
   unsigned int nmax;      /* above this PQN, Coulomb WF for

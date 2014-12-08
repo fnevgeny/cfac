@@ -20,8 +20,6 @@ typedef struct _SLATER_YK_ {
   float coeff[2];
 } SLATER_YK;
 
-int SetBoundary(cfac_t *cfac, int nmax, double p, double bqp);
-int RadialOverlaps(cfac_t *cfac, char *fn, int kappa);
 void SetSlaterCut(cfac_t *cfac, int k0, int k1);
 void SetSE(cfac_t *cfac, int n);
 void SetVP(cfac_t *cfac, int n);

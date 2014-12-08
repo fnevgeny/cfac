@@ -2774,40 +2774,6 @@ static int PAsymmetry(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PRadialOverlaps(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
-  int kappa;
-
-  if (argc != 2 || argt[0] != STRING) return -1;
-
-  if (argc == 2) kappa = atoi(argv[1]);
-  else kappa = -1;
-
-  RadialOverlaps(cfac, argv[0], kappa);
-  
-  return 0;
-}
-
-static int PSetBoundary(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
-  int nmax;
-  double bqp, p;
-
-  bqp = 0.0;
-  p = -1.0;
-  if (argc > 1) {
-    p = atof(argv[1]);    
-    if (argc > 2) {
-      bqp = atof(argv[2]);
-    }
-  }
-
-  nmax = atoi(argv[0]);
-  
-  return SetBoundary(cfac, nmax, p, bqp);
-}
-
-
 static int PSetSlaterCut(int argc, char *argv[], int argt[], 
 			 ARRAY *variables) {
   int k0, k1;
@@ -3045,7 +3011,6 @@ static METHOD methods[] = {
   {"OptimizeRadial", POptimizeRadial},
   {"PrepAngular", PPrepAngular},
   {"Pause", PPause},
-  {"RadialOverlaps", PRadialOverlaps},
   {"RefineRadial", PRefineRadial},
   {"PrintTable", PPrintTable},
   {"RecStates", PRecStates},
@@ -3055,7 +3020,6 @@ static METHOD methods[] = {
   {"SetAngZOptions", PSetAngZOptions},
   {"SetAngZCut", PSetAngZCut},
   {"SetCILevel", PSetCILevel},
-  {"SetBoundary", PSetBoundary},
   {"SetMixCut", PSetMixCut},
   {"SetAtom", PSetAtom},
   {"SetAvgConfig", PSetAvgConfig},

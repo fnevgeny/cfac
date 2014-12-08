@@ -90,96 +90,6 @@ void SetSlaterCut(cfac_t *cfac, int k0, int k1) {
   }
 }
 
-int SetBoundary(cfac_t *cfac, int nmax, double p, double bqp) {
-  ORBITAL *orb;
-  int i = 0, j, n, kl, kl2, kappa, k;
-  double d1, d2, d;
-  POTENTIAL *potential = cfac->potential;
-
-  if (nmax == -100) {
-    if (p <= 0.0) {
-      printf("2nd argument must be > 0 in SetBoundary(-100,...)\n");
-      return -1;
-    }
-    for (i = 0; i < potential->maxrp-10; i++) {
-      if (potential->rad[i] >= p) break;
-    }
-    potential->ib1 = i;
-    if (bqp > 0) {
-      if (bqp >= p) {
-	printf("3rd argument must be less than 2nd in SetBoundary(-100,...)\n");
-	return -1;
-      }
-      for (i = 0; i < potential->maxrp; i++) {
-	if (potential->rad[i] >= bqp) break;
-      }
-      if (i < potential->ib1) {
-	potential->ib = i;
-      }
-    }
-    return 0;
-  }
-  potential->nb = abs(nmax);
-  potential->bqp = bqp;
-  if (nmax == 0) {
-    potential->ib = 0;
-  } else if (nmax < 0) {
-    d = GetResidualZ(cfac);
-    d1 = potential->nb;
-    if (p < 0.0) p = 2.0*d1*d1/d;
-    for (i = 0; i < potential->maxrp; i++) {
-      if (potential->rad[i] >= p) break;
-    }
-    if (i > potential->maxrp-10) {
-      printf("enlarge maxrp\n");
-      exit(1);
-    }
-    if (IsEven(i)) i++;
-    potential->ib = i;
-    for (n = 1; n <= potential->nb; n++) {
-      for (kl = 0; kl < n; kl++) {
-	kl2 = 2*kl;
-	for (j = kl2 - 1; j <= kl2 + 1; j += 2) {
-	  if (j < 0) continue;
-	  kappa = GetKappaFromJL(j, kl2);
-	  k = OrbitalIndex(cfac, n, kappa, 0);
-	  orb = GetOrbitalSolved(cfac, k);
-	}
-      }
-    }
-  } else {
-    if (p < 0.0) p = 1E-8;
-    for (n = 1; n <= potential->nb; n++) {
-      for (kl = 0; kl < n; kl++) {
-	kl2 = 2*kl;
-	for (j = kl2 - 1; j <= kl2 + 1; j += 2) {
-	  if (j < 0) continue;
-	  kappa = GetKappaFromJL(j, kl2);
-	  k = OrbitalIndex(cfac, n, kappa, 0);
-	  orb = GetOrbitalSolved(cfac, k);	  
-	  for (i = orb->ilast-3; i >= 0; i--) {
-	    d1 = Large(orb)[i];
-	    d2 = Small(orb)[i];
-	    d = d1*d1 + d2*d2;
-	    if (d >= p) {
-	      i++;
-	      break;
-	    }
-	  }
-	  if (potential->ib < i) potential->ib = i;
-	}
-      }
-    }
-    if (IsEven(i)) i++;
-    if (i > potential->maxrp-10) {
-      printf("enlarge maxrp\n");
-      return -1;
-    }
-  }
-  potential->ib1 = potential->ib;
-  return 0;
-}
-
 void SetSE(cfac_t *cfac, int n) {
   cfac->qed.se = n;
 }
@@ -1044,7 +954,6 @@ int ClearOrbitalTable(cfac_t *cfac, int m) {
     cfac->n_orbitals = 0;
     cfac->n_continua = 0;
     ArrayFree(cfac->orbitals);
-    SetBoundary(cfac, 0, 1.0, 0.0);
   } else {
     for (i = cfac->n_orbitals-1; i >= 0; i--) {
       orb = GetOrbital(cfac, i);
@@ -3873,35 +3782,5 @@ int ReinitRadial(cfac_t *cfac, int m) {
       cfac->awgrid[0] = EPS3;
     }
   }
-  return 0;
-}
-
-
-int RadialOverlaps(cfac_t *cfac, char *fn, int kappa) {
-  ORBITAL *orb1, *orb2;
-  int i, j, k;
-  double r;
-  FILE *f;
-  POTENTIAL *potential = cfac->potential;
-  double dwork[MAXRP];
-
-  f = fopen(fn, "w");
-  for (k = 0; k < potential->maxrp; k++) {
-    dwork[k] = 1.0;
-  }
-  for (i = 0; i < cfac->n_orbitals; i++) {
-    orb1 = GetOrbital(cfac, i);
-    if (orb1->kappa != kappa) continue;
-    for (j = 0; j <= i; j++) {
-      orb2 = GetOrbital(cfac, j);
-      if (orb2->kappa != kappa) continue;
-      IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, &r, 0);
-      fprintf(f, "%2d %2d %10.3E  %2d %2d %10.3E  %12.5E\n", 
-	      orb1->n, orb1->kappa, orb1->energy, 
-	      orb2->n, orb2->kappa, orb2->energy, r);
-    }
-  }
-  fclose(f);
-
   return 0;
 }

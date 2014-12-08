@@ -197,7 +197,6 @@ cfac_t *cfac_new(void)
         return NULL;
     }
     memset(cfac->potential, 0, sizeof(POTENTIAL));
-    SetBoundary(cfac, 0, 1.0, -1.0);
     SetRadialGrid(cfac, DMAXRP, -1.0, -1.0, -1.0);
 
     if (cfac_init_radial(cfac)) {

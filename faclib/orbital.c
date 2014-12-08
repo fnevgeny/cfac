@@ -20,7 +20,7 @@ static const double wave_zero = 1E-10;
 static int SetVEffective(int kl, POTENTIAL *pot);
 static int TurningPoints(int n, double e, POTENTIAL *pot);
 static int CountNodes(double *p, int i1, int i2);
-static int IntegrateRadial(double *p, double e, POTENTIAL *pot, 
+static int IntegrateRadial(double *p, double e, const POTENTIAL *pot, 
 			   int i1, double p1, int i2, double p2, int q);
 static double Amplitude(double *p, double e, int kl, POTENTIAL *pot, int i1);
 static int Phase(double *p, POTENTIAL *pot, int i1, double p0);
@@ -1201,13 +1201,11 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     i2m = i2 - 1;
     i2p2 = i2 + 2;
     i2m2 = i2 - 2;
+
     dn = 1.2/(ME-1.0);
-    en[0] = orb->n - 0.95;
-    for (j = 1; j < ME; j++) {
-      en[j] = en[j-1] + dn;
-    }
     for (j = 0; j < ME; j++) {
-      e = EnergyH(z, en[j], orb->kappa);
+      double n_eff = orb->n - 0.95 + dn*j;
+      e = EnergyH(z, n_eff, orb->kappa);
       en[j] = e;
       SetPotentialW(pot, e, orb->kappa);
       SetVEffective(kl, pot);
@@ -1247,6 +1245,10 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     i2 = LastMaximum(p, pot->r_core, i2);
     x0 = pot->rad[i2];
     DCOUL(z, e, orb->kappa, x0, &pp, &qq, &ppi, &qqi, &ierr);
+    if (ierr) {
+      printf("DCOUL failed with ierr = %d\n", ierr);
+      return -4;
+    }
     norm2 = pp;
     fact = norm2/p[i2];
     if (IsOdd(nodes)) {
@@ -1743,7 +1745,7 @@ static int CountNodes(double *p, int i1, int i2) {
   return n;
 }
 
-static int IntegrateRadial(double *p, double e, POTENTIAL *pot,
+static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
 			   int i1, double p1, int i2, double p2, int q) {
   double a, b, r, x, y, z, p0, a1, a2;
   int i, info, n, m, k;

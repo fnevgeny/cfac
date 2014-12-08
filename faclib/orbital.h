@@ -5,31 +5,45 @@
 
 typedef struct _POTENTIAL_ {
   int mode;
-  int flag;
-  int r_core;
-  int maxrp;
-  double hxs, ratio, asymp, rmin;
-  double Z[MAXRP]; /* effective atomic number */
-  double N; /* number of electrons */
-  double lambda, a; /* parameters for the Vc */
-  double ar, br; /* parameters for the transformation */
-  int ib, nb, ib1; 
-  double bqp; /* boundary condition */
-  double rad[MAXRP];
-  double dr_drho[MAXRP];
-  double dr_drho2[MAXRP];
-  double Vc[MAXRP];
-  double dVc[MAXRP];
-  double dVc2[MAXRP];
-  double U[MAXRP];
-  double dU[MAXRP];
-  double dU2[MAXRP];
-  double W[MAXRP];
-  double dW[MAXRP];
-  double dW2[MAXRP];
-  double uehling[MAXRP];
   
-  unsigned int nmax; /* above this n, Coulomb WF for r > r_core are assumed */
+  int flag;               /* radial grid completeness             */
+  
+  int maxrp;              /* used length of the [MAXRP] arrays    */
+  double ratio;           /* incr. ratio of radial mesh near 0    */
+  double asymp;           /* number of mesh points per oscillation
+                             wavelength for high-n orbitals       */
+  double rmin;            /* starting point of the radial mesh    */
+  
+  double hxs;
+  double N;               /* effective number of electrons        */
+  double lambda, a;       /* optimization parameters for Vc       */
+  double ar, br;          /* parameters for the transformation    */
+  int ib, nb, ib1; 
+  double bqp;             /* boundary condition                   */
+  
+  int r_core;             /* core radius index                    */
+  unsigned int nmax;      /* above this PQN, Coulomb WF for
+                             r > rad[r_core] are assumed          */
+  
+  double rad[MAXRP];      /* radial grid; rad[0] = rmin/at.number */
+
+  double Z[MAXRP];        /* nuclear charge distribution          */
+  
+  double dr_drho[MAXRP];  /* dr/d\rho                             */
+  double dr_drho2[MAXRP];
+  
+  double Vc[MAXRP];       /* optimized potential                  */
+  double dVc[MAXRP];      /* its first derivative                 */
+  double dVc2[MAXRP];     /* its second derivative                */
+  
+  double U[MAXRP];        /* direct interaction part of potential */
+  double dU[MAXRP];       /* its first derivative                 */
+  double dU2[MAXRP];      /* its second derivative                */
+  
+  double W[MAXRP];
+  
+  double uehling[MAXRP];  /* the Uehling potential                */
+  
   double veff[MAXRP];
 } POTENTIAL;
 

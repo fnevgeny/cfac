@@ -2101,14 +2101,6 @@ int SetPotentialW (POTENTIAL *pot, double e, int kappa) {
     pot->W[i] = -pot->W[i];
   }
 
-  Differential(pot->W, pot->dW, 0, pot->maxrp-1);
-  for (i = 0; i < pot->maxrp; i++) {
-    pot->dW[i] = pot->dr_drho[i];
-  }
-  Differential(pot->dW, pot->dW2, 0, pot->maxrp-1);
-  for (i = 0; i < pot->maxrp; i++) {
-    pot->dW2[i] = pot->dr_drho[i];
-  }
   return 0;
 }
 

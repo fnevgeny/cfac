@@ -31,7 +31,6 @@ void SetMS(cfac_t *cfac, int nms, int sms);
 int SetAWGrid(cfac_t *cfac, int n, double min, double max);
 int SetRadialGrid(cfac_t *cfac,
     int maxrp, double ratio, double asymp, double rmin);
-double SetPotential(cfac_t *cfac, int iter, double *vbuf);
 int GetPotential(const cfac_t *cfac, char *s);
 double GetResidualZ(const cfac_t *cfac);
 double GetRMax(cfac_t *cfac);

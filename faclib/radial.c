@@ -380,7 +380,7 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
   return jmax;
 }
 
-double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
+static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
   int jmax, i, j, k;
   double *u, *w, *v, a, b, c, r;
   POTENTIAL *potential = cfac->potential;
@@ -398,7 +398,7 @@ double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
       for (j = 0; j < potential->maxrp; j++) {
 	v[j] = u[j];
       }
-    } else {	
+    } else {
       r = 0.0;
       k = 0;
       a = cfac->optimize_control.stabilizer;
@@ -457,7 +457,7 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   const AVERAGE_CONFIG *acfg = &(cfac->average_config);
   FILE *f;
   int i;
-  double u[MAXRP], *v, *w;
+  double u[MAXRP], v[MAXRP], w[MAXRP];
   POTENTIAL *potential = cfac->potential;
 
   f = fopen(fn, "w");
@@ -474,8 +474,6 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   fprintf(f, "#   mode = %d\n", potential->mode);
   fprintf(f, "#    HXS = %10.3E\n", potential->hxs);
 
-  w = potential->W;
-  v = potential->dW;
   PotentialHX(cfac, u, v, w);
 
   fprintf(f, "# Mean configuration:\n");

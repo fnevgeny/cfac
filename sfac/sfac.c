@@ -1954,15 +1954,23 @@ static int PSetRecQkMode(int argc, char *argv[], int argt[],
 
 static int PSetRadialGrid(int argc, char *argv[], int argt[], 
 			  ARRAY *variables) {
-  double rmin, ratio, asym;
+  double rmin = -1.0, ratio = -1.0, asym = -1.0;
   int maxrp;
 
-  if (argc != 4) return -1;
+  switch (argc) {
+  case 1:
+    break;
+  case 4:
+    ratio = atof(argv[1]);
+    asym = atof(argv[2]);
+    rmin = atof(argv[3]);
+    break;
+  default:
+    return -1;
+    break;
+  }
   
   maxrp = atoi(argv[0]);
-  ratio = atof(argv[1]);
-  asym = atof(argv[2]);
-  rmin = atof(argv[3]);
 
   return SetRadialGrid(cfac, maxrp, ratio, asym, rmin);
 }

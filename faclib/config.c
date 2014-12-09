@@ -1976,8 +1976,8 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
 ** SIDE EFFECT: 
 ** NOTE:        there is a limit the highest n the shells in the average
 **              configuration can take. it is determined by the macro M.
-**              with M = 2500, the limit is about 70, which should be 
-**              more than enough.
+**              with M = 2500, the limit is about 50, which should be 
+**              more than enough (higher-n shells will be ignored).
 */
 int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
 		     int n_screen, int *screened_n, double screened_charge,
@@ -2021,8 +2021,11 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
 	n = cfg->shells[j].n;
 	kappa = cfg->shells[j].kappa;
 	k = ShellToInt(n, kappa);
-	if (k >= M) k = M-1;
-	tnq[k] += (((double)(cfg->shells[j].nq)) * weight[i]*a);
+	if (k >= M) {
+          printf("A high-n (n = %d) shell is ignored in GetAverageConfig\n", n);
+        } else {
+	  tnq[k] += (((double)(cfg->shells[j].nq)) * weight[i]*a);
+        }
       }
     }
     acfg->n_cfgs += cfac->cfg_groups[kg[i]].n_cfgs;

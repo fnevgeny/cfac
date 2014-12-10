@@ -1904,40 +1904,37 @@ int SetPotentialZ(cfac_t *cfac, double c) {
 
 /* Set central potential */
 int SetPotentialVc(POTENTIAL *pot) {
-  int i;
-  double n, r, r2, v, x, y, a, b, v0;
-
-  /* nucleus */
-  for (i = 0; i < pot->maxrp; i++) {
-    r = pot->rad[i];
-    pot->Vc[i] = - (pot->Z[i] / r);
-    r2 = r*r;
-    pot->dVc[i] = pot->Z[i] / r2; 
-    pot->dVc2[i] = -2.0 * pot->Z[i] / (r2*r);
-  }
-
-  /* core electrons  */
-  n = pot->N - 1;
-  if (n > 0 && (pot->a > 0 || pot->lambda > 0)) {
+    int i;
+    double r, ncore = pot->N - 1;
+    
+    /* nucleus */
     for (i = 0; i < pot->maxrp; i++) {
-      r = pot->rad[i];
-      r2 = r*r;
-      v0 = n/r;
-      x = 1.0 + r*pot->a;
-      a = exp(-pot->lambda * r);
-      v = v0 * (1.0 - a/x);
-      pot->Vc[i] += v;      
-      b = (pot->lambda + pot->a/x);
-      y = -v/r + (v0 - v)*b;
-      pot->dVc[i] += y;
-      pot->dVc2[i] -= y/r;
-      pot->dVc2[i] += v/r2;
-      pot->dVc2[i] -= (v0/r + y) * b;
-      pot->dVc2[i] -= (v0 - v)*(pot->a*pot->a)/(x*x);
+        r = pot->rad[i];
+        
+        pot->Vc[i] = -pot->Z[i]/r;
     }
-  }
-  
-  return 0;
+    
+    /* screening core electrons */
+    if (ncore > 0 && (pot->a > 0 || pot->lambda > 0)) {
+        for (i = 0; i < pot->maxrp; i++) {
+            double v;
+            r = pot->rad[i];
+        
+            v = ncore/r*(1 - exp(-pot->lambda*r)/(1 + r*pot->a));
+            pot->Vc[i] += v;
+        }
+    }
+
+    Differential(pot->Vc, pot->dVc, 0, pot->maxrp-1);
+    for (i = 0; i < pot->maxrp; i++) {
+        pot->dVc[i] /= pot->dr_drho[i];
+    }
+    Differential(pot->dVc, pot->dVc2, 0, pot->maxrp-1);
+    for (i = 0; i < pot->maxrp; i++) {
+        pot->dVc2[i] /= pot->dr_drho[i];
+    }
+
+    return 0;
 }
 
 int SetPotentialU(POTENTIAL *pot, int n) {

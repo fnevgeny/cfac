@@ -148,7 +148,6 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
 int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
   int ierr;
   int nm, km, k;
-  double z;
   POTENTIAL *pot = cfac->potential;
 
   if (orb->n > 0) {
@@ -162,7 +161,7 @@ int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
 	k = GetLFromKappa(orb->kappa);
 	k /= 2;
 	if (orb->n > nm || k > km) {
-	  z = pot->Z[pot->maxrp-1];
+	  double z = cfac_get_atomic_number(cfac);
 	  if (pot->N > 0) z -= pot->N - 1.0;
 	  orb->energy = EnergyH(z, (double)(orb->n), orb->kappa);
 	  orb->ilast = -1;
@@ -1903,10 +1902,12 @@ int SetPotentialZ(cfac_t *cfac, double c) {
   return 0;
 }
 
+/* Set central potential */
 int SetPotentialVc(POTENTIAL *pot) {
   int i;
   double n, r, r2, v, x, y, a, b, v0;
 
+  /* nucleus */
   for (i = 0; i < pot->maxrp; i++) {
     r = pot->rad[i];
     pot->Vc[i] = - (pot->Z[i] / r);
@@ -1915,6 +1916,7 @@ int SetPotentialVc(POTENTIAL *pot) {
     pot->dVc2[i] = -2.0 * pot->Z[i] / (r2*r);
   }
 
+  /* core electrons  */
   n = pot->N - 1;
   if (n > 0 && (pot->a > 0 || pot->lambda > 0)) {
     for (i = 0; i < pot->maxrp; i++) {
@@ -1934,6 +1936,7 @@ int SetPotentialVc(POTENTIAL *pot) {
       pot->dVc2[i] -= (v0 - v)*(pot->a*pot->a)/(x*x);
     }
   }
+  
   return 0;
 }
 
@@ -2159,15 +2162,17 @@ double UehlingL1(double x) {
 int SetPotentialUehling(cfac_t *cfac, int vp) {
   int i, j, i1;
   double a, b, r0, r, rm, rp, rn;
-  double v, d, c;
+  double v, d, c, z;
   POTENTIAL *pot = cfac->potential;
   double _dwork[MAXRP];
 
   if (vp <= 0) return 0;
+  
+  z = cfac_get_atomic_number(cfac);
 
   r0 = 3.86159E-11/RBOHR;
-  a = -2.0*pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST/(3.0*M_PI);
-  b = -pot->Z[pot->maxrp-1]*FINE_STRUCTURE_CONST2/(M_PI*M_PI);
+  a = -2.0*z*FINE_STRUCTURE_CONST/(3.0*M_PI);
+  b = -z*FINE_STRUCTURE_CONST2/(M_PI*M_PI);
   
   for (i = 0; i < pot->maxrp-1; i++) {
     r = pot->rad[i]*2.0/r0;
@@ -2184,7 +2189,7 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
     a = -2.0*r0*FINE_STRUCTURE_CONST/3.0;
     b = -r0*FINE_STRUCTURE_CONST2/M_PI;
     v = 4.0*M_PI*rn*rn*rn/3.0;
-    d = pot->Z[pot->maxrp-1]/v;
+    d = z/v;
     for (i = 0; i < pot->maxrp-1; i++) {
       if (pot->rad[i] > rn) break;
     }

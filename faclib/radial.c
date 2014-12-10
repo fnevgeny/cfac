@@ -322,7 +322,7 @@ static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
       SetPotentialU(potential, -1);
       return 0.0;
     }
-    r = potential->Z[potential->maxrp-1];
+    r = cfac_get_atomic_number(cfac);
     b = (1.0 - 1.0/potential->N);
     for (i = 0; i < acfg->n_shells; i++) {
       a = acfg->nq[i];
@@ -388,7 +388,7 @@ double GetResidualZ(const cfac_t *cfac) {
   double z;
   POTENTIAL *potential = cfac->potential;
   
-  z = potential->Z[potential->maxrp-1];
+  z = cfac_get_atomic_number(cfac);
   if (potential->N > 0) z -= potential->N - 1;
   return z;
 }
@@ -529,7 +529,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   }
 
   SetPotentialZ(cfac, 0.0);
-  z = potential->Z[potential->maxrp-1];
+  z = cfac_get_atomic_number(cfac);
   if (a > 0.0) z = z - a + 1;
   potential->a = 0.0;
   potential->lambda = 0.5*z;
@@ -540,7 +540,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   }
 
   if (cfac->optimize_control.iset == 0) {
-    cfac->optimize_control.stabilizer = 0.25 + 0.75*(z/potential->Z[potential->maxrp-1]);
+    cfac->optimize_control.stabilizer = 0.25 + 0.75*(z/cfac_get_atomic_number(cfac));
   }
 
   iter = OptimizeLoop(cfac, vbuf);
@@ -2077,7 +2077,7 @@ double QED1E(cfac_t *cfac, int k0, int k1) {
 
   if (k0 == k1 && (cfac->qed.se < 0 || orb1->n <= cfac->qed.se)) {
     if (potential->ib <= 0 || orb1->n <= potential->nb) {
-      a = HydrogenicSelfEnergy(potential->Z[potential->maxrp-1], 
+      a = HydrogenicSelfEnergy(cfac_get_atomic_number(cfac), 
 			       orb1->n, orb1->kappa);
       if (a) {
 	a *= SelfEnergyRatio(potential, orb1);

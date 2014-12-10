@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <assert.h>
+
 #include "cfacP.h"
 #include "structure.h"
 
@@ -32,77 +34,77 @@ static double _emass[] =
 
 int cfac_set_atom(cfac_t *cfac, const char *s,
     double z, double mass, double rn) {
-  cfac_nucleus_t *atom = &cfac->nucleus;
-  unsigned int i, n_elements = sizeof(_emass)/sizeof(double);
+    cfac_nucleus_t *atom = &cfac->nucleus;
+    unsigned int i, n_elements = sizeof(_emass)/sizeof(double);
 
-  if (!cfac || !s) return -1;
-  if (strlen(s) == 0) {
-    if (z <= 0) {
-      printf("atomic symbol and z cannot be both unset\n");
+    if (!cfac || !s) return -1;
+    if (strlen(s) == 0) {
+        if (z <= 0) {
+            printf("atomic symbol and z cannot be both unset\n");
+        }
+        s = _ename[(int)(z-0.8)];
     }
-    s = _ename[(int)(z-0.8)];
-  }
-  strncpy(atom->symbol, s, 2); 
-  
-  for (i = 0; i < n_elements; i++) {
-    if (strncasecmp(_ename[i], s, 2) == 0) {
-      if (z <= 0) atom->atomic_number = i+1;
-      if (mass <= 0) atom->mass = _emass[i];
-      break;
+    strncpy(atom->symbol, s, 2); 
+
+    for (i = 0; i < n_elements; i++) {
+        if (strncasecmp(_ename[i], s, 2) == 0) {
+            if (z <= 0) atom->atomic_number = i+1;
+            if (mass <= 0) atom->mass = _emass[i];
+            break;
+        }
     }
-  }
-  if (i == n_elements) return -1;
-  
-  cfac->anum = i + 1;
+    if (i == n_elements) return -1;
 
-  if (z > 0) {
-    atom->atomic_number = z;
-  } 
-  if (mass > 0.0) {
-    atom->mass = mass;
-  }
-  if (rn < 0.0) {
-    atom->rn = 2.2677E-5 * pow(atom->mass, 1.0/3);
-  } else {
-    atom->rn = rn;
-  }
-  
-  /* allocate & init per-charge-state level arrays */
-  cfac->levels_per_ion = malloc(sizeof(ARRAY)*(cfac->anum + 1));
+    cfac->anum = i + 1;
 
-  for (i = 0; i <= cfac->anum; i++) {
-    ArrayInit(&cfac->levels_per_ion[i], sizeof(LEVEL_ION), 512, NULL, NULL);
-  }
+    if (z > 0) {
+        atom->atomic_number = z;
+    } 
+    if (mass > 0.0) {
+        atom->mass = mass;
+    }
+    if (rn < 0.0) {
+        atom->rn = 2.2677E-5*cbrt(atom->mass);
+    } else {
+        atom->rn = rn;
+    }
 
+    /* allocate & init per-charge-state level arrays */
+    cfac->levels_per_ion = malloc(sizeof(ARRAY)*(cfac->anum + 1));
 
-  return 0;
+    for (i = 0; i <= cfac->anum; i++) {
+        ArrayInit(&cfac->levels_per_ion[i], sizeof(LEVEL_ION), 512, NULL, NULL);
+    }
+
+    return 0;
 }
 
 double cfac_get_atomic_mass(const cfac_t *cfac) {
-  return cfac->nucleus.mass;
+    return cfac->nucleus.mass;
 }
 
 double cfac_get_atomic_number(const cfac_t *cfac) {
-  return cfac->nucleus.atomic_number;
+    return cfac->nucleus.atomic_number;
 }
 
 const char *cfac_get_atomic_symbol(const cfac_t *cfac) {
-  return cfac->nucleus.symbol;
+    return cfac->nucleus.symbol;
 }
 
 double cfac_get_atomic_effective_z(const cfac_t *cfac, double r) {
-  cfac_nucleus_t atom = cfac->nucleus;
-  double x, y;
-  if (r > atom.rn) {
-    return (double) atom.atomic_number;
-  } else {
-    x = r/atom.rn;
-    y = 3.0 - x*x;
-    y = x*y*0.5*(atom.atomic_number);
-    return y;
-  }
+    cfac_nucleus_t atom = cfac->nucleus;
+    double Z = atom.atomic_number;
+  
+    assert(r >= 0.0);
+  
+    if (r < atom.rn) {
+        double x = r/atom.rn;
+        Z *= 0.5*x*(3 - x*x);
+    }
+
+    return Z;
 }
 
 double cfac_get_atomic_rn(const cfac_t *cfac) {
-  return cfac->nucleus.rn;
+    return cfac->nucleus.rn;
 }

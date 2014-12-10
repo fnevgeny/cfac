@@ -27,10 +27,10 @@ typedef struct _POTENTIAL_ {
   double Z[MAXRP];        /* nuclear charge distribution          */
   
   double dr_drho[MAXRP];  /* dr/d\rho                             */
-  double dr_drho2[MAXRP];
+  double dr_drho2[MAXRP]; /* square root of the above             */
   
-  double Vc[MAXRP];       /* optimized potential                  */
-  double dVc[MAXRP];      /* its first derivative                 */
+  double Vc[MAXRP];       /* optimized central potential          */
+  double dVc[MAXRP];      /* its first derivative d(Vc)/dr        */
   double dVc2[MAXRP];     /* its second derivative                */
   
   double U[MAXRP];        /* direct interaction part of potential */
@@ -68,7 +68,7 @@ double InnerProduct(int i1, int n,
 void Differential(double *p, double *dp, int i1, int i2);
 int SetOrbitalRGrid(cfac_t *cfac);
 double GetRFromRho(double rho, double a, double b, double r0);
-int SetPotentialZ(cfac_t *cfac, double c);
+int SetPotentialZ(cfac_t *cfac);
 int SetPotentialUehling(cfac_t *cfac, int vp);
 int SetPotentialVc(POTENTIAL *pot);
 int SetPotentialU(POTENTIAL *pot, int n);

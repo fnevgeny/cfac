@@ -528,7 +528,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
     SetOrbitalRGrid(cfac);
   }
 
-  SetPotentialZ(cfac, 0.0);
+  SetPotentialZ(cfac);
   z = cfac_get_atomic_number(cfac);
   if (a > 0.0) z = z - a + 1;
   potential->a = 0.0;

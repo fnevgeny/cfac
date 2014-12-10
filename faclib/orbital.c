@@ -1891,13 +1891,12 @@ double GetRFromRho(double rho, double a, double b, double r0) {
   return r0;
 }
 
-int SetPotentialZ(cfac_t *cfac, double c) {
+int SetPotentialZ(cfac_t *cfac) {
   int i;
   POTENTIAL *pot = cfac->potential;
 
-  c = 1.0+c;
   for (i = 0; i < pot->maxrp; i++) {
-    pot->Z[i] = c*cfac_get_atomic_effective_z(cfac, pot->rad[i]);
+    pot->Z[i] = cfac_get_atomic_effective_z(cfac, pot->rad[i]);
   }
   return 0;
 }

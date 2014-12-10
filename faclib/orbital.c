@@ -735,7 +735,19 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
 
   return 0;
 }
- 
+
+static double InnerProduct(int i1, int i2, const double *p1, const double *p2,
+    const POTENTIAL *pot) {
+    int k;
+    double dwork[MAXRP];
+
+    for (k = i1; k <= i2; k++) {
+        dwork[k] = p1[k]*p2[k]*pot->dr_drho[k];
+    }
+    
+    return Simpson(dwork, i1, i2);
+}
+
 int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   double z, z0, e, de, ep, delta, emin, emax;
   double *p, norm2, fact, p1, p2, qo, qi;
@@ -1786,14 +1798,27 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   return n;
 }
 
-double InnerProduct(int i1, int n, double *p1, double *p2, POTENTIAL *pot) {
-  int k;
-  double _dwork[MAXRP];
+/* solving "a*sqrt(r) + b*log(r) = rho" for r using r0 as the initial guess */
+static double GetRFromRho(double rho, double a, double b, double r0) {
+    double e, d1;
+    int i;
 
-  for (k = i1; k <= n; k++) {
-    _dwork[k] = p1[k]*p2[k] * pot->dr_drho[k];
-  }
-  return Simpson(_dwork, i1, n);
+    e = 1.0;
+    i = 0;
+    while (fabs(e) > 1E-10) {
+        if (i > 100) {
+            printf("Newton iteration failed to converge in GetRFromRho\n");
+            exit(1);
+        }
+
+        d1 = a*sqrt(r0);
+        e = (d1 + b*log(r0) - rho)/(0.5*d1 + b);
+        r0 *= (1.0 - e);
+
+        i++;
+    }
+
+    return r0;
 }
 
 int SetOrbitalRGrid(cfac_t *cfac) {
@@ -1870,35 +1895,15 @@ int SetOrbitalRGrid(cfac_t *cfac) {
   return 0;
 }
 
-double GetRFromRho(double rho, double a, double b, double r0) {
-  double e, d1;
-  int i;
-
-  e = 1.0;
-  i = 0;
-  while (fabs(e) > 1E-10) {
-    if (i > 100) {
-      printf("Newton iteration failed to converge in GetRFromRho\n");
-      exit(1);
-    }
-    d1 = sqrt(r0)*a;
-    e = d1 + b*log(r0) - rho;
-    e /= (0.5*d1 + b);
-    r0 *= (1.0 - e);
-    i++;
-  }
-
-  return r0;
-}
-
 int SetPotentialZ(cfac_t *cfac) {
-  int i;
-  POTENTIAL *pot = cfac->potential;
+    int i;
+    POTENTIAL *pot = cfac->potential;
 
-  for (i = 0; i < pot->maxrp; i++) {
-    pot->Z[i] = cfac_get_atomic_effective_z(cfac, pot->rad[i]);
-  }
-  return 0;
+    for (i = 0; i < pot->maxrp; i++) {
+        pot->Z[i] = cfac_get_atomic_effective_z(cfac, pot->rad[i]);
+    }
+    
+    return 0;
 }
 
 /* Set central potential */
@@ -2223,4 +2228,3 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
   }
   return 0;
 }
-      

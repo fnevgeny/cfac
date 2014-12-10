@@ -63,11 +63,8 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot);
 int RadialBound(ORBITAL *orb, POTENTIAL *pot);
 int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot);
 int RadialFree(ORBITAL *orb, POTENTIAL *pot);
-double InnerProduct(int i1, int n, 
-		    double *p1, double *p2, POTENTIAL *pot);
 void Differential(double *p, double *dp, int i1, int i2);
 int SetOrbitalRGrid(cfac_t *cfac);
-double GetRFromRho(double rho, double a, double b, double r0);
 int SetPotentialZ(cfac_t *cfac);
 int SetPotentialUehling(cfac_t *cfac, int vp);
 int SetPotentialVc(POTENTIAL *pot);

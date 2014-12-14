@@ -179,7 +179,7 @@ int SetRadialGrid(cfac_t *cfac,
   return 0;
 }
 
-static void AdjustScreeningParams(POTENTIAL *potential, double *u) {
+static void AdjustScreeningParams(POTENTIAL *potential, const double *u) {
   int i;
   double c;
   
@@ -190,7 +190,8 @@ static void AdjustScreeningParams(POTENTIAL *potential, double *u) {
   potential->lambda = log(2.0)/potential->rad[i];
 }
 
-static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
+/* w - electron density distribution of the average config */
+static int PotentialHX(const cfac_t *cfac, double *u, double *w) {
   int i, j, k1, jmax, m, jm;
   ORBITAL *orb1;
   double large, small, a, b, c, d0, d1, d;
@@ -203,10 +204,8 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
   for (m = 0; m < potential->maxrp; m++) {
     u[m] = 0.0;
     w[m] = 0.0;
-    if (v) {
-      v[m] = 0.0;
-    }
   }
+  
   jmax = -1;
   for (i = 0; i < acfg->n_shells; i++) {
     k1 = OrbitalExists(cfac, acfg->n[i], acfg->kappa[i], 0.0);
@@ -226,33 +225,23 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
     k1 = OrbitalExists(cfac, acfg->n[i], acfg->kappa[i], 0.0);
     if (k1 < 0) continue;
     orb1 = GetOrbital(cfac, k1);
+    if (orb1->wfun == NULL) continue;
     GetYk(cfac, 0, yk, orb1, orb1, k1, k1, 1);
     for (m = 0; m <= jmax; m++) {    
-      u[m] += acfg->nq[i] * yk[m];
+      u[m] += acfg->nq[i]*yk[m];
       if (w[m]) {
 	large = Large(orb1)[m];
 	small = Small(orb1)[m];  
 	b = large*large + small*small;
-	a = yk[m] * acfg->nq[i] * b/w[m];
+	a = yk[m]*acfg->nq[i]*b/w[m];
 	u[m] -= a;
       }
     }
   }
 
-  if (potential->hxs + 1.0 != 1.0) {
-    for (m = 0; m <= jmax; m++) {
-      a = w[m]*potential->rad[m];
-      a = -(potential->hxs * 0.64 * pow(a, 1.0/3.0));
-      u[m] += a;
-      if (v) v[m] += a;
-    }
-  }
-
   c = potential->N-1.0;
   for (jm = jmax; jm >= 10; jm--) {
-    if (fabs(w[jm]) > EPS6 && 
-	c > u[jm] &&
-	u[jm] > u[jm-1]) {
+    if (fabs(w[jm]) > EPS6 && c > u[jm] && u[jm] > u[jm-1]) {
       break;
     }
   }
@@ -274,17 +263,16 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *v, double *w) {
   return jmax;
 }
 
-static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
+static double SetPotential(cfac_t *cfac, int iter, double *v) {
   int jmax, i, j, k;
-  double *u, *w, *v, a, b, c, r;
+  double *u, a, b, c, r;
   POTENTIAL *potential = cfac->potential;
   AVERAGE_CONFIG *acfg = &cfac->average_config;
+  double w[MAXRP];
 
   u = potential->U;
-  w = potential->W;
-  v = vbuf;
 
-  jmax = PotentialHX(cfac, u, NULL, w);
+  jmax = PotentialHX(cfac, u, w);
 
   if (jmax > 0) {
     if (iter < 3) {
@@ -307,8 +295,10 @@ static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
       }
       r /= k;
     }
+    
     AdjustScreeningParams(potential, u);
     SetPotentialVc(potential);
+    
     for (j = 0; j < potential->maxrp; j++) {
       a = u[j] - potential->Z[j];
       b = potential->Vc[j]*potential->rad[j];
@@ -332,8 +322,10 @@ static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
 	u[j] += a*b*(1.0 - exp(-c*potential->rad[j]));
       }
     }
+    
     AdjustScreeningParams(potential, u);
     SetPotentialVc(potential);
+    
     for (j = 0; j < potential->maxrp; j++) {
       a = u[j] - potential->Z[j];
       b = potential->Vc[j]*potential->rad[j];
@@ -341,6 +333,7 @@ static double SetPotential(cfac_t *cfac, int iter, double *vbuf) {
       u[j] /= potential->rad[j];
     }
     SetPotentialU(potential, 0);
+    
     r = 1.0;
   }
   
@@ -351,22 +344,23 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   const AVERAGE_CONFIG *acfg = &(cfac->average_config);
   FILE *f;
   int i;
-  double u[MAXRP], v[MAXRP], w[MAXRP];
+  double u[MAXRP], w[MAXRP];
   POTENTIAL *potential = cfac->potential;
 
   f = fopen(fn, "w");
   if (!f) return -1;
   
+  fprintf(f, "#      N = %10.3E\n", potential->N);
   fprintf(f, "# Lambda = %10.3E\n", potential->lambda);
   fprintf(f, "#      A = %10.3E\n", potential->a);
   fprintf(f, "#     ar = %10.3E\n", potential->ar);
   fprintf(f, "#     br = %10.3E\n", potential->br);
   fprintf(f, "#     rb = %10.3E\n", potential->rad[potential->ib]);
   fprintf(f, "#    rb1 = %10.3E\n", potential->rad[potential->ib1]);
-  fprintf(f, "#     nb = %d\n", potential->nb);
-  fprintf(f, "#    HXS = %10.3E\n", potential->hxs);
+  fprintf(f, "# r_core = %10.3E\n", potential->rad[potential->r_core]);
+  fprintf(f, "#     nb = %d\n",     potential->nb);
 
-  PotentialHX(cfac, u, v, w);
+  PotentialHX(cfac, u, w);
 
   fprintf(f, "# Mean configuration:\n");
   for (i = 0; i < acfg->n_shells; i++) {
@@ -376,7 +370,7 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   for (i = 0; i < potential->maxrp; i++) {
     fprintf(f, "%5d %14.8E %12.5E %12.5E %12.5E %12.5E %12.5E\n",
 	    i, potential->rad[i], potential->Z[i], 
-	    potential->Vc[i], potential->U[i], u[i], v[i]);
+	    potential->Vc[i], potential->U[i], u[i], w[i]);
   }
 
   fclose(f);  
@@ -416,11 +410,12 @@ int SetAverageConfig(cfac_t *cfac, int nshells, int *n, int *kappa, double *nq) 
   return 0;
 }
 
-static int OptimizeLoop(cfac_t *cfac, double *vbuf) {
+static int OptimizeLoop(cfac_t *cfac) {
   double tol, a, b;
   ORBITAL orb_old, *orb;
   int i, k, iter, no_old;
   AVERAGE_CONFIG *acfg = &cfac->average_config;
+  double vbuf[MAXRP];
   
   no_old = 0;
   iter = 0;
@@ -482,8 +477,6 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   int iter, i;
   POTENTIAL *potential = cfac->potential;
   
-  double vbuf[MAXRP];
-
   if (ng > 0) {
     if (ng > 1) {
       printf("\nWarning: more than 1 configuration groups");
@@ -534,7 +527,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   potential->a = 0.0;
   potential->lambda = 0.5*z;
   if (potential->N > 1) {
-    potential->r_core = potential->maxrp-5;
+    potential->r_core = potential->maxrp - 5;
   } else {
     potential->r_core = 50;
   }
@@ -543,7 +536,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
     cfac->optimize_control.stabilizer = 0.25 + 0.75*(z/cfac_get_atomic_number(cfac));
   }
 
-  iter = OptimizeLoop(cfac, vbuf);
+  iter = OptimizeLoop(cfac);
 
   if (potential->uehling[0] == 0.0) {
     SetPotentialUehling(cfac, cfac->qed.vp);

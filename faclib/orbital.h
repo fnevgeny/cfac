@@ -12,7 +12,6 @@ typedef struct _POTENTIAL_ {
   double asymp;           /* number of mesh points per oscillation
                              wavelength for high-n orbitals       */
   
-  double hxs;
   double N;               /* effective number of electrons        */
   double lambda, a;       /* optimization parameters for Vc       */
   double ar, br;          /* parameters for the transformation    */
@@ -24,10 +23,10 @@ typedef struct _POTENTIAL_ {
   
   double rad[MAXRP];      /* radial grid; rad[0] = rmin/at.number */
 
-  double Z[MAXRP];        /* nuclear charge distribution          */
-  
   double dr_drho[MAXRP];  /* dr/d\rho                             */
   double dr_drho2[MAXRP]; /* square root of the above             */
+  
+  double Z[MAXRP];        /* nuclear charge distribution          */
   
   double Vc[MAXRP];       /* optimized central potential          */
   double dVc[MAXRP];      /* its first derivative d(Vc)/dr        */

@@ -1547,7 +1547,7 @@ int Phase(double *p, POTENTIAL *pot, int i1, double phase0) {
   double fact;
   double _dwork[MAXRP];
   
-  fact = 1.0 / 3.0;
+  fact = 1.0/3.0;
 
   for (i = i1; i < pot->maxrp; i++) {
     _dwork[i] = 1.0/p[i];
@@ -1563,21 +1563,18 @@ int Phase(double *p, POTENTIAL *pot, int i1, double phase0) {
   return 0;
 }
 
-int SetVEffective(int kl, POTENTIAL *pot) {
-  double kl1;
-  int i;
-  double r;
+static int SetVEffective(int kl, POTENTIAL *pot) {
+    int i;
+    double kl1 = 0.5*kl*(kl+1);
 
-  kl1 = 0.5*kl*(kl+1);
- 
-  for (i = 0; i < pot->maxrp; i++) {
-    r = pot->rad[i];
-    r *= r;
-    pot->veff[i] = pot->Vc[i] + pot->U[i] + kl1/r;
-    pot->veff[i] += pot->W[i];
-  }
+    for (i = 0; i < pot->maxrp; i++) {
+        double r = pot->rad[i];
+        double r2 = r*r;
+        
+        pot->veff[i] = pot->Vc[i] + pot->U[i] + pot->W[i] + kl1/r2;
+    }
 
-  return 0;
+    return 0;
 }
 
 static int TurningPoints(int n, double e, POTENTIAL *pot) {

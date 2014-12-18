@@ -6,6 +6,9 @@
 typedef struct _POTENTIAL_ {
   int flag;               /* radial grid completeness             */
   
+  double Z;               /* nuclear charge
+                            (cfac->nucleus->atomic_number)        */
+  
   int maxrp;              /* used length of the [MAXRP] arrays    */
   double rmin;            /* starting point of the radial mesh    */
   double ratio;           /* incr. ratio of radial mesh near 0    */
@@ -26,7 +29,7 @@ typedef struct _POTENTIAL_ {
   double dr_drho[MAXRP];  /* dr/d\rho                             */
   double dr_drho2[MAXRP]; /* square root of the above             */
   
-  double Z[MAXRP];        /* nuclear charge distribution          */
+  double Vn[MAXRP];        /* nucleus potential                   */
   
   double Vc[MAXRP];       /* optimized central potential          */
   double dVc[MAXRP];      /* its first derivative d(Vc)/dr        */

@@ -496,7 +496,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
 
   niter = 0;
 
-  z0 = pot->Z[pot->maxrp-1];
+  z0 = pot->Z;
   z = (z0 - pot->N + 1.0);
 
   if (kl > 0) {
@@ -768,7 +768,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
 
   nr = orb->n - kl - 1;
 
-  z0 = pot->Z[pot->maxrp-1];
+  z0 = pot->Z;
   z = (z0 - pot->N + 1.0);
 
   if (kl > 0) {
@@ -974,7 +974,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   double en[ME], dq[ME], dn, zero=0.0;
   int j, np, nme, one=1;
 
-  z = (pot->Z[pot->maxrp-1] - pot->N + 1.0);
+  z = (pot->Z - pot->N + 1.0);
   kl = orb->kappa;
   kl = (kl < 0)? (-kl-1):kl;
   if (kl < 0 || kl >= orb->n) {
@@ -1466,7 +1466,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
                                           h0, atol, rtol);
   
   n = pot->maxrp-1;
-  z = pot->Z[n] - pot->N + 1.0;
+  z = pot->Z - pot->N + 1.0;
   kl1 = ka*(ka+1);
 
   dk = sqrt(2.0*e*(1.0+0.5*FINE_STRUCTURE_CONST2*e));
@@ -1897,7 +1897,7 @@ int SetPotentialZ(cfac_t *cfac) {
     POTENTIAL *pot = cfac->potential;
 
     for (i = 0; i < pot->maxrp; i++) {
-        pot->Z[i] = cfac_get_atomic_effective_z(cfac, pot->rad[i]);
+        pot->Vn[i] = cfac_get_nucleus_potential(cfac, pot->rad[i]);
     }
     
     return 0;
@@ -1906,20 +1906,18 @@ int SetPotentialZ(cfac_t *cfac) {
 /* Set central potential */
 int SetPotentialVc(POTENTIAL *pot) {
     int i;
-    double r, ncore = pot->N - 1;
+    double ncore = pot->N - 1;
     
     /* nucleus */
     for (i = 0; i < pot->maxrp; i++) {
-        r = pot->rad[i];
-        
-        pot->Vc[i] = -pot->Z[i]/r;
+        pot->Vc[i] = pot->Vn[i];
     }
     
     /* screening core electrons */
     if (ncore > 0 && (pot->a > 0 || pot->lambda > 0)) {
         for (i = 0; i < pot->maxrp; i++) {
             double v;
-            r = pot->rad[i];
+            double r = pot->rad[i];
         
             v = ncore/r*(1 - exp(-pot->lambda*r)/(1 + r*pot->a));
             pot->Vc[i] += v;

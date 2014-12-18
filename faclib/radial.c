@@ -300,10 +300,7 @@ static double SetPotential(cfac_t *cfac, int iter, double *v) {
     SetPotentialVc(potential);
     
     for (j = 0; j < potential->maxrp; j++) {
-      a = u[j] - potential->Z[j];
-      b = potential->Vc[j]*potential->rad[j];
-      u[j] = a - b;
-      u[j] /= potential->rad[j];
+      u[j] = u[j]/potential->rad[j] + potential->Vn[j] - potential->Vc[j];
     }
     SetPotentialU(potential, 0);
   } else {
@@ -327,10 +324,7 @@ static double SetPotential(cfac_t *cfac, int iter, double *v) {
     SetPotentialVc(potential);
     
     for (j = 0; j < potential->maxrp; j++) {
-      a = u[j] - potential->Z[j];
-      b = potential->Vc[j]*potential->rad[j];
-      u[j] = a - b;
-      u[j] /= potential->rad[j];
+      u[j] = u[j]/potential->rad[j] + potential->Vn[j] - potential->Vc[j];
     }
     SetPotentialU(potential, 0);
     
@@ -369,7 +363,7 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   fprintf(f, "\n\n");
   for (i = 0; i < potential->maxrp; i++) {
     fprintf(f, "%5d %14.8E %12.5E %12.5E %12.5E %12.5E %12.5E\n",
-	    i, potential->rad[i], potential->Z[i], 
+	    i, potential->rad[i], potential->Vn[i], 
 	    potential->Vc[i], potential->U[i], u[i], w[i]);
   }
 
@@ -1300,7 +1294,7 @@ int ResidualPotential(const cfac_t *cfac, double *s, int k0, int k1) {
     for (i = potential->ib; i <= potential->ib1; i++) {
       z = potential->U[i];
       z += potential->Vc[i];
-      dwork[i] = -(potential->Z[i]/potential->rad[i]) - z;
+      dwork[i] = potential->Vn[i] - z;
       dwork[i] *= potential->dr_drho[i];
       dwork[i] *= p1[i]*p2[i] + q1[i]*q2[i];
     }
@@ -1309,7 +1303,7 @@ int ResidualPotential(const cfac_t *cfac, double *s, int k0, int k1) {
     for (i = 0; i < potential->maxrp; i++) {
       z = potential->U[i];
       z += potential->Vc[i];
-      dwork[i] = -(potential->Z[i]/potential->rad[i]) - z;
+      dwork[i] = potential->Vn[i] - z;
     }
     IntegrateS(potential, dwork, orb1, orb2, INT_P1P2pQ1Q2, s, -1);
   }
@@ -1987,7 +1981,7 @@ double SelfEnergyRatio(POTENTIAL *potential, ORBITAL *orb) {
     if (potential->uehling[npts] > -EPS4) break;
   }
   
-  z = potential->Z[potential->maxrp-1];
+  z = potential->Z;
   RadialDiracCoulomb(npts, p, q, potential->rad, z, 
 			 orb->n, orb->kappa);
   large = Large(orb);

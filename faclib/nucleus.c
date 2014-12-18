@@ -68,6 +68,8 @@ int cfac_set_atom(cfac_t *cfac, const char *s,
     } else {
         atom->rn = rn;
     }
+    
+    cfac->potential->Z = atom->atomic_number;
 
     /* allocate & init per-charge-state level arrays */
     cfac->levels_per_ion = malloc(sizeof(ARRAY)*(cfac->anum + 1));
@@ -91,7 +93,7 @@ const char *cfac_get_atomic_symbol(const cfac_t *cfac) {
     return cfac->nucleus.symbol;
 }
 
-double cfac_get_atomic_effective_z(const cfac_t *cfac, double r) {
+double cfac_get_nucleus_potential(const cfac_t *cfac, double r) {
     cfac_nucleus_t atom = cfac->nucleus;
     double Z = atom.atomic_number;
   
@@ -99,10 +101,10 @@ double cfac_get_atomic_effective_z(const cfac_t *cfac, double r) {
   
     if (r < atom.rn) {
         double x = r/atom.rn;
-        Z *= 0.5*x*(3 - x*x);
+        return -Z/atom.rn*(3 - x*x)/2;
+    } else {
+        return -Z/r;
     }
-
-    return Z;
 }
 
 double cfac_get_atomic_rn(const cfac_t *cfac) {

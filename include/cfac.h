@@ -22,7 +22,7 @@ cfac_get_atomic_rn(const cfac_t *cfac);
 const char *
 cfac_get_atomic_symbol(const cfac_t *cfac);
 double
-cfac_get_atomic_effective_z(const cfac_t *cfac, double r);
+cfac_get_nucleus_potential(const cfac_t *cfac, double r);
 
 /* config.c */
 int

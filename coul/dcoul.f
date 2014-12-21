@@ -17,8 +17,8 @@ C     ierr error code returned by coulcc
       double precision lambda, y, qi, x0, b1, b2, np
       complex*16 x, eta, zlmin, omega, a, pp, qq, mu, nu, IONE
       complex*16 fc(1), gc(1), fcp(1), gcp(1), sig(1), clogam, lam0
-      double precision SL, SL2, TSL2, ALPHA
-      parameter (SL=137.036D0,SL2=SL*SL,TSL2=SL2+SL2,ALPHA=1.0D0/SL)
+      double precision SL, SL2, ALPHA
+      parameter (SL=137.036D0,SL2=SL*SL,ALPHA=1.0D0/SL)
       real*8 HALFPI
       parameter (HALFPI = 1.5707963268D0)
 

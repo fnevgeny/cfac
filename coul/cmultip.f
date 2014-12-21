@@ -3,15 +3,14 @@ c1   MULTIPOLE RADIAL MATRIX ELEMENTS.  L.D. TOLSMA.
 cREF. IN COMP. PHYS. COMMUN. 41 (1986) 41
 C ***** CALCULATION OF ELECTRIC MULTIPOLE RADIAL MATRIX ELEMENTS *******
       SUBROUTINE CMULTIP(DRM1, DRM2, DZ, DWNI, DWNF, LAMB, LMIN, LMAX,
-     1     DRST, MODE, IERR)
+     1     DRST, IERR)
       IMPLICIT DOUBLE PRECISION (D,F,G)
-      PARAMETER (NPMAX=2000, NLMAX=1200, NLMAX1=NLMAX+10)
+      PARAMETER (NLMAX=1200, NLMAX1=NLMAX+10)
       DIMENSION      FC(NLMAX),FDC(NLMAX),GC(NLMAX),GDC(NLMAX)
      1              ,SIGMA(NLMAX),IEXP(NLMAX)
       DIMENSION      FFINT(NLMAX,6),FGINT(NLMAX,6)
      2              ,GFINT(NLMAX,6),GGINT(NLMAX,6)
      6              ,DMINT(NLMAX,4),DSINT(NLMAX,4)
-     7              ,DA(5,NPMAX),DB(NPMAX,8),DAL(2,NPMAX)
       DIMENSION      DFI1(NLMAX1),DGI1(NLMAX1),DFF1(NLMAX1),DGF1(NLMAX1)
      1              ,DFI2(NLMAX1),DGI2(NLMAX1),DFF2(NLMAX1),DGF2(NLMAX1)
       DIMENSION      DRST(*)
@@ -27,15 +26,8 @@ C
       LXMLP = LMAX-LMIN+1
       LXMLN = NLMAX
       LXMCN = NLMAX1
-      IACC = MODE/100
-      MODE0 = MOD(MODE, 100)
-      LINQ = MODE0/10
-      MODE0 = MOD(MODE0, 10)
-
-      IF (MODE0 .LT. 1 .OR. MODE0 .GT. 4) THEN
-         IERR = 1
-         RETURN
-      ENDIF
+      
+      IACC = 0
 
       IF (LAMB .LT. 1 .OR. LAMB .GT. 6) THEN
          IERR = 2
@@ -52,11 +44,10 @@ C
       IF(LMIN.LT.0) LMIN=0
       LXLN   = LMAX-LMIN+1+MOD(LAMB,2)+LAMB/2
       LXCN   = LMAX-LMIN+1+LAMB
-      LXLNM2 = (LXLN-2)*2
 
       CALL RECMUD(DRM1 ,DRM2 ,DETI ,DWNI ,DETF ,DWNF ,LAMB  ,
-     1            LMIN ,LMAX ,IACC ,LINQ ,
-     2            DMINT,DSINT,DA   ,DB   ,DAL  ,LXMLN,LXLNM2,
+     1            LMIN ,LMAX ,IACC ,
+     2            DMINT,DSINT,LXMLN,
      3            FC   ,FDC  ,GC   ,GDC  ,SIGMA,IEXP ,
      4            DFI1 ,DGI1 ,DFF1 ,DGF1 ,
      5            DFI2 ,DGI2 ,DFF2 ,DGF2 ,LXCN ,IERR2       )
@@ -85,33 +76,23 @@ C
       DO 200 IM=IMIN,IMAX,LMDL
       DO 200 ML=1,LAP1
          INDX = INDX+1
-         IF (MODE0 .EQ. 1) THEN 
-            DRST(INDX) = FFINT(IM,ML)
-         ELSEIF (MODE0 .EQ. 2) THEN
-            DRST(INDX) = GFINT(IM,ML)
-         ELSEIF (MODE0 .EQ. 3) THEN
-            DRST(INDX) = FGINT(IM,ML)
-         ELSEIF (MODE0 .EQ. 4) THEN
-            DRST(INDX) = GGINT(IM,ML)
-         ENDIF
+         DRST(INDX) = FFINT(IM,ML)
   200 CONTINUE
 
       END
 
       SUBROUTINE RECMUD(DRM1  ,DRM2  ,DETI  ,DWNI  ,DETF  ,DWNF  ,LAMB ,
-     1                  LMIN  ,LMAX  ,IACC  ,LINQ  ,
-     2                  DMINT ,DSINT ,DA    ,DB    ,DAL   ,LXLN ,LXLNM2,
+     1                  LMIN  ,LMAX  ,IACC  ,
+     2                  DMINT ,DSINT ,LXLN  ,
      3                  FC    ,FDC   ,GC    ,GDC   ,SIGMA ,IEXP  ,
      4                  DFI1  ,DGI1  ,DFF1  ,DGF1  ,
      5                  DFI2  ,DGI2  ,DFF2  ,DGF2  ,LXCN  ,IERR        )
       IMPLICIT DOUBLE PRECISION (A,D,F,G)
       DIMENSION         DMINT(LXLN,  4),DSINT(LXLN,  4),
-     1                  DA  (5, LXLNM2),DB  (LXLNM2, 8),DAL  (2,LXLNM2),
-     2                  FC  (1),FDC (1),GC  (1),GDC (1),SIGMA(1),IEXP(1)
+     1                  FC  (1),FDC (1),GC  (1),GDC (1),SIGMA(1),IEXP(1)
       DIMENSION         DFI1(LXCN),DGI1(LXCN),DFF1(LXCN),DGF1(LXCN),
      1                  DFI2(LXCN),DGI2(LXCN),DFF2(LXCN),DGF2(LXCN)
-      DIMENSION         DMJ1(4),DMJ2(4),DSJ1(4),DSJ2(4),DCLM(4),
-     1                  ALF1(4),ALF2(4),ALF3(4),ALF4(4)
+      DIMENSION         DMJ1(4),DMJ2(4),DSJ1(4),DSJ2(4),DCLM(4)
       LOGICAL           CONV
       COMMON /PRINT/    KTINPL,KTMISI,KTFCGC,MTINPL,MTMISI,MTFCGC
 C
@@ -194,17 +175,14 @@ C
       DEFDI = DETF/DETI
       DEITF = DETI*DETF
       DEIKI = DETI*DWNI
-      IF(KTMISI.NE.0 .AND. LINQ.EQ.0) WRITE(6,1010) LAMB
-      IF(KTMISI.NE.0 .AND. LINQ.NE.0) WRITE(6,1015) LAMB
+      IF(KTMISI.NE.0) WRITE(6,1010) LAMB
       LLMN = LMIN+3
       LLMX = LMXX+1
-      IF(LINQ.EQ.1) GO TO 229
-      IF(LINQ.EQ.2) GO TO 228
       LLM1 = LMIN+1
       LLM2 = LMIN+2
       LLDL = 1
       GO TO 230
-  228 TLISQ= REAL((DRM1*DWNI-DETI)**2-DEI2)
+      TLISQ= REAL((DRM1*DWNI-DETI)**2-DEI2)
       TLFSQ= REAL((DRM1*DWNF-DETF)**2-DEF2)
       TLILF= AMIN1(TLISQ,TLFSQ)
       LILF = NINT(SQRT(TLILF))-3
@@ -214,7 +192,7 @@ C
       LLM2 = LILF+1
       LLDL = LLM2-LLM1
       GO TO 230
-  229 LLM1 = LMIN+1
+      LLM1 = LMIN+1
       LLM2 = LMXX+1
       LLDL = LLM2-LLM1
   230 INOR = 1-LLDL
@@ -272,8 +250,6 @@ C
       DMJ2(3) = DMJ2(3) - DGI2(INDX)*DFF2(INDX)*DRLA2
       DMJ2(4) = DMJ2(4) - DGI2(INDX)*DGF2(INDX)*DRLA2
   245 CONTINUE
-C
-  250 IF(LINQ.NE.0) GO TO 300
 C
 C *****************************************************************
 C             RECURRENCE BY MEANS OF UPWARD RECURSION
@@ -369,244 +345,11 @@ C
      *                             DSINT(INDX,3),DSINT(INDX,4)
   290 CONTINUE
   295 RETURN
-C
-C *****************************************************************
-C   RECURRENCE BY MEANS OF SOLVING A SET OF BAND LINEAR EQUATIONS
-C *****************************************************************
-C
-  300 N = 2*(LMXX-LMIN-1)
-      IF(LINQ.EQ.1) GO TO 302
-      DO 301 IN=1,N
-      DB(IN,5) = 0.D0
-      DB(IN,6) = 0.D0
-      DB(IN,7) = 0.D0
-  301 DB(IN,8) = 0.D0
-  302 INDX  = 2
-      DO 320 LL=LLMN,LLMX
-      INDX  = INDX+1
-      IDM1  = INDX-1
-      IDM2  = INDX-2
-      IND2  = IDM2*2
-      IND1  = IND2-1
-      DLL   = LL-2
-      D2L   = 2.D0*DLL
-      DLLS  = DLL**2
-      DLP1  = DLL+1.D0
-      DLP1S = DLP1**2
-      D2LP1 = D2L+1.D0
-      D2LP2 = D2L+2.D0
-      D2LP3 = D2L+3.D0
-      D2LP4 = D2L+4.D0
-      DC1   = DC2
-      DD1   = DD2
-      DD2   = DD3
-      DC2   = DSQRT( DLP1S        +DEI2)
-      DD3   = DSQRT((DLP1+1.D0)**2+DEF2)
-C USING THE RECURRENCE RELATION FOR I(L,LA,L) ACCORDING TO EQ.(2.3A)
-      DM1   = (D2L-DLAMB)*DLP1S*DC1*DD1/D2LP1
-      DM2   =-(DEITF*(DLLS+DLP1S)+DLLS*DLP1S*(DEIDF+DEFDI))
-      DM3   = (D2LP2+DLAMB)*DLLS*DC2*DD2/D2LP1
-      DS4   = DLAP1*DETF*DLP1*DC1
-      DS5   =-DLAP1*DETI*DLL *DD2
-      DJ1   =-DLL*DLP1S*DC1/DWNF
-      DJ2   =-DLLS*DLP1*DD2/DWNI
-      DO 304 I=1,4
-  304 DSJ1(I) = DSJ2(I)
-      DSJ2(1) =           DFI1(IDM1)*DFF1(INDX)*DRLA1
-      DSJ2(2) =           DFI1(IDM1)*DGF1(INDX)*DRLA1
-      DSJ2(3) =           DGI1(IDM1)*DFF1(INDX)*DRLA1
-      DSJ2(4) =           DGI1(IDM1)*DGF1(INDX)*DRLA1
-      IF(IFIN.EQ.0) GO TO 305
-      DSJ2(1) = DSJ2(1) - DFI2(IDM1)*DFF2(INDX)*DRLA2
-      DSJ2(2) = DSJ2(2) - DFI2(IDM1)*DGF2(INDX)*DRLA2
-      DSJ2(3) = DSJ2(3) - DGI2(IDM1)*DFF2(INDX)*DRLA2
-      DSJ2(4) = DSJ2(4) - DGI2(IDM1)*DGF2(INDX)*DRLA2
-  305 CONTINUE
-C USING THE RECURRENCE RELATION FOR I(L,LA,L+1) ACCORDING TO EQ.(2.3B)
-      DS1   = (D2LP1-DLAMB)*DC1*DD2/D2L
-      DS2   =-(2.D0*DEITF+DLP1*((DLL+0.5D0)*DEIDF+(DLL+1.5D0)*DEFDI))
-      DS3   = (D2LP3+DLAMB)*DC2*DD3/D2LP4
-      DM4   = DLAM1*DETI*D2LP1*DD2/(D2L*DLP1)
-      DM5   =-DLAM1*DETF*D2LP3*DC2/(DLP1*D2LP4)
-      DJ3   =-(DLL+0.5D0)*DD2/DWNI
-      DJ4   =-(DLL+1.5D0)*DC2/DWNF
-      DO 309 I=1,4
-  309 DMJ1(I) = DMJ2(I)
-      DMJ2(1) =           DFI1(INDX)*DFF1(INDX)*DRLA1
-      DMJ2(2) =           DFI1(INDX)*DGF1(INDX)*DRLA1
-      DMJ2(3) =           DGI1(INDX)*DFF1(INDX)*DRLA1
-      DMJ2(4) =           DGI1(INDX)*DGF1(INDX)*DRLA1
-      IF(IFIN.EQ.0) GO TO 310
-      DMJ2(1) = DMJ2(1) - DFI2(INDX)*DFF2(INDX)*DRLA2
-      DMJ2(2) = DMJ2(2) - DFI2(INDX)*DGF2(INDX)*DRLA2
-      DMJ2(3) = DMJ2(3) - DGI2(INDX)*DFF2(INDX)*DRLA2
-      DMJ2(4) = DMJ2(4) - DGI2(INDX)*DGF2(INDX)*DRLA2
-  310 CONTINUE
-      DA(1,IND1) = DM1
-      DA(2,IND1) = DS4
-      DA(3,IND1) = DM2
-      DA(4,IND1) = DS5
-      DA(5,IND1) = DM3
-      DA(1,IND2) = DS1
-      DA(2,IND2) = DM4
-      DA(3,IND2) = DS2
-      DA(4,IND2) = DM5
-      DA(5,IND2) = DS3
-      DO 312 I=1,4
-      DB(IND1,I) = DJ1*DSJ1(I)-DJ2*DSJ2(I)
-  312 DB(IND2,I) = DJ3*DMJ1(I)-DJ4*DMJ2(I)
-      IF(LL.NE.LLMN) GO TO 315
-      DA(1,IND1) = DM2
-      DA(2,IND1) = DS5
-      DA(3,IND1) = DM3
-      DA(4,IND1) = 0.D0
-      DA(5,IND1) = 0.D0
-      DA(1,IND2) = DM4
-      DA(2,IND2) = DS2
-      DA(3,IND2) = DM5
-      DA(4,IND2) = DS3
-      DA(5,IND2) = 0.D0
-      IF(LINQ.EQ.1) GO TO 313
-      DB(IND1,5) =-DM1
-      DB(IND1,6) =-DS4
-      DB(IND2,6) =-DS1
-      GO TO 320
-  313 DO 314 I=1,4
-      DB(IND1,I) = DB(IND1,I) - DM1*DMINT(IDM2,I)-DS4*DSINT(IDM2,I)
-  314 DB(IND2,I) = DB(IND2,I) -                   DS1*DSINT(IDM2,I)
-      GO TO 320
-  315 IF(LL.NE.LLMX) GO TO 320
-      DA(1,IND1) = DM1
-      DA(2,IND1) = DS4
-      DA(3,IND1) = DM2
-      DA(4,IND1) = DS5
-      DA(5,IND1) = 0.D0
-      DA(1,IND2) = DS1
-      DA(2,IND2) = DM4
-      DA(3,IND2) = DS2
-      DA(4,IND2) = 0.D0
-      DA(5,IND2) = 0.D0
-      IF(LINQ.EQ.1) GO TO 317
-      DB(IND1,7) =-DM3
-      DB(IND2,7) =-DM5
-      DB(IND2,8) =-DS3
-      GO TO 320
-  317 DO 318 I=1,4
-      DB(IND1,I) = DB(IND1,I) - DM3*DMINT(INDX,I)
-  318 DB(IND2,I) = DB(IND2,I) - DM5*DMINT(INDX,I)-DS3*DSINT(INDX,I)
-  320 CONTINUE
-C
-      IFAIL = 1
-      IF(LINQ.EQ.1) IR = 4
-      IF(LINQ.EQ.2) IR = 8
-      IF(KTMISI.GT.1) GO TO 323
-  321 M     = 2
-      IA    = 5
-      IL    = M
-      CALL F01LBF(N,M,M,   DA,IA,DAL,IL,IEXP,   IV,IFAIL)
-      IF(IFAIL.EQ.0) GO TO 322
-      WRITE(6,9991) IFAIL
-      STOP
-  322 IFAIL = 1
-      CALL F04LDF(N,M,M,IR,DA,IA,DAL,IL,IEXP,DB, N,IFAIL)
-      IF(IFAIL.EQ.0) GO TO 323
-      WRITE(6,9992) IFAIL
-      STOP
-  323 CONTINUE
-      IF(KTMISI.LE.1) GO TO 330
-      WRITE(6,1300)
-      IF(LINQ.EQ.1) WRITE(6,1305)
-      DO 324 IN=1,N
-      IF((IN.GT.4 .AND. IN.LT.N-3) .AND. MOD(IN,MTMISI).NE.0) GO TO 324
-      WRITE(6,1320)            IN,(DA(IA,IN), IA=1, 5)
-      IF(LINQ.EQ.1) WRITE(6,1325) (DB(IN,IB), IB=1,IR)
-  324 CONTINUE
-      IF(LINQ.EQ.1) GO TO 326
-      WRITE(6,1310)
-      DO 325 IN=1,N
-      IF((IN.GT.4 .AND. IN.LT.N-3) .AND. MOD(IN,MTMISI).NE.0) GO TO 325
-      WRITE(6,1330) IN,(DB(IN,IB), IB=1,IR)
-  325 CONTINUE
-  326 IF(IFAIL.EQ.1) GO TO 321
-C
-  330 N = N/2
-      IF(LINQ.EQ.1) GO TO 340
-      IND2 = 2*(INOR-1)
-      IND1 = IND2-1
-      DO 332 I=1,4
-      ALF1(I) = DMINT(1,I)
-      ALF2(I) = DSINT(1,I)
-      DINH1   = DMINT(INOR,I)-(DB(IND1,I)+ALF1(I)*DB(IND1,5)
-     *                                   +ALF2(I)*DB(IND1,6))
-      DINH2   = DSINT(INOR,I)-(DB(IND2,I)+ALF1(I)*DB(IND2,5)
-     *                                   +ALF2(I)*DB(IND2,6))
-      DENOM   = DB(IND1,7)*DB(IND2,8)-DB(IND2,7)*DB(IND1,8)
-      ALF3(I) = (DINH1 *DB(IND2,8)-DINH2 *DB(IND1,8))/DENOM
-      ALF4(I) =-(DINH1 *DB(IND2,7)-DINH2 *DB(IND1,7))/DENOM
-      IF(KTMISI.LE.1) GO TO 332
-      IF( I.EQ.1) WRITE(6,1315)
-      WRITE(6,1335) I,ALF1( I),ALF2 (  I),ALF3(I),ALF4(I),
-     *              DMINT(INOR,I),DSINT(INOR,I),DINH1,DINH2,DENOM,INOR
-  332 CONTINUE
-      DO 334 IN=1,N
-      IND2 = 2*IN
-      IND1 = IND2-1
-      INP1 = IN+1
-      DO 333 I =1,4
-      DMINT(INP1,I) = DB(IND1,I)+ALF1(I)*DB(IND1,5)+ALF2(I)*DB(IND1,6)
-     *                          +ALF3(I)*DB(IND1,7)+ALF4(I)*DB(IND1,8)
-  333 DSINT(INP1,I) = DB(IND2,I)+ALF1(I)*DB(IND2,5)+ALF2(I)*DB(IND2,6)
-     *                          +ALF3(I)*DB(IND2,7)+ALF4(I)*DB(IND2,8)
-  334 CONTINUE
-      INP1 = N+2
-      DO 335 I=1,4
-      DMINT(INP1,I) = ALF3(I)
-  335 DSINT(INP1,I) = ALF4(I)
-      GO TO 350
-  340 DO 345 IN=1,N
-      IND2 = 2*IN
-      IND1 = IND2-1
-      INP1 = IN+1
-      DO 344 I =1,4
-      DMINT(INP1,I) = DB(IND1,I)
-  344 DSINT(INP1,I) = DB(IND2,I)
-  345 CONTINUE
-C
-  350 IF(KTMISI.EQ.0) GO TO 375
-      INMX = LMXX-LMIN+1
-      WRITE(6,1020) LAMB
-      LLM1 = LMIN-1
-      DO 355 INDX=1,INMX
-      LLM1 = LLM1+1
-      IF(INDX.GT.2 .AND. MOD(LLM1,MTMISI).NE.0) GO TO 355
-      WRITE(6,1050) INDX,LLM1,LLM1,(DMINT(INDX,I), I=1,4)
-  355 CONTINUE
-      WRITE(6,1025) LAMB
-      LLM1 = LMIN-1
-      DO 360 INDX=1,INMX
-      LLM1 = LLM1+1
-      LL   = LLM1+1
-      IF(INDX.GT.2 .AND. MOD(LLM1,MTMISI).NE.0) GO TO 360
-      WRITE(6,1050) INDX,LLM1,LL  ,(DSINT(INDX,I), I=1,4)
-  360 CONTINUE
-  375 CONTINUE
-C
-      RETURN
 
  9980 WRITE(6,9981)
  9981 FORMAT(18H0NO CONV IN CLMINT)
       IERR = 1
       RETURN
-      
- 9991 FORMAT(40H0ERROR FOR THE RECURRENCE OF I(L,LA,L+1) ,
-     1       20HIN F01LBF;   IFAIL =,I2)
- 9992 FORMAT(40H0ERROR FOR THE RECURRENCE OF I(L,LA,L+1) ,
-     1       20HIN F04LDF;   IFAIL =,I2)
- 9993 FORMAT(40H0ERROR FOR THE RECURRENCE OF I(L,LA,L)   ,
-     1       20HIN F01LBF;   IFAIL =,I2)
- 9994 FORMAT(40H0ERROR FOR THE RECURRENCE OF I(L,LA,L)   ,
-     1       20HIN F04LDF;   IFAIL =,I2)
-      STOP
 C
 C **********************************************************************
 C
@@ -614,10 +357,6 @@ C
      1      13H FOR LAMBDA =,I2,3X,36(1H*) / 16H  INDX   LI   LF,
      2      48H       FFMINT(INDX)            FGMINT(INDX)     ,
      3      48H       GFMINT(INDX)            GGMINT(INDX)           )
- 1015 FORMAT(1H0,35(1H*),3X,38HBOUNDARY VALUES RADIAL MATRIX ELEMENTS,
-     1      13H FOR LAMBDA =,I2,3X,36(1H*) / 16H  INDX   LI   LF,
-     2      48H       FFSINT(INDX)            FGSINT(INDX)     ,
-     3      48H       GFSINT(INDX)            GGSINT(INDX)           )
  1020 FORMAT(1H0,34(1H*),3X,38H    DIAGONAL    RADIAL MATRIX ELEMENTS,
      1      13H FOR LAMBDA =,I2,6X,34(1H*) / 16H  INDX   LI   LF,
      2      48H       FFMINT(INDX)            FGMINT(INDX)     ,
@@ -638,22 +377,10 @@ C
      3       55HG(ETAF;RHOF)          GP(ETAF;RHOF)       WRONS+1   IEX,
      4       20HP     SIGMA(ETAF)                                      )
  1225 FORMAT(1H ,I5,1P4D22.14,D12.4,I4,1X,D20.12)
- 1300 FORMAT(1H1,17H  IN    DA(1,IN) ,
-     1      52H    DA(2,IN)     DA(3,IN)     DA(4,IN)     DA(5,IN) )
- 1305 FORMAT(1H+,69X,
-     1      52H    DB(IN,1)     DB(IN,2)     DB(IN,3)     DB(IN,4) )
- 1310 FORMAT(1H0, 4H  IN,
-     1      52H    DB(IN,1)     DB(IN,2)     DB(IN,3)     DB(IN,4) ,
-     2      52H    DB(IN,5)     DB(IN,6)     DB(IN,7)     DB(IN,8) )
- 1315 FORMAT(1H0, 4H   I,
-     1      52H    ALF1(I)      ALF2(I)      ALF3(I)      ALF4(I)  ,
-     2      52H DMINT(INOR,I)DSINT(INOR,I)   DINH1(I)     DINH2(I) ,
-     3      20H    DENOM(I)   INOR )
- 1320 FORMAT(1H ,I4 ,5D13.6)
- 1325 FORMAT(1H+,69X,4D13.6)
- 1330 FORMAT(1H ,I4 ,8D13.6)
- 1335 FORMAT(1H ,I4 ,9D13.6,I6)
       END
+
+
+
       SUBROUTINE RECLIP(DRM1  ,DRM2  ,DETI  ,DWNI  ,DETF  ,DWNF  ,LAMB ,
      1                  LMIN  ,LMAX  ,LXLN  ,LAP1  ,
      2                  FFINT ,FGINT ,GFINT ,GGINT ,DMINT ,DSINT ,
@@ -2808,284 +2535,5 @@ C
     4 DX=DSQRT(DX)
       DF=DSIN(DFIE)/DX
       DG=DCOS(DFIE)/DX
-      RETURN
-      END
-      SUBROUTINE F01LBF(N, M1, M2, A, IA, AL, IL, IN, IV, IFAIL)
-C     MARK 8 RELEASE. NAG COPYRIGHT 1979.
-C
-C     PDK, DNAC, NPL, TEDDINGTON. JUNE 1976.
-C     NPL DNAC LIBRARY SUBROUTINE BANDLU.
-C     REVISED BY N.A.G. CENTRAL OFFICE, 1979.
-C
-C     LU DECOMPOSITION OF A BAND MATRIX A WITH M1 SUB AND M2 SUPER-
-C     DIAGONALS. THE MATRIX A IS PRESENTED AS AN IW*N ARRAY
-C     WITH EACH ROW TOP JUSTIFIED, WHERE IW=MIN(N,M1+M2+1).
-C     L AND U ARE FOUND USING GAUSSIAN
-C     ELIMINATION WITH PARTIAL PIVOTING. U IS OVERWRITTEN ON A, THE
-C     DIAGONAL ELEMENTS BEING STORED AS THEIR RECIPROCALS AND L IS
-C     STORED AS A SEPARATE N*M1 MATRIX AL. THE ARRAY AL MUST
-C     HAVE DIMENSIONS AT LEAST N*1 IN THE CALLING PROGRAM
-C     IF M1 IS ZERO. DETAILS OF THE PIVOTING ARE
-C     STORED IN THE VECTOR IN WHICH IS SUCH THAT IN(I)=K IF ROWS I
-C     AND K WERE INTERCHENGED AT THE ITH MAJOR STEP.
-C     IA AND IL ARE THE ROW DIMENSIONS OF A AND AL IN THE
-C     CALLING PROGRAM.
-C
-C     .. SCALAR ARGUMENTS ..
-      INTEGER IA, IFAIL, IL, IV, M1, M2, N
-C     .. ARRAY ARGUMENTS ..
-      DOUBLE PRECISION A(IA,N), AL(IL,N)
-      INTEGER IN(N)
-C     ..
-C     .. LOCAL SCALARS ..
-      CHARACTER (LEN=8) SRNAME
-      DOUBLE PRECISION EPS, ONE, X, Y, ZERO
-      INTEGER I, IK, IR, ISAVE, IW, IWW, J, JR, K, M
-C     .. FUNCTION REFERENCES ..
-      DOUBLE PRECISION X02AAF
-      INTEGER P01AAF
-C     ..
-      DATA SRNAME /' F01LBF '/, ZERO /0.D0/, ONE /1.D0/
-      ISAVE = IFAIL
-      IFAIL = 1
-      IV = 0
-      EPS = X02AAF()
-      IW = MIN0(M1+M2+1,N)
-      IF (N.LT.1 .OR. M1.LT.0 .OR. M1.GT.N-1 .OR. M2.LT.0 .OR.
-     * M2.GT.N-1 .OR. IA.LT.IW .OR. IL.LT.1 .OR. IL.LT.M1) GO TO 380
-      IFAIL = 2
-      M = M2 + 1
-      K = IW - M2 - 1
-      IF (K.LE.0) GO TO 60
-      DO 40 I=1,K
-         M = M + 1
-         DO 20 J=M,IW
-            A(J,I) = ZERO
-   20    CONTINUE
-   40 CONTINUE
-   60 M = N - IW + M1 + 2
-      J = IW + 1
-      IF (M.GT.N) GO TO 120
-      DO 100 I=M,N
-         J = J - 1
-         DO 80 K=J,IW
-            A(K,I) = ZERO
-   80    CONTINUE
-  100 CONTINUE
-C
-C     ZEROS INSERTED.
-C
-  120 DO 180 I=1,N
-         X = ZERO
-         DO 140 J=1,IW
-            X = X + DABS(A(J,I))
-  140    CONTINUE
-         IF (X.GT.ZERO) GO TO 160
-         IR = I
-         GO TO 360
-  160    AL(1,I) = ONE/X
-  180 CONTINUE
-C
-C     ROW NORMS OF A CALCULATED AND THEIR RECIPROCALS
-C     STORED IN FIRST COLUMN OF AL.
-C
-      IFAIL = 3
-      DO 340 IR=1,N
-         X = ZERO
-         M = MIN0(N,IR+M1)
-         IWW = MIN0(IW,N-IR+1)
-         DO 200 I=IR,M
-            Y = DABS(A(1,I))*AL(1,I)
-            IF (Y.LE.X) GO TO 200
-            X = Y
-            J = I
-  200    CONTINUE
-         IF (X.LT.EPS) GO TO 360
-         IN(IR) = J
-C
-C     (IR)TH PIVOT ELEMENT SELECTED.
-C
-         IF (J.EQ.IR) GO TO 240
-         DO 220 I=1,IWW
-            X = A(I,IR)
-            A(I,IR) = A(I,J)
-            A(I,J) = X
-  220    CONTINUE
-         AL(1,J) = AL(1,IR)
-C
-C     ROWS IR AND J INTERCHANGED.
-C
-  240    JR = IR + 1
-         Y = ONE/A(1,IR)
-         IF (JR.GT.M) GO TO 320
-         DO 300 I=JR,M
-            X = A(1,I)*Y
-            IF (IWW.LT.2) GO TO 280
-            DO 260 J=2,IWW
-               A(J-1,I) = A(J,I) - X*A(J,IR)
-  260       CONTINUE
-  280       IK = I - IR
-            AL(IK,IR) = X
-            A(IWW,I) = ZERO
-  300    CONTINUE
-  320    A(1,IR) = Y
-  340 CONTINUE
-C
-C     ELIMINATION COMPLETED.
-C
-      IFAIL = 0
-      RETURN
-  360 A(1,IR) = ZERO
-      IV = IR
-  380 IFAIL = P01AAF(ISAVE,IFAIL,SRNAME)
-      RETURN
-      END
-      SUBROUTINE F04LDF(N, M1, M2, IR, A, IA, AL, IL, IN, B, IB,
-     * IFAIL)
-C     MARK 8 RELEASE. NAG COPYRIGHT 1979.
-C
-C     PDK, DNAC, NPL, TEDDINGTON. JUNE 1976.
-C     NPL DNAC LIBRARY SUBROUTINE BANSOL.
-C     REVISED BY N.A.G. CENTRAL OFFICE, 1979.
-C
-C     SOLUTION OF THE BAND EQUATIONS AX=B WHERE A,AL AND IN
-C     ARE AS SUPPLIED BY SUBROUTINE F01LBF AND B IS AN N*IR MATRIX.
-C     ALTHOUGH B MUST BE A TWO-DIMENSIONAL MATRIX IT IS PERMISSIBLE
-C     TO PUT IR=1. IA,IL AND IB ARE THE ROW DIMENSIONS OF A, AL AND
-C     B IN THE CALLING PROGRAM. X IS OVERWRITTEN ON B.
-C
-C     .. SCALAR ARGUMENTS ..
-      INTEGER IA, IB, IFAIL, IL, IR, M1, M2, N
-C     .. ARRAY ARGUMENTS ..
-      DOUBLE PRECISION A(IA,N), AL(IL,N), B(IB,IR)
-      INTEGER IN(N)
-C     ..
-C     .. LOCAL SCALARS ..
-      CHARACTER (LEN=8) SRNAME
-      DOUBLE PRECISION X, Y
-      INTEGER I, II, IK, IW, J, JJ, K, KK, M
-C     .. FUNCTION REFERENCES ..
-      INTEGER P01AAF
-C     ..
-      DATA SRNAME /' F04LDF '/
-      IW = MIN0(M1+M2+1,N)
-      IF (N.LT.1 .OR. M1.LT.0 .OR. M1.GT.N-1 .OR. M2.LT.0 .OR.
-     * M2.GT.N-1 .OR. IA.LT.IW .OR. IL.LT.1 .OR. IL.LT.M1 .OR.
-     * IB.LT.N) GO TO 160
-      M = M1
-      DO 60 K=1,N
-         IK = K + 1
-         M = MIN0(N,M+1)
-         J = IN(K)
-         DO 40 JJ=1,IR
-            X = B(J,JJ)
-            B(J,JJ) = B(K,JJ)
-            B(K,JJ) = X
-            IF (IK.GT.M) GO TO 40
-            DO 20 I=IK,M
-               II = I - K
-               B(I,JJ) = B(I,JJ) - X*AL(II,K)
-   20       CONTINUE
-   40    CONTINUE
-   60 CONTINUE
-C
-C     FORWARD SUBSTITUTION COMPLETED.
-C
-      DO 140 K=1,N
-         M = MIN0(IW,K)
-         I = N + 1 - K
-         II = I - 1
-         Y = A(1,I)
-         DO 120 JJ=1,IR
-            X = B(I,JJ)
-            IF (M.EQ.1) GO TO 100
-            DO 80 J=2,M
-               KK = J + II
-               X = X - A(J,I)*B(KK,JJ)
-   80       CONTINUE
-  100       B(I,JJ) = X*Y
-  120    CONTINUE
-  140 CONTINUE
-C
-C     BACKWARD SUBSTITUTION COMPLETED.
-C
-      IFAIL = 0
-      RETURN
-  160 IFAIL = P01AAF(IFAIL,1,SRNAME)
-      RETURN
-      END
-      INTEGER FUNCTION P01AAF(IFAIL, ERROR, SRNAME)
-C     MARK 1 RELEASE.  NAG COPYRIGHT 1971
-C     MARK 3 REVISED
-C     MARK 4A REVISED, IER-45
-C     MARK 4.5 REVISED
-C     MARK 7 REVISED (DEC 1978)
-C     RETURNS THE VALUE OF ERROR OR TERMINATES THE PROGRAM.
-      INTEGER ERROR, IFAIL, NOUT
-      CHARACTER (LEN=*) SRNAME
-C     TEST IF NO ERROR DETECTED
-      IF (ERROR.EQ.0) GO TO 20
-C     DETERMINE OUTPUT UNIT FOR MESSAGE
-      CALL X04AAF (0,NOUT)
-C     TEST FOR SOFT FAILURE
-      IF (MOD(IFAIL,10).EQ.1) GO TO 10
-C     HARD FAILURE
-      IF (NOUT) 30,30,40
-30    WRITE(6,99999) SRNAME,ERROR
-      STOP
-40    WRITE (NOUT,99999) SRNAME, ERROR
-C      LOCK NOUT
-      STOP
-C     SOFT FAIL
-C     TEST IF ERROR MESSAGES SUPPRESSED
-   10 IF (MOD(IFAIL/10,10).EQ.0) GO TO 20
-      IF (NOUT) 50,50,60
-50    WRITE(6,99999) SRNAME,ERROR
-C     STOP
-      GO TO 20
-60    WRITE (NOUT,99999) SRNAME, ERROR
-C     LOCK NOUT
-   20 P01AAF = ERROR
-      RETURN
-99999 FORMAT (1H0, 38HERROR DETECTED BY NAG LIBRARY ROUTINE , A8,
-     * 11H - IFAIL = , I5//)
-      END
-      DOUBLE PRECISION FUNCTION X02AAF()
-C     NAG COPYRIGHT 1975
-C     MARK 4.5 RELEASE
-C     * EPS *
-C     RETURNS THE VALUE EPS WHERE EPS IS THE SMALLEST
-C     POSITIVE
-C     NUMBER SUCH THAT 1.0 + EPS > 1.0
-C     THE X PARAMETER IS NOT USED
-C     FOR B 7700 SP      FOR CDC SP         FOR IBM DP
-C     X02AAF=2.0**(-37); X02AAF=2.0**(-56); X02AAF=2.0**(-56)
-      X02AAF=2.0**(-56)
-      RETURN
-      END
-      SUBROUTINE X04AAF(I,NERR)
-C     MARK 7 RELEASE. NAG COPYRIGHT 1978
-C      MARK 7C REVISED IER-190 (MAY 1979)
-C     IF I = 0, SETS NERR TO CURRENT ERROR MESSAGE UNIT NUMBER
-C     (STORED IN NERR1).
-C     IF I = 1, CHANGES CURRENT ERROR MESSAGE UNIT NUMBER TO
-C     VALUE SPECIFIED BY NERR.
-C
-C     *** NOTE ***
-C     THIS ROUTINE ASSUMES THAT THE VALUE OF NERR1 IS SAVED
-C     BETWEEN CALLS.  IN SOME IMPLEMENTATIONS IT MAY BE
-C     NECESSARY TO STORE NERR1 IN A LABELLED COMMON
-C     BLOCK /AX04AA/ TO ACHIEVE THIS.
-C
-C     .. SCALAR ARGUMENTS ..
-      INTEGER I, NERR
-C     ..
-C     .. LOCAL SCALARS ..
-      INTEGER NERR1
-C     ..
-      COMMON  /AX04AA/ NERR1
-      IF (NERR1.LE.0) NERR1 = 6
-      IF (I.EQ.0) NERR = NERR1
-      IF (I.EQ.1) NERR1 = NERR
       RETURN
       END

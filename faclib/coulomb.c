@@ -439,10 +439,10 @@ int PrepCoulombBethe(cfac_cbcache_t *cbcache,
 	  i1 = i + 1;
 	  if (mode == 0) {
 	    CMULTIP(r0, r1, z, k0, k1, i1, q0, q1, 
-		    r[i], 1, &ierr);
+		    r[i], &ierr);
 	  } else {
 	    CMULTIP(r0, r1, z, k1, k0, i1, q0, q1, 
-		    r[i], 1, &ierr);
+		    r[i], &ierr);
 	  }
           if (ierr != 0) {
             printf("error in CMULTIP: %d\n", ierr);

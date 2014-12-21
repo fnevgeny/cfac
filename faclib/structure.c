@@ -14,7 +14,7 @@
 
 static ARRAY *cfac_get_ion_levels(cfac_t *cfac, unsigned int nele)
 {
-    if (nele > cfac->anum) {
+    if (nele > cfac->nucleus.anum) {
         return NULL;
     } else {
         return &cfac->levels_per_ion[nele];

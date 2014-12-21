@@ -6,8 +6,7 @@
 typedef struct _POTENTIAL_ {
   int flag;               /* radial grid completeness             */
   
-  double Z;               /* nuclear charge
-                            (cfac->nucleus->atomic_number)        */
+  unsigned int anum;      /* nuclear charge (cfac->nucleus.anum)  */
   
   int maxrp;              /* used length of the [MAXRP] arrays    */
   double rmin;            /* starting point of the radial mesh    */

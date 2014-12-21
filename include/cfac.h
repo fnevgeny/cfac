@@ -12,7 +12,7 @@ cfac_free(cfac_t *cfac);
 
 /* nucleus.c */
 int
-cfac_set_atom(cfac_t *cfac, const char *s, double z, double mass, double rn);
+cfac_set_atom(cfac_t *cfac, const char *s, int z, double mass, double rn);
 double
 cfac_get_atomic_number(const cfac_t *cfac);
 double

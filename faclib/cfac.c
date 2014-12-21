@@ -289,7 +289,7 @@ void cfac_free(cfac_t *cfac)
         }
         free(cfac->symmetry_list);
 
-        for (i = 0; i <= cfac->anum; i++) {
+        for (i = 0; i <= cfac->nucleus.anum; i++) {
             ArrayFree(&cfac->levels_per_ion[i]);
         }
         free(cfac->levels_per_ion);

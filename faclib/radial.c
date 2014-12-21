@@ -1981,7 +1981,7 @@ double SelfEnergyRatio(POTENTIAL *potential, ORBITAL *orb) {
     if (potential->uehling[npts] > -EPS4) break;
   }
   
-  z = potential->Z;
+  z = potential->anum;
   RadialDiracCoulomb(npts, p, q, potential->rad, z, 
 			 orb->n, orb->kappa);
   large = Large(orb);

@@ -1207,15 +1207,16 @@ static int PSetMixCut(int argc, char *argv[], int argt[],
 
 static int PSetAtom(int argc, char *argv[], int argt[], 
 		    ARRAY *variables) {
-  double z, mass, rn;
+  double mass, rn;
+  int z;
 
   mass = 0.0;
-  z = 0.0;
+  z = 0;
   rn = -1.0;
 
   if (argc < 1 || argt[0] != STRING || argc > 4) return -1;
   if (argc > 1) {
-    z = atof(argv[1]);
+    z = atoi(argv[1]);
     if (argc > 2) {
       mass = atof(argv[2]);
       if (argc > 3) {

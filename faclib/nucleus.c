@@ -33,7 +33,7 @@ static double _emass[] =
 
 
 int cfac_set_atom(cfac_t *cfac, const char *s,
-    double z, double mass, double rn) {
+    int z, double mass, double rn) {
     cfac_nucleus_t *atom = &cfac->nucleus;
     unsigned int i, n_elements = sizeof(_emass)/sizeof(double);
 
@@ -42,23 +42,23 @@ int cfac_set_atom(cfac_t *cfac, const char *s,
         if (z <= 0) {
             printf("atomic symbol and z cannot be both unset\n");
         }
-        s = _ename[(int)(z-0.8)];
+        s = _ename[z - 1];
     }
     strncpy(atom->symbol, s, 2); 
 
     for (i = 0; i < n_elements; i++) {
         if (strncasecmp(_ename[i], s, 2) == 0) {
-            if (z <= 0) atom->atomic_number = i+1;
+            if (z <= 0) atom->anum = i+1;
             if (mass <= 0) atom->mass = _emass[i];
             break;
         }
     }
     if (i == n_elements) return -1;
 
-    cfac->anum = i + 1;
+    cfac->nucleus.anum = i + 1;
 
     if (z > 0) {
-        atom->atomic_number = z;
+        atom->anum = z;
     } 
     if (mass > 0.0) {
         atom->mass = mass;
@@ -69,12 +69,12 @@ int cfac_set_atom(cfac_t *cfac, const char *s,
         atom->rn = rn;
     }
     
-    cfac->potential->Z = atom->atomic_number;
+    cfac->potential->anum = atom->anum;
 
     /* allocate & init per-charge-state level arrays */
-    cfac->levels_per_ion = malloc(sizeof(ARRAY)*(cfac->anum + 1));
+    cfac->levels_per_ion = malloc(sizeof(ARRAY)*(cfac->nucleus.anum + 1));
 
-    for (i = 0; i <= cfac->anum; i++) {
+    for (i = 0; i <= cfac->nucleus.anum; i++) {
         ArrayInit(&cfac->levels_per_ion[i], sizeof(LEVEL_ION), 512, NULL, NULL);
     }
 
@@ -86,7 +86,7 @@ double cfac_get_atomic_mass(const cfac_t *cfac) {
 }
 
 double cfac_get_atomic_number(const cfac_t *cfac) {
-    return cfac->nucleus.atomic_number;
+    return cfac->nucleus.anum;
 }
 
 const char *cfac_get_atomic_symbol(const cfac_t *cfac) {
@@ -95,7 +95,7 @@ const char *cfac_get_atomic_symbol(const cfac_t *cfac) {
 
 double cfac_get_nucleus_potential(const cfac_t *cfac, double r) {
     cfac_nucleus_t atom = cfac->nucleus;
-    double Z = atom.atomic_number;
+    double Z = atom.anum;
   
     assert(r >= 0.0);
   

@@ -10,13 +10,12 @@
 
 typedef struct {
   char symbol[5];
-  double atomic_number;
+  unsigned int anum;
   double mass;
-  double rn;
+  double rn;                  /* effective radius of the nucleus            */
 } cfac_nucleus_t;
 
 struct _cfac_t {
-    unsigned int anum;
     cfac_nucleus_t nucleus;
 
     CONFIG_GROUP *cfg_groups; /* a list of configuration groups              */

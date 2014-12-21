@@ -496,7 +496,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
 
   niter = 0;
 
-  z0 = pot->Z;
+  z0 = pot->anum;
   z = (z0 - pot->N + 1.0);
 
   if (kl > 0) {
@@ -768,7 +768,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
 
   nr = orb->n - kl - 1;
 
-  z0 = pot->Z;
+  z0 = pot->anum;
   z = (z0 - pot->N + 1.0);
 
   if (kl > 0) {
@@ -974,7 +974,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   double en[ME], dq[ME], dn, zero=0.0;
   int j, np, nme, one=1;
 
-  z = (pot->Z - pot->N + 1.0);
+  z = (1.0 + pot->anum - pot->N);
   kl = orb->kappa;
   kl = (kl < 0)? (-kl-1):kl;
   if (kl < 0 || kl >= orb->n) {
@@ -1466,7 +1466,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
                                           h0, atol, rtol);
   
   n = pot->maxrp-1;
-  z = pot->Z - pot->N + 1.0;
+  z = 1.0 + pot->anum - pot->N;
   kl1 = ka*(ka+1);
 
   dk = sqrt(2.0*e*(1.0+0.5*FINE_STRUCTURE_CONST2*e));

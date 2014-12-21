@@ -9,11 +9,13 @@ details. The original file, documenting development up to the version 1.1.1, is
 kept as doc/ChangeLog.MFG.
 
 There has never been an explicit statement about either copyright or licensing
-of FAC. Some bits of the FAC sources, which are still used in cFAC, bear
-copyright notices by NAG. On the other hand, cFAC heavily relies on the GNU
-Scientific Library (GSL), released under the GPL terms. AS A RESULT, THE
-COMBINED SOFTWARE IS NOT DISTRIBUTABLE. A future release may have these issues
-fixed.
+of FAC. Some bits of the FAC sources, which are still used in cFAC, were
+published in the Computer Physics Communications journal, and as such, are
+explcitly licensed for non-profit or academic use only, see
+<http://cpc.cs.qub.ac.uk/licence/licence.html>. On the other hand, cFAC heavily
+relies on the GNU Scientific Library (GSL), released under the GPL terms. AS A
+RESULT, THE COMBINED SOFTWARE IS NOT DISTRIBUTABLE. A future release may have
+these issues fixed.
 
 
 Prerequisites:

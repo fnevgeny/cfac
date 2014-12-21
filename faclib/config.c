@@ -1986,10 +1986,7 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
 
   double tnq[M];
   int i, j, k, n, kappa, t;
-  ARRAY *c;
-  CONFIG *cfg;
   int weight_allocated = 0;
-  double a;
 
   if (ng <= 0) return -1;
   for(i = 0; i < M; i++) tnq[i] = 0.0;
@@ -1997,26 +1994,18 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
   if (weight == NULL) {
     weight = malloc(sizeof(double)*ng);
     if (!weight) return -1;
-    for (i = 0; i < ng; i++) {
-      weight[i] = 1.0;
-    }
-    weight_allocated = 1;
   }
-
-  /* normalize the weight */
-  a = 0.0;
+  
   for (i = 0; i < ng; i++) {
-    a += weight[i];
+    weight[i] = 1.0/ng;
   }
-  for (i = 0; i < ng; i++) {
-    weight[i] /= a;
-  }
+  weight_allocated = 1;
 
   for (i = 0; i < ng; i++) {
-    c = &(cfac->cfg_groups[kg[i]].cfg_list);
-    a = 1.0/cfac->cfg_groups[kg[i]].n_cfgs;
+    ARRAY *c = &(cfac->cfg_groups[kg[i]].cfg_list);
+    double a = 1.0/cfac->cfg_groups[kg[i]].n_cfgs;
     for (t = 0; t < cfac->cfg_groups[kg[i]].n_cfgs; t++) {
-      cfg = (CONFIG *) ArrayGet(c, t);
+      CONFIG *cfg = ArrayGet(c, t);
       for (j = 0; j < cfg->n_shells; j++) {
 	n = cfg->shells[j].n;
 	kappa = cfg->shells[j].kappa;
@@ -2024,7 +2013,7 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
 	if (k >= M) {
           printf("A high-n (n = %d) shell is ignored in GetAverageConfig\n", n);
         } else {
-	  tnq[k] += (((double)(cfg->shells[j].nq)) * weight[i]*a);
+	  tnq[k] += cfg->shells[j].nq*weight[i]*a;
         }
       }
     }
@@ -2042,9 +2031,13 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
   acfg->kappa = malloc(sizeof(int)*j);
   acfg->nq = malloc(sizeof(double)*j);
   
-  if (!acfg->n ||
-      !acfg->kappa ||
-      !acfg->nq) goto ERROR;
+  if (!acfg->n || !acfg->kappa || !acfg->nq) {
+    if (acfg->n) free(acfg->n);
+    if (acfg->nq) free(acfg->nq);
+    if (acfg->kappa) free(acfg->kappa);
+    if (weight_allocated) free(weight);
+    return -1;
+  }
 
   for (i = 0, j = 0; i < M; i++) {
     if (tnq[i] > EPS10) {
@@ -2104,13 +2097,6 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
   }
 
   return j;
-
- ERROR:
-  if (acfg->n) free(acfg->n);
-  if (acfg->nq) free(acfg->nq);
-  if (acfg->kappa) free(acfg->kappa);
-  if (weight_allocated) free(weight);
-  return -1;
 
 #undef M
 }

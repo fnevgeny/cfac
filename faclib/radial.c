@@ -6,7 +6,6 @@
 
 #include "cfacP.h"
 #include "coulomb.h"
-#include "radial.h"
 #include "recouple.h"
 #include "angular.h"
 #include "grid.h"
@@ -19,7 +18,7 @@ void InitOrbitalData(void *p, int n) {
   ORBITAL *d;
   int i;
   
-  d = (ORBITAL *) p;
+  d = p;
   for (i = 0; i < n; i++) {
     d[i].wfun = NULL;
     d[i].phase = 0.0;
@@ -31,7 +30,7 @@ void InitYkData(void *p, int n) {
   SLATER_YK *d;
   int i;
 
-  d = (SLATER_YK *) p;
+  d = p;
   for (i = 0; i < n; i++) {
     d[i].npts = -1;
     d[i].yk = NULL;
@@ -53,7 +52,7 @@ void FreeMultipole(void *p) {
 void FreeYkData(void *p) {
   SLATER_YK *dp;
   
-  dp = (SLATER_YK *) p;
+  dp = p;
   if (dp->npts > 0) free(dp->yk);
 }
 
@@ -464,7 +463,6 @@ static int OptimizeLoop(cfac_t *cfac) {
   return iter;
 }
 
-#define NXS 5
 int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   AVERAGE_CONFIG *acfg = &(cfac->acfg);
   double z;
@@ -536,7 +534,6 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 
   return iter;
 }      
-#undef NXS
 
 
 static double EnergyFunc(const gsl_vector *v, void *params) {
@@ -875,7 +872,7 @@ int AddOrbital(cfac_t *cfac, ORBITAL *orb) {
 
   if (orb == NULL) return -1;
 
-  orb = (ORBITAL *) ArrayAppend(cfac->orbitals, orb);
+  orb = ArrayAppend(cfac->orbitals, orb);
   if (!orb) {
     printf("Not enough memory for cfac->orbitals array\n");
     exit(1);
@@ -889,14 +886,14 @@ int AddOrbital(cfac_t *cfac, ORBITAL *orb) {
 }
 
 ORBITAL *GetOrbital(const cfac_t *cfac, int k) {
-  return (ORBITAL *) ArrayGet(cfac->orbitals, k);
+  return ArrayGet(cfac->orbitals, k);
 }
 
 ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k) {
   ORBITAL *orb;
   int i;
   
-  orb = (ORBITAL *) ArrayGet(cfac->orbitals, k);
+  orb = ArrayGet(cfac->orbitals, k);
   if (orb->wfun == NULL) {
     i = SolveDirac(cfac, orb);
     if (i < 0) {
@@ -910,7 +907,7 @@ ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k) {
 ORBITAL *GetNewOrbital(cfac_t *cfac) {
   ORBITAL *orb;
 
-  orb = (ORBITAL *) ArrayAppend(cfac->orbitals, NULL);
+  orb = ArrayAppend(cfac->orbitals, NULL);
   if (!orb) {
     printf("Not enough memory for cfac->orbitals array\n");
     exit(1);
@@ -923,7 +920,7 @@ ORBITAL *GetNewOrbital(cfac_t *cfac) {
 void FreeOrbitalData(void *p) {
   ORBITAL *orb;
 
-  orb = (ORBITAL *) p;
+  orb = p;
   if (orb->wfun) free(orb->wfun);
   orb->wfun = NULL;
   orb->phase = 0.0;
@@ -1038,7 +1035,7 @@ int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg) {
 	if (mr > 0) RefineRadial(cfac, mr, 0);
 	g = GetGroup(cfac, k);
 	for (i = 0; i < g->n_cfgs; i++) {
-	  cfg = (CONFIG *) ArrayGet(&(g->cfg_list), i);
+	  cfg = ArrayGet(&(g->cfg_list), i);
 	  cfg->energy = AverageEnergyConfig(cfac, cfg);
 	}
 	ReinitRadial(cfac, 1);
@@ -1050,7 +1047,7 @@ int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg) {
       for (k = 0; k < ng; k++) {
 	g = GetGroup(cfac, kg[k]);
 	for (i = 0; i < g->n_cfgs; i++) {
-	  cfg = (CONFIG *) ArrayGet(&(g->cfg_list), i);
+	  cfg = ArrayGet(&(g->cfg_list), i);
 	  if (cfg->energy == 0) {
 	    cfg->energy = AverageEnergyConfig(cfac, cfg);
 	  }
@@ -1064,7 +1061,7 @@ int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg) {
     for (k = 0; k < ng; k++) {
       g = GetGroup(cfac, k);
       for (i = 0; i < g->n_cfgs; i++) {
-	cfg = (CONFIG *) ArrayGet(&(g->cfg_list), i);
+	cfg = ArrayGet(&(g->cfg_list), i);
 	if (cfg->energy != 0) {
 	  cfg->delta = cfg->energy - AverageEnergyConfig(cfac, cfg);
 	}
@@ -1087,7 +1084,7 @@ double TotalEnergyGroup(cfac_t *cfac, int kg) {
   
   total_energy = 0.0;
   for (t = 0; t < g->n_cfgs; t++) {
-    cfg = (CONFIG *) ArrayGet(c, t);
+    cfg = ArrayGet(c, t);
     total_energy += AverageEnergyConfig(cfac, cfg);
   }
   return total_energy;

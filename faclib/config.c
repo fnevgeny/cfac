@@ -14,10 +14,7 @@
 #include <math.h>
 
 #include "cfacP.h"
-#include "config.h"
-#include "array.h"
 #include "parser.h"
-#include "dbase.h"
 
 /*
 ** VARIABLE:    spec_symbols
@@ -1946,7 +1943,7 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
 }
 
 /* 
-** FUNCTION:    GetAverageConfig
+** FUNCTION:    MakeAverageConfig
 ** PURPOSE:     determine the average configuration based on given
 **              groups, the weight given to each group, and possible
 **              screening orbitals.
@@ -1956,20 +1953,6 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
 **              ng elements array of groups indexes.
 **              {double *weight},
 **              weight given for each group.
-**              {int n_screen},
-**              number of screening orbitals.
-**              {int *screened_n},
-**              an array of principle quantum numbers for the 
-**              screening orbitals.
-**              {int screened_charge},
-**              total charge to be screened by the screening orbitals.
-**              {int screened_kl},
-**              the orbital angular momentum used for the screening orbital.
-**              -1: use the kl = 0 orbital.
-**               0: use the kl = n/2 orbital.
-**              +1: use the kl = n-1 orbital.
-**              {AVERAGE_CONFIG *acfg},
-**              pointer holding the resulting average configuration.
 ** RETURN:      {int},
 **              >=0: success, the number of shells in the average config.
 **               -1: error.
@@ -1979,10 +1962,13 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
 **              with M = 2500, the limit is about 50, which should be 
 **              more than enough (higher-n shells will be ignored).
 */
-int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
-		     int n_screen, int *screened_n, double screened_charge,
-		     int screened_kl, AVERAGE_CONFIG *acfg) {
+int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
 #define M 2500 /* max # of shells may be present in an average config */
+  AVERAGE_CONFIG *acfg = &cfac->acfg;
+  int n_screen = cfac->optimize_control.n_screen;
+  int *screened_n = cfac->optimize_control.screened_n;
+  double screened_charge = cfac->optimize_control.screened_charge;
+  int screened_kl = cfac->optimize_control.screened_kl;
 
   double tnq[M];
   int i, j, k, n, kappa, t;
@@ -2011,7 +1997,7 @@ int GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
 	kappa = cfg->shells[j].kappa;
 	k = ShellToInt(n, kappa);
 	if (k >= M) {
-          printf("A high-n (n = %d) shell is ignored in GetAverageConfig\n", n);
+          printf("A high-n (n = %d) shell is ignored in MakeAverageConfig\n", n);
         } else {
 	  tnq[k] += cfg->shells[j].nq*weight[i]*a;
         }
@@ -2121,7 +2107,7 @@ int IBisect(int b, int n, int *a) {
 
 /* 
 ** FUNCTION:    InGroups
-** PURPOSE:     determing if a group is within a list of groups.
+** PURPOSE:     determine if a group is within a list of groups.
 ** INPUT:       {int kg},
 **              the index of the group to be tested.
 **              {int ng, *kgroup}
@@ -2257,4 +2243,3 @@ int cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str)
 
     return gidx;
 }
-

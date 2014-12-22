@@ -221,10 +221,7 @@ int          ShellToInt(int n, int k);
 int          ShellIndex(int n, int kappa, int ns, SHELL *s);
 void         IntToShell(int i, int *n, int *k);
 void         PackShellState(SHELL_STATE *s, int J, int j, int nu, int Nr);
-int          GetAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight,
-			      int n_screen, int *screened_n, 
-			      double screened_charge,
-			      int screened_kl, AVERAGE_CONFIG *acfg);
+int          MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight);
 int          GroupIndex(cfac_t *cfac, const char *name);
 int          GroupExists(const cfac_t *cfac, const char *name);
 int          AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg);

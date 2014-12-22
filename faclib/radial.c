@@ -488,11 +488,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
       acfg->nq = NULL;
       acfg->kappa = NULL;
     }
-    GetAverageConfig(cfac, ng, kg, weight, 
-		     cfac->optimize_control.n_screen,
-		     cfac->optimize_control.screened_n,
-		     cfac->optimize_control.screened_charge,
-		     cfac->optimize_control.screened_kl, acfg); 
+    MakeAverageConfig(cfac, ng, kg, weight); 
   } else {
     if (acfg->n_shells <= 0) {
       printf("No average configuration exist.\n");

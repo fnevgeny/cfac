@@ -53,10 +53,17 @@ struct _cfac_t {
       double stabilizer;
       double tolerance;       /* tolerance for self-consistency              */
       int maxiter;            /* max iter. for self-consistency              */
-      double screened_charge; 
-      int screened_kl;
-      int n_screen;
-      int *screened_n;
+
+      int n_screen;           /* number of screening orbitals                */
+      int *screened_n;        /* an array of principle quantum numbers for
+                                 the screening orbitals                      */
+      double screened_charge; /* total charge to be screened by the
+                                 screening orbitals.                         */
+      int screened_kl;        /* the orbital angular momentum used for the
+                                 screening orbitals:
+                                  -1: use the kl = 0 orbital.
+                                   0: use the kl = n/2 orbital.
+                                  +1: use the kl = n-1 orbital.              */
       int iprint;             /* printing information in each iteration.     */
       int iset;
     } optimize_control;

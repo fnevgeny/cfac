@@ -1,8 +1,6 @@
 #ifndef _GRID_H_
 #define _GRID_H_ 1
 
-int AddPW(int *nkl0, double *kl, double *logkl, 
-	  int maxkl, int n, int step);
 int SetPWGrid(int *nkl0, double *kl, double *logkl, 
 	      int maxkl, int *ns, int *n, int *step);
 int SetTEGridDetail(double *te, double *logte, int n, double *x);

@@ -5,7 +5,7 @@
 #include "consts.h"
 #include "grid.h"
 
-int AddPW(int *nkl0, double *kl, double *logkl, 
+static int AddPW(int *nkl0, double *kl, double *logkl, 
 	  int maxkl, int n, int step) {
   int i;
   for (i = *nkl0; i < n+(*nkl0); i++) {

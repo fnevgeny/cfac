@@ -103,7 +103,7 @@ static int cfac_init_radial(cfac_t *cfac)
 
 static void cfac_free_radial(cfac_t *cfac)
 {
-    AVERAGE_CONFIG *acfg = &cfac->average_config;
+    AVERAGE_CONFIG *acfg = &cfac->acfg;
     
     ArrayFree(cfac->orbitals);
     free(cfac->orbitals);

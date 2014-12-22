@@ -162,7 +162,7 @@ int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
 	k /= 2;
 	if (orb->n > nm || k > km) {
 	  double z = cfac_get_atomic_number(cfac);
-	  if (pot->N > 0) z -= pot->N - 1.0;
+	  if (pot->Navg > 0) z -= pot->Navg - 1;
 	  orb->energy = EnergyH(z, (double)(orb->n), orb->kappa);
 	  orb->ilast = -1;
 	  orb->wfun = NULL;
@@ -497,7 +497,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   niter = 0;
 
   z0 = pot->anum;
-  z = (z0 - pot->N + 1.0);
+  z = z0 - (pot->Navg - 1);
 
   if (kl > 0) {
     SetPotentialW(pot, 0.0, orb->kappa);
@@ -769,7 +769,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   nr = orb->n - kl - 1;
 
   z0 = pot->anum;
-  z = (z0 - pot->N + 1.0);
+  z = z0 - (pot->Navg - 1);
 
   if (kl > 0) {
     SetPotentialW(pot, 0.0, orb->kappa);
@@ -974,7 +974,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   double en[ME], dq[ME], dn, zero=0.0;
   int j, np, nme, one=1;
 
-  z = (1.0 + pot->anum - pot->N);
+  z = pot->anum - (pot->Navg - 1);
   kl = orb->kappa;
   kl = (kl < 0)? (-kl-1):kl;
   if (kl < 0 || kl >= orb->n) {
@@ -1080,7 +1080,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     }    
     pp = 0.0;
   } else {
-    if (pot->N <= 1) j = 3;
+    if (pot->Navg <= 1) j = 3;
     else j = 1;
     i2p2 = pot->maxrp - j*pot->asymp - 5;
     for (i2 = pot->r_core; i2 < i2p2; i2++) {
@@ -1465,8 +1465,8 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   ode_drv = gsl_odeiv2_driver_alloc_y_new(&ode_sys, gsl_odeiv2_step_rk8pd,
                                           h0, atol, rtol);
   
-  n = pot->maxrp-1;
-  z = 1.0 + pot->anum - pot->N;
+  n = pot->maxrp - 1;
+  z = pot->anum - (pot->Navg - 1);
   kl1 = ka*(ka+1);
 
   dk = sqrt(2.0*e*(1.0+0.5*FINE_STRUCTURE_CONST2*e));
@@ -1828,7 +1828,7 @@ int SetOrbitalRGrid(cfac_t *cfac) {
   gasymp = pot->asymp;
   z0 = cfac_get_atomic_number(cfac);
   z = z0;
-  if (pot->N > 0) z = (z - pot->N + 1);
+  if (pot->Navg > 0) z -= pot->Navg - 1;
   if (pot->flag == 0) pot->flag = -1; 
 
   rmin = pot->rmin/z0;
@@ -1906,7 +1906,7 @@ int SetPotentialZ(cfac_t *cfac) {
 /* Set central potential */
 int SetPotentialVc(POTENTIAL *pot) {
     int i;
-    double ncore = pot->N - 1;
+    double ncore = pot->Navg - 1;
     
     /* nucleus */
     for (i = 0; i < pot->maxrp; i++) {

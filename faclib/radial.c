@@ -196,10 +196,10 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *w) {
   ORBITAL *orb1;
   double large, small, a, b, c, d0, d1, d;
   POTENTIAL *potential = cfac->potential;
-  const AVERAGE_CONFIG *acfg = &cfac->average_config;
+  const AVERAGE_CONFIG *acfg = &cfac->acfg;
   double yk[MAXRP];
   
-  if (potential->N < 1+EPS3) return -1;
+  if (potential->Navg < 1+EPS3) return -1;
 
   for (m = 0; m < potential->maxrp; m++) {
     u[m] = 0.0;
@@ -239,7 +239,7 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *w) {
     }
   }
 
-  c = potential->N-1.0;
+  c = potential->Navg - 1;
   for (jm = jmax; jm >= 10; jm--) {
     if (fabs(w[jm]) > EPS6 && c > u[jm] && u[jm] > u[jm-1]) {
       break;
@@ -267,7 +267,7 @@ static double SetPotential(cfac_t *cfac, int iter, double *v) {
   int jmax, i, j, k;
   double *u, a, b, c, r;
   POTENTIAL *potential = cfac->potential;
-  AVERAGE_CONFIG *acfg = &cfac->average_config;
+  AVERAGE_CONFIG *acfg = &cfac->acfg;
   double w[MAXRP];
 
   u = potential->U;
@@ -304,13 +304,13 @@ static double SetPotential(cfac_t *cfac, int iter, double *v) {
     }
     SetPotentialU(potential, 0);
   } else {
-    if (potential->N < 1.0+EPS3) {
+    if (potential->Navg < 1.0+EPS3) {
       SetPotentialVc(potential);
       SetPotentialU(potential, -1);
       return 0.0;
     }
     r = cfac_get_atomic_number(cfac);
-    b = (1.0 - 1.0/potential->N);
+    b = (1.0 - 1.0/potential->Navg);
     for (i = 0; i < acfg->n_shells; i++) {
       a = acfg->nq[i];
       c = acfg->n[i];
@@ -335,7 +335,7 @@ static double SetPotential(cfac_t *cfac, int iter, double *v) {
 }
 
 int GetPotential(const cfac_t *cfac, char *fn) {
-  const AVERAGE_CONFIG *acfg = &(cfac->average_config);
+  const AVERAGE_CONFIG *acfg = &(cfac->acfg);
   FILE *f;
   int i;
   double u[MAXRP], w[MAXRP];
@@ -344,7 +344,7 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   f = fopen(fn, "w");
   if (!f) return -1;
   
-  fprintf(f, "#      N = %10.3E\n", potential->N);
+  fprintf(f, "#   Navg = %10.3E\n", potential->Navg);
   fprintf(f, "# Lambda = %10.3E\n", potential->lambda);
   fprintf(f, "#      A = %10.3E\n", potential->a);
   fprintf(f, "#     ar = %10.3E\n", potential->ar);
@@ -377,7 +377,7 @@ double GetResidualZ(const cfac_t *cfac) {
   POTENTIAL *potential = cfac->potential;
   
   z = cfac_get_atomic_number(cfac);
-  if (potential->N > 0) z -= potential->N - 1;
+  if (potential->Navg > 0) z -= potential->Navg - 1;
   return z;
 }
 
@@ -388,19 +388,19 @@ double GetRMax(cfac_t *cfac) {
 int SetAverageConfig(cfac_t *cfac, int nshells, int *n, int *kappa, double *nq) {
   int i;
   if (nshells <= 0) return -1;
-  cfac->average_config.kappa = realloc(cfac->average_config.kappa, 
+  cfac->acfg.kappa = realloc(cfac->acfg.kappa, 
 					 sizeof(int)*nshells);
-  cfac->average_config.nq = realloc(cfac->average_config.nq, 
+  cfac->acfg.nq = realloc(cfac->acfg.nq, 
 					 sizeof(double)*nshells);
-  cfac->average_config.n = realloc(cfac->average_config.n, 
+  cfac->acfg.n = realloc(cfac->acfg.n, 
 				     sizeof(int)*nshells);
   for (i = 0; i < nshells; i++) {
-    cfac->average_config.n[i] = n[i];
-    cfac->average_config.kappa[i] = kappa[i];
-    cfac->average_config.nq[i] = nq[i];
+    cfac->acfg.n[i] = n[i];
+    cfac->acfg.kappa[i] = kappa[i];
+    cfac->acfg.nq[i] = nq[i];
   }
-  cfac->average_config.n_shells = nshells;
-  cfac->average_config.n_cfgs = 1;
+  cfac->acfg.n_shells = nshells;
+  cfac->acfg.n_cfgs = 1;
   return 0;
 }
 
@@ -408,7 +408,7 @@ static int OptimizeLoop(cfac_t *cfac) {
   double tol, a, b;
   ORBITAL orb_old, *orb;
   int i, k, iter, no_old;
-  AVERAGE_CONFIG *acfg = &cfac->average_config;
+  AVERAGE_CONFIG *acfg = &cfac->acfg;
   double vbuf[MAXRP];
   
   no_old = 0;
@@ -466,8 +466,8 @@ static int OptimizeLoop(cfac_t *cfac) {
 
 #define NXS 5
 int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
-  AVERAGE_CONFIG *acfg = &(cfac->average_config);
-  double a, z;
+  AVERAGE_CONFIG *acfg = &(cfac->acfg);
+  double z;
   int iter, i;
   POTENTIAL *potential = cfac->potential;
   
@@ -495,20 +495,20 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 		     cfac->optimize_control.screened_kl, acfg); 
   } else {
     if (acfg->n_shells <= 0) {
-      printf("No average configuation exist. \n");
+      printf("No average configuration exist.\n");
       printf("Specify with AvgConfig, ");
       printf("or give config groups to OptimizeRadial.\n");
       return -1;
     }
   }
   
-  a = 0.0;
+  potential->Navg = 0.0;
   for (i = 0; i < acfg->n_shells; i++) {
-    if (cfac->optimize_control.iprint) 
+    if (cfac->optimize_control.iprint) {
       printf("%d %d %f\n", acfg->n[i], acfg->kappa[i], acfg->nq[i]);
-    a += acfg->nq[i];
+    }
+    potential->Navg += acfg->nq[i];
   }
-  potential->N = a;  
 
   /* setup the radial grid if not yet */
   if (potential->flag == 0) {
@@ -517,10 +517,12 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 
   SetPotentialZ(cfac);
   z = cfac_get_atomic_number(cfac);
-  if (a > 0.0) z = z - a + 1;
+  if (potential->Navg > 0.0) {
+    z -= potential->Navg - 1;
+  }
   potential->a = 0.0;
   potential->lambda = 0.5*z;
-  if (potential->N > 1) {
+  if (potential->Navg > 1) {
     potential->r_core = potential->maxrp - 5;
   } else {
     potential->r_core = 50;
@@ -1193,7 +1195,7 @@ double AverageEnergyAvgConfig(cfac_t *cfac) {
   int i, j, n, kappa, np, kappap;
   int k, kp, kk, kl, klp, kkmin, kkmax, j2, j2p;
   double x, y, t, q, a, b, r, nq, nqp, r0, r1;
-  AVERAGE_CONFIG *cfg = &cfac->average_config;
+  AVERAGE_CONFIG *cfg = &cfac->acfg;
  
   r0 = 0.0;
   r1 = 0.0;

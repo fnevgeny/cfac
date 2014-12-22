@@ -12,7 +12,7 @@ typedef struct {
   char symbol[5];
   unsigned int anum;
   double mass;
-  double rn;                  /* effective radius of the nucleus            */
+  double rn;                  /* effective radius of the nucleus             */
 } cfac_nucleus_t;
 
 struct _cfac_t {
@@ -30,13 +30,15 @@ struct _cfac_t {
 
     ARRAY *levels_per_ion;
 
-    POTENTIAL *potential;     /* potential                                   */
-
-
     ARRAY *orbitals;          /* array of orbitals                           */
     int n_orbitals;           /* total number of orbitals                    */
     int n_continua;           /* number of continuum orbitals                */
  
+    AVERAGE_CONFIG acfg;      /* average config for potential optimization   */
+
+    POTENTIAL *potential;     /* potential                                   */
+
+
     MULTI *slater_array;
     MULTI *breit_array;
     MULTI *vinti_array;
@@ -55,7 +57,7 @@ struct _cfac_t {
       int screened_kl;
       int n_screen;
       int *screened_n;
-      int iprint;             /* printing infomation in each iteration.      */
+      int iprint;             /* printing information in each iteration.     */
       int iset;
     } optimize_control;
     
@@ -71,8 +73,6 @@ struct _cfac_t {
       int sms;
       int br;
     } qed;
-
-    AVERAGE_CONFIG average_config;
 
     int n_awgrid;
     double awgrid[MAXNTE];

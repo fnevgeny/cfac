@@ -14,7 +14,9 @@ typedef struct _POTENTIAL_ {
   double asymp;           /* number of mesh points per oscillation
                              wavelength for high-n orbitals       */
   
-  double N;               /* effective number of electrons        */
+  double Navg;            /* effective number of electrons in the
+                             average config                       */
+
   double lambda, a;       /* optimization parameters for Vc       */
   double ar, br;          /* parameters for the transformation    */
   int ib, nb, ib1; 

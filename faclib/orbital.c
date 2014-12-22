@@ -18,7 +18,7 @@ static const int max_iteration = 512;
 static const double wave_zero = 1E-10;
 
 static int SetVEffective(int kl, POTENTIAL *pot);
-static int TurningPoints(int n, double e, POTENTIAL *pot);
+static int TurningPoints(int n, double e, const POTENTIAL *pot);
 static int CountNodes(double *p, int i1, int i2);
 static int IntegrateRadial(double *p, double e, const POTENTIAL *pot, 
 			   int i1, double p1, int i2, double p2, int q);
@@ -1577,17 +1577,16 @@ static int SetVEffective(int kl, POTENTIAL *pot) {
     return 0;
 }
 
-static int TurningPoints(int n, double e, POTENTIAL *pot) {
+static int TurningPoints(int n, double e, const POTENTIAL *pot) {
   int i, i2;
-  double x, a, b;
 
   if (n == 0) {
     for (i = 10; i < pot->maxrp-5; i++) {
-      x = e - pot->veff[i];
-      if (x <= 0) continue;
-      b = 1.0/pot->rad[i];
-      a = 20.0/(0.5*pot->ar*sqrt(b) + pot->br*b);
-      x = TWO_PI/sqrt(2.0*x);
+      double r, a, x, de = e - pot->veff[i];
+      if (de <= 0) continue;
+      r = pot->rad[i];
+      a = 40/(pot->ar/sqrt(r) + 2*pot->br/r);
+      x = TWO_PI/sqrt(2*de);
       if (x < a) break;
     }
     i2 = i-2;
@@ -1614,6 +1613,7 @@ static int TurningPoints(int n, double e, POTENTIAL *pot) {
     }
     i2 = i;
   }
+  
   return i2;
 }
 
@@ -1638,11 +1638,33 @@ static int CountNodes(double *p, int i1, int i2) {
   return n;
 }
 
+/* Coefficient at the RHS of Eq.(16) in gu:2008a */
+static double get_dirac_rhs(const POTENTIAL *pot, double e, unsigned int i)
+{
+    double a = pot->ar, b = pot->br;
+    double r = pot->rad[i];
+    double x, y, z, t;
+
+    t = a*sqrt(r) + 2*b;
+    y = 1/(t*t);
+
+    z = 3.0/4.0*a*a*r + 5*a*b*sqrt(r) + 4*b*b;
+
+    x = 8*(pot->veff[i] - e)*r*r + z*y;
+
+    return x*y;
+}
+
+/* Solve the radial DE using Numerov's method from radial index i1 to i2;
+   store result in p[i1]..p[i2]. Return node count.
+   q = {0,1,2} determines the boundary conditions (value/derivative) for WF
+   matching: both, left, or right */
 static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
 			   int i1, double p1, int i2, double p2, int q) {
-  double a, b, r, x, y, z, p0, a1, a2;
-  int i, info, n, m, k;
-  double ABAND[4*MAXRP];
+#define NN  4 /* stride of ABAND */
+  double x, p0;
+  int i, info, m, k, nodes;
+  double ABAND[NN*MAXRP];
   gsl_vector_view bv;
   gsl_vector *xv, *dv, *supv, *subv;
   
@@ -1654,83 +1676,46 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
       p[i2] = p2;
     } else if (q == 1) {
       p[i1] = p1;
-      p[i2] = (1.0+p2)*p1;
+      p[i2] = (1 + p2)*p1;
     } else if (q == 2) {
-      p[i1] = (1.0-p1)*p2;
+      p[i1] = (1 - p1)*p2;
       p[i2] = p2;
     }
     return 0;
   }
 
-  for (i = i1+1; i < i2; i++) {
+  for (i = i1 + 1; i < i2; i++) {
     p[i] = 0.0;
   }
 
-  n = 4;
-  k = 2;
-  for (i = i1+1; i < i2; i++, k += n) {
-    r = pot->rad[i];
-    x = 2.0*(pot->veff[i] - e);
-    x *= 4.0*r*r;
-    a = pot->ar;
-    b = pot->br;
-    z = sqrt(r);
-    y = a*z + 2.0*b;
-    y = 1/(y*y);
-    z = (0.75*a*a*r + 5.0*a*b*z +4.0*b*b);
-    x += z*y;    
-    x *= y / 12.0;
-    a = 1.0 - x;
-    b = -2.0*(1.0 + 5.0*x);
-    ABAND[k-1] = a;
-    ABAND[k] = b;
-    ABAND[k+1] = a;
+  for (i = i1 + 1, k = 2; i < i2; i++, k += NN) {
+    x = get_dirac_rhs(pot, e, i)/12;
+
+    ABAND[k-1] = 1 - x;
+    ABAND[k]   = -2*(1 + 5*x);
+    ABAND[k+1] = 1 - x;
   }
 
-  i = i2;
-  r = pot->rad[i];
-  x = 2.0*(pot->veff[i] - e);
-  x *= 4.0*r*r;
-  a = pot->ar;
-  b = pot->br;
-  z = sqrt(r);
-  y = a*z + 2.0*b;
-  y = 1/(y*y);
-  z = (0.75*a*a*r + 5.0*a*b*z +4.0*b*b);
-  x += z*y;    
-  x *= y / 12.0;
-  a2 = 1.0 - x;
+  x = get_dirac_rhs(pot, e, i2)/12;
   if (q == 1) {
-    k -= n;
-    ABAND[k] += 2*p2*a2;
-    k -= n;
-    ABAND[k+1] += a2;
+    k -= NN;
+    ABAND[k] += 2*p2*2;
+    k -= NN;
+    ABAND[k+1] += 2;
   } else {
     p[i2] = p2;
-    p[i2-1] += -a2*p2;
+    p[i2-1] += -(1 - x)*p2;
   }
     
-  i = i1;
-  r = pot->rad[i];
-  x = 2.0*(pot->veff[i] - e);
-  x *= 4.0*r*r;
-  a = pot->ar;
-  b = pot->br;
-  z = sqrt(r);
-  y = a*z + 2.0*b;
-  y = 1/(y*y);
-  z = (0.75*a*a*r + 5.0*a*b*z +4.0*b*b);
-  x += z*y;    
-  x *= y / 12.0;
-  a1 = 1.0 - x;
+  x = get_dirac_rhs(pot, e, i1)/12;
   if (q == 2) {
     k = 2;
-    ABAND[k] -= 2*p1*a1;
-    k += n;
-    ABAND[k-1] += a1;
+    ABAND[k] -= 2*(1 - x)*p1;
+    k += NN;
+    ABAND[k-1] += (1 - x);
   } else {
     p[i1] = p1;
-    p[i1+1] += -a1*p1;
+    p[i1+1] += -(1 - x)*p1;
   }
 
   bv   = gsl_vector_view_array(p+i1+1, m);
@@ -1740,12 +1725,12 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   subv = gsl_vector_alloc(m - 1);
   
   for (i = 0; i < m; i++) {
-    k = n*(i + 1) - 2;
+    k = NN*(i + 1) - 2;
     gsl_vector_set(dv, i, ABAND[k]);
     if (i < m - 1) {
-      k = n*(i + 1) - 1;
+      k = NN*(i + 1) - 1;
       gsl_vector_set(subv, i, ABAND[k]);
-      k = n*(i + 2) - 3;
+      k = NN*(i + 2) - 3;
       gsl_vector_set(supv, i, ABAND[k]);
     }
   }
@@ -1767,35 +1752,29 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
 
   if (q == 1) {
     p[i2] = 2*p2*p[i2-1] + p[i2-2];
-  }
+  } else
   if (q == 2) {
     p[i1] = -2*p1*p[i1+1] + p[i1+2];
   }
 
-  n = 0;
-  i = i2;
-  /*
+  /* now count nodes */
+  nodes = 0;
+  p0 = p[i2];
   for (i = i2; i >= i1; i--) {
-    if (e >= pot->veff[i]) break;
-  }
-  if (i <= i1) return n;
-  */
-  p0 = p[i];
-  for (; i >= i1; i--) {
-    a = fabs(p[i]);
-    if (a > wave_zero) {
+    if (fabs(p[i]) > wave_zero) {
       if ((p0 > 0 && p[i] < 0) ||
 	  (p0 < 0 && p[i] > 0)) {
-	n++;
+	nodes++;
 	p0 = p[i];
       }
     }
   }
     
-  return n;
+  return nodes;
 }
+#undef NN
 
-/* solving "a*sqrt(r) + b*log(r) = rho" for r using r0 as the initial guess */
+/* solving "a*sqrt(r) + b*log(r) = rho" for r using r0 as an initial guess */
 static double GetRFromRho(double rho, double a, double b, double r0) {
     double e, d1;
     int i;
@@ -1818,74 +1797,68 @@ static double GetRFromRho(double rho, double a, double b, double r0) {
     return r0;
 }
 
-int SetOrbitalRGrid(cfac_t *cfac) {
+int SetOrbitalRGrid(POTENTIAL *pot) {
+  double ratio = pot->ratio, asymp = pot->asymp;
   int i;  
-  double z0, z, d1, d2, del, gratio, gasymp;
-  double a = 0.0, b, c = 0.0, r1, rmin, rmax = 0.0;
-  POTENTIAL *pot = cfac->potential;
+  double z0, z, d1, d2;
+  double a = 0.0, b, c = 0.0, rmin, rmax = 0.0;
+  double rho, drho;
 
-  gratio = pot->ratio;
-  gasymp = pot->asymp;
-  z0 = cfac_get_atomic_number(cfac);
+  z0 = pot->anum;
   z = z0;
   if (pot->Navg > 0) z -= pot->Navg - 1;
+  
   if (pot->flag == 0) pot->flag = -1; 
 
   rmin = pot->rmin/z0;
 
-  if (gasymp > 0 && gratio > 0) {
-    a = gasymp*sqrt(2.0*z)/M_PI;
-    c = 1.0/log(gratio);
-    d2 = pot->maxrp-10.0 + a*sqrt(rmin) + c*log(rmin);
-    rmax = d2/a;
-    rmax *= rmax;
+  if (asymp > 0 && ratio > 0) {
+    a = asymp*sqrt(2*z)/M_PI;
+    c = 1/log(ratio);
+    d2 = pot->maxrp - 10 + a*sqrt(rmin) + c*log(rmin);
+    rmax = d2*d2/(a*a);
     d1 = 1.0;
     while (d1 > EPS3) {
-      r1 = d2 - c*log(rmax);
-      r1 = r1/a;
+      double r1 = (d2 - c*log(rmax))/a;
       r1 *= r1;
       d1 = fabs(r1/rmax-1.0);
       rmax = r1;
     }
-  } else if (gratio > 0) {
-    rmax = -gasymp;
-    c = 1.0/log(gratio);
-    a = pot->maxrp-15.0 + c*(log(rmin)-log(rmax));
-    a /= sqrt(rmax) - sqrt(rmin);
-  } else if (gasymp > 0) {
-    rmax = -gratio;
-    a = gasymp*sqrt(2.0*z)/M_PI;
-    c = pot->maxrp-15.0 + a*(sqrt(rmin)-sqrt(rmax));
-    c /= log(rmax) - log(rmin);
+  } else if (ratio > 0) {
+    rmax = -asymp;
+    c = 1/log(ratio);
+    a = (pot->maxrp - 15 - c*log(rmax/rmin))/(sqrt(rmax) - sqrt(rmin));
+  } else if (asymp > 0) {
+    rmax = -ratio;
+    a = asymp*sqrt(2*z)/M_PI;
+    c = (pot->maxrp - 15 + a*(sqrt(rmin) - sqrt(rmax)))/log(rmax/rmin);
   }     
   pot->nmax = sqrt(rmax*z)/2.0;
 
   d1 = log(rmax/rmin);
   d2 = sqrt(rmax) - sqrt(rmin);
-  b = (pot->maxrp - 1.0 - (a*d2))/d1;
+  b = (pot->maxrp - 1 - a*d2)/d1;
   if (b < c) {
     printf("Not enough radial mesh points, ");
     printf("enlarge to at least %d\n", (int) (1 + a*d2 + c*d1));
     exit(1);
   }
 
-  d1 = b*d1;
-  d2 = a*d2;
-  del = (d1 + d2)/(pot->maxrp - 1);
+  drho = (b*d1 + a*d2)/(pot->maxrp - 1);
   pot->rad[0] = rmin;
-  d1 = a*sqrt(rmin) + b*log(rmin);
+
+  rho = a*sqrt(rmin) + b*log(rmin);
   for (i = 1; i < pot->maxrp; i++) {
-    d1 += del;
-    pot->rad[i] = GetRFromRho(d1, a, b, pot->rad[i-1]);
+    rho += drho;
+    pot->rad[i] = GetRFromRho(rho, a, b, pot->rad[i-1]);
   }
 
   pot->ar = a;
   pot->br = b;
 
   for (i = 0; i < pot->maxrp; i++) {
-    d1 = a * sqrt(pot->rad[i]);
-    d2 = 2.0*pot->rad[i];
-    pot->dr_drho[i] = d2/(d1 + 2.0*b);
+    double r = pot->rad[i];
+    pot->dr_drho[i] = 2*r/(a*sqrt(r) + 2*b);
     pot->dr_drho2[i] = sqrt(pot->dr_drho[i]);
   }
 

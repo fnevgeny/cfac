@@ -14,11 +14,12 @@ typedef struct _POTENTIAL_ {
   double asymp;           /* number of mesh points per oscillation
                              wavelength for high-n orbitals       */
   
-  double Navg;            /* effective number of electrons in the
-                             average config                       */
+  double Navg;            /* total number of electrons in the
+                             average config (cfac->acfg)          */
 
-  double lambda, a;       /* optimization parameters for Vc       */
-  double ar, br;          /* parameters for the transformation    */
+  double ar, br;          /* parameters for the transformation
+                             \rho = ar*sqrt(r) + br*log(r)        */
+
   int ib, nb, ib1; 
   
   int r_core;             /* core radius index                    */
@@ -32,6 +33,7 @@ typedef struct _POTENTIAL_ {
   
   double Vn[MAXRP];        /* nucleus potential                   */
   
+  double lambda, a;       /* optimization parameters for Vc       */
   double Vc[MAXRP];       /* optimized central potential          */
   double dVc[MAXRP];      /* its first derivative d(Vc)/dr        */
   double dVc2[MAXRP];     /* its second derivative                */
@@ -67,7 +69,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot);
 int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot);
 int RadialFree(ORBITAL *orb, POTENTIAL *pot);
 void Differential(double *p, double *dp, int i1, int i2);
-int SetOrbitalRGrid(cfac_t *cfac);
+int SetOrbitalRGrid(POTENTIAL *pot);
 int SetPotentialZ(cfac_t *cfac);
 int SetPotentialUehling(cfac_t *cfac, int vp);
 int SetPotentialVc(POTENTIAL *pot);

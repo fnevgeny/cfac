@@ -252,10 +252,8 @@ static HAMILTON *AllocHamMem(int hdim, int nbasis) {
     }
     memset(h, 0, sizeof(HAMILTON));
     
-    /* start reallocations as needed */
-    if (nbasis > h->n_basis) {
-        h->basis = realloc(h->basis, sizeof(int)*(nbasis));
-    }
+    /* start allocations */
+    h->basis = malloc(sizeof(int)*nbasis);
     if (!h->basis) {
         cfac_hamiltonian_free(h);
         return NULL;
@@ -267,9 +265,7 @@ static HAMILTON *AllocHamMem(int hdim, int nbasis) {
 
     /* matrix partitioned as: H1[tdim] + B[hdim*np] + H2[np] */
     hsize = tdim + hdim*np + np;
-    if (hsize > h->hsize) {
-        h->hamilton = realloc(h->hamilton, sizeof(double)*hsize);
-    }
+    h->hamilton = malloc(sizeof(double)*hsize);
     if (!h->hamilton) {
         cfac_hamiltonian_free(h);
         return NULL;
@@ -278,9 +274,7 @@ static HAMILTON *AllocHamMem(int hdim, int nbasis) {
 
     /* length of the mixings array */
     msize = hdim*nbasis + hdim;  
-    if (msize > h->msize) {
-        h->mixing = realloc(h->mixing, sizeof(double)*msize);
-    }
+    h->mixing = malloc(sizeof(double)*msize);
     if (!h->mixing) {
         cfac_hamiltonian_free(h);
         return NULL;
@@ -3844,6 +3838,7 @@ int cfac_calculate_structure(cfac_t *cfac,
         
         res = DiagonalizeHamilton(cfac, h);
         if (res < 0) {
+            cfac_hamiltonian_free(h);
             return -1;
         }
         
@@ -3852,6 +3847,8 @@ int cfac_calculate_structure(cfac_t *cfac,
         } else {
             AddToLevels(cfac, h, 0, NULL);
         }
+        
+        cfac_hamiltonian_free(h);
     }
     
     if (int_gids != gids) {

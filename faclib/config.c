@@ -2012,6 +2012,13 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
     }
   }
   
+  if (!j) {
+    if (weight_allocated) {
+      free(weight);
+    }
+    return 0;
+  }
+  
   acfg->n_shells = j;
   acfg->n = malloc(sizeof(int)*j);
   acfg->kappa = malloc(sizeof(int)*j);
@@ -2079,7 +2086,6 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
 	  
   if (weight_allocated) {
     free(weight);
-    weight = NULL;
   }
 
   return j;

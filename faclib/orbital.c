@@ -1932,27 +1932,27 @@ int SetPotentialU(POTENTIAL *pot, int n) {
   return 0;
 }
 
-int SetPotentialW (POTENTIAL *pot, double e, int kappa) {
-  int i;
-  double xi, r, x, y, z;
+int SetPotentialW(POTENTIAL *pot, double e, int kappa) {
+    int i;
 
-  for (i = 0; i < pot->maxrp; i++) {
-    xi = e - pot->Vc[i] - pot->U[i];
-    r = xi*FINE_STRUCTURE_CONST2*0.5 + 1.0;
-  
-    x = pot->dU[i] + pot->dVc[i];
-    y = - 2.0*kappa*x/pot->rad[i];
-    x = x*x*0.75*FINE_STRUCTURE_CONST2/r;
-    z = (pot->dU2[i] + pot->dVc2[i]);
-    pot->W[i] = x + y + z;
-    pot->W[i] /= 4.0*r;
-    x = xi*xi;
-    pot->W[i] = x - pot->W[i];
-    pot->W[i] *= 0.5*FINE_STRUCTURE_CONST2;
-    pot->W[i] = -pot->W[i];
-  }
+    for (i = 0; i < pot->maxrp; i++) {
+        double v, dv, dv2, xi, r, t, x, y;
+        
+        r = pot->rad[i];
+        
+        v   = pot->Vc[i]   + pot->U[i];
+        dv  = pot->dVc[i]  + pot->dU[i];
+        dv2 = pot->dVc2[i] + pot->dU2[i];
 
-  return 0;
+        xi = e - v;
+        t = 1 + 0.5*xi*FINE_STRUCTURE_CONST2;
+        x = 0.75*dv*dv*FINE_STRUCTURE_CONST2/t;
+        y = -2*kappa*dv/r;
+        
+        pot->W[i] = -0.5*FINE_STRUCTURE_CONST2*(xi*xi - (x + y + dv2)/(4*t));
+    }
+
+    return 0;
 }
 
 static double Poly(double x, double n, double c[]) {

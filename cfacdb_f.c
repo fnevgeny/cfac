@@ -1,7 +1,7 @@
 /* F77 wrapper functions for CFACDB */
 
 /* 
- * Copyright (C) 2013-2014 Evgeny Stambulchik
+ * Copyright (C) 2013-2015 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,7 +134,7 @@ void cfacdb_species_(int *anum, double *mass, int *ierr)
 }
 
 
-static void levels_fsink(const cfacdb_t *cdb,
+static int levels_fsink(const cfacdb_t *cdb,
     cfacdb_levels_data_t *cbdata, void *udata)
 {
     struct {
@@ -148,6 +148,8 @@ static void levels_fsink(const cfacdb_t *cdb,
                 (char *) cbdata->name, (char *) cbdata->ncmplx, (char *) cbdata->sname,
                 strlen(cbdata->name), strlen(cbdata->ncmplx),
                 strlen(cbdata->sname));
+    
+    return CFACDB_SUCCESS;
 }
 
 void cfacdb_levels_(cfacdb_levels_fsink_t sink, int *ierr)
@@ -163,7 +165,7 @@ void cfacdb_levels_(cfacdb_levels_fsink_t sink, int *ierr)
 }
 
 
-static void rtrans_fsink(const cfacdb_t *cdb,
+static int rtrans_fsink(const cfacdb_t *cdb,
     cfacdb_rtrans_data_t *cbdata, void *udata)
 {
     struct {
@@ -174,6 +176,8 @@ static void rtrans_fsink(const cfacdb_t *cdb,
     int fj = cbdata->fi + 1;
     
     fdata->sink(&fi, &fj, &cbdata->mpole, &cbdata->gf);
+    
+    return CFACDB_SUCCESS;
 }
 
 void cfacdb_rtrans_(cfacdb_rtrans_fsink_t sink, int *ierr)
@@ -189,7 +193,7 @@ void cfacdb_rtrans_(cfacdb_rtrans_fsink_t sink, int *ierr)
 }
 
 
-static void aitrans_fsink(const cfacdb_t *cdb,
+static int aitrans_fsink(const cfacdb_t *cdb,
     cfacdb_aitrans_data_t *cbdata, void *udata)
 {
     struct {
@@ -200,6 +204,8 @@ static void aitrans_fsink(const cfacdb_t *cdb,
     int fj = cbdata->fi + 1;
     
     fdata->sink(&fi, &fj, &cbdata->rate);
+    
+    return CFACDB_SUCCESS;
 }
 
 void cfacdb_aitrans_(cfacdb_aitrans_fsink_t sink, int *ierr)
@@ -215,7 +221,7 @@ void cfacdb_aitrans_(cfacdb_aitrans_fsink_t sink, int *ierr)
 }
 
 
-static void ctrans_fsink(const cfacdb_t *cdb,
+static int ctrans_fsink(const cfacdb_t *cdb,
     cfacdb_ctrans_data_t *cbdata, void *udata)
 {
     struct {
@@ -230,6 +236,8 @@ static void ctrans_fsink(const cfacdb_t *cdb,
     fdata->sink(&fi, &fj, (int *) &cbdata->type, (int *) &cbdata->kl,
         &cbdata->ap0, &cbdata->ap1, &cbdata->ap2, &cbdata->ap3,
         (int *) &cbdata->nd, cbdata->e, cbdata->d);
+    
+    return CFACDB_SUCCESS;
 }
 
 void cfacdb_ctrans_(cfacdb_ctrans_fsink_t sink, int *ierr)
@@ -244,7 +252,7 @@ void cfacdb_ctrans_(cfacdb_ctrans_fsink_t sink, int *ierr)
 }
 
 
-static void crates_fsink(const cfacdb_t *cdb,
+static int crates_fsink(const cfacdb_t *cdb,
     cfacdb_crates_data_t *cbdata, void *udata)
 {
     struct {
@@ -257,6 +265,8 @@ static void crates_fsink(const cfacdb_t *cdb,
     fj = cbdata->fi + 1;
     
     fdata->sink(&fi, &fj, (int *) &cbdata->type, &cbdata->ratec);
+    
+    return CFACDB_SUCCESS;
 }
 
 

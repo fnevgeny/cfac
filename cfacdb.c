@@ -5,7 +5,7 @@
  */
 
 /* 
- * Copyright (C) 2013-2014 Evgeny Stambulchik
+ * Copyright (C) 2013-2015 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -237,7 +237,10 @@ int cfacdb_sessions(const cfacdb_t *cdb,
             cbdata.nele_min = sqlite3_column_int   (stmt, 4);
             cbdata.nele_max = sqlite3_column_int   (stmt, 5);
             
-            sink(cdb, &cbdata, udata);
+            if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
+                sqlite3_finalize(stmt);
+                return CFACDB_FAILURE;
+            }
             
             break;
         default:
@@ -536,7 +539,10 @@ int cfacdb_cstates(cfacdb_t *cdb, cfacdb_cstates_sink_t sink, void *udata)
             cbdata.e_gs    = sqlite3_column_double(stmt, 1);
             cbdata.nlevels = sqlite3_column_int   (stmt, 2);
             
-            sink(cdb, &cbdata, udata);
+            if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
+                sqlite3_finalize(stmt);
+                return CFACDB_FAILURE;
+            }
             
             break;
         default:
@@ -595,7 +601,10 @@ int cfacdb_levels(cfacdb_t *cdb, cfacdb_levels_sink_t sink, void *udata)
             cbdata.ncmplx = (char *) sqlite3_column_text  (stmt, 8);
             cbdata.sname  = (char *) sqlite3_column_text  (stmt, 9);
             
-            sink(cdb, &cbdata, udata);
+            if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
+                sqlite3_finalize(stmt);
+                return CFACDB_FAILURE;
+            }
             i++;
             
             break;
@@ -665,7 +674,10 @@ int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
             cbdata.ii = cdb->lmap[ilfac - cdb->id_min];
             cbdata.fi = cdb->lmap[iufac - cdb->id_min];
             
-            sink(cdb, &cbdata, udata);
+            if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
+                sqlite3_finalize(stmt);
+                return CFACDB_FAILURE;
+            }
             
             break;
         default:
@@ -722,7 +734,10 @@ int cfacdb_aitrans(cfacdb_t *cdb, cfacdb_aitrans_sink_t sink, void *udata)
             
             cbdata.rate = rate;
             
-            sink(cdb, &cbdata, udata);
+            if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
+                sqlite3_finalize(stmt);
+                return CFACDB_FAILURE;
+            }
             
             break;
         default:
@@ -788,7 +803,10 @@ int cfacdb_ctrans(cfacdb_t *cdb, cfacdb_ctrans_sink_t sink, void *udata)
             if (nd) {
                 cbdata.nd   = nd;
 
-                sink(cdb, &cbdata, udata);
+                if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
+                    sqlite3_finalize(stmt);
+                    return CFACDB_FAILURE;
+                }
             }
             break;
         case SQLITE_ROW:
@@ -820,7 +838,10 @@ int cfacdb_ctrans(cfacdb_t *cdb, cfacdb_ctrans_sink_t sink, void *udata)
                 if (nd) {
                     cbdata.nd   = nd;
                     
-                    sink(cdb, &cbdata, udata);
+                    if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
+                        sqlite3_finalize(stmt);
+                        return CFACDB_FAILURE;
+                    }
                 }
 
                 nd = 0;

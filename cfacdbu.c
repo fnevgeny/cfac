@@ -11,7 +11,7 @@ typedef struct {
 } cfacdbu_t;
 
 
-static void sessions_sink(const cfacdb_t *cdb,
+static int sessions_sink(const cfacdb_t *cdb,
     cfacdb_sessions_data_t *cbdata, void *udata)
 {
     cfacdbu_t *cdu = udata;
@@ -23,6 +23,8 @@ static void sessions_sink(const cfacdb_t *cdb,
     printf("\t%s (Z = %d, mass = %.2f) nele = %d ... %d \n",
 	      cbdata->sym, cbdata->anum, cbdata->mass,
               cbdata->nele_min, cbdata->nele_max);
+
+    return CFACDB_SUCCESS;
 }
 
 int main(int argc, const char *argv[])

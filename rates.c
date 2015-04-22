@@ -1,7 +1,7 @@
 /* Calculation of rate coefficients. Mostly copied from CRaC */
 
 /* 
- * Copyright (C) 2013-2014 Evgeny Stambulchik
+ * Copyright (C) 2013-2015 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -228,7 +228,7 @@ static double rate_int_f(double e, void *params) {
     return xs*get_e_MB_vf(p->T, e);
 }
 
-static void crates_sink(const cfacdb_t *cdb,
+static int crates_sink(const cfacdb_t *cdb,
     cfacdb_ctrans_data_t *cbdata, void *udata)
 {
     cfacdb_crates_data_t rcbdata;
@@ -276,7 +276,7 @@ static void crates_sink(const cfacdb_t *cdb,
     if (gsl_status) {
         fprintf(stderr, "gsl_integration_qags() failed with %s\n",
             gsl_strerror(gsl_status));
-        return;
+        return CFACDB_FAILURE;
     }
     ratec = result;
     
@@ -285,7 +285,7 @@ static void crates_sink(const cfacdb_t *cdb,
     if (gsl_status) {
         fprintf(stderr, "gsl_integration_qagiu() failed with %s\n",
             gsl_strerror(gsl_status));
-        return;
+        return CFACDB_FAILURE;
     }
     ratec += result;
 
@@ -297,6 +297,8 @@ static void crates_sink(const cfacdb_t *cdb,
     rcbdata.ratec = ratec;
     
     rdata->sink(cdb, &rcbdata, rdata->udata);
+    
+    return CFACDB_SUCCESS;
 }
 
 int cfacdb_crates(cfacdb_t *cdb, double T,

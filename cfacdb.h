@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013-2014 Evgeny Stambulchik
+ * Copyright (C) 2013-2015 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,19 +120,19 @@ typedef struct {
     double     (*f_asymptote)(double x, const double *ap);
 } cfacdb_intext_t;
 
-typedef void (*cfacdb_sessions_sink_t)(const cfacdb_t *cdb,
+typedef int (*cfacdb_sessions_sink_t)(const cfacdb_t *cdb,
     cfacdb_sessions_data_t *cbdata, void *udata);
-typedef void (*cfacdb_cstates_sink_t)(const cfacdb_t *cdb,
+typedef int (*cfacdb_cstates_sink_t)(const cfacdb_t *cdb,
     cfacdb_cstates_data_t *cbdata, void *udata);
-typedef void (*cfacdb_levels_sink_t)(const cfacdb_t *cdb,
+typedef int (*cfacdb_levels_sink_t)(const cfacdb_t *cdb,
     cfacdb_levels_data_t *cbdata, void *udata);
-typedef void (*cfacdb_rtrans_sink_t)(const cfacdb_t *cdb,
+typedef int (*cfacdb_rtrans_sink_t)(const cfacdb_t *cdb,
     cfacdb_rtrans_data_t *cbdata, void *udata);
-typedef void (*cfacdb_aitrans_sink_t)(const cfacdb_t *cdb,
+typedef int (*cfacdb_aitrans_sink_t)(const cfacdb_t *cdb,
     cfacdb_aitrans_data_t *cbdata, void *udata);
-typedef void (*cfacdb_ctrans_sink_t)(const cfacdb_t *cdb,
+typedef int (*cfacdb_ctrans_sink_t)(const cfacdb_t *cdb,
     cfacdb_ctrans_data_t *cbdata, void *udata);
-typedef void (*cfacdb_crates_sink_t)(const cfacdb_t *cdb,
+typedef int (*cfacdb_crates_sink_t)(const cfacdb_t *cdb,
     cfacdb_crates_data_t *cbdata, void *udata);
 
 

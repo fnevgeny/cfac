@@ -140,6 +140,9 @@ cfacdb_t *cfacdb_open(const char *fname);
 void cfacdb_close(cfacdb_t *cdb);
 int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max);
 
+int cfacdb_set_udata(cfacdb_t *cdb, void *udata);
+void *cfacdb_get_udata(cfacdb_t *cdb);
+
 unsigned int cfacdb_get_nsessions(const cfacdb_t *cdb);
 
 int cfacdb_sessions(const cfacdb_t *cdb,

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013-2014 Evgeny Stambulchik
+ * Copyright (C) 2013-2015 Evgeny Stambulchik
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@ struct _cfacdb_t {
     unsigned int id_max;
 
     unsigned int *lmap;
+    
+    void *udata;
 };
 
 #endif /* _CFACDBP_H */

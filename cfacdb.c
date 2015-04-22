@@ -176,6 +176,26 @@ void cfacdb_close(cfacdb_t *cdb)
     cdb = NULL;
 }
 
+int cfacdb_set_udata(cfacdb_t *cdb, void *udata)
+{
+    if (!cdb) {
+        return CFACDB_FAILURE;
+    }
+    
+    cdb->udata = udata;
+    
+    return CFACDB_SUCCESS;
+}
+
+void *cfacdb_get_udata(cfacdb_t *cdb)
+{
+    if (!cdb) {
+        return NULL;
+    } else {
+        return cdb->udata;
+    }
+}
+
 unsigned int cfacdb_get_nsessions(const cfacdb_t *cdb)
 {
     if (!cdb) {

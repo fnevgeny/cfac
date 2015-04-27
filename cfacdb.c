@@ -670,6 +670,7 @@ int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
             m2 = 2*abs(mpole);
             cbdata.gf = SQR(rme)*de*pow(ALPHA*de, m2 - 2)/(m2 + 1);
             cbdata.mpole = mpole;
+            cbdata.de = de;
             
             cbdata.ii = cdb->lmap[ilfac - cdb->id_min];
             cbdata.fi = cdb->lmap[iufac - cdb->id_min];

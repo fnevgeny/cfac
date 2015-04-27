@@ -73,6 +73,8 @@ typedef struct {
     
     int mpole;
     
+    double de;
+    
     double gf;
 } cfacdb_rtrans_data_t;
 

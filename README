@@ -1,21 +1,22 @@
 FAC is a software package for the calculation of various atomic processes,
 written by Ming Feng Gu at the Space Science Laboratory of Berkeley.
 
-The last official version of FAC is 1.1.1 (released in 2006). cFAC was started
-as a maintenance project due to a lack of interest from the original author in
-the last years. The main focus is on providing large volumes of data as
-required, e.g., for collisional-radiative plasma modeling. See ChangeLog for
-details. The original file, documenting development up to the version 1.1.1, is
-kept as doc/ChangeLog.MFG.
+cFAC was started around 2010 (based on FAC-1.1.1, released in 2006) as a
+maintenance project due to a lack of interest from the original author in the
+last years. The main focus is on providing large volumes of data as required,
+e.g., for collisional-radiative plasma modeling.  See ChangeLog for details. The
+original file, documenting development up to the version 1.1.1, is kept as
+doc/ChangeLog.MFG.
 
-There has never been an explicit statement about either copyright or licensing
-of FAC. Some bits of the FAC sources, which are still used in cFAC, were
-published in the Computer Physics Communications journal, and as such, are
-explcitly licensed for non-profit or academic use only, see
-<http://cpc.cs.qub.ac.uk/licence/licence.html>. On the other hand, cFAC heavily
-relies on the GNU Scientific Library (GSL), released under the GPL terms. AS A
-RESULT, THE COMBINED SOFTWARE IS NOT DISTRIBUTABLE. A future release may have
-these issues fixed.
+Recently, Ming Feng Gu kindly agreed to release the FAC sources under the GPL
+(version 3 or higher) license, and the repository is currently made public on
+GitHub, <https://github.com/fnevgeny/fac/>.
+
+Some bits of the FAC sources, which are still used in cFAC, were published in
+the Computer Physics Communications journal, and as such, are explcitly licensed
+for non-profit or academic use only, see
+<http://cpc.cs.qub.ac.uk/licence/licence.html>. As a result, the combined
+software is not redistributable. This issue may be fixed in a future release.
 
 
 Prerequisites:
@@ -49,6 +50,7 @@ directory for examples. For more details, please read the manual, and be sure to
 read the FAQ section of it. 
 
 Evgeny Stambulchik
+Department of Particle Physics and Astrophysics
 Faculty of Physics
 Weizmann Institute of Science
 Rehovot 7610001

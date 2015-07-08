@@ -1,242 +1,331 @@
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-
-#include "consts.h"
-#include "cfacP.h"
-#include "radial.h"
-#include "angular.h"
-#include "dbase.h"
 #include "transition.h"
+#include <time.h>
 
-void SetTransitionMode(cfac_t *cfac, int m) {
-  cfac->tr_opts.mode = m;
-}
+static char *rcsid="$Id: transition.c,v 1.1.1.1.2.1 2015/07/08 12:27:13 fnevgeny Exp $";
+#if __GNUC__ == 2
+#define USE(var) static void * use_##var = (&use_##var, (void *) &var) 
+USE (rcsid);
+#endif
 
-void SetTransitionGauge(cfac_t *cfac, int m) {
-  cfac->tr_opts.gauge = m;
-}
+/* the following options controll the computation methods of OS.
+   gauge = 1 coulomb gauge (velocity form)
+         = 2 babushkin gauge (length form)
 
-void SetTransitionMaxE(cfac_t *cfac, int m) {
-  cfac->tr_opts.max_e = m;
-}
+   mode = 0 use relativistic expression for radial integrals.
+        = 1 use non-relativistic approximation.
+   
+   max_e, the maximum rank of electric multipoles.
+   max_m, the maximum rank of magnetic multipoles.
+*/
+static struct {
+  int gauge;
+  int mode;
+  int max_e;
+  int max_m;
+  double eps0;
+  double eps;
+} transition_option = {DGAUGE, DMODE, ERANK, MRANK, TRCUT0, TRCUT};
 
-void SetTransitionMaxM(cfac_t *cfac, int m) {
-  cfac->tr_opts.max_m = m;
-}
+typedef struct {
+  TR_RECORD r;
+  TR_EXTRA rx;
+  int ks[2];
+} TR_DATUM;
 
-void SetTransitionOptions(cfac_t *cfac, int gauge, int mode, 
-			  int max_e, int max_m) {
-  cfac->tr_opts.gauge = gauge;
-  cfac->tr_opts.mode = mode;
-  cfac->tr_opts.max_e = max_e;
-  cfac->tr_opts.max_m = max_m;
-}
-
-int GetTransitionGauge(const cfac_t *cfac) {
-  return cfac->tr_opts.gauge;
-}
-
-int GetTransitionMode(const cfac_t *cfac) {
-  return cfac->tr_opts.mode;
-}
-
-static int _TRMultipole(cfac_t *cfac, double *rme, double *energy,
-		int m, int lower, int upper) {
-  int m2;
-  int p1, p2, j1, j2;
-  LEVEL *lev1, *lev2;
-  double s, r, aw;
-  int nz, i;
-  ANGULAR_ZMIX *ang;
-  
-  *rme = 0.0;
-
-  lev1 = GetLevel(cfac, lower);
-  if (lev1 == NULL) return -1;
-  lev2 = GetLevel(cfac, upper);
-  if (lev2 == NULL) return -1;
-  
-  if (GetNumElectrons(cfac, lower) != GetNumElectrons(cfac, upper)) {
-    return -1;
+int SetTransitionCut(double c0, double c) {
+  if (c0 >= 0) {
+    transition_option.eps0 = c0;
+  } else {
+    transition_option.eps0 = TRCUT0;
   }
-  
-  *energy = lev2->energy - lev1->energy;
-  if (*energy < 0.0) {
-    return -1;
+  if (c >= 0) {
+    transition_option.eps = c;
+  } else {
+    transition_option.eps = TRCUT;
   }
-    
-  aw = FINE_STRUCTURE_CONST*fabs(*energy);
-
-  DecodePJ(lev1->pj, &p1, &j1);
-  DecodePJ(lev2->pj, &p2, &j2);
-  if (j1 == 0 && j2 == 0) return 0;
-
-  m2 = 2*abs(m);    
-  if (!Triangle(j1, j2, m2)) return 0;
-  if (m > 0 && IsEven(p1+p2+m)) return 0;
-  if (m < 0 && IsOdd(p1+p2-m)) return 0;    
-
-  s = 0.0;
-
-  nz = AngularZMix(cfac, &ang, lower, upper, m2, m2);
-  if (nz <= 0) {
-    return -1;
-  }
-
-  for (i = 0; i < nz; i++) {
-    if (ang[i].k != m2) continue;
-    if (cfac->tr_opts.mode == M_NR && m != 1) {
-      r = MultipoleRadialNR(cfac, m, ang[i].k0, ang[i].k1, 
-			    cfac->tr_opts.gauge);
-    } else {
-      r = MultipoleRadialFR(cfac, aw, m, ang[i].k0, ang[i].k1,
-			    cfac->tr_opts.gauge);
-    }
-    s += r * ang[i].coeff;
-  }
-  if (nz > 0) {
-    free(ang);	
-  }  
-
-  *rme = s;
-  
   return 0;
 }
 
-typedef struct {
-  int m;
-  int valid;
-  double energy;
-  double rme;
-} TRANS_T;
-
-typedef struct {
-  unsigned int dim;
-  TRANS_T *transitions;
-} TRM_CACHE_T;
-
-static TRM_CACHE_T *trm_cache = NULL;
-
-static TRM_CACHE_T *TRMultipole_cache_new(unsigned int dim)
-{
-  TRM_CACHE_T *cache;
-  
-  cache = calloc(1, sizeof(TRM_CACHE_T));
-  if (!cache) {
-    return NULL;
-  }
-  
-  cache->transitions = calloc(dim*dim, sizeof(TRANS_T));
-  if (!cache->transitions) {
-    free(cache);
-    return NULL;
-  }
-  
-  cache->dim = dim;
-  
-  return cache;
+double GetTransitionCut(void) {
+  return transition_option.eps;
 }
 
-static void TRMultipole_cache_free(TRM_CACHE_T *cache)
-{
-  if (!cache) {
-    return;
-  }
-  
-  if (cache->transitions) {
-    free(cache->transitions);
-  }
-  
-  free(cache);
+void SetTransitionMode(int m) {
+  transition_option.mode = m;
 }
 
-/* If energy is not NULL, it is assigned trans. energy; */
-int TRMultipole(cfac_t *cfac, double *rme, double *energy,
-		int m, int lower, int upper) {
-  double dE = 0.0;
-  
-  TRANS_T *trans = NULL;
-  
-  int res;
-  
-  if (trm_cache &&
-      lower >= 0 && lower < trm_cache->dim &&
-      upper >= 0 && upper < trm_cache->dim) {
-    trans = &trm_cache->transitions[trm_cache->dim*upper + lower];
-    if (trans->m == m && trans->valid) {
-      if (energy) {
-        *energy = trans->energy;
-      }
-      *rme = trans->rme;
-      
-      return 0;
-    }
-  }
-  
-  res = _TRMultipole(cfac, rme, &dE, m, lower, upper);
-  if (energy) {
-    *energy = dE;
-  }
-  
-  if (trans) {
-    trans->m      = m;
-    trans->energy = dE;
-    trans->rme    = *rme;
-    trans->valid  = 1;
-  }
-  
-  return res;
-}  
+void SetTransitionGauge(int m) {
+  transition_option.gauge = m;
+}
 
-int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m, int lower, int upper) {
+void SetTransitionMaxE(int m) {
+  transition_option.max_e = m;
+}
+
+void SetTransitionMaxM(int m) {
+  transition_option.max_m = m;
+}
+
+void SetTransitionOptions(int gauge, int mode, 
+			  int max_e, int max_m) {
+  transition_option.gauge = gauge;
+  transition_option.mode = mode;
+  transition_option.max_e = max_e;
+  transition_option.max_m = max_m;
+}
+
+int GetTransitionGauge(void) {
+  return transition_option.gauge;
+}
+
+int GetTransitionMode(void) {
+  return transition_option.mode;
+}
+
+int TRMultipoleUTA(double *strength, TR_EXTRA *rx, 
+		   int m, int lower, int upper, int *ks) {
+  int m2, ns, k0, k1, q1, q2;
+  int p1, p2, j1, j2, ia, ib;
   LEVEL *lev1, *lev2;
-  int i1, m2, q;
-
-  lev1 = GetEBLevel(cfac, lower);
+  double r, aw;
+  INTERACT_DATUM *idatum;
+  
+  *strength = 0.0;
+  lev1 = GetLevel(lower);
   if (lev1 == NULL) return -1;
-  lev2 = GetEBLevel(cfac, upper);
+  lev2 = GetLevel(upper);
+  if (lev2 == NULL) return -1;
+
+  p1 = lev1->pj;
+  p2 = lev2->pj;
+  if (m > 0 && IsEven(p1+p2+m)) return -1;
+  if (m < 0 && IsOdd(p1+p2+m)) return -1;
+  
+  idatum = NULL;
+  ns = GetInteract(&idatum, NULL, NULL, lev1->iham, lev2->iham,
+		   lev1->pb, lev2->pb, 0, 0, 0);
+  if (ns <= 0) return -1;
+  if (idatum->s[0].index < 0 || idatum->s[3].index >= 0) {
+    free(idatum->bra);
+    free(idatum);
+    return -1;
+  }
+
+  if (idatum->s[0].nq_bra > idatum->s[0].nq_ket) {
+    ia = ns-1-idatum->s[0].index;
+    ib = ns-1-idatum->s[1].index;
+    j1 = idatum->s[0].j;
+    j2 = idatum->s[1].j;
+    q1 = idatum->s[0].nq_bra;
+    q2 = idatum->s[1].nq_bra;
+    k0 = OrbitalIndex(idatum->s[0].n, idatum->s[0].kappa, 0.0);
+    k1 = OrbitalIndex(idatum->s[1].n, idatum->s[1].kappa, 0.0);
+    PackNRShell(ks, idatum->s[0].n, idatum->s[0].kl, q1);
+    if (idatum->s[0].kappa > 0) ks[0] |= 0x01000000;
+    PackNRShell(ks+1, idatum->s[1].n, idatum->s[1].kl, q2);
+    if (idatum->s[1].kappa > 0) ks[1] |= 0x01000000;
+  } else {
+    ia = ns-1-idatum->s[1].index;
+    ib = ns-1-idatum->s[0].index;    
+    j1 = idatum->s[1].j;
+    j2 = idatum->s[0].j;
+    q1 = idatum->s[1].nq_bra;
+    q2 = idatum->s[0].nq_bra;
+    k1 = OrbitalIndex(idatum->s[0].n, idatum->s[0].kappa, 0.0);
+    k0 = OrbitalIndex(idatum->s[1].n, idatum->s[1].kappa, 0.0);
+    PackNRShell(ks, idatum->s[1].n, idatum->s[1].kl, q1);
+    if (idatum->s[1].kappa > 0)  ks[0] |= 0x01000000;
+    PackNRShell(ks+1, idatum->s[0].n, idatum->s[0].kl, q2);
+    if (idatum->s[0].kappa > 0)  ks[1] |= 0x01000000;
+  }
+
+  m2 = 2*abs(m);
+  if (!Triangle(j1, j2, m2)) {
+    free(idatum->bra);    
+    free(idatum);
+    return -1;
+  }
+
+  rx->energy = (lev2->energy - lev1->energy);
+  if (m < 0) {
+    rx->energy += ConfigEnergyShift(ns, idatum->bra, ia, ib, m2);
+    rx->sdev = sqrt(ConfigEnergyVariance(ns, idatum->bra, ia, ib, m2));
+  } else {
+    rx->sdev = 0.0;
+  }
+  aw = FINE_STRUCTURE_CONST * rx->energy;
+  if (aw < 0.0) {
+    free(idatum->bra);
+    free(idatum);
+    return -1;
+  }
+  
+  if (transition_option.mode == M_NR && m != 1) {
+    r = MultipoleRadialNR(m, k0, k1, transition_option.gauge);
+  } else {
+    r = MultipoleRadialFR(aw, m, k0, k1, transition_option.gauge);
+  }
+
+  *strength = sqrt((lev1->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
+  
+  free(idatum->bra);
+  free(idatum);
+  return 0;
+}
+
+int TRMultipole(double *strength, double *energy,
+		int m, int lower, int upper) {
+  int m0, m1, m2;
+  int p1, p2, j1, j2;
+  LEVEL *lev1, *lev2;
+  double s, r, a, aw, *mbk, tr;
+  int nz, i, nmk;
+  ANGULAR_ZMIX *ang;
+
+  lev1 = GetLevel(lower);
+  if (lev1 == NULL) return -1;
+  lev2 = GetLevel(upper);
+  if (lev2 == NULL) return -1;
+  if (*energy <= 0.0) {
+    *energy = lev2->energy - lev1->energy;
+  }
+  if (*energy <= 0.0) return -1;
+  aw = FINE_STRUCTURE_CONST * (*energy);
+  if (aw < 0.0) return -1;
+
+  DecodePJ(lev1->pj, &p1, &j1);
+  DecodePJ(lev2->pj, &p2, &j2);
+  if (j1 == 0 && j2 == 0) return -1;
+
+  if (m != 0) {
+    m2 = 2*abs(m);    
+    if (!Triangle(j1, j2, m2)) return -1;
+    if (m > 0 && IsEven(p1+p2+m)) return -1;
+    if (m < 0 && IsOdd(p1+p2-m)) return -1;    
+    
+    s = 0.0;
+    
+    nz = AngularZMix(&ang, lower, upper, m2, m2, &nmk, &mbk);
+    if (nz <= 0 && nmk < m2/2) {
+      if (nmk > 0) free(mbk);
+      return -1;
+    }
+    
+    for (i = 0; i < nz; i++) {
+      if (ang[i].k != m2) continue;
+      if (transition_option.mode == M_NR && m != 1) {
+	r = MultipoleRadialNR(m, ang[i].k0, ang[i].k1, 
+			      transition_option.gauge);
+      } else {
+	r = MultipoleRadialFR(aw, m, ang[i].k0, ang[i].k1,
+			      transition_option.gauge);
+      }
+      s += r * ang[i].coeff;
+    }
+    if (nmk >= m2/2) {
+      r = mbk[m2/2-1];
+      if (transition_option.gauge == G_COULOMB && m < 0) {
+	r /= aw;
+      }
+      a = r/s;
+      a *= a;
+      if (a < 0.75) {
+	s += r;
+      }
+    }
+    if (nz > 0) {
+      free(ang);	
+    }  
+    if (nmk > 0) {
+      free(mbk);
+    }
+
+    *strength = s;
+  } else {
+    m0 = abs(j1-j2);
+    if (m0 == 0) m0 += 2;
+    m1 = (j1+j2);
+    if (m0 > transition_option.max_m && m0 > transition_option.max_e) {
+      return -1;
+    }
+    tr = 0.0;
+    nz = AngularZMix(&ang, lower, upper, m0, m1, &nmk, &mbk);
+    for (m2 = m0; m2 <= m1; m2 += 2) {      
+      m = m2/2;
+      if (IsEven(p1+p2+m)) m = -m;
+      s = 0.0;
+      for (i = 0; i < nz; i++) {
+	if (ang[i].k != m2) continue;
+	if (transition_option.mode == M_NR && m != 1) {
+	  r = MultipoleRadialNR(m, ang[i].k0, ang[i].k1,
+				transition_option.gauge);
+	} else {
+	  r = MultipoleRadialFR(aw, m, ang[i].k0, ang[i].k1,
+				transition_option.gauge);
+	}
+	s += r * ang[i].coeff;
+      }
+      if (nmk >= m2/2) {
+	r = mbk[m2/2-1];
+	if (transition_option.gauge == G_COULOMB && m < 0) {
+	  r /= aw;
+	}
+	a = r/s;
+	a *= a;
+	if (a < 0.75) {
+	  s += r;
+	}
+      }
+      r = OscillatorStrength(m, *energy, s, &a);
+      tr += r;
+      if (tr > 0 && r/tr < transition_option.eps0) break;
+    }
+    if (nz > 0) {
+      free(ang);
+    }
+    if (nmk > 0) {
+      free(mbk);
+    }
+    *strength = tr;
+  }
+  return 0;
+}
+
+int TRMultipoleEB(double *strength, double *energy, int m, int lower, int upper) {
+  LEVEL *lev1, *lev2;
+  LEVEL *plev1, *plev2;
+  int i1, i2, j1, j2, p1, p2, k, m2;
+  int ilev1, ilev2, mlev1, mlev2, q;
+  double r, a, c;
+
+  lev1 = GetEBLevel(lower);
+  if (lev1 == NULL) return -1;
+  lev2 = GetEBLevel(upper);
   if (lev2 == NULL) return -1;
   
   *energy = lev2->energy - lev1->energy;
   if (*energy <= 0.0) return -1;
   
   m2 = 2*abs(m);
-  
+
   for (q = 0; q <= m2; q++) strength[q] = 0.0;
-
   for (i1 = 0; i1 < lev1->n_basis; i1++) {
-    LEVEL *plev1;
-    int ilev1, mlev1, j1, p1;
-    int i2;
-
     if (lev1->mixing[i1] == 0) continue;
-
     DecodeBasisEB(lev1->basis[i1], &ilev1, &mlev1);
-    plev1 = GetLevel(cfac, ilev1);
+    plev1 = GetLevel(ilev1);
     DecodePJ(plev1->pj, &p1, &j1);
-    
     for (i2 = 0; i2 < lev2->n_basis; i2++) {
-      LEVEL *plev2;
-      int ilev2, mlev2, j2, p2;
-      double r, a, c;
-
       if (lev2->mixing[i2] == 0) continue;
-
       c = lev1->mixing[i1]*lev2->mixing[i2];
       DecodeBasisEB(lev2->basis[i2], &ilev2, &mlev2);
-      plev2 = GetLevel(cfac, ilev2);
+      plev2 = GetLevel(ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
-      
-      if (TRMultipole(cfac, &r, NULL, m, ilev1, ilev2) != 0) {
-        continue;
-      }
-      
+      k = TRMultipole(&r, energy, m, ilev1, ilev2);
+      if (k != 0) continue;
       a = W3j(j1, m2, j2, -mlev1, mlev1-mlev2, mlev2);
-      if (IsOdd((j1-mlev1)/2)) a = -a;
-     
       q = (mlev1-mlev2)/2+abs(m);
+      if (a == 0) continue;
+      if (IsOdd((j1-mlev1)/2)) a = -a;
       strength[q] += c*r*a;
       /*
       printf("%d %d %d %d %2d %2d %2d %10.3E %10.3E %10.3E %10.3E %10.3E\n",
@@ -249,7 +338,47 @@ int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m, int low
   return 0;
 }
 
-int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
+static int CompareNRConfig(const void *p1, const void *p2) {
+  CONFIG *c1, *c2;
+
+  c1 = (CONFIG *) p1;
+  c2 = (CONFIG *) p2;
+  if (c1->nnrs > c2->nnrs) return 1;
+  else if (c1->nnrs < c2->nnrs) return -1;
+  else {
+    return memcmp(c1->nrs, c2->nrs, sizeof(int)*c1->nnrs);
+  }
+}
+
+static int CompareNRLevel(const void *p1, const void *p2) {
+  int *i1, *i2;
+  LEVEL *lev1, *lev2;
+  CONFIG *c1, *c2;
+  
+  i1 = (int *) p1;
+  i2 = (int *) p2;
+  lev1 = GetLevel(*i1);
+  lev2 = GetLevel(*i2);
+  c1 = GetConfigFromGroup(lev1->iham, lev1->pb);
+  c2 = GetConfigFromGroup(lev2->iham, lev2->pb);
+  return CompareNRConfig(c1, c2);
+}
+
+static int CompareTRDatum(const void *p1, const void *p2) {
+  TR_DATUM *r1, *r2;
+
+  r1 = (TR_DATUM *) p1;
+  r2 = (TR_DATUM *) p2;
+  if ((r1->r).upper < (r2->r).upper) return -1;
+  else if ((r1->r).upper > (r2->r).upper) return 1;
+  else {
+    if ((r1->r).lower < (r2->r).lower) return -1;
+    else if ((r1->r).lower > (r2->r).lower) return 1;
+    else return 0;
+  }
+}
+
+int SaveTransitionEB0(int nlow, int *low, int nup, int *up, 
 		      char *fn, int m) {
   int k, i, j, nq;
   double emin, emax, e0, s[101], et;
@@ -260,14 +389,14 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   FILE *f;
   
   if (nlow <= 0 || nup <= 0) return -1;
-  if (m == 1 || cfac->tr_opts.mode == M_FR) {
+  if (m == 1 || transition_option.mode == M_FR) {
     k = 0;
     emin = 1E10;
     emax = 1E-10;
     for (i = 0; i < nlow; i++) {
-      lev1 = GetEBLevel(cfac, low[i]);
+      lev1 = GetEBLevel(low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetEBLevel(cfac, up[j]);
+	lev2 = GetEBLevel(up[j]);
 	e0 = lev2->energy - lev1->energy;
 	if (e0 > 0) k++;
 	if (e0 < emin && e0 > 0) emin = e0;
@@ -283,38 +412,38 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     emax *= FINE_STRUCTURE_CONST;
     e0 = 2.0*(emax-emin)/(emin+emax);
     
-    FreeMultipoleArray(cfac);
+    FreeMultipoleArray();
     if (e0 < EPS3) {
-      SetAWGrid(cfac, 1, emin, emax);
+      SetAWGrid(1, 0.5*(emin+emax), emax);
     } else if (e0 < 1.0) {
-      SetAWGrid(cfac, 2, emin, emax);
+      SetAWGrid(2, emin, emax);
     } else {
-      SetAWGrid(cfac, 3, emin, emax);
+      SetAWGrid(3, emin, emax);
     }
   }
   fhdr.type = DB_TRF;
-  strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
-  fhdr.atom = cfac_get_atomic_number(cfac);  
-  lev1 = GetEBLevel(cfac, low[0]);
+  strcpy(fhdr.symbol, GetAtomicSymbol());
+  fhdr.atom = GetAtomicNumber();  
+  lev1 = GetEBLevel(low[0]);
   DecodeBasisEB(lev1->pb, &i, &j);  
-  tr_hdr.nele = GetNumElectrons(cfac, i);
+  tr_hdr.nele = GetNumElectrons(i);
   tr_hdr.multipole = m;
-  tr_hdr.gauge = GetTransitionGauge(cfac);
+  tr_hdr.gauge = GetTransitionGauge();
   if (m == 1) { /* always FR for M1 transitions */
     tr_hdr.mode = M_FR;
   } else {
-    tr_hdr.mode = GetTransitionMode(cfac);
+    tr_hdr.mode = GetTransitionMode();
   }
   nq = 2*abs(m) + 1;
   r.strength = (float *) malloc(sizeof(float)*nq);
-  GetFields(cfac, &tr_hdr.bfield, &tr_hdr.efield, &tr_hdr.fangle);
+  GetFields(&tr_hdr.bfield, &tr_hdr.efield, &tr_hdr.fangle);
     
   f = OpenFile(fn, &fhdr);
   InitFile(f, &fhdr, &tr_hdr);
 
   for (j = 0; j < nup; j++) {
     for (i = 0; i < nlow; i++) {
-      k = TRMultipoleEB(cfac, s, &et, m, low[i], up[j]);
+      k = TRMultipoleEB(s, &et, m, low[i], up[j]);
       if (k != 0) continue;
       e0 = 0.0;
       for (k = 0; k < nq; k++) {
@@ -334,30 +463,294 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 
   return 0;
 }
+      
+int SaveTransition0(int nlow, int *low, int nup, int *up, 
+		    char *fn, int m) {
+  int i, j, k, jup;
+  FILE *f;
+  LEVEL *lev1, *lev2;
+  TR_RECORD r;
+  TR_EXTRA rx;
+  TR_HEADER tr_hdr;
+  F_HEADER fhdr;
+  double *s, *et, *a, trd, gf;
+  double e0, emin, emax;
+  int ic0, ic1, nic0, nic1, *nc0, *nc1, j0, j1, ntr;
+  int imin, imax, jmin, jmax, nrs0, nrs1, ir, ir0;
+  double ep, em, wp, wm, w0, de, cp, cm;
+  CONFIG *c0, *c1;
+  TR_DATUM *rd;
+  int mj = 0xFF000000, mn = 0xFFFFFF;
 
-double OscillatorStrength(int m, double e, double s, double *ga) {
-  double aw, x;
-
-  aw = FINE_STRUCTURE_CONST*e;
-  if (m != 0) {
-    int m2 = 2*abs(m);
-    x = s*s*e*pow(aw, m2 - 2)/(m2 + 1);
-  } else {
-    x = s;
-  }
-  if (ga) {
-    *ga = x*2.0*pow(aw,2)*FINE_STRUCTURE_CONST;
-  }  
-
-  return x;
-}  
-
-static int CompareInt(const void *a1, const void *a2) {
-  int *i1, *i2;
+#ifdef PERFORM_STATISTICS
+  STRUCT_TIMING structt;
+  ANGULAR_TIMING angt;
+  RECOUPLE_TIMING recouplet;
+  RAD_TIMING radt;
+#endif
   
-  i1 = (int *) a1;
-  i2 = (int *) a2;
-  return (*i1 - *i2);
+  if (nlow <= 0 || nup <= 0) return -1;
+  k = 0;
+  emin = 1E10;
+  emax = 1E-10;
+  for (i = 0; i < nlow; i++) {
+    lev1 = GetLevel(low[i]);
+    for (j = 0; j < nup; j++) {
+      lev2 = GetLevel(up[j]);
+      e0 = lev2->energy - lev1->energy;
+      if (e0 > 0) k++;
+      if (e0 < emin && e0 > 0) emin = e0;
+      if (e0 > emax) emax = e0;
+    }
+  }
+  
+  if (k == 0) {
+    return 0;
+  }
+    
+  emin *= FINE_STRUCTURE_CONST;
+  emax *= FINE_STRUCTURE_CONST;
+  e0 = 2.0*(emax-emin)/(emin+emax);
+    
+  FreeMultipoleArray();
+  if (e0 < EPS3) {
+    SetAWGrid(1, 0.5*(emin+emax), emax);
+  } else if (e0 < 1.0) {
+    SetAWGrid(2, emin, emax);
+  } else {
+    SetAWGrid(3, emin, emax);
+  }
+  
+  fhdr.type = DB_TR;
+  strcpy(fhdr.symbol, GetAtomicSymbol());
+  fhdr.atom = GetAtomicNumber();
+  tr_hdr.nele = GetNumElectrons(low[0]);
+  tr_hdr.multipole = m;
+  tr_hdr.gauge = GetTransitionGauge();
+  if (m == 1) { /* always FR for M1 transitions */
+    tr_hdr.mode = M_FR;
+  } else {
+    tr_hdr.mode = GetTransitionMode();
+  }
+  f = OpenFile(fn, &fhdr);
+  InitFile(f, &fhdr, &tr_hdr);
+    
+  if (IsUTA()) {
+    qsort(low, nlow, sizeof(int), CompareNRLevel);
+    nc0 = malloc(sizeof(int)*nlow);    
+    ic0 = 0;
+    for (i = 0; i < nlow; i++) {
+      lev1 = GetLevel(low[i]);
+      c1 = GetConfigFromGroup(lev1->iham, lev1->pb);
+      if (i > 0 && CompareNRConfig(c1, c0)) {
+	nc0[ic0++] = i;
+      }
+      c0 = c1;
+    }
+    nc0[ic0] = nlow;
+    nic0 = ic0+1;
+    if (up != low) {
+      qsort(up, nup, sizeof(int), CompareNRLevel);
+      nc1 = malloc(sizeof(int)*nup);    
+      ic1 = 0;
+      for (i = 0; i < nup; i++) {
+	lev1 = GetLevel(up[i]);
+	c1 = GetConfigFromGroup(lev1->iham, lev1->pb);
+	if (i > 0 && CompareNRConfig(c1, c0) != 0) {
+	  nc1[ic1++] = i;
+	}
+	c0 = c1;
+      }
+      nc1[ic1] = nup;
+      nic1 = ic1+1;
+    } else {
+      nc1 = nc0;
+      nic1 = nic0;
+    }
+    imin = 0;
+    for (ic0 = 0; ic0 < nic0; ic0++) {
+      imax = nc0[ic0];
+      jmin = 0;
+      lev1 = GetLevel(low[imin]);
+      c0 = GetConfigFromGroup(lev1->iham, lev1->pb);
+      for (ic1 = 0; ic1 < nic1; ic1++) {
+	jmax = nc1[ic1];
+	lev2 = GetLevel(up[jmin]);
+	c1 = GetConfigFromGroup(lev2->iham, lev2->pb);
+	ir = 0;
+	ntr = (jmax-jmin)*(imax-imin);
+	rd = malloc(sizeof(TR_DATUM)*ntr);
+	ep = 0.0;
+	em = 0.0;
+	e0 = 0.0;
+	wp = 0.0;
+	wm = 0.0;
+	w0 = 0.0;
+	ir0 = -1;
+	for (i = imin; i < imax; i++) {
+	  for (j = jmin; j < jmax; j++) {
+	    k = TRMultipoleUTA(&gf, &(rd[ir].rx), m, low[i], up[j], rd[ir].ks);
+	    if (k != 0) {
+	      rd[ir].r.lower = -1;
+	      rd[ir].r.upper = -1;
+	      ir++;
+	      continue;
+	    }
+	    ir0 = ir;
+	    rd[ir].r.lower = low[i];
+	    rd[ir].r.upper = up[j];
+	    rd[ir].r.strength = gf;
+	    rd[ir].rx.sci = 1.0;
+	    if (m == -1) {
+	      gf = OscillatorStrength(m, rd[ir].rx.energy, 
+				      rd[ir].r.strength, NULL);
+	      j0 = rd[ir].ks[0]&mj;
+	      j1 = rd[ir].ks[1]&mj;
+	      if (j0==0 && j1==0) {
+		wp += gf;
+		ep += gf*rd[ir].rx.energy;
+	      } else if (j0 && j1) {
+		wm += gf;
+		em += gf*rd[ir].rx.energy;
+	      }
+	      e0 += gf*rd[ir].rx.energy;
+	      w0 += gf;
+	    }
+	    ir++;
+	  }
+	}	
+	if (wm > 0.0 && ir0 >= 0) {
+	  nrs0 = 0;
+	  nrs1 = 0;
+	  for (i = 0; i < c0->nnrs; i++) {
+	    if (c0->nrs[i]>>8 == (rd[ir0].ks[0]&mn)>>8) nrs0 = c0->nrs[i];
+	    else if (c0->nrs[i]>>8 == (rd[ir0].ks[1]&mn)>>8) nrs1 = c1->nrs[i];
+	  }
+	  if (nrs0 == 0) {
+	    nrs0 = rd[ir0].ks[0] & mn;
+	  }
+	  if (nrs1 == 0) {
+	    nrs1 = rd[ir0].ks[1] & mn;
+	  }
+	  ep /= wp;
+	  em /= wm;
+	  e0 /= w0;
+	  de = ConfigEnergyShiftCI(nrs0, nrs1);
+	  cm = 1.0 + de/(e0 - ep);
+	  cp = 1.0 + de/(e0 - em);
+	  if (cm < EPS3) {
+	    cp = (wp+wm)/wp;
+	    cm = 0.0;
+	  } else if (cp < EPS3) {
+	    cm = (wp+wm)/wm;
+	    cp = 0.0;
+	  }
+	  ir = 0;
+	  for (i = imin; i < imax; i++) {
+	    for (j = jmin; j < jmax; j++) {
+	      if (rd[ir].r.lower < 0) {
+		ir++;
+		continue;
+	      }
+	      j0 = rd[ir].ks[0]&mj;
+	      j1 = rd[ir].ks[1]&mj;
+	      if (j0==0 && j1==0) {
+		rd[ir].rx.sci = cp;
+	      } else if (j0 && j1) {
+		rd[ir].rx.sci = cm;
+	      }
+	      ir++;
+	    }
+	  }
+	}
+	qsort(rd, ntr, sizeof(TR_DATUM), CompareTRDatum);
+	ir = 0;
+	for (ir = 0; ir < ntr; ir++) {
+	  if (rd[ir].r.lower < 0) {
+	    continue;
+	  }
+	  WriteTRRecord(f, &(rd[ir].r), &(rd[ir].rx));
+	}
+	free(rd);
+	jmin = jmax;
+      }
+      imin = imax;
+    }    
+    free(nc0);
+    if (up != low) free(nc1);
+  } else {
+    a = malloc(sizeof(double)*nlow);
+    s = malloc(sizeof(double)*nlow);
+    et = malloc(sizeof(double)*nlow);
+    for (j = 0; j < nup; j++) {
+      jup = LevelTotalJ(up[j]);
+      trd = 0.0;
+      for (i = 0; i < nlow; i++) {
+	a[i] = 0.0;
+	et[i] = 0.0;
+	k = TRMultipole(s+i, et+i, m, low[i], up[j]);
+	if (k != 0) continue;
+	gf = OscillatorStrength(m, et[i], s[i], &(a[i]));
+	a[i] /= jup+1.0;
+	trd += a[i];
+      } 
+      if (trd < 1E-30) continue;
+      r.upper = up[j];
+      for (i = 0; i < nlow; i++) {
+	if (a[i] <= 0 || a[i] < (transition_option.eps * trd)) continue;
+	r.lower = low[i];
+	r.strength = s[i];
+	WriteTRRecord(f, &r, NULL);
+      }
+    }
+    
+    free(a);
+    free(s);
+    free(et);
+  }
+
+  DeinitFile(f, &fhdr);
+  CloseFile(f, &fhdr);
+
+#ifdef PERFORM_STATISTICS
+  GetStructTiming(&structt);
+  fprintf(perform_log, "AngZMix: %6.1E, AngZFB: %6.1E, AngZxZFB: %6.1E, SetH: %6.1E DiagH: %6.1E\n",
+	  ((double) (structt.angz_mix))/CLOCKS_PER_SEC,
+	  ((double) (structt.angz_fb))/CLOCKS_PER_SEC,
+	  ((double) (structt.angzxz_fb))/CLOCKS_PER_SEC,
+	  ((double) (structt.set_ham))/CLOCKS_PER_SEC,
+	  ((double) (structt.diag_ham))/CLOCKS_PER_SEC);
+  fprintf(perform_log, "AngZS: %7d %7d %6.1E, %6.1E, AngZFBS: %6.1E, AngZxZFBS: %6.1E, AddZ: %6.1E, AddZxZ: %6.1E\n",
+	  structt.n_angz_states, structt.n_angz_states_load,
+	  ((double) (structt.angz_states))/CLOCKS_PER_SEC, 
+	  ((double) (structt.angz_states_load))/CLOCKS_PER_SEC,
+	  ((double) (structt.angzfb_states))/CLOCKS_PER_SEC,
+	  ((double) (structt.angzxzfb_states))/CLOCKS_PER_SEC,
+	  ((double) (structt.add_angz))/CLOCKS_PER_SEC,
+	  ((double) (structt.add_angzxz))/CLOCKS_PER_SEC);
+
+  GetAngularTiming(&angt);
+  fprintf(perform_log, "W3J: %6.1E, W6J: %6.1E, W9J: %6.1E\n", 
+	  ((double)angt.w3j)/CLOCKS_PER_SEC, 
+	  ((double)angt.w6j)/CLOCKS_PER_SEC, 
+	  ((double)angt.w9j)/CLOCKS_PER_SEC);
+  GetRecoupleTiming(&recouplet);
+  fprintf(perform_log, "AngZ: %6.1E, AngZxZ: %6.1E, Interact: %6.1E\n",
+	  ((double)recouplet.angz)/CLOCKS_PER_SEC,
+	  ((double)recouplet.angzxz)/CLOCKS_PER_SEC,
+	  ((double)recouplet.interact)/CLOCKS_PER_SEC);
+  GetRadTiming(&radt);
+  fprintf(perform_log, "Dirac: %d, %6.1E, 1E: %6.1E, Slater: %6.1E, 2E: %6.1E\n", 
+	  GetNumContinua(),
+	  ((double)radt.dirac)/CLOCKS_PER_SEC, 
+	  ((double)radt.radial_1e)/CLOCKS_PER_SEC,
+	  ((double)radt.radial_slater)/CLOCKS_PER_SEC,
+	  ((double)radt.radial_2e)/CLOCKS_PER_SEC);
+  fprintf(perform_log, "\n");
+  fflush(perform_log);
+#endif /* PERFORM_STATISTICS */
+
+  return 0;
 }
 
 int OverlapLowUp(int nlow, int *low, int nup, int *up) {
@@ -413,282 +806,58 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
 
   return n;
 }
-
-/* 
- * Find complements and intersection of unsorted sets I and F:
- * K = I\F; L = F\I; M = I*F.
- * Return bool flag whether an allocation occured (and hence resultant
- * sets need to be free'd.)
- */
-int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
-    unsigned *nk, unsigned **k, unsigned *nl, unsigned **l,
-    unsigned *nm, unsigned **m)
-{
-    int j;
-    int i_min, i_max, f_min, f_max, sn_min, sn_max;
-    unsigned n_k = 0, n_l = 0, n_m = 0;
-    char *s;
-    int allocated = 0;
-    
-    *nm = *nk = *nl = 0;
-    
-    if (ni == 0 || nf == 0) {
-        return allocated;
-    }
-    
-    if (ni == nf && i == f) {
-        /* degenerate case I = F */
-        
-        *nm = ni;
-        *m  = i;
-        
-        return allocated;
-    }
-    
-    i_min = i_max = i[0];
-    f_min = f_max = f[0];
-    
-    for (j = 1; j < ni; j++) {
-        if (i[j] < i_min) {
-            i_min = i[j];
-        }
-        if (i[j] > i_max) {
-            i_max = i[j];
-        }
-    }
-    
-    for (j = 1; j < nf; j++) {
-        if (f[j] < f_min) {
-            f_min = f[j];
-        }
-        if (f[j] > f_max) {
-            f_max = f[j];
-        }
-    }
-    
-    if (i_max < f_min || i_min > f_max) {
-        /* no overlap */
-        
-        *nk = ni;
-        *k  = i;
-        *nl = nf;
-        *l  = f;
-        
-        return allocated;
-    }
-    
-    sn_min = (i_min < f_min) ? i_min:f_min;
-    sn_max = (i_max > f_max) ? i_max:f_max;
-    
-    s = calloc(sn_max - sn_min + 1, 1);
-    
-    for (j = 0; j < ni; j++) {
-        s[i[j] - sn_min] |= 1;
-    }
-    for (j = 0; j < nf; j++) {
-        s[f[j] - sn_min] |= 2;
-    }
-    
-    for (j = sn_min; j <= sn_max; j++) {
-        switch (s[j - sn_min]) {
-        case 1:
-            n_k++;
-            break;
-        case 2:
-            n_l++;
-            break;
-        case 3:
-            n_m++;
-            break;
-        }
-    }
-    
-    *nk = n_k;
-    *nl = n_l;
-    *nm = n_m;
-
-    *k = malloc(sizeof(int)*(*nk));
-    *l = malloc(sizeof(int)*(*nl));
-    *m = malloc(sizeof(int)*(*nm));
-    
-    allocated = 1;
-
-    n_k = n_m = n_l = 0;
-    for (j = sn_min; j <= sn_max; j++) {
-        switch (s[j - sn_min]) {
-        case 1:
-            (*k)[n_k++] = j;
-            break;
-        case 2:
-            (*l)[n_l++] = j;
-            break;
-        case 3:
-            (*m)[n_m++] = j;
-            break;
-        }
-    }
-
-    free(s);
-    
-    return allocated;
-}
-
-/* save radiative transitions; low & up are assumed NOT overlapping */
-static int crac_save_rtrans0(cfac_t *cfac,
-    unsigned nlow, const unsigned *low, unsigned nup, const unsigned *up,
-    int mpole, int mode,
-    cfac_tr_sink_t sink, void *udata) {
-  unsigned i, j, ntr;
-  double emin, emax;
-
-  if (!nlow || !nup) return 0;
-
-  emin = 0.0;
-  emax = 0.0;
-  ntr = 0;
-  for (i = 0; i < nlow; i++) {
-    LEVEL *llev = GetLevel(cfac, low[i]);
-    if (!llev) {
-      return -1;
-    }
-    for (j = 0; j < nup; j++) {
-      double dE;
-      LEVEL *ulev = GetLevel(cfac, up[j]);
-      if (!ulev) {
-        return -1;
-      }
-      dE = ulev->energy - llev->energy;
-      
-      if (dE < 0) {
-        continue;
-      }
-      if (!emin || dE < emin) {
-        emin = dE;
-      }
-      if (dE > emax) {
-        emax = dE;
-      }
-      ntr++;
-    }
-  }
   
-  if (!ntr) {
-    return 0;
-  }
-
-  if (mode == M_FR && cfac->tr_opts.fr_interpolate) {
-      double e0;
-      emin *= FINE_STRUCTURE_CONST;
-      emax *= FINE_STRUCTURE_CONST;
-      e0 = 2.0*(emax-emin)/(emin+emax);
-
-      FreeMultipoleArray(cfac);
-      if (e0 < EPS3) {
-        SetAWGrid(cfac, 1, emin, emax);
-      } else if (e0 < 1.0) {
-        SetAWGrid(cfac, 2, emin, emax);
-      } else {
-        SetAWGrid(cfac, 3, emin, emax);
-      }
-  }
+int SaveTransition(int nlow, int *low, int nup, int *up,
+		   char *fn, int m) {
+  int n, *alev, i, nc;
   
-  for (j = 0; j < nup; j++) {
-    LEVEL *ulev = GetLevel(cfac, up[j]);
-    for (i = 0; i < nlow; i++) {
-      double rme;
-      cfac_rtrans_data_t rtdata;
+  n = 0;
+  if (nlow == 0 || nup == 0) {
+    n = GetNumLevels();
+    if (n <= 0) return -1;
+    alev = malloc(sizeof(int)*n);
+    if (!alev) return -1;
+    
+    for (i = 0; i < n; i++) alev[i] = i;
 
-      if (mode == M_FR && !cfac->tr_opts.fr_interpolate) {
-        LEVEL *llev = GetLevel(cfac, low[i]);
-        double dE = ulev->energy - llev->energy;
-        if (dE < 0) {
-          continue;
-        }
-        
-        FreeMultipoleArray(cfac);
-        SetAWGrid(cfac, 1, dE*FINE_STRUCTURE_CONST, dE*FINE_STRUCTURE_CONST);
-      }
-      
-      if (TRMultipole(cfac, &rme, NULL, mpole, low[i], up[j]) != 0) {
-        continue;
-      }
-      if (fabs(rme) < EPS30) continue;
-      
-      rtdata.fi = low[i];
-      rtdata.ii = up[j];
-      rtdata.rme = rme;
-      if (sink(cfac, &rtdata, udata) != 0) {
-        return -1;
-      }
+    if (nlow == 0) {
+      nlow = n; 
+      low = alev;
+    }
+    if (nup == 0) {
+      nup = n;
+      up = alev;
     }
   }
+  if (nlow <= 0 || nup <= 0) return -1;
+
+  nc = OverlapLowUp(nlow, low, nup, up);
+  SaveTransition0(nc, low+nlow-nc, nc, up+nup-nc, fn, m);
+  SaveTransition0(nc, low+nlow-nc, nup-nc, up, fn, m);
+  SaveTransition0(nup-nc, up, nc, low+nlow-nc, fn, m);
+  SaveTransition0(nlow-nc, low, nup, up, fn, m);
+  SaveTransition0(nup, up, nlow-nc, low, fn, m);
+
+  if (n > 0) free(alev);
+  ReinitRadial(1);
 
   return 0;
 }
-
-int crac_calculate_rtrans(cfac_t *cfac,
-    unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
-    int mpole, int mode,
-    cfac_tr_sink_t sink, void *udata) {
-    
-    unsigned int nk, nl, nm;
-    unsigned int *k, *l, *m;
-    int allocated, res;
-
-    if (nlow <= 0 || nup <= 0) {
-        return -1;
-    }
-
-    allocated = cfac_overlap_if(nlow, low, nup, up, &nk, &k, &nl, &l, &nm, &m);
-
-    /* K <-> F */
-    res = crac_save_rtrans0(cfac, nk, k, nup, up, mpole, mode, sink, udata);
-    if (res != 0) {
-        return -1;
-    }
-    res = crac_save_rtrans0(cfac, nup, up, nk, k, mpole, mode, sink, udata);
-    if (res != 0) {
-        return -1;
-    }
-    /* M <-> M */
-    res = crac_save_rtrans0(cfac, nm, m, nm, m, mpole, mode, sink, udata);
-    if (res != 0) {
-        return -1;
-    }
-    /* M <-> L */
-    res = crac_save_rtrans0(cfac, nm, m, nl, l, mpole, mode, sink, udata);
-    if (res != 0) {
-        return -1;
-    }
-    res = crac_save_rtrans0(cfac, nl, l, nm, m, mpole, mode, sink, udata);
-    if (res != 0) {
-        return -1;
-    }
-
-    if (allocated) {
-        free(k);
-        free(l);
-        free(m);
-    }
-    
-    return 0;
-}
-
-int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
-	       int nlow0, const int *low0, int nup0, const int *up0) {
-  int i, n;
+  
+int GetLowUpEB(int *nlow, int **low, int *nup, int **up, 
+	       int nlow0, int *low0, int nup0, int *up0) {  
+  int i, j, ilev, mlev, n;
+  LEVEL *lev;
  
-  n = GetNumEBLevels(cfac);
+  n = GetNumEBLevels();
   if (n == 0) return -1;
 
   *low = malloc(sizeof(int)*n);
   *up = malloc(sizeof(int)*n);
   *nlow = 0;
   *nup = 0;
-  
   for (i = 0; i < n; i++) {
-    int j, ilev, mlev;
-    LEVEL *lev = GetEBLevel(cfac, i);
+    lev = GetEBLevel(i);
     DecodeBasisEB(lev->pb, &ilev, &mlev);
     for (j = 0; j < nlow0; j++) {
       if (low0[j] == ilev) {
@@ -707,34 +876,29 @@ int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up,
   return 0;
 }
 
-int SaveTransitionEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0,
+int SaveTransitionEB(int nlow0, int *low0, int nup0, int *up0,
 		     char *fn, int m) {
   int n, nlow, *low, nup, *up, nc;
 
-  n = GetLowUpEB(cfac, &nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
+  n = GetLowUpEB(&nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
   if (n == -1) return 0;
-  
-  trm_cache = TRMultipole_cache_new(cfac_get_num_levels(cfac));
 
   nc = OverlapLowUp(nlow, low, nup, up);
-  SaveTransitionEB0(cfac, nc, low+nlow-nc, nc, up+nup-nc, fn, m);
-  SaveTransitionEB0(cfac, nc, low+nlow-nc, nup-nc, up, fn, m);
-  SaveTransitionEB0(cfac, nup-nc, up, nc, low+nlow-nc, fn, m);
-  SaveTransitionEB0(cfac, nlow-nc, low, nup, up, fn, m);
-  SaveTransitionEB0(cfac, nup, up, nlow-nc, low, fn, m);
+  SaveTransitionEB0(nc, low+nlow-nc, nc, up+nup-nc, fn, m);
+  SaveTransitionEB0(nc, low+nlow-nc, nup-nc, up, fn, m);
+  SaveTransitionEB0(nup-nc, up, nc, low+nlow-nc, fn, m);
+  SaveTransitionEB0(nlow-nc, low, nup, up, fn, m);
+  SaveTransitionEB0(nup, up, nlow-nc, low, fn, m);
 
   free(low);
   free(up);
-  ReinitRadial(cfac, 1);
-  
-  TRMultipole_cache_free(trm_cache);
-  trm_cache = NULL;
+  ReinitRadial(1);
 
   return 0;
 }
 
 int PolarizeCoeff(char *ifn, char *ofn, int i0, int i1) {
-  FILE *f1, *f2 = NULL;
+  FILE *f1, *f2;
   int n, i, t, tp, k, q, s, sp, m, mp, m2;
   double a, c, e;
   F_HEADER fh;
@@ -786,7 +950,7 @@ int PolarizeCoeff(char *ifn, char *ofn, int i0, int i1) {
 	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
 	e = FINE_STRUCTURE_CONST*e;
 	e = e*e*e;
-	e *= RATE_AU/(4.0*M_PI);
+	e *= RATE_AU/(4.0*PI);
 	for (t = -1; t <= 1; t += 2) {
 	  for (tp = -1; tp <= 1; tp += 2) {
 	    for (k = 0; k <= m2; k++) {
@@ -830,37 +994,3 @@ int PolarizeCoeff(char *ifn, char *ofn, int i0, int i1) {
   return 0;
 }
   
-int GetTransition(const cfac_t *cfac,
-    int nlo, int nup, TRANSITION *tr, int *swapped)
-{
-    if (!tr) {
-        return -1;
-    }
-    
-    tr->llo = GetLevel(cfac, nlo);
-    tr->lup = GetLevel(cfac, nup);
-    if (!tr->llo || !tr->lup) {
-        return -1;
-    }
-    
-    tr->e = tr->lup->energy - tr->llo->energy;
-    if (tr->e < 0) {
-        LEVEL *lbuf;
-        tr->e = -tr->e;
-        lbuf = tr->llo;
-        tr->llo = tr->lup;
-        tr->lup = lbuf;
-        
-        tr->nup = nlo;
-        tr->nlo = nup;
-        
-        *swapped = 1;
-    } else {
-        tr->nup = nup;
-        tr->nlo = nlo;
-        
-        *swapped = 0;
-    }
-    
-    return 0;
-}

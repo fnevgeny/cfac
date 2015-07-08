@@ -1,8 +1,10 @@
 #ifndef _DBASE_H_
 #define _DBASE_H_ 1
 
+#include <time.h>
 #include <stdio.h>
-#include <sqlite3.h>
+#include <math.h>
+#include "consts.h"
 
 #define DB_EN 1
 #define DB_TR 2
@@ -10,21 +12,20 @@
 #define DB_RR 4
 #define DB_AI 5
 #define DB_CI 6
-#define DB_AIM 7
-#define DB_CIM 8
-#define DB_ENF 9
-#define DB_TRF 10
-#define DB_CEF 11
-#define DB_CEMF 12
-#define NDB   12
+#define DB_SP 7
+#define DB_RT 8
+#define DB_DR 9
+#define DB_AIM 10
+#define DB_CIM 11
+#define DB_ENF 12
+#define DB_TRF 13
+#define DB_CEF 14
+#define DB_CEMF 15
+#define NDB   15
 
 #define LNCOMPLEX   32
 #define LSNAME      24
 #define LNAME       56
-
-#define DB_SQL_CS_CE    1
-#define DB_SQL_CS_CI    2
-#define DB_SQL_CS_RR    3
 
 typedef struct _FORM_FACTOR_ {  
   double te;
@@ -86,6 +87,8 @@ typedef struct _ENF_RECORD_ {
   double energy;
   int pbasis;
 } ENF_RECORD;
+#define SIZE_ENF_RECORD \
+  (sizeof(int)*2 + sizeof(double))
 
 typedef struct _TR_HEADER_ {
   long int position;
@@ -113,8 +116,15 @@ typedef struct _TRF_HEADER_ {
 typedef struct _TR_RECORD_ {
   int lower;
   int upper;
-  float rme;
+  float strength;
 } TR_RECORD;
+#define SIZE_TR_RECORD (sizeof(int)+sizeof(int)+sizeof(float))
+
+typedef struct _TR_EXTRA_ {
+  float energy;
+  float sdev;
+  float sci;
+} TR_EXTRA;
 
 typedef struct _TRF_RECORD_ {
   int lower;
@@ -127,6 +137,7 @@ typedef struct _CE_HEADER_ {
   long int length;
   int nele;
   int ntransitions;
+  int qk_mode;
   int n_tegrid;
   int n_egrid;
   int egrid_type;
@@ -306,6 +317,83 @@ typedef struct _CIM_RECORD_ {
   float *strength;
 } CIM_RECORD;
 
+typedef struct _SP_HEADER_ { 
+  long int position;
+  long int length;
+  int nele;
+  int ntransitions;
+  int iblock;
+  int fblock;
+  char icomplex[LNCOMPLEX];
+  char fcomplex[LNCOMPLEX];
+  int type;
+} SP_HEADER;
+
+typedef struct _SP_RECORD_ {
+  int lower;
+  int upper;
+  float energy;
+  float strength;
+  float rrate;
+  float trate;
+} SP_RECORD;
+#define SIZE_SP_RECORD (sizeof(int)+sizeof(int)+sizeof(float)*4)
+
+typedef struct _SP_EXTRA_ {
+  float sdev;
+} SP_EXTRA;
+
+typedef struct _RT_HEADER_ { 
+  long int position;
+  long int length;
+  int ntransitions;
+  int iedist;
+  int np_edist;
+  double *p_edist;
+  float eden;
+  int ipdist;
+  int np_pdist;
+  double *p_pdist;
+  float pden;
+} RT_HEADER;
+
+typedef struct _RT_RECORD_ {
+  int dir;
+  int iblock;
+  float nb;
+  float tr;
+  float ce;
+  float rr;
+  float ai;
+  float ci;
+  char icomplex[LNCOMPLEX];
+} RT_RECORD;
+
+typedef struct _DR_HEADER_ {
+  long int position;
+  long int length;
+  int nele;
+  int ilev;
+  int ntransitions;
+  int vn;
+  int j;
+  float energy;
+} DR_HEADER;
+
+typedef struct _DR_RECORD_ {
+  int ilev;
+  int flev;
+  int ibase;
+  int fbase;
+  int vl;
+  int j;
+  float energy;
+  float etrans;
+  float br;
+  float ai;
+  float total_rate;
+} DR_RECORD;  
+
 /* these read functions interface with the binary data files.
  * they can be used in custom c/c++ codes to read the binary 
  * files directly. to do so, copy consts.h, dbase.h, and dbase.c
@@ -318,7 +406,7 @@ int ReadENRecord(FILE *f, EN_RECORD *r, int swp);
 int ReadENFHeader(FILE *f, ENF_HEADER *h, int swp);
 int ReadENFRecord(FILE *f, ENF_RECORD *r, int swp);
 int ReadTRHeader(FILE *f, TR_HEADER *h, int swp);
-int ReadTRRecord(FILE *f, TR_RECORD *r, int swp);
+int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp);
 int ReadTRFHeader(FILE *f, TRF_HEADER *h, int swp);
 int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, TRF_HEADER *h);
 int ReadCEHeader(FILE *f, CE_HEADER *h, int swp);
@@ -337,6 +425,12 @@ int ReadCIHeader(FILE *f, CI_HEADER *h, int swp);
 int ReadCIMHeader(FILE *f, CIM_HEADER *h, int swp);
 int ReadCIRecord(FILE *f, CI_RECORD *r, int swp, CI_HEADER *h);
 int ReadCIMRecord(FILE *f, CIM_RECORD *r, int swp, CIM_HEADER *h);
+int ReadSPHeader(FILE *f, SP_HEADER *h, int swp);
+int ReadSPRecord(FILE *f, SP_RECORD *r, SP_EXTRA *rx, int swp);
+int ReadRTHeader(FILE *f, RT_HEADER *h, int swp);
+int ReadRTRecord(FILE *f, RT_RECORD *r, int swp);
+int ReadDRHeader(FILE *f, DR_HEADER *h, int swp);
+int ReadDRRecord(FILE *f, DR_RECORD *r, int swp);
 
 void CEMF2CEFHeader(CEMF_HEADER *mh, CEF_HEADER *h);
 void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh, 
@@ -348,12 +442,6 @@ void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh,
  */
 int JFromENRecord(EN_RECORD *r);
 int IBaseFromENRecord(EN_RECORD *r);
-
-int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n);
-
-int SaveTransition(cfac_t *cfac,
-    unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
-    const char *fn, int mpole);
 
 /* these are the write functions, which shouldn't be of much interest.
  * unless one needs to format the external data into FAC binary format.
@@ -371,13 +459,16 @@ int WriteAIHeader(FILE *f, AI_HEADER *h);
 int WriteAIMHeader(FILE *f, AIM_HEADER *h);
 int WriteCIHeader(FILE *f, CI_HEADER *h);
 int WriteCIMHeader(FILE *f, CIM_HEADER *h);
+int WriteSPHeader(FILE *f, SP_HEADER *h);
+int WriteRTHeader(FILE *f, RT_HEADER *h);
+int WriteDRHeader(FILE *f, DR_HEADER *h);
 
 int CheckEndian(F_HEADER *fh);
 void SwapEndian(char *p, int size);
 int SwapEndianFHeader(F_HEADER *h);
 int InitDBase(void);
 int ReinitDBase(int m);
-FILE *OpenFile(const char *fn, F_HEADER *fhdr);
+FILE *OpenFile(char *fn, F_HEADER *fhdr);
 int CloseFile(FILE *f, F_HEADER *fhdr);
 int InitFile(FILE *f, F_HEADER *fhdr, void *rhdr);
 int DeinitFile(FILE *f, F_HEADER *fhdr);
@@ -395,10 +486,11 @@ int SwapEndianENHeader(EN_HEADER *h);
 int SwapEndianENRecord(EN_RECORD *r);
 int SwapEndianENFHeader(ENF_HEADER *h);
 int SwapEndianENFRecord(ENF_RECORD *r);
-int WriteTRRecord(FILE *f, TR_RECORD *r);
+int WriteTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx);
+double OscillatorStrength(int m, double e, double s, double *ga);
 int PrintTRTable(FILE *f1, FILE *f2, int v, int swp);
 int SwapEndianTRHeader(TR_HEADER *h);
-int SwapEndianTRRecord(TR_RECORD *r);
+int SwapEndianTRRecord(TR_RECORD *r, TR_EXTRA *rx);
 int WriteTRFRecord(FILE *f, TRF_RECORD *r);
 int PrintTRFTable(FILE *f1, FILE *f2, int v, int swp);
 int SwapEndianTRFHeader(TRF_HEADER *h);
@@ -435,12 +527,31 @@ int WriteCIMRecord(FILE *f, CIM_RECORD *r);
 int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp);
 int SwapEndianCIMHeader(CIM_HEADER *h);
 int SwapEndianCIMRecord(CIM_RECORD *r);
+int WriteSPRecord(FILE *f, SP_RECORD *r, SP_EXTRA *rx);
+int PrintSPTable(FILE *f1, FILE *f2, int v, int swp);
+int SwapEndianSPHeader(SP_HEADER *h);
+int SwapEndianSPRecord(SP_RECORD *r, SP_EXTRA *rx);
+int WriteRTRecord(FILE *f, RT_RECORD *r);
+int PrintRTTable(FILE *f1, FILE *f2, int v, int swp);
+int SwapEndianRTHeader(RT_HEADER *h);
+int SwapEndianRTRecord(RT_RECORD *r);
+int WriteDRRecord(FILE *f, DR_RECORD *r);
+int PrintDRTable(FILE *f1, FILE *f2, int v, int swp);
+int SwapEndianDRHeader(DR_HEADER *h);
+int SwapEndianDRRecord(DR_RECORD *r);
+double IonDensity(char *fn, int k);
+double IonRadiation(char *fn, int k, int m);
+void SetUTA(int m, int mci);
+int IsUTA(void);
+void SetTRF(int m);
 int AppendTable(char *fn);
 int JoinTable(char *fn1, char *fn2, char *fn);
 int TRBranch(char *fn, int i, int j, double *te, double *pa, double *ta);
 int AIBranch(char *fn, int i, int j, double *te, double *pa, double *ta);
 int LevelInfor(char *fn, int ilev, EN_RECORD *r0);
 int FindLevelByName(char *fn, int nele, char *nc, char *cnr, char *cr);
+int AdjustEnergy(int nlevs, int *ilevs, double *e, 
+		 char *efn0, char *efn1, char *afn0, char *afn1);
 int ISearch(int i, int n, int *ia);
 void SetBornFormFactor(double te, char *fn);
 int BornFormFactorTE(double *te);
@@ -448,17 +559,5 @@ FORM_FACTOR *BornFormFactor(void);
 void SetBornMass(double m);
 double BornMass(void);
 
-int StoreInit(const cfac_t *cfac,
-    const char *fn, int reset, sqlite3 **db, unsigned long *sid);
-int StoreTable(const cfac_t *cfac,
-    sqlite3 *db, unsigned long int sid, const char *ifn);
-int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreRRTable(const cfac_t *cfac,
-    sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreClose(sqlite3 *db);
-
 #endif
+

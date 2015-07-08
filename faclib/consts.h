@@ -1,10 +1,21 @@
 #ifndef _CONSTS_H_
 #define _CONSTS_H_ 1
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 #include <math.h>
 
-#include "version.h"
-
+/*
+** VARIABLE:    VERSION, SUBVERSION, SUBSUBVERSION.
+** TYPE:        macro constants.
+** PURPOSE:     tracking the version.
+** NOTE:        
+*/
+#define VERSION        1
+#define SUBVERSION     1
+#define SUBSUBVERSION  2
 #define VersionGE(h, a, b, c)    (((h)->version >= (a)) &&\
                                   ((h)->sversion >= (b)) &&\
                                   ((h)->ssversion >= (c)))
@@ -62,12 +73,20 @@
 #define EPS1  1E-01
 
 /*
-** VARIABLE:    TWO_PI
+** VARIABLE:    PI, TWO_PI
 ** TYPE:        macro constants, double
-** PURPOSE:     2*PI
+** PURPOSE:     PI, and 2*PI
 ** NOTE:        
 */
-#define TWO_PI     (2*M_PI)
+#define PI         3.14159265359
+#define TWO_PI     6.28318530718
+/*
+** VARIABLE:    SQRT2
+** TYPE:        macro constant, double
+** PURPOSE:     sqrt(2)
+** NOTE:        
+*/
+#define SQRT2      1.41421356237
 
 /*
 ** VARIABLE:    HARTREE_EV
@@ -78,12 +97,14 @@
 #define HARTREE_EV 27.2113962 
 
 /*
-** VARIABLE:    RATE_AU
+** VARIABLE:    RATE_AU, RATE_AU10, RATE_AU12
 ** TYPE:        macro constants.
-** PURPOSE:     atomic units of rate in 1/s
+** PURPOSE:     atomic units of rate in 1/s, 10^10 1/s, 10^12 1/s
 ** NOTE:        
 */
 #define RATE_AU    4.13413733E16
+#define RATE_AU10  4.13413733E06
+#define RATE_AU12  4.13413733E04
 
 /*
 ** VARIABLE:    AREA_AU20
@@ -96,15 +117,15 @@
 /*
 ** VARIABLE:    RBOHR
 ** TYPE:        macro constant.
-** PURPOSE:     Bohr radius in cm.
+** PURPOSE:     Bohr radius in Angstrom.
 ** NOTE:        
 */
-#define RBOHR      5.29177249e-9
+#define RBOHR      0.529177249
 
 /*
 ** VARIABLE:    MBOHR
 ** TYPE:        macro constant.
-** PURPOSE:     Bohr magneton in eV/Gauss.
+** PURPOSE:     Bohr magenton in eV/Gauss.
 ** NOTE:        
 */
 #define MBOHR      5.78838263E-9
@@ -118,6 +139,9 @@
 #define FINE_STRUCTURE_CONST  7.29735308E-3
 #define FINE_STRUCTURE_CONST2 5.32513620E-5
 #define AMU  1836.153
+
+/* nucleus */
+#define N_ELEMENTS 109
 
 /* radial QK modes */
 #define QK_DEFAULT    -1
@@ -168,7 +192,6 @@
 
 /* structure */
 #define MAX_HAMS           2000
-#define MAX_HAMS2          (MAX_HAMS*MAX_HAMS)
 #define LEVELS_BLOCK       1024
 #define ANGZ_BLOCK         1024
 #define ANGZxZ_BLOCK       8192
@@ -189,6 +212,8 @@
 #define DMODE              M_NR
 #define ERANK              4
 #define MRANK              4
+#define TRCUT0             1E-4
+#define TRCUT              1E-4
 
 /* recouple */
 #define MAXRANK            20
@@ -212,7 +237,7 @@
 #define MAXNTE             6
 #define MAXNTHETA          30
 #define MAXNPHI            60
-#define TE_MAX_MIN         5.0
+#define TE_MIN_MAX         (1.0/5.0)
 
 /* excitation */
 #define NGOSK              256

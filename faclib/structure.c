@@ -705,6 +705,12 @@ double HamiltonElementEB(const cfac_t *cfac, HAMILTON *h, int i0, int j0) {
 	    
             a = W3j(ji, 2, jj, -mi, -q2, mj);
 	    if (a == 0.0) continue;
+
+	    /* radial parts of different j's are not completely orthogonal
+               for relativistic w.f. */
+            if (ang[i].k0 != ang[i].k1) {
+	      a *= RadialMoments(cfac, 0, ang[i].k0, ang[i].k1);
+	    }
 	    
             a *= cfac->b1[m]*ang[i].coeff;
 	    if (IsOdd(abs(ji-mi+q2)/2)) a = -a;

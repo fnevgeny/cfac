@@ -1557,6 +1557,11 @@ C
       DO 1 I=1,4
     1 DGI(I)=0
       NN=2
+
+      DO I=1,NN
+        DCHI(I)=0D0
+      ENDDO
+
       MN=0
       IF(DK1.EQ.DK2)NN=1
       IF(NN.EQ.1.AND.L1.EQ.L2)MN=1

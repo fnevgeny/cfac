@@ -21,6 +21,9 @@
 #define _CF77_H_ 1
 
 #include "sysdef.h"
+
+#ifdef WITH_CPC_ACCEPTED
+
 #include "cfortran.h"
 
      /* dirac coulomb function */
@@ -38,4 +41,17 @@
      CCALLSFSUB10(CMULTIP, cmultip, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE,\
 		  INT, INT, INT, DOUBLEV, INTV,			\
 		  A1,A2,A3,A4,A5,A6,A7,A8,A9,A10)
+
+#else
+
+#define DCOUL cfac_dummy_dcoul
+#define CMULTIP cfac_dummy_cmultip
+
+void cfac_dummy_dcoul(double, double, int, double, double *,\
+		 double *, double *, double *, int *);
+void cfac_dummy_cmultip(double, double, double, double, double,\
+		  int, int, int, double *, int *);
+
+#endif /* ACCEPT_CPC */
+
 #endif

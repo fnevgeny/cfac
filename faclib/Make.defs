@@ -27,6 +27,7 @@ CSRCS = cfac.c \
 	recombination.c \
 	recouple.c \
 	structure.c \
-	transition.c
+	transition.c \
+	cfac_dummy.c
 
 GENINCS = schema.i

@@ -5,13 +5,8 @@
 
 LIB  = $(CFAC_COUL_LIB)
 
-FSRCS = clogam.f \
-	f11.f \
-	mpfun.f \
-	coulcc.f \
-	dcoul.f \
-	cmultip.f \
-	d1mach.f
+FSRCS = dcoul.f coulcc.f mpfun.f \
+	cmultip.f d1mach.f
 
 d1mach.o :
 	$(FC) -c ${FFLAGSNO} d1mach.f

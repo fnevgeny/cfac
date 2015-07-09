@@ -117,7 +117,7 @@ fi
 
 # which F77 known by cfortran.h is used
 AC_ARG_WITH(cfortran, 
-	[  --with-cfortran=xxFortran    Macro to be defined for cfortran.h],
+	[  --with-cfortran=Fortran Macro to be defined for cfortran.h],
 	[xxFortran="$withval"])
 if test -z "$xxFortran"
 then

@@ -2,6 +2,9 @@
 #ifndef _SYSDEF_H_ 
 #define _SYSDEF_H_ 1
 
+/* Define if the CPC license is accepted */
+#undef WITH_CPC_ACCEPTED
+
 #undef f2cFortran
 #undef NAGf90Fortran
 #undef hpuxFortran

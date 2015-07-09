@@ -78,6 +78,43 @@ then
     FFLAGS="$FFLAGS -fno-common -Wall -Wextra -Wno-compare-reals"
 fi
 
+# use bundled T1lib  
+AC_ARG_WITH(cpc_modules,
+[  --with-cpc-modules      compile in CPC-licensed modules [[no]]],
+[case "${withval}" in
+  yes) cpc_modules=true ;;
+  no)  cpc_modules=false;;
+  *) AC_MSG_ERROR(bad value ${withval} for --with-cpc-modules) ;;
+esac],[cpc_modules=false])
+
+if test $cpc_modules = true
+then
+    echo ""
+    cat coul/CPC-LICENSE | more
+    answer="?"
+    while test "x$answer" != "xyes" -a "x$answer" != "xno"
+    do
+        echo "Do you agree to these terms (type \"yes\" or \"no\")?"
+        read answer <&AS_ORIGINAL_STDIN_FD
+    done
+    
+    if test "x$answer" = "xyes"
+    then
+        echo ""
+        echo "THE RESULTING BINARIES WILL NOT BE DISTRIBUTABLE!!!"
+        echo ""
+        echo "Press any key to continue"
+        read answer <&AS_ORIGINAL_STDIN_FD
+    else
+        cpc_modules=false
+    fi
+fi
+
+if test $cpc_modules = true
+then
+  AC_DEFINE(WITH_CPC_ACCEPTED)
+fi
+
 # which F77 known by cfortran.h is used
 AC_ARG_WITH(cfortran, 
 	[  --with-cfortran=xxFortran    Macro to be defined for cfortran.h],

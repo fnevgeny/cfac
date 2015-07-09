@@ -75,7 +75,7 @@ then
 fi
 if test -n "$G77"
 then
-    FFLAGS="$FFLAGS -fno-common -Wall -Wextra"
+    FFLAGS="$FFLAGS -fno-common -Wall -Wextra -Wno-compare-reals"
 fi
 
 # which F77 known by cfortran.h is used

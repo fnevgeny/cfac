@@ -1,23 +1,26 @@
 FAC is a software package for the calculation of various atomic processes,
 written by Ming Feng Gu at the Space Science Laboratory of Berkeley.
 
-cFAC was started around 2010 (based on FAC-1.1.1, released in 2006) as a
-maintenance project due to a lack of interest from the original author in the
-last years. The main focus is on providing large volumes of data as required,
-e.g., for collisional-radiative plasma modeling.  See ChangeLog for details. The
-original file, documenting development up to the version 1.1.1, is kept as
-doc/ChangeLog.MFG.
+cFAC was started around 2010 (based on FAC-1.1.1, released in 2006), initially
+focusing on providing large volumes of data as required, e.g., for
+collisional-radiative plasma modeling, and eliminating reliance upon third-party
+Fortran numerical libraries with their C equivalents (hence the change in the
+package name). See ChangeLog for details. The original file, documenting
+development up to version 1.1.1, is kept as doc/ChangeLog.MFG.
 
 Recently, Ming Feng Gu kindly agreed to release the FAC sources under the GPL
 (version 3 or higher) license, and the repository is currently made public on
 GitHub, <https://github.com/fnevgeny/fac/>.
 
 Some bits of the FAC sources, which are still used in cFAC, were published in
-the Computer Physics Communications journal, and as such, are explcitly licensed
-for non-profit or academic use only, see
-<http://cpc.cs.qub.ac.uk/licence/licence.html>. As a result, the combined
-software is not redistributable. This issue may be fixed in a future release.
+the Computer Physics Communications journal, and as such, are licensed for
+non-profit or academic use only, please see
+<http://cpc.cs.qub.ac.uk/licence/licence.html>.
 
+In order to compile in these CPC-licensed modules, you need to pass the
+"--with-cpc-module" configure flag and explicitly agree to the CPC licensing
+terms. Please note that as a result, the "sfac" executable will not be
+redistributable!
 
 Prerequisites:
 1) The GNU Scientific Library (GSL) <http://www.gnu.org/software/gsl/>,
@@ -45,7 +48,7 @@ This will run a test suite of demo scripts. Any error should be reported!
 This installs the "sfac" binary.
 
 Usage:
-The "sfac" executable accepts an input file as its only argument. See the demo
+The "sfac" executable accepts an input file as its only argument. See the "demo"
 directory for examples. For more details, please read the manual, and be sure to
 read the FAQ section of it. 
 

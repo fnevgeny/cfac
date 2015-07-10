@@ -1,0 +1,57 @@
+# Ignore objects and archives, anywhere in the tree.
+*.[oa]
+
+# Ignore configure-generated stuff
+Make.conf
+autom4te.cache
+config.log
+config.status
+configure
+sysdef.h
+
+Make.dep
+faclib/schema.i
+
+ChangeLog
+
+# Ignore binaries
+sfac/sfac
+
+# TeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.idx
+*.ilg
+*.ind
+*.log
+*.out
+*.toc
+
+# Compiled TeX docs
+doc/manual.pdf
+
+demo/aidr/se.ai
+demo/aidr/se.ai.b
+demo/aidr/se.lev
+demo/aidr/se.lev.b
+demo/excitation/ne.ce
+demo/excitation/ne.ce.b
+demo/excitation/ne.lev
+demo/excitation/ne.lev.b
+demo/excitationM/ne.ceM
+demo/excitationM/ne.ceM.b
+demo/excitationM/ne.lev
+demo/excitationM/ne.lev.b
+demo/ionization/ne.ci
+demo/ionization/ne.ci.b
+demo/ionization/ne_f.lev
+demo/ionization/ne_f.lev.b
+demo/pirr/li.lev
+demo/pirr/li.lev.b
+demo/pirr/li.rr
+demo/pirr/li.rr.b
+demo/structure/ne.lev
+demo/structure/ne.lev.b
+demo/structure/ne.tr
+demo/structure/ne.tr.b

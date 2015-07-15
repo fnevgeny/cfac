@@ -55,3 +55,10 @@ demo/structure/ne.lev
 demo/structure/ne.lev.b
 demo/structure/ne.tr
 demo/structure/ne.tr.b
+
+# Tags
+tags
+
+# Debugger history
+.gdb_history
+

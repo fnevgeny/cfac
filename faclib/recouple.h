@@ -87,13 +87,13 @@
 ** NOTE:        
 */
 typedef struct _INTERACT_SHELL_ {
-  int index; /* the index of the shell within the SHELL_STATE */
-  int n; /* principle quantum number */
-  int j; /* the angular momentum of the shell, double of its actual value */
-  int kl; /* orbital angular momentum */
-  int kappa; /* relativistic angular quantum number kappa */
-  int nq_bra; /* the occupation number in the bra state */
-  int nq_ket; /* occupation number in the ket state */
+  int index;
+  int n;
+  int j;
+  int kl;
+  int kappa;
+  int nq_bra;
+  int nq_ket;
 } INTERACT_SHELL;
 
 /*

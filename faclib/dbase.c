@@ -3526,12 +3526,10 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
 
       ibase = lev->ilev; /* this is actually [2]j... */
     } else {
-      int si;
       SYMMETRY *sym;
 
-      si = lev->pb;
       sym = GetSymmetry(cfac, lev->pj);
-      s = GetSymmetryState(sym, si);
+      s = GetSymmetryState(sym, lev->pb);
 
       DecodePJ(lev->pj, &p, &j);
 

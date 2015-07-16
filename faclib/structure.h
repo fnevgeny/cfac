@@ -49,17 +49,17 @@ typedef struct _SHAMILTON_ {
 } SHAMILTON;
 
 typedef struct _LEVEL_ {
-  int ilev;            /* level index in cfac->(eb)levels */
-  int pj;              /* parity & j encoded              */
-  int iham;            /* symmetry Hamiltonian            */
+  int ilev;            /* level index in cfac->(eb)levels (g - 1 in UTA) */
+  int pj;              /* parity & j encoded (only P in UTA)             */
+  int iham;            /* symmetry Hamiltonian                           */
   int n_basis;
-  int pb;              /* principle (??) basis            */
+  int pb;              /* principle (??) basis                           */
   int kpb[NPRINCIPLE];
   int ibase;
   int *basis;
   short *ibasis;
   double *mixing;
-  double energy;       /* energy                          */
+  double energy;       /* energy                                         */
 } LEVEL;
 
 typedef struct _LEVEL_ION_ {

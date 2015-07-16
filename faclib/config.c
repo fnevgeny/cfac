@@ -1094,13 +1094,15 @@ static int CompareShellInvert(const void *ts1, const void *ts2) {
 ** PURPOSE:     recursively construct all possible states for a Config.
 ** INPUT:       {CONFIG *cfg},
 **              pointer to the config. to be coupled.
+**              {int uta},
+**              UTA flag.
 ** RETURN:      {int},
 **               0: success.
 **              <0: error.
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int Couple(CONFIG *cfg) {
+int Couple(CONFIG *cfg, int uta) {
   CONFIG outmost, inner;
   int errcode;
 
@@ -1117,6 +1119,17 @@ int Couple(CONFIG *cfg) {
   /* make sure that the shells are sorted in inverse order */
   qsort(cfg->shells, cfg->n_shells, sizeof(SHELL), CompareShellInvert);
 
+  if (uta) {
+    int i;
+    cfg->csfs = NULL;
+    cfg->n_csfs = 0;
+    cfg->n_electrons = 0;
+    for (i = 0; i < cfg->n_shells; i++) {
+      cfg->n_electrons += cfg->shells[i].nq;
+    }
+    return 0;
+  }
+
   if (cfg->n_shells == 1) {
     if (GetSingleShell(cfg) < 0) {
       errcode = -3;
@@ -1127,11 +1140,11 @@ int Couple(CONFIG *cfg) {
     outmost.shells = cfg->shells;
     inner.n_shells = cfg->n_shells - 1;
     inner.shells = cfg->shells + 1;
-    if (Couple(&outmost) < 0) {
+    if (Couple(&outmost, uta) < 0) {
       errcode = -4;
       goto ERROR;
     }
-    if (Couple(&inner) < 0) {
+    if (Couple(&inner, uta) < 0) {
       errcode = -5;
       free(outmost.csfs);
       goto ERROR;
@@ -2254,7 +2267,7 @@ int cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str)
     for (j = 0; j < ncfgs; j++) {
         CONFIG *cfg = &cfgs[j];
         
-        if (Couple(cfg) < 0) {
+        if (Couple(cfg, cfac->uta) < 0) {
             return -1;
         }
         if (AddConfigToList(cfac, gidx, cfg) < 0) {
@@ -2267,4 +2280,14 @@ int cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str)
     }
 
     return gidx;
+}
+
+int cfac_set_uta(cfac_t *cfac, int uta)
+{
+    if (cfac) {
+        cfac->uta = uta;
+        return CFAC_SUCCESS;
+    } else {
+        return CFAC_FAILURE;
+    }
 }

@@ -20,6 +20,9 @@
 #ifndef __CFAC_H_
 #define __CFAC_H_
 
+#define CFAC_SUCCESS    0
+#define CFAC_FAILURE    1
+
 typedef struct _cfac_t cfac_t;
 
 /* cfac.c */
@@ -48,6 +51,8 @@ int
 cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str);
 int
 cfac_get_config_gid(const cfac_t *cfac, const char *cname);
+int
+cfac_set_uta(cfac_t *cfac, int uta);
 
 /* structure.c */
 int

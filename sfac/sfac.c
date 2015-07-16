@@ -188,11 +188,17 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       k = 0;
       for (j = 0; j < nlevels; j++) {
 	lev = GetLevel(cfac, j);
-	im = lev->pb;
-	sym = GetSymmetry(cfac, lev->pj);
-	s = GetSymmetryState(sym, im);
-	ig = s->kgroup;
-	if (InGroups(ig, ng, kg)) {
+	
+        if (cfac->uta) {
+          ig = lev->iham;
+        } else {
+          im = lev->pb;
+	  sym = GetSymmetry(cfac, lev->pj);
+	  s = GetSymmetryState(sym, im);
+	  ig = s->kgroup;
+        }
+	
+        if (InGroups(ig, ng, kg)) {
 	  (*t)[k] = j;
 	  k++;
 	}
@@ -485,7 +491,7 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
     strncat(scfg, argv[i], MCHSHELL - 1);
     ncfg = GetConfigFromString(&cfg, scfg);
     for (j = 0; j < ncfg; j++) {
-      if (Couple(cfg+j) < 0) return -1;
+      if (Couple(cfg+j, cfac->uta) < 0) return -1;
       t = GroupIndex(cfac, gname);
       if (t < 0) return -1;
       if (AddConfigToList(cfac, t, cfg+j) < 0) return -1;
@@ -558,7 +564,7 @@ static int PAddConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   if (argt[0] != STRING) return -1;
   if (argt[1] != LIST) return -1;
   if (ConfigListToC(argv[1], &cfg, variables) < 0) return -1;
-  if (Couple(cfg) < 0) return -1;
+  if (Couple(cfg, cfac->uta) < 0) return -1;
 
   k = GroupIndex(cfac, argv[0]);
   if (k < 0) return -1;
@@ -2449,6 +2455,22 @@ static int PStructure(int argc, char *argv[], int argt[],
   return 0;
 }
 
+static int PSetUTA(int argc, char *argv[], int argt[], 
+                   ARRAY *variables) {
+  int m;
+
+  if (argc == 1) {
+    if (argt[0] != NUMBER) return -1;
+    m = atoi(argv[0]);
+  } else {
+    return -1;
+  }
+
+  cfac_set_uta(cfac, m);
+  
+  return 0;
+}
+
 static int PPrepAngular(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int nlow, nup, *low, *up;
@@ -3037,6 +3059,7 @@ static METHOD methods[] = {
   {"Info", PInfo},
   {"MemENTable", PMemENTable},
   {"OptimizeRadial", POptimizeRadial},
+  {"SetUTA", PSetUTA},
   {"PrepAngular", PPrepAngular},
   {"Pause", PPause},
   {"RefineRadial", PRefineRadial},

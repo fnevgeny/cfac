@@ -1553,6 +1553,68 @@ int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h) {
   }
 }
 
+static int ShellDegeneracy(int g, int nq) {
+  if (nq == 1) {
+    return g;
+  } else if (nq == g) {
+    return 1;
+  } else {
+    return (int) (exp(LnFactorial(g)-LnFactorial(nq)-LnFactorial(g-nq))+0.5);
+  }
+}
+
+static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
+{
+  int i;
+  LEVEL lev;
+
+  lev.n_basis = 0;
+  lev.ibase = -1;
+
+  for (i = 0; i < ng; i++) {
+    int j;
+    CONFIG_GROUP *g;
+    
+    lev.iham = kg[i];
+    g = GetGroup(cfac, kg[i]);
+    
+    for (j = 0; j < g->n_cfgs; j++) {
+      int t;
+      CONFIG *c = GetConfigFromGroup(cfac, kg[i], j);
+
+      lev.pb = j;
+      lev.pj = 0;
+      lev.ilev = 1;
+      
+      for (t = 0; t < c->n_shells; t++) {       
+	int d, k;
+        
+        GetJLFromKappa(c->shells[t].kappa, &d, &k);
+	k /= 2;
+	d = ShellDegeneracy(d+1, c->shells[t].nq);
+	if (d > 1) {
+	  lev.ilev *= d;
+	}
+	if (IsOdd(k) && IsOdd(c->shells[t].nq)) lev.pj++;
+      }
+      lev.ilev--;
+      lev.pj = IsOdd(lev.pj);
+      if (c->energy == 0) {
+	c->energy = AverageEnergyConfig(cfac, c);
+      }
+      lev.energy = c->energy;
+      if (ArrayAppend(cfac->levels, &lev) == NULL) {
+	printf("Not enough memory for levels array\n");
+	exit(1);
+      }
+
+      cfac->n_levels++;
+    }
+  }
+
+  return 0;
+}
+
 /* If ng !=0, states NOT in kg are treated approximately
    (non-diagonal mixings are ignored) */
 int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
@@ -1561,6 +1623,10 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
   SYMMETRY *sym;
   STATE *s, *s1;
   double *mix, a;
+
+  if (cfac->uta) {
+    return AddToLevelsUTA(cfac, ng, kg);
+  }
   
   if (h->basis == NULL ||
       h->mixing == NULL) return -1;
@@ -1878,6 +1944,12 @@ static int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
   SYMMETRY *sym1, *sym2;
   int i1, i2;
 
+  if (cfac->uta) {
+    if (lev1->energy > lev2->energy) return 1;
+    else if (lev1->energy < lev2->energy) return -1;
+    return 0;
+  }
+
   if (lev1->pj < 0 || lev2->pj < 0) {
     if (lev1->energy > lev2->energy) {
       return 1;
@@ -1995,16 +2067,21 @@ int GetLevNumElectrons(const cfac_t *cfac, const LEVEL *lev) {
   STATE *s;
   CONFIG_GROUP *g;
   int nele;
-  
-  sym = GetSymmetry(cfac, lev->pj);
-  s = ArrayGet(&(sym->states), lev->basis[0]);
-  if (s->kgroup >= 0) {
-    g = GetGroup(cfac, s->kgroup);
+
+  if (cfac->uta) {
+    g = GetGroup(cfac, lev->iham);
     nele = g->n_electrons;
   } else {
-    nele = 1+GetNumElectrons(cfac, -(s->kgroup)-1);
-  }    
-
+    sym = GetSymmetry(cfac, lev->pj);
+    s = ArrayGet(&(sym->states), lev->basis[0]);
+    if (s->kgroup >= 0) {
+      g = GetGroup(cfac, s->kgroup);
+      nele = g->n_electrons;
+    } else {
+      nele = 1+GetNumElectrons(cfac, -(s->kgroup)-1);
+    }    
+  }
+  
   return nele;
 }
 
@@ -3853,34 +3930,42 @@ int cfac_calculate_structure(cfac_t *cfac,
     }
     
     nlevels_old = cfac_get_num_levels(cfac);
-    for (isym = 0; isym < MAX_SYMMETRIES; isym++) {
-        int res;
-        HAMILTON *h = ConstructHamilton(cfac, isym,
-            int_ng, int_gids, extra_ng, extra_gids);
-        if (!h) {
-            continue;
-        }
-        
-        res = DiagonalizeHamilton(cfac, h);
-        if (res < 0) {
+    
+    if (cfac->uta) {
+        AddToLevels(cfac, NULL, ng, gids);
+    } else {
+        for (isym = 0; isym < MAX_SYMMETRIES; isym++) {
+            int res;
+            HAMILTON *h = ConstructHamilton(cfac, isym,
+                int_ng, int_gids, extra_ng, extra_gids);
+            if (!h) {
+                continue;
+            }
+
+            res = DiagonalizeHamilton(cfac, h);
+            if (res < 0) {
+                cfac_hamiltonian_free(h);
+                return -1;
+            }
+
+            if (int_ng != ng) {
+                AddToLevels(cfac, h, ng, gids);
+            } else {
+                AddToLevels(cfac, h, 0, NULL);
+            }
+
             cfac_hamiltonian_free(h);
-            return -1;
         }
-        
-        if (int_ng != ng) {
-            AddToLevels(cfac, h, ng, gids);
-        } else {
-            AddToLevels(cfac, h, 0, NULL);
-        }
-        
-        cfac_hamiltonian_free(h);
     }
     
     if (int_gids != gids) {
         free(int_gids);
     }
 
-    FinalizeLevels(cfac, nlevels_old, -1);
+    if (!cfac->uta) {
+        FinalizeLevels(cfac, nlevels_old, -1);
+    }
+    
     SortLevels(cfac, nlevels_old, -1, 0);
     
     return 0;

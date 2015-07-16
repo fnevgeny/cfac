@@ -217,7 +217,7 @@ int          GetConfigFromStringNR(CONFIG **cfg, char *scfg);
 int          GetConfigFromString(CONFIG **cfg, char *scfg);
 int          GetAverageConfigFromString(int **n, int **kappa, 
 					double **nq, char *scfg);
-int          Couple(CONFIG *cfg);
+int          Couple(CONFIG *cfg, int uta);
 int          CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner);
 int          GetSingleShell(CONFIG *cfg);
 void         UnpackShell(SHELL *s, int *n, int *kl, int *j, int *nq);

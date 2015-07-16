@@ -40,7 +40,7 @@ struct _cfac_t {
     CONFIG_GROUP *cfg_groups; /* a list of configuration groups              */
     int n_groups;             /* number of configuration groups present      */
 
-    double ef, bf, eb_angle;  /* electric, magnetic ield, and angle between  */
+    double ef, bf, eb_angle;  /* electric, magnetic field, and angle between */
     double e1[3];             /* spherical components of the E field         */
     double b0, b1[3], b2[5];  /* 0th, 1st, and 2nd-order tensors of B        */
 
@@ -67,6 +67,8 @@ struct _cfac_t {
     MULTI *moments_array;
     MULTI *gos_array;
     MULTI *yk_array;
+    
+    int uta;                  /* UTA flag                                    */
 
     struct {
       double stabilizer;

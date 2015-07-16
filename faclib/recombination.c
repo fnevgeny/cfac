@@ -295,7 +295,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
 	  memcpy(rcfg->shells, &ns, sizeof(SHELL));
 	}
 	
-	if (Couple(rcfg) < 0) return -3;
+	if (Couple(rcfg, cfac->uta) < 0) return -3;
 	if (AddConfigToList(cfac, kg[i], rcfg) < 0) return -4;
 	ncfgs++;
       }

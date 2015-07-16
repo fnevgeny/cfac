@@ -3482,19 +3482,11 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
 }
 
 int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
-  STATE *s;
-  SYMMETRY *sym;
-  LEVEL *lev;
-  EN_RECORD r;
   EN_HEADER en_hdr;
   F_HEADER fhdr;
-  char name[LEVEL_NAME_LEN];
-  char sname[LEVEL_NAME_LEN];
-  char nc[LEVEL_NAME_LEN];
   FILE *f = NULL;
-  int i, k, p, j0;
-  int nele, nele0, vnl;
-  int si;
+  int k;
+  int nele0;
   
   nele0 = -1;
   
@@ -3512,31 +3504,58 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
   }
 
   for (k = 0; k < n; k++) {
-    i = start + k;
+    STATE sp, *s;
+    LEVEL *lev;
+    EN_RECORD r;
+    int p, j, nele, vnl, ibase;
+    char name[LEVEL_NAME_LEN];
+    char sname[LEVEL_NAME_LEN];
+    char nc[LEVEL_NAME_LEN];
+    
+    int i = start + k;
     lev = GetLevel(cfac, i);
-    si = lev->pb;
-    sym = GetSymmetry(cfac, lev->pj);
-    s = GetSymmetryState(sym, si);
+    
+    if (cfac->uta) {
+      sp.kgroup = lev->iham;
+      sp.kcfg = lev->pb;
+      sp.kstate = 0;
+      s = &sp;
 
-    DecodePJ(lev->pj, &p, &j0);
+      p = lev->pj;
+      j = -1;
+
+      ibase = lev->ilev; /* this is actually [2]j... */
+    } else {
+      int si;
+      SYMMETRY *sym;
+
+      si = lev->pb;
+      sym = GetSymmetry(cfac, lev->pj);
+      s = GetSymmetryState(sym, si);
+
+      DecodePJ(lev->pj, &p, &j);
+
+      ibase = lev->ibase;
+    }
+    
+    r.j = j;
     r.ilev = i;
-    r.ibase = lev->ibase;
-    r.p = p;
-    r.j = j0;
+    r.ibase = ibase;
     r.energy = lev->energy;
 
     nele = ConstructLevelName(cfac, s, name, sname, nc, &vnl);
+    if (p == 0) {
+      r.p = vnl;
+    } else {
+      r.p = -vnl;
+    }
     strncpy(r.name, name, LNAME);
     strncpy(r.sname, sname, LSNAME);
     strncpy(r.ncomplex, nc, LNCOMPLEX);
     r.name[LNAME-1] = '\0';
     r.sname[LSNAME-1] = '\0';
     r.ncomplex[LNCOMPLEX-1] = '\0';
-    if (r.p == 0) {
-      r.p = vnl;
-    } else {
-      r.p = -vnl;
-    }
+    
     if (nele != nele0) {
       if (nele0 >= 0) {
 	DeinitFile(f, &fhdr);

@@ -1059,7 +1059,7 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
   int m2, ns, k0, k1, q1, q2;
   int p1, p2, j1, j2, ia, ib;
   LEVEL *lev1, *lev2;
-  double r, aw;
+  double r, aw, e0;
   INTERACT_DATUM *idatum;
   
   *ks = 0;
@@ -1120,14 +1120,15 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
     return -1;
   }
 
-  rx->energy = (lev2->energy - lev1->energy);
+  e0 = lev2->energy - lev1->energy;
+  rx->de = 0.0;
   if (m < 0) {
-    rx->energy += ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
+    rx->de += ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
     rx->sdev = sqrt(ConfigEnergyVariance(cfac, ns, idatum->bra, ia, ib, m2));
   } else {
     rx->sdev = 0.0;
   }
-  aw = FINE_STRUCTURE_CONST * rx->energy;
+  aw = FINE_STRUCTURE_CONST*(e0 + rx->de);
   if (aw < 0.0) {
     free(idatum->bra);
     free(idatum);
@@ -1217,7 +1218,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
     CONFIG *c0, *c1;
     LEVEL *lev1, *lev2;
     int k;
-    int mj = 0xFF000000, mn = 0xFFFFFF;
+    const int mj = 0xFF000000, mn = 0xFFFFFF;
 
     // qsort(low, nlow, sizeof(int), CompareNRLevel);
     nc0 = malloc(sizeof(int)*nlow);
@@ -1290,19 +1291,24 @@ static int crac_save_rtrans0(cfac_t *cfac,
 	    rd[ir].r.rme = gf;
 	    rd[ir].rx.sci = 1.0;
 	    if (mpole == -1) {
-	      gf = OscillatorStrength(mpole, rd[ir].rx.energy,
+              double energy = GetLevel(cfac, up[j])->energy -
+                              GetLevel(cfac, low[i])->energy + rd[ir].rx.de;
+
+              gf = OscillatorStrength(mpole, energy,
 				      rd[ir].r.rme, NULL);
 	      j0 = rd[ir].ks[0]&mj;
 	      j1 = rd[ir].ks[1]&mj;
 	      if (j0==0 && j1==0) {
 		wp += gf;
-		ep += gf*rd[ir].rx.energy;
+		ep += gf*energy;
 	      } else if (j0 && j1) {
 		wm += gf;
-		em += gf*rd[ir].rx.energy;
+		em += gf*energy;
 	      }
-	      e0 += gf*rd[ir].rx.energy;
+	      e0 += gf*energy;
 	      w0 += gf;
+              
+              printf("%g %g %g -- %g %g %g\n", e0, ep, em, w0, wp, wm);
 	    }
 	    ir++;
 	  }
@@ -1363,7 +1369,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
           rtdata.ii = rd[ir].r.upper;
           rtdata.rme = rd[ir].r.rme;
           
-          rtdata.uta_e = rd[ir].rx.energy;
+          rtdata.uta_de = rd[ir].rx.de;
           rtdata.uta_sd = rd[ir].rx.sdev;
           rtdata.uta_ci = rd[ir].rx.sci;
           

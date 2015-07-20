@@ -848,7 +848,7 @@ int WriteTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx) {
   WSF0(r->rme);
 
   if (rx && iuta) {
-    WSF0(rx->energy);
+    WSF0(rx->de);
     WSF0(rx->sdev);
     WSF0(rx->sci);
   }
@@ -1168,7 +1168,7 @@ int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp) {
   RSF0(r->rme);
 
   if (iuta) {
-    RSF0(rx->energy);
+    RSF0(rx->de);
     RSF0(rx->sdev);
     RSF0(rx->sci);
   }
@@ -2509,10 +2509,9 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
       n = ReadTRRecord(f1, &r, &rx, swp);
       if (n == 0) break;
       if (v) {
-	if (iuta) {
-            e = rx.energy;
-        } else {
-            e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
+	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
+        if (iuta) {
+            e += rx.de;
         }
 	gf = OscillatorStrength(h.multipole, e, r.rme, &a);
 	a /= (mem_en_table[r.upper].j + 1.0);
@@ -2530,7 +2529,7 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
         }
       } else {
 	if (iuta) {
-	    e = rx.energy;
+	    e = rx.de;
 	    fprintf(f2, "%5d %5d %13.6E %11.4E %13.6E %10.3E\n",
 		  r.upper, r.lower, e, rx.sdev, r.rme, rx.sci);
         } else {
@@ -3505,9 +3504,9 @@ static int tr_sink(const cfac_t *cfac,
     r.rme   = rtdata->rme;
 
     if (cfac->uta) {
-        rx.energy = rtdata->uta_e;
-        rx.sdev   = rtdata->uta_sd;
-        rx.sci    = rtdata->uta_ci;
+        rx.de   = rtdata->uta_de;
+        rx.sdev = rtdata->uta_sd;
+        rx.sci  = rtdata->uta_ci;
         
         WriteTRRecord(f, &r, &rx);
     } else {

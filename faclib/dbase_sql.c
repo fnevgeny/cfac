@@ -307,8 +307,9 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
         for (i = 0; i < h.ntransitions; i++) {
             TR_RECORD r;
+            TR_EXTRA rx;
 
-            n = ReadTRRecord(fp, &r, swp);
+            n = ReadTRRecord(fp, &r, &rx, swp);
             if (n == 0) {
                 break;
             }

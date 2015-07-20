@@ -134,6 +134,13 @@ typedef struct _TR_RECORD_ {
   int upper;
   float rme;
 } TR_RECORD;
+#define SIZE_TR_RECORD (sizeof(int)+sizeof(int)+sizeof(float))
+
+typedef struct _TR_EXTRA_ {
+  float energy;
+  float sdev;
+  float sci;
+} TR_EXTRA;
 
 typedef struct _TRF_RECORD_ {
   int lower;
@@ -337,7 +344,7 @@ int ReadENRecord(FILE *f, EN_RECORD *r, int swp);
 int ReadENFHeader(FILE *f, ENF_HEADER *h, int swp);
 int ReadENFRecord(FILE *f, ENF_RECORD *r, int swp);
 int ReadTRHeader(FILE *f, TR_HEADER *h, int swp);
-int ReadTRRecord(FILE *f, TR_RECORD *r, int swp);
+int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp);
 int ReadTRFHeader(FILE *f, TRF_HEADER *h, int swp);
 int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, TRF_HEADER *h);
 int ReadCEHeader(FILE *f, CE_HEADER *h, int swp);
@@ -414,7 +421,7 @@ int SwapEndianENHeader(EN_HEADER *h);
 int SwapEndianENRecord(EN_RECORD *r);
 int SwapEndianENFHeader(ENF_HEADER *h);
 int SwapEndianENFRecord(ENF_RECORD *r);
-int WriteTRRecord(FILE *f, TR_RECORD *r);
+int WriteTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx);
 int PrintTRTable(FILE *f1, FILE *f2, int v, int swp);
 int SwapEndianTRHeader(TR_HEADER *h);
 int SwapEndianTRRecord(TR_RECORD *r);

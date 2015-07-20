@@ -552,6 +552,602 @@ int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
     return allocated;
 }
 
+
+
+typedef struct {
+  TR_RECORD r;
+  TR_EXTRA rx;
+  int ks[2];
+} TR_DATUM;
+
+
+static int CompareNRConfig(const void *p1, const void *p2) {
+  CONFIG *c1, *c2;
+
+  c1 = (CONFIG *) p1;
+  c2 = (CONFIG *) p2;
+  if (c1->nnrs > c2->nnrs) return 1;
+  else if (c1->nnrs < c2->nnrs) return -1;
+  else {
+    return memcmp(c1->nrs, c2->nrs, sizeof(int)*c1->nnrs);
+  }
+}
+
+
+static int CompareTRDatum(const void *p1, const void *p2) {
+  TR_DATUM *r1, *r2;
+
+  r1 = (TR_DATUM *) p1;
+  r2 = (TR_DATUM *) p2;
+  if ((r1->r).upper < (r2->r).upper) return -1;
+  else if ((r1->r).upper > (r2->r).upper) return 1;
+  else {
+    if ((r1->r).lower < (r2->r).lower) return -1;
+    else if ((r1->r).lower > (r2->r).lower) return 1;
+    else return 0;
+  }
+}
+
+static double FKB(cfac_t *cfac, int ka, int kb, int k) {
+  int ja, jb, ia, ib;
+  double a, b;
+  
+  GetJLFromKappa(GetOrbital(cfac, ka)->kappa, &ja, &ia);
+  GetJLFromKappa(GetOrbital(cfac, kb)->kappa, &jb, &ib);
+
+  if (!Triangle(ia, k, ia) || !Triangle(ib, k, ib)) return 0.0;
+  a = W3j(ja, k, ja, 1, 0, -1)*W3j(jb, k, jb, 1, 0, -1);
+  if (fabs(a) < EPS30) return 0.0;
+  Slater(cfac, &b, ka, kb, ka, kb, k/2, 0);
+  
+  b *= a*(ja+1.0)*(jb+1.0);
+  if (IsEven((ja+jb)/2)) b = -b;
+
+  return b;
+}
+
+static double GKB(cfac_t *cfac, int ka, int kb, int k) {
+  int ja, jb, ia, ib;
+  double a, b;
+  
+  GetJLFromKappa(GetOrbital(cfac, ka)->kappa, &ja, &ia);
+  GetJLFromKappa(GetOrbital(cfac, kb)->kappa, &jb, &ib);
+  
+  if (IsOdd((ia+k+ib)/2) || !Triangle(ia, k, ib)) return 0.0;
+  a = W3j(ja, k, jb, 1, 0, -1);
+  if (fabs(a) < EPS30) return 0.0;
+  Slater(cfac, &b, ka, kb, kb, ka, k/2, 0);
+  
+  b *= a*a*(ja+1.0)*(jb+1.0);
+  if (IsEven((ja+jb)/2)) b = -b;
+  return b;
+}
+
+static double ConfigEnergyVarianceParts0(cfac_t *cfac,
+    SHELL *bra, int ia, int ib, int m2, int p) {
+  int ja, jb, k, kp, k0, k1, kp0, kp1, ka, kb;
+  double a, b, c, d, e;
+
+  ja = GetJFromKappa(bra[ia].kappa);
+  ka = OrbitalIndex(cfac, bra[ia].n, bra[ia].kappa, 0);
+  if (p > 0) {
+    jb = GetJFromKappa(bra[ib].kappa);
+    kb = OrbitalIndex(cfac, bra[ib].n, bra[ib].kappa, 0);
+  }
+  e = 0.0;
+  switch (p) {
+  case 0:
+    k0 = 4;
+    k1 = 2*ja;
+    a = 1.0/(ja*(ja+1.0));
+    for (k = k0; k <= k1; k += 4) {
+      for (kp = k0; kp <= k1; kp += 4) {
+	b = -a + W6j(ja, ja, k, ja, ja, kp);
+	if (k == kp) b += 1.0/(k+1.0);
+	b *= a*FKB(cfac, ka, ka, k)*FKB(cfac, ka, ka, kp);
+	e += b;
+      }
+    }
+    break;
+  case 1:
+    k0 = 4;
+    k1 = 2*ja;
+    kp0 = 4;
+    kp1 = 2*jb;
+    kp1 = Min(kp1, k1);
+    a = 1.0/(ja*(ja+1.0));
+    for (k = k0; k <= k1; k += 4) {
+      for (kp = kp0; kp <= kp1; kp += 4) {
+	b = a - W6j(ja, ja, kp, ja, ja, k);
+	if (k == kp) b -= 1.0/(k+1.0);
+	b *= W6j(ja, ja, kp, jb, jb, m2);
+	b /= 0.5*ja;
+	b *= FKB(cfac, ka, ka, k)*FKB(cfac, ka, kb, kp);
+	e += b;
+      }
+    }
+    if (IsOdd((ja+jb)/2+1)) e = -e;
+    break;
+  case 2:
+    k0 = 4;
+    k1 = 2*ja;
+    kp0 = abs(ja-jb);
+    kp1 = ja + jb;
+    a = 1.0/(ja*(ja+1.0));
+    for (k = k0; k <= k1; k += 4) {
+      for (kp = kp0; kp <= kp1; kp += 2) {
+	b = W6j(k, kp, m2, jb, ja, ja);
+	b = -b*b;
+	b += W6j(jb, jb, k, ja, ja, m2)*W6j(jb, jb, k, ja, ja, kp);
+	if (m2 == kp) {
+	  b -= (1.0/(m2+1.0)-1.0/(jb+1.0))*a;
+	} else {
+	  b += a/(jb+1.0);
+	}
+	b /= 0.5*ja;
+	b *= FKB(cfac, ka, ka, k)*GKB(cfac, ka, kb, kp);
+	e += b;
+      }
+    }
+    if (IsOdd((ja+jb)/2+1)) e = -e;
+    break;
+  case 3:
+    k0 = 4;
+    k1 = 2*ja;
+    k = 2*jb;
+    k1 = Min(k, k1);
+    for (k = k0; k <= k1; k += 4) {
+      for (kp = k0; kp <= k1; kp += 4) {
+	b = 0.0;
+	if (k == kp) b += 1.0/((k+1.0)*(jb+1.0));
+	b -= W9j(ja, ja, k, ja, m2, jb, kp, jb, jb);
+	b -= W6j(ja, jb, m2, jb, ja, k)*W6j(ja, jb, m2, jb, ja, kp)/ja;
+	b /= ja;
+	b *= FKB(cfac, ka, kb, k)*FKB(cfac, ka, kb, kp);
+	e += b;
+      }
+    }
+    break;
+  case 4:
+    k0 = abs(ja-jb);
+    k1 = ja+jb;
+    for (k = k0; k <= k1; k += 2) {
+      for (kp = k0; kp <= k1; kp += 2) {
+	b = 0.0;
+	if (k == kp) b += 1.0/((k+1.0)*(jb+1.0));
+	b -= W9j(ja, jb, k, jb, m2, ja, kp, ja, jb);
+	c = -1.0/(jb+1.0);
+	d = c;
+	if (k == m2) {
+	  c += 1.0/(m2+1.0);
+	}
+	if (kp == m2) {
+	  d += 1.0/(m2+1.0);
+	}
+	b -= c*d/ja;
+	b /= ja;
+	b *= GKB(cfac, ka, kb, k)*GKB(cfac, ka, kb, kp);
+	e += b;
+      }
+    }
+    break;
+  case 5:
+    k0 = 4;
+    k1 = 2*ja;
+    k = 2*jb;
+    k1 = Min(k1, k);
+    kp0 = abs(ja-jb);
+    kp1 = ja+jb;
+    for (k = k0; k <= k1; k += 4) {
+      for (kp = kp0; kp <= kp1; kp += 2) {
+	b = -W6j(jb, jb, k, ja, ja, kp)/(jb+1.0);
+	c = W6j(k, kp, m2, ja, jb, jb)*W6j(k, kp, m2, jb, ja, ja);
+	if (IsOdd((ja+jb)/2)) b += c;
+	else b -= c;
+	c = -1.0/(jb+1.0);
+	if (kp == m2) c += 1.0/(m2+1.0);
+	c *= W6j(ja, jb, m2, jb, ja, k);
+	b += c/ja;
+	b /= 0.5*ja;
+	b *= FKB(cfac, ka, kb, k)*GKB(cfac, ka, kb, kp);
+	e += b;
+      }
+    }
+    break;
+  case 6:
+    k0 = 4;
+    k1 = 2*ja;
+    k = 2*jb;
+    k1 = Min(k, k1);
+    a = 1.0/((ja+1.0)*(jb+1.0));
+    for (k = k0; k <= k1; k += 4) {
+      b = a/(k+1.0);
+      c = FKB(cfac, ka, kb, k);
+      b *= c*c;
+      e += b;
+    }
+    break;
+  case 7:
+    k0 = abs(ja-jb);
+    k1 = ja+jb;
+    a = 1.0/((ja+1.0)*(jb+1.0));
+    for (k = k0; k <= k1; k += 2) {
+      for (kp = k0; kp <= k1; kp += 2) {
+	b = 0;
+	if (k == kp) {
+	  b += 1.0/(k+1.0);
+	}
+	b -= a;
+	c = GKB(cfac, ka, kb, k);
+	d = GKB(cfac, ka, kb, kp);
+	e += a*b*c*d;
+      }
+    }
+    break;
+  case 8:
+    k0 = 4;
+    k1 = 2*ja;
+    k = 2*jb;
+    k1 = Min(k, k1);
+    kp0 = abs(ja-jb);
+    kp1 = ja+jb;
+    kp0 = k0;
+    kp1 = k1;
+    a = 1.0/((ja+1.0)*(jb+1.0));
+    for (k = k0; k <= k1; k += 4) {
+      for (kp = kp0; kp <= kp1; kp += 2) {
+	b = W6j(jb, ja, kp, ja, jb, k);
+	if (fabs(b) < EPS30) continue;
+	b *= 2.0*a;
+	if (IsOdd(kp/2)) b = -b;
+	c = FKB(cfac, ka, kb, k);
+	d = GKB(cfac, ka, kb, kp);
+	e += b*c*d;
+      }
+    }
+    break;
+  }
+
+  return e;
+}
+
+static double ConfigEnergyVarianceParts1(cfac_t *cfac, SHELL *bra, int i,
+					 int ia, int ib, int m2, int p) {
+  int js, ja, jb, k, kp, k0, k1, kp0, kp1, ka, kb, ks;
+  double a, b, e;
+  
+  js = GetJFromKappa(bra[i].kappa);
+  ks = OrbitalIndex(cfac, bra[i].n, bra[i].kappa, 0);
+  ja = GetJFromKappa(bra[ia].kappa);
+  ka = OrbitalIndex(cfac, bra[ia].n, bra[ia].kappa, 0);
+  jb = GetJFromKappa(bra[ib].kappa);
+  kb = OrbitalIndex(cfac, bra[ib].n, bra[ib].kappa, 0);
+  e = 0.0;
+
+  switch (p) {
+  case 0:
+    k0 = 4;
+    k1 = 2*ja;
+    k = 2*jb;
+    k1 = Min(k, k1);
+    k = 2*js;
+    k1 = Min(k, k1);
+    for (k = k0; k <= k1; k += 4) {
+      b = W6j(ja, ja, k, jb, jb, m2);
+      if (fabs(b) < EPS30) continue;
+      b *= 2.0/((k+1.0)*(js+1.0));
+      b *= FKB(cfac, ks, ka, k)*FKB(cfac, ks, kb, k);
+      if (IsOdd((ja+jb)/2)) b = -b;
+      e += b;
+    }
+    break;
+  case 1:
+    k0 = abs(js-ja);
+    k1 = js+ja;
+    kp0 = abs(js-jb);
+    kp1 = js+jb;
+    a = 1.0/((js+1.0)*(ja+1.0)*(jb+1.0));
+    for (k = k0; k <= k1; k += 2) {
+      for (kp = kp0; kp <= kp1; kp += 2) {
+	b = W6j(k, kp, m2, jb, ja, js);
+	b = -b*b + a;
+	b /= (js+1.0);
+	b *= 2.0*GKB(cfac, ks, ka, k)*GKB(cfac, ks, kb, kp);
+	if (IsOdd((ja+jb)/2+1)) b = -b;
+	e += b;
+      }
+    }
+    break;
+  case 2:
+    k0 = 4;
+    k1 = 2*js;
+    k = 2*ja;
+    k1 = Min(k, k1);
+    kp0 = abs(js-jb);
+    kp1 = js+jb;
+    for (k = k0; k <= k1; k += 4) {
+      for (kp = kp0; kp <= kp1; kp += 2) {
+	b = W6j(jb, jb, k, ja, ja, m2);
+	b *= W6j(jb, jb, k, js, js, kp);
+	if (fabs(b) < EPS30) continue;
+	b /= (js+1.0);
+	if (IsOdd((ja+jb+kp)/2)) b = -b;
+	b *= 2.0*FKB(cfac, ks, ka, k)*GKB(cfac, ks, kb, kp);
+	e += b;
+      }
+    }
+    break;
+  }
+
+  return e;
+}
+
+double ConfigEnergyVariance(cfac_t *cfac,
+    int ns, SHELL *bra, int ia, int ib, int m2) {
+  int i, js, p;
+  double e, a, b, c;
+  
+  e = 0.0;
+  for (i = 0; i < ns; i++) {
+    js = GetJFromKappa(bra[i].kappa);
+    a = bra[i].nq;
+    b = js+1.0 - bra[i].nq;
+    if (i == ia) {
+      a -= 1.0;
+    }
+    if (i == ib) {
+      b -= 1.0;
+    }
+    if (a == 0.0 || b == 0.0) continue;
+    a = a*b;
+    b = 0.0;
+    if (i == ia) {
+      for (p = 0; p < 6; p++) {
+	c = ConfigEnergyVarianceParts0(cfac, bra, ia, ib, m2, p);
+	b += c;
+      }
+      b /= js-1.0;
+    } else if (i == ib) {
+      for (p = 0; p < 6; p++) {
+	c = ConfigEnergyVarianceParts0(cfac, bra, ib, ia, m2, p);
+	b += c;
+      }
+      b /= js-1.0;
+    } else {
+      for (p = 6; p < 9; p++) {
+	c = ConfigEnergyVarianceParts0(cfac, bra, i, ia, m2, p);
+	b += c;
+	c = ConfigEnergyVarianceParts0(cfac, bra, i, ib, m2, p);
+	b += c;
+      }
+      c = ConfigEnergyVarianceParts1(cfac, bra, i, ia, ib, m2, 0);
+      b += c;
+      c = ConfigEnergyVarianceParts1(cfac, bra, i, ia, ib, m2, 1);
+      b += c;
+      c = ConfigEnergyVarianceParts1(cfac, bra, i, ia, ib, m2, 2);
+      b += c;
+      c = ConfigEnergyVarianceParts1(cfac, bra, i, ib, ia, m2, 2);
+      b += c;
+      b /= js;
+    }
+
+    e += a*b;
+  }
+    
+  if (e < 0.0) e = 0.0;
+  return e;
+}
+
+double ConfigEnergyShift(cfac_t *cfac,
+    int ns, SHELL *bra, int ia, int ib, int m2) {
+  double qa, qb, a, b, c, e;
+  int ja, jb, k, kmin, kmax;
+  int k0, k1;
+
+  qa = bra[ia].nq;
+  qb = bra[ib].nq;
+  ja = GetJFromKappa(bra[ia].kappa);
+  jb = GetJFromKappa(bra[ib].kappa);
+  if (qa == 1 && qb == 0) e = 0.0;
+  else {
+    e = (qa-1.0)/ja - qb/jb;
+    if (e != 0.0) {
+      kmin = 4;
+      kmax = 2*ja;
+      k = 2*jb;
+      kmax = Min(kmax, k);
+      a = 0.0;
+      k0 = OrbitalIndex(cfac, bra[ia].n, bra[ia].kappa, 0);
+      k1 = OrbitalIndex(cfac, bra[ib].n, bra[ib].kappa, 0);
+      for (k = kmin; k <= kmax; k += 4) {
+	b = W6j(k, ja, ja, m2, jb, jb);
+	if (fabs(b) > EPS30) {
+	  a -= b*FKB(cfac, k0, k1, k);
+	}
+      }
+      kmin = abs(ja-jb);
+      kmax = ja + jb;
+      c = 1.0/((ja+1.0)*(jb+1.0));
+      for (k = kmin; k <= kmax; k += 2) {
+	if (k == m2) {
+	  b = 1.0/(m2+1.0)-c;
+	} else {
+	  b = -c;
+	}
+	a += b*GKB(cfac, k0, k1, k);
+      }
+      if (IsEven((ja+jb)/2)) a = -a;
+      e *= a;
+    }
+  }
+
+  return e;
+}
+
+static double ConfigEnergyShiftCI(cfac_t *cfac, int nrs0, int nrs1) {
+  int n0, k0, q0, n1, k1, q1;
+  int j0, j1, s0, s1, kmax, k;
+  double a, g, pk, w, sd, q;
+
+  UnpackNRShell(&nrs0, &n0, &k0, &q0);
+  UnpackNRShell(&nrs1, &n1, &k1, &q1);
+  q = (q0-1.0)/(2.0*k0+1.0) - q1/(2.0*k1+1.0);
+  if (q == 0.0) return q;
+  g = 0.0;
+  for (j0 = k0-1; j0 <= k0+1; j0 += 2) {
+    if (j0 < 0) continue;
+    s0 = OrbitalIndex(cfac, n0, GetKappaFromJL(j0, k0), 0);
+    for (j1 = k1-1; j1 <= k1+1; j1 += 2) {
+      if (j1 < 0) continue;
+      s1 = OrbitalIndex(cfac, n1, GetKappaFromJL(j1, k1), 0);
+      w = W6j(j0, k0, 1, k1, j1, 2);
+      w = w*w*(j0+1.0)*(j1+1.0)*0.5;
+      pk = ((j0+1.0)*(j1+1.0))/((k0+1.0)*(k1+1.0)*4.0) - w;
+      Slater(cfac, &sd, s0, s1, s0, s1, 0, 0);
+      g += sd*pk;
+      kmax = 2*j0;
+      k = 2*j1;
+      kmax = Min(k, kmax);
+      for (k = 4; k <= kmax; k += 4) {	
+	pk = W3j(k0, k, k0, 0, 0, 0);
+	if (fabs(pk) > 0) {
+	  pk *= W3j(k1, k, k1, 0, 0, 0);
+	  if (fabs(pk) > 0) {
+	    pk *= 0.25;
+	    a = W6j(j0, 2, j1, k1, 1, k0);
+	    if (fabs(a) > 0) {
+	      a = a*a;
+	      a *= W6j(j0, k, j0, k0, 1, k0);
+	      if (fabs(a) > 0) {
+		a *= W6j(j1, k, j1, k1, 1, k1);
+		if (fabs(a) > 0) {
+		  a *= W6j(j0, k, j0, j1, 2, j1);
+		  a *= 2.0*(j0+1.0)*(j1+1.0)*(k0+1.0)*(k1+1.0);
+		}
+	      }
+	    }
+	    a += W6j(k0, k, k0, k1, 2, k1);
+	    pk *= a;
+	  }
+	  if (fabs(pk) > 0) {
+	    Slater(cfac, &sd, s0, s1, s0, s1, k/2, 0);
+	    g += pk*sd*(j0+1.0)*(j1+1.0);
+	  }
+	}
+      }
+      pk = W3j(k0, 2, k1, 0, 0, 0);
+      if (fabs(pk) > 0) {
+	pk = pk*pk;
+	a = W6j(j0, 2, j1, k1, 1, k0);
+	a *= a;
+	pk *= a;
+	pk *= (k0+1.0)*(k1+1.0)/3.0;
+	pk *= (1.0 - 0.5*(j0+1.0)*(j1+1.0)*a);
+	if (fabs(pk) > 0) {
+	  Slater(cfac, &sd, s0, s1, s1, s0, 1, 0);
+	  g += pk*sd*(j0+1.0)*(j1+1.0);
+	}
+      }
+    }
+  }
+
+  return q*g;
+}
+
+static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
+		   int m, int lower, int upper, int *ks) {
+  int m2, ns, k0, k1, q1, q2;
+  int p1, p2, j1, j2, ia, ib;
+  LEVEL *lev1, *lev2;
+  double r, aw;
+  INTERACT_DATUM *idatum;
+  
+  *ks = 0;
+  
+  *strength = 0.0;
+  lev1 = GetLevel(cfac, lower);
+  if (lev1 == NULL) return -1;
+  lev2 = GetLevel(cfac, upper);
+  if (lev2 == NULL) return -1;
+
+  p1 = lev1->pj;
+  p2 = lev2->pj;
+  if (m > 0 && IsEven(p1+p2+m)) return -1;
+  if (m < 0 && IsOdd(p1+p2+m)) return -1;
+  
+  idatum = NULL;
+  ns = GetInteract(cfac, &idatum, NULL, NULL, lev1->iham, lev2->iham,
+		   lev1->pb, lev2->pb, 0, 0, 0);
+  if (ns <= 0) return -1;
+  if (idatum->s[0].index < 0 || idatum->s[3].index >= 0) {
+    free(idatum->bra);
+    free(idatum);
+    return -1;
+  }
+
+  if (idatum->s[0].nq_bra > idatum->s[0].nq_ket) {
+    ia = ns-1-idatum->s[0].index;
+    ib = ns-1-idatum->s[1].index;
+    j1 = idatum->s[0].j;
+    j2 = idatum->s[1].j;
+    q1 = idatum->s[0].nq_bra;
+    q2 = idatum->s[1].nq_bra;
+    k0 = OrbitalIndex(cfac, idatum->s[0].n, idatum->s[0].kappa, 0.0);
+    k1 = OrbitalIndex(cfac, idatum->s[1].n, idatum->s[1].kappa, 0.0);
+    PackNRShell(ks, idatum->s[0].n, idatum->s[0].kl, q1);
+    if (idatum->s[0].kappa > 0) ks[0] |= 0x01000000;
+    PackNRShell(ks+1, idatum->s[1].n, idatum->s[1].kl, q2);
+    if (idatum->s[1].kappa > 0) ks[1] |= 0x01000000;
+  } else {
+    ia = ns-1-idatum->s[1].index;
+    ib = ns-1-idatum->s[0].index;
+    j1 = idatum->s[1].j;
+    j2 = idatum->s[0].j;
+    q1 = idatum->s[1].nq_bra;
+    q2 = idatum->s[0].nq_bra;
+    k0 = OrbitalIndex(cfac, idatum->s[1].n, idatum->s[1].kappa, 0.0);
+    k1 = OrbitalIndex(cfac, idatum->s[0].n, idatum->s[0].kappa, 0.0);
+    PackNRShell(ks, idatum->s[1].n, idatum->s[1].kl, q1);
+    if (idatum->s[1].kappa > 0)  ks[0] |= 0x01000000;
+    PackNRShell(ks+1, idatum->s[0].n, idatum->s[0].kl, q2);
+    if (idatum->s[0].kappa > 0)  ks[1] |= 0x01000000;
+  }
+
+  m2 = 2*abs(m);
+  if (!Triangle(j1, j2, m2)) {
+    free(idatum->bra);
+    free(idatum);
+    return -1;
+  }
+
+  rx->energy = (lev2->energy - lev1->energy);
+  if (m < 0) {
+    rx->energy += ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
+    rx->sdev = sqrt(ConfigEnergyVariance(cfac, ns, idatum->bra, ia, ib, m2));
+  } else {
+    rx->sdev = 0.0;
+  }
+  aw = FINE_STRUCTURE_CONST * rx->energy;
+  if (aw < 0.0) {
+    free(idatum->bra);
+    free(idatum);
+    return -1;
+  }
+  
+  if (cfac->tr_opts.mode == M_NR && m != 1) {
+    r = MultipoleRadialNR(cfac, m, k0, k1, cfac->tr_opts.gauge);
+  } else {
+    r = MultipoleRadialFR(cfac, aw, m, k0, k1, cfac->tr_opts.gauge);
+  }
+
+  *strength = sqrt((lev1->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
+  
+  free(idatum->bra);
+  free(idatum);
+  return 0;
+}
+
+
 /* save radiative transitions; low & up are assumed NOT overlapping */
 static int crac_save_rtrans0(cfac_t *cfac,
     unsigned nlow, const unsigned *low, unsigned nup, const unsigned *up,
@@ -611,6 +1207,181 @@ static int crac_save_rtrans0(cfac_t *cfac,
       }
   }
   
+  if (cfac->uta) {
+    TR_DATUM *rd;
+    double gf;
+    double e0;
+    int ic0, ic1, nic0, nic1, *nc0, *nc1, j0, j1, ntr;
+    int imin, imax, jmin, jmax, nrs0, nrs1, ir, ir0;
+    double ep, em, wp, wm, w0, de, cp, cm;
+    CONFIG *c0, *c1;
+    LEVEL *lev1, *lev2;
+    int k;
+    int mj = 0xFF000000, mn = 0xFFFFFF;
+
+    // qsort(low, nlow, sizeof(int), CompareNRLevel);
+    nc0 = malloc(sizeof(int)*nlow);
+    ic0 = 0;
+    for (i = 0; i < nlow; i++) {
+      lev1 = GetLevel(cfac, low[i]);
+      c1 = GetConfigFromGroup(cfac, lev1->iham, lev1->pb);
+      if (i > 0 && CompareNRConfig(c1, c0)) {
+	nc0[ic0++] = i;
+      }
+      c0 = c1;
+    }
+    nc0[ic0] = nlow;
+    nic0 = ic0+1;
+    
+    
+    if (up != low) {
+      // qsort(up, nup, sizeof(int), CompareNRLevel);
+      nc1 = malloc(sizeof(int)*nup);
+      ic1 = 0;
+      for (i = 0; i < nup; i++) {
+	lev1 = GetLevel(cfac, up[i]);
+	c1 = GetConfigFromGroup(cfac, lev1->iham, lev1->pb);
+	if (i > 0 && CompareNRConfig(c1, c0) != 0) {
+	  nc1[ic1++] = i;
+	}
+	c0 = c1;
+      }
+      nc1[ic1] = nup;
+      nic1 = ic1+1;
+    } else {
+      nc1 = nc0;
+      nic1 = nic0;
+    }
+    
+    
+    imin = 0;
+    for (ic0 = 0; ic0 < nic0; ic0++) {
+      imax = nc0[ic0];
+      jmin = 0;
+      lev1 = GetLevel(cfac, low[imin]);
+      c0 = GetConfigFromGroup(cfac, lev1->iham, lev1->pb);
+      for (ic1 = 0; ic1 < nic1; ic1++) {
+	jmax = nc1[ic1];
+	lev2 = GetLevel(cfac, up[jmin]);
+	c1 = GetConfigFromGroup(cfac, lev2->iham, lev2->pb);
+	ir = 0;
+	ntr = (jmax-jmin)*(imax-imin);
+	rd = malloc(sizeof(TR_DATUM)*ntr);
+	ep = 0.0;
+	em = 0.0;
+	e0 = 0.0;
+	wp = 0.0;
+	wm = 0.0;
+	w0 = 0.0;
+	ir0 = -1;
+	for (i = imin; i < imax; i++) {
+	  for (j = jmin; j < jmax; j++) {
+	    k = TRMultipoleUTA(cfac,
+                &gf, &(rd[ir].rx), mpole, low[i], up[j], rd[ir].ks);
+	    if (k != 0) {
+	      rd[ir].r.lower = -1;
+	      rd[ir].r.upper = -1;
+	      ir++;
+	      continue;
+	    }
+	    ir0 = ir;
+	    rd[ir].r.lower = low[i];
+	    rd[ir].r.upper = up[j];
+	    rd[ir].r.rme = gf;
+	    rd[ir].rx.sci = 1.0;
+	    if (mpole == -1) {
+	      gf = OscillatorStrength(mpole, rd[ir].rx.energy,
+				      rd[ir].r.rme, NULL);
+	      j0 = rd[ir].ks[0]&mj;
+	      j1 = rd[ir].ks[1]&mj;
+	      if (j0==0 && j1==0) {
+		wp += gf;
+		ep += gf*rd[ir].rx.energy;
+	      } else if (j0 && j1) {
+		wm += gf;
+		em += gf*rd[ir].rx.energy;
+	      }
+	      e0 += gf*rd[ir].rx.energy;
+	      w0 += gf;
+	    }
+	    ir++;
+	  }
+	}
+	if (wm > 0.0 && ir0 >= 0) {
+	  nrs0 = 0;
+	  nrs1 = 0;
+	  for (i = 0; i < c0->nnrs; i++) {
+	    if (c0->nrs[i]>>8 == (rd[ir0].ks[0]&mn)>>8) nrs0 = c0->nrs[i];
+	    else if (c0->nrs[i]>>8 == (rd[ir0].ks[1]&mn)>>8) nrs1 = c1->nrs[i];
+	  }
+	  if (nrs0 == 0) {
+	    nrs0 = rd[ir0].ks[0] & mn;
+	  }
+	  if (nrs1 == 0) {
+	    nrs1 = rd[ir0].ks[1] & mn;
+	  }
+	  ep /= wp;
+	  em /= wm;
+	  e0 /= w0;
+	  de = ConfigEnergyShiftCI(cfac, nrs0, nrs1);
+	  cm = 1.0 + de/(e0 - ep);
+	  cp = 1.0 + de/(e0 - em);
+	  if (cm < EPS3) {
+	    cp = (wp+wm)/wp;
+	    cm = 0.0;
+	  } else if (cp < EPS3) {
+	    cm = (wp+wm)/wm;
+	    cp = 0.0;
+	  }
+	  ir = 0;
+	  for (i = imin; i < imax; i++) {
+	    for (j = jmin; j < jmax; j++) {
+	      if (rd[ir].r.lower < 0) {
+		ir++;
+		continue;
+	      }
+	      j0 = rd[ir].ks[0]&mj;
+	      j1 = rd[ir].ks[1]&mj;
+	      if (j0==0 && j1==0) {
+		rd[ir].rx.sci = cp;
+	      } else if (j0 && j1) {
+		rd[ir].rx.sci = cm;
+	      }
+	      ir++;
+	    }
+	  }
+	}
+	qsort(rd, ntr, sizeof(TR_DATUM), CompareTRDatum);
+	ir = 0;
+	for (ir = 0; ir < ntr; ir++) {
+          cfac_rtrans_data_t rtdata;
+	  if (rd[ir].r.lower < 0) {
+	    continue;
+	  }
+	  // WriteTRRecord(f, &(rd[ir].r), &(rd[ir].rx));
+          rtdata.fi = rd[ir].r.lower;
+          rtdata.ii = rd[ir].r.upper;
+          rtdata.rme = rd[ir].r.rme;
+          
+          rtdata.uta_e = rd[ir].rx.energy;
+          rtdata.uta_sd = rd[ir].rx.sdev;
+          rtdata.uta_ci = rd[ir].rx.sci;
+          
+          if (sink(cfac, &rtdata, udata) != 0) {
+            return -1;
+          }
+	}
+	free(rd);
+	jmin = jmax;
+      }
+      imin = imax;
+    }
+    free(nc0);
+    if (up != low) free(nc1);
+    
+    return 0;
+  }
+
   for (j = 0; j < nup; j++) {
     LEVEL *ulev = GetLevel(cfac, up[j]);
     for (i = 0; i < nlow; i++) {

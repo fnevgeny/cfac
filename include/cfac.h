@@ -65,6 +65,10 @@ cfac_calculate_structure(cfac_t *cfac,
 typedef struct {
     unsigned int ii, fi; /* initial (upper) and final (lower) level indices */
     double rme;          /* reduced matrix element                          */
+    
+    double uta_e;        /* UTA energy                                      */
+    double uta_sd;       /* UTA std. dev.                                   */
+    double uta_ci;       /* UTA configuration interaction multiplier        */
 } cfac_rtrans_data_t;
 
 typedef int

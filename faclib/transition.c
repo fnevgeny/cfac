@@ -984,76 +984,6 @@ double ConfigEnergyShift(cfac_t *cfac,
   return e;
 }
 
-static double ConfigEnergyShiftCI(cfac_t *cfac, int nrs0, int nrs1) {
-  int n0, k0, q0, n1, k1, q1;
-  int j0, j1, s0, s1, kmax, k;
-  double a, g, pk, w, sd, q;
-
-  UnpackNRShell(&nrs0, &n0, &k0, &q0);
-  UnpackNRShell(&nrs1, &n1, &k1, &q1);
-  q = (q0-1.0)/(2.0*k0+1.0) - q1/(2.0*k1+1.0);
-  if (q == 0.0) return q;
-  g = 0.0;
-  for (j0 = k0-1; j0 <= k0+1; j0 += 2) {
-    if (j0 < 0) continue;
-    s0 = OrbitalIndex(cfac, n0, GetKappaFromJL(j0, k0), 0);
-    for (j1 = k1-1; j1 <= k1+1; j1 += 2) {
-      if (j1 < 0) continue;
-      s1 = OrbitalIndex(cfac, n1, GetKappaFromJL(j1, k1), 0);
-      w = W6j(j0, k0, 1, k1, j1, 2);
-      w = w*w*(j0+1.0)*(j1+1.0)*0.5;
-      pk = ((j0+1.0)*(j1+1.0))/((k0+1.0)*(k1+1.0)*4.0) - w;
-      Slater(cfac, &sd, s0, s1, s0, s1, 0, 0);
-      g += sd*pk;
-      kmax = 2*j0;
-      k = 2*j1;
-      kmax = Min(k, kmax);
-      for (k = 4; k <= kmax; k += 4) {	
-	pk = W3j(k0, k, k0, 0, 0, 0);
-	if (fabs(pk) > 0) {
-	  pk *= W3j(k1, k, k1, 0, 0, 0);
-	  if (fabs(pk) > 0) {
-	    pk *= 0.25;
-	    a = W6j(j0, 2, j1, k1, 1, k0);
-	    if (fabs(a) > 0) {
-	      a = a*a;
-	      a *= W6j(j0, k, j0, k0, 1, k0);
-	      if (fabs(a) > 0) {
-		a *= W6j(j1, k, j1, k1, 1, k1);
-		if (fabs(a) > 0) {
-		  a *= W6j(j0, k, j0, j1, 2, j1);
-		  a *= 2.0*(j0+1.0)*(j1+1.0)*(k0+1.0)*(k1+1.0);
-		}
-	      }
-	    }
-	    a += W6j(k0, k, k0, k1, 2, k1);
-	    pk *= a;
-	  }
-	  if (fabs(pk) > 0) {
-	    Slater(cfac, &sd, s0, s1, s0, s1, k/2, 0);
-	    g += pk*sd*(j0+1.0)*(j1+1.0);
-	  }
-	}
-      }
-      pk = W3j(k0, 2, k1, 0, 0, 0);
-      if (fabs(pk) > 0) {
-	pk = pk*pk;
-	a = W6j(j0, 2, j1, k1, 1, k0);
-	a *= a;
-	pk *= a;
-	pk *= (k0+1.0)*(k1+1.0)/3.0;
-	pk *= (1.0 - 0.5*(j0+1.0)*(j1+1.0)*a);
-	if (fabs(pk) > 0) {
-	  Slater(cfac, &sd, s0, s1, s1, s0, 1, 0);
-	  g += pk*sd*(j0+1.0)*(j1+1.0);
-	}
-      }
-    }
-  }
-
-  return q*g;
-}
-
 static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
 		   int m, int lower, int upper, int *ks) {
   int m2, ns, k0, k1, q1, q2;
@@ -1211,14 +1141,11 @@ static int crac_save_rtrans0(cfac_t *cfac,
   if (cfac->uta) {
     TR_DATUM *rd;
     double gf;
-    double e0;
-    int ic0, ic1, nic0, nic1, *nc0, *nc1, j0, j1, ntr;
-    int imin, imax, jmin, jmax, nrs0, nrs1, ir, ir0;
-    double ep, em, wp, wm, w0, de, cp, cm;
+    int ic0, ic1, nic0, nic1, *nc0, *nc1, ntr;
+    int imin, imax, jmin, jmax, ir;
     CONFIG *c0, *c1;
     LEVEL *lev1, *lev2;
     int k;
-    const int mj = 0xFF000000, mn = 0xFFFFFF;
 
     // qsort(low, nlow, sizeof(int), CompareNRLevel);
     nc0 = malloc(sizeof(int)*nlow);
@@ -1268,13 +1195,6 @@ static int crac_save_rtrans0(cfac_t *cfac,
 	ir = 0;
 	ntr = (jmax-jmin)*(imax-imin);
 	rd = malloc(sizeof(TR_DATUM)*ntr);
-	ep = 0.0;
-	em = 0.0;
-	e0 = 0.0;
-	wp = 0.0;
-	wm = 0.0;
-	w0 = 0.0;
-	ir0 = -1;
 	for (i = imin; i < imax; i++) {
 	  for (j = jmin; j < jmax; j++) {
 	    k = TRMultipoleUTA(cfac,
@@ -1285,76 +1205,10 @@ static int crac_save_rtrans0(cfac_t *cfac,
 	      ir++;
 	      continue;
 	    }
-	    ir0 = ir;
 	    rd[ir].r.lower = low[i];
 	    rd[ir].r.upper = up[j];
 	    rd[ir].r.rme = gf;
-	    rd[ir].rx.sci = 1.0;
-	    if (mpole == -1) {
-              double energy = GetLevel(cfac, up[j])->energy -
-                              GetLevel(cfac, low[i])->energy + rd[ir].rx.de;
-
-              gf = OscillatorStrength(mpole, energy,
-				      rd[ir].r.rme, NULL);
-	      j0 = rd[ir].ks[0]&mj;
-	      j1 = rd[ir].ks[1]&mj;
-	      if (j0==0 && j1==0) {
-		wp += gf;
-		ep += gf*energy;
-	      } else if (j0 && j1) {
-		wm += gf;
-		em += gf*energy;
-	      }
-	      e0 += gf*energy;
-	      w0 += gf;
-              
-              printf("%g %g %g -- %g %g %g\n", e0, ep, em, w0, wp, wm);
-	    }
 	    ir++;
-	  }
-	}
-	if (wm > 0.0 && ir0 >= 0) {
-	  nrs0 = 0;
-	  nrs1 = 0;
-	  for (i = 0; i < c0->nnrs; i++) {
-	    if (c0->nrs[i]>>8 == (rd[ir0].ks[0]&mn)>>8) nrs0 = c0->nrs[i];
-	    else if (c0->nrs[i]>>8 == (rd[ir0].ks[1]&mn)>>8) nrs1 = c1->nrs[i];
-	  }
-	  if (nrs0 == 0) {
-	    nrs0 = rd[ir0].ks[0] & mn;
-	  }
-	  if (nrs1 == 0) {
-	    nrs1 = rd[ir0].ks[1] & mn;
-	  }
-	  ep /= wp;
-	  em /= wm;
-	  e0 /= w0;
-	  de = ConfigEnergyShiftCI(cfac, nrs0, nrs1);
-	  cm = 1.0 + de/(e0 - ep);
-	  cp = 1.0 + de/(e0 - em);
-	  if (cm < EPS3) {
-	    cp = (wp+wm)/wp;
-	    cm = 0.0;
-	  } else if (cp < EPS3) {
-	    cm = (wp+wm)/wm;
-	    cp = 0.0;
-	  }
-	  ir = 0;
-	  for (i = imin; i < imax; i++) {
-	    for (j = jmin; j < jmax; j++) {
-	      if (rd[ir].r.lower < 0) {
-		ir++;
-		continue;
-	      }
-	      j0 = rd[ir].ks[0]&mj;
-	      j1 = rd[ir].ks[1]&mj;
-	      if (j0==0 && j1==0) {
-		rd[ir].rx.sci = cp;
-	      } else if (j0 && j1) {
-		rd[ir].rx.sci = cm;
-	      }
-	      ir++;
-	    }
 	  }
 	}
 	qsort(rd, ntr, sizeof(TR_DATUM), CompareTRDatum);
@@ -1371,7 +1225,6 @@ static int crac_save_rtrans0(cfac_t *cfac,
           
           rtdata.uta_de = rd[ir].rx.de;
           rtdata.uta_sd = rd[ir].rx.sdev;
-          rtdata.uta_ci = rd[ir].rx.sci;
           
           if (sink(cfac, &rtdata, udata) != 0) {
             return -1;

@@ -139,7 +139,6 @@ typedef struct _TR_RECORD_ {
 typedef struct _TR_EXTRA_ {
   float de;
   float sdev;
-  float sci;
 } TR_EXTRA;
 
 typedef struct _TRF_RECORD_ {

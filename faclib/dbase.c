@@ -2526,7 +2526,7 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
             fprintf(f2, "%6d %2d %6d %2d %13.6E %13.6E %13.6E %13.6E\n",
 		    r.upper, mem_en_table[r.upper].j,
 		    r.lower, mem_en_table[r.lower].j,
-		    (e*HARTREE_EV), gf, a, r.rme);
+		    (e*HARTREE_EV), gf, a*RATE_AU, r.rme);
         }
       } else {
 	if (iuta) {

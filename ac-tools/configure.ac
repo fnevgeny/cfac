@@ -78,11 +78,13 @@ fi
 # gcc warnings
 if test -n "$GCC"
 then
-    CFLAGS="$CFLAGS -fno-common -Wall -Wextra -pedantic -Wno-sign-compare -Wno-unused-parameter"
+    CFLAGS="$CFLAGS -fno-common -Wall -Wextra -pedantic"
+    CFLAGS="$CFLAGS -Wno-sign-compare -Wno-unused-parameter"
 fi
 if test -n "$G77"
 then
-    FFLAGS="$FFLAGS -fno-common -Wall -Wextra -Wno-compare-reals"
+    FFLAGS="$FFLAGS -fno-common -Wall -Wextra"
+    FFLAGS="$FFLAGS -Wno-compare-reals -Wno-unused-dummy-argument -Wno-unused-parameter"
 fi
 
 # use bundled T1lib  

@@ -29,6 +29,12 @@
 #define CFACDB_CS_CI    2
 #define CFACDB_CS_PI    3
 
+typedef enum {
+    CFACDB_TEMP_DEFAULT = 0,
+    CFACDB_TEMP_FILE,
+    CFACDB_TEMP_MEMORY
+} cfacdb_temp_t;
+
 typedef struct _cfacdb_t cfacdb_t;
 
 typedef struct {
@@ -141,7 +147,7 @@ typedef int (*cfacdb_crates_sink_t)(const cfacdb_t *cdb,
     cfacdb_crates_data_t *cbdata, void *udata);
 
 
-cfacdb_t *cfacdb_open(const char *fname);
+cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store);
 void cfacdb_close(cfacdb_t *cdb);
 int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max);
 

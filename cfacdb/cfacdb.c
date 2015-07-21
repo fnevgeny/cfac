@@ -79,7 +79,7 @@ static int session_cb(void *udata,
     return 0;
 }
 
-cfacdb_t *cfacdb_open(const char *fname)
+cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store)
 {
     cfacdb_t *cdb = NULL;
     
@@ -100,6 +100,27 @@ cfacdb_t *cfacdb_open(const char *fname)
     rc = sqlite3_open_v2(fname, &cdb->db, SQLITE_OPEN_READONLY, NULL);
     if (rc) {
         fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(cdb->db));
+        cfacdb_close(cdb);
+        return NULL;
+    }
+
+    /* Set temporal storage */
+    switch (temp_store) {
+    case CFACDB_TEMP_FILE:
+        sql = "PRAGMA temp_store = FILE";
+        break;
+    case CFACDB_TEMP_MEMORY:
+        sql = "PRAGMA temp_store = MEMORY";
+        break;
+    default:
+        sql = "PRAGMA temp_store = DEFAULT";
+        break;
+    }
+    
+    rc = sqlite3_exec(cdb->db, sql, NULL, NULL, &errmsg);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
         cfacdb_close(cdb);
         return NULL;
     }

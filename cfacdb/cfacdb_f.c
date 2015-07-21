@@ -83,7 +83,7 @@ void cfacdb_init_(const char *fname, int *nele_min, int *nele_max,
         return;
     }
     
-    cdb = cfacdb_open(s);
+    cdb = cfacdb_open(s, CFACDB_TEMP_DEFAULT);
     free(s);
     
     if (!cdb) {

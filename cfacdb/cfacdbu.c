@@ -44,7 +44,7 @@ int main(int argc, const char *argv[])
     }
     fname = argv[1];
 
-    cdb = cfacdb_open(fname);
+    cdb = cfacdb_open(fname, CFACDB_TEMP_DEFAULT);
     if (!cdb) {
         fprintf(stderr, "Failed to open DB \"%s\"\n", fname);
         exit(1);

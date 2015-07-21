@@ -41,10 +41,6 @@
 #define LSNAME      24
 #define LNAME       56
 
-#define DB_SQL_CS_CE    1
-#define DB_SQL_CS_CI    2
-#define DB_SQL_CS_RR    3
-
 typedef struct _FORM_FACTOR_ {  
   double te;
   int nk;

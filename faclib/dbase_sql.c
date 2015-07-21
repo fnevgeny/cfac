@@ -28,6 +28,7 @@
 #include "cfacP.h"
 #include "transition.h"
 #include "dbase.h"
+#include "cfacdb.h"
 
 #include "schema.i"
 
@@ -509,7 +510,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             }
 
             retval = StoreCTransition(db, sid,
-                DB_SQL_CS_CE, QK_EXACT, r.lower, r.upper,
+                CFACDB_CS_CE, QK_EXACT, r.lower, r.upper,
                 0, r.bethe, r.born[0], r.born[1], 0.0,
                 &cid);
             if (retval != 0) {
@@ -591,7 +592,7 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             }
 
             retval = StoreCTransition(db, sid,
-                DB_SQL_CS_CI, h.qk_mode, r.b, r.f,
+                CFACDB_CS_CI, h.qk_mode, r.b, r.f,
                 r.kl, r.params[0], r.params[1], r.params[2], r.params[3],
                 &cid);
             if (retval != 0) {
@@ -645,7 +646,7 @@ int StoreRRTable(const cfac_t *cfac,
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt, 1, sid);
-    sqlite3_bind_int(stmt, 2, DB_SQL_CS_RR);
+    sqlite3_bind_int(stmt, 2, CFACDB_CS_PI);
     
     sqlite3_exec(db, "BEGIN", 0, 0, 0);
 
@@ -683,7 +684,7 @@ int StoreRRTable(const cfac_t *cfac,
             }
 
             retval = StoreCTransition(db, sid,
-                DB_SQL_CS_RR, h.qk_mode, r.b, r.f,
+                CFACDB_CS_PI, h.qk_mode, r.b, r.f,
                 r.kl, ap0, ap1, ap2, ap3,
                 &cid);
             if (retval != 0) {

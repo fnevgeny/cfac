@@ -2,6 +2,11 @@ TOP  = ..
 
 include $(TOP)/Make.conf
 
+ALL_CFLAGS = $(CPPFLAGS) -I$(TOP)/include $(CFLAGS)
+
+.c.o: 
+	$(CC) -c $(ALL_CFLAGS) $<
+
 PROGS = cfacdbu	fdemo
 
 # Suffixes
@@ -46,13 +51,13 @@ include Make.dep
 Make.dep: $(SRCS) $(SQLIS)
 	@echo -n "Generating dependencies... "
 	@echo "# Generated automatically by \`make depend'" > $@
-	@$(CC) $(CFLAGS) -MM $(SRCS) >> $@
+	@$(CC) $(ALL_CFLAGS) -MM $(SRCS) >> $@
 	@echo "done"
 
-install: cfacdbu cfacdb.h $(LIBCFACDB)
-	mkdir -p $(DESTBIN) && install -m 755 cfacdbu $(BINDIR)
-	mkdir -p $(DESTINC) && install -m 644 cfacdb.h $(INCDIR)
-	mkdir -p $(DESTLIB) && install -m 644 $(LIBCFACDB) $(LIBDIR)
+install: cfacdbu $(TOP)/include/cfacdb.h $(LIBCFACDB)
+	mkdir -p $(BINDIR) && install -m 755 cfacdbu $(BINDIR)
+	mkdir -p $(INCDIR) && install -m 644 $(TOP)/include/cfacdb.h $(INCDIR)
+	mkdir -p $(LIBDIR) && install -m 644 $(LIBCFACDB) $(LIBDIR)
 
 check :
 

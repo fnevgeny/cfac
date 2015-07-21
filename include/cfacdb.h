@@ -25,7 +25,6 @@
 #define CFACDB_SUCCESS 0
 #define CFACDB_FAILURE 1
 
-/* TODO: include a public cfac header when it exists... */
 #define CFACDB_CS_CE    1
 #define CFACDB_CS_CI    2
 #define CFACDB_CS_PI    3

@@ -1,5 +1,5 @@
 CREATE TEMPORARY VIEW _sessions_v AS
-  SELECT sess.sid, s.symbol, s.anum, s.mass,
+  SELECT sess.*, s.symbol, s.anum, s.mass,
     MIN(l.nele) AS nele_min, MAX(l.nele) AS nele_max
     FROM sessions AS sess
       INNER JOIN species AS s ON (sess.sid = s.sid)
@@ -25,7 +25,7 @@ CREATE TEMPORARY VIEW _levels_v AS
       INNER JOIN _cstates_v AS cs ON (l.sid = cs.sid AND l.nele = cs.nele);
 
 CREATE TEMPORARY VIEW _rtransitions_v AS
-  SELECT rt.sid, rt.ini_id, rt.fin_id, rt.mpole, rt.rme,
+  SELECT rt.*,
          li.nele, lf.e - li.e AS de
     FROM rtransitions AS rt
       INNER JOIN levels AS li ON (rt.sid = li.sid AND rt.ini_id = li.id)

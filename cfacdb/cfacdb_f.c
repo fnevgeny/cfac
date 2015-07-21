@@ -29,7 +29,7 @@ typedef void (*cfacdb_levels_fsink_t)(int *i,
     int _namelen, int _ncmplxlen, int _snamelen);  
 
 typedef void (*cfacdb_rtrans_fsink_t)(int *i, int *j,
-    int *mpole, double *gf);  
+    int *mpole, double *gf, double *uta_de, double *uta_sd);  
 
 typedef void (*cfacdb_aitrans_fsink_t)(int *i, int *j,
     double *rate);  
@@ -145,7 +145,8 @@ static int levels_fsink(const cfacdb_t *cdb,
     
     fdata->sink(&fi, &cbdata->energy, (int *) &cbdata->nele, (int *) &cbdata->g,
                 (int *) &cbdata->vn, (int *) &cbdata->vl, (int *) &cbdata->p,
-                (char *) cbdata->name, (char *) cbdata->ncmplx, (char *) cbdata->sname,
+                (char *) cbdata->name, (char *) cbdata->ncmplx,
+                (char *) cbdata->sname,
                 strlen(cbdata->name), strlen(cbdata->ncmplx),
                 strlen(cbdata->sname));
     
@@ -175,7 +176,8 @@ static int rtrans_fsink(const cfacdb_t *cdb,
     int fi = cbdata->ii + 1;
     int fj = cbdata->fi + 1;
     
-    fdata->sink(&fi, &fj, &cbdata->mpole, &cbdata->gf);
+    fdata->sink(&fi, &fj, &cbdata->mpole, &cbdata->gf,
+        &cbdata->uta_de, &cbdata->uta_sd);
     
     return CFACDB_SUCCESS;
 }

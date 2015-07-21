@@ -48,6 +48,7 @@ typedef struct {
     double mass;
     unsigned int nele_min;
     unsigned int nele_max;
+    int uta;
 } cfacdb_sessions_data_t;
 
 typedef struct {
@@ -76,6 +77,9 @@ typedef struct {
     double de;
     
     double gf;
+    
+    double uta_de;
+    double uta_sd;
 } cfacdb_rtrans_data_t;
 
 typedef struct {

@@ -1,7 +1,6 @@
 /* 
  * Callback-based access to CFAC SQLite DB, based on corresponding
- * code from CRaC. Most of it will eventially become part, and distributed
- * with, CFAC
+ * code from CRaC.
  */
 
 /* 
@@ -114,7 +113,7 @@ cfacdb_t *cfacdb_open(const char *fname)
         cdb->db_format = 1;
     }
     
-    if (cdb->db_format != 1 && cdb->db_format != 2) {
+    if (cdb->db_format < 1 || cdb->db_format > 3) {
         fprintf(stderr, "Unsupported database format %d\n", cdb->db_format);
         cfacdb_close(cdb);
         return NULL;
@@ -216,9 +215,15 @@ int cfacdb_sessions(const cfacdb_t *cdb,
         return CFACDB_FAILURE;
     }
     
-    sql = "SELECT sid, symbol, anum, mass, nele_min, nele_max" \
-          " FROM _sessions_v" \
-          " ORDER BY sid";
+    if (cdb->db_format < 3) {
+        sql = "SELECT sid, symbol, anum, mass, nele_min, nele_max" \
+              " FROM _sessions_v" \
+              " ORDER BY sid";
+    } else {
+        sql = "SELECT sid, symbol, anum, mass, nele_min, nele_max, uta" \
+              " FROM _sessions_v" \
+              " ORDER BY sid";
+    }
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     
     do {
@@ -236,6 +241,11 @@ int cfacdb_sessions(const cfacdb_t *cdb,
             cbdata.mass     = sqlite3_column_double(stmt, 3);
             cbdata.nele_min = sqlite3_column_int   (stmt, 4);
             cbdata.nele_max = sqlite3_column_int   (stmt, 5);
+            if (cdb->db_format >= 3) {
+                cbdata.uta  = sqlite3_column_int   (stmt, 6);
+            } else {
+                cbdata.uta = CFACDB_FALSE;
+            }
             
             if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
                 sqlite3_finalize(stmt);
@@ -632,17 +642,25 @@ int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
         return CFACDB_FAILURE;
     }
     
-    sql = "SELECT ini_id, fin_id, mpole, rme, de" \
-          " FROM _rtransitions_v" \
-          " WHERE sid = ? AND nele <= ? AND nele >= ? AND de <> 0" \
-          " ORDER BY ini_id, fin_id";
+    if (cdb->db_format < 3) {
+        sql = "SELECT ini_id, fin_id, mpole, rme, de" \
+              " FROM _rtransitions_v" \
+              " WHERE sid = ? AND nele <= ? AND nele >= ? AND de <> 0" \
+              " ORDER BY ini_id, fin_id";
+    } else {
+        sql = "SELECT ini_id, fin_id, mpole, rme, de, uta_de, uta_sd" \
+              " FROM _rtransitions_v" \
+              " WHERE sid = ? AND nele <= ? AND nele >= ? AND de <> 0" \
+              " ORDER BY ini_id, fin_id";
+    }
+
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
     sqlite3_bind_int(stmt, 2, cdb->nele_max);
     sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     do {
-        double de, rme;
+        double de, rme, uta_de, uta_sd;
         unsigned int ilfac, iufac, m2;
         int mpole;
         
@@ -659,6 +677,13 @@ int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
             mpole = sqlite3_column_int   (stmt, 2);
             rme   = sqlite3_column_double(stmt, 3);
             de    = sqlite3_column_double(stmt, 4);
+            if (cdb->db_format >= 3) {
+                uta_de = sqlite3_column_double(stmt, 5);
+                uta_sd = sqlite3_column_double(stmt, 6);
+            } else {
+                uta_de = 0.0;
+                uta_sd = 0.0;
+            }
             
             /* in the original DB format, ini/fin levels were swapped */
             if (cdb->db_format < 2) {
@@ -674,6 +699,11 @@ int cfacdb_rtrans(cfacdb_t *cdb, cfacdb_rtrans_sink_t sink, void *udata)
             
             cbdata.ii = cdb->lmap[ilfac - cdb->id_min];
             cbdata.fi = cdb->lmap[iufac - cdb->id_min];
+            
+            cbdata.de = de;
+            
+            cbdata.uta_de = uta_de;
+            cbdata.uta_sd = uta_sd;
             
             if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
                 sqlite3_finalize(stmt);

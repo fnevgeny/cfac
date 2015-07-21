@@ -625,7 +625,7 @@ static double GKB(cfac_t *cfac, int ka, int kb, int k) {
 
 static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     SHELL *bra, int ia, int ib, int m2, int p) {
-  int ja, jb, k, kp, k0, k1, kp0, kp1, ka, kb;
+  int ja, jb = 0, k, kp, k0, k1, kp0, kp1, ka, kb = 0;
   double a, b, c, d, e;
 
   ja = GetJFromKappa(bra[ia].kappa);

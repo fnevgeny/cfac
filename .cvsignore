@@ -1,5 +1,0 @@
-*.db *.sqlite *.i
-Make.dep
-fdemo
-cfacdbu
-.gdb_history

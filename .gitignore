@@ -56,6 +56,12 @@ demo/structure/ne.lev.b
 demo/structure/ne.tr
 demo/structure/ne.tr.b
 
+# CFACDB
+cfacdb/*.i
+cfacdb/cfacdbu
+cfacdb/fdemo
+
+
 # Tags
 tags
 

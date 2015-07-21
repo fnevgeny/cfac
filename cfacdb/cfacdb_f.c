@@ -46,7 +46,7 @@ static char *f77char2str(const char *fstr, unsigned int fstrlen)
 {
     char *s = malloc(fstrlen + 1);
     if (s) {
-        unsigned int i;
+        int i;
         
         strncpy(s, fstr, fstrlen);
         s[fstrlen] = '\0';

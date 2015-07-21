@@ -6,6 +6,7 @@ CREATE TABLE cfacdb (
 CREATE TABLE sessions (
     sid     INTEGER PRIMARY KEY NOT NULL,
     version INTEGER NOT NULL,
+    uta     BOOLEAN NOT NULL,
     fname   TEXT NOT NULL,
     config  TEXT NOT NULL
 );
@@ -40,6 +41,8 @@ CREATE TABLE rtransitions (
     mpole  INTEGER NOT NULL,
     rme    REAL    NOT NULL,
     mode   INTEGER NOT NULL,
+    uta_de REAL,
+    uta_sd REAL,
     FOREIGN KEY(sid, ini_id) REFERENCES levels(sid, id) ON DELETE CASCADE,
     FOREIGN KEY(sid, fin_id) REFERENCES levels(sid, id) ON DELETE CASCADE
 );

@@ -3577,7 +3577,7 @@ int StoreTable(const cfac_t *cfac,
         retval = StoreENTable(db, sid, fp, swp);
         break;
     case DB_TR:
-        retval = StoreTRTable(db, sid, fp, swp);
+        retval = StoreTRTable(db, sid, fp, swp, iuta);
         break;
     case DB_CE:
         retval = StoreCETable(db, sid, fp, swp);

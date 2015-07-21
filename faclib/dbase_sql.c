@@ -31,7 +31,7 @@
 
 #include "schema.i"
 
-#define CFACDB_FORMAT_VERSION   2
+#define CFACDB_FORMAT_VERSION   3
 
 #define SQLITE3_BIND_STR(stmt, id, txt) \
         sqlite3_bind_text(stmt, id, txt, -1, SQLITE_STATIC)
@@ -155,13 +155,14 @@ int StoreInit(const cfac_t *cfac,
     }
 
     sql = "INSERT INTO sessions" \
-          " (sid, version, fname, config)" \
-          " VALUES (?, ?, '', '')";
+          " (sid, version, uta, fname, config)" \
+          " VALUES (?, ?, ?, '', '')";
 
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt, 1, *sid);
     sqlite3_bind_int(stmt, 2, 10000*VERSION + 100*SUBVERSION + SUBSUBVERSION);
+    sqlite3_bind_int(stmt, 3, cfac->uta ? 1:0);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
@@ -276,7 +277,8 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     return retval;
 }
 
-int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp,
+    int swp, int iuta)
 {
     int retval = 0;
     int rc;
@@ -284,9 +286,15 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     
     char *sql;
     
-    sql = "INSERT INTO rtransitions" \
-          " (sid, ini_id, fin_id, mpole, rme, mode)" \
-          " VALUES (?, ?, ?, ?, ?, ?)";
+    if (iuta) {
+        sql = "INSERT INTO rtransitions" \
+              " (sid, ini_id, fin_id, mpole, rme, mode, uta_de, uta_sd)" \
+              " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    } else {
+        sql = "INSERT INTO rtransitions" \
+              " (sid, ini_id, fin_id, mpole, rme, mode)" \
+              " VALUES (?, ?, ?, ?, ?, ?)";
+    }
     
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
@@ -319,6 +327,11 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             sqlite3_bind_int   (stmt,  4, h.multipole);
             sqlite3_bind_double(stmt,  5, r.rme);
             sqlite3_bind_int   (stmt,  6, h.mode);
+            
+            if (iuta) {
+                sqlite3_bind_double(stmt,  7, rx.de);
+                sqlite3_bind_double(stmt,  8, rx.sdev);
+            }
 
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {

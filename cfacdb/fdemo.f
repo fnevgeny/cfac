@@ -125,13 +125,14 @@ c---------
       return
       end
 
-      subroutine rt_sink(i, j, mpole, gf)
+      subroutine rt_sink(i, j, mpole, gf, uta_de, uta_sd)
       implicit none
       integer i, j, mpole
-      double precision gf
+      double precision gf, uta_de, uta_sd
 
-      write (*,921) i, j, mpole, gf
- 921  format(i5, ' -> ', i5, ' mpole = ', i2, ', gf = ', g10.3)
+      write (*,921) i, j, mpole, gf, uta_de, uta_sd
+ 921  format(i5, ' -> ', i5, ' mpole = ', i2, ', gf = ', g10.3,
+     c       ', uta_de = ', g10.3, ', uta_sd = ', g10.3)
 
       return
       end

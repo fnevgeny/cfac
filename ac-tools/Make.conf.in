@@ -9,13 +9,14 @@ PACKAGE=cfac
 SHELL = /bin/sh
 
 LIBDIRS = coul faclib
-SUBDIRS = $(LIBDIRS) sfac doc demo
+SUBDIRS = $(LIBDIRS) sfac doc demo cfacdb
 
 CFAC_COUL_LIB    = $(TOP)/coul/cfac_coul.a
 CFAC_FAC_LIB     = $(TOP)/faclib/cfac_faclib.a
 
 FACLIBS = $(CFAC_FAC_LIB) $(CFAC_COUL_LIB)
 
+AR     = @AR@
 RANLIB = @RANLIB@
 
 CC       = @CC@
@@ -36,4 +37,6 @@ exec_prefix = @exec_prefix@
 datarootdir = @datarootdir@
 
 BINDIR  = @bindir@
+LIBDIR  = @libdir@
+INCDIR  = @includedir@
 DOCDIR  = @docdir@

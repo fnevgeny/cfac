@@ -1,3 +1,7 @@
+TOP  = ..
+
+include $(TOP)/Make.conf
+
 PROGS = cfacdbu	fdemo
 
 # Suffixes
@@ -26,16 +30,10 @@ LIBS = -lsqlite3 -lgsl -lgslcblas -lm
 
 SRCS  = $(LSRCS) $(CSRCS)
 
-include Make.conf
-
-CFLAGS = $(DEBUG) $(LINT) $(OPTIMIZE) $(TCOVERAGE) $(PROFILING)
-FFLAGS = $(DEBUG) $(OPTIMIZE)
-LDFLAGS = $(DEBUG) 
-
 all: $(PROGS)
 
 $(LIBCFACDB): $(LOBJS)
-	$(RM) $@ && $(AR) $@ ${LOBJS} && $(RANLIB) $@
+	$(RM) $@ && $(AR) cr $@ ${LOBJS} && $(RANLIB) $@
 
 cfacdbu: $(COBJS) $(LIBCFACDB)
 	$(CC) $(LDFLAGS) -o $@ $(COBJS) $(LIBCFACDB) $(LIBS)
@@ -52,9 +50,11 @@ Make.dep: $(SRCS) $(SQLIS)
 	@echo "done"
 
 install: cfacdbu cfacdb.h $(LIBCFACDB)
-	mkdir -p $(DESTBIN) && install -m 755 cfacdbu $(DESTBIN)
-	mkdir -p $(DESTINC) && install -m 644 cfacdb.h $(DESTINC)
-	mkdir -p $(DESTLIB) && install -m 644 $(LIBCFACDB) $(DESTLIB)
+	mkdir -p $(DESTBIN) && install -m 755 cfacdbu $(BINDIR)
+	mkdir -p $(DESTINC) && install -m 644 cfacdb.h $(INCDIR)
+	mkdir -p $(DESTLIB) && install -m 644 $(LIBCFACDB) $(LIBDIR)
+
+check :
 
 clean:
 	rm -f $(PROGS) $(LIBCFACDB) \

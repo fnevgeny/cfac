@@ -17,6 +17,13 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
+AC_CHECK_PROG(AR, ar, ar, NONE)
+if test "$AR" = "NONE"; then
+  AC_MSG_ERROR(--> Can't find \`ar'!)
+  AC_CACHE_SAVE
+  exit 1
+fi
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T

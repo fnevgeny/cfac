@@ -1058,6 +1058,13 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
   } else {
     rx->sdev = 0.0;
   }
+  
+  /* for transitions between nearly degenerate levels, ignore the shift as
+     largely meaningless */
+  if (fabs(rx->de) > 0.5*fabs(e0)) {
+    rx->de = 0.0;
+  }
+  
   aw = FINE_STRUCTURE_CONST*(e0 + rx->de);
   if (aw < 0.0) {
     free(idatum->bra);

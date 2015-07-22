@@ -97,7 +97,6 @@ static double log_egrid[MAXNE];
 static double egrid_min = 0.05;
 static double egrid_max = 8.0;
 static int egrid_limits_type = 0;
-static double sigma[MAXNE];
 static double xegrid[MAXNTE][MAXNE];
 static double log_xegrid[MAXNTE][MAXNE];
 static int usr_different = 0;
@@ -578,7 +577,7 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   } 
 
   nqk = n_tegrid*n_egrid;
-  *p = (double *) malloc(sizeof(double)*nqk);
+  *p = malloc(sizeof(double)*nqk);
   qkc = *p;
   
   bms = BornMass();
@@ -700,7 +699,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 		   int b, int f) {
   LEVEL *lev1, *lev2;
   int i, ip, ierr;
-  double b0, qke[MAXNUSR], sigma[MAXNUSR];
+  double b0;
   int kb, nqk = NPARAMS;
   double tol, x[MAXNE], logx[MAXNE];
   ORBITAL *orb;
@@ -742,9 +741,6 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       qkc[i] = 0.0;
     }
 
-    nz = AngularZFreeBound(cfac, &ang, f, b);
-    if (nz <= 0) return -1;
-
     if (cfac->uta) {
       int nq;
       
@@ -755,10 +751,15 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 
       for (i = 0; i < nqk; i++) {
         qkc[i] = M_PI_2*cbo_params[ip+kl0][i]/(*te);
-        qkc[i] *= qb*(lev1->ilev+1.0);
-
+        qkc[i] *= qb*(lev1->ilev + 1.0);
       }
+
+      free(idatum->bra);
+      free(idatum);
     } else {
+      nz = AngularZFreeBound(cfac, &ang, f, b);
+      if (nz <= 0) return -1;
+
       for (i = 0; i < nz; i++) {
         int j;
         double c;
@@ -777,24 +778,19 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
         
         ip = (orb->n - 1)*orb->n/2;
         for (j = 0; j < nqk; j++) {
-	  qke[j] = M_PI_2*cbo_params[ip+kl][j]/(*te);
-	  qkc[j] += c*qke[j];
+	  qkc[j] += c*M_PI_2*cbo_params[ip+kl][j]/(*te);
         }
       }
+      
+      free(ang);
     }
     
     CIRadialQkFromFit(NPARAMS, qkc, n_usr, xusr, log_xusr, qku);
     
-    if (cfac->uta) {
-      free(idatum->bra);
-      free(idatum);
-    } else {
-      free(ang);
-    }
-    
     return kl0;
   } else {
     double bethe;
+    double qke[MAXNUSR], sigma[MAXNUSR];
     
     kl0 = BoundFreeOS(qke, qkc, te, b, f, -1, cfac->uta);
     if (kl0 < 0) return kl0;
@@ -811,6 +807,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
     
     if (!cfac->uta) {
       nz = AngularZFreeBound(cfac, &ang, f, b);
+      if (nz <= 0) return -1;
     }
     
     if (qk_mode == QK_BED) {
@@ -1045,7 +1042,7 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   pw_type = 0;
   if (usr_egrid_type < 0) usr_egrid_type = 1;
   nqk = NPARAMS;
-  r.params = (float *) malloc(sizeof(float)*nqk);
+  r.params = malloc(sizeof(float)*nqk);
     
   fhdr.type = DB_CI;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
@@ -1151,7 +1148,6 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
 	if (egrid_type == 1) xegrid[i][ie] += 1.0;
 	log_xegrid[i][ie] = log(xegrid[i][ie]);
       }
-      sigma[ie] = 1.0;
     }
     yegrid0[0] = log(1E-5);
     delta = (log(0.5) - yegrid0[0])/(NINT-1.0);
@@ -1166,7 +1162,7 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
       SetCIPWGrid(0, NULL, NULL);
     }
 
-    r.strength = (float *) malloc(sizeof(float)*n_usr);
+    r.strength = malloc(sizeof(float)*n_usr);
 
     ci_hdr.n_tegrid = n_tegrid;
     ci_hdr.n_egrid = n_egrid;

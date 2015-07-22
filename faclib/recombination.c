@@ -836,19 +836,19 @@ int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
 int BoundFreeOS(double *rqu, double *rqc, double *eb, 
 		int rec, int f, int m, int iuta) {
   LEVEL *lev1, *lev2;
-  ORBITAL *orb;
+  ORBITAL *orb = NULL;
   double rq[MAXNE], tq[MAXNE];
   double a, b, d, eb0 = 0.0, z;
   int nkl = 0, nq = 0, k;
   int ie, c;
-  int kb, jb, klb;
+  int kb = 0, jb, klb;
   
   ANGULAR_ZFB *ang;
-  int i, j, kbp, jbp, nz;
+  int i, j, kbp, jbp, nz = 0;
   double amax;
 
   INTERACT_DATUM *idatum;
-  int j1, ns, q1;
+  int j1 = 0, ns, q1 = 0;
 
   lev1 = GetLevel(cfac, rec);
   lev2 = GetLevel(cfac, f);

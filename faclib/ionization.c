@@ -705,7 +705,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
   ORBITAL *orb;
   ANGULAR_ZFB *ang;
   INTERACT_DATUM *idatum;
-  int nz, j0, j0p, kl0 = 0, kl, kbp, qb;
+  int nz, j0, j0p, kl0 = 0, kl, kbp, qb = 0;
   double cmax = 0.0;
 
   lev1 = GetLevel(cfac, b);

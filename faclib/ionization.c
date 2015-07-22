@@ -751,7 +751,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
   } else {
     double bethe;
     
-    kl0 = BoundFreeOS(qke, qkc, te, b, f, -1);
+    kl0 = BoundFreeOS(qke, qkc, te, b, f, -1, 0);
     if (kl0 < 0) return kl0;
     
     nz = AngularZFreeBound(cfac, &ang, f, b);

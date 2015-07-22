@@ -832,18 +832,23 @@ int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
 
   return 0;
 }
-    
+
 int BoundFreeOS(double *rqu, double *rqc, double *eb, 
-		int rec, int f, int m) {
+		int rec, int f, int m, int iuta) {
   LEVEL *lev1, *lev2;
-  ANGULAR_ZFB *ang;
   ORBITAL *orb;
-  int nz, ie, k;
-  double a, b, d, amax, eb0 = 0.0, z;
   double rq[MAXNE], tq[MAXNE];
-  int i, j, c;
-  int nkl = 0, nq = 0;
-  int kb, kbp, jb, klb, jbp;
+  double a, b, d, eb0 = 0.0, z;
+  int nkl = 0, nq = 0, k;
+  int ie, c;
+  int kb, jb, klb;
+  
+  ANGULAR_ZFB *ang;
+  int i, j, kbp, jbp, nz;
+  double amax;
+
+  INTERACT_DATUM *idatum;
+  int j1, ns, q1;
 
   lev1 = GetLevel(cfac, rec);
   lev2 = GetLevel(cfac, f);
@@ -851,44 +856,81 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   *eb = (lev2->energy - lev1->energy);
   if (*eb <= 0.0) return -1;
 
-  nz = AngularZFreeBound(cfac, &ang, f, rec);
-  if (nz <= 0) return -1;
+  if (iuta) {
+    idatum = NULL;
+    ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->iham, lev1->iham,
+		     lev2->pb, lev1->pb, 0, 0, 1);  
+    if (ns <= 0) return -1;
+    if (idatum->s[1].index < 0 || idatum->s[3].index >= 0) {
+      free(idatum->bra);
+      free(idatum);
+      return -1;
+    }
+
+    j1 = idatum->s[1].j;
+    q1 = idatum->s[1].nq_ket;
+    kb = OrbitalIndex(cfac, idatum->s[1].n, idatum->s[1].kappa, 0.0);
+    orb = GetOrbital(cfac, kb);
+    eb0 = -(orb->energy);
+    GetJLFromKappa(orb->kappa, &jb, &klb);
+    klb /= 2;
+  } else {
+    nz = AngularZFreeBound(cfac, &ang, f, rec);
+    if (nz <= 0) return -1;
+  }
 
   c = 2*abs(m) - 2;
 
   for (ie = 0; ie < n_egrid; ie++) {
     tq[ie] = 0.0;
   }
-  amax = 0.0;
-  for (i = 0; i < nz; i++) {
-    kb = ang[i].kb;
-    orb = GetOrbital(cfac, kb);
-    jbp = orb->kappa;
-    GetJLFromKappa(jbp, &jb, &klb);
-    klb /= 2;
-    for (j = 0; j <= i; j++) {
-      kbp = ang[j].kb;
-      jbp = GetOrbital(cfac, kbp)->kappa;
-      jbp = GetJFromKappa(jbp);
-      if (jbp != jb) continue;
-      k = RRRadialQk(rq, *eb, kb, kbp, m);
-      if (k < 0) continue;
-      a = ang[i].coeff*ang[j].coeff;
-      if (j != i) {
-	a *= 2;
-      } else {
-	if (a > amax) {
-	  nkl = klb;
-	  nq = orb->n; 
-	  amax = a;
-	  eb0 = -(orb->energy);
-	}
-      }
-      for (ie = 0; ie < n_egrid; ie++) {
-	tq[ie] += a*rq[ie];
+  
+  if (iuta) {
+    k = RRRadialQk(rq, *eb, kb, kb, m);
+    if (k < 0) {
+      free(idatum->bra);
+      free(idatum);
+      return -1;
+    };
+
+    nq = orb->n;
+    nkl = klb;
+    for (ie = 0; ie < n_egrid; ie++) {
+      tq[ie] += (jb+1.0)*rq[ie];
+    }
+  } else {
+    amax = 0.0;
+    for (i = 0; i < nz; i++) {
+      kb = ang[i].kb;
+      orb = GetOrbital(cfac, kb);
+      jbp = orb->kappa;
+      GetJLFromKappa(jbp, &jb, &klb);
+      klb /= 2;
+      for (j = 0; j <= i; j++) {
+        kbp = ang[j].kb;
+        jbp = GetOrbital(cfac, kbp)->kappa;
+        jbp = GetJFromKappa(jbp);
+        if (jbp != jb) continue;
+        k = RRRadialQk(rq, *eb, kb, kbp, m);
+        if (k < 0) continue;
+        a = ang[i].coeff*ang[j].coeff;
+        if (j != i) {
+	  a *= 2;
+        } else {
+	  if (a > amax) {
+	    nkl = klb;
+	    nq = orb->n; 
+	    amax = a;
+	    eb0 = -(orb->energy);
+	  }
+        }
+        for (ie = 0; ie < n_egrid; ie++) {
+	  tq[ie] += a*rq[ie];
+        }
       }
     }
   }
+
   if (qk_mode == QK_FIT) {
     z = GetResidualZ(cfac);
     RRRadialQkHydrogenicParams(NPARAMS, rqc, z, nq, nkl);
@@ -946,7 +988,18 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
     }
   }      
  
-  free(ang);
+  if (iuta) {
+    d = (lev1->ilev+1.0)*(q1/(j1+1.0));
+    for (ie = 0; ie < n_usr; ie++) {
+      rqu[ie] *= d;
+    }
+    rqc[0] *= d;
+
+    free(idatum->bra);
+    free(idatum);
+  } else {
+    free(ang);
+  }
 
   return nkl;
 }
@@ -1135,6 +1188,109 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
     free(p);    
     return k;
   }
+}
+
+int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
+  INTERACT_DATUM *idatum;
+  LEVEL *lev1, *lev2;
+  int j0, j1, jb, ns, q0, q1, qb;
+  int k0, k1, kb, kmin, kmax, jmin, jmax;
+  int jf, ik, klf, kappaf, k, nt, j, jm;
+  double a, b, r, s, log_e, *ai_pk;
+  
+  *rate = 0.0;
+  lev1 = GetLevel(cfac, rec);
+  lev2 = GetLevel(cfac, f);
+
+  if (GetLevNumElectrons(cfac, lev1) != GetLevNumElectrons(cfac, lev2) + 1) {
+    return -1;
+  }
+  
+  log_e = log(*e);
+  
+  idatum = NULL;
+  ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->iham, lev1->iham,
+		   lev2->pb, lev1->pb, 0, 0, 1);  
+  if (ns <= 0) return -1;
+  if (idatum->s[3].index < 0) {
+    free(idatum->bra);
+    free(idatum);
+    return -1;
+  }
+
+  kb = OrbitalIndex(cfac, idatum->s[1].n, idatum->s[1].kappa, 0.0);
+  k0 = OrbitalIndex(cfac, idatum->s[2].n, idatum->s[2].kappa, 0.0);
+  k1 = OrbitalIndex(cfac, idatum->s[3].n, idatum->s[3].kappa, 0.0);
+  j0 = idatum->s[2].j;
+  j1 = idatum->s[3].j;
+  jb = idatum->s[1].j;
+  q0 = idatum->s[2].nq_ket;
+  q1 = idatum->s[3].nq_ket;
+  qb = idatum->s[1].nq_ket;
+
+  if (idatum->s[1].index != idatum->s[3].index) {
+    kmin = abs(j0-j1);
+    kmax = j0 + j1;
+    jmin = 1;
+    jmax = j1+j0+jb;
+    nt = 1;
+    r = 0.0;
+    for (jf = jmin; jf <= jmax; jf += 2) {
+      for (ik = -1; ik <= 1; ik += 2) {
+	klf = jf + ik;
+	kappaf = GetKappaFromJL(jf, klf);
+	for (k = kmin; k <= kmax; k += 2) {
+	  if (!Triangle(j0, j1, k) || !Triangle(jb, jf, k)) continue;
+	  AIRadialPk(&ai_pk, k0, k1, kb, kappaf, k);
+	  if (n_egrid > 1) {
+	    UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	  } else {
+	    s = ai_pk[0];
+	  }
+	  s = s*s/(k + 1.0);
+	  r += s;
+	}
+      }
+    }  
+    r *= 4.0*(q1/(j1+1.0))*(qb/(jb+1.0))*((j0+1.0-q0)/(j0+1.0));
+  } else {
+    jm = 2*j1;
+    r = 0.0;
+    nt = 1;
+    for (j = 0; j <= jm; j += 4) {
+      jmin = abs(j-j0);
+      jmax = j+j0;
+      for (jf = jmin; jf <= jmax; jf += 2) {
+	for (ik = -1; ik <= 1; ik += 2) {
+	  klf = jf + ik;
+	  kappaf = GetKappaFromJL(jf, klf);
+	  kmin = abs(j0-j1);
+	  kmax = j0 + j1;
+	  a = 0.0;
+	  for (k = kmin; k <= kmax; k += 2) {
+	    if (!Triangle(jb, jf, k)) continue;
+	    b = W6j(j, jf, j0, k, j1, j1);
+	    if (fabs(b) < EPS30) continue;
+	    AIRadialPk(&ai_pk, k0, k1, kb, kappaf, k);
+	    if (n_egrid > 1) {
+	      UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	    } else {
+	      s = ai_pk[0];
+	    } 
+	    a += b*s;
+	  }
+	  r += a*a*2.0*(j+1.0);
+	}
+      }
+    }
+    r *= 4.0*(q1/(j1+1.0))*((qb-1.0)/jb)*((j0+1.0-q0)/(j0+1.0));
+  }
+
+  *rate = r;
+  
+  free(idatum->bra);
+  free(idatum);
+  return 0;
 }
 
 int AIRadial1E(double *ai_pk, int kb, int kappaf) {
@@ -1574,9 +1730,11 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
 	lev2 = GetLevel(cfac, low[j]);
 	e = lev1->energy - lev2->energy;
 	if (e < e0 || e >= e1) continue;
-	nq = BoundFreeOS(rqu, qc, &eb, low[j], up[i], m);
+        
+        nq = BoundFreeOS(rqu, qc, &eb, low[j], up[i], m, cfac->uta);
 	if (nq < 0) continue;
-	r.b = low[j];
+	
+        r.b = low[j];
 	r.f = up[i];
 	r.kl = nq;
 	
@@ -1778,7 +1936,11 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 	if (e < 0 && lev1->ibase != up[j]) e -= eref;
 	if (e < e0 || e >= e1) continue;
 	if (!msub) {
-	  k = AutoionizeRate(&s, &e, low[i], up[j], msub);
+	  if (cfac->uta) {
+	    k = AutoionizeRateUTA(&s, &e, low[i], up[j]);
+          } else {
+            k = AutoionizeRate(&s, &e, low[i], up[j], msub);
+          }
 	  if (k < 0) continue;
 	  if (s < ai_cut) continue;
 	  r.b = low[i];

@@ -61,7 +61,7 @@ void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx,
 void RRRadialQkHydrogenicParams(int np, double *p, double z, int n, int klb);
 int BoundFreeMultipole(FILE *fp, int rec, int f, int m);
 int BoundFreeOS(double *rqu, double *p, 
-		double *eb, int rec, int f, int m);
+		double *eb, int rec, int f, int m, int iuta);
 int PrepRREGrids(double eth, double emax0);
 int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveRecRR(int nlow, int *low, int nup, int *up, char *fn, int m);

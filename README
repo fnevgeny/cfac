@@ -33,8 +33,7 @@ Note: If you install the above software using a package manager of your OS, make
 Installation:
 1) ./configure
 Note 1: Specify --prefix=my/dir, if the default /usr/local is not what you 
-        want. This directory only affects the installation of the sfac
-        executable.
+        want.
 Note 2: Use the "--with-extrainc" and "--with-extralib" options if the
         third-party libraries are not installed in the default system place.
 Note 3: Run ./configure --help for more options.
@@ -45,7 +44,8 @@ Note 3: Run ./configure --help for more options.
 This will run a test suite of demo scripts. Any error should be reported!
 
 4) make install
-This installs the "sfac" binary.
+This installs the "sfac" binary, as well as the CFACDB library, C header file,
+and utility.
 
 Usage:
 The "sfac" executable accepts an input file as its only argument. See the "demo"

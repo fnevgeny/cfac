@@ -1,38 +1,11 @@
 CFACDB is a set of application programming interface (API) calls for accessing
 cFAC-generated databases from C or Fortran codes.
 
-cFAC is a descendant of Flexible Atomic Code (FAC), a software package for
-calculation of atomic structure and various processes, written by Ming Feng Gu
-at the Space Science Laboratory of Berkeley. The main focus of cFAC is on
-producing large volumes of data as required, e.g., for collisional-radiative
-plasma modeling.
+The data are returned via user-provided "sink" callback routines. Until a proper
+documentation is written, please refer to the "fdemo.f" Fortran code
+demonstrating usage of the Fortran API.
 
-The data are returned via user-provided "sink" callback routines.
-
-Prerequisites:
--------------
-1) C and Fortran compilers (gcc and gfortran recommended);
-2) standard Unix set of utilities (make, sed, cat, sh,...)
-3) The GNU Scientific Library (GSL) <http://www.gnu.org/software/gsl/>;
-4) The SQLite software library <http://www.sqlite.org/>.
-
-Note: If you install the above libraries using a package manager of your OS,
-      make sure you select the development packages (*-dev*).
-
-Installation:
-------------
-1) Edit Make.conf according to your preferences
-2) make
-3) make install
-
-If successful, the library and the C header file will be installed. In addition,
-the (very rudimentary at the moment) "cfacdbu" utility will be installed.
+In addition, a very rudimentary at the moment "cfacdbu" utility is provided.
 When run with a database pathname as its argument, a basic information of the
 data stored in the file will be displayed. The functionality of the utility will
 soon be extended.
-
-Usage:
------
-Until a proper documentation is written, please refer to the "fdemo.f" Fortran
-code demonstrating usage of the Fortran API.
-

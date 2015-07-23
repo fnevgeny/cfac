@@ -1155,7 +1155,6 @@ static int crac_save_rtrans0(cfac_t *cfac,
     LEVEL *lev1, *lev2;
     int k;
 
-    // qsort(low, nlow, sizeof(int), CompareNRLevel);
     nc0 = malloc(sizeof(int)*nlow);
     ic0 = 0;
     for (i = 0; i < nlow; i++) {
@@ -1171,7 +1170,6 @@ static int crac_save_rtrans0(cfac_t *cfac,
     
     
     if (up != low) {
-      // qsort(up, nup, sizeof(int), CompareNRLevel);
       nc1 = malloc(sizeof(int)*nup);
       ic1 = 0;
       for (i = 0; i < nup; i++) {
@@ -1226,7 +1224,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
 	  if (rd[ir].r.lower < 0) {
 	    continue;
 	  }
-	  // WriteTRRecord(f, &(rd[ir].r), &(rd[ir].rx));
+
           rtdata.fi = rd[ir].r.lower;
           rtdata.ii = rd[ir].r.upper;
           rtdata.rme = rd[ir].r.rme;

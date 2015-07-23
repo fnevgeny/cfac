@@ -985,7 +985,7 @@ double ConfigEnergyShift(cfac_t *cfac,
 }
 
 static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
-		   int m, int lower, int upper, int *ks) {
+		   int mpole, int lower, int upper, int *ks) {
   int m2, ns, k0, k1, q1, q2;
   int p1, p2, j1, j2, ia, ib;
   LEVEL *lev1, *lev2;
@@ -1002,8 +1002,8 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
 
   p1 = lev1->pj;
   p2 = lev2->pj;
-  if (m > 0 && IsEven(p1+p2+m)) return -1;
-  if (m < 0 && IsOdd(p1+p2+m)) return -1;
+  if (mpole > 0 && IsEven(p1 + p2 + mpole)) return -1;
+  if (mpole < 0 && IsOdd(p1 + p2 + mpole)) return -1;
   
   idatum = NULL;
   ns = GetInteract(cfac, &idatum, NULL, NULL, lev1->iham, lev2->iham,
@@ -1043,7 +1043,7 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
     if (idatum->s[0].kappa > 0)  ks[1] |= 0x01000000;
   }
 
-  m2 = 2*abs(m);
+  m2 = 2*abs(mpole);
   if (!Triangle(j1, j2, m2)) {
     free(idatum->bra);
     free(idatum);
@@ -1051,11 +1051,11 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
   }
 
   e0 = lev2->energy - lev1->energy;
-  rx->de = 0.0;
-  if (m < 0) {
-    rx->de += ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
+  if (mpole < 0) {
+    rx->de = ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
     rx->sdev = sqrt(ConfigEnergyVariance(cfac, ns, idatum->bra, ia, ib, m2));
   } else {
+    rx->de = 0.0;
     rx->sdev = 0.0;
   }
   
@@ -1072,16 +1072,17 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
     return -1;
   }
   
-  if (cfac->tr_opts.mode == M_NR && m != 1) {
-    r = MultipoleRadialNR(cfac, m, k0, k1, cfac->tr_opts.gauge);
+  if (cfac->tr_opts.mode == M_NR && mpole != 1) {
+    r = MultipoleRadialNR(cfac, mpole, k0, k1, cfac->tr_opts.gauge);
   } else {
-    r = MultipoleRadialFR(cfac, aw, m, k0, k1, cfac->tr_opts.gauge);
+    r = MultipoleRadialFR(cfac, aw, mpole, k0, k1, cfac->tr_opts.gauge);
   }
 
   *strength = sqrt((lev1->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
   
   free(idatum->bra);
   free(idatum);
+  
   return 0;
 }
 

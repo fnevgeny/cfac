@@ -1145,7 +1145,9 @@ double ZerothResidualConfig(cfac_t *cfac, CONFIG *cfg) {
 double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
   int i, j, n, kappa, nq, np, kappap, nqp;
   int k, kp, kk, kl, klp, kkmin, kkmax, j2, j2p;
-  double x, y, t, q, a, b, r, e;
+  double x, y, t, q, a, b, r, e, am;
+  
+  am = AMU * cfac_get_atomic_mass(cfac);
  
   x = 0.0;
   for (i = 0; i < cfg->n_shells; i++) {
@@ -1158,12 +1160,24 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
     
     if (nq > 1) {
       t = 0.0;
-      for (kk = 2; kk <= j2; kk += 2) {
-	Slater(cfac, &y, k, k, k, k, kk, 0);
-	q = W3j(j2, 2*kk, j2, -1, 0, 1);
-	t += y * q * q ;
+
+      for (kk = 1; kk <= j2; kk += 1) {
+	y = 0;
+	if (IsEven(kk)) {
+	  Slater(cfac, &y, k, k, k, k, kk, 0);
+	}
+	if (cfac->qed.br < 0 || n <= cfac->qed.br) {
+	  y += Breit(cfac, k, k, k, k, kk, kl, kl, kl, kl);
+	}
+	if (y) {
+	  q = W3j(j2, 2*kk, j2, -1, 0, 1);
+	  t += y * q * q ;
+	}
       }
       Slater(cfac, &y, k, k, k, k, 0, 0);
+      if (cfac->qed.br < 0 || (n > 0 && n <= cfac->qed.br)) {
+	y += Breit(cfac, k, k, k, k, 0, kl, kl, kl, kl);
+      }
       b = ((nq-1.0)/2.0) * (y - (1.0 + 1.0/j2)*t);
 
     } else {
@@ -1172,6 +1186,9 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
 
     t = 0.0;
     for (j = 0; j < i; j++) {
+      int maxn;
+      double bi;
+      
       np = (cfg->shells[j]).n;
       kappap = (cfg->shells[j]).kappa;
       klp = GetLFromKappa(kappap);
@@ -1181,20 +1198,39 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
 
       kkmin = abs(j2 - j2p);
       kkmax = (j2 + j2p);
-      if (IsOdd((kkmin + kl + klp)/2)) kkmin += 2;
+      maxn = Max(n, np);
       a = 0.0;
-      for (kk = kkmin; kk <= kkmax; kk += 4) {
-	Slater(cfac, &y, k, kp, kp, k, kk/2, 0);
-	q = W3j(j2, kk, j2p, -1, 0, 1);
-	a += y * q * q;
+      for (kk = kkmin; kk <= kkmax; kk += 2) {
+	int kk2 = kk/2;
+	y = 0.0;
+	if (IsEven((kl+klp+kk)/2)) {
+	  Slater(cfac, &y, k, kp, kp, k, kk2, 0);
+	  if (kk == 2 && cfac->qed.sms) {
+	    double v = Vinti(cfac, k, kp)*Vinti(cfac, kp, k);
+	    y -= v/am;
+	  }
+        }
+        if (cfac->qed.br < 0 || maxn <= cfac->qed.br) {
+          y += Breit(cfac, k, kp, kp, k, kk2, kl, klp, klp, kl);
+        }
+	if (y) {
+	  q = W3j(j2, kk, j2p, -1, 0, 1);
+	  a += y * q * q;
+ 	}
       }
+      y = 0.0;
       Slater(cfac, &y, k, kp, k, kp, 0, 0);
-
+      bi = 0.0;
+      if (cfac->qed.br < 0 || maxn <= cfac->qed.br) {
+	bi = Breit(cfac, k, kp, k, kp, 0, kl, klp, kl, klp);
+	y += bi;
+      }      
       t += nqp * (y - a);
     }
 
     ResidualPotential(cfac, &y, k, k);
     e = GetOrbital(cfac, k)->energy;
+    e += QED1E(cfac, k, k);
     r = nq * (b + t + e + y);
     x += r;
   }
@@ -1911,31 +1947,27 @@ int SlaterTotal(cfac_t *cfac,
   am = AMU * cfac_get_atomic_mass(cfac);
   if (sd) {
     d = 0.0;
-    if (IsEven((kl0+kl2)/2+kk) && IsEven((kl1+kl3)/2+kk) &&
-	Triangle(js[0], js[2], k) && Triangle(js[1], js[3], k)) {
-      Slater(cfac, &d, k0, k1, k2, k3, kk, mode);
-      if (kk == 1 && cfac->qed.sms && maxn > 0) {
-	a1 = Vinti(cfac, k0, k2);
-	a2 = Vinti(cfac, k1, k3);
-	d -= a1 * a2 / am;
+    if (Triangle(js[0], js[2], k) && Triangle(js[1], js[3], k)) {
+      if (IsEven((kl0+kl2)/2+kk) && IsEven((kl1+kl3)/2+kk)) {	
+	Slater(cfac, &d, k0, k1, k2, k3, kk, mode);
+	if (kk == 1 && cfac->qed.sms && maxn > 0) {
+	  a1 = Vinti(cfac, k0, k2);
+	  a2 = Vinti(cfac, k1, k3);
+	  d -= a1 * a2 / am;
+	}
       }
-      a1 = ReducedCL(js[0], k, js[2]);
-      a2 = ReducedCL(js[1], k, js[3]); 
-      d *= a1*a2;
-      if (k0 == k1 && k2 == k3) d *= 0.5;
-    }
-    *sd = d;
-    d = 0.0;
-    if (cfac->qed.br < 0 || (maxn > 0 && maxn <= cfac->qed.br)) {
-      if (Triangle(js[0], js[2], k) && Triangle(js[1], js[3], k)) {
-	d = Breit(cfac, k0, k1, k2, k3, kk, kl0, kl1, kl2, kl3);
+
+      if (cfac->qed.br < 0 || (maxn > 0 && maxn <= cfac->qed.br)) {
+        d += Breit(cfac, k0, k1, k2, k3, kk, kl0, kl1, kl2, kl3);
+      }
+      if (d) {
 	a1 = ReducedCL(js[0], k, js[2]);
 	a2 = ReducedCL(js[1], k, js[3]);
 	d *= a1*a2;
 	if (k0 == k1 && k2 == k3) d *= 0.5;
       }
     }
-    *sd += d;
+    *sd = d;
   }
   
   if (!se) goto EXIT;

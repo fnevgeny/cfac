@@ -6,7 +6,7 @@ all : $(DOCS)
 
 include $(TOP)/Make.conf
 
-manual.pdf : manual.tex
+manual.pdf : manual.tex facref.bib
 	pdflatex manual
 	bibtex manual
 	makeindex manual

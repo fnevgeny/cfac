@@ -1,11 +1,12 @@
-\documentclass[twoside,letterpaper]{refrep}
+\documentclass[twoside,a4paper]{refrep}
+
 \usepackage{makeidx}
 \usepackage{natbib}
 \usepackage{xspace}
-\usepackage{graphicx}
 \usepackage{verbatim}
-\usepackage{threeparttable}
-\usepackage[pdftex,bookmarks,colorlinks=false,pdfborder=0]{hyperref}
+
+\usepackage[pdftex,bookmarks, colorlinks, breaklinks]{hyperref}
+\hypersetup{linkcolor=blue,citecolor=blue,filecolor=black,urlcolor=blue}
 
 \usepackage{listings}
 \newcommand{\includecode}[2][sh]{\lstinputlisting[language=#1]{#2}}
@@ -18,20 +19,6 @@
 \newcommand{\var}[1]{\textit{#1}}
 \newcommand{\key}[1]{\texttt{#1}}
 
-\newcommand{\threej}[6]{\ensuremath{\left({#1\atop #4}{#2\atop #5}
-{#3\atop #6}\right)}}
-\newcommand{\sixj}[6]{\ensuremath{\left\{{#1\atop #4}{#2\atop #5}
-{#3\atop #6}\right\}}}
-
-\newenvironment{ttscript}[1]{
-	\begin{list}{}{
-	\settowidth{\labelwidth}{\texttt{#1}}
-	\setlength{\leftmargin}{\labelwidth}
-	\addtolength{\leftmargin}{\labelsep}
-	\setlength{\parsep}{0.5ex plus0.2ex minus0.2ex}
-	\setlength{\itemsep}{0.3ex}
-	\renewcommand{\makelabel}[1]{\texttt{##1\hfill}}}}
-	{\end{list}}
 \newenvironment{dbdesc}{\textbf{Field Description:} \begin{list}
 	{:}{\setlength{\labelwidth}{2in}
 	   \setlength{\leftmargin}{2in}
@@ -2311,7 +2298,6 @@ method. In the \key{BED} mode, the radial integrals are calculated using the
 bound-free differential oscillator strengths, which can be computed much
 faster than the \key{DW} ionization radial integrals.}
 
-%\bibliographystyle{plainapj}
 \bibliographystyle{plain}
 \bibliography{facref}
 

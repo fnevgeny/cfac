@@ -22,13 +22,6 @@
 
 #include <math.h>
 
-#define VersionGE(h, a, b, c)    (((h)->version >= (a)) &&\
-                                  ((h)->sversion >= (b)) &&\
-                                  ((h)->ssversion >= (c)))
-#define VersionLE(h, a, b, c)    (((h)->version <= (a)) &&\
-                                  ((h)->sversion <= (b)) &&\
-                                  ((h)->ssversion <= (c)))
-
 /* 
 ** MACRO:       IsOdd, IsEven
 ** PURPOSE:     determin if an integer is Odd or Even.

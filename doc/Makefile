@@ -14,7 +14,7 @@ manual.pdf : manual.tex facref.bib
 	pdflatex manual
 
 clean :
-	rm -f *~ *.aux *.bbl *.blg *.idx *.log *.out *.toc *.ilg *.ind
+	rm -f *~ *.aux *.bbl *.blg *.idx *.log *.out *.toc *.ilg *.ind *.lol
 
 devclean : clean
 	rm -f $(DOCS)

@@ -81,7 +81,7 @@ background and computational methods are not discussed in this manual,
 instead, they are described in a series of papers which are distributed along
 with this package and this manual.
 
-FAC is a step forward to bring detailed atomic model accessable to a wide
+FAC is a step forward to bring detailed atomic model accessible to a wide
 community of laboratory and astrophysical plasma diagnostics. Its flexible
 interface is designed to be useful even for people without a deep
 understanding of the underlying atomic theories. It is also powerful enough
@@ -100,7 +100,7 @@ tenure.
 The latest version of FAC is \facversion. It can be obtained from
 \textbf{http://sprg.ssl.berkeley.edu/~mfgu/fac}. I can also send a copy to you
 through email. Please request to \textbf{mfgu@ssl.berkeley.edu}. It is being
-continously developed at present, so please check regularly to get the newest
+continuously developed at present, so please check regularly to get the newest
 version.
 
 Much of the FAC package is written in ANSI C and Fortran 77. It should 
@@ -160,7 +160,7 @@ results in the potential to be less optimized for \verb|n2| and \verb|n3|
 individually. Lines 14 and 21 are used to make a crude correction to the
 resulting energy levels due to this effect. The first call to
 \verb|ConfigEnergy(0)| will make individual optimization to all configuration
-groups. The average energy of each configuration group with these indivudually 
+groups. The average energy of each configuration group with these individually 
 optimized potential is then calculated and stored. The
 second call to \verb|ConfigEnergy(1)| will then recalculate the average energy
 of configuration groups under the potential taking into account all
@@ -176,11 +176,11 @@ last argument to \verb|PrintTable| indicates it be done in verbose mode). For
 the conversion in simple mode (the last argument is 0), the in-memory table is
 not needed, and Line 24 may be omitted. For the difference between the verbose
 and simple ASCII files, see Chapter \ref{cha:format}. Line 27 calculates the
-E1 oscillator strength and transition rates between cofiguration groups
+E1 oscillator strength and transition rates between configuration groups
 \verb|n2| and \verb|n3|, and saves the results in the binary file
 \verb|tr.asc.b|. The function \verb|TransitionTable| accepts an optional 4th
 integer argument specifying the transition type. A negative integer means
-electric multipol and a positive integer for magnetic multipole. The absolute
+electric multipole and a positive integer for magnetic multipole. The absolute
 value of the integer indicates the rank of the multipole. Therefore, $-1$ would
 be E1, $+1$ would be M1, etc. Without this argument, the default is E1, as is
 done here. Line 28 converts the binary output to an ASCII file in verbose
@@ -195,7 +195,7 @@ mode. The exact formats of binary and ASCII files are explained in Chapter
 \includecode[]{../demo/structure/ref/tr.asc}
 
 In file \verb|lev.asc|, the energy, parity, $2J$ ($J$ is the total
-angular momentum of the level), and configuration coupling informations are
+angular momentum of the level), and configuration coupling information are
 listed. In file \verb|tr.asc|, the upper and lower level indexes, the $2J$
 values of these levels, the transition energy, $gf$-values, radiative
 decay rates, and the reduced multipole matrix elements are given.
@@ -216,8 +216,8 @@ contract NAS8-39073.
 
 Any opinions, findings and conclusions or
 recommendations expressed in this manual are those of the author and do not
-necessrarily reflect the views of the National Aeronautics Space
-Administration and/or the Smithonian Astrophysical Observatory.
+necessarily reflect the views of the National Aeronautics Space
+Administration and/or the Smithsonian Astrophysical Observatory.
 
 \chapter{Description of Output Files}
 \label{cha:format}
@@ -229,7 +229,7 @@ describe the structure of these files in detail.
 \section{Binary Format}
 \label{sec:binary}
 \index{Binary format}
-Presently, FAC produces different types of files. Each type is asigned
+Presently, FAC produces different types of files. Each type is assigned
 a unique integer, which corresponds to a macro define in the file
 \verb|faclib/dbase.h|. These types are
 \begin{description}
@@ -292,9 +292,9 @@ value returned by the C lib function time(0). It is platform dependent.
 \item[\texttt{int type}:] Type of the data file.
 \item[\texttt{float atom}:] Atomic number.
 \item[\texttt{char symbol[4]}:] The first 3 bytes contains a NULL
-terminated C string representing the 2-charactor abbreviation of the atomic
+terminated C string representing the 2-character abbreviation of the atomic
 symbol. The 4th byte is either 0 or 1, indicating whether the platform stores
-data in litle or big endian.
+data in little or big endian.
 \item[\texttt{int nblocks}:] Number of data blocks in this file.
 \end{dbdesc}
 
@@ -365,19 +365,19 @@ electron, and the $\pm$ sign indicates an even ($+$) or odd ($-$) parity state.
   also -1. The value of \texttt{ibase} is primarily used in dealing with DR
   and RE rates, where it may help the distinguish different resonance channels
   and facilitate easy extrapolation. This variable is only added in version
-  FAC 1.0.4. So these later versions are not compartible with the binary
-  output of the ealier versions.
+  FAC 1.0.4. So these later versions are not compatible with the binary
+  output of the earlier versions.
 \item[\texttt{energy}:] The energy of the level in Hartree.
 \item[\texttt{char ncomplex[LNCOMPLEX]}:] The complex name. It is in the format
 of \verb|n1*nq1 n2*nq2|$\cdots$, where \verb|n1| and \verb|n2| are the
 principle quantum numbers of the shell, \verb|nq1| and \verb|nq2| are the
 occupation number of these shells.
-\item[\texttt{char sname[LSNAME]}:] The non-relativstic configuration name of
+\item[\texttt{char sname[LSNAME]}:] The non-relativistic configuration name of
 the level. Each non-relativistic shell is denoted by the standard
 spectroscopic notation, e.g., \verb|2p2| for 2 electrons in $2p$ shell. Only
 open and non-empty shells are given. No coupling information is available in
 this name.
-\item[\texttt{char name[LNAME]}:] The relativstic configuration name of the
+\item[\texttt{char name[LNAME]}:] The relativistic configuration name of the
 level. Each shell is denoted such that \verb|2p+2(2)| represents 2 electrons in
 $2p_{3/2}(J=1)$ and \verb|2p-2(2)| represents 2 electrons in
 $2p_{1/2}(J=1)$. The number in the parenthesis is 2 times the total angular
@@ -458,7 +458,7 @@ where $L$ is the multipole rank.
 \index{TR\_EXTRA}
 \texttt{TR\_EXTRA} contains the UTA related transition data, namely, the
 transition energy including the UTA shift, the UTA Gaussian width, and the
-configuration interaction multipler. This structure is written to the
+configuration interaction multiplier. This structure is written to the
 \texttt{DB\_TR} file only in UTA mode, which is set by \key{SetUTA()}
 function.
 
@@ -473,7 +473,7 @@ typedef struct _TR_EXTRA_ {
 \begin{dbdesc}
 \item[\texttt{float energy}:] The transition energy including UTA shift.
 \item[\texttt{float sdev}:] The Gaussian standard deviation of the UTA.
-\item[\texttt{float sci}:] The configuration interaction multipler, which
+\item[\texttt{float sci}:] The configuration interaction multiplier, which
   accounts for the CI within the same non-relativistic configurations.
 \end{dbdesc}
 
@@ -512,7 +512,7 @@ length of the header.
 \item[\texttt{int ntransitions}:] Number of transitions in this block.
 \item[\texttt{int qk\_mode}:] The mode for the calculation of radial
 integrals. There are 3 choices for collisional excitation. 0 for EXACT, 1 for
-INTERPOLATE, and 2 for FIT. In the EXACT mode, the collison strengths are
+INTERPOLATE, and 2 for FIT. In the EXACT mode, the collision strengths are
 calculated at the energy grid specified as is, so the \texttt{egrid} and
 \texttt{usr\_egrid} must be the same. In the INTERPOLATE mode, the collision
 strengths are calculated at \texttt{egrid}, and interpolated to
@@ -585,7 +585,7 @@ parameter $b_1$ is calculated at an energy given by $b_2$, which is chosen to
 be very high, about $10^{2}E_{th}$ or higher.
 For spin forbidden transitions, $b_0 = 0$. $b_1$, $b_2$ are stored in the array
 \texttt{born[2]}. These numbers are useful to extrapolate the collision
-strengths to high energies with correct aysmptotic behaviour.
+strengths to high energies with correct asymptotic behavior.
 \item[\texttt{float *params}:] Parameters for the fitting formula, if the
 fitting mode is used. The number of elements is given by \texttt{nparams} in
 \texttt{CE\_HEADER}. In the present implementation, different fitting formulae
@@ -601,7 +601,7 @@ p_2\left(1-\frac{1}{x}\right)^{p_3} + b\ln x,
 \end{eqnarray}
 where $E_0$ is the energy of the incident electron, $E_{th}$ is the transition
 threshold, $p_0$, $p_1$, $p_2$ and $p_4$ are four parameters, and $b$ is the
-Bethe coeffificient, which is 0 for non-dipole transitions.
+Bethe coefficient, which is 0 for non-dipole transitions.
 
 For forbidden transitions, the collision strength is given by
 \begin{eqnarray}
@@ -662,13 +662,13 @@ length of the header.
 \item[\texttt{int ntransitions}:] Number of transitions in this block.
 \item[\texttt{int qk\_mode}:] The mode for the calculation of radial
 integrals. There are 3 choices at present. 0 for EXACT, 1 for INTERPOLATE, and
-2 for FIT, similar to collsional excitation. However, even if the FIT
+2 for FIT, similar to collisional excitation. However, even if the FIT
 mode is used, the fitting formula is only valid in the high energy asymptotic
 regions. The low energy results should be obtained by interpolation.
 \item[\texttt{int multipole}:] Multipole type of the transition. Its absolute
 value is the rank of the multipole, 1 for dipole, 2 for quadrupole, etc. The
 positive sign for magnetic type and negative sign for electric type. Usually,
-only E1 type is relavent for radiative recombination and photoionization.
+only E1 type is relevant for radiative recombination and photoionization.
 \item[\texttt{int n\_tegrid}:] Number of points for the transition energy grid.
 \item[\texttt{int n\_egrid}:] Number of points for the collision energy grid.
 \item[\texttt{int egrid\_type}:] Type of the energy grid. 0 for the incident
@@ -679,7 +679,7 @@ grid.
 incident photon energy, 1 for photo-electron energy.
 \item[\texttt{int nparams}:] Number of parameters in the fitting formula if the
 bound-free oscillator strengths are calculated in the FIT mode. In the present
-imprementation, \texttt{nparams} is 4.
+implementation, \texttt{nparams} is 4.
 \item[\texttt{double *tegrid}:] The transition energy grid, the number of
 elements is given by \texttt{n\_tegrid}.
 \item[\texttt{double *egrid}:] The energy grid, the number of elements is
@@ -737,7 +737,7 @@ atomic units. It is related to photoionization and radiative recombination as
                   \varepsilon\right)} \sigma_{PI},
 \end{eqnarray}
 where $\alpha$ is the fine structure constant, $g_i$ and $g_f$ are the
-statistical weight of the bound states before and after the photoionzation
+statistical weight of the bound states before and after the photoionization
 takes place respectively, $\omega$ is the photon energy, and $\varepsilon$ is
 the energy of the ejected photo-electron. The tabulated values are $d(gf)/dE$.
 \end{dbdesc}
@@ -768,7 +768,7 @@ length of the header.
 \item[\texttt{int channel}:] This an identifier to label the autoionization
 channel, which does not have specific physical meaning.
 \item[\texttt{int n\_egrid}:] The number of points for the Auger electron
-energy grid. The autoionzation radial integrals are calculated on this grid
+energy grid. The autoionization radial integrals are calculated on this grid
 and interpolated to the actual discrete energies.
 \item[\texttt{double *egrid}:] The energy grid. The number of elements is
 given by \texttt{n\_egrid}.
@@ -885,7 +885,7 @@ y &=& 1-\frac{1}{x} \nonumber\\
 where $E_0$ is the energy of the incident electron, $E_{th}$ is the ionization
 threshold, $p_0$, $p_1$, $p_2$, and $p_3$ are the four parameters. The
 parameter $p_0$ is actually obtained from the bound-free oscillator strength,
-which is more reliable than one would get by fitting the calculated collision stregnths.
+which is more reliable than one would get by fitting the calculated collision strengths.
 \item[\texttt{float *strength}:] The collision strength for ionization. It is
 related to the ionization cross section as (in atomic units):
 \begin{equation}
@@ -921,7 +921,7 @@ length of the header.
 \item[\texttt{int channel}:] This an identifier to label the autoionization
 channel, which does not have specific physical meaning.
 \item[\texttt{int n\_egrid}:] The number of points for the Auger electron
-energy grid. The autoionzation radial integrals are calculated on this grid
+energy grid. The autoionization radial integrals are calculated on this grid
 and interpolated to the actual discrete energies.
 \item[\texttt{double *egrid}:] The energy grid. The number of elements is
 given by \texttt{n\_egrid}.
@@ -941,7 +941,7 @@ typedef struct _AIM_RECORD_ {
 \item[\texttt{int b}:] The bound state index.
 \item[\texttt{int f}:] The free state index.
 \item[\texttt{int nsub}:] The number of entries in array \texttt{rate}. It is
-twice the number of transitions tabulated, because both autoionziation and DR
+twice the number of transitions tabulated, because both autoionization and DR
 capture strength need to be stored. 
 \item[\texttt{float *rate}:] An array containing magnetic sublevel
 autoionization rates and DR capture strength. Suppose $A(M_1,M_2)$ represents
@@ -1056,17 +1056,17 @@ platforms are taken into account automatically. Therefore, it is possible to
 create the binary files on a little endian machine (probably faster), then
 convert them to ASCII format on a slower big endian machine.
 
-In the verbose form, the more common units of physical quanties are
+In the verbose form, the more common units of physical quantities are
 used. Specifically, s$^{-1}$ for transition rates, 10$^{-20}$ cm$^2$ for cross
 sections, and eV for energies. For data files other than \texttt{DB\_EN} type,
 the energies and angular momenta of the levels involved in the processes are
 not included in the binary version. In the verbose form of corresponding ASCII
-files, these infomations are added by looking up in the energy level
+files, this information is added by looking up in the energy level
 table. Also, for \texttt{DB\_TR} files, not only matrix elements, but also
 $gf$ values and radiative transition rates are tabulated. For \texttt{DB\_CE}
 and \texttt{DB\_CI}, cross
 sections are tabulated along with the collision strengths. For \texttt{DB\_RR},
-radiative recombination and photionization cross sections are tabulated along
+radiative recombination and photoionization cross sections are tabulated along
 with the bound-free differential $gf$ values. For \texttt{DB\_AI}, the energy
 integrated dielectronic capture strengths (in unit of 10$^{-20}$ eV cm$^2$)
 are tabulated in addition to the autoionization rates.
@@ -1155,7 +1155,7 @@ Mode	= 1
 After version 1.0.8, if the UTA mode is used, the output contains an
 additional column after the transition energy, which is the Gaussian standard
 deviation of the UTA transition. The $2J$ values in this case are also
-redefined to be the statistical weight of the configuraiton minus 1.
+redefined to be the statistical weight of the configuration minus 1.
 
 \subsection{\texttt{DB\_CE}}
 \index{DB\_CE}
@@ -1559,7 +1559,7 @@ for the orbital angular momentum can be omitted if it comprises of a single
 character. Otherwise, the bracket must be present. For example, $2p-2$ is
 illegal, but $2[p-]2$ is. Each shell may be followed by multiple conditions on
 the occupation number, separated by ``;'', e.g., $3*10;3s>0;3p>5$ generate
-configuarations that have at least 1 electron in the $3s$ and 6 electrons in
+configurations that have at least 1 electron in the $3s$ and 6 electrons in
 the $3p$ shells. The logical relations allowed in conditions include $=$, $>$,
 and $<$. 
 \end{fundesc}
@@ -1577,7 +1577,7 @@ configuration group. If \var{m} = 0, one may also
 specify an integer \var{n} to indicate that \key{RefineRadial(n)} should be
 called after the optimization. The call with \var{m} = 1 does not accept
 additional arguments. It recalculates the average energy of each configuration
-under the potential obtained by \key{OptimizeRadial} issured by the user, The
+under the potential obtained by \key{OptimizeRadial} issued by the user, The
 diagonal elements of the Hamiltonian calculated in the \key{Structure} call is
 then adjusted by the difference of the two average energies for each
 configuration. The purpose of this routine is to remove some of the errors in
@@ -1599,7 +1599,7 @@ level for all other entries in the list. The correction energies in the list
 \var{e} for these other entries with \var{ilev}$\ge 0$ are the desired energies
 relative to the reference level, i.e., they replace the energies calculated by
 FAC. However, if \var{ilev}$<0$, then these corrections are also interpreted
-as shifts to be added to the energyies calculated by FAC.
+as shifts to be added to the energies calculated by FAC.
 \end{fundesc}
 
 \begin{fundesc}{CutMixing}{g0, g1\opt{, c}}
@@ -1609,7 +1609,7 @@ that are not in the group list \var{g1} or the mixing coefficients less than
 \end{fundesc}
 
 \begin{fundesc}{GetConfigNR}{c, ...}
-This functions returns a list of non-relativisitc configurations corresponding
+This functions returns a list of non-relativistic configurations corresponding
 to the supplied configuration strings, which may contain wild casts as in the
 function \key{Config}. It is useful, e.g., when one wants to know the
 non-relativistic configurations of \key{1*2 2*2 3*1}. 
@@ -1676,14 +1676,14 @@ not present, the angular coefficients are calculated between states in the
 \var{p} list. Only $Z^L(\alpha,\beta)$ and $\tilde{a_\alpha}$ coefficients are
 calculated. If the Bra and Ket states have the same number of electrons, $Z^L$
 is calculated, otherwise $\tilde{a_\alpha}$ is calculated. This routine should
-primarily be used when atomic states are construced with \key{RecStates},
+primarily be used when atomic states are constructed with \key{RecStates},
 where the angular coefficients between the base states are used many times. It
 is therefore more efficient to precalculate these coefficients.
 \end{fundesc}
 
 \begin{fundesc}{Print}{args}
 Print out the string representation of \var{args}. This function exists to
-asist the conversion to SFAC interface, since Python's \key{print} statement
+assist the conversion to SFAC interface, since Python's \key{print} statement
 is not converted.
 \end{fundesc}
 
@@ -1712,14 +1712,14 @@ during the calculation. Default: \var{n} = 100, \var{m} = 0 (no print out).
 
 \begin{fundesc}{RRMultipole}{fn, b, f\opt{, m}}
 Calculate the bound-free multipole matrix elements. Because \key{RRTable}
-does not calculate the matrix elements directly, this function exisits to
+does not calculate the matrix elements directly, this function exists to
 provide such data. The output are written to the file \var{fn} in ASCII
 format. The format is described in the header of the file itself. The
 remaining arguments are identical to those in \key{RRTable}
 \end{fundesc}
 
 \begin{fundesc}{RRTable}{fn, b, f\opt{, m}}
-Calculate the bound-free differetial oscillator strengths between the bound
+Calculate the bound-free differential oscillator strengths between the bound
 configuration groups \var{b} and free groups \var{f}, which are related to
 radiative recombination and photoionization cross sections. The optional
 multipole type \var{m} is set to -1 (E1) by default. In almost all cases, no
@@ -1754,12 +1754,12 @@ included. Default is 5.
 \end{fundesc}
 
 \begin{fundesc}{SetCEBorn}{e\opt{,x\opt{, x1}}}
-\var{e} specifies the asysmtotic energy where the plane-wave Born approximation is
+\var{e} specifies the asymptotic energy where the plane-wave Born approximation is
 expected to be valid, and is used to deduce the constant component of the
 collision strength at high energies. If $e > 0$, it is in unit of the
 characteristic transition energy of the array. If $e < 0$, then its absolute
 value is the energy in unit of eV. $x$ and $x1$
-set the energy boundary between the distroted-wave Born approximation and
+set the energy boundary between the distorted-wave Born approximation and
 plane-wave Born approximation for the collisional excitation. If $x > 0$ and
 the scattered
 electron energy is less than $xE_{b}$, DW method is chosen, where $E_{b}$ is
@@ -1776,7 +1776,7 @@ is $-1.0$.
 \end{fundesc}
 
 \begin{fundesc}{SetCEGrid}{g $\mid$ n\opt{, e0, e1}}
-Set the collsion energy grid for collsional excitation. In the first form, the
+Set the collision energy grid for collisional excitation. In the first form, the
 grid is given by a Python list \var{g}. In the second form, the grid is
 constructed with \var{n} points, from \var{e0} to \var{e1}. The energies are
 specified for the scattered electron energy, and in units of eV. This routine
@@ -1803,7 +1803,7 @@ collisional excitation.
 \end{fundesc}
 
 \begin{fundesc}{SetCELQR}{m}
-Set the maxmum orbital angular momentum for quasi-relativistic approximation
+Set the maximum orbital angular momentum for quasi-relativistic approximation
 in collisional excitation. The default is 0, i.e., always use
 quasi-relativistic approximation.
 \end{fundesc}
@@ -1815,7 +1815,7 @@ variable \key{QKMODE}.
 \end{fundesc}
 
 \begin{fundesc}{SetCIEGrid}{g $\mid$ n\opt{, e0, e1}}
-Set the collsion energy grid for collsional ionization. In the first form, the
+Set the collision energy grid for collisional ionization. In the first form, the
 grid is given by a Python list \var{g}. In the second form, the grid is
 constructed with \var{n} points, from \var{e0} to \var{e1}. The energies are
 specified for the total energy of the final electrons, and in units of
@@ -1843,7 +1843,7 @@ configuration space is determined by the configuration groups passed to the
 \key{Structure} function. CI can be further refined by the value of $m$. If
 $m=-1$, then no CI is included, the Hamiltonian is assumed to be diagonal. If
 $m=1$, only CI within the same relativistic configuration is included. If
-$m=2$, only CI within the same non-relativisitc configuration is included. If
+$m=2$, only CI within the same non-relativistic configuration is included. If
 $m=3$, only CI within the same configuration group is included.
 \end{fundesc}
 
@@ -1874,8 +1874,8 @@ variable \key{QKMODE}.
 \end{fundesc}
 
 \begin{fundesc}{SetFields}{b, e, a\opt{, m}}
-Set the magnetic and electric fiedls. \var{b} is the magnetic fields in Gauss,
-\var{e} is the electrific fields in Volts/cm. \var{a} is the angle between the
+Set the magnetic and electric fields. \var{b} is the magnetic fields in Gauss,
+\var{e} is the electric fields in Volts/cm. \var{a} is the angle between the
 magnetic and electric fields. If the optional \var{m} is 1, then the
 diamagnetic effects is ignored in the Hamiltonian.
 \end{fundesc}
@@ -1914,7 +1914,7 @@ Hamiltonian. 0---disable, 1---enable. Defaults: 1.
 
 \begin{fundesc}{SetOptimizeControl}{t, s, m\opt{, p}}
 Set the options for radial potential optimization. \var{t} is the tolerance
-for the self-consistent field iteration. \var{s} is the stablizer for the
+for the self-consistent field iteration. \var{s} is the stabilizer for the
 iteration, a number from 0 to 1. \var{m} is the maximum number of iterations
 allowed. \var{p} 
 specifies whether diagnostic information should be printed out during the
@@ -1933,7 +1933,7 @@ Set the printing option in \key{OptimizeRadial}.
 \end{fundesc}
 
 \begin{fundesc}{SetOptimizeStabilizer}{m}
-Set the stablilizer factor in \key{OptimizeRadial}.
+Set the stabilizer factor in \key{OptimizeRadial}.
 \end{fundesc}
 
 \begin{fundesc}{SetOptimizeTolerance}{m}
@@ -2020,7 +2020,7 @@ self-energy correction should be included in the Hamiltonian. Default is 5.
 \end{fundesc}
 
 \begin{fundesc}{SetSlaterCut}{k1, k2}
-Set the calulation modes of Slater integrals. \var{k1} and \var{k2} are
+Set the calculation modes of Slater integrals. \var{k1} and \var{k2} are
 orbital angular momentum values. When one of the orbitals has $l > k1$, then
 exchange integrals are not calculated. When one has $l > k2$, the direct
 integrals are evaluated with the multipole moments.
@@ -2066,13 +2066,13 @@ integral, 0 for fully relativistic and 1 for non-relativistic approximation
 \end{fundesc}
 
 \begin{fundesc}{SetUsrCEGrid}{g $\mid$ n\opt{, e0, e1}}
-Set the user collision energy grid for collisional excitation. The collsion
+Set the user collision energy grid for collisional excitation. The collision
 strengths on this grid are output. It is forced to be same as that set by
 \key{SetCEGrid} if the \key{QKMODE} is \key{'exact'}.
 \end{fundesc}
 
 \begin{fundesc}{SetUsrCIEGrid}{g $\mid$ n\opt{, e0, e1}}
-Set the user collision energy grid for collisional ionization. The collsion
+Set the user collision energy grid for collisional ionization. The collision
 strengths on this grid are output. 
 \end{fundesc}
 
@@ -2088,8 +2088,8 @@ Set the flag for configuration average models. If $m=1$, all calculations are
 carried out in the configuration average approximation. The radiative
 transition rates output contains three additional fields, the transition
 energy including the UTA shift,
-the Gausian standard deviation, and the correction to the line strengths due to
-the configuration interaction within the same non-relativisitc
+the Gaussian standard deviation, and the correction to the line strengths due to
+the configuration interaction within the same non-relativistic
 configurations. If $m=0$, which is the default,
 the usual detailed term accounting method is used. This function should be
 called in the beginning of the script, before \key{Config} function, since it
@@ -2110,14 +2110,14 @@ order term as well. Default is 2.
 Calculate the expansion coefficients of the exchange radial integral
 in the Coulomb energy of each state in the
 configuration list 
-\var{g}. The Coulomb energy betwee electrons of a state can be expanded as
+\var{g}. The Coulomb energy between electrons of a state can be expanded as
 \begin{equation}
 E = \sum g_kG^k(\alpha\alpha^\prime,\beta\beta^\prime) + \mbox{direct terms},
 \end{equation}
 where $\alpha$ and $\alpha^\prime$ are the interacting orbitals in the bra and
 ket states, which have the same $l$ values. Because we work in the
 $jj$-coupling basis, $\alpha$ and $\alpha^\prime$ may have different $j$
-values. The results are stored in the text file \var{fn}. These coefficents
+values. The results are stored in the text file \var{fn}. These coefficients
 are useful in determining the radiative transition rates from level to average
 configurations. \var{a} and \var{b} are the orbital lists contain $\alpha$ and
 $\beta$, respectively. They are specified as configuration strings.
@@ -2130,9 +2130,9 @@ indicating whether $\alpha$ and $\alpha^\prime$ have the same $j$ values. The
 6-9th  columns are the corresponding values for the $\beta$ orbital. The 10th
 column is the expansion coefficients $g_1$. The 11th column is $g_2$. The 12th
 column is the the number to be added to $g_1$ to form the relative intensities
-of level to configuraiton transitions for dipole transitions. The 13th column
+of level to configuration transitions for dipole transitions. The 13th column
 is the number to be added to $g_2$ to form relative intensities for quadrupole
-tranisions.
+transitions.
 \end{fundesc}
 
 \begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}}}
@@ -2182,7 +2182,7 @@ electric fields.
 Print the radial wavefunction of the orbital with the principle quantum number
 \var{n}, relativistic angular quantum number $\kappa$=\var{k} to the file
 \var{fn}. If \var{n}=0, the orbital is a continuum state. In this case, the
-optiontal \var{e} must be a positive number for the energy of the continuum
+optional \var{e} must be a positive number for the energy of the continuum
 orbital in unit of eV.
 \end{fundesc}
 
@@ -2199,16 +2199,16 @@ without restriction. Currently, it can be obtained from anonymous
 \faq{What operating systems does FAC run on}{
 FAC is written in a mixture of ANSI C, Fortran 77, and Python, all of them are
 in principle platform independent. However, the mixed language programming and
-the dynamically loadable Python modules makes it more easyly installed in
+the dynamically loadable Python modules makes it more easily installed in
 modern UNIX-like systems than others. So far, it has been tested to work under
-solaris, linux, Mac OS X, and windows with the UNIX API emulation provided by
+Solaris, Linux, Mac OS X, and windows with the UNIX API emulation provided by
 Cygwin.}
   
 \faq{How does FAC differ from other atomic codes}{
 The theoretical methods used in FAC are similar to some other distorted-wave
 atomic codes, such as HULLAC and differ from more elaborate programs based on
 close-coupling approximations, such as the Belfast R-Matrix code. The biggest
-advatage of FAC is its ease of use and its scriptability.}
+advantage of FAC is its ease of use and its scriptability.}
 
 \faq{How does FAC differ from plasma synthetic codes}{
 There are various plasma codes widely used in X-ray astronomy, such as APEC,
@@ -2223,28 +2223,28 @@ radiation may also be included.}
 
 \faq{Can FAC be incorporated into XSPEC or other spectral analysis programs}{
 In principle, the collisional radiative model comes with FAC can be used in
-XSPEC or similar spectral analysis programs. However, this is not practicle,
-as the model inlcudes a large number of atomic states, especially, the doubly
+XSPEC or similar spectral analysis programs. However, this is not practical,
+as the model includes a large number of atomic states, especially, the doubly
 excited states to treat the resonant processes, and is therefore very time
-consumming. The best strategy of incorporating the FAC results to external
+consuming. The best strategy of incorporating the FAC results to external
 spectral models is to extract basic atomic or plasma parameters and use them
 to build table models or implement dedicated subroutines.}
 
 \faq{Which atomic processes can or cannot be calculated with FAC}{
 FAC can calculate energy levels, radiative transition rates of arbitrary
 multipole type, collisional excitation and ionization cross sections by
-electron impact, photionization and radiative recombination cross sections and
-autoionization rates. In the currect form, FAC does not treat two-photon
+electron impact, photoionization and radiative recombination cross sections and
+autoionization rates. In the current form, FAC does not treat two-photon
 decay, although such decay rates of $2s S_{1/2}$ state of H-like ions and
 $1s2s S_{0}$ state of He-like ions are included in the collisional radiative
 model using interpolation formulae taken from literature. The three-body
 recombination are not implemented as well.}
 
-\faq{What are the typical accuracies of the atomic parameters caculated with
+\faq{What is a typical accuracy of the atomic parameters calculated with
 FAC}{
 The ions other than H-like, the accuracy of energy levels are usually a few
 eV, which translates to 10--30 m{\AA} for the wavelength at $\sim$10{\AA}. For
-radiative transition rates and cross sections, the accuracies are
+radiative transition rates and cross sections, the accuracy is
 $\sim$10--20\%. Data for near-neutral ions or atoms may have even larger
 errors.}
 
@@ -2270,7 +2270,7 @@ soon. The first paper that used results of FAC is Gu, M.F., 2003, ApJ, 582,
 versions}{
 Please contact the author at \textbf{mfgu@space.mit.edu} for bugs and
 suggestions. I maintain a small email address list of people who expressed
-interest in FAC and send release anouncements to them. Let me know if you want
+interest in FAC and send release announcements to them. Let me know if you want
 to be added to this list. If the list ever grows to the point when I can no
 longer put it under my personal address book, we may have to create a
 dedicated mailing list.}
@@ -2280,15 +2280,15 @@ dedicated mailing list.}
 The bare ion is indicated by a call to \key{Config('', group='b')}, i.e.,
 the first argument of \key{Config} is an empty string.}
 
-\faq{Which configurations should be used as basis for the mean cofiguration
+\faq{Which configurations should be used as basis for the mean configuration
 which optimizes the radial potential}{
 The function \key{OptimizeRadial} accepts a list of configurations, which
 form the basis for the construction of the mean configuration. Usually, only
 the lowest lying configurations should be used in \key{OptimizeRadial} for
 the construction of mean configuration. I have found that using configurations
 corresponding to the ground complex is always a good idea. Sometimes, it maybe
-worthwile to inlcude the first excited configurations. However, it is always a
-bad practice to inlcude very highly excited configurations, especially those
+worthwhile to include the first excited configurations. However, it is always a
+bad practice to include very highly excited configurations, especially those
 inner shell excited ones.}
 
 \faq{Can I use a specific mean configuration to be used in potential
@@ -2298,7 +2298,7 @@ the potential optimization. In this case, the function
 \key{OptimizeRadial} must be called with no arguments.}
 
 \faq{How do I know what mean configuration is used in the potential
-optimization, If one is not given specificly by \key{AvgConfig}}{
+optimization, If one is not given specifically by \key{AvgConfig}}{
 The function \key{GetPotential} may be called after \key{OptimizeRadial}
 to obtain the mean configuration used, and the resulting radial potential.}
 
@@ -2306,7 +2306,7 @@ to obtain the mean configuration used, and the resulting radial potential.}
 mean configuration for recombined (ionizing) or recombining (ionized) ion}{
 Usually, it does not matter for highly charged ions, and I usually use the 
 recombined ion. The difference of one more or less electron screening the
-nuclear charge may be substaintial for low-$Z$ elements, in which case, one
+nuclear charge may be substantial for low-$Z$ elements, in which case, one
 may have to make a decision by comparing the results to experimental values or
 other theoretical works.}
 
@@ -2315,7 +2315,7 @@ This depends on the computer resource available, and the desired accuracy. The
 dimension of the Hamiltonian matrix increases very rapidly as the number of
 interacting configurations grows. The convergence with respect to the
 configuration interaction is usually slow. For applications which FAC is
-primirily designed for, one typically inlcudes only configurations within the
+primarily designed for, one typically includes only configurations within the
 same complex, except for some low-lying configurations.}
 
 \faq{What relativistic effects are included}{
@@ -2330,8 +2330,8 @@ treated in the screened hydrogenic approximation.}
 file, although it should have been calculated}{
 Not every calculated transition rate are output. Some weak transitions are
 discarded to avoid very large files. A small number, which may be set by the
-function \key{SetTransitionCut}, controlls this behavior. If the
-transition rate of $2\to 1$ devided by the total decay rate of state 2 is less
+function \key{SetTransitionCut}, controls this behavior. If the
+transition rate of $2\to 1$ divided by the total decay rate of state 2 is less
 than this number, this rate is not output. The default for this number is
 $10^{-4}$.}
 
@@ -2369,7 +2369,7 @@ grid on which the collision strengths are calculated, and use
 \faq{The collision strengths at very high energies are incorrect}{
 Due to the limited radial grid size, the collision strengths at energies much
 higher than the excitation energy (more than a few hundred times higher) are
-unlikely to be reliabe. However, the high energy collision strengths should
+unlikely to be reliable. However, the high energy collision strengths should
 not be calculated directly. The Bethe and Born limit parameters in the output
 should be used to obtain them.}
 
@@ -2383,7 +2383,7 @@ to an empty orbital.}
 theoretical calculation by a constant factor}{
 The bound-free differential oscillator strengths calculated by FAC have units
 of Hartree$^{-1}$. Also the values depend on the normalization of continuum
-orbitals. It is therefore possible that they differ from other theorectial
+orbitals. It is therefore possible that they differ from other theoretical
 calculations by a constant factor. One should always use the formula in this
 manual or the accompanying papers to convert them to photoionization or
 radiative recombination cross sections.}
@@ -2396,7 +2396,7 @@ photo-electron energy grid). This means that the $gf$ values at energies
 within the photo-electron energy grid should be calculated by interpolation
 instead of the fitting formula. However, this is often only necessary for the
 ionization of valence shells of near neutral ions and atoms, since only in
-these cases, the near threashold behavior of the $gf$ values differ from the
+these cases, the near threshold behavior of the $gf$ values differ from the
 fitting formula significantly.}
 
 \section{Autoionization and Dielectronic Recombination}{
@@ -2406,21 +2406,21 @@ sometimes to tag a certain autoionization channel.}
 
 \faq{How do I improve the resonance energies of low-lying $\Delta n = 0$
 resonances}{
-The energyies of low-lying $\Delta n = 0$ resonances can not the calculated
+The energies of low-lying $\Delta n = 0$ resonances can not the calculated
 accurately. This greatly reduces the reliability of the resulting dielectronic
 recombination rates. In FAC, there is a method to improve the accuracy of
 these energies by adjusting the core transition energies according to the
 experimental values. The function \key{CorrectEnergy} is used to modify the
 calculated energy levels by specified amount.}
 
-\faq{Why is it advised to make seperate calls to \key{AITable} for different
+\faq{Why is it advised to make separate calls to \key{AITable} for different
 bound or free state complexes}{
 The autoionization radial integrals are only calculated for a few free
 electron energies. The actual values are interpolated from them. This only
 works well if the the free electron energy after autoionization does not vary
 widely. Therefore, one should avoid calling \key{AITable} with bound or free
 states in different complexes. e.g., KLL and KLM resonances should be
-calculated with two seperate calls to \key{AITable}.}
+calculated with two separate calls to \key{AITable}.}
 
 \section{Collisional Ionization}
 \faq{Why are FAC ionization cross sections calculated with \key{BED} mode
@@ -2429,7 +2429,7 @@ distorted-wave calculations}{
 When using \key{BED} mode to calculate the ionization radial integrals, the
 total ionization cross sections are scaled by a factor $E/(E+I)$, where $E$ is
 the energy of incident electron, and $I$ is the ionization threshold
-energy. The result of this scalling is usually desirable as distorted-wave
+energy. The result of this scaling is usually desirable as distorted-wave
 method overestimates the near threshold cross sections.}
 
 \faq{Why is the \key{DW} mode so slow as compared with \key{BED} and \key{CB}

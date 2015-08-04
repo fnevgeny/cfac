@@ -18,15 +18,16 @@ ChangeLog
 sfac/sfac
 
 # TeX auxiliary files
-*.aux
-*.bbl
-*.blg
-*.idx
-*.ilg
-*.ind
-*.log
-*.out
-*.toc
+doc/*.aux
+doc/*.bbl
+doc/*.blg
+doc/*.idx
+doc/*.ilg
+doc/*.ind
+doc/*.log
+doc/*.out
+doc/*.toc
+doc/*.lol
 
 # Compiled TeX docs
 doc/manual.pdf

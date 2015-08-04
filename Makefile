@@ -34,7 +34,7 @@ devclean : distclean
 texts : ChangeLog
 
 ChangeLog : dummy
-	cvs2cl -F trunk
+	git log --pretty=format:"- %s%n%b" > ChangeLog
 
 Make.conf : ac-tools/Make.conf.in configure
 	@echo

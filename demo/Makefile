@@ -1,4 +1,5 @@
-DEMOS = structure excitation excitationM pirr aidr ionization
+DEMOS = structure pirr aidr ionization excitation excitationM \
+	structureUTA pirrUTA aidrUTA ionizationUTA excitationUTA 
 
 all: 
 

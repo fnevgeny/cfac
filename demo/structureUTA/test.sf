@@ -1,0 +1,31 @@
+# Calculation of the energy levels and radiative transition rates
+# in the UTA mode.
+
+SetUTA(1)
+
+SetAtom('Fe')
+
+# 1s shell is closed
+Closed('1s')
+
+Config('2*8', group = 'n2')
+# instead of a keyword, the group name can also
+# be given as the first argument.
+Config('n3', '2*7 3*1')
+
+# Self-consistent iteration for optimized central potential
+ConfigEnergy(0)
+# the configurations passed to OptimizeRadial should always
+# be one or two of the lowest lying ones. and it is often best
+# to just use the ground configurations. If you need more highly
+# excited levels, such as n=4, 5, 6, ..., do not put them
+# in the OptimizeRadial. 
+OptimizeRadial(['n2'])
+ConfigEnergy(1)
+
+Structure('lev.bin', ['n2', 'n3'])
+MemENTable('lev.bin')
+PrintTable('lev.bin', 'lev.asc', 1)
+
+TransitionTable('tr.bin', ['n2'], ['n3'], -1)
+PrintTable('tr.bin', 'tr.asc', 1)

@@ -1,0 +1,30 @@
+# Calculate the photoionization and 
+# radiative recombination cross sections
+# in the UTA mode.
+
+SetUTA(1)
+
+SetAtom('Fe')
+
+# specify the configurations for both recombining
+# and recombined ions.
+Config('1s2', group = 'n1')
+Config('1s1 2*1', group = 'n2')
+Config('1s2 2*1', group = 'rn2')
+
+ConfigEnergy(0)
+OptimizeRadial(['rn2'])
+ConfigEnergy(1)
+
+# configuration interaction between n=1 and n=2
+# complexes are included for the recombining ion.
+Structure('lev.bin', ['n1', 'n2'])
+Structure('lev.bin', ['rn2'])
+MemENTable('lev.bin')
+PrintTable('lev.bin', 'lev.asc', 1)
+
+# SetRecQkMode('exact')
+# SetUsrPEGrid(6, 100, 16000)
+
+RRTable('rr.bin', ['rn2'], ['n1'])
+PrintTable('rr.bin', 'rr.asc', 1)

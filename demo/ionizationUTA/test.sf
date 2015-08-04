@@ -1,0 +1,32 @@
+# Calculate the electron impact ionization cross sections
+# in the UTA mode.
+
+SetUTA(1)
+
+SetAtom('Fe')
+
+# 1s shell is closed
+Closed('1s')
+
+# Ne-like ground state
+Config('2*8', group='fe17')
+
+# F-like configuations
+Config('2*7', group='fe18')
+
+# Solve the structure problem
+ConfigEnergy(0)
+OptimizeRadial(['fe17'])
+ConfigEnergy(1)
+
+Structure('lev.bin', ['fe17'])
+Structure('lev.bin', ['fe18'])
+MemENTable('lev.bin')
+PrintTable('lev.bin', 'lev.asc', 1)
+
+# Set the output collision energies
+e = [500.0, 900.0, 1.3e3, 1.7e3, 2.1e3, 4.2e3, 6.0e3, 8.0e3]
+SetUsrCIEGrid($e)
+
+CITable('ci.bin', ['fe17'], ['fe18'])
+PrintTable('ci.bin', 'ci.asc', 1)

@@ -1,9 +1,14 @@
 This directory contains example scripts and the resulting outputs 
 discussed in the papers submitted to CPC.
 
-structure/,   atomic structure example for Ne-like Fe.
-excitation/,  electron impact excitation example for Ne-like Fe.
-excitationM/, same as above but m-resolved.
-pirr/,        photoionzation and radiative recombination for Li-like Fe.
-aidr/,        autoionization example for Ne-like Se.
-ionization/,  electron impact ionization example for Ne-like Fe.
+structure/,     atomic structure example for Ne-like Fe.
+structureUTA/,  same as above but in the UTA mode.
+excitation/,    electron impact excitation example for Ne-like Fe.
+excitationM/,   same as above but m-resolved.
+excitationUTA/, same as excitation/ but in the UTA mode.
+pirr/,          photoionzation and radiative recombination for Li-like Fe.
+pirrUTA/,       same as above but in the UTA mode.
+aidr/,          autoionization example for Ne-like Se.
+aidrUTA/,       same as above but in the UTA mode.
+ionization/,    electron impact ionization example for Ne-like Fe.
+ionizationUTA/, same as above but in the UTA mode.

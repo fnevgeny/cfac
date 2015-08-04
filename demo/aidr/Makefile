@@ -1,4 +1,3 @@
-CONFIG = se_ai.sf
-RESULTS = se.lev se.ai
+RESULTS = lev.asc ai.asc
 
 include ../Make.common

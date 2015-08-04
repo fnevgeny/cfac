@@ -1,4 +1,3 @@
-CONFIG = fe17_structure.sf
-RESULTS = ne.lev ne.tr
+RESULTS = lev.asc tr.asc
 
 include ../Make.common

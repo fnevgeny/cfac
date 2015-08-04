@@ -1,4 +1,3 @@
-CONFIG = fe24_pirr.sf
-RESULTS = li.lev li.rr
+RESULTS = lev.asc rr.asc
 
 include ../Make.common

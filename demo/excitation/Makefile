@@ -1,4 +1,3 @@
-CONFIG = fe17_excitation.sf
-RESULTS = ne.ce ne.lev
+RESULTS = lev.asc ce.asc
 
 include ../Make.common

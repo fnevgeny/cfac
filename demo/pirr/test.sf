@@ -1,4 +1,4 @@
-# calculate the photoionization and 
+# Calculate the photoionization and 
 # radiative recombination cross sections
 
 SetAtom('Fe')
@@ -15,16 +15,13 @@ ConfigEnergy(1)
 
 # configuration interaction between n=1 and n=2
 # complexes are included for the recombining ion.
-Structure('li.lev.b', ['n1', 'n2'])
-Structure('li.lev.b', ['rn2'])
-MemENTable('li.lev.b')
-PrintTable('li.lev.b', 'li.lev', 1)
+Structure('lev.bin', ['n1', 'n2'])
+Structure('lev.bin', ['rn2'])
+MemENTable('lev.bin')
+PrintTable('lev.bin', 'lev.asc', 1)
 
-# calculate asymmetry
-#Asymmetry('li.asym', '1s2', 10)
+# SetRecQkMode('exact')
+# SetUsrPEGrid(6, 100, 16000)
 
-#SetRecQkMode('exact')
-#SetUsrPEGrid(6, 100, 16000)
-
-RRTable('li.rr.b', ['rn2'], ['n1'])
-PrintTable('li.rr.b', 'li.rr', 1)
+RRTable('rr.bin', ['rn2'], ['n1'])
+PrintTable('rr.bin', 'rr.asc', 1)

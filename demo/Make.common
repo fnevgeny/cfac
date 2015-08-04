@@ -1,5 +1,8 @@
 SFAC = ../../sfac/sfac
-DIFF = diff -q -I TSess -IFAC
+
+CONFIG = test.sf
+
+DIFF = diff -q -I TSess -I FAC
 
 all: 
 
@@ -8,9 +11,7 @@ check: $(RESULTS)
             echo " Tests passed!"
 
 clean:
-	rm -f $(RESULTS) *.b
+	rm -f $(RESULTS) *.bin
 
 $(RESULTS): $(CONFIG) $(SFAC)
 	$(SFAC) $(CONFIG)
-
-

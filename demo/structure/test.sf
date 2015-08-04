@@ -1,9 +1,10 @@
-
-# calculation of the energy levels. and radiative transition rates
+# Calculation of the energy levels and radiative transition rates
 
 SetAtom('Fe')
+
 # 1s shell is closed
 Closed('1s')
+
 Config('2*8', group = 'n2')
 # instead of a keyword, the group name can also
 # be given as the first argument.
@@ -18,10 +19,10 @@ ConfigEnergy(0)
 # in the OptimizeRadial. 
 OptimizeRadial(['n2'])
 ConfigEnergy(1)
-Structure('ne.lev.b', ['n2', 'n3'])
-MemENTable('ne.lev.b')
-PrintTable('ne.lev.b', 'ne.lev', 1)
 
-TransitionTable('ne.tr.b', ['n2'], ['n3'], -1)
-PrintTable('ne.tr.b', 'ne.tr', 1)
+Structure('lev.bin', ['n2', 'n3'])
+MemENTable('lev.bin')
+PrintTable('lev.bin', 'lev.asc', 1)
 
+TransitionTable('tr.bin', ['n2'], ['n3'], -1)
+PrintTable('tr.bin', 'tr.asc', 1)

@@ -897,6 +897,150 @@ as compared to the formula for collisional excitation is due to the different
 normalization for bound and free states.
 \end{dbdesc}
 
+\subsection{\texttt{AIM\_HEADER}}
+\index{AIM\_HEADER}
+\begin{verbatim}
+typedef struct _AIM_HEADER_ {
+  long int position;
+  long int length;
+  int nele;
+  int ntransitions;
+  int channel;
+  int n_egrid;
+  double *egrid;
+} AIM_HEADER;
+\end{verbatim}
+
+\begin{dbdesc}
+\item[\texttt{long position}:] The number of bytes from the beginning of the
+file to the place where this data block starts.
+\item[\texttt{long length}:] Number of bytes in this data block, excluding the
+length of the header.
+\item[\texttt{int nele}:] Number of electrons in the ion for this block.
+\item[\texttt{int ntransitions}:] Number of transitions in this block.
+\item[\texttt{int channel}:] This an identifier to label the autoionization
+channel, which does not have specific physical meaning.
+\item[\texttt{int n\_egrid}:] The number of points for the Auger electron
+energy grid. The autoionzation radial integrals are calculated on this grid
+and interpolated to the actual discrete energies.
+\item[\texttt{double *egrid}:] The energy grid. The number of elements is
+given by \texttt{n\_egrid}.
+\end{dbdesc}
+
+\subsection{\texttt{AIM\_RECORD}}
+\index{AIM\_RECORD}
+\begin{verbatim}
+typedef struct _AIM_RECORD_ {
+  int b;
+  int f;
+  int nsub;
+  float *rate;
+} AIM_RECORD;
+\end{verbatim}
+\begin{dbdesc}
+\item[\texttt{int b}:] The bound state index.
+\item[\texttt{int f}:] The free state index.
+\item[\texttt{int nsub}:] The number of entries in array \texttt{rate}. It is
+twice the number of transitions tabulated, because both autoionziation and DR
+capture strength need to be stored. 
+\item[\texttt{float *rate}:] An array containing magnetic sublevel
+autoionization rates and DR capture strength. Suppose $A(M_1,M_2)$ represents
+autoionization rate from $M_1$ sublevel of \texttt{b} to $M_2$ sublevel of
+\texttt{f}, and $R(M_1,M_2)$ is capture strength from $M_2$ sublevel of
+\texttt{f} to $M_1$ sublevel of \texttt{b}. Then the array \texttt{rate} is
+generated in the order consistent with the following code:
+\begin{verbatim}
+t = 0
+for (M1 = -J1; M1 <= 0; M1++) {
+  for (M2 = -J2; M2 <= J2; M2++) {
+     rate[t++] = A(M1,M2);
+     rate[t++] = R(M1,M2);
+  }
+}
+\end{verbatim}
+Due to axial symmetry, values for $M_1 > 0$ can be obtained from those with
+$M_1 \le 0$.
+\end{dbdesc}
+
+\subsection{\texttt{CIM\_HEADER}}
+\index{CIM\_HEADER}
+\texttt{CIM\_HEADER} is the data header for magnetic sublevel collisional
+ionization data blocks. 
+
+\begin{verbatim}
+typedef struct _CIM_HEADER_ {
+  long position;
+  long length;
+  int nele;
+  int ntransitions;
+  int n_egrid;
+  int egrid_type;
+  int n_usr;
+  int usr_egrid_type;
+  double *egrid;
+  double *usr_egrid;
+} CIM_HEADER;
+\end{verbatim}
+
+\begin{dbdesc}
+\item[\texttt{long position}:] The number of bytes from the beginning of the
+file to the place where this data block starts.
+\item[\texttt{long length}:] Number of bytes in this data block, excluding the
+length of the header.
+\item[\texttt{int nele}:] Number of electrons in the ion for this block.
+\item[\texttt{int ntransitions}:] Number of transitions in this block.
+\item[\texttt{int n\_egrid}:] Number of points for the collision energy grid.
+\item[\texttt{int egrid\_type}:] Type of the energy grid. 0 for the incident
+electron energy, 1 for the total energy of scattered and ejected electron.
+\item[\texttt{int n\_usr}:]N umber of points for the user collision energy
+grid.
+\item[\texttt{int usr\_egrid\_type}:] Type of the user energy grid. 0 for the
+incident electron energy, 1 for the total energy of scattered and ejected
+electrons .
+\item[\texttt{double *tegrid}:] The transition energy grid, the number of
+elements is given by \texttt{n\_tegrid}.
+\item[\texttt{double *egrid}:] The energy grid, the number of elements is
+given by \texttt{n\_egrid}.
+\item[\texttt{double *usr\_egrid}:] The user energy grid, the number of
+elements is given by \texttt{n\_usr}.
+\end{dbdesc}
+
+\subsection{\texttt{CIM\_RECORD}}
+\index{CIM\_RECORD}
+\texttt{CIM\_RECORD} is for magnetic sublevel collisional ionization data.
+
+\begin{verbatim}
+typedef struct _CIM_RECORD_ {
+  int b;
+  int f;
+  int nsub;
+  float *strength;
+} CIM_RECORD;
+\end{verbatim}
+
+\begin{dbdesc}
+\item[\texttt{int b}:] The bound state index.
+\item[\texttt{int f}:] The free state index.
+\item[\texttt{int nusb}:] The number of sublevel transitions in the
+  \texttt{strength} array. 
+\item[\texttt{float *strength}:] The magnetic sublevel collision strength for
+  ionization. It is related to the ionization cross section as (in atomic
+  units): 
+\begin{equation}
+\sigma = \frac{1}{k_0^2}\Omega,
+\end{equation}
+where ${k_0}$ is the kinetic momentum of the incident electron. The different
+magnetic sublevel transitions are arranged in the order similar to those for
+excitation, i.e., $-J_i\to -J_f$, $-J_i\to -J_f+1$, $\cdots$, $-J_i\to J_f$,
+$-J_i+1\to -J_f$, $-J_i+1\to -J_f+1$, $\cdots$, $-J_i+1\to J_f$,
+$\cdots$. Only the cross sections with $M_i \le 0$ are included, since those
+with $M_i \ge 0$ can be obtained using time reversal symmetry.
+
+\end{dbdesc}
+
+
+
+
 \section{ASCII Format}
 \index{ASCII Format}
 FAC provides functions to convert the binary output to ASCII files. There are

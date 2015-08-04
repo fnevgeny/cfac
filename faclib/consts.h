@@ -22,8 +22,6 @@
 
 #include <math.h>
 
-#include "version.h"
-
 #define VersionGE(h, a, b, c)    (((h)->version >= (a)) &&\
                                   ((h)->sversion >= (b)) &&\
                                   ((h)->ssversion >= (c)))

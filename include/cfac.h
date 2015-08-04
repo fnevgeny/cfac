@@ -20,6 +20,11 @@
 #ifndef __CFAC_H_
 #define __CFAC_H_
 
+/* Versioning */
+#define CFAC_VERSION        1
+#define CFAC_SUBVERSION     4
+#define CFAC_SUBSUBVERSION  5
+
 #define CFAC_SUCCESS    0
 #define CFAC_FAILURE    1
 

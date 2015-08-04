@@ -162,7 +162,8 @@ int StoreInit(const cfac_t *cfac,
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt, 1, *sid);
-    sqlite3_bind_int(stmt, 2, 10000*VERSION + 100*SUBVERSION + SUBSUBVERSION);
+    sqlite3_bind_int(stmt, 2,
+        10000*CFAC_VERSION + 100*CFAC_SUBVERSION + CFAC_SUBSUBVERSION);
     sqlite3_bind_int(stmt, 3, cfac->uta ? 1:0);
 
     rc = sqlite3_step(stmt);

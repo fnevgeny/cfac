@@ -478,9 +478,9 @@ int InitDBase(void) {
   int i;
   for (i = 0; i < NDB; i++) {
     fheader[i].tsession = (long int) time(0);
-    fheader[i].version = VERSION;
-    fheader[i].sversion = SUBVERSION;
-    fheader[i].ssversion = SUBSUBVERSION;
+    fheader[i].version = CFAC_VERSION;
+    fheader[i].sversion = CFAC_SUBVERSION;
+    fheader[i].ssversion = CFAC_SUBSUBVERSION;
     fheader[i].symbol[2] = '\0';
     fheader[i].symbol[3] = (char) (CheckEndian(NULL));
     fheader[i].type = 0;
@@ -518,9 +518,9 @@ int ReinitDBase(int m) {
     if (m > NDB) return -1;
     i = m-1;
     fheader[i].tsession = (long int) time(0);
-    fheader[i].version = VERSION;
-    fheader[i].sversion = SUBVERSION;
-    fheader[i].ssversion = SUBSUBVERSION;
+    fheader[i].version = CFAC_VERSION;
+    fheader[i].sversion = CFAC_SUBVERSION;
+    fheader[i].ssversion = CFAC_SUBSUBVERSION;
     fheader[i].type = 0;
     fheader[i].atom = 0;
     fheader[i].nblocks = 0;

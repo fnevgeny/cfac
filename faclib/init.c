@@ -34,7 +34,8 @@ cfac_t *cfac = NULL;
 int Info(void) {
   printf("========================================\n");
   printf("The Flexible Atomic Code (FAC)\n");
-  printf("Version %d.%d.%d\n", VERSION, SUBVERSION, SUBSUBVERSION);
+  printf("Version %d.%d.%d\n",
+    CFAC_VERSION, CFAC_SUBVERSION, CFAC_SUBSUBVERSION);
   printf("Bugs and suggestions, please contact:\n");
   printf("Ming Feng Gu, mfgu@ssl.berkeley.edu\n");
   printf("========================================\n");

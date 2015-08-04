@@ -2,26 +2,37 @@
 PATH=/bin:/usr/bin:/usr/local/bin
 export PATH
 
+CDIR=`pwd`
+CDIR_BNAME=`basename $CDIR`
+
 make configure
 
 cat << EOF > Make.conf
 .SUFFIXES:
-O=.o
-EXE=
 PAPERSIZE=a4
 EOF
 
 make ChangeLog
 
-CDIR=`pwd`
-CDIR_BNAME=`basename $CDIR`
 cd faclib
 touch Make.dep
-make schema.sql
+make schema.i
 rm -f Make.dep
 cd ..
+
+cd cfacdb
+touch Make.dep
+make cfac_schema.i cfac_schema_v1.i cfac_schema_v2.i
+rm -f Make.dep
+cd ..
+
+cd doc
+make manual.pdf
+make clean
+cd ..
+
 rm -f Make.conf
 cd ..
-tar --exclude CVS --exclude .cvsignore --exclude autom4te.cache --exclude Make.dep \
+tar --exclude .git --exclude .gitignore --exclude autom4te.cache --exclude Make.dep \
  -cvzf ${CDIR_BNAME}.tar.gz $CDIR_BNAME
 cd -

@@ -1,12 +1,14 @@
 \documentclass[twoside,a4paper]{refrep}
 
 \usepackage{makeidx}
-\usepackage{natbib}
+\usepackage[numbers]{natbib}
 \usepackage{xspace}
 \usepackage{verbatim}
 
-\usepackage[pdftex,bookmarks, colorlinks, breaklinks]{hyperref}
+\usepackage[pdftex,bookmarks,colorlinks,breaklinks]{hyperref}
 \hypersetup{linkcolor=blue,citecolor=blue,filecolor=black,urlcolor=blue}
+
+\usepackage{doi}
 
 \usepackage{listings}
 \newcommand{\includecode}[2][sh]{\lstinputlisting[language=#1]{#2}}
@@ -75,7 +77,7 @@ interaction in the zero energy limit for the exchanged photon, and hydrogenic
 approximations for self-energy and vacuum polarization effects. 
 Continuum processes are treated
 in the distorted-wave (DW) approximation. Systematic application of the
-factorization-interpolation method of \citet{barshalom88} makes the present
+factorization-interpolation method of \citet{barshalom:1988a} makes the present
 code highly efficient for large scale calculations. The details of theoretical
 background and computational methods are not discussed in this manual,
 instead, they are described in a series of papers which are distributed along
@@ -824,13 +826,13 @@ length of the header.
 \item[\texttt{int nele}:] Number of electrons in the ion for this block.
 \item[\texttt{int ntransitions}:] Number of transitions in this block.
 \item[\texttt{int qk\_mode}:] The mode for the calculation of radial
-integrals. At present, there are 3 choices. 3 for CB mode (Coulomb-Born), 4
-for DW mode (distorted-wave), and 5 for BED mode (binary-encounter-dipole). In
-CB mode, the radial integrals are obtained by looking up a table of
-Coulomb-Born-Exchange results from \citet{golden77,golden80}, which is very
-fast. In DW mode, the integrals are calculated using the distorted-wave
+integrals. At present, there are 3 choices. 3 for CB mode (Coulomb-Born), 4 for
+DW mode (distorted-wave), and 5 for BED mode (binary-encounter-dipole). In CB
+mode, the radial integrals are obtained by looking up a table of
+Coulomb-Born-Exchange results from \citet{golden:1977a,golden:1980a}, which is
+very fast. In DW mode, the integrals are calculated using the distorted-wave
 approximation, which is very slow. In BED mode, the binary-encounter-dipole
-theory of \citet{kim94} is used which makes use of bound-free oscillator
+theory of \citet{kim:1994a} is used which makes use of bound-free oscillator
 strength of the same transition. This method is also very fast.
 \item[\texttt{int n\_tegrid}:] Number of points for the transition energy grid.
 \item[\texttt{int n\_egrid}:] Number of points for the collision energy grid.
@@ -2442,7 +2444,7 @@ method. In the \key{BED} mode, the radial integrals are calculated using the
 bound-free differential oscillator strengths, which can be computed much
 faster than the \key{DW} ionization radial integrals.}
 
-\bibliographystyle{plain}
+\bibliographystyle{plainnat}
 \bibliography{facref}
 
 \printindex

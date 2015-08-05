@@ -1,0 +1,176 @@
+\chapter{Overview}
+\label{cha:overview}
+
+\section{What Are FAC and \cFAC}
+FAC stands for the Flexible Atomic Code. It is an integrated software package to
+calculate various atomic radiative and collisional processes, including energy
+levels, radiative transition rates, collisional excitation and  ionization by
+electron impact, photoionization, autoionization, radiative recombination and
+dielectronic capture. FAC was written by Ming Feng Gu largely while at the Space
+Science Laboratory of Berkeley. 
+
+FAC makes detailed atomic model accessible to a wide community of laboratory and
+astrophysical plasma diagnostics. Its flexible interface is designed to be
+useful even for people without a deep understanding of the underlying atomic
+theories. It is also powerful enough for experienced users to explore the
+effects of algorithmic choices and different physical approximations.
+
+The atomic structure calculation in FAC is based on the relativistic
+configuration interaction with independent particle basis wavefunctions. These
+basis wavefunctions are derived from a local central potential, which is
+self-consistently determined to represent electronic screening of the nuclear
+potential. Relativistic effects are fully taken into account using the Dirac
+Coulomb Hamiltonian. Higher order QED effects are included with Breit
+interaction in the zero energy limit for the exchanged photon, and hydrogenic
+approximations for self-energy and vacuum polarization effects. 
+Continuum processes are treated
+in the distorted-wave (DW) approximation. Systematic application of the
+factorization-interpolation method of \citet{barshalom:1988a} makes the present
+code highly efficient for large scale calculations. The details of theoretical
+background and computational methods are not discussed in this manual,
+instead, they are described in a series of papers which are distributed along
+with this package and this manual.
+
+\cFAC is a forked version of FAC. It was started by Evgeny Stambulchik
+around 2010 (based on FAC-1.1.1, released in 2006), initially focusing on
+providing large volumes of data as required, e.g., for collisional-radiative
+plasma modeling, and replacing third-party Fortran numerical libraries with
+their C equivalents (hence the change in the package name).
+
+\section{License}
+The bulk of the \cFAC sources is distributed under the GNU General Public
+License (GPL) terms. The full text of the license is given in
+\hyperref[GPL]{Appendix}.
+
+Some bits of the FAC sources, which are still used in cFAC, were originally
+published in the Computer Physics Communications (CPC) journal, and as such, are
+licensed for non-profit or academic use only, please see
+\url{http://cpc.cs.qub.ac.uk/licence/licence.html}.
+
+In order to compile in these CPC-licensed modules, you need to pass the
+``--with-cpc-module'' configure flag and explicitly agree to the CPC licensing
+terms. {\em Please note that since CPC and GPL are incompatible, as a result,
+the ``sfac'' executable will not be redistributable!}
+
+\section{Obtaining and Installing \cFAC}
+\index{Install}
+\label{sec:install}
+The latest version of \cFAC can be obtained from
+\url{https://www-amdis.iaea.org/FAC/}. The public repository is hosted on
+\href{https://github.com}{GitHub}, \url{https://github.com/fnevgeny/cfac}.
+
+Much of the \cFAC package is written in ANSI C and Fortran 77. It should 
+therefore work on any platform with modern C and Fortran 77 compilers.
+\verb|gcc| and \verb|gfortran| from the
+\href{https://gcc.gnu.org/}{GNU Compiler Collection} are recommended.
+
+Step-by-step instructions for installation can be found in the README file in
+the top directory of the \cFAC distribution.
+
+\section{Quick Start}
+\label{sec:start}
+\subsection{SFAC Interface}
+To use SFAC, one passes the
+input files to the \verb|sfac| executable on
+the command line such as 
+\begin{verbatim}
+    sfac input.sf
+\end{verbatim}
+or, one may invoke \verb|sfac| without arguments, in which
+case, it reads from \verb|stdin| for inputs, where commands are interpreted
+line by line.
+
+Perhaps the quickest way to get familiar with \cFAC is to inspect the simple
+demo scripts in the \verb|demo/| directory in \cFAC distribution. There
+are individual scripts demonstrating the
+calculation of energy levels, radiative transition rates, collisional
+excitation and ionization cross sections, radiative recombination cross
+sections and autoionization rates.
+
+In this section, we look into the details of one of these scripts,
+\verb|demo/structure/test.sf| for the calculation of Ne-like iron
+energy levels and radiative transition rates between $n = 2$ and $n = 3$
+complexes. The following is a duplication of that script.
+
+\lstset{numbers=left,caption=demo/structure/test.sf}
+\includecode[sh]{../demo/structure/test.sf}
+
+Line numbers are added for easy reference, they are not part of the script. 
+Empty lines are ignored. As is evident from the above listing, all functions
+have a naming convention of concatenated capitalized words.
+Line 3 set the atomic element to be iron. Line 5 is a comment, which starts
+with a \verb|#|. Lines 6--11 specify the electronic configurations to be
+included in the calculation. The closed shells specified by the function
+\verb|Closed| must be inactive in this calculation. In the \verb|Config|
+functions, \verb|2*8| stands for an $n = 2$ complexes with 8 electrons, while
+\verb|2*7 3*1| stands for all configurations resulting from excitation of one
+electron from $n = 2$ to $n = 3$. For more possibilities in the specification
+of electronic configurations, one is referred to Chapter \ref{cha:function}.
+Lines 14--21 carry out a Dirac-Fock-Slater self-consistent calculation to
+derive a local central potential which represents the electronic screening of
+the nuclear potential. In this calculation, the potential is optimized to the
+average electron clouds of configurations \verb|n2| and \verb|n3|, since in
+\cFAC, all atomic processes are treated with basis wavefunctions generated from
+a single potential. This
+results in the potential to be less optimized for \verb|n2| and \verb|n3|
+individually. Lines 14 and 21 are used to make a crude correction to the
+resulting energy levels due to this effect. The first call to
+\verb|ConfigEnergy(0)| will make individual optimization to all configuration
+groups. The average energy of each configuration group with these individually 
+optimized potential is then calculated and stored. The
+second call to \verb|ConfigEnergy(1)| will then recalculate the average energy
+of configuration groups under the potential taking into account all
+configuration groups. The difference between the two represents the effect of
+a less optimized potential, and are used to adjust the final energy levels. If
+this procedure is not needed, one can omit lines 14 and 21 in this script. Line
+23 sets up the Hamiltonian matrix for levels in $n = 2$ and $n = 3$ complexes,
+diagonalize it, and saves to the energy level information in the binary file
+\verb|lev.bin|. Line 24 builds an in-memory table of energy levels, which is
+used to convert the binary files to their ASCII counterparts in verbose mode,
+such as done in Line 25, which converts \verb|lev.bin| to \verb|lev.asc| (the
+last argument to \verb|PrintTable| indicates it be done in verbose mode). For
+the conversion in simple mode (the last argument is 0), the in-memory table is
+not needed, and Line 24 may be omitted. For the difference between the verbose
+and simple ASCII files, see Chapter \ref{cha:format}. Line 27 calculates the
+E1 oscillator strength and transition rates between configuration groups
+\verb|n2| and \verb|n3|, and saves the results in the binary file
+\verb|tr.asc|. The function \verb|TransitionTable| accepts an optional 4th
+integer argument specifying the transition type. A negative integer means
+electric multipole and a positive integer for magnetic multipole. The absolute
+value of the integer indicates the rank of the multipole. Therefore, $-1$ would
+be E1, $+1$ would be M1, etc. Without this argument, the default is E1, as is
+done here. Line 28 converts the binary output to an ASCII file in verbose
+mode. The exact formats of binary and ASCII files are explained in Chapter
+\ref{cha:format}. Here we list the two ASCII files \verb|lev.asc| and
+\verb|tr.asc| resulted from this calculation. 
+
+\lstset{numbers=none,basicstyle=\scriptsize,caption=demo/structure/lev.asc}
+\includecode[]{../demo/structure/ref/lev.asc}
+
+\lstset{numbers=none,basicstyle=\normalsize,caption=demo/structure/tr.asc}
+\includecode[]{../demo/structure/ref/tr.asc}
+
+In file \verb|lev.asc|, the energy, parity, $2J$ ($J$ is the total
+angular momentum of the level), and configuration coupling information are
+listed. In file \verb|tr.asc|, the upper and lower level indexes, the $2J$
+values of these levels, the transition energy, $gf$-values, radiative
+decay rates, and the reduced multipole matrix elements are given.
+
+\section*{Acknowledgments}
+Throughout the development of FAC, the discussion with Ehud Behar, Masao
+Sako, Peter Beiersdorfer, Ali Kinkhabwala and Steven Kahn has been very
+useful. Some Fortran 77 subroutines were retrieved from Computer Physics
+Communications Program Library at
+\url{http://www.cpc.cs.qub.ac.uk}.
+
+The original development of FAC (during Dec 2000 -- Aug 2003, or prior
+to version 1.0.2) was
+supported by NASA through Chandra Postdoctoral Fellowship Award Number
+PF01-10014 issued by the Chandra X-ray Observatory Center, which is operated
+by Smithsonian Astrophysical Observatory for and on behalf of NASA under
+contract NAS8-39073. 
+
+Any opinions, findings and conclusions or
+recommendations expressed in this manual are those of the author and do not
+necessarily reflect the views of the National Aeronautics Space
+Administration and/or the Smithsonian Astrophysical Observatory.

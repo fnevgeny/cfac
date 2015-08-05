@@ -2,6 +2,8 @@ TOP = ..
 
 DOCS = manual.pdf
 
+CHAPTERS = overview.tex sfaclang.tex fformat.tex faq.tex
+
 INCLISTINGS = $(TOP)/demo/structure/test.sf \
 	      $(TOP)/demo/structure/ref/lev.asc \
 	      $(TOP)/demo/structure/ref/tr.asc \
@@ -11,7 +13,7 @@ all : $(DOCS)
 
 include $(TOP)/Make.conf
 
-manual.pdf : manual.tex facref.bib $(INCLISTINGS)
+manual.pdf : manual.tex $(CHAPTERS) facref.bib $(INCLISTINGS)
 	pdflatex manual
 	bibtex manual
 	makeindex manual

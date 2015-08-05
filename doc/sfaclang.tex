@@ -1,0 +1,778 @@
+\chapter{SFAC Language Reference}
+\label{cha:function}
+\index{Functions}
+This chapter describes the functions available in the SFAC interface.
+In the
+documentation of each function, the arguments in brackets are optional,
+arguments separated by ``$\mid$'' are alternative forms of calling syntax,
+``...'' in the argument list denotes variable number of arguments, and
+keyword arguments are indicated by \var{key=arg} pair.
+
+\section{Functions}
+\label{sec:fac}
+\index{fac}
+
+The module contains the following functions.
+
+\begin{fundesc}{AITable}{fn, b, f\opt{, c}}
+Calculate the autoionization rates between the bound configuration group
+\var{b} and the free configuration group \var{f}. The results are saved in
+file \var{fn}. The optional channel number \var{c} can be supplied as an
+identification of the transition array.
+\end{fundesc}
+
+\begin{fundesc}{AITableMSub}{fn, b, f\opt{, c}}
+Calculate the magnetic sublevel autoionization rates and dielectronic capture
+strength between the bound configuration group \var{b} and the free
+configuration group \var{f}. The results are saved in file \var{fn}. The
+optional channel number \var{c} can be supplied as an identification of the
+transition array.
+\end{fundesc}
+
+\begin{fundesc}{AppendTable}{fn}
+By default, when a new script is executed, existing binary files are
+overwritten. If instead the new data should be appended to the file, use 
+this function to set the append flag.
+\end{fundesc}
+
+\begin{fundesc}{Asymmetry}{fn, s\opt{, m}}
+Calculate the photoionization asymmetry parameters for given relativistic
+subshells. \var{s} is a string which gives the subshells. It should be in
+spectroscopic notation, e.g., '1s' for $1s_{1/2}$, '2p' for $2p_{1/2,3/2}$
+shells, '3p-' for $3p_{1/2}$ and '3p+' for $3p_{3/2}$, etc. The optional
+\var{m} specifies the maximum multipole expansion, counting in the order E1,
+M1, E2, M2, ..., therefore, $m=1$ includes only E1, $m=2$ includes E1 and M1,
+etc. Default is $m=1$. The results are stored in file \var{fn}. For each
+subshell, the output starts with one line indicating which subshell it is,
+its $nlj$ values, the ionization energy, the number of energy points, and the
+value of \var{m} used. It is followed by a block, which contains one line for
+each energy point and tabulates the electron energy, photon energy, total
+photoionization cross section ($10^{-20}$ cm$^2$), cross section for electron
+direction perpendicular to that of photon, the total radiative recombination
+cross section, the cross section at 90$^\circ$, and the ratio of
+$\sigma_\perp$/$\sigma_\parallel$, where $\sigma_\perp$ is the 90$^\circ$
+radiative cross section for photons polarized in the direction perpendicular
+to the electron direction, and $\sigma_\parallel$ is the 90$^\circ$ cross
+section for photons polarized in the direction parallel to the electron
+direction. The last piece of data for each subshell are the $B_\lambda$ and
+$B_\lambda^\phi$ parameters defined as
+\begin{equation}
+\frac{d\sigma}{d\Omega}=\frac{\sigma}{4\pi}\left[\sum_{\lambda\ge 0} B_\lambda
+  P_{\lambda}(\cos\theta) - \sum_{\lambda\ge 2} \lambda^{-1}(\lambda-1)^{-1}
+  B_\lambda^\phi P_{\lambda}^2(\cos\theta)\cos(2\phi)\right],
+\end{equation}
+where $\sigma$ is the total cross section, $\theta$ is the angle between the
+electron and photon directions, $\phi$ is the azimuth angle of polarization
+direction of the photon relative to the electron direction.
+\end{fundesc}
+
+\begin{fundesc}{AvgConfig}{c}
+Setup a mean configuration for the optimization of central potential as
+specified by a string \var{c}. The format of the string is the same as in the
+function \key{Config}, except that the occupation can be a non-integer number
+in this routine. The mean configuration setup by this function is effective
+only if the function \key{OptimizeRadial} is called with no
+arguments. Otherwise, the configurations given in that function are used to
+generate the mean configuration automatically. It is important that this
+function be called before \key{OptimizeRadial} and after
+\key{ConfigEnergy(0)}, if the later is used.
+\end{fundesc}
+
+\begin{fundesc}{BasisTable}{fn\opt{,m}}
+Print out a table of basis wavefunctions and mixing coefficients in the file
+\var{fn}. If \var{m} is 0, then the basis table for the ordinary atom is
+given, otherwise, the basis table for atom in magnetic and electric fields are
+given.
+\end{fundesc}
+
+\begin{fundesc}{CETable}{fn, low, up}
+Calculate the collision strength for the excitation of states in the
+configuration group list \var{low} to those in the group list\var{up}. The
+results are saved in the file \var{fn}.
+\end{fundesc}
+
+\begin{fundesc}{CETableEB}{fn, low, up\opt{, m}}
+Calculate the collision strength for the excitation of states in the
+configuration group list \var{low} to those in the group list\var{up}, but for
+atoms in magnetic and electric fields. The
+results are saved in the file \var{fn}. If \var{m} is 0, then incident
+electron is assumed to be isotropic, otherwise, cross sections at different
+incident directions are calculated.
+\end{fundesc}
+
+\begin{fundesc}{CETableMSub}{fn, low, up}
+Calculate the magnetic sublevel collision strength for the excitation of
+states in the configuration groups \var{low} to those in the groups
+\var{up}. The results are saved in the file \var{fn}.
+\end{fundesc}
+
+\begin{fundesc}{CITable}{fn, b, f}
+Calculate the collision strength for the ionization of states in the bound
+configuration groups \var{b} to those in the free configuration groups
+\var{f}. The results are saved in the file \var{fn}.
+\end{fundesc}
+
+\begin{fundesc}{CITableMSub}{fn, b, f}
+Calculate the magnetic sublevel collision strength for the ionization of
+states in the bound configuration groups \var{b} to those in the free
+configuration groups \var{f}. The results are saved in the file \var{fn}.
+\end{fundesc}
+
+\begin{fundesc}{CheckEndian}{\opt{fn}}
+Check the byte order of database file \var{fn}. It returns 0 for little endian
+and 1 for big endian. If the optional file name \var{fn} is omitted, the
+endian for the current platform is returned.
+\end{fundesc}
+
+\begin{fundesc}{Closed}{s, ...}
+Specify the closed shells in the electronic configurations. It takes variable
+number of arguments, each of them is a non-relativistic or relativistic shell
+in the spectroscopic notation. e.g., \key{2s} for $2s$ shell, \key{2p-} for
+$2p_{1/2}$ shell, and \key{2p+} for $2p_{3/2}$ shell.
+\end{fundesc}
+
+\begin{fundesc}{Config}{c, ..., group=g $\mid$ g, c, ...}
+Add one or more configurations to the configuration group \var{g}. In the
+first form, the group name \var{g} is given as a keyword, while in the second
+form, the first argument must be a group name instead of a configuration. It
+takes one or more strings for the configuration specification. A configuration
+\var{c} is a string comprised of one or more non-relativistic or relativistic
+shells in spectroscopic notation separated by white spaces. e.g.,
+\key{2[p+]3} is a $2p_{3/2}$ shell with 3 electrons. If a \key{*} is given
+instead of the orbital angular momentum symbol, configurations with all
+legitimate values are generated. It is also possible to use \key{[s,p,d]} to
+indicate that the orbital angular momentum may take $s$, $p$, or $d$
+values. For $l > 20$, no spectroscopic symbol is available, it is specified as
+[$l$] such as [21,22] for $l$ = 21 and 22 shells. This numerical notation also
+works for $l \le 20$ shells, for which spectroscopic symbols \key{s, p, d, f,
+g, h, i, k, l, m, n, o, q, r, t, u, v, w, x, y, z} are available. The bracket
+for the orbital angular momentum can be omitted if it comprises of a single
+character. Otherwise, the bracket must be present. For example, $2p-2$ is
+illegal, but $2[p-]2$ is. Each shell may be followed by multiple conditions on
+the occupation number, separated by ``;'', e.g., $3*10;3s>0;3p>5$ generate
+configurations that have at least 1 electron in the $3s$ and 6 electrons in
+the $3p$ shells. The logical relations allowed in conditions include $=$, $>$,
+and $<$. 
+\end{fundesc}
+
+\begin{fundesc}{ConfigEnergy}{m\opt{, n\opt{, g, ...}}}
+This function should be called twice just before (with \var{m} = 0) and after
+(with \var{m} = 1) \key{OptimizeRadial} if used. If \key{AvgConfig} is
+called, then \key{ConfigEnergy} with \var{m}=0 must be called before that.
+The call with \var{m} = 0
+performs a radial optimization for the configuration groups given by the list
+\var{g}, and calculate the average energy of each configuration under
+such potentials. Multiple optimizations are performed if more than one list
+are given. If none is given, the optimization are carried out for each
+configuration group. If \var{m} = 0, one may also
+specify an integer \var{n} to indicate that \key{RefineRadial(n)} should be
+called after the optimization. The call with \var{m} = 1 does not accept
+additional arguments. It recalculates the average energy of each configuration
+under the potential obtained by \key{OptimizeRadial} issued by the user, The
+diagonal elements of the Hamiltonian calculated in the \key{Structure} call is
+then adjusted by the difference of the two average energies for each
+configuration. The purpose of this routine is to remove some of the errors in
+the level energies introduced by using a single central potential for all
+configurations.
+\end{fundesc}
+
+\begin{fundesc}{CorrectEnergy}{fn, nmin $\mid$ ilev, e, nmin}
+Correct the energies of certain levels by given amount. This is used if the
+exact energy of some levels is critical. In the first form, the indexes and the
+energy corrections are listed as two columns in the file \var{fn}. In the
+second form, the indexes are given in the Python list \var{ilev}, and the
+energy corrections are given in the list \var{e}. Only levels with valence
+electron in $n\ge nmin$ are corrected, if these levels are not constructed
+with \key{RecStates}. The corrections are given in
+units of eV. For the first level in the correction list, the amount is added
+to the energies calculated by \cFAC, and that level is taken as the reference
+level for all other entries in the list. The correction energies in the list
+\var{e} for these other entries with \var{ilev}$\ge 0$ are the desired energies
+relative to the reference level, i.e., they replace the energies calculated by
+\cFAC. However, if \var{ilev}$<0$, then these corrections are also interpreted
+as shifts to be added to the energies calculated by \cFAC.
+\end{fundesc}
+
+\begin{fundesc}{CutMixing}{g0, g1\opt{, c}}
+For each levels in the group list \var{g0}, eliminate all mixing components
+that are not in the group list \var{g1} or the mixing coefficients less than
+\var{c}. 
+\end{fundesc}
+
+\begin{fundesc}{GetConfigNR}{c, ...}
+This functions returns a list of non-relativistic configurations corresponding
+to the supplied configuration strings, which may contain wild casts as in the
+function \key{Config}. It is useful, e.g., when one wants to know the
+non-relativistic configurations of \key{1*2 2*2 3*1}. 
+\end{fundesc}
+
+\begin{fundesc}{GetPotential}{fn}
+Print the radial potential obtained by \key{OptimizeRadial} to the file
+\var{fn}. The file starts with the parameters for the analytic fit the to
+potential, $\lambda$ and $a$, in the formula
+\begin{equation}
+V_0(r) = -\frac{Z}{r} + \frac{N-1}{r}\left(1-\frac{\exp(-\lambda
+r)}{1+ar}\right). 
+\end{equation}
+After that, the mean configuration used to generate the potential is printed
+in 3 columns representing the principle quantum number, the relativistic
+angular quantum number $\kappa$, and the fractional occupation number
+respectively. Finally, the file gives 8 columns which are $i$, $r$, $Z(r)$,
+$V(r)$, $V_d(r)$, $V_e(r)$, $V_e^\prime(r)$, and $U(r)$, where $i$ is the index
+for the radial grid, $r$ is the radial grid, $Z(r)$ is the nuclear charge at
+radius $r$ taking into account the nuclear charge distribution, $V(r)$ is the
+optimal potential, $V_d(r)$ is the direct interaction part of the potential,
+$V_e(r)$ is the exchange interaction part of the potential, $V_e^\prime(r)$ is
+the Slater approximation of the exchange interaction, and $U(r)$ is the
+Uehling potential which approximates the vacuum polarization effects.
+\end{fundesc}
+
+\begin{fundesc}{Info}{}
+Print out the version information of \cFAC and contact information of the
+author. 
+\end{fundesc}
+
+\begin{fundesc}{JoinTable}{fn1, fn2, fn}
+Join two binary files \var{fn1} and \var{fn2} to produce a single file
+\var{fn}. \var{fn1} and \var{fn2} must have been produced on the same
+platform, have the same type and for the same element.
+\end{fundesc}
+
+\begin{fundesc}{ListConfig}{\opt{fn, g}}
+Print the configurations in the list \var{g} to file \var{fn}. If \var{fn} is
+not given or if it is ``-'', the results are written to the stdout. If \var{g}
+is not given, then all configurations currently defined are printed.
+\end{fundesc}
+
+\begin{fundesc}{MemENTable}{fn}
+Build an energy level table in the memory for the \texttt{DB\_EN} type file
+\var{fn}. This function must be called before any calls to \key{PrintTable}
+in verbose mode.
+\end{fundesc}
+
+\begin{fundesc}{OptimizeRadial}{\opt{g\opt{, w}}}
+Obtain the optimal radial potential based on the mean configuration generated
+by the configuration group list \var{g} and the weight \var{w}, or if they are
+absent in the call, by the mean configuration specified by \key{AvgConfig}.
+\var{g} and \var{w} must be equal length Python lists if both present. \var{g}
+is a list of configuration groups, and \var{w} is a list of weights for each
+group when generating the mean configuration. If only \var{g} is present, each
+configuration group is given an equal weight.
+\end{fundesc}
+
+\begin{fundesc}{PrepAngular}{p\opt{, q}}
+Precalculate the angular coefficients between states in \var{p} and
+\var{q}. \var{p} and \var{q} are lists of configuration groups. If \var{q} is
+not present, the angular coefficients are calculated between states in the
+\var{p} list. Only $Z^L(\alpha,\beta)$ and $\tilde{a_\alpha}$ coefficients are
+calculated. If the Bra and Ket states have the same number of electrons, $Z^L$
+is calculated, otherwise $\tilde{a_\alpha}$ is calculated. This routine should
+primarily be used when atomic states are constructed with \key{RecStates},
+where the angular coefficients between the base states are used many times. It
+is therefore more efficient to precalculate these coefficients.
+\end{fundesc}
+
+\begin{fundesc}{Print}{args}
+Print out the string representation of \var{args}. This function exists to
+assist the conversion to SFAC interface, since Python's \key{print} statement
+is not converted.
+\end{fundesc}
+
+\begin{fundesc}{PrintTable}{fnb, fna\opt{, v}}
+Convert the binary database file \var{fnb} to the ASCII file \var{fna}. The
+optional argument \var{v} = 1 requires the conversion be done in verbose
+mode, otherwise it is done in simple mode. Note that before conversion in
+verbose mode is carried out, one must call \key{MemENTable} first.
+\end{fundesc}
+
+\begin{fundesc}{RecStates}{fn, b, n}
+Construct recombined states by adding a spectator electron with the principle
+quantum number \var{n} onto the basis states in the configuration groups
+\var{b}. The orbital angular momentum of the spectator electron is set by two
+functions \key{SetRecPWLimits} and \key{SetRecSpectator}. The resulting energy
+levels are saved in file \var{fn}.
+\end{fundesc}
+
+\begin{fundesc}{RefineRadial}{\opt{n\opt{, m}}}
+This function may be called after \key{OptimizeRadial}, which performs a
+minimization of the total energy of the mean configuration by adjusting the
+parameters in the analytic central potential. \var{n} is the number of energy
+evaluations allowed in the minimization, and \var{m} controls the print out
+during the calculation. Default: \var{n} = 100, \var{m} = 0 (no print out).
+\end{fundesc}
+
+\begin{fundesc}{RRMultipole}{fn, b, f\opt{, m}}
+Calculate the bound-free multipole matrix elements. Because \key{RRTable}
+does not calculate the matrix elements directly, this function exists to
+provide such data. The output are written to the file \var{fn} in ASCII
+format. The format is described in the header of the file itself. The
+remaining arguments are identical to those in \key{RRTable}
+\end{fundesc}
+
+\begin{fundesc}{RRTable}{fn, b, f\opt{, m}}
+Calculate the bound-free differential oscillator strengths between the bound
+configuration groups \var{b} and free groups \var{f}, which are related to
+radiative recombination and photoionization cross sections. The optional
+multipole type \var{m} is set to -1 (E1) by default. In almost all cases, no
+other multipole types should be important. The results are saved in file
+\var{fn}. 
+\end{fundesc}
+
+\begin{fundesc}{SetAICut}{c}
+Set the autoionization rate cutoff threshold in the output. Only
+autoionization rates greater than \var{c} a.u. are output. The default is
+$10^{-16}$ a.u. or $\sim 4.13$ s$^{-1}$, if this routine is not called. 
+\end{fundesc}
+
+\begin{fundesc}{SetAngZCut}{c}
+Set the cutoff threshold for the mixing basis in the calculation of recoupling
+coefficients. Only the basis functions with mixing coefficients $>$\var{c} are
+included. The default is $10^{-6}$ if this routine is not called.
+\end{fundesc}
+
+\begin{fundesc}{SetAtom}{asym\opt{, z\opt{, m\opt{,r}}}}
+This function set the atomic element to \var{asym}, where \var{asym} is the
+standard elemental symbol. The nuclear charge \var{z}, atomic mass \var{m},
+and the nucleus radius of the element can be set optionally. If they are not
+set, the standard values are used.
+\end{fundesc}
+
+\begin{fundesc}{SetBreit}{n}
+Set the maximum principle quantum number of the orbitals for which the
+Breit interaction should be included in the Hamiltonian. If \var{n} $<$ 0,
+then the Breit interaction involving all bound and continuum states is
+included. Default is 5.
+\end{fundesc}
+
+\begin{fundesc}{SetCEBorn}{e\opt{,x\opt{, x1}}}
+\var{e} specifies the asymptotic energy where the plane-wave Born approximation is
+expected to be valid, and is used to deduce the constant component of the
+collision strength at high energies. If $e > 0$, it is in unit of the
+characteristic transition energy of the array. If $e < 0$, then its absolute
+value is the energy in unit of eV. $x$ and $x1$
+set the energy boundary between the distorted-wave Born approximation and
+plane-wave Born approximation for the collisional excitation. If $x > 0$ and
+the scattered
+electron energy is less than $xE_{b}$, DW method is chosen, where $E_{b}$ is
+the binding energy of the electron being excited. 
+If $x$ is negative, the switch between DW and PW occurs when the estimated
+high partial-wave contributions becomes larger than $-x$ times the low
+partial-waves calculated explicitly. If $x=0$, then PW is always used.
+default for $x$ is $-0.5$, i.e., use DW when the estimated high partial-wave
+contributions represents no more than 50\% of the explicitly calculated low
+partial-wave sum. The contributions of high partial waves for monopole and
+dipole transitions are calculated with coulomb-bethe approximation, their
+cutoff values are treated differently with the switch \var{x1}, whose default
+is $-1.0$.
+\end{fundesc}
+
+\begin{fundesc}{SetCEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the collision energy grid for collisional excitation. In the first form, the
+grid is given by a Python list \var{g}. In the second form, the grid is
+constructed with \var{n} points, from \var{e0} to \var{e1}. The energies are
+specified for the scattered electron energy, and in units of eV. This routine
+does not need to be called. A default is constructed for a given transition
+array with 6 points, minimum and maximum energies specified by
+\key{SetCEGridLimits}. Calling this routine with \var{n}=0, reset the grid to
+system default.
+\end{fundesc}
+
+\begin{fundesc}{SetCEGridLimits}{e0, e1}
+Set the minimum and maximum collision energy for collisional excitation for
+the automatic construction of the grid. They are in units of average threshold
+energy of the transition array being considered. The default is 0.05 and 8.0
+if this routine is not called.
+\end{fundesc}
+
+\begin{fundesc}{SetCELCB}{m}
+Set the orbital angular momentum for Coulomb-Bethe approximation.
+\end{fundesc}
+
+\begin{fundesc}{SetCELMax}{m}
+Set the maximum of orbital angular momentum for the partial-wave expansion in
+collisional excitation.
+\end{fundesc}
+
+\begin{fundesc}{SetCELQR}{m}
+Set the maximum orbital angular momentum for quasi-relativistic approximation
+in collisional excitation. The default is 0, i.e., always use
+quasi-relativistic approximation.
+\end{fundesc}
+
+\begin{fundesc}{SetCEQkMode}{mode}
+Set the computation mode for the excitation radial integrals. \var{mode} may
+be a string or an integer specifying the mode. These values are listed in the
+variable \key{QKMODE}.
+\end{fundesc}
+
+\begin{fundesc}{SetCIEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the collision energy grid for collisional ionization. In the first form, the
+grid is given by a Python list \var{g}. In the second form, the grid is
+constructed with \var{n} points, from \var{e0} to \var{e1}. The energies are
+specified for the total energy of the final electrons, and in units of
+eV. This routine does not need to be called. A default is constructed for a
+given transition array with 6 points, minimum and maximum energies specified
+by \key{SetCIEGridLimits}. 
+Calling this routine with \var{n}=0, reset the grid to system default.
+\end{fundesc}
+
+\begin{fundesc}{SetCIEGridLimits}{e0, e1}
+Set the minimum and maximum collision energy for collisional ionization for
+the automatic construction of the grid. They are in units of average threshold
+energy of the transition array being considered. The default is 0.05 and 8.0
+if this routine is not called.
+\end{fundesc}
+
+\begin{fundesc}{SetCILCB}{m}
+Set the orbital angular momentum for the Coulomb-Bethe approximation in DW
+collisional ionization.
+\end{fundesc}
+
+\begin{fundesc}{SetCILevel}{m}
+Set the level of configuration interaction space. By default, $m=0$, the
+configuration space is determined by the configuration groups passed to the
+\key{Structure} function. CI can be further refined by the value of $m$. If
+$m=-1$, then no CI is included, the Hamiltonian is assumed to be diagonal. If
+$m=1$, only CI within the same relativistic configuration is included. If
+$m=2$, only CI within the same non-relativistic configuration is included. If
+$m=3$, only CI within the same configuration group is included.
+\end{fundesc}
+
+\begin{fundesc}{SetCILMax}{m}
+Set the maximum orbital angular momentum for the partial-wave expansion in DW
+collisional ionization.
+\end{fundesc}
+
+\begin{fundesc}{SetCILMaxEject}{m}
+Set the maximum orbital angular momentum for the ejected electron in DW
+collisional ionization.
+\end{fundesc}
+
+\begin{fundesc}{SetCILQR}{m}
+Set the orbital angular momentum for quasi-relativistic approximation in DW
+collisional ionization.
+\end{fundesc}
+
+\begin{fundesc}{SetCITol}{m}
+Set the tolerance factor in the partial-wave expansion of DW collisional
+ionization. 
+\end{fundesc}
+
+\begin{fundesc}{SetCIQkMode}{mode}
+Set the computation mode for the ionization radial integrals. \var{mode} may
+be a string or an integer specifying the mode. These values are listed in the
+variable \key{QKMODE}.
+\end{fundesc}
+
+\begin{fundesc}{SetFields}{b, e, a\opt{, m}}
+Set the magnetic and electric fields. \var{b} is the magnetic fields in Gauss,
+\var{e} is the electric fields in Volts/cm. \var{a} is the angle between the
+magnetic and electric fields. If the optional \var{m} is 1, then the
+diamagnetic effects is ignored in the Hamiltonian.
+\end{fundesc}
+
+\begin{fundesc}{SetHydrogenicNL}{\opt{n,\opt{l}}}
+Set the principle quantum number \var{n} and the orbital angular momentum
+\var{l}, beyond which, the hydrogenic approximation for the E1 multipole
+integrals should be used. If this routine is not called or the argument is not
+given, the default is \var{n}=8, and \var{l}=7. 
+\end{fundesc}
+
+\begin{fundesc}{SetIEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the ionization threshold energy grid for the collisional ionization. In
+the first form, the grid is given by a Python list \var{g}. In the second
+form, the grid is constructed with \var{n} points from \var{e0} to
+\var{e1}. This routine does not need to be called. A 3 point grid is
+constructed according to the transition array being considered by default.
+Calling this routine with \var{n}=0, reset the grid to system default.
+\end{fundesc}
+
+\begin{fundesc}{SetMaxRank}{k}
+Set the maximum rank in the expansion of Slater integrals. The default is 6,
+if this routine is not called.
+\end{fundesc}
+
+\begin{fundesc}{SetMixCut}{c}
+Set cutoff threshold of the mixing basis in the wavefunction. Only the basis
+with mixing coefficients greater than \var{c} are included in the wavefunction
+expansion. Default is $10^{-5}$.
+\end{fundesc}
+
+\begin{fundesc}{SetMS}{nms, sms}
+Set flags for normal mass shift and specific mass shift contributions to the
+Hamiltonian. 0---disable, 1---enable. Defaults: 1.
+\end{fundesc}
+
+\begin{fundesc}{SetOptimizeControl}{t, s, m\opt{, p}}
+Set the options for radial potential optimization. \var{t} is the tolerance
+for the self-consistent field iteration. \var{s} is the stabilizer for the
+iteration, a number from 0 to 1. \var{m} is the maximum number of iterations
+allowed. \var{p} 
+specifies whether diagnostic information should be printed out during the
+optimization. This routine does not need to be called. The default for \var{t}
+is $10^{-6}$, \var{s} is determined dynamically according to the
+type of ion, \var{m} is 100, and \var{p} is 0 for no printing out of
+information. 
+\end{fundesc}
+
+\begin{fundesc}{SetOptimizeMaxIter}{m}
+Set the maximum itneration in \key{OptimizeRadial}.
+\end{fundesc}
+
+\begin{fundesc}{SetOptimizePrint}{m}
+Set the printing option in \key{OptimizeRadial}.
+\end{fundesc}
+
+\begin{fundesc}{SetOptimizeStabilizer}{m}
+Set the stabilizer factor in \key{OptimizeRadial}.
+\end{fundesc}
+
+\begin{fundesc}{SetOptimizeTolerance}{m}
+Set the tolerance factor in \key{OptimizeRadial}.
+\end{fundesc}
+
+\begin{fundesc}{SetPEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the free electron energy grid for photoionization, radiative recombination
+and autoionization. In the first form, the grid is given by a Python list
+\var{g}. In the second form, the grid is constructed with \var{n} points from
+\var{e0} to \var{e1}. The energies are in units of eV. This function does not
+need to be called. A 6 point grid is constructed according to the transition
+array being considered by default. Calling this function with \var{n}=0 reset
+the grid to system default. 
+\end{fundesc}
+
+\begin{fundesc}{SetPEGridLimits}{e0, e1}
+Set the minimum and maximum collision energy for photoionization and radiative
+recombination for the automatic construction of the grid. They are in units of
+average threshold energy of the transition array being considered. The default
+is 0.05 and 8.0 if this routine is not called.
+\end{fundesc}
+
+\begin{fundesc}{SetRadialGrid}{n\opt{, r0\opt{,r1}\opt{,rmin}}}
+Set the radial grid properties. \var{n} is the number of radial grid
+points. It must be an even number and less than the macro
+\key{MAXRP}. \var{r0} specifies the ratio of successive radial points near 
+origin, which is approximately logarithmic. \var{r1} specifies the number of
+mesh-points per oscillation wavelength for very high-$n$ orbitals at large 
+radii. \var{rmin} divided by the nuclear charge is the starting point of the
+radial mesh.
+\end{fundesc}
+
+\begin{fundesc}{SetRRTEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the transition energy grid for photoionization and radiative
+recombination. In the first form, the grid is given by a Python list
+\var{g}. In the second form, the grid is constructed with \var{n} points from
+\var{e0} to \var{e1}. This routine does not need to be called. For E1 type
+transitions, the transition energy does not enter the calculation, a 1-point
+grid is constructed by default. for other types of multipoles, a 3-point grid
+is constructed. Calling this function with \var{n}=0 reset the grid to system default.
+\end{fundesc}
+
+\begin{fundesc}{SetRecPWLimits}{l0, l1}
+Set the orbital angular momentum range for the spectator electron in the
+recombined states to [\var{l0}, \var{l1}] inclusive. The default is [0, 12].
+\end{fundesc}
+
+\begin{fundesc}{SetRecPWOptions}{lmax}
+Set maximum orbital angular momentum of the spectator electron in the
+recombined states to \var{lmax}. The allowed values are also limited by the
+setting of \key{SetRecPWLimits}. The default is 12.
+\end{fundesc}
+
+\begin{fundesc}{SetRecQkMode}{mode}
+Set the computation mode for the photoionization and radiative recombination
+radial integrals. \var{mode} may be a string or an integer specifying the
+mode. These values are listed in the variable \key{QKMODE}.
+\end{fundesc}
+
+\begin{fundesc}{SetRecSpectator}{nmin\opt{, nfrozen}}
+Set the minimum principle quantum numbers \var{nmin} and \var{nfrozen} for the
+spectator electron. States with $n > nmin$ are constructed with
+\key{RecStates} function, and those with $n > nfrozen$ are treated with frozen
+core approximation. Default for both \var{nmin} and \var{nfrozen} are 8.
+\end{fundesc}
+
+\begin{fundesc}{SetScreening}{ns\opt{,c\opt{,k}}}
+Set the orbital parameters of screening electrons. \var{ns} is a list of
+integers which are the principle quantum numbers of the screening
+orbitals. The optional \var{c} is the total charge to be screened, whose
+default is 1.0. \var{k} is the either 1, $-1$, or 0. If \var{k}=$-1$, then
+the \var{l=0} orbitals are used. If \var{k}=0, then the the \var{l}=\var{ns}/2
+orbitals are used. If \var{k}=1, then the \var{l}=\var{ns}-1 nodeless orbital
+is used. The default is \var{k}=1. This function is usually used when
+additional screening charge is desired for the mean configuration generating
+the optimal central potential. It is quite experimental, and therefore not
+recommended for general use.
+\end{fundesc}
+
+\begin{fundesc}{SetSE}{n}
+Set the maximum principle quantum number of the orbitals for which the
+self-energy correction should be included in the Hamiltonian. Default is 5.
+\end{fundesc}
+
+\begin{fundesc}{SetSlaterCut}{k1, k2}
+Set the calculation modes of Slater integrals. \var{k1} and \var{k2} are
+orbital angular momentum values. When one of the orbitals has $l > k1$, then
+exchange integrals are not calculated. When one has $l > k2$, the direct
+integrals are evaluated with the multipole moments.
+\end{fundesc}
+
+\begin{fundesc}{SetTEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the transition energy grid for collisional excitation. In the first form,
+the grid is given by a Python list \var{g}. In the second form, the grid is
+constructed with \var{n} points from 
+\var{e0} to \var{e1}. This routine does not need to be called. A 3-point grid
+is constructed by default. Calling this function with \var{n}=0 reset the grid
+to system default. 
+\end{fundesc}
+
+\begin{fundesc}{SetTransitionCut}{c}
+Set the cutoff threshold for the radiative transition rates output. Only rates
+greater than \var{c} times the total decay rate of the upper level is written
+to the output file. The default is $10^{-3}$ if this routine is not called.
+\end{fundesc}
+
+\begin{fundesc}{SetTransitionGauge}{m}
+Set the gauge for radiative transition.
+\end{fundesc}
+
+\begin{fundesc}{SetTransitionMaxE}{m}
+Set the maximum rank of electric multipole transitions.
+\end{fundesc}
+
+\begin{fundesc}{SetTransitionMaxM}{m}
+Set the maximum rank of magnetic multipole transitions.
+\end{fundesc}
+
+\begin{fundesc}{SetTransitionMode}{m}
+Set the mode for the radiative transition.
+\end{fundesc}
+
+\begin{fundesc}{SetTransitionOptions}{g, m}
+Set the options for the radiative transition calculation. \var{g} is the gauge
+to be used, 1 for Coulomb gauge (velocity form) and 2 for Babushkin gauge
+(length form, which is the default). \var{m} is the mode for the multipole
+integral, 0 for fully relativistic and 1 for non-relativistic approximation
+(the default is 1).
+\end{fundesc}
+
+\begin{fundesc}{SetUsrCEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the user collision energy grid for collisional excitation. The collision
+strengths on this grid are output. It is forced to be same as that set by
+\key{SetCEGrid} if the \key{QKMODE} is \key{'exact'}.
+\end{fundesc}
+
+\begin{fundesc}{SetUsrCIEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the user collision energy grid for collisional ionization. The collision
+strengths on this grid are output. 
+\end{fundesc}
+
+\begin{fundesc}{SetUsrPEGrid}{g $\mid$ n\opt{, e0, e1}}
+Set the user electron energy grid for photoionization and radiative
+recombination. The bound-free differential oscillator
+strengths on this grid are output. It is forced to be same as that set by
+\key{SetPEGrid} if the \key{QKMODE} is \key{'exact'}.
+\end{fundesc}
+
+\begin{fundesc}{SetUTA}{m\opt{, ci}}
+Set the flag for configuration average models. If $m=1$, all calculations are
+carried out in the configuration average approximation. The radiative
+transition rates output contains three additional fields, the transition
+energy including the UTA shift,
+the Gaussian standard deviation, and the correction to the line strengths due to
+the configuration interaction within the same non-relativistic
+configurations. If $m=0$, which is the default,
+the usual detailed term accounting method is used. This function should be
+called in the beginning of the script, before \key{Config} function, since it
+disables the angular momentum coupling performed by \key{Config}. The optional
+argument \var{ci} indicates whether the configuration interaction correction
+factors should be included when reading the \key{DB\_TR} files. These 
+correction factors are always calculated in \key{TransitionTable} irrespective
+of the value of \var{ci}.
+\end{fundesc}
+
+\begin{fundesc}{SetVP}{vp}
+Set the flag for vacuum polarization correction to the
+Hamiltonian. 0---disable, 1---only include 2nd order term, 2---include the 4th
+order term as well. Default is 2.
+\end{fundesc}
+
+\begin{fundesc}{SlaterCoeff}{fn, g, a, b}
+Calculate the expansion coefficients of the exchange radial integral
+in the Coulomb energy of each state in the
+configuration list 
+\var{g}. The Coulomb energy between electrons of a state can be expanded as
+\begin{equation}
+E = \sum g_kG^k(\alpha\alpha^\prime,\beta\beta^\prime) + \mbox{direct terms},
+\end{equation}
+where $\alpha$ and $\alpha^\prime$ are the interacting orbitals in the bra and
+ket states, which have the same $l$ values. Because we work in the
+$jj$-coupling basis, $\alpha$ and $\alpha^\prime$ may have different $j$
+values. The results are stored in the text file \var{fn}. These coefficients
+are useful in determining the radiative transition rates from level to average
+configurations. \var{a} and \var{b} are the orbital lists contain $\alpha$ and
+$\beta$, respectively. They are specified as configuration strings.
+The format of the file is as follows. For each state, a line
+starts with ``\#'' gives the level index, parity, $2J$-value, and the
+configuration label. It is followed by a block of lines. In this block, the first
+column is the level index. The 2rd, 3th, and 4th columns are the $n$, $kappa$,
+$l$ values of the $\alpha$ orbital. The 5th column is either 0 or 1,
+indicating whether $\alpha$ and $\alpha^\prime$ have the same $j$ values. The
+6-9th  columns are the corresponding values for the $\beta$ orbital. The 10th
+column is the expansion coefficients $g_1$. The 11th column is $g_2$. The 12th
+column is the the number to be added to $g_1$ to form the relative intensities
+of level to configuration transitions for dipole transitions. The 13th column
+is the number to be added to $g_2$ to form relative intensities for quadrupole
+transitions.
+\end{fundesc}
+
+\begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}}}
+Diagonalize the Hamiltonian for configurations in the groups \var{g}. The
+configurations in the optional groups \var{p} are allowed to interact with
+\var{g} but only states within \var{g} are added to the energy level table. If
+\var{ip}=0, the interaction between \var{g} and \var{p} are treated exactly,
+if \var{ip}=1, this interaction is treated approximately in a way that the
+non-diagonal elements within \var{p} are neglected. The energy levels are
+output to the file \var{fn}.
+\end{fundesc}
+
+\begin{fundesc}{Structure}{p, j}
+This is the second form of the \key{Structure} function. It distinguishes
+itself from the first form because the first argument is an integer. It sets which
+$\pi J$ symmetry and/or which level to include in the structure calculation. By
+default, all symmetries are processed. But if this function is called with
+$p=0$, or 1; $j \ge 0$ or $j$ is a list of integers, then only the specified
+symmetry is processed. $j$ or integers in the list if $j$ is a list, is 
+twice the actual value of the total angular momentum. The symmetry
+restrictions specified here also applies to the \key{StructureMBPT} function.
+\end{fundesc}
+
+\begin{fundesc}{StructureEB}{fn, g}
+Calculate the atomic structure for atom in magnetic and electric fields. The
+levels belong to the configuration group \var{g} are allowed to mix in the
+external fields.
+\end{fundesc}
+
+\begin{fundesc}{TransitionTable}{fn, low, up\opt{, m}}
+Calculate the weighted oscillator strength and radiative transition rates from
+states in \var{up} groups to states in \var{low} groups with multipole type
+\var{m}. The default for \var{m} is -1, i.e., E1 transitions. The results are
+saved to file \var{fn}.
+\end{fundesc}
+
+\begin{fundesc}{TRTable}{fn, low, up\opt{, m}}
+Same as \key{TransitionTable}
+\end{fundesc}
+
+\begin{fundesc}{TRTableEB}{fn, lo, up\opt{, m}}
+Calculate radiative transition rates between levels in external magnetic and
+electric fields.
+\end{fundesc}
+
+\begin{fundesc}{WaveFuncTable}{fn, n, k\opt{, e}}
+Print the radial wavefunction of the orbital with the principle quantum number
+\var{n}, relativistic angular quantum number $\kappa$=\var{k} to the file
+\var{fn}. If \var{n}=0, the orbital is a continuum state. In this case, the
+optional \var{e} must be a positive number for the energy of the continuum
+orbital in unit of eV.
+\end{fundesc}

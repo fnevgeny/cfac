@@ -15,7 +15,9 @@
 
 \settextfraction{1.0}
 
+\newcommand{\cFAC}{{cFAC}\xspace}
 \newcommand{\facversion}{{1.5.0}\xspace}
+
 \newcommand{\opt}[1]{
   {\textnormal{[}}{#1}\hspace{0.5mm}{\textnormal{]}}}
 \newcommand{\var}[1]{\textit{#1}}
@@ -47,8 +49,8 @@
 
 \begin{document}
 
-\title{cFAC \facversion Manual}
-\author{Ming Feng Gu}
+\title{\cFAC--\facversion Manual}
+\author{Ming Feng Gu\thanks{With post-FAC--1.1.1 changes by Evgeny Stambulchik}}
 
 \date{}
 
@@ -59,13 +61,19 @@
 \chapter{Overview}
 \label{cha:overview}
 
-\section{What Is FAC}
-FAC stands for The Flexible Atomic Code. It is an
-integrated software package to calculate various atomic radiative and
-collisional processes, including energy levels, radiative transition rates,
-collisional excitation and 
-ionization by electron impact, photoionization, autoionization, radiative
-recombination and dielectronic capture.
+\section{What Are FAC and \cFAC}
+FAC stands for the Flexible Atomic Code. It is an integrated software package to
+calculate various atomic radiative and collisional processes, including energy
+levels, radiative transition rates, collisional excitation and  ionization by
+electron impact, photoionization, autoionization, radiative recombination and
+dielectronic capture. FAC was written by Ming Feng Gu largely while at the Space
+Science Laboratory of Berkeley. 
+
+FAC makes detailed atomic model accessible to a wide community of laboratory and
+astrophysical plasma diagnostics. Its flexible interface is designed to be
+useful even for people without a deep understanding of the underlying atomic
+theories. It is also powerful enough for experienced users to explore the
+effects of algorithmic choices and different physical approximations.
 
 The atomic structure calculation in FAC is based on the relativistic
 configuration interaction with independent particle basis wavefunctions. These
@@ -83,35 +91,41 @@ background and computational methods are not discussed in this manual,
 instead, they are described in a series of papers which are distributed along
 with this package and this manual.
 
-FAC is a step forward to bring detailed atomic model accessible to a wide
-community of laboratory and astrophysical plasma diagnostics. Its flexible
-interface is designed to be useful even for people without a deep
-understanding of the underlying atomic theories. It is also powerful enough
-for experienced users to explore the effects of algorithmic choices and
-different physical approximations.
+\cFAC is a forked version of FAC. It was started by Evgeny Stambulchik
+around 2010 (based on FAC-1.1.1, released in 2006), initially focusing on
+providing large volumes of data as required, e.g., for collisional-radiative
+plasma modeling, and replacing third-party Fortran numerical libraries with
+their C equivalents (hence the change in the package name).
 
-FAC is freely distributed in the hope that it will be useful. The author makes
-every effort to ensure its correctness. However, he does not guarantee its
-fitness to any specific purpose. The author is not responsible for any damage
-resulting from the use of this program, including failure to obtain or loss of
-tenure. 
+\section{License}
+The bulk of the \cFAC sources is distributed under the GNU General Public
+License (GPL) terms. The full text of the license is given in
+\hyperref[GPL]{Appendix}.
 
-\section{Obtain and Install FAC}
+Some bits of the FAC sources, which are still used in cFAC, were originally
+published in the Computer Physics Communications (CPC) journal, and as such, are
+licensed for non-profit or academic use only, please see
+\url{http://cpc.cs.qub.ac.uk/licence/licence.html}.
+
+In order to compile in these CPC-licensed modules, you need to pass the
+``--with-cpc-module'' configure flag and explicitly agree to the CPC licensing
+terms. {\em Please note that since CPC and GPL are incompatible, as a result,
+the ``sfac'' executable will not be redistributable!}
+
+\section{Obtaining and Installing \cFAC}
 \index{Install}
 \label{sec:install}
-The latest version of FAC is \facversion. It can be obtained from
-\textbf{http://sprg.ssl.berkeley.edu/~mfgu/fac}. I can also send a copy to you
-through email. Please request to \textbf{mfgu@ssl.berkeley.edu}. It is being
-continuously developed at present, so please check regularly to get the newest
-version.
+The latest version of \cFAC can be obtained from
+\url{https://www-amdis.iaea.org/FAC/}. The public repository is hosted on
+\href{https://github.com}{GitHub}, \url{https://github.com/fnevgeny/cfac}.
 
-Much of the FAC package is written in ANSI C and Fortran 77. It should 
-therefore work on any platform with a C and Fortran 77 compilers. However, 
-this is only true to the rather simple command parser that comes with FAC,
-referred to as SFAC.
+Much of the \cFAC package is written in ANSI C and Fortran 77. It should 
+therefore work on any platform with modern C and Fortran 77 compilers.
+\verb|gcc| and \verb|gfortran| from the
+\href{https://gcc.gnu.org/}{GNU Compiler Collection} are recommended.
 
 Step-by-step instructions for installation can be found in the README file in
-the top directory of FAC distribution.
+the top directory of the \cFAC distribution.
 
 \section{Quick Start}
 \label{sec:start}
@@ -126,8 +140,8 @@ or, one may invoke \verb|sfac| without arguments, in which
 case, it reads from \verb|stdin| for inputs, where commands are interpreted
 line by line.
 
-Perhaps the quickest way to get familiar with FAC is to inspect the simple
-demo scripts in the \verb|demo/| directory in FAC distribution. There
+Perhaps the quickest way to get familiar with \cFAC is to inspect the simple
+demo scripts in the \verb|demo/| directory in \cFAC distribution. There
 are individual scripts demonstrating the
 calculation of energy levels, radiative transition rates, collisional
 excitation and ionization cross sections, radiative recombination cross
@@ -156,7 +170,7 @@ Lines 14--21 carry out a Dirac-Fock-Slater self-consistent calculation to
 derive a local central potential which represents the electronic screening of
 the nuclear potential. In this calculation, the potential is optimized to the
 average electron clouds of configurations \verb|n2| and \verb|n3|, since in
-FAC, all atomic processes are treated with basis wavefunctions generated from
+\cFAC, all atomic processes are treated with basis wavefunctions generated from
 a single potential. This
 results in the potential to be less optimized for \verb|n2| and \verb|n3|
 individually. Lines 14 and 21 are used to make a crude correction to the
@@ -180,7 +194,7 @@ not needed, and Line 24 may be omitted. For the difference between the verbose
 and simple ASCII files, see Chapter \ref{cha:format}. Line 27 calculates the
 E1 oscillator strength and transition rates between configuration groups
 \verb|n2| and \verb|n3|, and saves the results in the binary file
-\verb|tr.asc.b|. The function \verb|TransitionTable| accepts an optional 4th
+\verb|tr.asc|. The function \verb|TransitionTable| accepts an optional 4th
 integer argument specifying the transition type. A negative integer means
 electric multipole and a positive integer for magnetic multipole. The absolute
 value of the integer indicates the rank of the multipole. Therefore, $-1$ would
@@ -203,13 +217,13 @@ values of these levels, the transition energy, $gf$-values, radiative
 decay rates, and the reduced multipole matrix elements are given.
 
 \section*{Acknowledgments}
-Throughout the development of this work, the discussion with Ehud Behar, Masao
+Throughout the development of FAC, the discussion with Ehud Behar, Masao
 Sako, Peter Beiersdorfer, Ali Kinkhabwala and Steven Kahn has been very
 useful. Some Fortran 77 subroutines were retrieved from Computer Physics
 Communications Program Library at
 \url{http://www.cpc.cs.qub.ac.uk}.
 
-The original development of this code (during Dec 2000 -- Aug 2003, or prior
+The original development of FAC (during Dec 2000 -- Aug 2003, or prior
 to version 1.0.2) was
 supported by NASA through Chandra Postdoctoral Fellowship Award Number
 PF01-10014 issued by the Chandra X-ray Observatory Center, which is operated
@@ -223,7 +237,7 @@ Administration and/or the Smithsonian Astrophysical Observatory.
 
 \chapter{Description of Output Files}
 \label{cha:format}
-The primary output files of FAC are in binary format. The I/O functionality
+The primary output files of \cFAC are in binary format. The I/O functionality
 and the conversion from binary to ASCII format are implemented in the source
 files \verb|faclib/dbase.h| and \verb|faclib/dbase.c|. In this chapter, we
 describe the structure of these files in detail.
@@ -231,7 +245,7 @@ describe the structure of these files in detail.
 \section{Binary Format}
 \label{sec:binary}
 \index{Binary format}
-Presently, FAC produces different types of files. Each type is assigned
+Presently, \cFAC produces different types of files. Each type is assigned
 a unique integer, which corresponds to a macro define in the file
 \verb|faclib/dbase.h|. These types are
 \begin{description}
@@ -288,9 +302,9 @@ typedef struct _F_HEADER_ {
 \begin{dbdesc}
 \item[\texttt{long tsession}:] Time stamp when the file is created. This is the
 value returned by the C lib function time(0). It is platform dependent. 
-\item[\texttt{int version}:] Major version number of FAC.
-\item[\texttt{int sversion}:] Minor version number of FAC.
-\item[\texttt{int ssversion}:] Release number of FAC.
+\item[\texttt{int version}:] Major version number of \cFAC.
+\item[\texttt{int sversion}:] Minor version number of \cFAC.
+\item[\texttt{int ssversion}:] Release number of \cFAC.
 \item[\texttt{int type}:] Type of the data file.
 \item[\texttt{float atom}:] Atomic number.
 \item[\texttt{char symbol[4]}:] The first 3 bytes contains a NULL
@@ -1045,7 +1059,7 @@ with $M_i \ge 0$ can be obtained using time reversal symmetry.
 
 \section{ASCII Format}
 \index{ASCII Format}
-FAC provides functions to convert the binary output to ASCII files. There are
+\cFAC provides functions to convert the binary output to ASCII files. There are
 two types of ASCII formats, a simple translation of binary files and a more
 verbose version that adds more derived information for the sake of
 convenience. If the ASCII files are created to be human-readable, the
@@ -1077,7 +1091,7 @@ In the following sections, a portion of each type of database file in the
 verbose form is listed and significant fields explained. The lines start with
 a ``\verb|#|'' are the added explanation, which are not part of the output
 file. These files are generated with the scripts in the \texttt{demo/}
-directory come with FAC.
+directory come with \cFAC.
 
 \subsection{\texttt{DB\_EN}}
 \index{DB\_EN}
@@ -1596,12 +1610,12 @@ energy corrections are given in the list \var{e}. Only levels with valence
 electron in $n\ge nmin$ are corrected, if these levels are not constructed
 with \key{RecStates}. The corrections are given in
 units of eV. For the first level in the correction list, the amount is added
-to the energies calculated by FAC, and that level is taken as the reference
+to the energies calculated by \cFAC, and that level is taken as the reference
 level for all other entries in the list. The correction energies in the list
 \var{e} for these other entries with \var{ilev}$\ge 0$ are the desired energies
 relative to the reference level, i.e., they replace the energies calculated by
-FAC. However, if \var{ilev}$<0$, then these corrections are also interpreted
-as shifts to be added to the energies calculated by FAC.
+\cFAC. However, if \var{ilev}$<0$, then these corrections are also interpreted
+as shifts to be added to the energies calculated by \cFAC.
 \end{fundesc}
 
 \begin{fundesc}{CutMixing}{g0, g1\opt{, c}}
@@ -1639,7 +1653,7 @@ Uehling potential which approximates the vacuum polarization effects.
 \end{fundesc}
 
 \begin{fundesc}{Info}{}
-Print out the version information of FAC and contact information of the
+Print out the version information of \cFAC and contact information of the
 author. 
 \end{fundesc}
 
@@ -2190,89 +2204,70 @@ orbital in unit of eV.
 
 
 
-\chapter{Frequently Asked Questions (FAQ) To FAC}
+\chapter{Frequently Asked Questions (FAQ)}
 \section{General}
-\faq{Where can I obtain FAC}{
-FAC is free software. It can be used, modified and redistributed
-without restriction. Currently, it can be obtained from anonymous
-\textbf{ftp://space.mit.edu/pub/mfgu/fac/}, or one may request to
-\textbf{mfgu@space.mit.edu} for a copy through email.}
-
-\faq{What operating systems does FAC run on}{
-FAC is written in a mixture of ANSI C, Fortran 77, and Python, all of them are
-in principle platform independent. However, the mixed language programming and
-the dynamically loadable Python modules makes it more easily installed in
-modern UNIX-like systems than others. So far, it has been tested to work under
-Solaris, Linux, Mac OS X, and windows with the UNIX API emulation provided by
-Cygwin.}
+\faq{What operating systems does \cFAC run on}{
+\cFAC is written in a mixture of ANSI C and Fortran 77, all of them are in
+principle platform independent. However, the mixed language programming makes it
+more easily installed in modern UNIX-like systems than others. So far, it has
+been tested to work under Solaris, Linux, Mac OS X, and MS Windows with the UNIX
+API emulation provided by Cygwin.}
   
-\faq{How does FAC differ from other atomic codes}{
-The theoretical methods used in FAC are similar to some other distorted-wave
+\faq{How does \cFAC differ from other atomic codes}{
+The theoretical methods used in \cFAC are similar to some other distorted-wave
 atomic codes, such as HULLAC and differ from more elaborate programs based on
 close-coupling approximations, such as the Belfast R-Matrix code. The biggest
-advantage of FAC is its ease of use and its scriptability.}
+advantage of \cFAC is its ease of use and its scriptability.}
 
-\faq{How does FAC differ from plasma synthetic codes}{
-There are various plasma codes widely used in X-ray astronomy, such as APEC,
-MEKAL, SPEX, XSTAR and Cloudy. These codes use the existing atomic data to
-construct spectral models under different physical conditions. FAC is an
-atomic code, whose primarily purpose is to generate atomic data, which can be
-used in these plasma codes. However, FAC includes a collisional radiative
-model that is able to compute spectral models for optically thin plasmas at a
-given electron temperature and density. Non-Maxwellian distribution of electron
-energy may be easily implemented as well. A power law ionizing continuum
-radiation may also be included.}
-
-\faq{Can FAC be incorporated into XSPEC or other spectral analysis programs}{
-In principle, the collisional radiative model comes with FAC can be used in
+\faq{Can \cFAC be incorporated into XSPEC or other spectral analysis programs}{
+In principle, the collisional radiative model comes with \cFAC can be used in
 XSPEC or similar spectral analysis programs. However, this is not practical,
 as the model includes a large number of atomic states, especially, the doubly
 excited states to treat the resonant processes, and is therefore very time
-consuming. The best strategy of incorporating the FAC results to external
+consuming. The best strategy of incorporating the \cFAC results to external
 spectral models is to extract basic atomic or plasma parameters and use them
 to build table models or implement dedicated subroutines.}
 
-\faq{Which atomic processes can or cannot be calculated with FAC}{
-FAC can calculate energy levels, radiative transition rates of arbitrary
+\faq{Which atomic processes can or cannot be calculated with \cFAC}{
+\cFAC can calculate energy levels, radiative transition rates of arbitrary
 multipole type, collisional excitation and ionization cross sections by
 electron impact, photoionization and radiative recombination cross sections and
-autoionization rates. In the current form, FAC does not treat two-photon
+autoionization rates. In the current form, \cFAC does not treat two-photon
 decay, although such decay rates of $2s S_{1/2}$ state of H-like ions and
 $1s2s S_{0}$ state of He-like ions are included in the collisional radiative
 model using interpolation formulae taken from literature. The three-body
 recombination are not implemented as well.}
 
 \faq{What is a typical accuracy of the atomic parameters calculated with
-FAC}{
+\cFAC}{
 The ions other than H-like, the accuracy of energy levels are usually a few
 eV, which translates to 10--30 m{\AA} for the wavelength at $\sim$10{\AA}. For
 radiative transition rates and cross sections, the accuracy is
 $\sim$10--20\%. Data for near-neutral ions or atoms may have even larger
 errors.}
 
-\faq{Can FAC be used to calculate atomic parameters for non-X-ray (UV,
+\faq{Can \cFAC be used to calculate atomic parameters for non-X-ray (UV,
 optical, etc.) lines}{
 For multiply-charged ions, non-X-ray lines usually result from the transitions
 within the same complex, which usually have large relative uncertainties in
 the calculated wavelengths and transition rates. The accuracy for UV and
 optical lines from near-neutral ions is also very limited.}
 
-\faq{Are there standard references to FAC}{
-Currently, no papers have been published describing the code, though
-drafts have been written, which are included in the FAC distribution. I have
-been trying to find a suitable journal willing to publish
-them. I originally submitted them to Computer Physics Communications
-(CPC). However, the referee and editor complained about the lack of
-documentation and code comments. The documentation has improved since
-then, the code commenting still needs extensive work, which may not be done
-soon. The first paper that used results of FAC is Gu, M.F., 2003, ApJ, 582,
-1241, which can be used as the reference.}
+\faq{Are there standard references to \cFAC}{
+Currently, no papers have been published describing the code, though drafts have
+been written, which are included in the \cFAC distribution. M. F. Gu was trying
+to find a suitable journal willing to publish them, originally submitting to
+Computer Physics Communications (CPC). However, the referee and editor
+complained about the lack of documentation and code comments. The documentation
+has improved since then, the code commenting still needs extensive work, which
+may not be done soon. The first paper that used results of FAC is Gu, M.F.,
+2003, ApJ, 582, 1241, which can be used as the reference.}
 
 \faq{How do I report bugs, make suggestions and get updated about new
 versions}{
 Please contact the author at \textbf{mfgu@space.mit.edu} for bugs and
 suggestions. I maintain a small email address list of people who expressed
-interest in FAC and send release announcements to them. Let me know if you want
+interest in \cFAC and send release announcements to them. Let me know if you want
 to be added to this list. If the list ever grows to the point when I can no
 longer put it under my personal address book, we may have to create a
 dedicated mailing list.}
@@ -2316,12 +2311,12 @@ other theoretical works.}
 This depends on the computer resource available, and the desired accuracy. The
 dimension of the Hamiltonian matrix increases very rapidly as the number of
 interacting configurations grows. The convergence with respect to the
-configuration interaction is usually slow. For applications which FAC is
+configuration interaction is usually slow. For applications which \cFAC is
 primarily designed for, one typically includes only configurations within the
 same complex, except for some low-lying configurations.}
 
 \faq{What relativistic effects are included}{
-The standard Dirac-Coulomb Hamiltonian is used in FAC, which means that the
+The standard Dirac-Coulomb Hamiltonian is used in \cFAC, which means that the
 spin-orbit interaction, mass-effect and other leading relativistic effects are
 fully treated. However, higher-order QED effects, such as retardation and
 recoil are only included in the Breit interaction with zero energy limit for
@@ -2383,7 +2378,7 @@ to an empty orbital.}
 
 \faq{Why is the bound-free oscillator strength differ from some other
 theoretical calculation by a constant factor}{
-The bound-free differential oscillator strengths calculated by FAC have units
+The bound-free differential oscillator strengths calculated by \cFAC have units
 of Hartree$^{-1}$. Also the values depend on the normalization of continuum
 orbitals. It is therefore possible that they differ from other theoretical
 calculations by a constant factor. One should always use the formula in this
@@ -2410,7 +2405,7 @@ sometimes to tag a certain autoionization channel.}
 resonances}{
 The energies of low-lying $\Delta n = 0$ resonances can not the calculated
 accurately. This greatly reduces the reliability of the resulting dielectronic
-recombination rates. In FAC, there is a method to improve the accuracy of
+recombination rates. In \cFAC, there is a method to improve the accuracy of
 these energies by adjusting the core transition energies according to the
 experimental values. The function \key{CorrectEnergy} is used to modify the
 calculated energy levels by specified amount.}
@@ -2425,7 +2420,7 @@ states in different complexes. e.g., KLL and KLM resonances should be
 calculated with two separate calls to \key{AITable}.}
 
 \section{Collisional Ionization}
-\faq{Why are FAC ionization cross sections calculated with \key{BED} mode
+\faq{Why are \cFAC ionization cross sections calculated with \key{BED} mode
 usually much smaller at near threshold energies as compared with
 distorted-wave calculations}{
 When using \key{BED} mode to calculate the ionization radial integrals, the
@@ -2448,4 +2443,11 @@ faster than the \key{DW} ionization radial integrals.}
 \bibliography{facref}
 
 \printindex
+
+\chapter*{Appendix}
+\appendix
+\label{GPL}
+\lstset{caption=}
+\includecode[]{../LICENSE}
+
 \end{document}

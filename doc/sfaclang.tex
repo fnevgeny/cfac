@@ -180,7 +180,7 @@ configurations.
 Correct the energies of certain levels by given amount. This is used if the
 exact energy of some levels is critical. In the first form, the indexes and the
 energy corrections are listed as two columns in the file \var{fn}. In the
-second form, the indexes are given in the Python list \var{ilev}, and the
+second form, the indexes are given in the list \var{ilev}, and the
 energy corrections are given in the list \var{e}. Only levels with valence
 electron in $n\ge nmin$ are corrected, if these levels are not constructed
 with \key{RecStates}. The corrections are given in
@@ -258,7 +258,7 @@ in verbose mode.
 Obtain the optimal radial potential based on the mean configuration generated
 by the configuration group list \var{g} and the weight \var{w}, or if they are
 absent in the call, by the mean configuration specified by \key{AvgConfig}.
-\var{g} and \var{w} must be equal length Python lists if both present. \var{g}
+\var{g} and \var{w} must be equal length lists if both present. \var{g}
 is a list of configuration groups, and \var{w} is a list of weights for each
 group when generating the mean configuration. If only \var{g} is present, each
 configuration group is given an equal weight.
@@ -281,9 +281,7 @@ is therefore more efficient to precalculate these coefficients.
 \end{fundesc}
 
 \begin{fundesc}{Print}{args}
-Print out the string representation of \var{args}. This function exists to
-assist the conversion to SFAC interface, since Python's \key{print} statement
-is not converted.
+Print out the string representation of \var{args}.
 \end{fundesc}
 
 \begin{fundesc}{PrintTable}{fnb, fna\opt{, v}}
@@ -376,7 +374,7 @@ is $-1.0$.
 
 \begin{fundesc}{SetCEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the collision energy grid for collisional excitation. In the first form, the
-grid is given by a Python list \var{g}. In the second form, the grid is
+grid is given by a list \var{g}. In the second form, the grid is
 constructed with \var{n} points, from \var{e0} to \var{e1}. The energies are
 specified for the scattered electron energy, and in units of eV. This routine
 does not need to be called. A default is constructed for a given transition
@@ -415,7 +413,7 @@ variable \key{QKMODE}.
 
 \begin{fundesc}{SetCIEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the collision energy grid for collisional ionization. In the first form, the
-grid is given by a Python list \var{g}. In the second form, the grid is
+grid is given by a list \var{g}. In the second form, the grid is
 constructed with \var{n} points, from \var{e0} to \var{e1}. The energies are
 specified for the total energy of the final electrons, and in units of
 eV. This routine does not need to be called. A default is constructed for a
@@ -488,7 +486,7 @@ given, the default is \var{n}=8, and \var{l}=7.
 
 \begin{fundesc}{SetIEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the ionization threshold energy grid for the collisional ionization. In
-the first form, the grid is given by a Python list \var{g}. In the second
+the first form, the grid is given by a list \var{g}. In the second
 form, the grid is constructed with \var{n} points from \var{e0} to
 \var{e1}. This routine does not need to be called. A 3 point grid is
 constructed according to the transition array being considered by default.
@@ -541,7 +539,7 @@ Set the tolerance factor in \key{OptimizeRadial}.
 
 \begin{fundesc}{SetPEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the free electron energy grid for photoionization, radiative recombination
-and autoionization. In the first form, the grid is given by a Python list
+and autoionization. In the first form, the grid is given by a list
 \var{g}. In the second form, the grid is constructed with \var{n} points from
 \var{e0} to \var{e1}. The energies are in units of eV. This function does not
 need to be called. A 6 point grid is constructed according to the transition
@@ -568,7 +566,7 @@ radial mesh.
 
 \begin{fundesc}{SetRRTEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the transition energy grid for photoionization and radiative
-recombination. In the first form, the grid is given by a Python list
+recombination. In the first form, the grid is given by a list
 \var{g}. In the second form, the grid is constructed with \var{n} points from
 \var{e0} to \var{e1}. This routine does not need to be called. For E1 type
 transitions, the transition energy does not enter the calculation, a 1-point
@@ -627,7 +625,7 @@ integrals are evaluated with the multipole moments.
 
 \begin{fundesc}{SetTEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the transition energy grid for collisional excitation. In the first form,
-the grid is given by a Python list \var{g}. In the second form, the grid is
+the grid is given by a list \var{g}. In the second form, the grid is
 constructed with \var{n} points from 
 \var{e0} to \var{e1}. This routine does not need to be called. A 3-point grid
 is constructed by default. Calling this function with \var{n}=0 reset the grid

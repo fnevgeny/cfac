@@ -41,6 +41,8 @@ cfacdb/*.i
 cfacdb/cfacdbu
 cfacdb/fdemo
 
+*.xpi
+
 
 # Tags
 tags

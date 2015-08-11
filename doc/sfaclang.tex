@@ -196,7 +196,11 @@ as shifts to be added to the energies calculated by \cFAC.
 \begin{fundesc}{CutMixing}{g0, g1\opt{, c}}
 For each levels in the group list \var{g0}, eliminate all mixing components
 that are not in the group list \var{g1} or the mixing coefficients less than
-\var{c}. 
+\var{c}.
+\end{fundesc}
+
+\begin{fundesc}{Exit}{}
+Exit \cFAC.
 \end{fundesc}
 
 \begin{fundesc}{GetConfigNR}{c, ...}
@@ -258,6 +262,10 @@ absent in the call, by the mean configuration specified by \key{AvgConfig}.
 is a list of configuration groups, and \var{w} is a list of weights for each
 group when generating the mean configuration. If only \var{g} is present, each
 configuration group is given an equal weight.
+\end{fundesc}
+
+\begin{fundesc}{Pause}{}
+Pause execution of \cFAC.
 \end{fundesc}
 
 \begin{fundesc}{PrepAngular}{p\opt{, q}}
@@ -724,6 +732,21 @@ column is the the number to be added to $g_1$ to form the relative intensities
 of level to configuration transitions for dipole transitions. The 13th column
 is the number to be added to $g_2$ to form relative intensities for quadrupole
 transitions.
+\end{fundesc}
+
+\begin{fundesc}{StoreClose}{}
+Close the database that has previously been initialized with \key{StoreInit}.
+\end{fundesc}
+
+\begin{fundesc}{StoreInit}{fn \opt{, reset}}
+Initialize a new session in the SQLite database file \var{fn}. If the file does
+not exist, it will be created. If the optional flag \var{reset} = 1 is present
+and the database already exists, all existing sessions will be dropped.
+\end{fundesc}
+
+\begin{fundesc}{StoreTable}{fn}
+Store data contained in the binary file \var{fn} into a database that has
+previously been initialized with \key{StoreInit}.
 \end{fundesc}
 
 \begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}}}

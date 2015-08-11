@@ -1461,29 +1461,23 @@ static int PSetTEGrid(int argc, char *argv[], int argt[],
 
 static int PSetCEPWOptions(int argc, char *argv[], int argt[], 
 			   ARRAY *variables) {
-
   int qr, max, kl_cb;
-  double tol;
 
   qr = EXCLQR;
   max = EXCLMAX;
   kl_cb = EXCLCB;
-  tol = EXCTOL;
   
-  if (argc < 1 || argc > 4) return -1;
+  if (argc < 1 || argc > 3) return -1;
   
-  tol = atof(argv[0]);
+  max = atoi(argv[0]);
   if (argc > 1) {
-    max = atoi(argv[1]);
+    qr = atoi(argv[1]);
     if (argc > 2) {
-      qr = atoi(argv[2]);
-      if (argc > 3) {
-	kl_cb = atoi(argv[3]);
-      }
+      kl_cb = atoi(argv[2]);
     }
   }
 
-  SetCEPWOptions(qr, max, kl_cb, tol);
+  SetCEPWOptions(qr, max, kl_cb);
 
   return 0;
 }
@@ -2681,19 +2675,6 @@ static int PSetCELCB(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetCETol(int argc, char *argv[], int argt[], 
-		     ARRAY *variables) {
-  double m;
-  
-  if (argc != 1 || argt[0] != NUMBER) {
-    return -1;
-  }
-
-  m = atof(argv[0]);
-  SetCETol(m);
-  return 0;
-}
-
 static int PSetCILQR(int argc, char *argv[], int argt[], 
 		     ARRAY *variables) {
   int m;
@@ -3085,7 +3066,6 @@ static METHOD methods[] = {
   {"SetCEPWGrid", PSetCEPWGrid},
   {"SetCEPWGridType", PSetCEPWGridType},
   {"SetCEPWOptions", PSetCEPWOptions},
-  {"SetCETol", PSetCETol},
   {"SetCIBorn", PSetCIBorn},
   {"SetCIEGrid", PSetCIEGrid},
   {"SetCIEGridLimits", PSetCIEGridLimits},

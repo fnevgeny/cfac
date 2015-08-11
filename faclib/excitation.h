@@ -27,7 +27,6 @@ typedef struct _CEPW_SCRATCH_ {
   int qr;
   int max_kl;
   int kl_cb;
-  double tolerance;
   int nkl0;
   int nkl;
   int ns;
@@ -55,8 +54,7 @@ int SetCEBorn(double e, double x, double x1, double x0);
 void SetCELQR(int m);
 void SetCELMax(int m);
 void SetCELCB(int m);
-void SetCETol(double t);
-int SetCEPWOptions(int qr, int max, int kl_cb, double tol);
+int SetCEPWOptions(int qr, int max, int kl_cb);
 int AddCEPW(int n, int step);
 int SetCEFormat(int m);
 int SetCEPWGrid(int ns, int *n, int *step);

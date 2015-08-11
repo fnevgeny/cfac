@@ -229,7 +229,6 @@
 #define EXCLQR             0
 #define EXCLMAX            36
 #define EXCLCB             36
-#define EXCTOL             5E-2
 #define XBORN              (-0.5)
 #define XBORN1             (-1.0)
 #define XBORN0             (0.25)

@@ -74,7 +74,7 @@ static double xborn0 = XBORN0;
 static double xborn1 = XBORN1;
 static double eborn = EBORN;
 
-static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 5E-2, 0, 0, 10, {0.0}, {0.0}};
+static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 0, 0, 10, {0.0}, {0.0}};
 
 static MULTI *pk_array;
 static MULTI *qk_array;
@@ -252,11 +252,7 @@ void SetCELCB(int m) {
   pw_scratch.kl_cb = m;
 }
 
-void SetCETol(double t) {
-  pw_scratch.tolerance = t;
-}
-
-int SetCEPWOptions(int qr, int max, int kl_cb, double tol) {
+int SetCEPWOptions(int qr, int max, int kl_cb) {
   pw_scratch.qr = qr;
   if (max > MAXKL) {
     printf("The maximum partial wave reached in Excitation: %d > %d\n", 
@@ -265,7 +261,6 @@ int SetCEPWOptions(int qr, int max, int kl_cb, double tol) {
   }
   pw_scratch.max_kl = max;
   pw_scratch.kl_cb = kl_cb;
-  pw_scratch.tolerance = tol;
   pw_scratch.nkl0 = 1;
   pw_scratch.kl[0] = 0;
   pw_scratch.log_kl[0] = -100.0;
@@ -3054,7 +3049,7 @@ int InitExcitation(void) {
   SetCEEGridLimits(0.05, 8.0, 0);
   usr_egrid[0] = -1.0;
   tegrid[0] = -1.0;  
-  SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB, EXCTOL);
+  SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB);
 
   SetAngleGrid(0, 10, 0.0, M_PI);
   SetAngleGrid(1, 20, 0.0, TWO_PI);
@@ -3073,7 +3068,7 @@ int ReinitExcitation(int m) {
   usr_egrid[0] = -1.0;
   tegrid[0] = -1.0;  
 
-  SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB, EXCTOL);
+  SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB);
 
   return 0;
 }

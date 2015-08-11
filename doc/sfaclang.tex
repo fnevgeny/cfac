@@ -8,6 +8,25 @@ arguments separated by ``$\mid$'' are alternative forms of calling syntax,
 ``...'' in the argument list denotes variable number of arguments, and
 keyword arguments are indicated by \var{key=arg} pair.
 
+\section{Variables}
+One can use variables instead of explicitly typed arguments of any SFAC
+function. This can be convenient if the same argument is used in more than one
+place. A variable name may contain any alphanumeric characters but must begin
+with a letter. Function names listed in Sec.~\ref{sec:fac} cannot be used as
+variables names for obvious reasons. Once assigned, a variable is accessed by
+prepending the dollar sign (\$) to its name. For example,
+\begin{verbatim}
+a = 2
+Print($a)
+2
+\end{verbatim}
+A variable may be either a scalar or a list (one-dimensional array), e.g.,
+\begin{verbatim}
+vv = [1,2,3]
+Print($vv)
+[1,2,3]
+\end{verbatim}
+
 \section{Functions}
 \label{sec:fac}
 \index{fac}

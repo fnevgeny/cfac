@@ -1,9 +1,14 @@
 \chapter{Description of Output Files}
 \label{cha:format}
-The primary output files of \cFAC are in binary format. The I/O functionality
-and the conversion from binary to ASCII format are implemented in the source
-files \verb|faclib/dbase.h| and \verb|faclib/dbase.c|. In this chapter, we
-describe the structure of these files in detail.
+\cFAC outputs results of calculations in three formats: binary, ASCII, and as a
+SQLite database. The primary format is the binary one. The binary files can be
+converted to either ASCII or SQLite ones by invoking \key{PrintTable} and 
+\key{StoreTable} functions, respectively.
+
+The structure of these files is described below.
+
+As of now (\cFAC-\facversion), the SQLite format does not support results of
+magnetic-sublevel-resolved calculations. This deficiency will be fixed soon.
 
 \section{Binary Format}
 \label{sec:binary}
@@ -1185,3 +1190,22 @@ NUSR	= 8
  6.0000E+03	 2.5609E-01	 1.3005E+00
  8.0000E+03	 2.9733E-01	 1.1840E+00
 \end{verbatim}
+
+\section{SQLite Format}
+\label{sec:sqlite}
+
+The SQLite format is that of the SQLite SQL database engine~\cite{sqlite}.
+The SQL scheme used by \cFAC to store the data in this format is listed below.
+
+\lstset{caption=SQL schema}
+\includecode[sql]{../faclib/schema.sql}
+
+However, it is not expected to be used directly; instead, the CFACDB library,
+which is part of the \cFAC distribution, is provided. The library hides all the
+complexity of working with an SQL database behind a simple application
+programming interface (API). The API is available both for C and Fortran
+programming languages. The data are returned via user-provided ``sink'' callback
+routines. An F77 demo program is shown in the listing below.
+
+\lstset{language=[77]Fortran,numbers=left,caption=An F77 demo}
+\lstinputlisting{../cfacdb/fdemo.f}

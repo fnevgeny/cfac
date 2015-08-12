@@ -7,6 +7,7 @@ CHAPTERS = overview.tex sfaclang.tex fformat.tex faq.tex
 INCLISTINGS = $(TOP)/demo/structure/test.sf \
 	      $(TOP)/demo/structure/ref/lev.asc \
 	      $(TOP)/demo/structure/ref/tr.asc \
+	      $(TOP)/faclib/schema.sql \
 	      $(TOP)/LICENSE
 
 all : $(DOCS)

@@ -1006,6 +1006,7 @@ static int PPrintTable(int argc, char *argv[], int argt[],
 
 static long unsigned int sid = 0;
 static sqlite3 *db = NULL;
+static char *cmdline = NULL;
 
 static int PStoreInit(int argc, char *argv[], int argt[], 
 		       ARRAY *variables) {
@@ -1050,9 +1051,9 @@ static int PStoreClose(int argc, char *argv[], int argt[],
     return -1;
   }
 
-  sid = 0;
-  StoreClose(db);
+  StoreClose(db, sid, cmdline);
   
+  sid = 0;
   return 0;
 }
 
@@ -3129,13 +3130,25 @@ static METHOD methods[] = {
   {"", NULL}
 };
  
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
   int i;
   FILE *f;
+  int cmdlen = 0;
 
   if (InitFac() < 0) {
     printf("initialization failed\n");
     exit(1);
+  }
+  
+  for (i = 0; i < argc; i++) {
+    cmdlen += strlen(argv[i]) + 1;
+  }
+
+  cmdline = malloc(cmdlen + 1);
+  strcat(cmdline, argv[0]);
+  for (i = 1; i < argc; i++) {
+    strcat(cmdline, " ");
+    strcat(cmdline, argv[i]);
   }
 
   SetModName("fac");
@@ -3152,6 +3165,6 @@ int main(int argc, char *argv[]) {
       EvalFile(f, 0, methods);
     }
   }
-
+  
   return 0;
 }

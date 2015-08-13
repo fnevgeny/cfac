@@ -7,7 +7,7 @@ CREATE TABLE sessions (
     sid     INTEGER PRIMARY KEY NOT NULL,
     version INTEGER NOT NULL,
     uta     BOOLEAN NOT NULL,
-    fname   TEXT NOT NULL,
+    cmdline TEXT NOT NULL,
     config  TEXT NOT NULL
 );
 

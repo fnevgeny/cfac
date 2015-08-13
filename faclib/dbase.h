@@ -479,6 +479,6 @@ int StoreRRTable(const cfac_t *cfac,
     sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreClose(sqlite3 *db);
+int StoreClose(sqlite3 *db,unsigned long int sid, const char *cmdline);
 
 #endif

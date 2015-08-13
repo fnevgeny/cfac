@@ -156,7 +156,7 @@ int StoreInit(const cfac_t *cfac,
     }
 
     sql = "INSERT INTO sessions" \
-          " (sid, version, uta, fname, config)" \
+          " (sid, version, uta, cmdline, config)" \
           " VALUES (?, ?, ?, '', '')";
 
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
@@ -723,9 +723,30 @@ int StoreRRTable(const cfac_t *cfac,
     return retval;
 }
 
-int StoreClose(sqlite3 *db)
+int StoreClose(sqlite3 *db, unsigned long int sid, const char *cmdline)
 {
+    int retval = 0;
+    int rc;
+    sqlite3_stmt *stmt;
+    
+    char *sql;
+
+    sql = "UPDATE sessions" \
+          " SET cmdline = ?" \
+          " WHERE sid = ?";
+    
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+    SQLITE3_BIND_STR(stmt, 1, cmdline);
+    sqlite3_bind_int(stmt, 2, sid);
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        retval = -1;
+    }
+    
     sqlite3_close(db);
     
-    return 0;
+    return retval;
 }

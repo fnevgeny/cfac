@@ -1,5 +1,18 @@
 \chapter{Frequently Asked Questions (FAQ)}
 \section{General}
+\faq{What are the differences between \cFAC and FAC}{
+In \cFAC, only the SFAC interface is retained (the Python PFAC binding is no
+longer there). Also removed were the simple collisional-radiative-model
+(crm) and line-polarization (pol) executables. The SFAC interface
+(as provided by sfac) is mostly backward compatible, meaning that scripts
+that worked with FAC will likely continue to with \cFAC unmodifed.
+
+\cFAC adds possibility to store the calculated results in an SQLite-based
+format, allowing for selecting subsets of data for various uses based on the
+powerful SQL query language. The CFACDB library, which is part of the \cFAC
+distribution, is provided to facilitate access to the SQLite \cFAC databases
+from third-party C and Fortran codes.}
+
 \faq{What operating systems does \cFAC run on}{
 \cFAC is written in a mixture of ANSI C and Fortran 77, all of them are in
 principle platform independent. However, the mixed language programming makes it

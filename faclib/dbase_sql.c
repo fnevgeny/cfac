@@ -156,8 +156,8 @@ int StoreInit(const cfac_t *cfac,
     }
 
     sql = "INSERT INTO sessions" \
-          " (sid, version, uta, cmdline, config)" \
-          " VALUES (?, ?, ?, '', '')";
+          " (sid, version, uta, cmdline)" \
+          " VALUES (?, ?, ?, '')";
 
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
 

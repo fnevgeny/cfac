@@ -66,6 +66,7 @@ modifications to numerical procedures made to extend the capability and
 improve the efficiency and robustness.
 
 \section{Structure}
+\label{sec:structure}
 The energy levels of an atomic ion with $N$ electrons are obtained by
 diagonalizing the relativistic Hamiltonian $H$. In atomic units, which we shall
 use throughout the papers, it reads
@@ -333,7 +334,7 @@ Z_{eff}^\prime &=& Z_{eff}(1+\alpha^2\varepsilon) \nonumber\\*
 \left(1+\frac{1}{2}\alpha^2\varepsilon\right)} \nonumber\\*
 \lambda(\lambda+1) &=& l(l+1) - (Z_{eff}\alpha)^2 .
 \end{eqnarray}
-The Whittakar function and its derivative at $r_{core}$ are calculated
+The Whittaker function and its derivative at $r_{core}$ are calculated
 using the program of \citet{thompson85} and matched with the solution
 obtained by outward integration. The program of \citet{thompson85} uses
 quadrupole precision floating point numbers in the calculation of 
@@ -544,6 +545,7 @@ depend on the transition energy in a trivial manner.
 
 
 \section{Electron Impact Excitation}
+\label{sec:eie}
 \subsection{Introduction}
 Two classes of methods are commonly used in the calculation of electron impact
 excitation (EIE) cross
@@ -655,7 +657,7 @@ X^k(\alpha_0\kappa_0;\alpha_1\kappa_1)+\sum_{t}
 X^t(\alpha_0\kappa_0;\kappa_1\alpha_1),
 \end{equation}
 where $X^k$ and the operator $Z^k(\alpha,\beta)$ are defined in
-Ref.~\cite{gu02a}. 
+Sec.~\ref{sec:structure}. 
  
 The importance of Eq.~(\ref{eq_cs}) is that the angular and radial integrals
 are completely factorized. The radial integrals
@@ -678,21 +680,20 @@ although not as simple as that on $\Delta E$, is still rather smooth, and has
 known asymptotic behavior at large energies according to the type of the
 transition. We use interpolation on $\varepsilon_1$ as well with a few more
 points. The calculation of $<\psi_0||Z^k||\psi_1>$ is the same as that
-involved in the radiative transition rates \cite{gu02a}.
+involved in the radiative transition rates, see Sec.~\ref{sec:structure}.
 
 \subsection{Solution of the Dirac Equation for The Continuum}
-In FAC, the continuum orbitals are obtained by solving the Dirac equations
-with the same central potential as that for bound orbitals. However, in
-obtaining the potential, one may optionally add a high lying subshell to the
-mean configuration to account for the fact that the continuum 
-wavefunctions experience the screening of one additional electron at large
-distances. Such a high 
-lying subshell has little effect on the bound orbitals because the deviation
-of the potential from its correct asymptotic value starts at very large
-distance where the bound orbitals have exponentially decayed. 
-After transforming the Dirac equations to a second order Schr\"{o}dinger-like
-equation, and adopting the same radial grid as in the solution of bound
-orbitals \cite{gu02a}, the transformed large component, $F(r)$,  of the
+In FAC, the continuum orbitals are obtained by solving the Dirac equations with
+the same central potential as that for bound orbitals. However, in obtaining the
+potential, one may optionally add a high lying subshell to the mean
+configuration to account for the fact that the continuum  wavefunctions
+experience the screening of one additional electron at large distances. Such a
+high  lying subshell has little effect on the bound orbitals because the
+deviation of the potential from its correct asymptotic value starts at very
+large distance where the bound orbitals have exponentially decayed.  After
+transforming the Dirac equations to a second order Schr\"{o}dinger-like
+equation, and adopting the same radial grid as in the solution of bound orbitals
+(see Sec.~\ref{sec:structure}), the transformed large component, $F(r)$,  of the
 free orbital satisfies 
 \begin{eqnarray}
 \label{eq_schrodinger2}
@@ -946,13 +947,13 @@ Coulomb-Born-exchange (CBE) approximation or the Binary-Encounter-Dipole (BED)
 theory of \citet{kim94}. The CBE implementation makes use of the
 parametrized reduced cross sections of \citet{golden77, golden80}, and the
 BED implementation uses the bound-free differential oscillator strengths
-calculated by the present program \cite{gu02c}. The CBE results are close to
+calculated by the present program. The CBE results are close to
 the non-relativistic DW cross sections, while the BED cross sections are
 substantially smaller at low energies due to a scaling factor deliberately
 introduced into the theory, which appear to improve the agreements with
 experimental results in many cases \cite{kim94}.
  
-\subsection{Relativistic Distorted-wave Theory}
+\subsection{Relativistic Distorted-Wave Theory}
 The formula for EII cross subsection, differential in energy of the ejected
 electron, may be obtained from that for EIE by replacing one bound orbital in
 the final state with the free orbital of the ejected electron and summing 
@@ -964,11 +965,11 @@ strength similar to that of EIE
 \end{equation}
 where $\varepsilon_0$ and $k_0$ are the energy and kinetic momentum of the
 incident electron, $\varepsilon$ is the energy of the ejected electron. The
-normalization of continuum orbitals is discussed in Ref.~\cite{gu02b}. Note
+normalization of continuum orbitals is discussed in Sec.~\ref{sec:eie}. Note
 that the absence of the 
 factor $\pi$ as compared with the formula for the EIE cross subsection is due to
 the different normalization of the free and bound orbitals. The collision
-strength $\Omega_{01}$ is \cite{gu02b}
+strength $\Omega_{01}$ is (see Sec.~\ref{sec:eie})
 \begin{equation}
 \label{eq_cs2}
 \Omega_{01} = 2\sum_{\kappa,J_T\atop k,\alpha_0\beta_0}
@@ -984,7 +985,7 @@ the bound orbitals in the final state is now replaced by a free orbital. Note
 that $Q^k$ contains the summation over the partial waves of incident and
 scattered electrons.
 
-As for photoionization \cite{gu02b}, the angular factors involving the free
+As for photoionization (Sec.~{sec:pirr}), the angular factors involving the free
 electron can be simplified using the decoupling formula of Racah
 \begin{eqnarray}
 &&\sum_{J_T}<\psi_0||Z^k(\alpha_0, \kappa)||\psi_1,\kappa;J_T>
@@ -1125,6 +1126,7 @@ number.
 
 
 \section{Photoionization and Radiative Recombination}
+\label{sec:pirr}
 \subsection{Introduction}
 The most accurate methods for calculating low energy
 non-resonant photoionization (PI) and
@@ -1190,7 +1192,7 @@ inducing the transition.
 
 As in the calculation of bound-bound radiative transitions,
 Eq.~(\ref{eq_S}) may be decomposed into an angular part and a radial part
-\cite{gu02a} 
+(see Sec.~\ref{sec:structure})
 \begin{equation}
 \label{eq_Sf}
 S = \sum_{\kappa J_T}\left|\sum_{\alpha\beta}
@@ -1269,7 +1271,7 @@ states are involved. The central potential entering the Dirac equation may be
 constructed with either the configurations of the ion before photoionization
 (recombined ion) or after photoionization (recombining ion). The difference
 between the two choices is small for high $Z$ elements. However, it can be
-substantial for low $Z$ elements. As discussed in \citet{gu02b}, the
+substantial for low $Z$ elements. As discussed in Sec.~\ref{sec:eie}, the
 effective nuclear charge experienced by the free electron at large radial
 distances is screened by one additional electron as compared to that
 experienced by the bound electrons in the
@@ -1326,7 +1328,7 @@ and $M_T$ are the total angular momentum of the new basis function and its
 projection, 
 the radial integrals $P^k$ are identical to those involved in the DW collision
 strength of EIE with free electrons now replaced with the spectators
-\cite{gu02b}. 
+(see Sec.~\ref{sec:eie}).
 
 \subsection{Multipole Radial Integrals}
 The radial integrals $M^L_{\kappa\beta}$ are the same as those involved in the
@@ -1338,7 +1340,7 @@ photon energy is not too high, the non-relativistic limits of the multipole
 operators suffices. Using non-relativistic multipole operators to
 evaluate radial integrals is the default of the program. 
 Bound and continuum wavefunctions are obtained by solving the Dirac equations,
-as discussed in Refs.~\cite{gu02a,gu02b} in detail.
+as discussed in Secs.~\ref{sec:structure} and \ref{sec:eie} in detail.
 
 Unlike in bound-bound radiative transitions, the radial integrals now
 depend on the photo-electron energy. In order to reduce the computing time,
@@ -1392,7 +1394,7 @@ A^a = 2\sum_\kappa \left|
 where $\psi_i$ is the autoionizing state, $\psi_f$ is the final state which has
 one less electron than $\psi_i$, $\kappa$ is the relativistic angular quantum
 number of the free electron, whose wavefunction is normalized as discussed in
-Ref.~\cite{gu02b}. The total angular momentum of the coupled final state must
+Sec.~\ref{sec:eie}. The total angular momentum of the coupled final state must
 be equal to that of $\psi_i$, i.e.,  $J_T = J_i$ and $M_T = M_i$. After the
 separation of the angular and radial integrals, we have
 \begin{equation}
@@ -1405,7 +1407,7 @@ $\psi_i$, $\alpha$ is the orbital which makes the internal transition in
 $\psi_f$, and
 $P^k$ is the radial integral as defined in the expression for the DW collision
 strength of electron impact excitation, except that one of the free orbital
-is replaced by a bound orbital \cite{gu02b}. For autoionization of
+is replaced by a bound orbital (see Sec.~\ref{sec:eie}). For autoionization of
 complex ions, the radial integrals $P^k$ with the same set of bound orbitals,
 $\alpha$, $\gamma$, and $\delta$, 
 often appear in many different transitions. However, the energies of the free

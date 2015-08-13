@@ -13,24 +13,12 @@ atomic codes, such as HULLAC and differ from more elaborate programs based on
 close-coupling approximations, such as the Belfast R-Matrix code. The biggest
 advantage of \cFAC is its ease of use and its scriptability.}
 
-\faq{Can \cFAC be incorporated into XSPEC or other spectral analysis programs}{
-In principle, the collisional radiative model comes with \cFAC can be used in
-XSPEC or similar spectral analysis programs. However, this is not practical,
-as the model includes a large number of atomic states, especially, the doubly
-excited states to treat the resonant processes, and is therefore very time
-consuming. The best strategy of incorporating the \cFAC results to external
-spectral models is to extract basic atomic or plasma parameters and use them
-to build table models or implement dedicated subroutines.}
-
 \faq{Which atomic processes can or cannot be calculated with \cFAC}{
 \cFAC can calculate energy levels, radiative transition rates of arbitrary
 multipole type, collisional excitation and ionization cross sections by
 electron impact, photoionization and radiative recombination cross sections and
 autoionization rates. In the current form, \cFAC does not treat two-photon
-decay, although such decay rates of $2s S_{1/2}$ state of H-like ions and
-$1s2s S_{0}$ state of He-like ions are included in the collisional radiative
-model using interpolation formulae taken from literature. The three-body
-recombination are not implemented as well.}
+decays.}
 
 \faq{What is a typical accuracy of the atomic parameters calculated with
 \cFAC}{
@@ -47,24 +35,18 @@ within the same complex, which usually have large relative uncertainties in
 the calculated wavelengths and transition rates. The accuracy for UV and
 optical lines from near-neutral ions is also very limited.}
 
-\faq{Are there standard references to \cFAC}{
-Currently, no papers have been published describing the code, though drafts have
-been written, which are included in the \cFAC distribution. M. F. Gu was trying
-to find a suitable journal willing to publish them, originally submitting to
-Computer Physics Communications (CPC). However, the referee and editor
-complained about the lack of documentation and code comments. The documentation
-has improved since then, the code commenting still needs extensive work, which
-may not be done soon. The first paper that used results of FAC is Gu, M.F.,
-2003, ApJ, 582, 1241, which can be used as the reference.}
+\faq{Are there standard references to FAC}{
+The first paper that used results of FAC is Gu, M.F., 2003, ApJ, 582, 1241. The
+code itself was described later in Gu, M.F., Can. J. Phys. 86: 675--689 (2008),
+which can be used as the reference. A more detailed description of the code can
+be found in the draft papers which are included in the \cFAC distribution.}
 
-\faq{How do I report bugs, make suggestions and get updated about new
-versions}{
-Please contact the author at \textbf{mfgu@space.mit.edu} for bugs and
-suggestions. I maintain a small email address list of people who expressed
-interest in \cFAC and send release announcements to them. Let me know if you want
-to be added to this list. If the list ever grows to the point when I can no
-longer put it under my personal address book, we may have to create a
-dedicated mailing list.}
+\faq{Are there standard references to \cFAC}{
+There are none yet.}
+
+\faq{How do I report bugs or make suggestions}{
+Please use the ``Issues'' tool of the \cFAC
+\href{https://github.com/fnevgeny/cfac}{GitHub repository}.}
 
 \section{Atomic Structure}
 \faq{How do I specify a bare ion}{
@@ -73,14 +55,14 @@ the first argument of \key{Config} is an empty string.}
 
 \faq{Which configurations should be used as basis for the mean configuration
 which optimizes the radial potential}{
-The function \key{OptimizeRadial} accepts a list of configurations, which
-form the basis for the construction of the mean configuration. Usually, only
-the lowest lying configurations should be used in \key{OptimizeRadial} for
-the construction of mean configuration. I have found that using configurations
-corresponding to the ground complex is always a good idea. Sometimes, it maybe
-worthwhile to include the first excited configurations. However, it is always a
-bad practice to include very highly excited configurations, especially those
-inner shell excited ones.}
+The function \key{OptimizeRadial} accepts a list of configurations, which form
+the basis for the construction of the mean configuration. Usually, only the
+lowest lying configurations should be used in \key{OptimizeRadial} for the
+construction of mean configuration. It has been found that using configurations
+corresponding to the ground complex is almost always a good idea. Sometimes, it
+maybe worthwhile to include the first excited configurations. However, it is
+always a bad practice to include very highly excited configurations, especially
+those inner shell excited ones.}
 
 \faq{Can I use a specific mean configuration to be used in potential
 optimization}{
@@ -89,20 +71,19 @@ the potential optimization. In this case, the function
 \key{OptimizeRadial} must be called with no arguments.}
 
 \faq{How do I know what mean configuration is used in the potential
-optimization, If one is not given specifically by \key{AvgConfig}}{
+optimization, if one is not given specifically by \key{AvgConfig}}{
 The function \key{GetPotential} may be called after \key{OptimizeRadial}
 to obtain the mean configuration used, and the resulting radial potential.}
 
 \faq{When calculating ionization or recombination processes, should I use the
 mean configuration for recombined (ionizing) or recombining (ionized) ion}{
-Usually, it does not matter for highly charged ions, and I usually use the 
-recombined ion. The difference of one more or less electron screening the
-nuclear charge may be substantial for low-$Z$ elements, in which case, one
-may have to make a decision by comparing the results to experimental values or
-other theoretical works.}
+Usually, it does not matter for highly charged ions. However, for low-$Z$
+elements the difference of one more or one less electron, screening the nuclear
+charge, may be substantial. In this case, one may have to make a decision by
+comparing the results to experimental values or other theoretical works.}
 
 \faq{How do I determine which configurations should be interacting}{
-This depends on the computer resource available, and the desired accuracy. The
+This depends on the computer resource available and the desired accuracy. The
 dimension of the Hamiltonian matrix increases very rapidly as the number of
 interacting configurations grows. The convergence with respect to the
 configuration interaction is usually slow. For applications which \cFAC is
@@ -111,20 +92,11 @@ same complex, except for some low-lying configurations.}
 
 \faq{What relativistic effects are included}{
 The standard Dirac-Coulomb Hamiltonian is used in \cFAC, which means that the
-spin-orbit interaction, mass-effect and other leading relativistic effects are
+spin--orbit interaction, mass-effect and other leading relativistic effects are
 fully treated. However, higher-order QED effects, such as retardation and
 recoil are only included in the Breit interaction with zero energy limit for
 the exchanged photon. Vacuum polarization and self-energy corrections are
 treated in the screened hydrogenic approximation.}
-
-\faq{Why the transition rate between two specific states is not in the output
-file, although it should have been calculated}{
-Not every calculated transition rate are output. Some weak transitions are
-discarded to avoid very large files. A small number, which may be set by the
-function \key{SetTransitionCut}, controls this behavior. If the
-transition rate of $2\to 1$ divided by the total decay rate of state 2 is less
-than this number, this rate is not output. The default for this number is
-$10^{-4}$.}
 
 \section{Collisional Excitation}
 \faq{Why is there multiple data blocks in the output corresponding to a single
@@ -143,11 +115,11 @@ therefore, corresponding to different data blocks in the output.}
 
 \faq{Why is the default \key{QKMODE} for excitation is \key{EXACT}, not
 \key{FIT}}{
-It used to be in \key{FIT} mode. However, the fitting formulae sometimes fail
-to reproduce the calculated collision strengths. After playing with different
-fitting formulae for a while, I decided that the user should do the fitting
-(if one is desired) on the case by case basis. The function \key{SetCEQkMode}
-may be used to specify a different \key{QKMODE}.}
+It used to be in the \key{FIT} mode. However, the fitting formulae sometimes
+fail to reproduce the calculated collision strengths. After playing with
+different fitting formulae for a while, it was decided that the user should do
+the fitting (if one is desired) on the case-by-case basis. The function
+\key{SetCEQkMode} may be used to specify a different \key{QKMODE}.}
 
 \faq{Can I use a different collision energy grid}{
 A collision energy grid in terms of the energy of the scattered electron is
@@ -157,12 +129,12 @@ grid. Or one may use \key{SetUsrCEGrid} to have a user grid different from the
 grid on which the collision strengths are calculated, and use
 \key{INTERPOLATE} mode for the \key{QKMODE}.}
 
-\faq{The collision strengths at very high energies are incorrect}{
-Due to the limited radial grid size, the collision strengths at energies much
+\faq{Why are collision strengths at very high energies incorrect}{
+Due to a limited radial grid size, the collision strengths at energies much
 higher than the excitation energy (more than a few hundred times higher) are
-unlikely to be reliable. However, the high energy collision strengths should
-not be calculated directly. The Bethe and Born limit parameters in the output
-should be used to obtain them.}
+unlikely to be reliable. However, the high energy collision strengths should not
+be calculated directly. Instead, the Bethe and Born limit parameters in the
+output should be used to obtain them.}
 
 \section{Photoionization and Radiative Recombination}
 \faq{When can I use the function \key{RecStates} to construct the
@@ -170,9 +142,9 @@ recombined states instead of specifying their configurations by \key{Config}}{
 The function \key{RecStates} can only be used if the free electron is captured
 to an empty orbital.}
 
-\faq{Why is the bound-free oscillator strength differ from some other
+\faq{Why do the bound--free oscillator strengths differ from some other
 theoretical calculation by a constant factor}{
-The bound-free differential oscillator strengths calculated by \cFAC have units
+The bound--free differential oscillator strengths calculated by \cFAC have units
 of Hartree$^{-1}$. Also the values depend on the normalization of continuum
 orbitals. It is therefore possible that they differ from other theoretical
 calculations by a constant factor. One should always use the formula in this
@@ -181,7 +153,7 @@ radiative recombination cross sections.}
 
 \faq{Can I use only the fitting formula and ignore the tabulated $gf$
 values}{
-The fitting formula and the parameters given for the bound-free oscillator
+The fitting formula and the parameters given for the bound--free oscillator
 strengths is only valid at high energies (beyond the largest energy of the
 photo-electron energy grid). This means that the $gf$ values at energies
 within the photo-electron energy grid should be calculated by interpolation
@@ -195,8 +167,7 @@ fitting formula significantly.}
 It does not mean anything. It is simply an identifier which may be useful
 sometimes to tag a certain autoionization channel.}
 
-\faq{How do I improve the resonance energies of low-lying $\Delta n = 0$
-resonances}{
+\faq{How do I improve the energies of low-lying $\Delta n = 0$ resonances}{
 The energies of low-lying $\Delta n = 0$ resonances can not the calculated
 accurately. This greatly reduces the reliability of the resulting dielectronic
 recombination rates. In \cFAC, there is a method to improve the accuracy of
@@ -208,7 +179,7 @@ calculated energy levels by specified amount.}
 bound or free state complexes}{
 The autoionization radial integrals are only calculated for a few free
 electron energies. The actual values are interpolated from them. This only
-works well if the the free electron energy after autoionization does not vary
+works well if the free electron energy after autoionization does not vary
 widely. Therefore, one should avoid calling \key{AITable} with bound or free
 states in different complexes. e.g., KLL and KLM resonances should be
 calculated with two separate calls to \key{AITable}.}
@@ -223,12 +194,12 @@ the energy of incident electron, and $I$ is the ionization threshold
 energy. The result of this scaling is usually desirable as distorted-wave
 method overestimates the near threshold cross sections.}
 
-\faq{Why is the \key{DW} mode so slow as compared with \key{BED} and \key{CB}
+\faq{Why is the \key{DW} mode so slow compared to the \key{BED} and \key{CB}
 modes}{
 In the \key{DW} mode, the ionization radial integrals are calculated by
 summing up partial wave contributions. This is a time consuming process as
-now there are two continuum electrons involved. In the \key{CB} mode, the
+now there are two continuum electrons involved. The \key{CB} mode, in which the
 radial integrals are simply looked up in a table, is therefore the fastest
 method. In the \key{BED} mode, the radial integrals are calculated using the
-bound-free differential oscillator strengths, which can be computed much
+bound--free differential oscillator strengths, which can be computed much
 faster than the \key{DW} ionization radial integrals.}

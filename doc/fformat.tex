@@ -1195,6 +1195,11 @@ NUSR	= 8
 \label{sec:sqlite}
 
 The SQLite format is that of the SQLite SQL database engine~\cite{sqlite}.
+In order to use it, (i) call \key{StoreInit}, (ii) call \key{StoreTable} every
+time when \key{PrintTable} would have been used for the ASCII output, and
+finally, (iii) call \key{StoreClose}. Please note that if desired, ASCII and
+SQLite data can be output simultaneously.
+
 The SQL scheme used by \cFAC to store the data in this format is listed below.
 
 \lstset{caption=SQL schema}

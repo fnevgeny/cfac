@@ -2,7 +2,7 @@ TOP = ..
 
 DOCS = manual.pdf
 
-CHAPTERS = overview.tex sfaclang.tex fformat.tex faq.tex
+CHAPTERS = overview.tex physics.tex sfaclang.tex fformat.tex faq.tex
 
 INCLISTINGS = $(TOP)/demo/structure/test.sf \
 	      $(TOP)/demo/structure/ref/lev.asc \

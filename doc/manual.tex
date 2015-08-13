@@ -43,6 +43,13 @@
 	\textbf{Q\arabic{faq}: #1?}\\#2
 	\end{minipage}}
 
+\usepackage{dcolumn}
+
+\newcommand{\threej}[6]{\ensuremath{\left({#1\atop #4}{#2\atop #5}
+{#3\atop #6}\right)}}
+\newcommand{\sixj}[6]{\ensuremath{\left\{{#1\atop #4}{#2\atop #5}
+{#3\atop #6}\right\}}}
+
 \setcounter{tocdepth}{3}
 
 \makeindex
@@ -60,6 +67,8 @@
 
 \include{overview}
 
+\include{physics}
+
 \include{sfaclang}
 
 \include{fformat}
@@ -68,7 +77,7 @@
 
 
 \bibliographystyle{unsrtnat}
-\bibliography{facref}
+\bibliography{facref,papers/facref}
 
 \printindex
 

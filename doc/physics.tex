@@ -1,0 +1,1507 @@
+\chapter{Theory and Numerical Techniques}
+
+This chapter is an extended version of theory and numerical techniques described
+in Ref.~\cite{gu:2008a} and is based on a series of manuscript drafts
+distributed with previous versions of FAC.
+
+\section{Introduction}
+
+A fully relativistic approach based on
+the Dirac equation is used throughout the entire package which allows its
+application to ions with large values of nuclear charge. Currently, \cFAC
+is able to treat radiative transition, direct collisional excitation and
+ionization by electron impact, non-resonant photoionization and radiative
+recombination, autoionization and dielectronic recombination. These processes
+are essential for the interpretation of laboratory and astrophysical 
+spectroscopic data. The main goal of creating such a comprehensive package is
+to integrate various atomic processes within a single theoretical framework,
+ensure the self-consistency between different parts, and provide a uniform,
+flexible and easy-to-use user interface for accessing all computational tasks. 
+
+Many computer programs now exist for the calculation of atomic processes,
+using either non-relativistic approximations (some including relativistic
+effects through the Breit-Pauli Hamiltonian) or fully relativistic
+methods. Most of them are mainly concerned with the atomic structure part and
+bound-bound processes, e.g., the non-relativistic configuration interaction
+codes CIV3 \cite{hibbert75} and SUPERSTRUCTURE \cite{eissner74}, the widely
+used program of \citet{cowan81}, the multi-configuration Hartree-Fock (MCHF)
+program of \citet{fischer00}, and the multi-configuration Dirac-Fock (MCDF)
+code of \citet{grant80}. Many newer programs for continuum processes make
+use of the output from these structure codes for bound state wave
+functions. This sometimes leads to 
+a different treatment of continuum states from that of bound states. More
+importantly, the communication between different programs tends to complicate
+the user interface, and makes it difficult for people other than the authors
+of the codes to efficiently use them. 
+
+There also exist several integrated
+packages for the calculation of a variety of atomic processes, e.g., the ATOM
+package \cite{amusia97}, the HULLAC package \cite{barshalom01}, and the fully
+relativistic code (SZ) developed by \citet{sampson89} and
+\citet{zhang89}. These programs treat continuum as well as bound
+processes. In  
+ATOM, the radial wave functions for bound and continuum orbitals are obtained
+using the self-consistent field Hartree-Fock method or the frozen-core
+Hartree-Fock method. A relativistic version based on the Dirac equation is
+also available. Such a procedure tends to be very time consuming, especially
+for continuum processes, where the number of continuum orbitals needed is
+large. The HULLAC package and SZ are both based on the Dirac equation, and use
+a single, local, central potential for the solution of radial orbitals. This
+approach is very efficient because the orthogonality of 
+different orbitals is automatically ensured. Both codes use the distorted wave
+(DW) approximation for continuum processes. The difference between them is
+mainly in the way the local central potential is obtained. In HULLAC, 
+a parametric potential is used and the parameters in the potential are derived
+by minimizing the average energies of some selected configurations
+\cite{klapisch77}. In SZ, one 
+constructs a fictitious mean configuration with fractional occupation numbers
+that takes into account the electron screening of all configurations involved
+in the physical processes to be calculated. A self-consistent
+Dirac-Fock-Slater iteration is then 
+performed on this mean configuration to derive the local central potential. 
+Although various results from these two codes have been published over the
+years, the programs are not available to the general public. The present
+package combines the strengths of these existing atomic codes, with
+modifications to numerical procedures made to extend the capability and
+improve the efficiency and robustness.
+
+\section{Structure}
+The energy levels of an atomic ion with $N$ electrons are obtained by
+diagonalizing the relativistic Hamiltonian $H$. In atomic units, which we shall
+use throughout the papers, it reads
+\begin{equation}
+\label{eq_hamilton}
+H = \sum_{i=1}^{N} H_{D}(i) + \sum_{i<j}^{N}\frac{1}{r_{ij}},
+\end{equation}
+where $H_{D}(i)$ is the single-electron Dirac Hamiltonian for the potential
+due to the nuclear charge. The basis states $\Phi_{\nu}$, which are usually
+referred to as configuration state functions (CSF), are antisymmetric sums of
+products of $N$ one-electron Dirac spinors $\varphi_{n\kappa m}$
+\begin{equation}
+\label{eq_spinor}
+\varphi_{n\kappa m} = \frac{1}{r}\left(\begin{array}{c}
+P_{n\kappa}(r) \chi_{\kappa m}(\theta, \phi, \sigma)\\
+iQ_{n\kappa}(r) \chi_{-\kappa m}(\theta, \phi, \sigma)
+\end{array}\right),
+\end{equation}
+where $\chi_{\kappa m}$ is the usual spin-angular function. $n$ is the
+principal quantum number, $\kappa$ is the relativistic angular quantum number
+, which is related to the orbital and total angular momentum through
+\begin{equation}
+\kappa = (l-j)(2j+1),
+\end{equation}
+and $m$ is the $z$-component of the total angular momentum $\mathbf{j}$. In
+coupling the angular momenta of successive shells, the standard $jj$ coupling
+scheme is used. 
+
+The approximate atomic state functions are given by mixing the basis
+states $\Phi_{\nu}$ with same symmetries
+\begin{equation}
+\label{eq_asf}
+\psi = \sum_{\nu} b_{\nu} \Phi_{\nu},
+\end{equation}
+where $b_{\nu}$ are the mixing coefficients obtained from diagonalizing the
+total Hamiltonian. 
+
+\subsection{Choice of Local Central Potential}
+The one-electron radial orbitals must be known in order to construct the
+Hamiltonian matrix. In the standard Dirac-Fock-Slater method, the large and
+small components, $P_{n\kappa}$ and $Q_{n\kappa}$, satisfy the coupled Dirac
+equation for a local central field $V(r)$
+\begin{eqnarray}
+\label{eq_dirac}
+\left(\frac{d}{d r} + \frac{\kappa}{r}\right)P_{n\kappa} &=&
+\alpha\left(\varepsilon_{n\kappa} - V + \frac{2}{\alpha^2}\right)Q_{n\kappa}
+\nonumber\\*
+\left(\frac{d}{d r} - \frac{\kappa}{r}\right)Q_{n\kappa} &=&
+\alpha\left(-\varepsilon_{n\kappa} + V\right)P_{n\kappa},
+\end{eqnarray}
+where $\alpha$ is the fine structure constant, and $\varepsilon_{n\kappa}$ are
+the energy eigenvalues of the radial orbitals.
+
+The local central potential $V$ includes the contribution from the nuclear
+charge $V^N(r)$ and the electron-electron interaction $V^{ee}(r)$. The nuclear
+potential can be written as
+\begin{equation}
+\label{eq_nuclear}
+V^{N} = \Bigg\{\begin{array}{ll}
+\frac{Z}{2}\left(\frac{r}{R_N}\right)
+\left[3-\left(\frac{r}{R_N}\right)^2\right], & r \le R_N \nonumber\\*
+Z, & r > R_N
+\end{array},
+\end{equation}
+where $R_N$ is the statistical model radius of the nucleus, which can be
+expressed in terms of the atomic mass $A$, $R_N = 2.2677\times 10^{-5}
+A^{1/3}$ \cite{chernysheva99}. In the standard Dirac-Fock-Slater method, which
+is the approach used by SZ, the electron-electron interaction includes the
+spherically averaged 
+classical potential due to the bound electrons, and a local approximation to
+the exchange interaction
+\begin{eqnarray}
+\label{eq_ee}
+V^{ee}(r) &=& V_c(r) - \left[\frac{3}{4\pi^2 r^2}\sum_{n\kappa}
+\omega_{n\kappa}\rho_{n\kappa}(r)\right]^{1/3}, \nonumber\\*
+V_c(r) &=& \sum_{n\kappa}\int \frac{\omega_{n\kappa}}{r_>}
+\rho_{n\kappa}(r^\prime)d r^{\prime}, \nonumber\\*
+\rho_{n\kappa}(r) &=& P_{n\kappa}^2(r) + Q_{n\kappa}^2(r), 
+\end{eqnarray}
+where $\omega_{n\kappa}$ is the occupation number of the subshell
+$n\kappa$, and $r_>$ is the greater of $r$ and $r^{\prime}$. This potential
+includes the undesirable self-interaction and has incorrect asymptotic
+behavior. We shall use a slightly more complicated expression for $V^{ee}(r)$
+\begin{eqnarray}
+\label{eq_nee}
+V^{ee}(r) &=& \frac{1}{r\sum_a
+\omega_a\rho_a(r)}\Big\{\sum_{ab}\omega_a(\omega_b -
+\delta_{ab})Y^0_{bb}(r)\rho_a(r) \nonumber\\*
+&&+\sum_a\omega_a(\omega_a-1)\sum_{k>0}f_{k}(a,a)Y^{k}_{aa}(r)\rho_a(r) 
+\nonumber\\*
+&&+\sum_{a\ne b} \sum_k \omega_a\omega_b 
+g_{k}(a,b) Y^{k}_{ab}(r)\rho_{ab}(r)\Big\},
+\end{eqnarray}
+where $a = n\kappa$ and $b = n^\prime\kappa^\prime$ are the dummy indices
+denoting the subshells and 
+\begin{eqnarray}
+\label{eq_yk} 
+\rho_{ab} &=& P_a(r)P_b(r) + Q_a(r)Q_b(r) \nonumber\\*
+Y^k_{ab}(r) &=& r\int\frac{r_<^k}{r_>^{k+1}}\rho_{ab}(r^\prime)d r^\prime,
+\end{eqnarray}
+where $r_<$ and $r_>$ are the lesser and greater of $r$ and $r^\prime$,
+respectively. $f_k$ and $g_k$ are the direct and exchange coefficients defined
+as
+\begin{eqnarray}
+\label{eq_fg}
+f_k(a,b) &=& -\left(1+\frac{1}{2j_a}\right)
+\threej{j_a}{k}{j_b}{-\frac{1}{2}}{0}{\frac{1}{2}}^2 \nonumber\\*
+g_k(a,b) &=& -\threej{j_a}{k}{j_b}{-\frac{1}{2}}{0}{\frac{1}{2}}^2,
+\end{eqnarray}
+where \threej{j_1}{j_2}{j_3}{m_1}{m_2}{m_3} is the Wigner $3j$ symbol. Such a
+choice for the electron-electron interaction is based on the fact that the
+quantity 
+\begin{eqnarray}
+\label{eq_Eee}
+E^{ee} &=& \frac{1}{2}\sum_a\omega_a<a|V^{ee}|a> \nonumber\\*
+&=& \frac{1}{2}\sum_a\omega_a\int V^{ee}(r)\rho_a(r)d r
+\end{eqnarray}
+is the electron-electron contribution to the average energy of the
+configuration. The factor $1/2$ in Eq.~(\ref{eq_Eee}) accounts for the
+double counting of electron pairs in the summation. It is easily seen
+that Eq.~(\ref{eq_nee}) has the correct asymptotic behavior at large $r$,
+since the self-interaction term is explicitly excluded.
+
+In order to take into account the screening of more than one configuration
+involved in the physical processes to be calculated, we do not use a single
+physical configuration in the construction of the potential. Instead, a
+fictitious mean configuration with fractional occupation numbers is used. As
+in SZ, this mean configuration is usually obtained by distributing the active
+electrons in the initial and final states. Therefore the potential obtained is
+not optimized to a single configuration. Rather, it is a compromise to
+accommodate different configurations. To reduce the error on level
+energies due to the use of this less optimized potential, we apply the 
+following correction procedure. Before the potential for the mean
+configuration is calculated, we obtain an optimized potential for each
+configuration, and calculate the average energy of the configuration using
+this potential. The arerage energy of each configuration is recalculated using
+the potential optimized for the mean configuration. The difference of the two
+average energies are then applied as a correction to the states within that
+configuration after the Hamiltonian is diagonalized.
+
+\subsection{Solution of Dirac Equations}
+Since the potential depends on the radial orbitals sought, a self-consistent
+iteration is required to solve Eq.~(\ref{eq_dirac}). In each iteration,
+the orbitals from the previous step are used to derive the
+potential. Therefore, one only needs to solve the eigenvalue problem with a
+known potential. As is 
+standard, we convert Eq.~(\ref{eq_dirac}) into a Schr\"{o}dinger-like
+equation by 
+eliminating the small component and performing the transformation
+\cite{chernysheva99} 
+\begin{eqnarray}
+\label{eq_transform}
+P_a &=& \xi_a(r) F_a(r) \nonumber \\*
+\xi_a(r) &=& \sqrt{1+\frac{\alpha^2}{2}\left[\varepsilon_a-V(r)\right]} 
+\nonumber \\*
+Q_a &=& \frac{\alpha}{2\xi_a^2}\left(\frac{d}{d r}P_a + 
+\frac{\kappa}{r}P_a\right),
+\end{eqnarray}
+Under this transformation, we have
+\begin{equation}
+\label{eq_schrodinger}
+\frac{d^2}{d r^2}F_a(r) + \left\{2\left[\varepsilon_a-U(r)\right] - 
+\frac{\kappa(\kappa + 1)}{r^2}\right\}F_a(r) = 0,
+\end{equation}
+where $U(r)$ is an effective potential defined as
+\begin{eqnarray} 
+\label{eq_UW}
+U(r) &=& V(r) - \frac{\alpha^2}{2}\left\{\left[V(r) - \varepsilon_a\right]^2 
+-W(r)\right\} \nonumber \\*
+W(r) &=& \frac{1}{4\xi^2(r)}\left[\frac{d^2}{d r^2}V(r) +
+\frac{3\alpha^2}{4\xi^2(r)}\left(\frac{d}{d r}V(r)\right)^2 - 
+\frac{2\kappa}{r}\frac{d}{d r}V(r)\right].
+\end{eqnarray}
+
+We use the standard Numerov method to solve Eq.~(\ref{eq_schrodinger}). 
+However, it is customary to perform another transformation before seeking the
+solution
+\begin{eqnarray}
+t &=& t(r) \nonumber\\*
+F_a(r) &=& \left(\frac{d t}{d r}\right)^{-1/2} G_a(t),
+\end{eqnarray}
+where $t(r)$ as a function of radial distance is suitably chosen
+so that a uniform grid can be used in the new variable $t$, and the
+corresponding transformation on the wavefunction is to bring the differential
+equation for $G_a(t)$ to a Schr\"{o}dinger-like form, i.e., without the first
+derivative term
+\begin{eqnarray}
+\label{eq_Ga}
+\frac{d^2}{d t^2}G_a(t) &=& \left(\frac{d t}{d r}\right)^{-2}G_a(t)
+\Bigg\{\frac{\kappa(\kappa +1)}{r^2} - 2\left[\varepsilon_a-U(r)\right]
+\nonumber\\*
+&+&\frac{1}{2}\left(\frac{d t}{d r}\right)^{-1}\frac{d^3 t}{d r^3}
+-\frac{3}{4}\left(\frac{d t}{d r}\right)^{-2}\left(\frac{d^2 t}{d
+r^2}\right)^2\Bigg\}.
+\end{eqnarray}
+
+Two types of $t(r)$ have been used in the past. One is a logarithmic
+transformation, $t(r) \propto \ln(r)$, which has been used in the MCHF code of
+\citet{fischer00}; the other is a hybrid form, $t(r) = c_1 r + c_2 \ln(r)$,
+e.g., as used in ATOM \cite{amusia97}. The logarithmic form is not
+suitable for 
+highly excited and continuum orbitals, because the radial grid interval may
+exceed the oscillation period of the wavefunction at large $r$. In the hybrid
+form, the grid interval approaches a constant at large $r$. For suitably
+chosen coefficients $c_1$ and $c_2$, it can be used in the calculation of
+highly excited orbitals and continua with energy below some limit. However,
+for free orbitals with sufficiently high energy, solving Eq.~(\ref{eq_Ga})
+in a conventional way becomes impractical. We shall use a different approach
+for continuum states, namely, the phase-amplitude method as used in
+HULLAC. For highly excited bound states, it is easily shown that the
+oscillation period of the 
+wavefunction is $\propto \sqrt{r}$ at large $r$. We therefore use a modified
+hybrid form, $t(r) = c_1\sqrt{r} + c_2\ln(r)$, so that 
+one oscillation period contains approximately the same number of grid points
+at large distances. The advantage of the modified form
+over the linear hybrid form is that for a given number of grid points, the
+modified form can cover a larger radial distance than the linear form, which is
+important for the calculation of highly excited states. 
+
+The minimum and maximum radial distances, $r_{min}$ and $r_{max}$, in setting
+up the radial grid are chosen as 
+\begin{eqnarray}
+r_{min} &=& 10^{-5}/Z_{eff} \nonumber \\*
+r_{max} &=& 500/Z_{eff},
+\end{eqnarray}
+where $Z_{eff}$ is the residual charge of the atomic ion that the electrons
+experience at large $r$. This ensures that $r_{min}$ is well within the
+nuclear charge distribution for any atomic system. The value of
+$r_{max}$ ensures that for excited states below $n \sim 20$, the bound energies
+are less than the Coulomb potential at $r_{max}$. These states have no nodes at
+$r > r_{max}$. For states with higher $n$, however, wavefunctions beyond
+$r_{max}$ may have additional nodes. Therefore, counting the nodes is no
+longer a valid method to pick out the right solution. Moreover, the
+wavefunctions can no longer be normalized by calculating their norm with simple
+numerical integration, since the contributions beyond $r_{max}$ cannot be
+neglected. Actually, such contributions must be included for $n$ well within
+20. One may increase $r_{max}$ when highly excited states are needed. One
+must also increase the number of grid points as well to
+ensure the accuracy of numerical integration. However, wavefunctions
+at large radial distances are rarely needed, either because the interaction
+operators are negligible, or because the states that interact with
+such highly excited orbitals have negligible amplitudes at large distances. 
+In the present program, the low-$n$ and high-$n$ states are treated
+differently. The dividing $n_0$ is determined by the choice of $r_{max}$,
+specifically, $n_0
+= 0.5*\sqrt{Z_{eff}r_{max}}$. For $n \le n_0$, the orbitals are found by
+outward and inward integration of Eq.~(\ref{eq_Ga}) with zero amplitudes at
+both ends, and matching at the outer classical turning point. Node counting is
+used to pick out the appropriate solution corresponding to the quantum numbers
+$n$ and $l$. The wavefunctions are then normalized by 
+numerical integration. For $n > n_0$, Eq.~(\ref{eq_Ga}) is integrated
+outward until $r=r_{core}$, where the potential has reached its asymptotic
+Coulomb value. For $r > r_{core}$, the wavefunction is the exponentially
+decaying Whittaker function 
+\begin{equation}
+y_5(\nu, \lambda, \rho) = W_{\nu, \lambda+1/2}(2\rho/\nu),
+\end{equation}
+where $\nu^2 = -\frac{1}{2}Z_{eff}^2/\varepsilon$, $\rho = Z_{eff}r$, and
+$\lambda = l$ in the non-relativistic limit \cite{seaton58}. In the
+relativistic case, the asymptotic behavior of the effective potential is
+modified according to Eq.~(\ref{eq_UW}), and corresponds to 
+\begin{eqnarray}
+Z_{eff}^\prime &=& Z_{eff}(1+\alpha^2\varepsilon) \nonumber\\*
+\nu^2 &=& -\frac{Z_{eff}^{\prime 2}}{2\varepsilon
+\left(1+\frac{1}{2}\alpha^2\varepsilon\right)} \nonumber\\*
+\lambda(\lambda+1) &=& l(l+1) - (Z_{eff}\alpha)^2 .
+\end{eqnarray}
+The Whittakar function and its derivative at $r_{core}$ are calculated
+using the program of \citet{thompson85} and matched with the solution
+obtained by outward integration. The program of \citet{thompson85} uses
+quadrupole precision floating point numbers in the calculation of 
+hypergeometric function to achieve the desired accuracy. Since not all computer
+platforms implement the quadrupole precision floating point numbers natively,
+we have modified the program to use a pure software quadrupole precision
+arithmetics to increase the portability of the
+program. Since for highly excited states, the quantum defect is 
+small, the solution with $\nu \sim n$ is picked out without node counting. To
+normalize the wavefunction, we note that the correct normalization is given by
+\cite{seaton58}
+\begin{equation}
+\label{eq_norm}
+F(r > r_{core}) = K(\nu_n, \lambda)y_5(\nu_n, \lambda, \rho),
+\end{equation}
+where 
+\begin{equation}
+K(\nu,\lambda) =
+Z_{eff}^{\prime 1/2}\left[\zeta(\nu_n)\nu_n^2\Gamma(\nu_n+\lambda+1)
+\Gamma(\nu_n-\lambda)\right]^{-1/2}, 
+\end{equation}
+and 
+\begin{equation}
+\zeta(\nu_n) = 1 + \frac{d\mu}{d\nu},
+\end{equation}
+where $\mu$ is the quantum defect. For high $n$ states we are concerned with,
+$\zeta(\nu_n) = 1$ is a very good approximation.
+
+\subsection{Angular Integration and Hamiltonian Matrix Elements}
+In Eq.~(\ref{eq_hamilton}), the first term of the Hamiltonian is a
+one-electron operator, while the second term is a two-electron operator. The
+traditional method of evaluating their matrix elements is to expand them into a
+sum, with each term being a product of an angular part and a radial part. The
+angular part is then calculated using Racah algebra. In doing so, the initial
+and final basis states need to be recoupled, which are often carried out by
+the recoupling program of \citet{grant76}. Recently, \citet{gaigalas97}
+proposed a new method of performing angular integration, which is based on the
+second quantization form of the operators and extends the use of Racah algebra
+to the quasi-spin space. In this method, instead of recoupling basis states,
+one recouples the creation and annihilation operators with the help of Racah
+algebra. The main advantage of this method 
+is that there are only two creation and two annihilation operators in the
+two-electron interaction, while for the one-electron interaction, there is
+only one creation and one annihilation operator. Therefore, at most four
+angular momenta 
+are involved in the recoupling independent of the shell structure of the
+basis states. In the conventional method, the recoupling of basis states can
+be quite complicated for complex configurations. The present code adopts the
+new method and the program of \citet{gaigalas01} is used for the reduced
+matrix elements of creation and annihilation operators.
+
+\subsubsection{One-electron Operators}
+The one-electron operator in the Hamiltonian is a scalar, however, we treat a
+general tensorial operator $O^L_M = \sum_i o^L_M(i)$ in this section since the
+calculation of 
+radiative transition rates involves tensors. In second quantization form,
+$O^L_M$ may be expressed as 
+\begin{equation}
+O^L_M = \sum_{\hat{\alpha}\hat{\beta}} a^{\dagger}_{\hat{\alpha}} 
+a_{\hat{\beta}} <\hat{\alpha}|o^L_M|\hat{\beta}>,
+\end{equation}
+where $\hat{\alpha}$ and $\hat{\beta}$ denotes a single electron state
+$n\kappa m$.  
+$a^{\dagger}$ is the creation operator and $a$ is the annihilation
+operator. Using Wigner-Ekart theorem for the matrix elements of $o^L_M$ we
+have
+\begin{equation}
+O^L_M = \sum_{\alpha\beta} Z^L_M(\alpha,\beta) 
+<\alpha||o^L||\beta>,
+\end{equation}
+where $<\alpha||o^L||\beta>$ denotes the reduced matrix element, and
+$\alpha$ and $\beta$ denote only quantum numbers $n\kappa$. The
+summation over $m$ is already contained in $Z^L_M$, which is defined as
+\begin{equation}
+Z^L_M(\alpha,\beta) = 
+-[L]^{-1/2}\left[a^{\dagger}_{\hat{\alpha}} \times
+\tilde{a}_{\hat{\beta}}\right]^L_M,
+\end{equation}
+where $[L] = 2L+1$, and $\tilde{a}_{\hat{\beta}} = (-1)^{j_\beta -
+m_\beta}a_{-\hat{\beta}}$ 
+with $-\hat{\beta}$ being understood as the single electron state
+$n_\beta\kappa_\beta -\!m_\beta$, i.e., having the magnetic quantum number
+negated. Such a transformation is necessary   
+since it is $\tilde{a}_{\hat{\beta}}$ that form an irreducible tensorial set
+with rank 
+$j_\beta$ \cite{judd67}. The tensorial coupling has the usual meaning. The
+angular integration is equivalent to the 
+evaluation of the reduced matrix elements of $Z^L_M$ between basis states
+\cite{gaigalas97}.
+
+\subsubsection{Two-electron Operators}
+After some algebraic manipulation \cite{barshalom88}, the
+electro-static interaction between electrons can be written as 
+\begin{equation}
+\label{eq_2e}
+\sum_{i<j} \frac{1}{r_{ij}} = \frac{1}{2}
+\sum_{\alpha\beta\gamma\delta}
+\sum_{k}\Bigg\{Z^k(\alpha,\gamma)\cdot Z^k(\beta,\delta)
+-(-1)^{j_\alpha-j_\beta}[j_\alpha]^{-1/2}Z^0_0(\alpha\delta)\Bigg\}
+X^k(\alpha\beta;\gamma\delta),
+\end{equation}
+where $Z^k(\alpha,\gamma)\cdot Z^k(\beta,\delta)$ denotes the scalar product
+of the two tensors, and 
+\begin{equation}
+X^k(\alpha\beta;\gamma\delta) = <\alpha||C^k||\gamma><\beta||C^k||\delta>
+R^k(\alpha\beta;\gamma\delta),
+\end{equation}
+where $C^k$ is the normalized spherical harmonic tensor as defined in
+\citet{cowan81}, and $R^k$ is the generalized Slater integral
+\begin{equation}
+R^k(\alpha\beta;\gamma\delta) = \int \frac{r_<^k}{r_>^{k+1}}
+\rho_{\alpha\gamma}(r_1)\rho_{\beta\delta}(r_2)d r_1 d r_2.
+\end{equation}
+The calculation of the 
+matrix elements of $Z^k(\alpha,\gamma)\cdot Z^k(\beta,\delta)$ follows
+\citet{gaigalas97}.
+
+\subsection{Large Scale Configuration Interaction}
+It is sometimes necessary to carry out calculations with a very large number of
+interacting configurations. Since the dimension of the Hamiltonian matrix
+grows very rapidly as the number of the interacting configurations
+increases. Such large
+scale calculations easily become unrealistic due to the insufficient CPU time
+and memory. In the present code, we use an approximate procedure to deal with
+such situations. In most cases, one is only interested in a small subset of the
+energy levels resulting from a large configuration space. The
+majority of the configurations are included only to provide mixing to the
+desired levels. Therefore, we partition the configuration space into two
+groups. The first is the main group whose diagonalization provides a good
+zeroeth order approximation to the desired energy levels. The second is a
+perturbing group whose interaction with the main group is weak, though not
+negligible. The Hamiltonian matrix can therefore be partitioned
+correspondingly
+\begin{equation}
+H = \left(\begin{array}{cc}H_1 & B^{\dagger}\\B & H_2\end{array}\right),
+\end{equation}
+where $H_1$ is the matrix resulting from the main group, and $H_2$ from the
+perturbing group. The matrix $B$ and its Hermitian conjugate $B^{\dagger}$
+result from the interaction between the two groups. In our approximating
+method, only 
+the matrix $H_1$, $B$, $B^{\dagger}$, and the diagonal elements of $H_2$ are
+retained, i.e., the interaction within the perturbing group is ignored. This
+can save large amount of computing time and storage space when the dimension of
+$H_2$ is much larger than that of $H_1$. To avoid diagonalizing the large
+matrix $H$ directly, we partition the eigenvectors of $H$ accordingly
+\begin{equation}
+\left(\begin{array}{cc}H_1 & B^{\dagger} \\ B & H_2\end{array}\right) 
+\left(\begin{array}{cc}Q_{11} & Q_{12} \\ Q_{21} & Q_{22} \end{array}\right) 
+= \left(\begin{array}{cc}Q_{11} & Q_{12} \\ Q_{21} & Q_{22} \end{array}\right)
+\left(\begin{array}{cc} D_1 & 0 \\ 0 & D_2 \end{array}\right),
+\end{equation}
+where the columns of matrix $Q$ are the eigenvectors of $H$, $D_1$ and $D_2$
+are diagonal matrices whose elements are the eigenvalues. We are only
+interested in the eigenvalues and eigenvectors corresponding to the subspace
+of the main group, i.e, the matrices $D_1$, $Q_{11}$, and $Q_{21}$. These
+matrices satisfy the following equations
+\begin{eqnarray}
+\label{eq_partition}
+H_1 Q_{11} + B^{\dagger}Q_{21} &=&  Q_{11} D_1 \nonumber \\*
+B Q_{11} + H_2 Q_{21} &=& Q_{21} D_1 .
+\end{eqnarray}
+The second relation of Eq.~(\ref{eq_partition}) results in 
+\begin{equation}
+\label{eq_Q21}
+Q_{21}^{i} = (D_1^{i} - H_2)^{-1}B Q_{11}^{i},
+\end{equation}
+where $Q_{21}^{i}$ and $Q_{11}^{i}$ are the $i$-th columns of $Q_{21}$ and
+$Q_{11}$, $D_1^{i}$ is the $i$-th diagonal element of $D_1$. Combined with the
+first relation of Eq.~(\ref{eq_partition}), the eigenvalues and
+eigenvectors can 
+be solved iteratively starting with $Q_{21} = 0$, $D_1$ and $Q_{11}$ being the
+eigenvalues and eigenvectors of $H_1$. During each step, one needs to
+diagonalize the matrix $Q_{11}^{T} H_1 Q_{11} + Q_{11}^{T}B^{\dagger}Q_{21}$,
+which has the same dimension as $H_1$. Since $H_2$ is diagonal, the matrix
+inversion in Eq.~(\ref{eq_Q21}) is trivial. Practically, if the partition
+between the two groups is carefully chosen, a single iteration yields
+sufficiently accurate eigenvalues and eigenvectors.
+
+\section{Radiative Transition Rates}
+The radiative transition rates are calculated in the single multipole
+approximation. This means that the interference between different multipoles
+is not taken into account, although rates corresponding to arbitrary
+multipoles can be calculated. For a given multipole operator $O^L_M$, and
+initial and final states of 
+the transition $\psi_i = \sum_\nu b_{i\nu}\Phi_\nu$ and $\psi_f = \sum_\mu
+b_{f\mu}\Phi_\mu$, the line strength of the transition is 
+\begin{eqnarray}
+S_{fi} &=& \left|<\psi_f||O^L_M||\psi_i>\right|^2 \nonumber\\*
+&=& \left|\sum_{\mu\nu}b_{f\mu}b_{i\nu}\sum_{\alpha\beta}
+<\Phi_\mu||Z^L_M(\alpha,\beta)||\Phi_\nu><\alpha||C^L||\beta>
+M^L_{\alpha\beta}\right|^2 ,
+\end{eqnarray} 
+where $M^L_{\alpha\beta}$ is the radial part of the single-electron multipole
+operator as defined by \citet{grant74}.
+The weighted oscillator strength and transition rates are given by 
+\begin{eqnarray}
+gf_{fi} &=& [L]^{-1}\omega(\alpha\omega)^{2L-2} S_{fi} \\*
+gA_{fi} &=& 2\alpha^3 \omega^2 gf_{fi},
+\end{eqnarray}
+where $\omega = E_i - E_f$ is the transition energy. 
+
+$M^L_{\alpha\beta}$ may be calculated using the fully relativistic
+expressions of \citet{grant74}. However, in most cases (except for M1
+transitions, where the use of the fully relativistic expressions is
+essential), their non-relativistic 
+limits are sufficiently accurate, which has the advantage that these operators
+depend on the transition energy in a trivial manner. 
+
+
+\section{Electron Impact Excitation}
+\subsection{Introduction}
+Two classes of methods are commonly used in the calculation of electron impact
+excitation (EIE) cross
+sections. The first is based on a set of close-coupling (CC) equations, which
+takes into account the coupling of various excitation channels
+\cite{seaton75}. In these methods, resonances can be included in a
+natural way by including the coupling to closed channels. Several
+implementations of this method exist. The most widely used is the R-matrix
+code developed by a group at the Queens University of Belfast
+\cite{berrington95}. The second class of methods is based on the first order
+Born approximation, which assumes independent excitation channels. The
+coupling to closed channels, which results in resonances, may be included in a
+perturbative fashion \cite{eissner72}. Different variants exist according to
+the different treatments of the continuum wavefunctions. The plane-wave (PW)
+Born approximation uses an unperturbed plane wave for the free orbital. The
+Coulomb-wave (CW) Born approximation takes into account the distortion of the
+continuum due to a pure Coulomb potential. The most accurate of this class is
+the DW Born approximation, in which the free orbitals are
+calculated in a more realistic potential taking into account the electronic
+structure of the target ion.
+The majority of the computer programs in this class implement the DW
+approximation, since it yields significantly better results than the PW and CW
+methods with minimal increase in the complexity. Many DW codes are in use
+today. For example, the non-relativistic DW code from University College
+London \cite{eissner98}, the relativistic code of \citet{hagelstein87}, the
+HULLAC package \cite{barshalom88}, the code by \citet{zhang89}, and that of
+\citet{chen96}, just to name some. The present DW implementation in FAC is
+in principle similar to any of the relativistic codes listed above.
+
+In the present implementation, the factorized formula of the collision
+strength is used, which separates the angular integration from the radial
+integrals, and permits efficient interpolation of the radial integrals. To
+avoid the difficulties in the radial integration arising from the oscillatory
+behavior of the continuum wavefunctions, we use a different technique from
+that for bound orbitals to solve the Dirac equation for free electrons. In the
+inner region where the wavefunction is not oscillatory or when one oscillation
+period contains 
+a sufficient number of radial grid points to ensure the accuracy of numerical
+integration, we use the standard Numerov method to integrate the equation 
+outward. In the outer region, a phase-amplitude method is used. The position
+where the outer solution is matched to the inner solution depends on the
+energy and angular momentum of the continuum orbital. This method allows us to
+evaluate the radial integrals involving the continuum orbitals to sufficiently
+large radial distance without using a prohibitively dense grid. The collision
+strength is calculated using the standard partial wave summation. A
+quasi-logarithmic grid is constructed for the orbital angular momenta of the
+free electrons. Detailed calculations are only carried out on this
+grid. Partial collision strengths for all other orbital angular momenta are
+obtained by interpolation. Very large
+angular momentum contributions to the allowed transitions
+are taken into account by the rapid Coulomb-Bethe approximation
+\cite{burgess74}. 
+
+\subsection{Factorized Collision Strength}
+The EIE cross subsection $\sigma_{01}$ from the inital state $\psi_0$ to the final
+state $\psi_1$ can be expressed in terms of the collision strength
+$\Omega_{01}$ as (in atomic units, which we shall use throughout the
+paper) 
+\begin{equation}
+\sigma_{01} = \frac{\pi}{k_0^2g_0}\Omega_{01},
+\end{equation}
+where $g_0$ is the statistical weight of the initial state, and $k_0$ is the
+kinetic momentum of the incident electron, which is related to the energy
+$\varepsilon_0$ by
+\begin{equation}
+k_0^2 = 2\varepsilon_0\left(1+\frac{\alpha^2}{2}\varepsilon_0\right),
+\end{equation}
+where $\alpha$ is the fine structure constant. The continuum wavefunction
+is normalized so that the large component has an asymptotic amplitude of
+$\sqrt{k/\varepsilon}$, which reduces to $\sqrt{2/k}$ in the non-relativistic
+limit, or equivalently,
+\begin{equation}
+\int_0^\infty \left[P_{\varepsilon(r)}P_{\varepsilon^\prime}(r)
++Q_{\varepsilon(r)}Q_{\varepsilon^\prime}(r)\right]d r = 
+\pi\delta(\varepsilon - \varepsilon^\prime),
+\end{equation}
+where $\varepsilon$ and $k$ are the energy and kinetic momentum of the
+orbital, $P_\varepsilon$ and $Q_\varepsilon$ are the large and small
+components of the continuum wavefunction. The collision strength can be
+written as
+\begin{equation}
+\Omega_{01} = 2\sum_{\kappa_0\kappa_1}\sum_{J_T}[J_T]
+|<\psi_0\kappa_0,J_TM_T|\sum_{i<j}\frac{1}{r_{ij}}|\psi_1\kappa_1,J_TM_T>|^2,
+\end{equation}
+where $\kappa_0$ and $\kappa_1$ are the relativistic angular quantum numbers of
+the incident and scattered electrons, $J_T$ is the total angular momentum
+when the target state is coupled to the continuum orbital, $M_T$ is the
+projection of the total angular momentum, and  $[J] = 2J+1$. 
+Following \citet{barshalom88}, this expression can be simplified to give
+\begin{equation}
+\label{eq_cs}
+\Omega_{01} = 2\sum_{k}\sum_{\alpha_0\alpha_1\atop\beta_0\beta_1}
+Q^k(\alpha_0\alpha_1;\beta_0\beta_1)
+<\psi_0||Z^k(\alpha_0,\alpha_1)||\psi_1>
+<\psi_0||Z^k(\beta_0,\beta_1)||\psi_1>,
+\end{equation}
+where 
+\begin{equation}
+\label{eq_Qk}
+Q^k(\alpha_0\alpha_1;\beta_0\beta_1) = \sum_{\kappa_0\kappa_1}[k]^{-1}
+P^k(\kappa_0\kappa_1;\alpha_0\alpha_1)P^k(\kappa_0\kappa_1;\beta_0\beta_1),
+\end{equation}
+and 
+\begin{equation}
+\label{eq_Pk}
+P^k(\kappa_0\kappa_1;\alpha_0\alpha_1)=
+X^k(\alpha_0\kappa_0;\alpha_1\kappa_1)+\sum_{t}
+(-1)^{k+t}[k]\sixj{j_{\alpha_0}}{j_1}{t}{j_0}{j_{\alpha_1}}{k}
+X^t(\alpha_0\kappa_0;\kappa_1\alpha_1),
+\end{equation}
+where $X^k$ and the operator $Z^k(\alpha,\beta)$ are defined in
+Ref.~\cite{gu02a}. 
+ 
+The importance of Eq.~(\ref{eq_cs}) is that the angular and radial integrals
+are completely factorized. The radial integrals
+$Q^k(\alpha_0\alpha_1;\beta_0\beta_1)$ with the same set of bound orbitals
+$\alpha_0$, $\alpha_1$, $\beta_0$, and $\beta_1$ may appear in many
+transitions. These integrals also depend on the energy of incident
+and scattered electrons, or for a fixed scattered electron energy, they depend
+on the excitation energy of the transition $\Delta E$. However, as noted by
+\citet{barshalom88}, the dependence on $\Delta E$  is rather weak. For
+dipole forbidden radial integrals, $Q^k \propto \Delta E$, and for dipole
+allowed integrals, $Q^k \propto \ln\Delta E$ approximately holds over a wide
+range of transition energes. Therefore, for a given scattered electron energy,
+$Q^k$ may be calculated at a few values of $\Delta E$, and the integral at the
+actual transition energy can be interpolated from these few values. In
+practice, 
+usually a three-point grid spanning the entire transition energy range for
+a given array of excitations yields sufficiently accurate results. The
+dependence of $Q^k$ on $\varepsilon_1$, the scattered electron energy,
+although not as simple as that on $\Delta E$, is still rather smooth, and has
+known asymptotic behavior at large energies according to the type of the
+transition. We use interpolation on $\varepsilon_1$ as well with a few more
+points. The calculation of $<\psi_0||Z^k||\psi_1>$ is the same as that
+involved in the radiative transition rates \cite{gu02a}.
+
+\subsection{Solution of the Dirac Equation for The Continuum}
+In FAC, the continuum orbitals are obtained by solving the Dirac equations
+with the same central potential as that for bound orbitals. However, in
+obtaining the potential, one may optionally add a high lying subshell to the
+mean configuration to account for the fact that the continuum 
+wavefunctions experience the screening of one additional electron at large
+distances. Such a high 
+lying subshell has little effect on the bound orbitals because the deviation
+of the potential from its correct asymptotic value starts at very large
+distance where the bound orbitals have exponentially decayed. 
+After transforming the Dirac equations to a second order Schr\"{o}dinger-like
+equation, and adopting the same radial grid as in the solution of bound
+orbitals \cite{gu02a}, the transformed large component, $F(r)$,  of the
+free orbital satisfies 
+\begin{eqnarray}
+\label{eq_schrodinger2}
+\frac{d^2}{d r^2}F(r) + \left\{2\left[\varepsilon-U(r)\right] - 
+\frac{\kappa(\kappa + 1)}{r^2}\right\}F(r) = 0,
+\end{eqnarray}
+where $\varepsilon$ is the energy of the free electron, and the boundary
+condition at infinity is replaced by the requirement that the
+original large component $P(r)$  has the asymptotic amplitude of
+$\sqrt{k/\varepsilon}$.  
+
+In solving Eq.~(\ref{eq_schrodinger2}), the radial grid is divided into two
+regions. In the inner region, where the wavefunction is not oscillatory, or
+the oscillation period is large enough to contain a sufficient number of grid
+intervals (e.g., more than 16), we use the standard Numerov method to
+integrate the equation outward. Beyond some point $r = r_c$, which depends on
+the energy and angular momentum of the continuum sought, the oscillation
+period of the wavefunction becomes too small for the direct integration to be
+accurate. At that point, we switch to a phase-amplitude method, in which
+$F(r)$ is written as
+\begin{equation}
+F(r) = A\frac{1}{\eta^{1/2}(r)} \sin\phi(r),
+\end{equation}
+where the constant $A$ is chosen to ensure the appropriate normalization.
+$\phi(r)$ and $\eta(r)$ satisfy  
+\begin{eqnarray}
+\label{eq_pham}
+\phi(r) &=& \int_0^{r} \eta(s) d s \nonumber \\*
+\eta^2(r) &=& \eta^{1/2}\frac{d^2}{d r^2}\eta^{-1/2} + \omega^2(r) ,
+\end{eqnarray}
+where
+\begin{equation}
+\omega^2(r) = 2\left[\varepsilon-U(r)\right] - 
+\frac{\kappa(\kappa + 1)}{r^2} .
+\end{equation}
+For $r > r_c$, Eq.~(\ref{eq_pham}) can be easily solved by iteration
+starting from the first order WKB approximation $\eta(r) = \omega(r)$. In
+fact, in most cases, the first order approximation itself is sufficiently
+accurate. The inner and outer solutions are matched at $r_c$ by requiring the
+continuity of $F(r)$ and its first derivative. 
+
+\subsection{Evaluation of Radial Integrals}
+The evaluation of Slater integrals reduces to the calculation of the following
+type of integrals 
+\begin{equation}
+I = \int_0^\infty P_a(r)f(r)P_b(r)d r,
+\end{equation}
+where $P_a(r)$ and $P_b(r)$ may be large or small components of either bound
+or continuum orbitals, and $f(r)$ is a smooth function of $r$. If both
+wavefunctions are from bound orbitals, direct numerical integration is
+used. 
+
+If one of them is from a continuum orbital, we divide the integration
+range into two regions. In the first region, $r < r_c$, the integration
+proceeds as in the bound-bound case. In the $r > r_c$ region, the integral is
+of the type 
+\begin{equation}
+I_1 = \int g(r)\sin\phi(r) d r ,
+\end{equation}
+or 
+\begin{equation}
+I_2 = \int g(r)\cos\phi(r) d r ,
+\end{equation}
+where $g(r)$ is a smooth function of $r$. Since the phase $\phi$ is also a
+smooth function of $r$, we evaluate $I_1$ as
+\begin{equation}
+I_1 = \int \tilde{g}(\phi)\sin\phi d\phi,
+\end{equation}
+where 
+\begin{equation}
+\tilde{g}(\phi) = g(r)\frac{d r}{d\phi},
+\end{equation}
+which is a smooth function of $\phi$. Using its values at each grid point, it
+is represented by a cubic spline interpolation function. Therefore within each
+grid interval, it is a third order polynomial of $\phi$. $I_1$ is evaluated by
+integrating $\int \phi^n\sin\phi d\phi$ analytically, where $n$ = 0, 1, 2, or
+3.  The evaluation of $I_2$ is similar, replacing $\sin\phi$ with $\cos\phi$. 
+
+If both wavefunctions are from the continuum, the integration range is divided
+into three regions. In the first region, $r < \mbox{min}(r_{c1}, r_{c2})$, the
+integration proceeds as in the bound-bound case. In the second region,
+$\mbox{min}(r_{c1}, r_{c2}) < r < \mbox{max}(r_{c1}, r_{c2})$, the integration
+proceeds as in the bound-free 
+case. In the last region, $r > \mbox{max}(r_{c1}, r_{c2})$, both wavefunctions
+are in the phase-amplitude form, the integrals are of the type 
+\begin{equation}
+I = \int g(r) \sin\phi_1(r)\sin\phi_2(r) d r,
+\end{equation}
+or similar ones where one or both sine functions are replaced by cosine
+functions. Such integrals are transformed to the sum of two terms
+\begin{eqnarray}
+I^+ &=& \int g^+(r)\cos\phi^+(r)d r \nonumber \\*
+I^- &=& \int g^-(r)\cos\phi^-(r)d r ,
+\end{eqnarray}
+or variants where the cosine function is replaced by the sine function. In the
+above equation, $\phi^+ = \phi_1 + \phi_2$ and $\phi^- = \phi_1 -\phi_2$,
+respectively. These 
+integrals are evaluated similar to the bound-free integrals except when the
+energies of two continuum orbitals are very close so that $\phi^-$ is very
+small, in 
+which case, the integrals containing $\phi^-$ are calculated directly in the
+radial variable $r$. 
+
+\subsection{Quasi-relativistic Approximation}
+In most cases, it is not necessary to solve the continuum radial equation
+fully relativistically. As noted by \citet{zhang89}, the quasi-relativistic
+approximation, in which the two wavefunctions with the same $l$ but different
+$j$ are treated in the same way, and the small components are neglected, often
+yields final collision strengths very close to the fully relativistic
+results for the nuclear charge as large as 74 and collision energy as high as 30 keV. Even for $Z = 92$, the differences are mostly within 15--20\%. 
+
+In the present code, we incorporate an option for such approximations as
+well. In fact, the 
+approximation can be invoked only for $l > l_{qr}$, where $l_{qr}$ is some
+suitable value, since one would expect the approximation to get better for
+higher $l$. Because
+the quasi-relativistic approximation is very good for all low to mid $Z$
+elements and saves 
+considerable amount of computing time, $l_{qr}$ is chosen to be 0 by default,
+i.e., all 
+partial waves are treated in quasi-relativistic approximaiton. For high $Z$
+elements, one needs to increas $l_{qr}$ or turn off the quasi-relativistic
+approximaiton completely.
+
+\subsection{Partial Wave Summation}
+The radial integral $Q^k$, Eq.~(\ref{eq_Qk}), is expressed as a sum of
+partial waves. The summation is evaluated as following
+\begin{eqnarray}
+Q^k &=& \sum_{l_0}\sum_{l_1} \tilde{Q}^k(l_0,l_1) \nonumber\\*
+\tilde{Q}^k(l_0,l_1) &=& \sum_{j_0,j_1}
+[k]^{-1}P^k(\kappa_0\kappa_1;\alpha_0\alpha_1)
+P^k(\kappa_0\kappa_1;\beta_0\beta_1),
+\end{eqnarray}
+where the summation over $\kappa$ is explicitly written out as the summation
+over the orbital and total angular
+momenta. $\tilde{Q}^k(l_0,l_1)$ is not calculated for every possible $l_0$
+and $l_1$. A suitable grid is chosen for $l_0$ from 0 to $l_{max}$. For each 
+$l_0$ in this grid, $\tilde{Q}^k(l_0) = \sum_{l_1}\tilde{Q}^k(l_0,l_1)$ is
+calculated, where the values of $l_1$ are limited by the triangular
+relations. $\tilde{Q}^k(l_0)$ is a smooth function of $l_0$ especially when 
+$l_0$ is relatively large. Therefore, for any $l_0$ that is missing in the
+grid, its value can be obtained by interpolation. The $l_0$ grid used
+in the code may be specified in the input. However, the default grid is
+usually sufficient, which contains every value from $l_0 = 0$ to 5, after
+that, the interval between the successive points is doubled every two points,
+i.e., it is almost logarithmic. 
+
+The value of $l_{max}$ needed for the desired accuracy varies widely depending
+on the type of the transition and the collision energy. Many programs choose
+an arbitrary value for $l_{max}$, and the convergence is not guaranteed for
+all transitions at all energies. In the present program, 
+$l_{max}$ is not fixed \textit{a priori}. At each point in the $l_0$ grid, an
+estimate of the contributions from higher partial waves is made according to
+the method described below. The relative uncertainty in the resulting
+collision strength is also estimated if the truncated sum plus the estimated
+higher partial wave contribution is taken to be the final result. Once this
+relative uncertainty becomes less than a prescribed accuracy (usually 5\%),
+the summation is truncated at this point.
+
+For strictly forbidden transitions, which have non-zero collision strengths
+only due to the exchange interaction, the high partial wave contributions are
+not important, no special difficulties arise regarding the convergence of the
+summaiton. 
+For allowed transitions (including all multipole types), we use the
+Coulomb-Bethe approximation to estimate the high partial wave contributions
+and calculate the uncertainties in such estimates. In this
+method, the exchange term in $P^k$ is neglected, and the direct term is
+approximated by 
+\begin{equation}
+\label{eq_PkApprox}
+P^k_{CB}(\kappa_0\kappa_1;\alpha_0\alpha_1) = 
+M_k(\alpha_0\alpha_1)R_k(\kappa_0\kappa_1),
+\end{equation}
+where 
+\begin{eqnarray}
+M_k(\alpha_0\alpha_1) &=& <\alpha_0||C^k||\alpha_1>
+\int (P_{\alpha_0}P_{\alpha_1}+Q_{\alpha_0}Q_{\alpha_1})r^kd r \nonumber\\*
+R_k(\kappa_0\kappa_1) &=&
+\int (P_{\kappa_0}P_{\kappa_1}+Q_{\kappa_0}Q_{\kappa_1})
+\frac{1}{r^{k+1}}d r.  
+\end{eqnarray}
+Note that $M_k$ only depends on the target orbitals, and $R_k$ only depends on
+the continua. The corresponding $\tilde{Q}^k(l_0,l_1)$ under this
+approximation is 
+\begin{equation}
+\tilde{Q}^k_{CB}(l_0, l_1) = M_k(\alpha_0\alpha_1)M_k(\beta_0\beta_1)
+\sum_{j_0j_1}[k]^{-1}R_k^2(\kappa_0\kappa_1),
+\end{equation}
+and 
+\begin{equation}
+\tilde{Q}^k_{CB}(l_0)=\sum_{l_1}\tilde{Q}^k_{CB}(l_0,l_1). 
+\end{equation}
+The ratio
+\begin{equation}
+\gamma(l_0) = \frac{\tilde{Q}^k_{CB}(l_0+1)}{\tilde{Q}^k_{CB}(l_0)}
+\end{equation}
+only depends on the continuum orbitals and approaches a constant,
+$\gamma_{\infty}=\varepsilon_1/\varepsilon_0$, at large $l_0$. 
+
+For $k \ge 2$,
+the convergence to this aysmptotic value is relatively fast. Therefore, we may
+approximate the summation over $l_0$ by
+\begin{equation}
+\sum_{l_0>l_{max}}\tilde{Q}^k_{CB}(l_0) =
+\tilde{Q}^k_{CB}(l_{max})\frac{\gamma_{\infty}}{1-\gamma_{\infty}}. 
+\end{equation}
+The difference between $\gamma_{\infty}$ and the value of 
+$\tilde{Q}^k(l_0+1)/\tilde{Q}^k(l_0)$ calculated with the actual wavefunctions
+may be used to calculate the uncertainty introduced in this
+approximation. Suppose this 
+difference is $\delta$, the absolute uncertainty is given by
+\begin{equation}
+\Delta = \tilde{Q}^k_{CB}(l_{max})\frac{\delta}{(1-\gamma_{\infty})^2}.
+\end{equation}
+This value is compared with the desired accuracy to determine whether the
+summation should be truncated.
+
+For $k = 0$ and 1, however, $\gamma_\infty$ is not reached until $l_0 \gg
+\varepsilon_1/(\varepsilon_0-\varepsilon_1)$, which can be very large, if the
+transition energy is very small or the collision
+energy is high. For such cases, we make use of the well known non-relativistic
+recursive relations which connect
+$\tilde{Q}^k_{CB}(l_0,l_1)$ with different $l_0$ to calculate the ratio
+$\gamma(l_0)$ until it converges to 
+$\gamma_{\infty}$ \cite{burgess74}. These ratios are then used to estimate
+the high partial wave contributions and the uncertainties in these estimates.
+
+\section{Electron Impact Ionization}
+\subsection{Introduction}
+Several DW programs have been developed for the calculation of
+electron impact ionization
+(EII) cross
+sections in the past decades, in either non-relativistic \cite{younger80} or
+relativistic \cite{pindzola88, sampson91} approximations. The present program
+is similar to that of \citet{sampson91} in particular,  which extends the
+efficient factorization-interpolation method of \citet{barshalom88} to the
+calculation of EII cross sections, and leads to great simplifications for
+complex ions. The essence of the factorization method is the separation of
+the angular and radial parts in the formula of EII cross sections. The angular
+part depends on the angular momentum coupling of the target states, while the
+radial part only depends on the one-electron radial orbitals, without
+explicit reference to the initial and final states involved in the
+process. Different initial and final states affect the radial part only
+implicitly through the ionization energy due to the energy conservation. Such
+a separation enables the rapid calculation of the radial integrals on a few
+ionization energy points, the integrals at actual ionization energies are
+obtained by interpolation.  
+
+The present program also implements much more efficient methods based on the
+Coulomb-Born-exchange (CBE) approximation or the Binary-Encounter-Dipole (BED)
+theory of \citet{kim94}. The CBE implementation makes use of the
+parametrized reduced cross sections of \citet{golden77, golden80}, and the
+BED implementation uses the bound-free differential oscillator strengths
+calculated by the present program \cite{gu02c}. The CBE results are close to
+the non-relativistic DW cross sections, while the BED cross sections are
+substantially smaller at low energies due to a scaling factor deliberately
+introduced into the theory, which appear to improve the agreements with
+experimental results in many cases \cite{kim94}.
+ 
+\subsection{Relativistic Distorted-wave Theory}
+The formula for EII cross subsection, differential in energy of the ejected
+electron, may be obtained from that for EIE by replacing one bound orbital in
+the final state with the free orbital of the ejected electron and summing 
+over its angular momentum. It can be expressed in terms of the collision
+strength similar to that of EIE 
+\begin{equation}
+\label{eq_cross}
+\sigma(\varepsilon_0,\varepsilon) = \frac{1}{k_0^2g_0}\Omega_{01},
+\end{equation}
+where $\varepsilon_0$ and $k_0$ are the energy and kinetic momentum of the
+incident electron, $\varepsilon$ is the energy of the ejected electron. The
+normalization of continuum orbitals is discussed in Ref.~\cite{gu02b}. Note
+that the absence of the 
+factor $\pi$ as compared with the formula for the EIE cross subsection is due to
+the different normalization of the free and bound orbitals. The collision
+strength $\Omega_{01}$ is \cite{gu02b}
+\begin{equation}
+\label{eq_cs2}
+\Omega_{01} = 2\sum_{\kappa,J_T\atop k,\alpha_0\beta_0}
+Q^k(\alpha_0\kappa;\beta_0\kappa)
+<\psi_0||Z^k(\alpha_0,\kappa)||\psi_1,\kappa;J_T>
+<\psi_0||Z^k(\beta_0,\kappa)||\psi_1,\kappa;J_T>,
+\end{equation}
+where $\kappa$ is the relativistic angular quantum number of the ejected
+electron, $J_T$ is the total angular momentum of the final state coupled with
+the ejected electron,
+the radial part $Q^k$ is identical to that for EIE, except that one of
+the bound orbitals in the final state is now replaced by a free orbital. Note
+that $Q^k$ contains the summation over the partial waves of incident and
+scattered electrons.
+
+As for photoionization \cite{gu02b}, the angular factors involving the free
+electron can be simplified using the decoupling formula of Racah
+\begin{eqnarray}
+&&\sum_{J_T}<\psi_0||Z^k(\alpha_0, \kappa)||\psi_1,\kappa;J_T>
+<\psi_0||Z^k(\beta_0, \kappa)||\psi_1,\kappa;J_T> = \nonumber\\*
+&(-1)^{j_{\alpha_0}-j_{\beta_0}}<&\psi_1||\tilde{a}_{\tilde{\alpha_0}}||\psi_0>
+<\psi_1||\tilde{a}_{\tilde{\beta_0}}||\psi_0>
+\sum_{J_T}[J_T]\sixj{J_1}{j}{J_T}{k}{J_0}{j_{\alpha_0}}
+\sixj{J_1}{j}{J_T}{k}{J_0}{j_{\beta_0}},
+\end{eqnarray}
+where $[J_T]$ denotes $2J_T+1$ and $\sixj{j_1}{j_2}{j_3}{j_4}{j_5}{j_6}$ is
+the Wigner $6j$ symbol. 
+Substituting this into Eq.~(\ref{eq_cs2}), and carrying
+out the summation over $J_T$ analytically, we find
+\begin{equation}
+\label{eq_scs}
+\Omega_{01} = 2\sum_{k,\alpha_0\beta_0}
+\delta_{j_{\alpha_0}j_{\beta_0}}[j_{\alpha_0}]^{-1} 
+\overline{Q}^k(\alpha_0,\beta_0)
+<\psi_1||\tilde{a}_{\tilde{\alpha_0}}||\psi_0>
+<\psi_1||\tilde{a}_{\tilde{\beta_0}}||\psi_0>,
+\end{equation}
+where $\overline{Q}^k(\alpha_0,\beta_0) = \sum_\kappa
+Q^k(\alpha_0\kappa;\beta_0\kappa)$.
+Note that since only basis states with the same parity can mix, the condition
+$j_{\alpha_0}=j_{\beta_0}$ implies that $l_{\alpha_0} = l_{\beta_0}$ as
+well. Therefore, if the configuration interaction is limited within the same
+$n$ complex, only terms with $\alpha_0 = \beta_0$ survive in the summation. 
+
+The total ionization cross subsection is obtained by integrating $\Omega_{01}$
+over the energy of the ejected electron, $\varepsilon$
+\begin{equation}
+\label{eq_total}
+\sigma(\varepsilon_0) = \int\nolimits_0^{\frac{\varepsilon_0-I}{2}}
+\sigma(\varepsilon_0,\varepsilon) d\varepsilon,
+\end{equation}
+where $I$ is the ionization energy. The ionization energy enters the
+radial integral $Q^k$ implicitly, since $\varepsilon_0 =
+I+\varepsilon_1+\varepsilon$, where $\varepsilon_1$ is the energy of the
+scattered electron. We choose to calculate $Q^k$ as a function of $I$,
+$\varepsilon_1$, and $\varepsilon$. For a given transition array, we first set
+up a three dimensional grid on these three energies. The integrals $Q^k$ are 
+only calculated on this grid, values for arbitrary energies are obtained by
+interpolation. For a given ionization channel with
+ionization energy of $I_{01}$ and the incident electron energy of
+$\varepsilon_t + I_{01}$, where $\varepsilon_t$ is the sum of the energies of
+the two final free electrons, the calculation of the total cross subsection
+proceeds as 
+following. The first step is the interpolation on the $I$ grid to obtain, for
+each point on the $(\varepsilon_1,\varepsilon)$ grid, the values of
+$\overline{Q}^k(I_{01})$ at the actual ionization energy, $I_{01}$. We then
+establish another grid for the energy of the ejected electron in the range 
+from 0 to $\varepsilon_t/2$ for the purpose of the numerical integration in
+Eq.~(\ref{eq_total}). For each 
+point on this grid, the value of $\varepsilon_1 = \varepsilon_t-\varepsilon$
+is determined. A two dimensional interpolation is then performed on the array
+$\overline{Q}^k(I_{01},\varepsilon_1,\varepsilon)$ to obtain the radial
+integrals at these specific 
+energies. Finally the integral in Eq.~(\ref{eq_total}) is evaluated to
+yield the total cross subsection. In practice, we find such a procedure
+minimizes the number of radial integrals need to be computed explicitly. The
+number of grid points for the ionization energy is chosen similarly as for the
+excitation energies of EIE, that is, 2 points with linear interpolation when
+the ionization energies vary by less than 20\%, and 3 points with cubic spline
+interpolation otherwise. The grids for the $\varepsilon_1$ and $\varepsilon$
+are usually chosen to have 6 points spanning the range necessary to cover the
+collision energies where the total cross sections are needed.
+
+For each point on the three dimensional grid $(I,\varepsilon_1, \varepsilon)$,
+and bound orbitals $\alpha_0$ and $\beta_0$, the evaluation of
+$\overline{Q}^k(\alpha_0,\beta_0)$ involves the summation of the 
+partial waves of all free electrons. The angular momentum of the ejected
+electron must satisfy the triangular relation $\Delta(j_{\alpha_0}, k, j)$,
+therefore, the limit on the rank $k$ in the expansion of the Coulomb
+interaction restricts the number of $\kappa$ terms. Usually $k_{max} = 6$ is
+large enough to ensure the convergence. A further limit on the orbital angular
+momentum of 
+the ejected electron may also be specified. The summation over the partial
+waves of the incident and scattered electrons proceeds exactly the same way as
+in the calculation of EIE cross sections, using the Coulomb-Bethe
+approximation for the high partial waves in the case of allowed integrals.
+
+\subsection{Coulomb-Born-Exchange Approximation}
+The computation of radial integrals in the DW approximation is very time
+consuming. In the CBE approximation implemented in the present program, only
+the terms with $\alpha_0 = \beta_0$ are retained in Eq.~(\ref{eq_scs}). After
+the integration over the energy of the ejected electron, a reduced radial
+integral is defined as 
+\begin{equation}
+\label{eq_reduced}
+Q_R(\alpha_0) = I_{\alpha_0}I
+\sum_k\int_0^{\frac{\varepsilon_0-I}{2}}
+\overline{Q}^k(\alpha_0,\alpha_0)d\varepsilon,
+\end{equation}
+where $I_{\alpha_0}$ is the binding energy of the orbital $\alpha_0$. It is
+well known that the reduced radial integrals are not very sensitive to the
+difference in the electronic structures and nuclear charges \cite{zhang90}. We
+therefore use the hydrogenic values calculated under the CBE approximation
+\cite{golden77, golden80}, in the place of detailed DW radial integrals. A
+simple parametrized formula as given in \citet{zhang90} is used for this
+purpose. 
+\begin{equation}
+Q_R = A\ln(u)+D\left(1-\frac{1}{u}\right)^2+
+\left(\frac{c}{u}+\frac{d}{u^2}\right)\left(1-\frac{1}{u}\right),
+\end{equation}
+where $u=\varepsilon_0/I$. In fact, even in the detailed DW calculations, the
+computed radial integrals are fitted with this formula, fixing the coefficient
+$A$ according to the correct Bethe limit. The parameters are then used to
+obtain total ionization cross sections at many incident energies. It is also
+possible to use the parameters given by \citet{fontes93} instead of the CBE
+values to bring the results in better agreement with the detailed DW
+calculations. 
+
+\subsection{Binary-Encounter-Dipole Theory}
+The CBE approximaiton discussed above trys to capture the detail of the ionic
+structure through a universal reduced radial integral. The BED theory
+combines the Mott cross subsection and binary encouter cross subsection, taking into
+account the high energy Bethe limit, to derive a semi-empirical formula for
+the radial integrals \cite{kim94}. The computation of bound-free differential
+oscillator strengths, which are related to the Bethe coefficients, is much
+simpler than the DW calculation of ionization radial integrals. Therefore the
+BED implementation is very efficient in practice. A unique feature of the BED
+theory is the energy denominator $\varepsilon_0+I$ (for neutral atoms, the
+average kinetic energy of the active bound electron should also be added), as
+opposed to $\varepsilon_0$ in various first order Born approximaitions
+(including DW). This modification effectively introduces a scaling factor
+$\varepsilon_0/(\varepsilon_0+I)$, which reduces the ionization cross sections
+at low energies. Comparison with experimental results for Low-Z near neutral
+ions indicates that such scaling brings the theoretical results in better
+agreement with experiments \cite{kim94}. However, for highly charged ions, we
+find that this scaling reduces the cross sections by a too large factor. A
+modified scaling factor is therefore introduced as
+$\varepsilon_0/(\varepsilon_0+I_s)$ with
+\begin{equation}
+I_s = \frac{N}{2Z-N}I,
+\end{equation}
+where $N$ is the number of electrons of the ion and $Z$ is the atomic
+number.
+
+
+\section{Photoionization and Radiative Recombination}
+\subsection{Introduction}
+The most accurate methods for calculating low energy
+non-resonant photoionization (PI) and
+recombination---both radiative recombination (RR) and dielectronic
+recombination (DR) cross sections, are ones
+based on the close-coupling (CC) approximation. The most widely used
+implementation of the CC approximation is the 
+R-matrix method \cite{hummer93, berrington95}. In this method, resonances are
+treated in the most natural way through the coupling to closed channels. The
+main drawback of the CC approximation is the prohibitively long computing time
+required, especially at high energies \cite{zhang98}. The other class of
+methods is based on the DW approximation, and ignores the inter-channel
+coupling. The non-resonant background and the resonances are calculated
+separately. In the present paper, we only discuss the non-resonant
+PI and RR. Many calculations have been carried out using the DW approximation
+employing different approaches to the bound and continuum wavefunctions
+\cite{reilman79, clark86, verner93}. Most of previous theoretical results are
+for PI from or RR onto a specific non-relativistic subshell, not for the
+specific atomic states. \citet{zhang98} has extended their fully
+relativistic code originally developed for the electron impact excitation
+(EIE) to the 
+calculation of PI and RR, and provided high energy PI cross sections to
+complement the Opacity Project database \cite{seaton87}. The
+present code is similar in technique to the program of \citet{zhang98}. To
+improve the efficiency, we have extended the factorization-interpolation
+procedure of \citet{barshalom88} first developed for the calculation of EIE
+cross sections to the calculation of PI and RR cross sections. 
+In addition, we have implemented the option to calculate PI and RR cross
+sections through multipole operators other than electric dipole (E1), although
+no interference between different multipoles is taken into account. 
+
+\subsection{Factorized Formula for Cross Sections}
+The partial PI cross section can be expressed in terms of the differential
+oscillator strength (in atomic units), and the partial RR cross section is
+related to that of PI through the Milne relation
+\begin{eqnarray}
+\sigma_{PI} &=&
+2\pi\alpha\frac{ d f}{ d E} \nonumber\\*
+\sigma_{RR} &=& \frac{\alpha^2}{2}\frac{g_i}{g_f}
+\frac{\omega^2}{\varepsilon(1+0.5\alpha^2\varepsilon)}
+\sigma_{PI},
+\end{eqnarray}
+where $\alpha$ is the fine structure constant, $g_i$ and $g_f$ are the
+statistical weight of the bound states before and after the photoionzation
+takes place respectively, $\omega$ is the photon energy, and $\varepsilon$ is
+the energy of the ejected photo-electron. 
+The differential oscillator
+strength, $df/dE$, may be calculated similar to the bound-bound oscillator
+strength through the generalized line strength
+\begin{equation}
+\frac{df}{dE} = \frac{\omega}{g_i}[L]^{-1}(\alpha\omega)^{2L-2}S,
+\end{equation}
+where $L$ is the rank of the multipole operator inducing the transition,
+$[L]$ denotes $2L+1$, and the generalized line strength is 
+\begin{equation}
+\label{eq_S}
+S = \sum_{\kappa J_T}\left|<\psi_f,\kappa;J_T||O^L||\psi_i>\right|^2,
+\end{equation}
+where $\kappa$ is the relativistic quantum number of the free electron, $J_T$
+is the total angular momentum of the free state when the final bound state is
+coupled to the continuum electron, and $O^L$ is the multiple operator
+inducing the transition.
+
+As in the calculation of bound-bound radiative transitions,
+Eq.~(\ref{eq_S}) may be decomposed into an angular part and a radial part
+\cite{gu02a} 
+\begin{equation}
+\label{eq_Sf}
+S = \sum_{\kappa J_T}\left|\sum_{\alpha\beta}
+<\psi_f,\kappa;J_T||Z^L_M(\alpha,\beta)||\psi_i><\alpha||C^L||\beta>
+M^L_{\alpha\beta}\right|^2,
+\end{equation}
+where $M^L_{\alpha\beta}$ is the one-electron radial integral and
+$Z^L_M(\alpha,\beta)$ is the angular operator obtained by coupling the
+creation and annihilation operators
+\begin{equation}
+Z^L_M(\alpha,\beta) = -[L]^{-1/2}\left[a^{\dagger}_{\hat{\alpha}}\times
+\tilde{a}_{\hat{\beta}}\right],
+\end{equation}
+where the hat over the one electron state index indicates the inclusion of
+magnetic quantum numbers $m$, and the tilde over the annihilation operator
+denotes the transformation $\tilde{a}_{\hat{\beta}} = (-1)^{j_\beta -
+m_\beta}a_{-\hat{\beta}}$ with $-\hat{\beta}$ being understood as the negation
+of the magnetic quantum number $m_\beta$. 
+
+Since the continuum orbital is absent in the initial bound state, the creation
+operator $a^{\dagger}_{\tilde{\alpha}}$ must be chosen to be that of the free
+electron. Using the decoupling formula of Racah, the reduced matrix elements
+of the angular operator can be written as
+\begin{equation}
+<\psi_f,\kappa;J_T||Z^L_M(\kappa,\beta)||\psi_i>=(-1)^{J_T+J_i-L}[J_T]^{1/2}
+<\psi_f||\tilde{a}_{\tilde{\beta}}||\psi_i>\sixj{J_f}{j}{J_T}{L}{J_i}{j_\beta},
+\end{equation}
+where $J_i$ and $J_f$ are the total angular momenta of the initial and final
+states, $j$ is the angular momentum of the free electron, and
+\sixj{j_1}{j_2}{j_3}{j_4}{j_5}{j_6} is the Wigner $6j$ symbol. Substituting
+this into Eq.~(\ref{eq_Sf}) results in
+\begin{eqnarray}
+S=\sum_{\kappa\beta\beta^\prime}&\Bigg\{&\sum_{J_T}[J_T]
+\sixj{J_f}{j}{J_T}{L}{J_i}{j_\beta}
+\sixj{J_f}{j}{J_T}{L}{J_i}{j_{\beta^\prime}} 
+\nonumber\\*
+&\times&
+<\psi_f||\tilde{a}_{\tilde{\beta}}||\psi_i>
+<\psi_f||\tilde{a}_{\tilde{\beta^\prime}}||\psi_i> 
+\nonumber\\*
+&\times& 
+<\kappa||C^L||\beta><\kappa||C^L||\beta^\prime>
+M^L_{\kappa\beta}M^L_{\kappa\beta^\prime}\Bigg\}.
+\end{eqnarray}
+The summation over $J_T$ can be carried out analytically using the
+orthogonality relation of $6j$ symbols to give
+\begin{eqnarray}
+S=\sum_{\kappa\beta\beta^\prime}&\Bigg\{&\delta_{j_\beta
+j_{\beta^\prime}}[j_\beta]^{-1} <\psi_f||\tilde{a}_{\tilde{\beta}}||\psi_i>
+<\psi_f||\tilde{a}_{\tilde{\beta^\prime}}||\psi_i>
+\nonumber\\*
+&\times&
+<\kappa||C^L||\beta><\kappa||C^L||\beta^\prime>
+M^L_{\kappa\beta}M^L_{\kappa\beta^\prime}\Bigg\}.
+\end{eqnarray}
+Note that the condition $j_\beta = j_{\beta^\prime}$ in the summation also
+implies $l_\beta = l_{\beta^\prime}$, since only basis states with the same
+parity can mix in $\psi_i$. 
+
+The initial and final bound states are expressed as a sum over basis states
+$\Phi_\mu$. The angular coefficients
+$<\psi_f||\tilde{a}_{\tilde{\beta}}||\psi_i>$ are calculated as
+\begin{equation}
+<\psi_f||\tilde{a}_{\hat{\beta}}||\psi_i> = \sum_{\mu\nu}b_\mu b_\nu
+<\Phi_\mu||\tilde{a}_{\hat{\beta}}||\Phi_\nu>,
+\end{equation}
+where $b_\mu$ are the mixing coefficients. The reduced matrix elements
+$<\Phi_\mu||\tilde{a}_{\tilde{\beta}}||\Phi_\nu>$, which are related to the
+coefficients of fractional parentage, are calculated using the method of
+\citet{gaigalas97}. 
+
+\subsection{Construction of Recombined Bound States}
+In the calculation of PI and RR cross sections, bound states in two
+neighboring charge 
+states are involved. The central potential entering the Dirac equation may be
+constructed with either the configurations of the ion before photoionization
+(recombined ion) or after photoionization (recombining ion). The difference
+between the two choices is small for high $Z$ elements. However, it can be
+substantial for low $Z$ elements. As discussed in \citet{gu02b}, the
+effective nuclear charge experienced by the free electron at large radial
+distances is screened by one additional electron as compared to that
+experienced by the bound electrons in the
+recombining ion, and is the same as that experienced by the bound electrons in
+the recombined ion. This suggests that
+one should use the mean configuration of the recombined ion for the
+construction of the central potential. 
+
+The Hamiltonian matrix for the recombined ion may be constructed as for the
+recombining ion by specifying appropriate configurations. However, it is
+sometimes beneficial to use an alternative approach, which utilizes the already
+diagonalized Hamiltonian of the recombining ion. In this method, the basis
+states are constructed by coupling one additional electron to a specific
+atomic state 
+of the recombining ion $|\psi>$. However, if $|\psi>$ has a shell which is
+equivalent to the additional electron, the antisymmetrization requires
+non-trivial recoupling. Such recoupling is not needed when the additional
+electron is high lying and interacts with the core recombining state
+weakly. That is, the added electrons can be treated as spectators. We shall use
+the alternative approach only in this case. In addition, only 
+mixing of the basis states that have the spectator electron in the same
+complex is 
+allowed. When more general configuration interaction is needed, one should
+construct the recombined states the same way as for recombining ones.
+Since the core states already diagonalize the Hamiltonian of the
+recombining ion, the addition of a weakly interacting electron should not
+introduce large mixing of basis functions with a common core state. In fact,
+when the 
+principal quantum number of the spectator electron is large, only the mixing
+between basis functions with the same core state need to be included. This
+reduces the dimension of the Hamiltonian matrices substantially. 
+
+The evaluation of the Hamiltonian matrix elements may also be simplified with
+such basis functions. If the added electrons in the bra and ket states are
+equivalent, the 
+interacting electrons for both one and two-electron operators can all be from
+the core states. Such terms only contribute to the diagonal elements, and are
+simply the energy values of the core states. When one interacting electron can
+be chosen to be the spectator, the kinetic and nuclear potential contributions
+are also diagonal, which are their expectation values in the spectator
+wavefunctions. With the aid of Racah algebra, the two-electron Coulomb
+interactions in such cases may be written as \cite{barshalom88} 
+\begin{eqnarray}
+<\psi_a,\alpha;J_TM_T|\sum_{i<j}\frac{1}{r_{ij}}|\psi_b,\gamma;J_TM_T>&=&
+\sum_{k,\beta\delta}\Bigg\{(-1)^{j_\alpha+J_b+J_T}
+\sixj{J_a}{j_\alpha}{J_T}{j_\gamma}{J_b}{k}
+\nonumber\\*
+&\times&
+<\psi_a||Z^k(\beta,\delta)||\psi_b>P^k(\alpha\gamma;\beta\delta)\Bigg\},
+\end{eqnarray}
+where $\alpha$ and $\gamma$ are the spectator orbitals, $\beta$ and $\delta$
+are the interacting electrons from the core states $\psi_a$ and $\psi_b$, $J_T$
+and $M_T$ are the total angular momentum of the new basis function and its
+projection, 
+the radial integrals $P^k$ are identical to those involved in the DW collision
+strength of EIE with free electrons now replaced with the spectators
+\cite{gu02b}. 
+
+\subsection{Multipole Radial Integrals}
+The radial integrals $M^L_{\kappa\beta}$ are the same as those involved in the
+the calculation of bound-bound radiative transitions, with a free electron
+replacing one of the bound orbitals. They may be calculated with the fully
+relativistic expressions of \citet{grant74}. These expressions depend on
+both the photon and the ejected photo-electron energies. However, when the
+photon energy is not too high, the non-relativistic limits of the multipole
+operators suffices. Using non-relativistic multipole operators to
+evaluate radial integrals is the default of the program. 
+Bound and continuum wavefunctions are obtained by solving the Dirac equations,
+as discussed in Refs.~\cite{gu02a,gu02b} in detail.
+
+Unlike in bound-bound radiative transitions, the radial integrals now
+depend on the photo-electron energy. In order to reduce the computing time,
+when cross sections at a large number of collision energy points are needed,
+the $M^L_{\kappa\beta}$ are calculated on an internal grid for the
+photo-electron energy. The integrals needed at other energies are interpolated
+on this grid. The grid points may be specified from the input, or if not
+specified, it is generated according to the photo-electron energies where the
+cross sections are to be calculated. For highly charged ions, where no Cooper
+minimum is present, few points are needed for accurate interpolation. However,
+when the PI cross sections show Cooper minima in the low energy region, which
+often occurs in neutral or near neutral ions, a dense grid
+should be used. On the other hand, the DW approximation at such low energies
+in neutral or near neutral ions is rather inaccurate \cite{zhang98}.
+
+
+\section{Autoionization and Dielectronic Recombination}
+\subsection{Introduction}
+The most accurate methods used today for treating resonances are ones based on
+the close-coupling (CC) approximation, which yield unified results for both
+background and resonant contributions. The efficient R-matrix implementation
+of the CC approximation has been used extensively in the past to calculate
+photoionization, recombination and electron impact excitation cross sections
+\cite{hummer93, berrington95}. The main drawback of this approximation is
+that it is very CPU-time consuming. Therefore, the number of coupled
+channels are often limited in realistic calculations. Fortunately, in many
+applications, especially for highly 
+ionized ions, methods based on the distorted-wave (DW) approximation are
+proven to be reasonably accurate even for resonant processes, e.g., as
+indicated by the comparison between various DW calculations and experimental 
+measurements of the dielectronic recombination (DR) rate coefficients for
+O-like and F-like iron \cite{savin99}. In the DW methods, resonances are
+usually treated as 
+multi-step processes, one or more of these steps involve autoionization (AI)
+or its inverse process, radiationless
+electron capture. For example, the first step of DR is the radiationless
+electron capture, followed by radiative decay, which competes with
+autoionization. Therefore, the calculation of autoionization rates is the
+major task in any DW treatments of resonant processes. Several DW programs
+have been developed for this purpose in the past decades \cite{pindzola80,
+kim87, oreg91}. The present method is most similar to that of
+\citet{oreg91}, which uses an efficient factorization-interpolation procedure
+for the calculation of the autoionization radial integrals. 
+
+In the first order perturbation theory, the AI rate can be written as (in
+atomic units) 
+\begin{equation}
+A^a = 2\sum_\kappa \left|
+<\psi_f,\kappa;J_TM_T|\sum_{i<j}\frac{1}{r_{ij}}|\psi_i>\right|^2,
+\end{equation}
+where $\psi_i$ is the autoionizing state, $\psi_f$ is the final state which has
+one less electron than $\psi_i$, $\kappa$ is the relativistic angular quantum
+number of the free electron, whose wavefunction is normalized as discussed in
+Ref.~\cite{gu02b}. The total angular momentum of the coupled final state must
+be equal to that of $\psi_i$, i.e.,  $J_T = J_i$ and $M_T = M_i$. After the
+separation of the angular and radial integrals, we have
+\begin{equation}
+A^a = 2[J_i]^{-1}\sum_\kappa \left|\sum_{k,\alpha\gamma\delta}
+<\psi_f,\kappa;J_T||Z^k(\alpha,\gamma)
+\cdot Z^k(\kappa,\delta)||\psi_i>P^k(\kappa\delta;\alpha\gamma)\right|^2,
+\end{equation}
+where $\gamma$ and $\delta$ are the doubly excited bound orbitals in
+$\psi_i$, $\alpha$ is the orbital which makes the internal transition in
+$\psi_f$, and
+$P^k$ is the radial integral as defined in the expression for the DW collision
+strength of electron impact excitation, except that one of the free orbital
+is replaced by a bound orbital \cite{gu02b}. For autoionization of
+complex ions, the radial integrals $P^k$ with the same set of bound orbitals,
+$\alpha$, $\gamma$, and $\delta$, 
+often appear in many different transitions. However, the energies of the free
+electrons in these integrals are different due to the conservation of
+energy. It is 
+computationally demanding to calculate such integrals for each transition
+individually. Fortunately, the dependence of $P^k$ on the free electron energy
+is rather weak, as noticed by \citet{oreg91}. Therefore, it is possible to
+calculate $P^k$ at a few energies, and the integrals at actual transition
+energies are obtained by interpolation from these values. Usually, for a given
+class of 
+transitions, a three-point grid spanning the entire range of transition
+energies is sufficient.
+
+The inverse process of AI is radiationless electron capture, or sometimes,
+called dielectronic capture (DC). The cross sections for DC are related to AI
+rates through the detailed balance. DC is a resonant process which only occur
+at certain energy. These resonances are extremely narrow, and in most
+applications, it is more appropriate to characterize each resonance by its
+resonance strength, which is the cross section integrated over energy. In
+atomic units, the DC strength can be written as
+\begin{equation}
+S_{DC} = \frac{g_i}{2g_f}\frac{\pi^2}{E_{if}}A^a,
+\end{equation}
+where $g_i$ and $g_f$ are the statistical weights of the autoionizing state
+formed by DC and the target state before DC, respectively, and $E_{if}$ is the
+resonance energy. 
+
+The autoionizing state formed by DC may either autoionize, or radiatively
+decay. Radiative decay to the states below the ionization limit completes the
+recombination process, DR. Sometimes, the final state of decay lies above the
+ionization limit, and may further decay to yield DR or autoionize. Therefore,
+the radiative branching ratio for DR can be expressed as
+\begin{equation}
+\label{eq_B}
+B(i) = \frac{\sum_k A^r(i\to k) + \sum_a A^r(i\to a)B(a)}
+{\sum_{k^\prime}A^a(i\to k^\prime) + \sum_k A^r(i\to k) + \sum_a A^r(i\to a)},
+\end{equation}
+where $A^r$ represents radiative decay rates, $k$ denotes levels below the
+ionization limit, $a$ denotes levels which 
+may further autoionize, and $k^\prime$ are the final levels of
+autoionization. In most cases, the effect of radiative decay to autoionizing
+levels is small, an approximate expression for the branching ratio may be used
+by dropping the final term in both the numerator and denominator of
+Eq.~(\ref{eq_B}), that is 
+\begin{equation}
+\label{eq_BApprox}B(i) = \frac{\sum_k A^r(i\to k)}
+{\sum_{k^\prime}A^a(i\to k^\prime) + \sum_k A^r(i\to k)}.
+\end{equation}
+This approximation turns out to be fairly good even if the decay to
+autoionizing levels is not completely negligible as demonstrated and explained
+by \citet{behar95, behar96}. The DR strength $S_{DR}$ is the product of DC
+strength and the branching ratio.
+
+In plasma modeling, the DR rate coefficients, $\alpha_{DR}$, for electrons in
+the Maxwellian distribution is often needed, which can be expressed as
+\begin{equation}
+\label{eq_rate}
+\alpha_{DR}(T) = \frac{h^3}{(2\pi m_e k_BT)^{3/2}}\sum_i\frac{g_i}{2g_f}
+A^a(i\to f)B(i)\exp\left(-\frac{E_{if}}{k_BT}\right),
+\end{equation}
+where $T$ is the electron temperature, $m_e$ is the electron mass, $h$ is the
+Planck constant, and $k_B$ is the Boltzmann constant. Since rate coefficients
+are not fundamental atomic parameters, atomic units is not used in this
+expression. 
+
+The summation over the autoionizing levels $i$ in Eq.~(\ref{eq_rate})
+extends to all possible states which may be formed by DC. Usually, the states
+of each 
+complex, designated as $nln^\prime l^\prime$, where the excited core electron
+and the captured electron have the principal quantum numbers, $n$ and
+$n^\prime$, are considered separately. 
+The number of different $nl$ terms for the excited core
+electron need to be considered is not large. Usually, the $\Delta n = 0$
+resonances, where the transition of the core electron does not change its
+principal quantum number, and $\Delta n = 1$ resonances, where the principal
+quantum number of the core electron changes by one unit, make
+dominant contributions to the 
+total DR rate coefficients at temperatures of interest. The summation
+over $n^\prime l^\prime$, however, can potentially involve large number of
+terms. For high $n^\prime$, the contributions from large $l^\prime$ are
+negligible. The maximum $l^\prime$ of 6--8 and $\sim 12$ are sufficient for
+$\Delta n \ne 0$ and $\Delta n = 0$ resonances, respectively. The maximum
+$n^\prime$ for $\Delta n \ne 0$ resonances is usually chosen to be $\sim 15$,
+beyond which, the $n^{\prime -3}$ scaling law may be used for
+extrapolation. For $\Delta n = 0$ resonances, the minimum $n^\prime$ which
+opens some low energy channels can be large, and the $n^{\prime -3}$ scaling
+law is only valid for very large $n^\prime$. Nevertheless, the partial DR rate
+coefficients as a function of $n^\prime$ is quite smooth except for some
+irregularities. Therefore, detailed 
+calculations can be carried out on a suitable $n^\prime$ grid.
+Interpolation may be used to complete the summation. However, one should pay
+special attention to those $n^\prime$ where a specific channel starts to
+open, because the rate coefficients is discontinuous at such $n^\prime$. In
+addition, the rate coefficients of very low energy resonances are quite
+sensitive to the exact value of the resonance energies. The theoretical
+energies should be used with caution for resonances below a few tens of
+eV. Sometimes, shifting the resonance energies for an entire series according
+to the experimental transition energies of the core prove to be practical.

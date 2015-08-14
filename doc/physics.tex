@@ -427,7 +427,7 @@ evaluation of the reduced matrix elements of $Z^L_M$ between basis states
 \cite{gaigalas97}.
 
 \subsubsection{Two-electron Operators}
-After some algebraic manipulation \cite{barshalom88}, the
+After some algebraic manipulation \cite{barshalom:1988a}, the
 electro-static interaction between electrons can be written as 
 \begin{equation}
 \label{eq_2e}
@@ -572,7 +572,7 @@ approximation, since it yields significantly better results than the PW and CW
 methods with minimal increase in the complexity. Many DW codes are in use
 today. For example, the non-relativistic DW code from University College
 London \cite{eissner98}, the relativistic code of \citet{hagelstein87}, the
-HULLAC package \cite{barshalom88}, the code by \citet{zhang89}, and that of
+HULLAC package \cite{barshalom:1988a}, the code by \citet{zhang89}, and that of
 \citet{chen96}, just to name some. The present DW implementation in FAC is
 in principle similar to any of the relativistic codes listed above.
 
@@ -635,7 +635,7 @@ where $\kappa_0$ and $\kappa_1$ are the relativistic angular quantum numbers of
 the incident and scattered electrons, $J_T$ is the total angular momentum
 when the target state is coupled to the continuum orbital, $M_T$ is the
 projection of the total angular momentum, and  $[J] = 2J+1$. 
-Following \citet{barshalom88}, this expression can be simplified to give
+Following \citet{barshalom:1988a}, this expression can be simplified to give
 \begin{equation}
 \label{eq_cs}
 \Omega_{01} = 2\sum_{k}\sum_{\alpha_0\alpha_1\atop\beta_0\beta_1}
@@ -667,7 +667,7 @@ $\alpha_0$, $\alpha_1$, $\beta_0$, and $\beta_1$ may appear in many
 transitions. These integrals also depend on the energy of incident
 and scattered electrons, or for a fixed scattered electron energy, they depend
 on the excitation energy of the transition $\Delta E$. However, as noted by
-\citet{barshalom88}, the dependence on $\Delta E$  is rather weak. For
+\citet{barshalom:1988a}, the dependence on $\Delta E$  is rather weak. For
 dipole forbidden radial integrals, $Q^k \propto \Delta E$, and for dipole
 allowed integrals, $Q^k \propto \ln\Delta E$ approximately holds over a wide
 range of transition energes. Therefore, for a given scattered electron energy,
@@ -950,14 +950,14 @@ saraph78}. \citet{zhang90} performed the first fully relativistic DW
 calculations of magnetic sublevel collision strengths with a modified version
 of their previous program for total cross sections.
 
-Since the pioneering work of \citet{barshalom88}, the factorization theory of
+Since the pioneering work of \citet{barshalom:1988a}, the factorization theory of
 DW collisional excitation is in wide use for calculating total cross
 sections. This theory enables one to obtain a complete collisional excitation
 array without calculating a large number of radial integrals by using
 appropriate interpolation procedures. However, DW calculations of magnetic
 sublevel sollision strengths have not utilized such
 factorization-interpolation techniques. In this paper, we generalize the
-theory of \citet{barshalom88} to the excitation of magnetic sublevels and
+theory of \citet{barshalom:1988a} to the excitation of magnetic sublevels and
 present its computer implimentation.
 
 \subsubsection{Factorization Theory}
@@ -1146,7 +1146,7 @@ electron impact ionization
 sections in the past decades, in either non-relativistic \cite{younger80} or
 relativistic \cite{pindzola88, sampson91} approximations. The present program
 is similar to that of \citet{sampson91} in particular,  which extends the
-efficient factorization-interpolation method of \citet{barshalom88} to the
+efficient factorization-interpolation method of \citet{barshalom:1988a} to the
 calculation of EII cross sections, and leads to great simplifications for
 complex ions. The essence of the factorization method is the separation of
 the angular and radial parts in the formula of EII cross sections. The angular
@@ -1162,7 +1162,7 @@ obtained by interpolation.
 The present program also implements much more efficient methods based on the
 Coulomb-Born-exchange (CBE) approximation or the Binary-Encounter-Dipole (BED)
 theory of \citet{kim94}. The CBE implementation makes use of the
-parametrized reduced cross sections of \citet{golden77, golden80}, and the
+parametrized reduced cross sections of \citet{golden:1977a, golden:1980a}, and the
 BED implementation uses the bound-free differential oscillator strengths
 calculated by the present program. The CBE results are close to
 the non-relativistic DW cross sections, while the BED cross sections are
@@ -1300,7 +1300,7 @@ where $I_{\alpha_0}$ is the binding energy of the orbital $\alpha_0$. It is
 well known that the reduced radial integrals are not very sensitive to the
 difference in the electronic structures and nuclear charges \cite{zhang90}. We
 therefore use the hydrogenic values calculated under the CBE approximation
-\cite{golden77, golden80}, in the place of detailed DW radial integrals. A
+\cite{golden:1977a, golden:1980a}, in the place of detailed DW radial integrals. A
 simple parametrized formula as given in \citet{zhang90} is used for this
 purpose. 
 \begin{equation}
@@ -1369,7 +1369,7 @@ calculation of PI and RR, and provided high energy PI cross sections to
 complement the Opacity Project database \cite{seaton87}. The
 present code is similar in technique to the program of \citet{zhang98}. To
 improve the efficiency, we have extended the factorization-interpolation
-procedure of \citet{barshalom88} first developed for the calculation of EIE
+procedure of \citet{barshalom:1988a} first developed for the calculation of EIE
 cross sections to the calculation of PI and RR cross sections. 
 In addition, we have implemented the option to calculate PI and RR cross
 sections through multipole operators other than electric dipole (E1), although
@@ -1530,7 +1530,7 @@ simply the energy values of the core states. When one interacting electron can
 be chosen to be the spectator, the kinetic and nuclear potential contributions
 are also diagonal, which are their expectation values in the spectator
 wavefunctions. With the aid of Racah algebra, the two-electron Coulomb
-interactions in such cases may be written as \cite{barshalom88} 
+interactions in such cases may be written as \cite{barshalom:1988a} 
 \begin{eqnarray}
 <\psi_a,\alpha;J_TM_T|\sum_{i<j}\frac{1}{r_{ij}}|\psi_b,\gamma;J_TM_T>&=&
 \sum_{k,\beta\delta}\Bigg\{(-1)^{j_\alpha+J_b+J_T}

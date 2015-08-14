@@ -53,6 +53,7 @@
 \setcounter{tocdepth}{3}
 
 \makeindex
+\usepackage[totoc]{idxlayout}
 
 \begin{document}
 
@@ -82,7 +83,9 @@
 
 \printindex
 
-\chapter*{Appendix}
+\chapter*{Appendix: GNU General Public Licence}
+\addcontentsline{toc}{chapter}{Appendix: GNU General Public Licence}
+
 \appendix
 \label{GPL}
 \lstset{caption=}

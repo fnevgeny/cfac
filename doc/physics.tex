@@ -203,7 +203,7 @@ energies due to the use of this less optimized potential, we apply the
 following correction procedure. Before the potential for the mean
 configuration is calculated, we obtain an optimized potential for each
 configuration, and calculate the average energy of the configuration using
-this potential. The arerage energy of each configuration is recalculated using
+this potential. The average energy of each configuration is recalculated using
 the potential optimized for the mean configuration. The difference of the two
 average energies are then applied as a correction to the states within that
 configuration after the Hamiltonian is diagonalized.
@@ -465,7 +465,7 @@ energy levels resulting from a large configuration space. The
 majority of the configurations are included only to provide mixing to the
 desired levels. Therefore, we partition the configuration space into two
 groups. The first is the main group whose diagonalization provides a good
-zeroeth order approximation to the desired energy levels. The second is a
+zeroth order approximation to the desired energy levels. The second is a
 perturbing group whose interaction with the main group is weak, though not
 negligible. The Hamiltonian matrix can therefore be partitioned
 correspondingly
@@ -601,10 +601,9 @@ are taken into account by the rapid Coulomb-Bethe approximation
 \cite{burgess74}. 
 
 \subsection{Factorized Collision Strength}
-The EIE cross subsection $\sigma_{01}$ from the inital state $\psi_0$ to the final
-state $\psi_1$ can be expressed in terms of the collision strength
-$\Omega_{01}$ as (in atomic units, which we shall use throughout the
-paper) 
+The EIE cross subsection $\sigma_{01}$ from the initial state $\psi_0$ to the
+final state $\psi_1$ can be expressed in terms of the collision strength
+$\Omega_{01}$ as (in atomic units, which we shall use throughout the paper) 
 \begin{equation}
 \sigma_{01} = \frac{\pi}{k_0^2g_0}\Omega_{01},
 \end{equation}
@@ -670,7 +669,7 @@ on the excitation energy of the transition $\Delta E$. However, as noted by
 \citet{barshalom:1988a}, the dependence on $\Delta E$  is rather weak. For
 dipole forbidden radial integrals, $Q^k \propto \Delta E$, and for dipole
 allowed integrals, $Q^k \propto \ln\Delta E$ approximately holds over a wide
-range of transition energes. Therefore, for a given scattered electron energy,
+range of transition energies. Therefore, for a given scattered electron energy,
 $Q^k$ may be calculated at a few values of $\Delta E$, and the integral at the
 actual transition energy can be interpolated from these few values. In
 practice, 
@@ -799,12 +798,13 @@ which case, the integrals containing $\phi^-$ are calculated directly in the
 radial variable $r$. 
 
 \subsection{Quasi-relativistic Approximation}
-In most cases, it is not necessary to solve the continuum radial equation
-fully relativistically. As noted by \citet{zhang89}, the quasi-relativistic
+In most cases, it is not necessary to solve the continuum radial equation fully
+relativistically. As noted by \citet{zhang89}, the quasi-relativistic
 approximation, in which the two wavefunctions with the same $l$ but different
 $j$ are treated in the same way, and the small components are neglected, often
-yields final collision strengths very close to the fully relativistic
-results for the nuclear charge as large as 74 and collision energy as high as 30 keV. Even for $Z = 92$, the differences are mostly within 15--20\%. 
+yields final collision strengths very close to the fully relativistic results
+for the nuclear charge as large as 74 and collision energy as high as 30 keV.
+Even for $Z = 92$, the differences are mostly within 15--20\%. 
 
 In the present code, we incorporate an option for such approximations as
 well. In fact, the 
@@ -815,9 +815,9 @@ the quasi-relativistic approximation is very good for all low to mid $Z$
 elements and saves 
 considerable amount of computing time, $l_{qr}$ is chosen to be 0 by default,
 i.e., all 
-partial waves are treated in quasi-relativistic approximaiton. For high $Z$
-elements, one needs to increas $l_{qr}$ or turn off the quasi-relativistic
-approximaiton completely.
+partial waves are treated in quasi-relativistic approximation. For high $Z$
+elements, one needs to increase $l_{qr}$ or turn off the quasi-relativistic
+approximation completely.
 
 \subsection{Partial Wave Summation}
 The radial integral $Q^k$, Eq.~(\ref{eq_Qk}), is expressed as a sum of
@@ -857,7 +857,7 @@ the summation is truncated at this point.
 For strictly forbidden transitions, which have non-zero collision strengths
 only due to the exchange interaction, the high partial wave contributions are
 not important, no special difficulties arise regarding the convergence of the
-summaiton. 
+summation. 
 For allowed transitions (including all multipole types), we use the
 Coulomb-Bethe approximation to estimate the high partial wave contributions
 and calculate the uncertainties in such estimates. In this
@@ -895,7 +895,7 @@ only depends on the continuum orbitals and approaches a constant,
 $\gamma_{\infty}=\varepsilon_1/\varepsilon_0$, at large $l_0$. 
 
 For $k \ge 2$,
-the convergence to this aysmptotic value is relatively fast. Therefore, we may
+the convergence to this asymptotic value is relatively fast. Therefore, we may
 approximate the summation over $l_0$ by
 \begin{equation}
 \sum_{l_0>l_{max}}\tilde{Q}^k_{CB}(l_0) =
@@ -939,26 +939,25 @@ directional electron beam, such as electron beam ion traps
 
 In order to determine the degree of polarization and angular distribution of
 emitted lines driven by electron collisional excitation, one needs detailed
-cross sections between the magnetic sublevels of lower and upper
-states. Several authors have made calculations of such cross sections
-involving magnetic sublevels. \citet{mitroy88a} and \citet{mitroy88b} used a
-nonrelativistic LS-coupling approach. \citet{inal87} made distorted-wave (DW)
-calculations using nonrelativistic radial wavefunctions, but they included
-intermediate-coupling effects by transforming the reactance matrices from
-LS-coupling to relativistic pair-coupling scheme \citep{eissner72,
-saraph78}. \citet{zhang90} performed the first fully relativistic DW
-calculations of magnetic sublevel collision strengths with a modified version
-of their previous program for total cross sections.
+cross sections between the magnetic sublevels of lower and upper states. Several
+authors have made calculations of such cross sections involving magnetic
+sublevels. \citet{mitroy:1988a} and \citet{mitroy:1988b} used a nonrelativistic
+LS-coupling approach. \citet{inal87} made distorted-wave (DW) calculations using
+nonrelativistic radial wavefunctions, but they included intermediate-coupling
+effects by transforming the reactance matrices from LS-coupling to relativistic
+pair-coupling scheme \citep{eissner72, saraph:1978a}. \citet{zhang90} performed
+the first fully relativistic DW calculations of magnetic sublevel collision
+strengths with a modified version of their previous program for total cross
+sections.
 
-Since the pioneering work of \citet{barshalom:1988a}, the factorization theory of
-DW collisional excitation is in wide use for calculating total cross
+Since the pioneering work of \citet{barshalom:1988a}, the factorization theory
+of DW collisional excitation is in wide use for calculating total cross
 sections. This theory enables one to obtain a complete collisional excitation
 array without calculating a large number of radial integrals by using
 appropriate interpolation procedures. However, DW calculations of magnetic
-sublevel sollision strengths have not utilized such
-factorization-interpolation techniques. In this paper, we generalize the
-theory of \citet{barshalom:1988a} to the excitation of magnetic sublevels and
-present its computer implimentation.
+sublevel collision strengths have not utilized such factorization-interpolation
+techniques. In this paper, we generalize the theory of \citet{barshalom:1988a}
+to the excitation of magnetic sublevels and present its computer implementation.
 
 \subsubsection{Factorization Theory}
 The scattering amplitude $B_{m_{si}}^{m_{sf}}$ can be written as
@@ -1000,7 +999,7 @@ $m_{si}$ gives
 &&\times
   T(\alpha_i,\alpha_f)T^{*}(\alpha_i^\prime,\alpha_f)
 \end{eqnarray}
-In the first order purterbation theory
+In the first order perturbation theory
 \begin{equation}
 T(\alpha_i,\alpha_f)=-2i<J_iM_i\tilde{j_i}m_i|V|J_fM_f\tilde{j_f}m_f>
 \end{equation}
@@ -1118,7 +1117,7 @@ Q^{tt^\prime}(j_0j_1,j_0^\prime j_1^\prime) &=&
 \end{eqnarray}
 
 In Eq. \ref{eq_cross2},
-ony after summation over $M_f$ and averaging over $M_i$, the first two 
+only after summation over $M_f$ and averaging over $M_i$, the first two 
 $3j$ symbols produces $\delta_{tt^\prime}\delta_{qq^\prime}$, then
 the summation over $m_f$ and $q$ in the last two $3j$ symbols gives
 $\delta_{j_i j_i^\prime}$, and finally, the summation over $m_{si}$ and
@@ -1161,14 +1160,14 @@ obtained by interpolation.
 
 The present program also implements much more efficient methods based on the
 Coulomb-Born-exchange (CBE) approximation or the Binary-Encounter-Dipole (BED)
-theory of \citet{kim94}. The CBE implementation makes use of the
-parametrized reduced cross sections of \citet{golden:1977a, golden:1980a}, and the
-BED implementation uses the bound-free differential oscillator strengths
-calculated by the present program. The CBE results are close to
-the non-relativistic DW cross sections, while the BED cross sections are
-substantially smaller at low energies due to a scaling factor deliberately
-introduced into the theory, which appear to improve the agreements with
-experimental results in many cases \cite{kim94}.
+theory of \citet{kim94}. The CBE implementation makes use of the parameterized
+reduced cross sections of \citet{golden:1977a, golden:1980a}, and the BED
+implementation uses the bound-free differential oscillator strengths calculated
+by the present program. The CBE results are close to the non-relativistic DW
+cross sections, while the BED cross sections are substantially smaller at low
+energies due to a scaling factor deliberately introduced into the theory, which
+appear to improve the agreements with experimental results in many cases
+\cite{kim94}.
  
 \subsection{Relativistic Distorted-Wave Theory}
 The formula for EII cross subsection, differential in energy of the ejected
@@ -1296,12 +1295,12 @@ Q_R(\alpha_0) = I_{\alpha_0}I
 \sum_k\int_0^{\frac{\varepsilon_0-I}{2}}
 \overline{Q}^k(\alpha_0,\alpha_0)d\varepsilon,
 \end{equation}
-where $I_{\alpha_0}$ is the binding energy of the orbital $\alpha_0$. It is
-well known that the reduced radial integrals are not very sensitive to the
-difference in the electronic structures and nuclear charges \cite{zhang90}. We
-therefore use the hydrogenic values calculated under the CBE approximation
-\cite{golden:1977a, golden:1980a}, in the place of detailed DW radial integrals. A
-simple parametrized formula as given in \citet{zhang90} is used for this
+where $I_{\alpha_0}$ is the binding energy of the orbital $\alpha_0$. It is well
+known that the reduced radial integrals are not very sensitive to the difference
+in the electronic structures and nuclear charges \cite{zhang90}. We therefore
+use the hydrogenic values calculated under the CBE approximation
+\cite{golden:1977a, golden:1980a}, in the place of detailed DW radial integrals.
+A simple parameterized formula as given in \citet{zhang90} is used for this
 purpose. 
 \begin{equation}
 Q_R = A\ln(u)+D\left(1-\frac{1}{u}\right)^2+
@@ -1316,17 +1315,17 @@ values to bring the results in better agreement with the detailed DW
 calculations. 
 
 \subsection{Binary-Encounter-Dipole Theory}
-The CBE approximaiton discussed above trys to capture the detail of the ionic
-structure through a universal reduced radial integral. The BED theory
-combines the Mott cross subsection and binary encouter cross subsection, taking into
-account the high energy Bethe limit, to derive a semi-empirical formula for
-the radial integrals \cite{kim94}. The computation of bound-free differential
+The CBE approximation discussed above tries to capture the detail of the ionic
+structure through a universal reduced radial integral. The BED theory combines
+the Mott cross subsection and binary encounter cross subsection, taking into
+account the high energy Bethe limit, to derive a semi-empirical formula for the
+radial integrals \cite{kim94}. The computation of bound-free differential
 oscillator strengths, which are related to the Bethe coefficients, is much
 simpler than the DW calculation of ionization radial integrals. Therefore the
 BED implementation is very efficient in practice. A unique feature of the BED
 theory is the energy denominator $\varepsilon_0+I$ (for neutral atoms, the
 average kinetic energy of the active bound electron should also be added), as
-opposed to $\varepsilon_0$ in various first order Born approximaitions
+opposed to $\varepsilon_0$ in various first order Born approximations
 (including DW). This modification effectively introduces a scaling factor
 $\varepsilon_0/(\varepsilon_0+I)$, which reduces the ionization cross sections
 at low energies. Comparison with experimental results for Low-Z near neutral
@@ -1387,7 +1386,7 @@ related to that of PI through the Milne relation
 \sigma_{PI},
 \end{eqnarray}
 where $\alpha$ is the fine structure constant, $g_i$ and $g_f$ are the
-statistical weight of the bound states before and after the photoionzation
+statistical weight of the bound states before and after the photoionization
 takes place respectively, $\omega$ is the photon energy, and $\varepsilon$ is
 the energy of the ejected photo-electron. 
 The differential oscillator

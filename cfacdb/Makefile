@@ -55,9 +55,12 @@ Make.dep: $(SRCS) $(SQLIS)
 	@echo "done"
 
 install: cfacdbu $(TOP)/include/cfacdb.h $(LIBCFACDB)
-	mkdir -p $(BINDIR) && install -m 755 cfacdbu $(BINDIR)
-	mkdir -p $(INCDIR) && install -m 644 $(TOP)/include/cfacdb.h $(INCDIR)
-	mkdir -p $(LIBDIR) && install -m 644 $(LIBCFACDB) $(LIBDIR)
+	$(INSTALLDIR) $(BINDIR)
+	$(INSTALL) cfacdbu $(BINDIR)
+	$(INSTALLDIR) $(INCDIR)
+	$(INSTALLDATA) $(TOP)/include/cfacdb.h $(INCDIR)
+	$(INSTALLDIR) $(LIBDIR)
+	$(INSTALLDATA) $(LIBCFACDB) $(LIBDIR)
 
 check :
 

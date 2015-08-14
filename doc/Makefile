@@ -31,6 +31,6 @@ check : dummy
 
 install : $(DOCS)
 	$(INSTALLDIR) $(DOCDIR)
-	$(INSTALL) $(DOCS) $(DOCDIR)
+	$(INSTALLDATA) $(DOCS) $(DOCDIR)
 
 dummy : 

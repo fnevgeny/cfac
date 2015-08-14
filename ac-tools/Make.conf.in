@@ -31,6 +31,7 @@ LIBS = @LDFLAGS@ @LIBS@ @FLIBS@
 
 INSTALL = @INSTALL@
 INSTALLDIR = @INSTALL@ -d
+INSTALLDATA = @INSTALL@ -m 644
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@

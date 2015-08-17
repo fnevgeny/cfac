@@ -1615,63 +1615,84 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
   return 0;
 }
 
+/* It is assumed that the zero-field AddToLevels() have already been made */
+static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
+  int j = cfac->n_eblevels, i;
+  double *mix;
+
+  if (h->basis == NULL || h->mixing == NULL) return -1;
+  
+  mix = h->mixing + h->dim;
+  
+  for (i = 0; i < h->dim; i++) {
+    LEVEL lev;
+    int k, t;
+    
+    k = GetPrincipleBasis(mix, h->dim, NULL);
+    
+    lev.energy = h->mixing[i];
+    lev.pj = h->pj;
+    lev.iham = -1;
+    lev.ilev = j;
+    lev.pb = h->basis[k];
+    lev.ibasis = malloc(sizeof(short)*h->n_basis);
+    lev.basis = malloc(sizeof(int)*h->n_basis);
+    lev.mixing = malloc(sizeof(double)*h->n_basis);
+    if (!lev.ibasis || !lev.basis || !lev.mixing) {
+      printf("Not enough memory for new level\n");
+      return -1;
+    }
+    lev.n_basis = h->n_basis;
+    
+    for (t = 0; t < h->n_basis; t++) {
+      lev.ibasis[t] = t;
+      lev.basis[t] = h->basis[t];
+      lev.mixing[t] = mix[t];
+    }
+
+    SortMixing(0, h->n_basis, &lev, NULL);
+    GetPrincipleBasis(lev.mixing, h->n_basis, lev.kpb);
+
+    if (ArrayAppend(cfac->eblevels, &lev) == NULL) {
+      printf("Not enough memory for levels array\n");
+      exit(1);
+    }
+    j++;
+    mix += h->n_basis;
+  }
+
+  cfac->n_eblevels = j;
+  if (i < h->dim - 1) return -2;
+  return 0;
+}
+
 /* If ng !=0, states NOT in kg are treated approximately
    (non-diagonal mixings are ignored) */
 int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
-  int i, d, j, k, t, m;
-  LEVEL lev;
+  int i, j;
+  double *mix;
   SYMMETRY *sym;
-  STATE *s, *s1;
-  double *mix, a;
 
   if (cfac->uta) {
     return AddToLevelsUTA(cfac, ng, kg);
+  } else
+  if (h->pj < 0) {
+    return AddToLevelsEB(cfac, h, ng, kg);
   }
   
-  if (h->basis == NULL ||
-      h->mixing == NULL) return -1;
-  d = h->dim;
-  mix = h->mixing + d;
+  if (h->basis == NULL || h->mixing == NULL) return -1;
 
-  if (h->pj < 0) {
-    j = cfac->n_eblevels;
-    for (i = 0; i < d; i++) {
-      k = GetPrincipleBasis(mix, d, NULL);
-      lev.energy = h->mixing[i];
-      lev.pj = h->pj;
-      lev.iham = -1;
-      lev.ilev = j;
-      lev.pb = h->basis[k];
-      lev.ibasis = malloc(sizeof(short)*h->n_basis);
-      lev.basis = malloc(sizeof(int)*h->n_basis);
-      lev.mixing = malloc(sizeof(double)*h->n_basis);
-      lev.n_basis = h->n_basis;
-      for (t = 0; t < h->n_basis; t++) {
-	lev.ibasis[t] = t;
-	lev.basis[t] = h->basis[t];
-	lev.mixing[t] = mix[t];
-      }
-      m = h->n_basis;
-      SortMixing(0, m, &lev, NULL);
-      GetPrincipleBasis(lev.mixing, m, lev.kpb);      
-    
-      if (ArrayAppend(cfac->eblevels, &lev) == NULL) {
-	printf("Not enough memory for levels array\n");
-	exit(1);
-      }
-      j++;
-      mix += h->n_basis;
-    }
-
-    cfac->n_eblevels = j;
-    if (i < d-1) return -2;
-    return 0;
-  }
+  mix = h->mixing + h->dim;
 
   j = cfac->n_levels;
   sym = GetSymmetry(cfac, h->pj);  
-  for (i = 0; i < d; i++) {
-    k = GetPrincipleBasis(mix, d, NULL);
+  for (i = 0; i < h->dim; i++) {
+    LEVEL lev;
+    STATE *s, *s1;
+    int k, m, t;
+    double a;
+    
+    k = GetPrincipleBasis(mix, h->dim, NULL);
     s = GetSymmetryState(sym, h->basis[k]);
     if (ng > 0) {      
       if (!InGroups(s->kgroup, ng, kg)) {
@@ -1702,16 +1723,21 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     lev.ibasis = malloc(sizeof(short)*h->n_basis);
     lev.basis = malloc(sizeof(int)*h->n_basis);
     lev.mixing = malloc(sizeof(double)*h->n_basis);
+    if (!lev.ibasis || !lev.basis || !lev.mixing) {
+      printf("Not enough memory for new level\n");
+      return -1;
+    }
     a = fabs(cfac->mix_cut * mix[k]);
     for (t = 0, m = 0; t < h->n_basis; t++) {
-      if (fabs(mix[t]) < a) continue;
-      lev.ibasis[m] = t;
-      lev.basis[m] = h->basis[t];
-      lev.mixing[m] = mix[t];
-      m++;
+      if (fabs(mix[t]) >= a) {
+	lev.ibasis[m] = t;
+	lev.basis[m] = h->basis[t];
+	lev.mixing[m] = mix[t];
+	m++;
+      }
     }
     lev.n_basis = m;
-    if (m < t) {
+    if (lev.n_basis < h->n_basis) {
       lev.ibasis = realloc(lev.ibasis, sizeof(short)*m);
       lev.basis = realloc(lev.basis, sizeof(int)*m);
       lev.mixing = realloc(lev.mixing, sizeof(double)*m);
@@ -1733,7 +1759,7 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
   }
 
   cfac->n_levels = j;
-  if (i < d-1) return -2;
+  if (i < h->dim - 1) return -2;
 
   return 0;
 }

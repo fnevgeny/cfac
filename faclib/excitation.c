@@ -2051,8 +2051,8 @@ int CollisionStrengthUTA(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
   lev1 = tr->llo;
   lev2 = tr->lup;
   
-  p1 = lev1->pj;
-  p2 = lev2->pj;
+  p1 = lev1->uta_p;
+  p2 = lev2->uta_p;
 
   rqk = qkc;
   for (ie = 0; ie < n_egrid1; ie++) {
@@ -2060,8 +2060,8 @@ int CollisionStrengthUTA(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
   }
 
   idatum = NULL;
-  ns = GetInteract(cfac, &idatum, NULL, NULL, lev1->iham, lev2->iham,
-		   lev1->pb, lev2->pb, 0, 0, 0);
+  ns = GetInteract(cfac, &idatum, NULL, NULL, lev1->uta_cfg_g, lev2->uta_cfg_g,
+		   lev1->uta_g_cfg, lev2->uta_g_cfg, 0, 0, 0);
   if (ns <= 0) return -1;
   if (idatum->s[0].index < 0 || idatum->s[3].index >= 0) {
     free(idatum->bra);
@@ -2095,7 +2095,7 @@ int CollisionStrengthUTA(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
     }
   }
 
-  d = (lev1->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0));
+  d = lev1->uta_g*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0));
   for (ie = 0; ie < n_egrid1; ie++) {
     qkc[ie] *= d;
   }
@@ -2292,7 +2292,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         /* ionization potential */
         
         if (iuta) {
-            cfg = GetConfigFromGroup(cfac, tr.lup->iham, tr.lup->pb);
+            cfg = GetConfigFromGroup(cfac, tr.lup->uta_cfg_g, tr.lup->uta_g_cfg);
             k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
         } else {
             sym = GetSymmetry(cfac, tr.lup->pj);

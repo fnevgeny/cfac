@@ -3422,15 +3422,15 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     lev = GetLevel(cfac, i);
     
     if (cfac->uta) {
-      sp.kgroup = lev->iham;
-      sp.kcfg = lev->pb;
+      sp.kgroup = lev->uta_cfg_g;
+      sp.kcfg = lev->uta_g_cfg;
       sp.kstate = 0;
       s = &sp;
 
-      p = lev->pj;
+      p = lev->uta_p;
       j = -1;
 
-      ibase = lev->ilev; /* this is actually [2]j... */
+      ibase = lev->uta_g - 1;
     } else {
       SYMMETRY *sym;
 

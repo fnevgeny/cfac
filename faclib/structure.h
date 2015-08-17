@@ -49,17 +49,23 @@ typedef struct _SHAMILTON_ {
 } SHAMILTON;
 
 typedef struct _LEVEL_ {
+  int uta;             /* flag indicating it is an UTA level or not      */
   int ilev;            /* level index in cfac->(eb)levels (g - 1 in UTA) */
   int pj;              /* parity & j encoded (only P in UTA)             */
-  int iham;            /* symmetry Hamiltonian                           */
+  int iham;            /* symmetry Hamiltonian # (config. group # in UTA)*/
   int n_basis;
-  int pb;              /* principle (??) basis                           */
+  int pb;              /* principle (??) basis (group's config # in UTA) */
   int kpb[NPRINCIPLE];
   int ibase;
   int *basis;
   short *ibasis;
   double *mixing;
   double energy;       /* energy                                         */
+
+  int uta_g;           /* used to be ilev + 1 */
+  int uta_p;           /* used to be pj */
+  int uta_cfg_g;       /* used to be iham */
+  int uta_g_cfg;       /* used to be pb */
 } LEVEL;
 
 typedef struct _LEVEL_ION_ {

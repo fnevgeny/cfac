@@ -1567,6 +1567,8 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
 {
   int i;
   LEVEL lev;
+  
+  lev.uta = 1;
 
   lev.n_basis = 0;
   lev.ibase = -1;
@@ -1575,30 +1577,33 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
     int j;
     CONFIG_GROUP *g;
     
-    lev.iham = kg[i];
+    lev.uta_cfg_g = kg[i];
     g = GetGroup(cfac, kg[i]);
     
     for (j = 0; j < g->n_cfgs; j++) {
-      int t;
+      int t, pj;
       CONFIG *c = GetConfigFromGroup(cfac, kg[i], j);
 
-      lev.pb = j;
-      lev.pj = 0;
-      lev.ilev = 1;
+      lev.uta_g_cfg = j;
+      
+      pj = 0;
+      lev.uta_g = 1;
       
       for (t = 0; t < c->n_shells; t++) {       
-	int d, k;
+	int d, l, k;
         
-        GetJLFromKappa(c->shells[t].kappa, &d, &k);
-	k /= 2;
+        GetJLFromKappa(c->shells[t].kappa, &d, &l);
+	k = l/2;
 	d = ShellDegeneracy(d+1, c->shells[t].nq);
 	if (d > 1) {
-	  lev.ilev *= d;
+	  lev.uta_g *= d;
 	}
-	if (IsOdd(k) && IsOdd(c->shells[t].nq)) lev.pj++;
+	
+	if (IsOdd(k) && IsOdd(c->shells[t].nq)) pj++;
       }
-      lev.ilev--;
-      lev.pj = IsOdd(lev.pj);
+
+      lev.uta_p = IsOdd(pj);
+      
       if (c->energy == 0) {
 	c->energy = AverageEnergyConfig(cfac, c);
       }
@@ -1715,6 +1720,9 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
 	}
       }
     }
+    
+    lev.uta = 0;
+    
     lev.energy = h->mixing[i];
     lev.pj = h->pj;
     lev.iham = cfac->nhams-1;
@@ -2095,7 +2103,7 @@ int GetLevNumElectrons(const cfac_t *cfac, const LEVEL *lev) {
   int nele;
 
   if (cfac->uta) {
-    g = GetGroup(cfac, lev->iham);
+    g = GetGroup(cfac, lev->uta_cfg_g);
     nele = g->n_electrons;
   } else {
     sym = GetSymmetry(cfac, lev->pj);

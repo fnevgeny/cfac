@@ -717,8 +717,8 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
     int ns;
     
     idatum = NULL;
-    ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->iham, lev1->iham,
-		     lev2->pb, lev1->pb, 0, 0, 1);  
+    ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->uta_cfg_g, lev1->uta_cfg_g,
+		     lev2->uta_g_cfg, lev1->uta_g_cfg, 0, 0, 1);  
     if (ns <= 0) return -1;
     
     if (idatum->s[1].index < 0 || idatum->s[3].index >= 0) {
@@ -751,7 +751,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 
       for (i = 0; i < nqk; i++) {
         qkc[i] = M_PI_2*cbo_params[ip+kl0][i]/(*te);
-        qkc[i] *= qb*(lev1->ilev + 1.0);
+        qkc[i] *= qb*lev1->uta_g;
       }
 
       free(idatum->bra);
@@ -849,7 +849,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       es = BEScale(cfac, kb0, *te);
 
       if (cfac->uta) {
-        c = ((4.0*M_PI)/(*te))*qb*(lev1->ilev+1.0) - b0;      
+        c = ((4.0*M_PI)/(*te))*qb*lev1->uta_g - b0;      
       } else {
         c = ((4.0*M_PI)/(*te))*csum - b0;
       }
@@ -899,7 +899,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
         if (ierr < 0) return -1;
 
         for (i = 0; i < n_egrid; i++) {
-	  qku[i] = qke[i]*qb*(lev1->ilev + 1.0);
+	  qku[i] = qke[i]*qb*lev1->uta_g;
         }      
       } else {
         for (i = 0; i < nz; i++) {

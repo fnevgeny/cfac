@@ -1000,14 +1000,14 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
   lev2 = GetLevel(cfac, upper);
   if (lev2 == NULL) return -1;
 
-  p1 = lev1->pj;
-  p2 = lev2->pj;
+  p1 = lev1->uta_p;
+  p2 = lev2->uta_p;
   if (mpole > 0 && IsEven(p1 + p2 + mpole)) return -1;
   if (mpole < 0 && IsOdd(p1 + p2 + mpole)) return -1;
   
   idatum = NULL;
-  ns = GetInteract(cfac, &idatum, NULL, NULL, lev1->iham, lev2->iham,
-		   lev1->pb, lev2->pb, 0, 0, 0);
+  ns = GetInteract(cfac, &idatum, NULL, NULL, lev1->uta_cfg_g, lev2->uta_cfg_g,
+		   lev1->uta_g_cfg, lev2->uta_g_cfg, 0, 0, 0);
   if (ns <= 0) return -1;
   if (idatum->s[0].index < 0 || idatum->s[3].index >= 0) {
     free(idatum->bra);
@@ -1078,7 +1078,7 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
     r = MultipoleRadialFR(cfac, aw, mpole, k0, k1, cfac->tr_opts.gauge);
   }
 
-  *strength = sqrt((lev1->ilev+1.0)*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
+  *strength = sqrt(lev1->uta_g*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
   
   free(idatum->bra);
   free(idatum);
@@ -1159,7 +1159,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
     ic0 = 0;
     for (i = 0; i < nlow; i++) {
       lev1 = GetLevel(cfac, low[i]);
-      c1 = GetConfigFromGroup(cfac, lev1->iham, lev1->pb);
+      c1 = GetConfigFromGroup(cfac, lev1->uta_cfg_g, lev1->uta_g_cfg);
       if (i > 0 && CompareNRConfig(c1, c0)) {
 	nc0[ic0++] = i;
       }
@@ -1174,7 +1174,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
       ic1 = 0;
       for (i = 0; i < nup; i++) {
 	lev1 = GetLevel(cfac, up[i]);
-	c1 = GetConfigFromGroup(cfac, lev1->iham, lev1->pb);
+	c1 = GetConfigFromGroup(cfac, lev1->uta_cfg_g, lev1->uta_g_cfg);
 	if (i > 0 && CompareNRConfig(c1, c0) != 0) {
 	  nc1[ic1++] = i;
 	}
@@ -1193,11 +1193,11 @@ static int crac_save_rtrans0(cfac_t *cfac,
       imax = nc0[ic0];
       jmin = 0;
       lev1 = GetLevel(cfac, low[imin]);
-      c0 = GetConfigFromGroup(cfac, lev1->iham, lev1->pb);
+      c0 = GetConfigFromGroup(cfac, lev1->uta_cfg_g, lev1->uta_g_cfg);
       for (ic1 = 0; ic1 < nic1; ic1++) {
 	jmax = nc1[ic1];
 	lev2 = GetLevel(cfac, up[jmin]);
-	c1 = GetConfigFromGroup(cfac, lev2->iham, lev2->pb);
+	c1 = GetConfigFromGroup(cfac, lev2->uta_cfg_g, lev2->uta_g_cfg);
 	ir = 0;
 	ntr = (jmax-jmin)*(imax-imin);
 	rd = malloc(sizeof(TR_DATUM)*ntr);

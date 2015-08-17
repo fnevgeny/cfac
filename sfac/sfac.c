@@ -190,7 +190,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
 	lev = GetLevel(cfac, j);
 	
         if (cfac->uta) {
-          ig = lev->iham;
+          ig = lev->uta_cfg_g;
         } else {
           im = lev->pb;
 	  sym = GetSymmetry(cfac, lev->pj);

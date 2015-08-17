@@ -858,8 +858,8 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
 
   if (iuta) {
     idatum = NULL;
-    ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->iham, lev1->iham,
-		     lev2->pb, lev1->pb, 0, 0, 1);  
+    ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->uta_cfg_g, lev1->uta_cfg_g,
+		     lev2->uta_g_cfg, lev1->uta_g_cfg, 0, 0, 1);  
     if (ns <= 0) return -1;
     if (idatum->s[1].index < 0 || idatum->s[3].index >= 0) {
       free(idatum->bra);
@@ -989,7 +989,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   }      
  
   if (iuta) {
-    d = (lev1->ilev+1.0)*(q1/(j1+1.0));
+    d = lev1->uta_g*(q1/(j1+1.0));
     for (ie = 0; ie < n_usr; ie++) {
       rqu[ie] *= d;
     }
@@ -1209,8 +1209,8 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
   log_e = log(*e);
   
   idatum = NULL;
-  ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->iham, lev1->iham,
-		   lev2->pb, lev1->pb, 0, 0, 1);  
+  ns = GetInteract(cfac, &idatum, NULL, NULL, lev2->uta_cfg_g, lev1->uta_cfg_g,
+		   lev2->uta_g_cfg, lev1->uta_g_cfg, 0, 0, 1);  
   if (ns <= 0) return -1;
   if (idatum->s[3].index < 0) {
     free(idatum->bra);

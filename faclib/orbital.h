@@ -61,7 +61,7 @@ typedef struct _POTENTIAL_ {
   double dU[MAXRP];       /* its first derivative                 */
   double dU2[MAXRP];      /* its second derivative                */
   
-  double W[MAXRP];
+  double W[MAXRP];        /* relativistic corrections             */
   
   double uehling[MAXRP];  /* the Uehling potential                */
   

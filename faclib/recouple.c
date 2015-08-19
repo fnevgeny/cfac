@@ -1226,7 +1226,7 @@ int InteractingShells(INTERACT_DATUM **idatum,
     goto END;
   }    
 
-  if (csf_i == NULL) goto END;
+  if (csf_i == NULL || csf_j == NULL) goto END;
 
   /* determine the phase factor */
   for (j = 0; j < 3; j++){
@@ -1254,7 +1254,7 @@ int InteractingShells(INTERACT_DATUM **idatum,
     (*idatum)->phase += 1;
   }
 
-  if (n_shells > 0) {
+  if (n_shells > 0 && sbra && sket) {
     i = 0;
     j = 0;
       

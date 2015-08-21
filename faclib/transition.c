@@ -1095,19 +1095,24 @@ static int crac_save_rtrans0(cfac_t *cfac,
   unsigned i, j, ntr;
   double emin, emax;
 
+  LEVEL *llev, *ulev;
+  int ic0, ic1, nic0, nic1, *nc0, *nc1;
+  int imin, imax, jmin, jmax, ir;
+  CONFIG *c0, *c1;
+
   if (!nlow || !nup) return 0;
 
   emin = 0.0;
   emax = 0.0;
   ntr = 0;
   for (i = 0; i < nlow; i++) {
-    LEVEL *llev = GetLevel(cfac, low[i]);
+    llev = GetLevel(cfac, low[i]);
     if (!llev) {
       return -1;
     }
     for (j = 0; j < nup; j++) {
       double dE;
-      LEVEL *ulev = GetLevel(cfac, up[j]);
+      ulev = GetLevel(cfac, up[j]);
       if (!ulev) {
         return -1;
       }
@@ -1146,137 +1151,121 @@ static int crac_save_rtrans0(cfac_t *cfac,
       }
   }
   
-  if (cfac->uta) {
-    TR_DATUM *rd;
-    double gf;
-    int ic0, ic1, nic0, nic1, *nc0, *nc1, ntr;
-    int imin, imax, jmin, jmax, ir;
-    CONFIG *c0, *c1;
-    LEVEL *lev1, *lev2;
-    int k;
+  nc0 = malloc(sizeof(int)*nlow);
+  ic0 = 0;
+  for (i = 0; i < nlow; i++) {
+    llev = GetLevel(cfac, low[i]);
+    c1 = GetConfigFromGroup(cfac, llev->uta_cfg_g, llev->uta_g_cfg);
+    if (i > 0 && CompareNRConfig(c1, c0)) {
+      nc0[ic0++] = i;
+    }
+    c0 = c1;
+  }
+  nc0[ic0] = nlow;
+  nic0 = ic0+1;
 
-    nc0 = malloc(sizeof(int)*nlow);
-    ic0 = 0;
-    for (i = 0; i < nlow; i++) {
-      lev1 = GetLevel(cfac, low[i]);
-      c1 = GetConfigFromGroup(cfac, lev1->uta_cfg_g, lev1->uta_g_cfg);
-      if (i > 0 && CompareNRConfig(c1, c0)) {
-	nc0[ic0++] = i;
+
+  if (up != low) {
+    nc1 = malloc(sizeof(int)*nup);
+    ic1 = 0;
+    for (i = 0; i < nup; i++) {
+      ulev = GetLevel(cfac, up[i]);
+      c1 = GetConfigFromGroup(cfac, ulev->uta_cfg_g, ulev->uta_g_cfg);
+      if (i > 0 && CompareNRConfig(c1, c0) != 0) {
+	nc1[ic1++] = i;
       }
       c0 = c1;
     }
-    nc0[ic0] = nlow;
-    nic0 = ic0+1;
-    
-    
-    if (up != low) {
-      nc1 = malloc(sizeof(int)*nup);
-      ic1 = 0;
-      for (i = 0; i < nup; i++) {
-	lev1 = GetLevel(cfac, up[i]);
-	c1 = GetConfigFromGroup(cfac, lev1->uta_cfg_g, lev1->uta_g_cfg);
-	if (i > 0 && CompareNRConfig(c1, c0) != 0) {
-	  nc1[ic1++] = i;
-	}
-	c0 = c1;
-      }
-      nc1[ic1] = nup;
-      nic1 = ic1+1;
-    } else {
-      nc1 = nc0;
-      nic1 = nic0;
-    }
-    
-    
-    imin = 0;
-    for (ic0 = 0; ic0 < nic0; ic0++) {
-      imax = nc0[ic0];
-      jmin = 0;
-      lev1 = GetLevel(cfac, low[imin]);
-      c0 = GetConfigFromGroup(cfac, lev1->uta_cfg_g, lev1->uta_g_cfg);
-      for (ic1 = 0; ic1 < nic1; ic1++) {
-	jmax = nc1[ic1];
-	lev2 = GetLevel(cfac, up[jmin]);
-	c1 = GetConfigFromGroup(cfac, lev2->uta_cfg_g, lev2->uta_g_cfg);
-	ir = 0;
-	ntr = (jmax-jmin)*(imax-imin);
-	rd = malloc(sizeof(TR_DATUM)*ntr);
-	for (i = imin; i < imax; i++) {
-	  for (j = jmin; j < jmax; j++) {
+    nc1[ic1] = nup;
+    nic1 = ic1+1;
+  } else {
+    nc1 = nc0;
+    nic1 = nic0;
+  }
+
+
+  imin = 0;
+  for (ic0 = 0; ic0 < nic0; ic0++) {
+    llev = GetLevel(cfac, low[imin]);
+    imax = nc0[ic0];
+    jmin = 0;
+    c0 = GetConfigFromGroup(cfac, llev->uta_cfg_g, llev->uta_g_cfg);
+    for (ic1 = 0; ic1 < nic1; ic1++) {
+      TR_DATUM *rd;
+      
+      ulev = GetLevel(cfac, up[jmin]);
+      jmax = nc1[ic1];
+      c1 = GetConfigFromGroup(cfac, ulev->uta_cfg_g, ulev->uta_g_cfg);
+      ir = 0;
+      ntr = (jmax-jmin)*(imax-imin);
+      rd = malloc(sizeof(TR_DATUM)*ntr);
+      for (i = imin; i < imax; i++) {
+	for (j = jmin; j < jmax; j++) {
+          double rme;
+          int k;
+
+          if (mode == M_FR && !cfac->tr_opts.fr_interpolate) {
+            double dE = ulev->energy - llev->energy;
+            if (dE < 0) {
+              continue;
+            }
+
+            FreeMultipoleArray(cfac);
+            SetAWGrid(cfac, 1, dE*FINE_STRUCTURE_CONST, dE*FINE_STRUCTURE_CONST);
+          }
+
+	  if (llev->uta || ulev->uta) {
 	    k = TRMultipoleUTA(cfac,
-                &gf, &(rd[ir].rx), mpole, low[i], up[j], rd[ir].ks);
-	    if (k != 0) {
-	      rd[ir].r.lower = -1;
-	      rd[ir].r.upper = -1;
-	      ir++;
-	      continue;
-	    }
-	    rd[ir].r.lower = low[i];
-	    rd[ir].r.upper = up[j];
-	    rd[ir].r.rme = gf;
-	    ir++;
+                &rme, &(rd[ir].rx), mpole, low[i], up[j], rd[ir].ks);
+	  } else {
+	    k = TRMultipole(cfac, &rme, NULL, mpole, low[i], up[j]);
+	    rd[ir].rx.de = 0.0;
+	    rd[ir].rx.sdev = 0.0;
 	  }
-	}
-	qsort(rd, ntr, sizeof(TR_DATUM), CompareTRDatum);
-	ir = 0;
-	for (ir = 0; ir < ntr; ir++) {
-          cfac_rtrans_data_t rtdata;
-	  if (rd[ir].r.lower < 0) {
+
+	  if (k != 0) {
+	    rd[ir].r.lower = -1;
+	    rd[ir].r.upper = -1;
+	    ir++;
 	    continue;
 	  }
 
-          rtdata.fi = rd[ir].r.lower;
-          rtdata.ii = rd[ir].r.upper;
-          rtdata.rme = rd[ir].r.rme;
-          
-          rtdata.uta_de = rd[ir].rx.de;
-          rtdata.uta_sd = rd[ir].rx.sdev;
-          
-          if (sink(cfac, &rtdata, udata) != 0) {
-            return -1;
-          }
+	  rd[ir].r.lower = low[i];
+	  rd[ir].r.upper = up[j];
+	  rd[ir].r.rme = rme;
+
+	  ir++;
 	}
-	free(rd);
-	jmin = jmax;
       }
-      imin = imax;
-    }
-    free(nc0);
-    if (up != low) free(nc1);
-    
-    return 0;
-  }
 
-  for (j = 0; j < nup; j++) {
-    LEVEL *ulev = GetLevel(cfac, up[j]);
-    for (i = 0; i < nlow; i++) {
-      double rme;
-      cfac_rtrans_data_t rtdata;
+      qsort(rd, ntr, sizeof(TR_DATUM), CompareTRDatum);
 
-      if (mode == M_FR && !cfac->tr_opts.fr_interpolate) {
-        LEVEL *llev = GetLevel(cfac, low[i]);
-        double dE = ulev->energy - llev->energy;
-        if (dE < 0) {
-          continue;
+      for (ir = 0; ir < ntr; ir++) {
+        cfac_rtrans_data_t rtdata;
+	if (rd[ir].r.lower < 0) {
+	  continue;
+	}
+
+        rtdata.fi = rd[ir].r.lower;
+        rtdata.ii = rd[ir].r.upper;
+        rtdata.rme = rd[ir].r.rme;
+
+        rtdata.uta_de = rd[ir].rx.de;
+        rtdata.uta_sd = rd[ir].rx.sdev;
+
+        if (fabs(rtdata.rme) < EPS30) continue;
+
+        if (sink(cfac, &rtdata, udata) != 0) {
+          return -1;
         }
-        
-        FreeMultipoleArray(cfac);
-        SetAWGrid(cfac, 1, dE*FINE_STRUCTURE_CONST, dE*FINE_STRUCTURE_CONST);
       }
-      
-      if (TRMultipole(cfac, &rme, NULL, mpole, low[i], up[j]) != 0) {
-        continue;
-      }
-      if (fabs(rme) < EPS30) continue;
-      
-      rtdata.fi = low[i];
-      rtdata.ii = up[j];
-      rtdata.rme = rme;
-      if (sink(cfac, &rtdata, udata) != 0) {
-        return -1;
-      }
+      free(rd);
+      jmin = jmax;
     }
+    imin = imax;
   }
+  free(nc0);
+  if (up != low) free(nc1);
 
   return 0;
 }

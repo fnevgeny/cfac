@@ -114,6 +114,8 @@ typedef struct _SHELL_RESTRICTION_ {
 **              i.e., the outermost shell is in the beginning of the list.
 */
 typedef struct _CONFIG_ {
+  int uta;
+  
   int n_electrons;
   int n_shells;
   int n_csfs;
@@ -217,7 +219,7 @@ int          GetConfigFromStringNR(CONFIG **cfg, char *scfg);
 int          GetConfigFromString(CONFIG **cfg, char *scfg);
 int          GetAverageConfigFromString(int **n, int **kappa, 
 					double **nq, char *scfg);
-int          Couple(CONFIG *cfg, int uta);
+int          Couple(CONFIG *cfg);
 int          CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner);
 int          GetSingleShell(CONFIG *cfg);
 void         UnpackShell(SHELL *s, int *n, int *kl, int *j, int *nq);

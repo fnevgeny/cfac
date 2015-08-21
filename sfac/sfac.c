@@ -312,7 +312,7 @@ static int SelectNeleLevels(cfac_t *cfac, int nele, int **levels)
     return j;
 }
 
-static int ConfigListToC(char *clist, CONFIG **cfg, ARRAY *variables) {
+static int ConfigListToC(char *clist, CONFIG **cfg, ARRAY *variables, int iuta) {
   SHELL *shells;
   int i, j, k, m;
   int n_shells, n;
@@ -325,6 +325,7 @@ static int ConfigListToC(char *clist, CONFIG **cfg, ARRAY *variables) {
   (*cfg) = malloc(sizeof(CONFIG));
   n_shells = DecodeArgs(clist, argv, argt, variables);
   na = n_shells;
+  (*cfg)->uta = iuta;
   (*cfg)->n_shells = n_shells;
   (*cfg)->shells = malloc(sizeof(SHELL)*n_shells);
   shells = (*cfg)->shells;
@@ -460,6 +461,7 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   static char gname[GROUP_NAME_LEN] = "_all_";
   int i, j, k, t, ncfg;
   char scfg[MCHSHELL];
+  int iuta = cfac->uta;
   
   k = -2;
   for (i = 0; i < argc; i++) {
@@ -476,11 +478,23 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
 
   i = 0;
   
-  if (k >= 0) strncpy(gname, argv[k+1], GROUP_NAME_LEN);
-  else {
-    if (argc == 0) return -1;
-    if (argt[i] != STRING) return -1;
+  if (k >= 0) {
+    strncpy(gname, argv[k+1], GROUP_NAME_LEN);
+  } else {
+    if (argc == 0) {
+      return -1;
+    }
+    
+    if (argt[i] == NUMBER && argc == 3) {
+      iuta = atoi(argv[i]) ? 1:0;
+      i++;
+    }
+    
+    if (argt[i] != STRING) {
+      return -1;
+    }
     strncpy(gname, argv[i], GROUP_NAME_LEN);
+    
     i++;
   }
 
@@ -491,10 +505,11 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
     strncat(scfg, argv[i], MCHSHELL - 1);
     ncfg = GetConfigFromString(&cfg, scfg);
     for (j = 0; j < ncfg; j++) {
-      if (Couple(cfg+j, cfac->uta) < 0) return -1;
+      cfg[j].uta = iuta;
+      if (Couple(&cfg[j]) < 0) return -1;
       t = GroupIndex(cfac, gname);
       if (t < 0) return -1;
-      if (AddConfigToList(cfac, t, cfg+j) < 0) return -1;
+      if (AddConfigToList(cfac, t, &cfg[j]) < 0) return -1;
     }   
     if (ncfg > 0) free(cfg);
   }
@@ -563,8 +578,8 @@ static int PAddConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   if (argc != 2) return -1;
   if (argt[0] != STRING) return -1;
   if (argt[1] != LIST) return -1;
-  if (ConfigListToC(argv[1], &cfg, variables) < 0) return -1;
-  if (Couple(cfg, cfac->uta) < 0) return -1;
+  if (ConfigListToC(argv[1], &cfg, variables, cfac->uta) < 0) return -1;
+  if (Couple(cfg) < 0) return -1;
 
   k = GroupIndex(cfac, argv[0]);
   if (k < 0) return -1;
@@ -3145,6 +3160,7 @@ int main(int argc, const char *argv[]) {
   }
 
   cmdline = malloc(cmdlen + 1);
+  cmdline[0] = '\0';
   strcat(cmdline, argv[0]);
   for (i = 1; i < argc; i++) {
     strcat(cmdline, " ");

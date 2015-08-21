@@ -295,7 +295,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
 	  memcpy(rcfg->shells, &ns, sizeof(SHELL));
 	}
 	
-	if (Couple(rcfg, cfac->uta) < 0) return -3;
+	if (Couple(rcfg) < 0) return -3;
 	if (AddConfigToList(cfac, kg[i], rcfg) < 0) return -4;
 	ncfgs++;
       }
@@ -1727,11 +1727,18 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
     for (i = 0; i < nup; i++) {
       lev1 = GetLevel(cfac, up[i]);
       for (j = 0; j < nlow; j++) {
+	int iuta;
+	
 	lev2 = GetLevel(cfac, low[j]);
 	e = lev1->energy - lev2->energy;
 	if (e < e0 || e >= e1) continue;
         
-        nq = BoundFreeOS(rqu, qc, &eb, low[j], up[i], m, cfac->uta);
+        if (lev1->uta || lev2->uta) {
+	  iuta = 1;
+	} else {
+	  iuta = 0;
+	}
+	nq = BoundFreeOS(rqu, qc, &eb, low[j], up[i], m, iuta);
 	if (nq < 0) continue;
 	
         r.b = low[j];
@@ -1936,7 +1943,8 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 	if (e < 0 && lev1->ibase != up[j]) e -= eref;
 	if (e < e0 || e >= e1) continue;
 	if (!msub) {
-	  if (cfac->uta) {
+	  /* FIXME: generalize AutoionizeRateUTA to treat detailed mode */
+          if (lev1->uta || lev2->uta) {
 	    k = AutoionizeRateUTA(&s, &e, low[i], up[j]);
           } else {
             k = AutoionizeRate(&s, &e, low[i], up[j], msub);

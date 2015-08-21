@@ -1338,7 +1338,7 @@ static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
 
 /* 
 ** FUNCTION:    GetInteract
-** PURPOSE:     determing which shells can be interacting.
+** PURPOSE:     determine which shells can be interacting.
 ** INPUT:       
 ** RETURN:      
 ** SIDE EFFECT: 
@@ -1369,7 +1369,7 @@ int GetInteract(cfac_t *cfac, INTERACT_DATUM **idatum,
   if (ci->n_shells <= 0 || cj->n_shells <= 0) return -1;
   if (abs(ci->n_shells+ifb - cj->n_shells) > 2) return -1;
 
-  if (csf_i != NULL) {
+  if (csf_i != NULL && csf_j != NULL) {
     n_shells = -1;
     /* check if this is a repeated call,
      * if not, search in the array.
@@ -1379,15 +1379,14 @@ int GetInteract(cfac_t *cfac, INTERACT_DATUM **idatum,
       index[1] = kgj;
       index[2] = kci;
       index[3] = kcj;
-      (*idatum) = (INTERACT_DATUM *) MultiSet(cfac->recouple.int_shells, index, 
-					      NULL);
+      (*idatum) = MultiSet(cfac->recouple.int_shells, index, NULL);
     }
-    if ((*idatum)->n_shells < 0) return -1;
+    if (!(*idatum) || (*idatum)->n_shells < 0) return -1;
   } else {
     (*idatum) = malloc(sizeof(INTERACT_DATUM));
     (*idatum)->n_shells = 0;
   }
-  if ((*idatum)->n_shells > 0) {
+  if ((*idatum)->n_shells > 0 && sbra && sket) {
     n_shells = (*idatum)->n_shells;
     bra = (*idatum)->bra;
     i = 0;

@@ -53,7 +53,7 @@ cfac_get_nucleus_potential(const cfac_t *cfac, double r);
 
 /* config.c */
 int
-cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str);
+cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str, int uta);
 int
 cfac_get_config_gid(const cfac_t *cfac, const char *cname);
 int

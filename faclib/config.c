@@ -715,6 +715,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
   ns = QuotedStrSplit(scfg, ' ', '[', ']');
   if (ns == 0) {
     *cfg = (CONFIG *) malloc(sizeof(CONFIG));
+    (*cfg)->uta = 0;
     (*cfg)->n_shells = 1;
     (*cfg)->shells = (SHELL *) malloc(sizeof(SHELL));
     PackShell((*cfg)->shells, 1, 0, 1, 0);
@@ -1094,15 +1095,13 @@ static int CompareShellInvert(const void *ts1, const void *ts2) {
 ** PURPOSE:     recursively construct all possible states for a Config.
 ** INPUT:       {CONFIG *cfg},
 **              pointer to the config. to be coupled.
-**              {int uta},
-**              UTA flag.
 ** RETURN:      {int},
 **               0: success.
 **              <0: error.
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int Couple(CONFIG *cfg, int uta) {
+int Couple(CONFIG *cfg) {
   CONFIG outmost, inner;
   int errcode;
 
@@ -1119,7 +1118,7 @@ int Couple(CONFIG *cfg, int uta) {
   /* make sure that the shells are sorted in inverse order */
   qsort(cfg->shells, cfg->n_shells, sizeof(SHELL), CompareShellInvert);
 
-  if (uta) {
+  if (cfg->uta) {
     int i;
     cfg->csfs = NULL;
     cfg->n_csfs = 0;
@@ -1136,15 +1135,17 @@ int Couple(CONFIG *cfg, int uta) {
       goto ERROR;
     }
   } else {
+    outmost.uta = cfg->uta;
     outmost.n_shells = 1;
     outmost.shells = cfg->shells;
+    inner.uta = cfg->uta;
     inner.n_shells = cfg->n_shells - 1;
     inner.shells = cfg->shells + 1;
-    if (Couple(&outmost, uta) < 0) {
+    if (Couple(&outmost) < 0) {
       errcode = -4;
       goto ERROR;
     }
-    if (Couple(&inner, uta) < 0) {
+    if (Couple(&inner) < 0) {
       errcode = -5;
       free(outmost.csfs);
       goto ERROR;
@@ -1691,7 +1692,11 @@ CONFIG *GetConfig(const cfac_t *cfac, const STATE *s) {
 }
 
 CONFIG *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc) {
-  return (CONFIG *) ArrayGet(&(cfac->cfg_groups[kg].cfg_list), kc);
+  if (kg < 0 || kg >= cfac->n_groups) {
+    return NULL;
+  } else {
+    return (CONFIG *) ArrayGet(&(cfac->cfg_groups[kg].cfg_list), kc);
+  }
 }
 
 /* 
@@ -2248,7 +2253,8 @@ int cfac_get_config_gid(const cfac_t *cfac, const char *cname) {
     return -1;
 }
 
-int cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str)
+int cfac_add_config(cfac_t *cfac,
+    const char *gname, const char *cfg_str, int uta)
 {
     CONFIG *cfgs;
     int j, gidx, ncfgs;
@@ -2266,8 +2272,9 @@ int cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str)
     free(tmpstr);
     for (j = 0; j < ncfgs; j++) {
         CONFIG *cfg = &cfgs[j];
+        cfg->uta = uta;
         
-        if (Couple(cfg, cfac->uta) < 0) {
+        if (Couple(cfg) < 0) {
             return -1;
         }
         if (AddConfigToList(cfac, gidx, cfg) < 0) {

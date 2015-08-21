@@ -707,13 +707,16 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
   INTERACT_DATUM *idatum;
   int nz = 0, j0, j0p, kl0 = 0, kl, kbp, qb = 0;
   double cmax = 0.0;
+  int iuta;
 
   lev1 = GetLevel(cfac, b);
   lev2 = GetLevel(cfac, f);
   *te = lev2->energy - lev1->energy;
   if (*te <= 0) return -1;
 
-  if (cfac->uta) {
+  iuta = (lev1->uta || lev2->uta);
+
+  if (iuta) {
     int ns;
     
     idatum = NULL;
@@ -741,7 +744,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       qkc[i] = 0.0;
     }
 
-    if (cfac->uta) {
+    if (iuta) {
       int nq;
       
       kl0 = GetLFromKappa(idatum->s[1].kappa);
@@ -792,20 +795,20 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
     double bethe;
     double qke[MAXNUSR], sigma[MAXNUSR];
     
-    kl0 = BoundFreeOS(qke, qkc, te, b, f, -1, cfac->uta);
+    kl0 = BoundFreeOS(qke, qkc, te, b, f, -1, iuta);
     if (kl0 < 0) return kl0;
     
     for (i = 0; i < n_egrid; i++) {
       x[i] = 1.0 + egrid[i]/(*te);
       logx[i] = log(x[i]);
-      if (cfac->uta) {
+      if (iuta) {
         xusr[i] = x[i];
       }
     }
     
     CIRadialQkBED(qku, &bethe, &b0, kl0, x, logx, qke, qkc, *te);
     
-    if (!cfac->uta) {
+    if (!iuta) {
       nz = AngularZFreeBound(cfac, &ang, f, b);
       if (nz <= 0) return -1;
     }
@@ -816,7 +819,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       int kb0;
       double csum = 0.0;
       
-      if (cfac->uta) {
+      if (iuta) {
         kb0 = OrbitalIndex(cfac, idatum->s[1].n, idatum->s[1].kappa, 0.0);
       } else {
         kb0 = -1;
@@ -848,7 +851,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       
       es = BEScale(cfac, kb0, *te);
 
-      if (cfac->uta) {
+      if (iuta) {
         c = ((4.0*M_PI)/(*te))*qb*lev1->uta_g - b0;      
       } else {
         c = ((4.0*M_PI)/(*te))*csum - b0;
@@ -892,7 +895,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 	qku[i] = 0.0;
       }
 
-      if (cfac->uta) {
+      if (iuta) {
         kb = OrbitalIndex(cfac, idatum->s[1].n, idatum->s[1].kappa, 0.0);
 
         ierr = CIRadialQkIntegrated(cfac, qke, *te, kb, kb);
@@ -957,7 +960,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       }
     }
     
-    if (cfac->uta) {
+    if (iuta) {
       free(idatum->bra);
       free(idatum);
     } else {

@@ -847,10 +847,8 @@ int WriteTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx) {
   WSF0(r->upper);
   WSF0(r->rme);
 
-  if (rx && iuta) {
-    WSF0(rx->de);
-    WSF0(rx->sdev);
-  }
+  WSF0(rx->de);
+  WSF0(rx->sdev);
 
   tr_header.ntransitions += 1;
   tr_header.length += m;
@@ -2508,32 +2506,19 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
       if (n == 0) break;
       if (v) {
 	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
-        if (iuta) {
-            e += rx.de;
-        }
-	gf = OscillatorStrength(h.multipole, e, r.rme, &a);
+        e += rx.de;
+	
+        gf = OscillatorStrength(h.multipole, e, r.rme, &a);
 	a /= (mem_en_table[r.upper].j + 1.0);
-	if (iuta) {
-	    fprintf(f2, "%5d %4d %5d %4d %13.6E %11.4E %13.6E %13.6E %13.6E\n",
-		    r.upper, mem_en_table[r.upper].j,
-		    r.lower, mem_en_table[r.lower].j,
-		    (e*HARTREE_EV),
-		    (rx.sdev*HARTREE_EV), gf, a*RATE_AU, r.rme);
-        } else {
-            fprintf(f2, "%6d %2d %6d %2d %13.6E %13.6E %13.6E %13.6E\n",
-		    r.upper, mem_en_table[r.upper].j,
-		    r.lower, mem_en_table[r.lower].j,
-		    (e*HARTREE_EV), gf, a*RATE_AU, r.rme);
-        }
+	  fprintf(f2, "%5d %4d %5d %4d %13.6E %11.4E %13.6E %13.6E %13.6E\n",
+		  r.upper, mem_en_table[r.upper].j,
+		  r.lower, mem_en_table[r.lower].j,
+		  (e*HARTREE_EV),
+		  (rx.sdev*HARTREE_EV), gf, a*RATE_AU, r.rme);
       } else {
-	if (iuta) {
-	    e = rx.de;
-	    fprintf(f2, "%5d %5d %13.6E %11.4E %13.6E\n",
-		  r.upper, r.lower, e, rx.sdev, r.rme);
-        } else {
-            fprintf(f2, "%6d %6d %13.6E\n",
-		    r.upper, r.lower, r.rme);
-        }
+	e = rx.de;
+	fprintf(f2, "%5d %5d %13.6E %11.4E %13.6E\n",
+	      r.upper, r.lower, e, rx.sdev, r.rme);
       }
     }
     nb += 1;
@@ -3392,8 +3377,6 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
   int k;
   int nele0;
   
-  iuta = cfac->uta;
-
   nele0 = -1;
   
   if (n < 0) {
@@ -3421,7 +3404,7 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     int i = start + k;
     lev = GetLevel(cfac, i);
     
-    if (cfac->uta) {
+    if (lev->uta) {
       sp.kgroup = lev->uta_cfg_g;
       sp.kcfg = lev->uta_g_cfg;
       sp.kstate = 0;
@@ -3496,19 +3479,15 @@ static int tr_sink(const cfac_t *cfac,
     TR_RECORD r;
     TR_EXTRA rx;
     FILE *f = udata;
-
+    
     r.upper = rtdata->ii;
     r.lower = rtdata->fi;
     r.rme   = rtdata->rme;
 
-    if (cfac->uta) {
-        rx.de   = rtdata->uta_de;
-        rx.sdev = rtdata->uta_sd;
-        
-        WriteTRRecord(f, &r, &rx);
-    } else {
-        WriteTRRecord(f, &r, NULL);
-    }
+    rx.de   = rtdata->uta_de;
+    rx.sdev = rtdata->uta_sd;
+
+    WriteTRRecord(f, &r, &rx);
     
     return 0;
 }
@@ -3577,7 +3556,7 @@ int StoreTable(const cfac_t *cfac,
         retval = StoreENTable(db, sid, fp, swp);
         break;
     case DB_TR:
-        retval = StoreTRTable(db, sid, fp, swp, iuta);
+        retval = StoreTRTable(db, sid, fp, swp);
         break;
     case DB_CE:
         retval = StoreCETable(db, sid, fp, swp);

@@ -50,7 +50,7 @@ typedef struct _SHAMILTON_ {
 
 typedef struct _LEVEL_ {
   int uta;             /* flag indicating it is an UTA level or not      */
-  int ilev;            /* level index in cfac->(eb)levels (g - 1 in UTA) */
+  int ilev;            /* level # in corresponding pj Hamiltonian (g - 1 in UTA) */
   int pj;              /* parity & j encoded (only P in UTA)             */
   int iham;            /* symmetry Hamiltonian # (config. group # in UTA)*/
   int n_basis;

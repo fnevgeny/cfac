@@ -2158,12 +2158,6 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
   cfac_cbcache_t cbcache;
   
-  int iuta = cfac->uta;
-  if (iuta && msub) {
-    printf("cannot set  MSub and UTA mode simultaneously\n");
-    return -1;
-  }
-
   cfac_cbcache_init(&cbcache);
 
   nc = OverlapLowUp(nlow, low, nup, up);
@@ -2181,6 +2175,11 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         return -1;
       }
       
+      if ((tr.lup->uta || tr.llo->uta) && msub) {
+        printf("cannot set MSub and UTA mode simultaneously\n");
+        return -1;
+      }
+
       if (swapped && i >= nlow-nc && j >= nup-nc) {
         continue;
       }
@@ -2291,7 +2290,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 
         /* ionization potential */
         
-        if (iuta) {
+        if (tr.lup->uta || tr.llo->uta) {
             cfg = GetConfigFromGroup(cfac, tr.lup->uta_cfg_g, tr.lup->uta_g_cfg);
             k = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
         } else {
@@ -2444,7 +2443,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
         
 	if (tr.e < e0 || tr.e >= e1) continue;
 
-	if (iuta) {
+	if (tr.lup->uta || tr.llo->uta) {
           k = CollisionStrengthUTA(&cbcache, &tr, qkc, params, bethe); 
         } else {
           k = CollisionStrength(&cbcache, &tr, msub, qkc, params, bethe); 

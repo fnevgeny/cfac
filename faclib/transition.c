@@ -791,8 +791,6 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     k1 = Min(k, k1);
     kp0 = abs(ja-jb);
     kp1 = ja+jb;
-    kp0 = k0;
-    kp1 = k1;
     a = 1.0/((ja+1.0)*(jb+1.0));
     for (k = k0; k <= k1; k += 4) {
       for (kp = kp0; kp <= kp1; kp += 2) {

@@ -666,7 +666,7 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
 	e += b;
       }
     }
-    if (IsOdd((ja+jb)/2+1)) e = -e;
+    if (IsOdd((ja+jb+m2)/2)) e = -e;
     break;
   case 2:
     k0 = 4;
@@ -678,7 +678,9 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
       for (kp = kp0; kp <= kp1; kp += 2) {
 	b = W6j(k, kp, m2, jb, ja, ja);
 	b = -b*b;
-	b += W6j(jb, jb, k, ja, ja, m2)*W6j(jb, jb, k, ja, ja, kp);
+	d = W6j(jb, jb, k, ja, ja, m2)*W6j(jb, jb, k, ja, ja, kp);
+	if (IsOdd((m2+kp)/2)) b -= d;
+	else b += d;
 	if (m2 == kp) {
 	  b -= (1.0/(m2+1.0)-1.0/(jb+1.0))*a;
 	} else {
@@ -740,14 +742,19 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     kp1 = ja+jb;
     for (k = k0; k <= k1; k += 4) {
       for (kp = kp0; kp <= kp1; kp += 2) {
-	b = -W6j(jb, jb, k, ja, ja, kp)/(jb+1.0);
+      	b = W6j(jb, jb, k, ja, ja, kp)/(jb+1.0);
+      	if (IsOdd(kp/2)) b = -b;
 	c = W6j(k, kp, m2, ja, jb, jb)*W6j(k, kp, m2, jb, ja, ja);
-	if (IsOdd((ja+jb)/2)) b += c;
+	if (IsOdd((ja+jb+kp+m2)/2)) b += c;
 	else b -= c;
 	c = -1.0/(jb+1.0);
 	if (kp == m2) c += 1.0/(m2+1.0);
-	c *= W6j(ja, jb, m2, jb, ja, k);
-	b += c/ja;
+	c *= W6j(ja, jb, m2, jb, ja, k)/ja;
+	if (IsOdd(m2/2)) {
+          b += c;
+        } else {
+          b -= c;
+        }
 	b /= 0.5*ja;
 	b *= FKB(cfac, ka, kb, k)*GKB(cfac, ka, kb, kp);
 	e += b;
@@ -835,7 +842,7 @@ static double ConfigEnergyVarianceParts1(cfac_t *cfac, SHELL *bra, int i,
       if (fabs(b) < EPS30) continue;
       b *= 2.0/((k+1.0)*(js+1.0));
       b *= FKB(cfac, ks, ka, k)*FKB(cfac, ks, kb, k);
-      if (IsOdd((ja+jb)/2)) b = -b;
+      if (IsEven((ja+jb+m2)/2)) b = -b;
       e += b;
     }
     break;
@@ -869,7 +876,7 @@ static double ConfigEnergyVarianceParts1(cfac_t *cfac, SHELL *bra, int i,
 	b *= W6j(jb, jb, k, js, js, kp);
 	if (fabs(b) < EPS30) continue;
 	b /= (js+1.0);
-	if (IsOdd((ja+jb+kp)/2)) b = -b;
+	if (IsEven((ja+jb+kp+m2)/2)) b = -b;
 	b *= 2.0*FKB(cfac, ks, ka, k)*GKB(cfac, ks, kb, kp);
 	e += b;
       }
@@ -960,9 +967,12 @@ double ConfigEnergyShift(cfac_t *cfac,
       for (k = kmin; k <= kmax; k += 4) {
 	b = W6j(k, ja, ja, m2, jb, jb);
 	if (fabs(b) > EPS30) {
-	  a -= b*FKB(cfac, k0, k1, k);
+	  a += b*FKB(cfac, k0, k1, k);
 	}
       }
+      
+      if(IsOdd(m2/2)) a=-a;
+      
       kmin = abs(ja-jb);
       kmax = ja + jb;
       c = 1.0/((ja+1.0)*(jb+1.0));

@@ -207,10 +207,14 @@ static double rate_int_f(double e, void *params) {
     
     switch (p->type) {
     case CFACDB_CS_CE:
-    case CFACDB_CS_CI:
         x1 = x;
         /* convert collisional strength to cross-section */
         conv = M_PI/(2*e);
+        break;
+    case CFACDB_CS_CI:
+        x1 = x;
+        /* convert collisional strength to cross-section */
+        conv = 1.0/(2*e);
         break;
     case CFACDB_CS_PI:
         x1 = x + 1;

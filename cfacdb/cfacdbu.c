@@ -71,6 +71,8 @@ int main(int argc, const char *argv[])
         stats.ndim, stats.rtdim, stats.aidim, stats.cedim, stats.cidim,
         stats.pidim);
 
+    free(cdu.sids);
+    
     cfacdb_close(cdb);
     
     exit(0);

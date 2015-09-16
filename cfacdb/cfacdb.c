@@ -343,7 +343,7 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     cdb->stats.ndim = sqlite3_column_int64(stmt, 0);
     
-    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
 
 
     sql = "SELECT COUNT(sid) AS rtdim" \
@@ -364,7 +364,7 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     cdb->stats.rtdim = sqlite3_column_int64(stmt, 0);
     
-    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
 
     sql = "SELECT COUNT(sid) AS aidim" \
           " FROM _aitransitions_v" \
@@ -384,7 +384,7 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     cdb->stats.aidim = sqlite3_column_int64(stmt, 0);
     
-    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
 
     sql = "SELECT COUNT(cid) AS cedim" \
           " FROM _ctransitions_v" \
@@ -404,7 +404,7 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     cdb->stats.cedim = sqlite3_column_int64(stmt, 0);
     
-    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
 
     sql = "SELECT COUNT(cid) AS cidim" \
           " FROM _ctransitions_v" \
@@ -424,7 +424,7 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     cdb->stats.cidim = sqlite3_column_int64(stmt, 0);
     
-    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
 
     sql = "SELECT COUNT(cid) AS pidim" \
           " FROM _ctransitions_v" \
@@ -444,7 +444,7 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     cdb->stats.pidim = sqlite3_column_int64(stmt, 0);
     
-    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
 
 
     /* get element properties */
@@ -481,7 +481,7 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
     }
     memset(cdb->lmap, 0, ntot*sizeof(unsigned int));
 
-    sqlite3_reset(stmt);
+    sqlite3_finalize(stmt);
 
     sql = "SELECT id" \
           " FROM levels" \

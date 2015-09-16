@@ -309,8 +309,6 @@ static int crates_sink(const cfacdb_t *cdb,
         sqlite3_bind_double(rdata->stmt, 3, ratec);
 
         sqlite3_step(rdata->stmt);
-
-        sqlite3_reset(rdata->stmt);
     }
     
     return CFACDB_SUCCESS;

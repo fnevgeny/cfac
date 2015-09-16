@@ -18,8 +18,8 @@ PROGS = cfacdbu	fdemo
 
 LIBCFACDB = libcfacdb.a
 
-LSRCS = cfacdb.c rates.c cfacdb_f.c
-SQLS  = cfac_schema.sql cfac_schema_v1.sql cfac_schema_v2.sql
+LSRCS = cfacdb.c rates.c cache.c cfacdb_f.c
+SQLS  = cfac_schema.sql cfac_schema_v1.sql cfac_schema_v2.sql cache_schema.sql
 
 CSRCS = cfacdbu.c
 CHDRS = cfacdb.h cfacdbP.h

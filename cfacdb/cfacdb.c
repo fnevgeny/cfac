@@ -190,6 +190,10 @@ void cfacdb_close(cfacdb_t *cdb)
         
         sqlite3_close(cdb->db);
         
+        if (cdb->cached) {
+            sqlite3_close(cdb->cache_db);
+        }
+        
         free(cdb);
     }
     
@@ -822,18 +826,37 @@ int cfacdb_ctrans(cfacdb_t *cdb, cfacdb_ctrans_sink_t sink, void *udata)
     if (!cdb) {
         return CFACDB_FAILURE;
     }
-    
+
     if (cdb->db_format == 1) {
-        sql = "SELECT ini_id, fin_id, type, e, strength, de, ap0, ap1" \
-              " FROM _cstrengths_v" \
-              " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
-              " ORDER BY ini_id, fin_id, type, e";
+        if (cdb->cached) {
+            sql = "SELECT cid, ini_id, fin_id, type, e, strength, de," \
+                  "       ap0, ap1" \
+                  " FROM _cstrengths_v" \
+                  " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
+                  " AND cid NOT IN (SELECT cid FROM _cache_temp)" \
+                  " ORDER BY ini_id, fin_id, type, e";
+        } else {
+            sql = "SELECT cid, ini_id, fin_id, type, e, strength, de," \
+                  "       ap0, ap1" \
+                  " FROM _cstrengths_v" \
+                  " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
+                  " ORDER BY ini_id, fin_id, type, e";
+        }
     } else {
-        sql = "SELECT ini_id, fin_id, type, e, strength, de," \
-              "       kl, ap0, ap1, ap2, ap3" \
-              " FROM _cstrengths_v" \
-              " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
-              " ORDER BY ini_id, fin_id, type, e";
+        if (cdb->cached) {
+            sql = "SELECT cid, ini_id, fin_id, type, e, strength, de," \
+                  "       kl, ap0, ap1, ap2, ap3" \
+                  " FROM _cstrengths_v" \
+                  " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
+                  " AND cid NOT IN (SELECT cid FROM _cache_temp)" \
+                  " ORDER BY ini_id, fin_id, type, e";
+        } else {
+            sql = "SELECT cid, ini_id, fin_id, type, e, strength, de," \
+                  "       kl, ap0, ap1, ap2, ap3" \
+                  " FROM _cstrengths_v" \
+                  " WHERE sid = ? AND ini_nele <= ? AND fin_nele >= ?" \
+                  " ORDER BY ini_id, fin_id, type, e";
+        }
     }
     
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
@@ -846,7 +869,7 @@ int cfacdb_ctrans(cfacdb_t *cdb, cfacdb_ctrans_sink_t sink, void *udata)
     type_prev = 0;
     nd = 0;
     do {
-        unsigned int ilfac, iufac, type, kl;
+        unsigned int cid, ilfac, iufac, type, kl;
         double de, ap0, ap1, ap2, ap3, e, strength;
         
         rc = sqlite3_step(stmt);
@@ -862,25 +885,27 @@ int cfacdb_ctrans(cfacdb_t *cdb, cfacdb_ctrans_sink_t sink, void *udata)
             }
             break;
         case SQLITE_ROW:
-            ilfac    = sqlite3_column_int(stmt, 0);
-            iufac    = sqlite3_column_int(stmt, 1);
+            cid      = sqlite3_column_int   (stmt, 0);
+
+            ilfac    = sqlite3_column_int   (stmt, 1);
+            iufac    = sqlite3_column_int   (stmt, 2);
             
-            type     = sqlite3_column_int(stmt, 2);
-            e        = sqlite3_column_double(stmt, 3);
-            strength = sqlite3_column_double(stmt, 4);
-            de       = sqlite3_column_double(stmt, 5);
+            type     = sqlite3_column_int   (stmt, 3);
+            e        = sqlite3_column_double(stmt, 4);
+            strength = sqlite3_column_double(stmt, 5);
+            de       = sqlite3_column_double(stmt, 6);
             if (cdb->db_format == 1) {
                 kl   = 0;
-                ap0  = sqlite3_column_double(stmt, 6);
-                ap1  = sqlite3_column_double(stmt, 7);
+                ap0  = sqlite3_column_double(stmt, 7);
+                ap1  = sqlite3_column_double(stmt, 8);
                 ap2  = 0.0;
                 ap3  = 0.0;
             } else {
-                kl   = sqlite3_column_int(stmt, 6);
-                ap0  = sqlite3_column_double(stmt, 7);
-                ap1  = sqlite3_column_double(stmt, 8);
-                ap2  = sqlite3_column_double(stmt, 9);
-                ap3  = sqlite3_column_double(stmt,10);
+                kl   = sqlite3_column_int   (stmt,  7);
+                ap0  = sqlite3_column_double(stmt,  8);
+                ap1  = sqlite3_column_double(stmt,  9);
+                ap2  = sqlite3_column_double(stmt, 10);
+                ap3  = sqlite3_column_double(stmt, 11);
             }
             
             if (ilfac != ilfac_prev ||
@@ -902,6 +927,8 @@ int cfacdb_ctrans(cfacdb_t *cdb, cfacdb_ctrans_sink_t sink, void *udata)
                 iufac_prev = iufac;
                 type_prev  = type;
             }
+            
+            cbdata.cid  = cid;
             
             cbdata.ii   = cdb->lmap[ilfac - cdb->id_min];
             cbdata.fi   = cdb->lmap[iufac - cdb->id_min];

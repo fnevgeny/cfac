@@ -94,6 +94,7 @@ typedef struct {
 } cfacdb_aitrans_data_t;
 
 typedef struct {
+    unsigned int cid;
     unsigned int ii, fi;
     
     unsigned int type;
@@ -174,5 +175,7 @@ int cfacdb_crates(cfacdb_t *cdb,
 int cfacdb_prepare_intext(const cfacdb_t *cdb,
     const cfacdb_ctrans_data_t *cbdata, cfacdb_intext_t *intext);
 double cfacdb_intext(const cfacdb_intext_t *intext, double x);
+
+int cfacdb_attach_cache(cfacdb_t *cdb, const char *fname);
 
 #endif /* _CFACDB_H */

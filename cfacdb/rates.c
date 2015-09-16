@@ -252,6 +252,7 @@ static int crates_sink(const cfacdb_t *cdb,
         cfacdb_crates_sink_t sink;
         void *udata;
         gsl_integration_workspace *w;
+        sqlite3_stmt *stmt;
     } *rdata = udata;
     
     params.T    = rdata->T;
@@ -301,6 +302,16 @@ static int crates_sink(const cfacdb_t *cdb,
     rcbdata.ratec = ratec;
     
     rdata->sink(cdb, &rcbdata, rdata->udata);
+
+    /* if the cache DB exists, store data there */
+    if (cdb->cached) {
+        sqlite3_bind_int   (rdata->stmt, 1, cbdata->cid);
+        sqlite3_bind_double(rdata->stmt, 3, ratec);
+
+        sqlite3_step(rdata->stmt);
+
+        sqlite3_reset(rdata->stmt);
+    }
     
     return CFACDB_SUCCESS;
 }
@@ -309,14 +320,31 @@ int cfacdb_crates(cfacdb_t *cdb, double T,
     cfacdb_crates_sink_t sink, void *udata)
 {
     int rc;
-
+    
     struct {
         double T;
         cfacdb_crates_sink_t sink;
         void *udata;
         gsl_integration_workspace *w;
+        sqlite3_stmt *stmt;
     } rdata;
     
+    if (cdb->cached) {
+        const char *sql;
+        
+        /* first, try to get previously calculated rates */
+        cfacdb_crates_cached(cdb, T, sink, udata);
+        
+        /* prepare for transaction */
+        sqlite3_exec(cdb->cache_db, "BEGIN", NULL, NULL, NULL);
+
+        sql = "INSERT INTO crates" \
+              " (cid, t, rate)" \
+              " VALUES (?, ?, ?)";
+        sqlite3_prepare_v2(cdb->cache_db, sql, -1, &rdata.stmt, NULL);
+        sqlite3_bind_double(rdata.stmt, 2, T);
+    }
+
     rdata.sink  = sink;
     rdata.udata = udata;
     rdata.T = T;
@@ -330,5 +358,15 @@ int cfacdb_crates(cfacdb_t *cdb, double T,
     
     gsl_integration_workspace_free(rdata.w);
     
+    if (cdb->cached) {
+        sqlite3_finalize(rdata.stmt);
+
+        /* finalize transaction */
+        sqlite3_exec(cdb->cache_db, "END", NULL, NULL, NULL);
+
+        /* clean the temporary table in the main DB */
+        sqlite3_exec(cdb->db, "DELETE FROM _cache_temp", NULL, NULL, NULL);
+    }
+
     return rc;
 }

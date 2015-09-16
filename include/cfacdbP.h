@@ -45,7 +45,14 @@ struct _cfacdb_t {
 
     unsigned int *lmap;
     
+    int cached;
+    sqlite3 *cache_db;
+    
     void *udata;
 };
+
+int cfacdb_crates_cached(cfacdb_t *cdb,
+    double T, cfacdb_crates_sink_t sink, void *udata);
+
 
 #endif /* _CFACDBP_H */

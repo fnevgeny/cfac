@@ -1,5 +1,5 @@
 CREATE TEMPORARY VIEW _cstrengths_v AS
-  SELECT ct.sid, ct.ini_id, ct.fin_id, ct.type,
+  SELECT ct.sid, ct.cid, ct.ini_id, ct.fin_id, ct.type,
          cs.e, cs.strength,
          li.nele AS ini_nele, lf.nele AS fin_nele,
          lf.e - li.e AS de, ct.kl, ct.ap0, ct.ap1, ct.ap2, ct.ap3

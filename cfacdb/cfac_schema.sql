@@ -43,3 +43,14 @@ CREATE TEMPORARY VIEW _ctransitions_v AS
       INNER JOIN levels AS li ON (t.sid = li.sid AND t.ini_id = li.id)
       INNER JOIN levels AS lf ON (t.sid = lf.sid AND t.fin_id = lf.id)
     GROUP BY t.cid;
+
+CREATE TEMPORARY TABLE _cache_temp (
+    cid      INTEGER NOT NULL REFERENCES ctransitions(cid) ON DELETE CASCADE,
+    rate     REAL    NOT NULL
+);
+
+CREATE TEMPORARY VIEW _crates_cached_v AS
+  SELECT ct.sid, ct.ini_id, ct.fin_id, ct.type,
+         ini_nele, fin_nele, de, tt.rate
+    FROM _ctransitions_v AS ct
+    INNER JOIN _cache_temp AS tt ON (ct.cid = tt.cid);

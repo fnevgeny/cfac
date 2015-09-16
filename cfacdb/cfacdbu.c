@@ -27,12 +27,6 @@ static int sessions_sink(const cfacdb_t *cdb,
     return CFACDB_SUCCESS;
 }
 
-static int crates_sink(const cfacdb_t *cdb,
-    cfacdb_crates_data_t *cbdata, void *udata)
-{
-    return CFACDB_SUCCESS;
-}
-
 int main(int argc, const char *argv[])
 {
     const char *fname;
@@ -77,14 +71,6 @@ int main(int argc, const char *argv[])
         stats.ndim, stats.rtdim, stats.aidim, stats.cedim, stats.cidim,
         stats.pidim);
 
-    if (cfacdb_attach_cache(cdb, "cache.db") == CFACDB_SUCCESS) {
-        cfacdb_crates(cdb, 100.0, crates_sink, NULL);
-        cfacdb_crates(cdb, 200.0, crates_sink, NULL);
-        cfacdb_crates(cdb, 300.0, crates_sink, NULL);
-    } else {
-        fprintf(stderr, "Failed attaching cache to DB \"%s\"\n", fname);
-    }
-    
     cfacdb_close(cdb);
     
     exit(0);

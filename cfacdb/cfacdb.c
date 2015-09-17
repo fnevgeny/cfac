@@ -306,6 +306,11 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
         return CFACDB_FAILURE;
     }
 
+    /* free from possible previous invocation of cfacdb_init() */
+    if (cdb->lmap) {
+        free(cdb->lmap);
+    }
+
     if (sid) {
         cdb->sid = sid;
     } else {

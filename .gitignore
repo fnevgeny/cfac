@@ -50,3 +50,5 @@ tags
 # Debugger history
 .gdb_history
 
+# NFS locks
+.nfs*

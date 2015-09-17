@@ -3,13 +3,15 @@ CREATE TEMPORARY VIEW _sessions_v AS
     MIN(l.nele) AS nele_min, MAX(l.nele) AS nele_max
     FROM sessions AS sess
       INNER JOIN species AS s ON (sess.sid = s.sid)
-      INNER JOIN levels AS l ON (s.sid = l.sid);
+      INNER JOIN levels AS l ON (s.sid = l.sid)
+    GROUP BY sess.sid;
 
 CREATE TEMPORARY VIEW _species_v AS
   SELECT s.sid, s.symbol, s.anum, s.mass,
          MIN(l.id) AS id_min, MAX(l.id) AS id_max
     FROM species AS s
-      INNER JOIN levels AS l ON (s.sid = l.sid);
+      INNER JOIN levels AS l ON (s.sid = l.sid)
+    GROUP BY s.sid;
 
 CREATE TEMPORARY VIEW _cstates_v AS
   SELECT l.sid, l.nele, s.anum - l.nele + 1 AS zsp, MIN(e) AS e_gs,

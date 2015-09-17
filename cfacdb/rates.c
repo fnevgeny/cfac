@@ -301,7 +301,9 @@ static int crates_sink(const cfacdb_t *cdb,
     
     rcbdata.ratec = ratec;
     
-    rdata->sink(cdb, &rcbdata, rdata->udata);
+    if (rdata->sink(cdb, &rcbdata, rdata->udata) != CFACDB_SUCCESS) {
+        return CFACDB_FAILURE;
+    }
 
     /* if the cache DB exists, store data there */
     if (cdb->cached) {

@@ -18,7 +18,7 @@ CREATE TEMPORARY VIEW _cstates_v AS
          COUNT(id) AS nlevels
     FROM levels AS l
       INNER JOIN species AS s ON (l.sid = s.sid)
-    GROUP BY l.nele;
+    GROUP BY s.sid, l.nele;
 
 CREATE TEMPORARY VIEW _levels_v AS
   SELECT l.sid, l.id, l.name, l.nele, cs.zsp, l.e, l.e - cs.e_gs AS e_rel,

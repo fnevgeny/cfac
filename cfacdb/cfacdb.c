@@ -343,9 +343,13 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
     }
 
     cdb->stats.ndim = sqlite3_column_int64(stmt, 0);
+    if (cdb->stats.ndim == 0) {
+        fprintf(stderr, "Empty or non-existing session id %lu\n", sid);
+        sqlite3_finalize(stmt);
+        return CFACDB_FAILURE;
+    }
     
     sqlite3_finalize(stmt);
-
 
     sql = "SELECT COUNT(sid) AS rtdim" \
           " FROM _rtransitions_v" \

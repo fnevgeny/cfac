@@ -99,7 +99,8 @@ cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store)
 
     rc = sqlite3_open_v2(fname, &cdb->db, SQLITE_OPEN_READONLY, NULL);
     if (rc) {
-        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(cdb->db));
+        fprintf(stderr, "Cannot open database \"%s\": %s\n",
+            fname, sqlite3_errmsg(cdb->db));
         cfacdb_close(cdb);
         return NULL;
     }

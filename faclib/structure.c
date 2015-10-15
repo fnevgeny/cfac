@@ -2394,6 +2394,14 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
   return 0;
 }
 
+static void string_trim(char *s) {
+    if (s) {
+        size_t len = strlen(s);
+        if (s[len - 1] == ' ') {
+            s[len - 1] = '\0';
+        }
+    }
+}
 
 int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
     char *name, char *sname, char *nc, int *vnl) {
@@ -2539,6 +2547,11 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
     UnpackShell(c->shells, &n, &kl, &j, &nq);
     *vnl = (kl/2) + 100*n;
   }
+
+  /* strip trailing spaces */
+  string_trim(name);
+  string_trim(sname);
+  string_trim(nc);
       
   return nele;
 }

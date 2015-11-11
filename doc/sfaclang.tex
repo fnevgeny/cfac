@@ -648,28 +648,27 @@ is constructed by default. Calling this function with \var{n}=0 reset the grid
 to system default. 
 \end{fundesc}
 
-\begin{fundesc}{SetTransitionGauge}{m}
-Set the gauge for radiative transition.
+\begin{fundesc}{SetTransitionGauge}{g}
+Set the gauge for radiative transition. 1 for Coulomb gauge (velocity form) and
+2 for Babushkin gauge (length form, which is the default). 
 \end{fundesc}
 
-\begin{fundesc}{SetTransitionMaxE}{m}
+\begin{fundesc}{SetTransitionMaxE}{max\_e}
 Set the maximum rank of electric multipole transitions.
 \end{fundesc}
 
-\begin{fundesc}{SetTransitionMaxM}{m}
+\begin{fundesc}{SetTransitionMaxM}{max\_m}
 Set the maximum rank of magnetic multipole transitions.
 \end{fundesc}
 
 \begin{fundesc}{SetTransitionMode}{m}
-Set the mode for the radiative transition.
+Set the mode for the multipole integral calculation. 0 for fully relativistic
+and 1 for non-relativistic approximation (the default is 1, but $M1$ transitions
+are always calculated in the fully relativistic mode anyway).
 \end{fundesc}
 
-\begin{fundesc}{SetTransitionOptions}{g, m}
-Set the options for the radiative transition calculation. \var{g} is the gauge
-to be used, 1 for Coulomb gauge (velocity form) and 2 for Babushkin gauge
-(length form, which is the default). \var{m} is the mode for the multipole
-integral, 0 for fully relativistic and 1 for non-relativistic approximation
-(the default is 1).
+\begin{fundesc}{SetTransitionOptions}{g, m\opt{, max\_e, max\_m}}
+A convenience function combining the four functions above in a single call.
 \end{fundesc}
 
 \begin{fundesc}{SetUsrCEGrid}{g $\mid$ n\opt{, e0, e1}}

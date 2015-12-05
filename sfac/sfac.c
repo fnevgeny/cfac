@@ -17,6 +17,7 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <math.h>
 
 #include "global.h"
@@ -3149,6 +3150,12 @@ int main(int argc, const char *argv[]) {
   int i;
   FILE *f;
   int cmdlen = 0;
+
+
+/* fix non-standard number of exponent digits in the MSVC runtime */
+#ifdef _WIN32
+  _set_output_format(_TWO_DIGIT_EXPONENT);
+#endif
 
   if (InitFac() < 0) {
     printf("initialization failed\n");

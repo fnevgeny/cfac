@@ -1967,7 +1967,7 @@ int PrintTable(char *ifn, char *ofn, int v) {
   FILE *f1, *f2;
   int n, swp;
 
-  f1 = fopen(ifn, "r");
+  f1 = fopen(ifn, "rb");
   if (f1 == NULL) return -1;
 
   if (strcmp(ofn, "-") == 0) {
@@ -2103,7 +2103,7 @@ int FindLevelByName(char *fn, int nele, char *nc, char *cnr, char *cr) {
   int n, k;
   int swp;
   
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) {
     printf("cannot open file %s\n", fn);
     return -1;
@@ -2150,7 +2150,7 @@ int LevelInfor(char *fn, int ilev, EN_RECORD *r0) {
   int n, i, k, nlevels;
   int swp, sr;
   
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) {
     printf("cannot open file %s\n", fn);
     return -1;
@@ -2265,7 +2265,7 @@ int MemENTable(char *fn) {
   float e0;
   int swp, sr;
 
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) return -1;
 
   n = ReadFHeader(f, &fh, &swp);  
@@ -2344,7 +2344,7 @@ int MemENFTable(char *fn) {
   int n, i, nlevels;
   int swp, sr;
 
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) return -1;
 
   n = ReadFHeader(f, &fh, &swp);  
@@ -3275,7 +3275,7 @@ int AppendTable(char *fn) {
   FILE *f;
   int n, swp;
     
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) return -1;
   n = ReadFHeader(f, &fh, &swp);
   if (!n) {
@@ -3299,9 +3299,9 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
 #define NBUF 8192
   char buf[NBUF];
 
-  f1 = fopen(fn1, "r");
+  f1 = fopen(fn1, "rb");
   if (f1 == NULL) return -1;
-  f2 = fopen(fn2, "r");
+  f2 = fopen(fn2, "rb");
   if (f2 == NULL) return -1;
 
   n = ReadFHeader(f1, &fh1, &swp1);
@@ -3533,7 +3533,7 @@ int StoreTable(const cfac_t *cfac,
     int n, swp;
     int retval = 0;
 
-    fp = fopen(ifn, "r");
+    fp = fopen(ifn, "rb");
     if (fp == NULL) {
         return -1;
     }

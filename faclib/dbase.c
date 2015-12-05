@@ -779,7 +779,7 @@ int WriteCIMHeader(FILE *f, CIM_HEADER *h) {
 }
 
 int WriteENRecord(FILE *f, EN_RECORD *r) {
-  int i, n, m = 0;
+  int i, n, m = 0, len;
 
   if (en_header.length == 0) {
     fheader[DB_EN-1].nblocks++;
@@ -791,21 +791,14 @@ int WriteENRecord(FILE *f, EN_RECORD *r) {
   WSF0(r->ilev);
   WSF0(r->ibase);
   WSF0(r->energy);
-  /* make sure the strings zeroes out after NULL */
-  for (i = 0; i < LNCOMPLEX; i++) {
-    if (r->ncomplex[i] == '\0') break;
-  }
-  for (i++; i < LNCOMPLEX; i++) r->ncomplex[i] = '\0';
-
-  for (i = 0; i < LSNAME; i++) {
-    if (r->sname[i] == '\0') break;
-  }
-  for (i++; i < LSNAME; i++) r->sname[i] = '\0';
-
-  for (i = 0; i < LNAME; i++) {
-    if (r->name[i] == '\0') break;
-  }
-  for (i++; i < LNAME; i++) r->name[i] = '\0';
+  
+  /* make sure the strings are zero-padded */
+  len = strlen(r->ncomplex);
+  memset(r->ncomplex + len, 0, LNCOMPLEX - len);
+  len = strlen(r->sname);
+  memset(r->sname + len, 0, LSNAME - len);
+  len = strlen(r->name);
+  memset(r->name + len, 0, LNAME - len);
   
   WSF1(r->ncomplex, sizeof(char), LNCOMPLEX);
   WSF1(r->sname, sizeof(char), LSNAME);

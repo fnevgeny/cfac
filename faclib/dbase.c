@@ -779,7 +779,7 @@ int WriteCIMHeader(FILE *f, CIM_HEADER *h) {
 }
 
 int WriteENRecord(FILE *f, EN_RECORD *r) {
-  int i, n, m = 0, len;
+  int n, m = 0, len;
 
   if (en_header.length == 0) {
     fheader[DB_EN-1].nblocks++;

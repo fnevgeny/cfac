@@ -13,6 +13,9 @@ AC_PROG_CC
 AC_PROG_F77(gfortran g77 f77 fort77 xlf f90 xlf90)
 AC_F77_LIBRARY_LDFLAGS
 
+# .exe file extension
+AC_EXEEXT
+
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
@@ -195,6 +198,8 @@ AC_CHECK_LIB([sqlite3],[sqlite3_open],[],
 FFLAGSNO="$FFLAGS"
 AC_SUBST(FFLAGSNO)
 FFLAGS="$FFLAGS $fopt"
+
+AC_SUBST(EXEEXT)
 
 AC_CONFIG_FILES([Make.conf:ac-tools/Make.conf.in])
 

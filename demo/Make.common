@@ -1,4 +1,8 @@
-SFAC = ../../sfac/sfac
+TOP = ../..
+
+include $(TOP)/Make.conf
+
+SFAC = $(TOP)/sfac/sfac$(EXE)
 
 CONFIG = test.sf
 

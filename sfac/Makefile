@@ -7,7 +7,7 @@ ALL_CFLAGS = $(CPPFLAGS) -I$(TOP) -I$(TOP)/include -I$(TOP)/faclib $(CFLAGS)
 .c.o: 
 	$(CC) -c $(ALL_CFLAGS) $<
 
-PROGS = sfac
+PROGS = sfac$(EXE)
 
 SRCS = stoken.c sfac.c
 
@@ -19,8 +19,8 @@ Make.dep : $(SRCS)
 	echo "# Generated automatically by \`make depend'" > $@
 	$(CC) $(ALL_CFLAGS) -MM $(SRCS) >> $@
 
-sfac : 	sfac.o stoken.o $(FACLIBS)
-	$(CC) -o sfac sfac.o stoken.o $(FACLIBS) $(LDFLAGS) $(LIBS)
+sfac$(EXE) : sfac.o stoken.o $(FACLIBS)
+	$(CC) -o sfac$(EXE) sfac.o stoken.o $(FACLIBS) $(LDFLAGS) $(LIBS)
 
 install :
 	$(INSTALLDIR) $(BINDIR)

@@ -8,6 +8,8 @@ PACKAGE=cfac
 
 SHELL = /bin/sh
 
+EXE=@EXEEXT@
+
 LIBDIRS = coul faclib
 SUBDIRS = $(LIBDIRS) sfac doc demo cfacdb
 

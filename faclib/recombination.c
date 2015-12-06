@@ -21,8 +21,6 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include <gsl/gsl_sf_legendre.h>
-#include <gsl/gsl_const.h>
 
 #include "global.h"
 #include "cfacP.h"

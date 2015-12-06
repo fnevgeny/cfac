@@ -1988,33 +1988,6 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 
   return 0;
 }
-	
-int DROpen(int n, int *nlev, int **ops) {
-  int i, j, n0, old_n;
-  LEVEL *lev;
-  double e0, e, z;
-
-  e0 = GetLevel(cfac, 0)->energy;
-  z = GetResidualZ(cfac);
-  z = z*z/2.0;
-
-  (*ops) = malloc(sizeof(int)*n);
-  j = 0;
-  old_n = -1;
-  for (i = 0; i < n; i++) {
-    lev = GetLevel(cfac, nlev[i]);
-    e = lev->energy - e0;
-    if (e < EPS16) continue;
-    n0 = ceil(sqrt(z/e));
-    if (n0 != old_n) {
-      (*ops)[j] = n0;
-      j++;
-      old_n = n0;
-    }
-  }
-
-  return j;
-}
 
 int FreeRecPk(void) {
   MultiFreeData(pk_array);

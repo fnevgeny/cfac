@@ -70,6 +70,5 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 int AIRadial1E(double *pk, int kb, int kappaf);
 int AIRadialPk(double **pk, int k0, int k1, int kb, int kappaf, int k);
 int AutoionizeRate(double *rate, double *e, int rec, int f, int msub);
-int DROpen(int n, int *nlev, int **ops);
 
 #endif

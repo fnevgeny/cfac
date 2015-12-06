@@ -67,8 +67,6 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveRecRR(int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveAI(int nlow, int *low, int nup, int *up, char *fn, 
 	   double eref, int msub);
-int AsymmetryPI(int k0, double e, int mx, int m, double *b);
-int SaveAsymmetry(char *fn, char *s, int mx);
 int AIRadial1E(double *pk, int kb, int kappaf);
 int AIRadialPk(double **pk, int k0, int k1, int kb, int kappaf, int k);
 int AutoionizeRate(double *rate, double *e, int rec, int f, int msub);

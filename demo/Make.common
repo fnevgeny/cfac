@@ -1,8 +1,12 @@
-SFAC = ../../sfac/sfac
+TOP = ../..
+
+include $(TOP)/Make.conf
+
+SFAC = $(TOP)/sfac/sfac$(EXE)
 
 CONFIG = test.sf
 
-DIFF = diff -q -I TSess -I FAC
+DIFF = diff -q --strip-trailing-cr -I TSess -I FAC
 
 all: 
 

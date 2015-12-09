@@ -17,6 +17,7 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include <math.h>
 
 #include "global.h"
@@ -2808,19 +2809,6 @@ static int PSetTransitionMaxM(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PAsymmetry(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
-  int mx;
-  
-  if (argc < 2) return -1;
-  if (argc == 3) mx = atoi(argv[2]);
-  else mx = 1;
-  
-  SaveAsymmetry(argv[0], argv[1], mx);
-  
-  return 0;
-}
-
 static int PSetSlaterCut(int argc, char *argv[], int argt[], 
 			 ARRAY *variables) {
   int k0, k1;
@@ -3031,7 +3019,6 @@ static METHOD methods[] = {
   {"AITableMSub", PAITableMSub},
   {"AddConfig", PAddConfig},
   {"AppendTable", PAppendTable}, 
-  {"Asymmetry", PAsymmetry},
   {"AvgConfig", PAvgConfig},
   {"BasisTable", PBasisTable},
   {"CETable", PCETable},
@@ -3149,6 +3136,12 @@ int main(int argc, const char *argv[]) {
   int i;
   FILE *f;
   int cmdlen = 0;
+
+
+/* fix non-standard number of exponent digits in the MSVC runtime */
+#ifdef _WIN32
+  _set_output_format(_TWO_DIGIT_EXPONENT);
+#endif
 
   if (InitFac() < 0) {
     printf("initialization failed\n");

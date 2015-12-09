@@ -18,11 +18,9 @@
  */
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <time.h>
 #include <errno.h>
 #include <math.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "cfacP.h"
@@ -85,7 +83,8 @@ int StoreInit(const cfac_t *cfac,
     }
 
     if (need_truncate) {
-        if (truncate(fn, 0)) {
+        FILE *fp = fopen(fn, "w");
+        if (!fp || fclose(fp) != 0) {
             return -1;
         }
     }

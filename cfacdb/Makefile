@@ -7,7 +7,7 @@ ALL_CFLAGS = $(CPPFLAGS) -I$(TOP)/include $(CFLAGS)
 .c.o: 
 	$(CC) -c $(ALL_CFLAGS) $<
 
-PROGS = cfacdbu	fdemo
+PROGS = cfacdbu$(EXE) fdemo$(EXE)
 
 # Suffixes
 .SUFFIXES : .c .f .sql .i
@@ -31,8 +31,6 @@ FOBJS =	${FSRCS:.f=.o}
 
 SQLIS =	${SQLS:.sql=.i}
 
-LIBS = -lsqlite3 -lgsl -lgslcblas -lm
-
 SRCS  = $(LSRCS) $(CSRCS)
 
 all: $(PROGS)
@@ -40,10 +38,10 @@ all: $(PROGS)
 $(LIBCFACDB): $(LOBJS)
 	$(RM) $@ && $(AR) cr $@ ${LOBJS} && $(RANLIB) $@
 
-cfacdbu: $(COBJS) $(LIBCFACDB)
+cfacdbu$(EXE): $(COBJS) $(LIBCFACDB)
 	$(CC) $(LDFLAGS) -o $@ $(COBJS) $(LIBCFACDB) $(LIBS)
 
-fdemo: $(FOBJS) $(LIBCFACDB)
+fdemo$(EXE): $(FOBJS) $(LIBCFACDB)
 	$(FC) $(LDFLAGS) -o $@ $(FOBJS) $(LIBCFACDB) $(LIBS)
 
 include Make.dep

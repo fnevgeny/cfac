@@ -779,7 +779,7 @@ int WriteCIMHeader(FILE *f, CIM_HEADER *h) {
 }
 
 int WriteENRecord(FILE *f, EN_RECORD *r) {
-  int i, n, m = 0;
+  int n, m = 0, len;
 
   if (en_header.length == 0) {
     fheader[DB_EN-1].nblocks++;
@@ -791,21 +791,14 @@ int WriteENRecord(FILE *f, EN_RECORD *r) {
   WSF0(r->ilev);
   WSF0(r->ibase);
   WSF0(r->energy);
-  /* make sure the strings zeroes out after NULL */
-  for (i = 0; i < LNCOMPLEX; i++) {
-    if (r->ncomplex[i] == '\0') break;
-  }
-  for (i++; i < LNCOMPLEX; i++) r->ncomplex[i] = '\0';
-
-  for (i = 0; i < LSNAME; i++) {
-    if (r->sname[i] == '\0') break;
-  }
-  for (i++; i < LSNAME; i++) r->sname[i] = '\0';
-
-  for (i = 0; i < LNAME; i++) {
-    if (r->name[i] == '\0') break;
-  }
-  for (i++; i < LNAME; i++) r->name[i] = '\0';
+  
+  /* make sure the strings are zero-padded */
+  len = strlen(r->ncomplex);
+  memset(r->ncomplex + len, 0, LNCOMPLEX - len);
+  len = strlen(r->sname);
+  memset(r->sname + len, 0, LSNAME - len);
+  len = strlen(r->name);
+  memset(r->name + len, 0, LNAME - len);
   
   WSF1(r->ncomplex, sizeof(char), LNCOMPLEX);
   WSF1(r->sname, sizeof(char), LSNAME);
@@ -1974,7 +1967,7 @@ int PrintTable(char *ifn, char *ofn, int v) {
   FILE *f1, *f2;
   int n, swp;
 
-  f1 = fopen(ifn, "r");
+  f1 = fopen(ifn, "rb");
   if (f1 == NULL) return -1;
 
   if (strcmp(ofn, "-") == 0) {
@@ -2069,180 +2062,6 @@ int FreeMemENTable(void) {
   return 0;
 }
 
-static int StrTrimCmp(char *s1, char *s2) {
-  int i, j;
-
-  i = 0;
-  while (s1[i] == ' ' || s1[i] == '\t') i++;
-  j = 0;
-  while (s2[j] == ' ' || s2[j] == '\t') j++;
-  while (s1[i] && s2[j]) {
-    if (s1[i] != s2[j]) {
-      return 1;
-    }
-    i++;
-    j++;
-  }
-  if (s1[i] == '\0') {
-    while (s2[j]) {
-      if (s2[j] != ' ' && s2[j] != '\t') {
-	return 1;
-      }
-      j++;
-    }
-  }
-  if (s2[j] == '\0') {
-    while (s1[i]) {
-      if (s1[i] != ' ' && s1[i] != '\t') {
-	return 1;
-      }
-      i++;
-    }
-  }
-  return 0;
-}
-   
-int FindLevelByName(char *fn, int nele, char *nc, char *cnr, char *cr) {
-  F_HEADER fh;  
-  EN_HEADER h;
-  EN_RECORD r;
-  FILE *f;
-  int n, k;
-  int swp;
-  
-  f = fopen(fn, "r");
-  if (f == NULL) {
-    printf("cannot open file %s\n", fn);
-    return -1;
-  }
-  n = ReadFHeader(f, &fh, &swp);
-  if (n == 0) {
-    fclose(f);
-    return 0;
-  }
-
-  if (fh.type != DB_EN) {
-    printf("File type is not DB_EN\n");
-    fclose(f);
-    return -1;
-  }
-
-  while (1) {
-    n = ReadENHeader(f, &h, swp);
-    if (n == 0) break;
-    if (h.nele != nele) {
-      fseek(f, h.length, SEEK_CUR);
-      continue;
-    }
-    for (k = 0; k < h.nlevels; k++) {
-      n = ReadENRecord(f, &r, swp);
-      if (StrTrimCmp(r.ncomplex, nc) == 0 &&
-	  StrTrimCmp(r.sname, cnr) == 0 &&
-	  StrTrimCmp(r.name, cr) == 0) {
-	fclose(f);
-	return r.ilev;
-      }
-    }
-  }
-  
-  fclose(f);
-  return -1;
-}
-      
-int LevelInfor(char *fn, int ilev, EN_RECORD *r0) {
-  F_HEADER fh;  
-  EN_HEADER h;
-  EN_RECORD r;
-  FILE *f;
-  int n, i, k, nlevels;
-  int swp, sr;
-  
-  f = fopen(fn, "r");
-  if (f == NULL) {
-    printf("cannot open file %s\n", fn);
-    return -1;
-  }
-  n = ReadFHeader(f, &fh, &swp);
-  if (n == 0) {
-    fclose(f);
-    return 0;
-  }
-  if (fh.type != DB_EN) {
-    printf("File type is not DB_EN\n");
-    fclose(f);
-    return -1;
-  }
-  if (version_read[DB_EN-1] < 109) sr = sizeof(EN_RECORD);
-  else sr = SIZE_EN_RECORD;
-
-  if (ilev >= 0) {
-    k = ilev;
-    nlevels = 0;
-    for (i = 0; i < fh.nblocks; i++) {
-      n = ReadENHeader(f, &h, swp);
-      if (n == 0) break;
-      nlevels += h.nlevels;
-      if (k < h.nlevels) {
-	if (k > 0) fseek(f, sr*k, SEEK_CUR);
-	n = ReadENRecord(f, &r, swp);
-	if (n == 0) break;
-	if (r.ilev != ilev) {
-	  fclose(f);
-	  return -1;
-	}
-	memcpy(r0, &r, sizeof(EN_RECORD));
-	break;
-      } else {
-	k -= h.nlevels;
-	fseek(f, h.length, SEEK_CUR);
-      }
-    }
-    fclose(f);
-    if (i == fh.nblocks) return -1;
-    return 0;
-  } else {
-    k = -ilev;
-    if (k == 1000) k = 0;
-    if (k < 1000) {
-      nlevels = 0;
-      for (i = 0; i < fh.nblocks; i++) {
-	n = ReadENHeader(f, &h, swp);
-	if (n == 0) break;
-	if (h.nele == k) break;
-	nlevels += h.nlevels;
-	fseek(f, h.length, SEEK_CUR);
-      }
-      fclose(f);
-      if (i == fh.nblocks) return -1;
-      return nlevels;
-    } else {
-      nlevels = 0;
-      k -= 1000;
-      if (k == 1) {
-	for (i = 0; i < fh.nblocks; i++) {
-	  n = ReadENHeader(f, &h, swp);
-	  if (n == 0) break;
-	  nlevels += h.nlevels;
-	  fseek(f, h.length, SEEK_CUR);
-	}
-      } else if (k == 2) {
-	nlevels = fh.nblocks;
-      } else if (k >= 1000) {
-	k -= 1000;
-	for (i = 0; i < fh.nblocks; i++) {
-	  if (i >= k) break;
-	  n = ReadENHeader(f, &h, swp);
-	  if (n == 0) break;
-	  nlevels += h.nlevels;
-	  fseek(f, h.length, SEEK_CUR);
-	}
-      }
-      fclose(f);
-      return nlevels;
-    }
-  }  
-}
-
 EN_SRECORD *GetMemENTable(int *s) {
   *s = mem_en_table_size;
   return mem_en_table;
@@ -2272,7 +2091,7 @@ int MemENTable(char *fn) {
   float e0;
   int swp, sr;
 
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) return -1;
 
   n = ReadFHeader(f, &fh, &swp);  
@@ -2351,7 +2170,7 @@ int MemENFTable(char *fn) {
   int n, i, nlevels;
   int swp, sr;
 
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) return -1;
 
   n = ReadFHeader(f, &fh, &swp);  
@@ -3282,7 +3101,7 @@ int AppendTable(char *fn) {
   FILE *f;
   int n, swp;
     
-  f = fopen(fn, "r");
+  f = fopen(fn, "rb");
   if (f == NULL) return -1;
   n = ReadFHeader(f, &fh, &swp);
   if (!n) {
@@ -3306,9 +3125,9 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
 #define NBUF 8192
   char buf[NBUF];
 
-  f1 = fopen(fn1, "r");
+  f1 = fopen(fn1, "rb");
   if (f1 == NULL) return -1;
-  f2 = fopen(fn2, "r");
+  f2 = fopen(fn2, "rb");
   if (f2 == NULL) return -1;
 
   n = ReadFHeader(f1, &fh1, &swp1);
@@ -3540,7 +3359,7 @@ int StoreTable(const cfac_t *cfac,
     int n, swp;
     int retval = 0;
 
-    fp = fopen(ifn, "r");
+    fp = fopen(ifn, "rb");
     if (fp == NULL) {
         return -1;
     }

@@ -458,7 +458,6 @@ int SwapEndianCIMHeader(CIM_HEADER *h);
 int SwapEndianCIMRecord(CIM_RECORD *r);
 int AppendTable(char *fn);
 int JoinTable(char *fn1, char *fn2, char *fn);
-int LevelInfor(char *fn, int ilev, EN_RECORD *r0);
 int FindLevelByName(char *fn, int nele, char *nc, char *cnr, char *cr);
 int ISearch(int i, int n, int *ia);
 void SetBornFormFactor(double te, char *fn);

@@ -485,7 +485,7 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
       return -1;
     }
     
-    if (argt[i] == NUMBER && argc == 3) {
+    if (argt[i] == NUMBER && argc >= 3) {
       iuta = atoi(argv[i]) ? 1:0;
       i++;
     }

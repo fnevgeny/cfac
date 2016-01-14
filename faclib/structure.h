@@ -123,8 +123,6 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
 int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n);
 HAMILTON *ConstructHamiltonFrozen(cfac_t *cfac,
     int isym, int k, int *kg, int n, int nc, int *kc);
-void HamiltonElement1E2E(cfac_t *cfac,
-    int isym, int isi, int isj, double *r1, double *r2);
 double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj);
 double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj);
 double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj);

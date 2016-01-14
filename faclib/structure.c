@@ -994,15 +994,7 @@ double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
   return r;
 } 
 
-double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj) {
-  double r1, r2;
-  
-  HamiltonElement1E2E(cfac, isym, isi, isj, &r1, &r2);
-  
-  return r1 + r2;
-}
-
-void HamiltonElement1E2E(cfac_t *cfac,
+static void HamiltonElement1E2E(cfac_t *cfac,
   int isym, int isi, int isj, double *x1, double *x2) { 
   CONFIG *ci, *cj;
   int ki, kj;
@@ -1138,6 +1130,14 @@ void HamiltonElement1E2E(cfac_t *cfac,
 
   free(sbra);
   free(sket);
+}
+
+double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj) {
+  double r1, r2;
+  
+  HamiltonElement1E2E(cfac, isym, isi, isj, &r1, &r2);
+  
+  return r1 + r2;
 }
 
 int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs, 

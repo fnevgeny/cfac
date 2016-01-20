@@ -555,6 +555,68 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 }      
 
 
+/* calculate the average energy of the average configuration */
+static double AverageEnergyAvgConfig(cfac_t *cfac) {
+  int i, j, n, kappa, np, kappap;
+  int k, kp, kk, kl, klp, kkmin, kkmax, j2, j2p;
+  double x, y, t, q, a, b, r, nq, nqp, r0, r1;
+  AVERAGE_CONFIG *cfg = &cfac->acfg;
+ 
+  r0 = 0.0;
+  r1 = 0.0;
+  x = 0.0;
+  for (i = 0; i < cfg->n_shells; i++) {
+    n = cfg->n[i];
+    kappa = cfg->kappa[i];
+    kl = GetLFromKappa(kappa);
+    j2 = GetJFromKappa(kappa);
+    nq = cfg->nq[i];
+    k = OrbitalIndex(cfac, n, kappa, 0.0);
+    
+    t = 0.0;
+    for (kk = 2; kk <= j2; kk += 2) {
+      Slater(cfac, &y, k, k, k, k, kk, 0);
+      q = W3j(j2, 2*kk, j2, -1, 0, 1);
+      t += y * q * q ;
+    }
+    Slater(cfac, &y, k, k, k, k, 0, 0);
+    b = ((nq-1.0)/2.0) * (y - (1.0 + 1.0/j2)*t);
+    
+    t = 0.0;
+    for (j = 0; j < i; j++) {
+      np = cfg->n[j];
+      kappap = cfg->kappa[j];
+      klp = GetLFromKappa(kappap);
+      j2p = GetJFromKappa(kappap);
+      nqp = cfg->nq[j];
+      kp = OrbitalIndex(cfac, np, kappap, 0.0);
+
+      kkmin = abs(j2 - j2p);
+      kkmax = (j2 + j2p);
+      if (IsOdd((kkmin + kl + klp)/2)) kkmin += 2;
+      a = 0.0;
+      for (kk = kkmin; kk <= kkmax; kk += 4) {
+	Slater(cfac, &y, k, kp, kp, k, kk/2, 0);
+	q = W3j(j2, kk, j2p, -1, 0, 1);
+	a += y * q * q;
+      }
+      Slater(cfac, &y, k, kp, k, kp, 0, 0);
+
+      t += nqp * (y - a);
+    }
+
+    ResidualPotential(cfac, &y, k, k);
+    a = GetOrbital(cfac, k)->energy;
+    r = nq * (b + t + a + y);
+    r0 += nq*y;
+    r1 += nq*(b+t);
+    x += r;
+  }
+
+  /*printf("%12.5E %12.5E %15.8E\n", r0, r1, x);*/
+  return x;
+}
+
 static double EnergyFunc(const gsl_vector *v, void *params) {
   double lambda, a, avg;
   cfac_t *cfac = (cfac_t *) params;
@@ -1062,7 +1124,7 @@ int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg) {
       }
     } else {
       OptimizeRadial(cfac, ng, kg, NULL);
-      if (mr) RefineRadial(cfac, mr, 0);
+      if (mr > 0) RefineRadial(cfac, mr, 0);
       for (k = 0; k < ng; k++) {
 	g = GetGroup(cfac, kg[k]);
 	for (i = 0; i < g->n_cfgs; i++) {
@@ -1235,68 +1297,6 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
     x += r;
   }
 
-  return x;
-}
-
-/* calculate the average energy of the average configuration */
-double AverageEnergyAvgConfig(cfac_t *cfac) {
-  int i, j, n, kappa, np, kappap;
-  int k, kp, kk, kl, klp, kkmin, kkmax, j2, j2p;
-  double x, y, t, q, a, b, r, nq, nqp, r0, r1;
-  AVERAGE_CONFIG *cfg = &cfac->acfg;
- 
-  r0 = 0.0;
-  r1 = 0.0;
-  x = 0.0;
-  for (i = 0; i < cfg->n_shells; i++) {
-    n = cfg->n[i];
-    kappa = cfg->kappa[i];
-    kl = GetLFromKappa(kappa);
-    j2 = GetJFromKappa(kappa);
-    nq = cfg->nq[i];
-    k = OrbitalIndex(cfac, n, kappa, 0.0);
-    
-    t = 0.0;
-    for (kk = 2; kk <= j2; kk += 2) {
-      Slater(cfac, &y, k, k, k, k, kk, 0);
-      q = W3j(j2, 2*kk, j2, -1, 0, 1);
-      t += y * q * q ;
-    }
-    Slater(cfac, &y, k, k, k, k, 0, 0);
-    b = ((nq-1.0)/2.0) * (y - (1.0 + 1.0/j2)*t);
-    
-    t = 0.0;
-    for (j = 0; j < i; j++) {
-      np = cfg->n[j];
-      kappap = cfg->kappa[j];
-      klp = GetLFromKappa(kappap);
-      j2p = GetJFromKappa(kappap);
-      nqp = cfg->nq[j];
-      kp = OrbitalIndex(cfac, np, kappap, 0.0);
-
-      kkmin = abs(j2 - j2p);
-      kkmax = (j2 + j2p);
-      if (IsOdd((kkmin + kl + klp)/2)) kkmin += 2;
-      a = 0.0;
-      for (kk = kkmin; kk <= kkmax; kk += 4) {
-	Slater(cfac, &y, k, kp, kp, k, kk/2, 0);
-	q = W3j(j2, kk, j2p, -1, 0, 1);
-	a += y * q * q;
-      }
-      Slater(cfac, &y, k, kp, k, kp, 0, 0);
-
-      t += nqp * (y - a);
-    }
-
-    ResidualPotential(cfac, &y, k, k);
-    a = GetOrbital(cfac, k)->energy;
-    r = nq * (b + t + a + y);
-    r0 += nq*y;
-    r1 += nq*(b+t);
-    x += r;
-  }
-
-  /*printf("%12.5E %12.5E %15.8E\n", r0, r1, x);*/
   return x;
 }
 

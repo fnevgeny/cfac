@@ -85,7 +85,6 @@ double TotalEnergyGroup(cfac_t *cfac, int kg);
 double ZerothEnergyConfig(cfac_t *cfac, CONFIG *cfg);
 double ZerothResidualConfig(cfac_t *cfac, CONFIG *cfg);
 double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg);
-double AverageEnergyAvgConfig(cfac_t *cfac);
 
 /* routines for radial integral calculations */
 int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 

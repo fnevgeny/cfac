@@ -955,7 +955,7 @@ int AddOrbital(cfac_t *cfac, ORBITAL *orb) {
 
   orb = ArrayAppend(cfac->orbitals, orb);
   if (!orb) {
-    printf("Not enough memory for cfac->orbitals array\n");
+    printf("Not enough memory for orbitals array\n");
     exit(1);
   }
 
@@ -990,7 +990,7 @@ ORBITAL *GetNewOrbital(cfac_t *cfac) {
 
   orb = ArrayAppend(cfac->orbitals, NULL);
   if (!orb) {
-    printf("Not enough memory for cfac->orbitals array\n");
+    printf("Not enough memory for orbitals array\n");
     exit(1);
   }
 
@@ -2393,7 +2393,7 @@ int Slater(const cfac_t *cfac,
     npts = potential->maxrp;
     switch (mode) {
     case 0: /* fall through to case 1 */
-    case 1: /* full relativistic with distorted free cfac->orbitals */
+    case 1: /* full relativistic with distorted free orbitals */
       GetYk(cfac, k, yk, orb0, orb2, k0, k2, 1); 
       if (orb1->n > 0) ilast = orb1->ilast;
       else ilast = npts-1;
@@ -2404,7 +2404,7 @@ int Slater(const cfac_t *cfac,
       IntegrateS(potential, yk, orb1, orb3, INT_P1P2pQ1Q2, s, 0);
       break;
     
-    case -1: /* quasi relativistic with distorted free cfac->orbitals */
+    case -1: /* quasi relativistic with distorted free orbitals */
       GetYk(cfac, k, yk, orb0, orb2, k0, k2, 2);
       if (orb1->n > 0) ilast = orb1->ilast;
       else ilast = npts-1;
@@ -2627,7 +2627,7 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 }  
 
 /*
- * integrate a function given by f with two cfac->orbitals.
+ * integrate a function given by f with two orbitals.
  * type indicates the type of integral
  * id indicates whether integrate inward (-1) or outward (0)
  * if last_only is set, only the end point is returned in x,

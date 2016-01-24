@@ -243,7 +243,6 @@
 #define IONTOL             5E-2
 
 /* recombination */
-#define RECNMAX            512
 #define RECNSPEC           8
 #define RECNFROZEN         8
 #define RECLMAX            12

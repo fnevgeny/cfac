@@ -70,7 +70,6 @@ static ARRAY *hyd_qk_array;
 static struct {
   int n_spec;
   int n_frozen;
-  int n_max;
   int max_kl;
   int kl_interp;
   int nkl0;
@@ -79,7 +78,7 @@ static struct {
   int kl[MAXNKL+1];
   int kappa0[(MAXNKL+1)*2];
 } pw_scratch = {RECNSPEC, RECNFROZEN, 
-		RECNMAX, RECLMAX, RECLMAX,
+		RECLMAX, RECLMAX,
 		0, 0, {0, RECLMAX}, {0.0}, {0.0}};
 
 double ai_cut = AICUT;
@@ -166,8 +165,7 @@ int AddRecPW(int n, int step) {
   return 0;
 }
 
-int SetRecSpectator(int n_max, int n_frozen, int n_spec) {
-  if (n_max > 0) pw_scratch.n_max = n_max;
+int SetRecSpectator(int n_frozen, int n_spec) {
   if (n_frozen > 0) pw_scratch.n_frozen = n_frozen;
   if (n_spec > 0) pw_scratch.n_spec = n_spec;
   return 0;

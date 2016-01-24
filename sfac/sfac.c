@@ -2032,25 +2032,20 @@ static int PSetRecPWLimits(int argc, char *argv[], int argt[],
 
 static int PSetRecSpectator(int argc, char *argv[], int argt[], 
 			    ARRAY *variables) {
-  int n_spec, n_frozen, n_max;
+  int n_spec, n_frozen;
 
   n_spec = 0;
   n_frozen = 0;
-  n_max = 0;
   
-  if (argc < 1 || argc > 3) return -1;
+  if (argc < 1 || argc > 2) return -1;
   n_spec = atoi(argv[0]);
   if (argc > 1) {
     n_frozen = atoi(argv[1]);
-    if (argc > 2) {
-      n_max = atoi(argv[2]);
-    }
   }
 
   if (n_frozen == 0) n_frozen = n_spec;
-  if (n_max == 0) n_max = 100;
 
-  SetRecSpectator(n_max, n_frozen, n_spec);
+  SetRecSpectator(n_frozen, n_spec);
 
   return 0;
 }

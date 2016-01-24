@@ -48,7 +48,7 @@ int AddRecPW(int n, int step);
 int SetRecQkMode(int m, double tol);
 int SetRecPWOptions(int kl_interp, int max_kl);
 int SetRecPWLimits(int m1, int m2);
-int SetRecSpectator(int n_max, int n_frozen, int n_spec);
+int SetRecSpectator(int n_frozen, int n_spec);
 int ConstructRecGroupName(char *rgn, char *gn, int n);
 int RecStates(int n, int k, int *kg, char *fn);
 int RecStatesFrozen(int n, int k, int *kg, char *fn);

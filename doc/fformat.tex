@@ -2,8 +2,8 @@
 \label{cha:format}
 \cFAC outputs results of calculations in three formats: binary, ASCII, and as a
 SQLite database. The primary format is the binary one. The binary files can be
-converted to either ASCII or SQLite ones by invoking \key{PrintTable} and 
-\key{StoreTable} functions, respectively.
+converted to either ASCII or SQLite ones by invoking \funcref{PrintTable} and 
+\funcref{StoreTable} functions, respectively.
 
 The structure of these files is described below.
 
@@ -201,7 +201,8 @@ length form.
 relativistic. 1 is non-relativistic approximation for multipole operators.
 \item[\texttt{int multipole}:] Multipole type of the transition. Its absolute
 value is the rank of the multipole, 1 for dipole, 2 for quadrupole, etc. The
-positive sign represents magnetic type and negative sign represents electric type.
+positive sign represents magnetic type and negative sign represents electric
+type.
 \end{dbdesc}
 
 \subsection{\texttt{TR\_RECORD}}
@@ -242,7 +243,7 @@ where $L$ is the multipole rank.
 \texttt{TR\_EXTRA} contains the UTA related transition data, namely, the
 transition energy including the UTA shift, the UTA Gaussian width, and the
 configuration interaction multiplier. This structure is written to the
-\texttt{DB\_TR} file only in UTA mode, which is set by \key{SetUTA()}
+\texttt{DB\_TR} file only in UTA mode, which is set by the \funcref{SetUTA}
 function.
 
 \begin{verbatim}
@@ -513,7 +514,7 @@ atomic units. It is related to photoionization and radiative recombination as
 \begin{eqnarray}
 \sigma_{PI} &=& 2\pi\alpha\frac{d f}{d E} \nonumber\\
             &=& \frac{2\pi\alpha}{g_i}
-		 \frac{1+\alpha^2\varepsilon}{1+\frac{1}{2}\alpha^2 \varepsilon} 
+		 \frac{1+\alpha^2\varepsilon}{1+\frac{1}{2}\alpha^2 \varepsilon}
 		 \frac{d(gf)}{d E} \nonumber\\
 \sigma_{RR} &=& \frac{\alpha^2}{2}\frac{g_i}{g_f}
                 \frac{\omega^2}{\varepsilon \left(1+\frac{1}{2}\alpha^2
@@ -666,9 +667,9 @@ y &=& 1-\frac{1}{x} \nonumber\\
 \Omega &=& p_0\ln x + p_1y^2 + p_2\frac{1}{x}y + p_3\frac{1}{x^2}y,
 \end{eqnarray}
 where $E_0$ is the energy of the incident electron, $E_{th}$ is the ionization
-threshold, $p_0$, $p_1$, $p_2$, and $p_3$ are the four parameters. The
-parameter $p_0$ is actually obtained from the bound-free oscillator strength,
-which is more reliable than one would get by fitting the calculated collision strengths.
+threshold, $p_0$, $p_1$, $p_2$, and $p_3$ are the four parameters. The parameter
+$p_0$ is actually obtained from the bound-free oscillator strength, which is
+more reliable than one would get by fitting the calculated collision strengths.
 \item[\texttt{float *strength}:] The collision strength for ionization. It is
 related to the ionization cross section as (in atomic units):
 \begin{equation}
@@ -1190,11 +1191,11 @@ NUSR	= 8
 \section{SQLite Format}
 \label{sec:sqlite}
 
-The SQLite format is that of the SQLite SQL database engine~\cite{sqlite}.
-In order to use it, (i) call \key{StoreInit}, (ii) call \key{StoreTable} every
-time when \key{PrintTable} would have been used for the ASCII output, and
-finally, (iii) call \key{StoreClose}. Please note that if desired, ASCII and
-SQLite data can be output simultaneously.
+The SQLite format is that of the SQLite SQL database engine~\cite{sqlite}. In
+order to use it, (i) call \funcref{StoreInit}, (ii) call \funcref{StoreTable}
+every time when \funcref{PrintTable} would have been used for the ASCII output,
+and finally, (iii) call \funcref{StoreClose}. Please note that if desired, ASCII
+and SQLite data can be output simultaneously.
 
 The SQL scheme used by \cFAC to store the data in this format is listed below.
 

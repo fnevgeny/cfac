@@ -22,8 +22,7 @@
 \newcommand{\cFAC}{{cFAC}\xspace}
 \newcommand{\facversion}{{1.5.0}\xspace}
 
-\newcommand{\opt}[1]{
-  {\textnormal{[}}{#1}\hspace{0.5mm}{\textnormal{]}}}
+\newcommand{\opt}[1]{{\textnormal{[}}{#1}\hspace{0.5mm}{\textnormal{]}}}
 \newcommand{\var}[1]{\textit{#1}}
 \newcommand{\key}[1]{\texttt{#1}}
 
@@ -33,13 +32,18 @@
 	   \setlength{\labelsep}{0.1in}
 	   \setlength{\rightmargin}{0.2in}}}
 	{\end{list}}
+
+\newcounter{fundesc}
 \newenvironment{fundesc}[2]{
+        \refstepcounter{fundesc}
 	\begin{center}
 	\begin{minipage}{\textwidth}
 	\subsection*{\key{\textbf{#1}}(\var{#2}):}
 	\index{#1}
+        \label{#1}
 	\addcontentsline{toc}{subsection}{#1}}
 	{\end{minipage}\end{center}}
+\newcommand{\funcref}[2][]{\hyperref[#2]{\texttt{#2(\var{#1})}}}
 
 \newcounter{faq}[section]
 \newcommand{\faq}[2]{\stepcounter{faq}

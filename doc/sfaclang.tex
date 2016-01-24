@@ -34,11 +34,12 @@ the UTA shift, the Gaussian standard deviation, and the correction to the line
 strengths due to the configuration interaction within the same non-relativistic
 configurations. If $m=0$, which is the default, the usual detailed term
 accounting method is used. This function should be called in the beginning of
-the script, before \key{Config} function, since it disables the angular momentum
-coupling performed by \key{Config}. The optional argument \var{ci} indicates
-whether the configuration interaction correction factors should be included when
-reading the \key{DB\_TR} files. These correction factors are always calculated
-in \key{TransitionTable} irrespective of the value of \var{ci}.
+the script, before \funcref{Config} function, since it disables the angular
+momentum coupling performed by \funcref{Config}. The optional argument \var{ci}
+indicates whether the configuration interaction correction factors should be
+included when reading the \key{DB\_TR} files. These correction factors are
+always calculated in \funcref{TransitionTable} irrespective of the value of
+\var{ci}.
 \end{fundesc}
 
 \subsection{Electron Shell Configuration}
@@ -77,7 +78,7 @@ include $=$, $>$, and $<$.
 \begin{fundesc}{GetConfigNR}{c, ...}
 This functions returns a list of non-relativistic configurations corresponding
 to the supplied configuration strings, which may contain wild casts as in the
-\key{Config} function. It is useful, e.g., when one wants to know the
+\funcref{Config} function. It is useful, e.g., when one wants to know the
 non-relativistic configurations of \key{1*2 2*2 3*1}. 
 \end{fundesc}
 
@@ -93,12 +94,13 @@ is not given, then all configurations currently defined are printed.
 \begin{fundesc}{AvgConfig}{c}
 Set up a mean configuration for the optimization of central potential as
 specified by the string \var{c}. The format of the string is the same as in the
-function \key{Config}, except that the occupation can be a non-integer number in
-this routine. The mean configuration set up by this function is effective only
-if the function \key{OptimizeRadial} is called with no arguments. Otherwise, the
-configurations given in that function are used to generate the mean
-configuration automatically. It is important that this function be called before
-\key{OptimizeRadial} and after \key{ConfigEnergy(0)}, if the later is used.
+function \funcref{Config}, except that the occupation can be a non-integer
+number in this routine. The mean configuration set up by this function is
+effective only if the function \funcref{OptimizeRadial} is called with no
+arguments. Otherwise, the configurations given in that function are used to
+generate the mean configuration automatically. It is important that this
+function be called before \funcref{OptimizeRadial} and after
+\funcref[0]{ConfigEnergy}, if the later is used.
 \end{fundesc}
 
 \begin{fundesc}{BasisTable}{fn\opt{,m}}
@@ -110,23 +112,21 @@ given.
 
 \begin{fundesc}{ConfigEnergy}{m\opt{, n\opt{, g, ...}}}
 This function should be called twice just before (with \var{m} = 0) and after
-(with \var{m} = 1) \key{OptimizeRadial} if used. If \key{AvgConfig} is
-called, then \key{ConfigEnergy} with \var{m}=0 must be called before that.
-The call with \var{m} = 0
-performs a radial optimization for the configuration groups given by the list
-\var{g}, and calculate the average energy of each configuration under
-such potentials. Multiple optimizations are performed if more than one list
-are given. If none is given, the optimization are carried out for each
-configuration group. If \var{m} = 0, one may also
-specify an integer \var{n} to indicate that \key{RefineRadial(n)} should be
-called after the optimization. The call with \var{m} = 1 does not accept
-additional arguments. It recalculates the average energy of each configuration
-under the potential obtained by \key{OptimizeRadial} issued by the user. The
-diagonal elements of the Hamiltonian calculated in the \key{Structure} call are
-then adjusted by the difference of the two average energies for each
-configuration. The purpose of this routine is to remove some of the errors in
-the level energies introduced by using a single central potential for all
-configurations.
+(with \var{m} = 1) \funcref{OptimizeRadial} if used. If \funcref{AvgConfig} is
+called, then \funcref{ConfigEnergy} with \var{m}=0 must be called before that.
+The call with \var{m} = 0 performs a radial optimization for the configuration
+groups given by the list \var{g}, and calculate the average energy of each
+configuration under such potentials. Multiple optimizations are performed if
+more than one list are given. If none is given, the optimization are carried out
+for each configuration group. If \var{m} = 0, one may also specify an integer
+\var{n} to indicate that \funcref[n]{RefineRadial} should be called after the
+optimization. The call with \var{m} = 1 does not accept additional arguments. It
+recalculates the average energy of each configuration under the potential
+obtained by \funcref{OptimizeRadial} issued by the user. The diagonal elements
+of the Hamiltonian calculated in the \funcref{Structure} call are then adjusted
+by the difference of the two average energies for each configuration. The
+purpose of this routine is to remove some of the errors in the level energies
+introduced by using a single central potential for all configurations.
 \end{fundesc}
 
 \begin{fundesc}{CorrectEnergy}{fn, nmin $\mid$ ilev, e, nmin}
@@ -136,11 +136,11 @@ the energy corrections are listed as two columns in the file \var{fn}. In the
 second form, the indexes are given in the list \var{ilev}, and the energy
 corrections are given in the list \var{e}. Only levels with valence electron in
 $n\ge nmin$ are corrected, if these levels are not constructed with
-\key{RecStates}. The corrections are given in units of eV. For the first level
-in the correction list, the amount is added to the energies calculated by \cFAC,
-and that level is taken as the reference level for all other entries in the
-list. The correction energies in the list \var{e} for these other entries with
-\var{ilev}$\ge 0$ are the desired energies relative to the reference level,
+\funcref{RecStates}. The corrections are given in units of eV. For the first
+level in the correction list, the amount is added to the energies calculated by
+\cFAC, and that level is taken as the reference level for all other entries in
+the list. The correction energies in the list \var{e} for these other entries
+with \var{ilev}$\ge 0$ are the desired energies relative to the reference level,
 i.e., they replace the energies calculated by \cFAC. However, if \var{ilev}$<0$,
 then these corrections are also interpreted as shifts to be added to the
 energies calculated by \cFAC.
@@ -153,7 +153,7 @@ that are not in the group list \var{g1} or the mixing coefficients less than
 \end{fundesc}
 
 \begin{fundesc}{GetPotential}{fn}
-Print the radial potential obtained by \key{OptimizeRadial} to the file
+Print the radial potential obtained by \funcref{OptimizeRadial} to the file
 \var{fn}. The file starts with the parameters for the analytic fit the to
 potential, $\lambda$ and $a$, in the formula
 \begin{equation}
@@ -176,7 +176,7 @@ Uehling potential which approximates the vacuum polarization effects.
 \begin{fundesc}{OptimizeRadial}{\opt{g\opt{, w}}}
 Obtain the optimal radial potential based on the mean configuration generated
 by the configuration group list \var{g} and the weight \var{w}, or if they are
-absent in the call, by the mean configuration specified by \key{AvgConfig}.
+absent in the call, by the mean configuration specified by \funcref{AvgConfig}.
 \var{g} and \var{w} must be equal length lists if both present. \var{g}
 is a list of configuration groups, and \var{w} is a list of weights for each
 group when generating the mean configuration. If only \var{g} is present, each
@@ -190,7 +190,7 @@ not present, the angular coefficients are calculated between states in the
 \var{p} list. Only $Z^L(\alpha,\beta)$ and $\tilde{a_\alpha}$ coefficients are
 calculated. If the bra and ket states have the same number of electrons, $Z^L$
 is calculated, otherwise $\tilde{a_\alpha}$ is calculated. This routine should
-primarily be used when atomic states are constructed with \key{RecStates},
+primarily be used when atomic states are constructed with \funcref{RecStates},
 where the angular coefficients between the base states are used many times. It
 is therefore more efficient to precalculate these coefficients.
 \end{fundesc}
@@ -199,12 +199,12 @@ is therefore more efficient to precalculate these coefficients.
 Construct recombined states by adding a spectator electron with the principal
 quantum number \var{n} onto the basis states in the configuration groups
 \var{b}. The orbital angular momentum of the spectator electron is set by two
-functions \key{SetRecPWLimits} and \key{SetRecSpectator}. The resulting energy
-levels are saved in file \var{fn}.
+functions \funcref{SetRecPWLimits} and \funcref{SetRecSpectator}. The resulting
+energy levels are saved in file \var{fn}.
 \end{fundesc}
 
 \begin{fundesc}{RefineRadial}{\opt{n\opt{, m}}}
-This function may be called after \key{OptimizeRadial}, which performs a
+This function may be called after \funcref{OptimizeRadial}, which performs a
 minimization of the total energy of the mean configuration by adjusting the
 parameters in the analytic central potential. \var{n} is the number of energy
 evaluations allowed in the minimization, and \var{m} controls the print out
@@ -227,7 +227,7 @@ included. The default value is 5.
 \begin{fundesc}{SetCILevel}{m}
 Set the level of configuration interaction space. By default, $m=0$, the
 configuration space is determined by the configuration groups passed to the
-\key{Structure} function. CI can be further refined by the value of $m$. If
+\funcref{Structure} function. CI can be further refined by the value of $m$. If
 $m=-1$, then no CI is included, the Hamiltonian is assumed to be diagonal. If
 $m=1$, only CI within the same relativistic configuration is included. If
 $m=2$, only CI within the same non-relativistic configuration is included. If
@@ -269,20 +269,23 @@ out of information.
 \end{fundesc}
 
 \begin{fundesc}{SetOptimizeMaxIter}{m}
-Set the maximum number of iterations allowed in \key{OptimizeRadial}. See
-\key{SetOptimizeControl}.
+Set the maximum number of iterations allowed in \funcref{OptimizeRadial}. See
+\funcref{SetOptimizeControl}.
 \end{fundesc}
 
 \begin{fundesc}{SetOptimizePrint}{m}
-Set the printing option in \key{OptimizeRadial}. See \key{SetOptimizeControl}.
+Set the printing option in \funcref{OptimizeRadial}. See
+\funcref{SetOptimizeControl}.
 \end{fundesc}
 
 \begin{fundesc}{SetOptimizeStabilizer}{m}
-Set the stabilizer factor in \key{OptimizeRadial}. See \key{SetOptimizeControl}.
+Set the stabilizer factor in \funcref{OptimizeRadial}. See
+\funcref{SetOptimizeControl}.
 \end{fundesc}
 
 \begin{fundesc}{SetOptimizeTolerance}{m}
-Set the tolerance factor in \key{OptimizeRadial}. See \key{SetOptimizeControl}.
+Set the tolerance factor in \funcref{OptimizeRadial}. See
+\funcref{SetOptimizeControl}.
 \end{fundesc}
 
 \begin{fundesc}{SetRadialGrid}{n\opt{, r0\opt{,r1}\opt{,rmin}}}
@@ -363,19 +366,19 @@ output to the file \var{fn}.
 \end{fundesc}
 
 \begin{fundesc}{Structure}{p, j}
-This is the second form of the \key{Structure} function. It distinguishes itself
-from the first form because the first argument is an integer. It sets which $\pi
-J$ symmetry and/or which level to include in the structure calculation. By
-default, all symmetries are processed. But if this function is called with $p=0$
-or 1 and $j \ge 0$ or $j$ is a list of integers, then only the specified
-symmetry is processed. $j$ (or integers in the list if $j$ is a list), is  twice
-the actual value of the total angular momentum.
+This is the second form of the \funcref{Structure} function. It distinguishes
+itself from the first form because the first argument is an integer. It sets
+which $\pi J$ symmetry and/or which level to include in the structure
+calculation. By default, all symmetries are processed. But if this function is
+called with $p=0$ or 1 and $j \ge 0$ or $j$ is a list of integers, then only the
+specified symmetry is processed. $j$ (or integers in the list if $j$ is a list),
+is  twice the actual value of the total angular momentum.
 \end{fundesc}
 
 \begin{fundesc}{StructureEB}{fn, g}
 Calculate the atomic structure for atom in magnetic and electric fields. The
 levels belonging to the configuration group \var{g} are allowed to mix in the
-external fields. This function should be called after \key{Structure}.
+external fields. This function should be called after \funcref{Structure}.
 \end{fundesc}
 
 \begin{fundesc}{WaveFuncTable}{fn, n, k\opt{, e}}
@@ -420,7 +423,7 @@ transitions. The results are saved to file \var{fn}.
 \end{fundesc}
 
 \begin{fundesc}{TRTable}{fn, low, up\opt{, m}}
-Same as \key{TransitionTable}
+Same as \funcref{TransitionTable}
 \end{fundesc}
 
 \begin{fundesc}{TRTableEB}{fn, lo, up\opt{, m}}
@@ -478,8 +481,9 @@ grid is given by a list \var{g}. In the second form, the grid is constructed
 with \var{n} points, from \var{e0} to \var{e1}. The energies are specified for
 the scattered electron energy, and are in units of eV. This routine does not
 need to be called. A default grid is constructed for a given transition array
-with 6 points, minimum and maximum energies specified by \key{SetCEGridLimits}.
-Calling this routine with \var{n}=0, resets the grid to the default one.
+with 6 points, minimum and maximum energies specified by
+\funcref{SetCEGridLimits}. Calling this routine with \var{n}=0, resets the grid
+to the default one.
 \end{fundesc}
 
 \begin{fundesc}{SetCEGridLimits}{e0, e1}
@@ -522,7 +526,7 @@ called. A 3-point grid is constructed by default. Calling this function with
 \begin{fundesc}{SetUsrCEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the user collision energy grid for collisional excitation. The collision
 strengths on this grid are output. It is forced to be same as that set by
-\key{SetCEGrid} if \key{QKMODE} is \key{'exact'}.
+\funcref{SetCEGrid} if \key{QKMODE} is \key{'exact'}.
 \end{fundesc}
 
 
@@ -548,8 +552,8 @@ with \var{n} points, from \var{e0} to \var{e1}. The energies are specified for
 the total energy of the final electrons, and are in units of eV. This routine
 does not need to be called. A default grid is constructed for a given transition
 array with 6 points, with the minimum and maximum energies specified by
-\key{SetCIEGridLimits}. Calling this routine with \var{n}=0 resets the grid to
-the system default.
+\funcref{SetCIEGridLimits}. Calling this routine with \var{n}=0 resets the grid
+to the system default.
 \end{fundesc}
 
 \begin{fundesc}{SetCIEGridLimits}{e0, e1}
@@ -610,11 +614,11 @@ strengths on this grid are output.
 \subsection{Radiative Recombination and Photoionization}
 
 \begin{fundesc}{RRMultipole}{fn, b, f\opt{, m}}
-Calculate the bound-free multipole matrix elements. Because \key{RRTable} does
-not calculate the matrix elements directly, this function exists to provide such
-data. The output is written to the file \var{fn} in an ASCII format, described
-in the header of the file itself. The remaining arguments are identical to those
-of \key{RRTable}.
+Calculate the bound-free multipole matrix elements. Because \funcref{RRTable}
+does not calculate the matrix elements directly, this function exists to provide
+such data. The output is written to the file \var{fn} in an ASCII format,
+described in the header of the file itself. The remaining arguments are
+identical to those of \funcref{RRTable}.
 \end{fundesc}
 
 \begin{fundesc}{RRTable}{fn, b, f\opt{, m}}
@@ -662,7 +666,7 @@ recombined states to [\var{l0}, \var{l1}] inclusive. The default is [0, 12].
 \begin{fundesc}{SetRecPWOptions}{lmax}
 Set maximum orbital angular momentum of the spectator electron in the
 recombined states to \var{lmax}. The allowed values are also limited by the
-setting of \key{SetRecPWLimits}. The default is 12.
+setting of \funcref{SetRecPWLimits}. The default is 12.
 \end{fundesc}
 
 \begin{fundesc}{SetRecQkMode}{mode}
@@ -674,14 +678,14 @@ mode. These values are listed in the variable \key{QKMODE}.
 \begin{fundesc}{SetRecSpectator}{nmin\opt{, nfrozen}}
 Set the minimum principal quantum numbers \var{nmin} and \var{nfrozen} for the
 spectator electron. States with $n > nmin$ are constructed with
-\key{RecStates} function, and those with $n > nfrozen$ are treated with the
+\funcref{RecStates} function, and those with $n > nfrozen$ are treated with the
 frozen core approximation. Default for both \var{nmin} and \var{nfrozen} are 8.
 \end{fundesc}
 
 \begin{fundesc}{SetUsrPEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the user electron energy grid for photoionization and radiative
 recombination. The bound-free differential oscillator strengths are output on
-this grid. It is forced to be same as that set by \key{SetPEGrid} if
+this grid. It is forced to be same as that set by \funcref{SetPEGrid} if
 \key{QKMODE} is \key{'exact'}.
 \end{fundesc}
 
@@ -731,7 +735,7 @@ platform, have the same type and be calculated for the same element.
 
 \begin{fundesc}{MemENTable}{fn}
 Build an energy level table in the memory for the \texttt{DB\_EN} type file
-\var{fn}. This function must be called before any calls to \key{PrintTable}
+\var{fn}. This function must be called before any calls to \funcref{PrintTable}
 made in the verbose mode.
 \end{fundesc}
 
@@ -739,11 +743,12 @@ made in the verbose mode.
 Convert the binary database file \var{fnb} to the ASCII file \var{fna}. The
 optional argument \var{v} = 1 requires the conversion be done in verbose
 mode, otherwise it is done in simple mode. Note that before conversion in
-verbose mode is carried out, one must call \key{MemENTable} first.
+verbose mode is carried out, one must call \funcref{MemENTable} first.
 \end{fundesc}
 
 \begin{fundesc}{StoreClose}{}
-Close the database that has previously been initialized with \key{StoreInit}.
+Close the database that has previously been initialized with
+\funcref{StoreInit}.
 \end{fundesc}
 
 \begin{fundesc}{StoreInit}{fn \opt{, reset}}
@@ -754,7 +759,7 @@ and the database already exists, all existing sessions will be dropped.
 
 \begin{fundesc}{StoreTable}{fn}
 Store data contained in the binary file \var{fn} into a database that has
-previously been initialized with \key{StoreInit}.
+previously been initialized with \funcref{StoreInit}.
 \end{fundesc}
 
 

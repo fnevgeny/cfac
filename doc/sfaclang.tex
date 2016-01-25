@@ -322,6 +322,14 @@ integrals are not calculated. When $l > k2$, the direct integrals are evaluated
 with the multipole moments.
 \end{fundesc}
 
+\begin{fundesc}{SetSymmetry}{p, j}
+Define which $\pi J$ symmetry to include in the structure calculations. By
+default, all symmetries are processed. But if this function is called with $p=0$
+or 1 and $j \ge 0$ or $j$ is a list of integers, then only the specified
+symmetry is processed. $j$ (or integers in the list if $j$ is a list) is twice
+the actual value of the total angular momentum.
+\end{fundesc}
+
 \begin{fundesc}{SetVP}{vp}
 Set the flag for QED vacuum polarization correction to the Hamiltonian.
 0---disable, 1---only include 2nd order term, 2---include the 4th order term as
@@ -355,7 +363,7 @@ configuration transitions for dipole transitions. The 13th column is the number
 to be added to $g_2$ to form relative intensities for quadrupole transitions.
 \end{fundesc}
 
-\begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}}}
+\begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}} $\mid$ p, j}
 Diagonalize the Hamiltonian for configurations in the groups \var{g}. The
 configurations in the optional groups \var{p} are allowed to interact with
 \var{g} but only states within \var{g} are added to the energy level table. If
@@ -363,16 +371,9 @@ configurations in the optional groups \var{p} are allowed to interact with
 exactly, if \var{ip}=1, this interaction is treated approximately in a way that
 the non-diagonal elements within \var{p} are neglected. The energy levels are
 output to the file \var{fn}.
-\end{fundesc}
 
-\begin{fundesc}{Structure}{p, j}
-This is the second form of the \funcref{Structure} function. It distinguishes
-itself from the first form because the first argument is an integer. It sets
-which $\pi J$ symmetry and/or which level to include in the structure
-calculation. By default, all symmetries are processed. But if this function is
-called with $p=0$ or 1 and $j \ge 0$ or $j$ is a list of integers, then only the
-specified symmetry is processed. $j$ (or integers in the list if $j$ is a list),
-is  twice the actual value of the total angular momentum.
+The second, obsolete form of this function corresponds to
+\funcref[p, j]{SetSymmetry}.
 \end{fundesc}
 
 \begin{fundesc}{StructureEB}{fn, g}

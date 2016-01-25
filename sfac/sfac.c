@@ -2406,6 +2406,20 @@ static int PCutMixing(int argc, char *argv[], int argt[],
   return 0;  
 }
 
+static int PSetSymmetry(int argc, char *argv[], int argt[], 
+		      ARRAY *variables) {
+  if (argc == 2 && argt[0] == NUMBER) {
+    int nj, ip, *kg;
+    ip = atoi(argv[0]);
+    nj = IntFromList(argv[1], argt[1], variables, &kg);
+    SetSymmetry(cfac, ip, nj, kg);
+    free(kg);
+    return 0;
+  } else {
+    return -1;
+  }
+}
+
 static int PStructure(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
   int ng, ngp;
@@ -2425,12 +2439,8 @@ static int PStructure(int argc, char *argv[], int argt[],
     if (ng < 0) return -1;
   } else
   if (argc == 2 && argt[0] == NUMBER) {
-    int nj;
-    ip = atoi(argv[0]);
-    nj = IntFromList(argv[1], argt[1], variables, &kg);
-    SetSymmetry(cfac, ip, nj, kg);
-    free(kg);
-    return 0;
+    printf("Structure(p, J) is obsolete; use SetSymmetry(p, J) instead.\n");
+    return PSetSymmetry(argc, argv, argt, variables);
   } else
   if (argc == 2 && argt[0] == STRING && argt[1] == NUMBER) {
     int nele = atoi(argv[1]);
@@ -3098,6 +3108,7 @@ static METHOD methods[] = {
   {"SetSE", PSetSE},
   {"SetScreening", PSetScreening},
   {"SetSlaterCut", PSetSlaterCut}, 
+  {"SetSymmetry", PSetSymmetry},
   {"SetTEGrid", PSetTEGrid},
   {"SetTransitionCut", PSetTransitionCut},
   {"SetTransitionGauge", PSetTransitionGauge},

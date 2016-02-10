@@ -2409,7 +2409,7 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
   int nele, i, len;
   char symbol[20];
   char jsym;
-  char ashell[16];
+  char ashell[32];
   CONFIG *c;
   SHELL_STATE *s = NULL;
   ORBITAL *orb;

@@ -88,8 +88,6 @@ int cfac_set_atom(cfac_t *cfac, const char *s,
         atom->rn = rn;
     }
     
-    cfac->potential->anum = atom->anum;
-
     /* allocate & init per-charge-state level arrays */
     cfac->levels_per_ion = malloc(sizeof(ARRAY)*(cfac->nucleus.anum + 1));
 

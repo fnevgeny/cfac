@@ -175,25 +175,24 @@ void SetScreening(cfac_t *cfac, int n_screen, int *screened_n,
 
 int SetRadialGrid(cfac_t *cfac,
     int maxrp, double ratio, double asymp, double rmin) {
-  POTENTIAL *potential = cfac->potential;
   if (maxrp > MAXRP) {
     printf("MAXRP must be <= %d\n", MAXRP);
     printf("to enlarge the limit, change MAXRP in consts.h\n");
     return -1;
   }
   if (maxrp < 0) maxrp = DMAXRP;
-  potential->maxrp = maxrp;
+  cfac->maxrp = maxrp;
   if (asymp < 0 && ratio < 0) {
     asymp = GRIDASYMP;
     ratio = GRIDRATIO;
   }
   if (rmin <= 0) rmin = GRIDRMIN;
-  potential->rmin = rmin;
-  if (ratio == 0) potential->ratio = GRIDRATIO;
-  else potential->ratio = ratio;
-  if (asymp == 0) potential->asymp = GRIDASYMP;
-  else potential->asymp = asymp;
-  potential->flag = 0;
+  cfac->rmin = rmin;
+  if (ratio == 0) cfac->rratio = GRIDRATIO;
+  else cfac->rratio = ratio;
+  if (asymp == 0) cfac->rasymp = GRIDASYMP;
+  else cfac->rasymp = asymp;
+  cfac->potential->flag = 0;
   return 0;
 }
 
@@ -525,7 +524,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 
   /* setup the radial grid if not yet */
   if (potential->flag == 0) {
-    SetOrbitalRGrid(potential);
+    SetOrbitalRGrid(cfac, potential);
   }
 
   SetPotentialZ(cfac);

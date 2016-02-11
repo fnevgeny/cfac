@@ -28,10 +28,7 @@ typedef struct _POTENTIAL_ {
   unsigned int anum;      /* nuclear charge (cfac->nucleus.anum)  */
   
   int maxrp;              /* used length of the [MAXRP] arrays    */
-  double rmin;            /* starting point of the radial mesh    */
-  double ratio;           /* incr. ratio of radial mesh near 0    */
-  double asymp;           /* number of mesh points per oscillation
-                             wavelength for high-n orbitals       */
+  double asymp;           /* copy of cfac_t->asymp                */
   
   double Navg;            /* total number of electrons in the
                              average config (cfac->acfg)          */
@@ -50,7 +47,7 @@ typedef struct _POTENTIAL_ {
   double dr_drho[MAXRP];  /* dr/d\rho                             */
   double dr_drho2[MAXRP]; /* square root of the above             */
   
-  double Vn[MAXRP];        /* nucleus potential                   */
+  double Vn[MAXRP];       /* nucleus potential                    */
   
   double lambda, a;       /* optimization parameters for Vc       */
   double Vc[MAXRP];       /* optimized central potential          */
@@ -88,7 +85,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot);
 int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot);
 int RadialFree(ORBITAL *orb, POTENTIAL *pot);
 void Differential(double *p, double *dp, int i1, int i2);
-int SetOrbitalRGrid(POTENTIAL *pot);
+int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot);
 int SetPotentialZ(cfac_t *cfac);
 int SetPotentialUehling(cfac_t *cfac, int vp);
 int SetPotentialVc(POTENTIAL *pot);

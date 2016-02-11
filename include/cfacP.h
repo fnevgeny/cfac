@@ -55,6 +55,13 @@ struct _cfac_t {
  
     AVERAGE_CONFIG acfg;      /* average config for potential optimization   */
 
+
+    double rmin;              /* starting point of the radial mesh x anum    */
+    double rratio;            /* incr. ratio of radial mesh near 0           */
+    double rasymp;            /* number of mesh points per oscillation
+                                 wavelength for high-n orbitals              */
+    int maxrp;                /* used length of the arrays in POTENTIAL      */
+
     POTENTIAL *potential;     /* potential                                   */
 
 

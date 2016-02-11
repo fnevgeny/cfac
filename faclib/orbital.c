@@ -1816,20 +1816,26 @@ static double GetRFromRho(double rho, double a, double b, double r0) {
     return r0;
 }
 
-int SetOrbitalRGrid(POTENTIAL *pot) {
-  double ratio = pot->ratio, asymp = pot->asymp;
+int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
+  double ratio = cfac->rratio, asymp = cfac->rasymp;
+  int maxrp = cfac->maxrp;
   int i;  
-  double z0, z, d1, d2;
-  double a = 0.0, b, c = 0.0, rmin, rmax = 0.0;
+  double rmin, z, d1, d2;
+  double a = 0.0, b, c = 0.0, rmax = 0.0;
   double rho, drho;
 
-  z0 = pot->anum;
-  z = z0;
-  if (pot->Navg > 0) z -= pot->Navg - 1;
+  pot->anum = cfac_get_atomic_number(cfac);
+  pot->asymp = asymp;
+  pot->maxrp = maxrp;
+  
+  rmin = cfac->rmin/pot->anum;
+  
+  z = pot->anum;
+  if (pot->Navg > 0) {
+    z -= pot->Navg - 1;
+  }
   
   if (pot->flag == 0) pot->flag = -1; 
-
-  rmin = pot->rmin/z0;
 
   if (asymp > 0 && ratio > 0) {
     a = asymp*sqrt(2*z)/M_PI;

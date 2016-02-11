@@ -3181,5 +3181,7 @@ int main(int argc, const char *argv[]) {
     }
   }
   
+  cfac_free(cfac);
+  
   return 0;
 }

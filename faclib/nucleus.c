@@ -104,7 +104,7 @@ double cfac_get_atomic_mass(const cfac_t *cfac) {
     return cfac->nucleus.mass;
 }
 
-double cfac_get_atomic_number(const cfac_t *cfac) {
+unsigned int cfac_get_atomic_number(const cfac_t *cfac) {
     return cfac->nucleus.anum;
 }
 

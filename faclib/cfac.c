@@ -289,6 +289,27 @@ cfac_t *cfac_new(void)
     return cfac;
 }
 
+static void cfac_potential_free(POTENTIAL *pot)
+{
+    if (pot) {
+        if (pot->maxrp) {
+            free(pot->rad);
+            free(pot->dr_drho);
+            free(pot->dr_drho2);
+            free(pot->Vn);
+            free(pot->Vc);
+            free(pot->dVc);
+            free(pot->dVc2);
+            free(pot->U);
+            free(pot->dU);
+            free(pot->dU2);
+            free(pot->W);
+            free(pot->uehling);
+            free(pot->veff);
+        }
+        free(pot);
+    }
+}
 
 void cfac_free(cfac_t *cfac)
 {
@@ -313,7 +334,7 @@ void cfac_free(cfac_t *cfac)
         }
         free(cfac->levels_per_ion);
         
-        free(cfac->potential);
+        cfac_potential_free(cfac->potential);
         
         cfac_free_radial(cfac);
         

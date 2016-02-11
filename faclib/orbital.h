@@ -27,7 +27,6 @@ typedef struct _POTENTIAL_ {
   
   unsigned int anum;      /* nuclear charge (cfac->nucleus.anum)  */
   
-  int maxrp;              /* used length of the [MAXRP] arrays    */
   double asymp;           /* copy of cfac_t->asymp                */
   
   double Navg;            /* total number of electrons in the
@@ -42,27 +41,30 @@ typedef struct _POTENTIAL_ {
   unsigned int nmax;      /* above this PQN, Coulomb WF for
                              r > rad[r_core] are assumed          */
   
-  double rad[MAXRP];      /* radial grid; rad[0] = rmin/at.number */
-
-  double dr_drho[MAXRP];  /* dr/d\rho                             */
-  double dr_drho2[MAXRP]; /* square root of the above             */
-  
-  double Vn[MAXRP];       /* nucleus potential                    */
-  
   double lambda, a;       /* optimization parameters for Vc       */
-  double Vc[MAXRP];       /* optimized central potential          */
-  double dVc[MAXRP];      /* its first derivative d(Vc)/dr        */
-  double dVc2[MAXRP];     /* its second derivative                */
+
+  int maxrp;              /* allocated length of the arrays below */
+
+  double *rad;            /* radial grid                          */
+
+  double *dr_drho;        /* dr/d\rho                             */
+  double *dr_drho2;       /* square root of the above             */
   
-  double U[MAXRP];        /* direct interaction part of potential */
-  double dU[MAXRP];       /* its first derivative                 */
-  double dU2[MAXRP];      /* its second derivative                */
+  double *Vn;             /* nucleus potential                    */
   
-  double W[MAXRP];        /* relativistic corrections             */
+  double *Vc;             /* optimized central potential          */
+  double *dVc;            /* its first derivative d(Vc)/dr        */
+  double *dVc2;           /* its second derivative                */
   
-  double uehling[MAXRP];  /* the Uehling potential                */
+  double *U;              /* direct interaction part of potential */
+  double *dU;             /* its first derivative                 */
+  double *dU2;            /* its second derivative                */
   
-  double veff[MAXRP];
+  double *W;              /* relativistic corrections             */
+  
+  double *uehling;        /* the Uehling potential                */
+  
+  double *veff;
 } POTENTIAL;
 
 typedef struct _ORBITAL_ {

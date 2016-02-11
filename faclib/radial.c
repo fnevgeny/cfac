@@ -524,7 +524,9 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 
   /* setup the radial grid if not yet */
   if (potential->flag == 0) {
-    SetOrbitalRGrid(cfac, potential);
+    if (SetOrbitalRGrid(cfac, potential) < 0) {
+      return -1;
+    }
   }
 
   SetPotentialZ(cfac);
@@ -546,9 +548,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 
   iter = OptimizeLoop(cfac);
 
-  if (potential->uehling[0] == 0.0) {
-    SetPotentialUehling(cfac, cfac->qed.vp);
-  }
+  SetPotentialUehling(cfac, cfac->qed.vp);
 
   return iter;
 }      

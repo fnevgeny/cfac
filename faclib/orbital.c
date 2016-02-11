@@ -1824,9 +1824,43 @@ int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
   double a = 0.0, b, c = 0.0, rmax = 0.0;
   double rho, drho;
 
+  if (pot->maxrp != maxrp) {
+    pot->rad      = realloc(pot->rad,      maxrp*sizeof(double));
+    pot->dr_drho  = realloc(pot->dr_drho,  maxrp*sizeof(double));
+    pot->dr_drho2 = realloc(pot->dr_drho2, maxrp*sizeof(double));
+    pot->Vn       = realloc(pot->Vn,       maxrp*sizeof(double));
+    pot->Vc       = realloc(pot->Vc,       maxrp*sizeof(double));
+    pot->dVc      = realloc(pot->dVc,      maxrp*sizeof(double));
+    pot->dVc2     = realloc(pot->dVc2,     maxrp*sizeof(double));
+    pot->U        = realloc(pot->U,        maxrp*sizeof(double));
+    pot->dU       = realloc(pot->dU,       maxrp*sizeof(double));
+    pot->dU2      = realloc(pot->dU2,      maxrp*sizeof(double));
+    pot->W        = realloc(pot->W,        maxrp*sizeof(double));
+    pot->uehling  = realloc(pot->uehling,  maxrp*sizeof(double));
+    pot->veff     = realloc(pot->veff,     maxrp*sizeof(double));
+  }
+  
+  if (!pot->rad      ||
+      !pot->dr_drho  ||
+      !pot->dr_drho2 ||
+      !pot->Vn       ||
+      !pot->Vc       ||
+      !pot->dVc      ||
+      !pot->dVc2     ||
+      !pot->U        ||
+      !pot->dU       ||
+      !pot->dU2      ||
+      !pot->W        ||
+      !pot->uehling  ||
+      !pot->veff) {
+    printf("Memory allocation failed in SetOrbitalRGrid()\n");
+    return -1;
+  }
+
+  pot->maxrp = maxrp;
+  
   pot->anum = cfac_get_atomic_number(cfac);
   pot->asymp = asymp;
-  pot->maxrp = maxrp;
   
   rmin = cfac->rmin/pot->anum;
   

@@ -207,6 +207,148 @@ static void AdjustScreeningParams(POTENTIAL *potential, const double *u) {
   potential->lambda = log(2.0)/potential->rad[i];
 }
 
+/*
+** this is a better version of Yk than GetYk0.
+** note that on exit, rk contains r^k, which is used in GetYk
+*/
+static int GetYk1(POTENTIAL *potential,
+    int k, double *yk, double *rk,
+    const ORBITAL *orb1, const ORBITAL *orb2, int type) {
+  int i, ilast;
+  double r0, a;
+  double dwork1[MAXRP];
+  double dwork2[MAXRP];
+  
+  ilast = Min(orb1->ilast, orb2->ilast);
+  r0 = sqrt(potential->rad[0]*potential->rad[ilast]);
+  for (i = 0; i < potential->maxrp; i++) {
+    dwork1[i] = pow(potential->rad[i]/r0, k);
+  }
+  IntegrateF(potential, dwork1, orb1, orb2, type, dwork2, 0);
+  a = pow(r0, k);
+  for (i = 0; i < potential->maxrp; i++) {
+    yk[i] = dwork2[i]/dwork1[i];
+    rk[i] = dwork1[i]*a;
+  }
+  for (i = 0; i < potential->maxrp; i++) {
+    dwork1[i] = (r0/potential->rad[i])/dwork1[i];
+  }
+  IntegrateF(potential, dwork1, orb1, orb2, type, dwork2, -1);
+  for (i = 0; i < potential->maxrp; i++) {
+    yk[i] += dwork2[i]/dwork1[i];
+  }
+
+  return 0;
+}
+
+int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
+	  int k1, int k2, RadIntType type) {
+  int i, i0, i1, n;
+  double a, b, a2, b2, max, max1;
+  int index[3];
+  SLATER_YK *syk;
+  POTENTIAL *potential = cfac->potential;
+  double dwork[MAXRP];
+
+  if (k1 <= k2) {
+    index[0] = k1;
+    index[1] = k2;
+  } else {
+    index[0] = k2;
+    index[1] = k1;
+  }
+  index[2] = k;
+
+  syk = (SLATER_YK *) MultiSet(cfac->yk_array, index, NULL);
+  if (syk->npts < 0) {
+    GetYk1(potential, k, yk, dwork, orb1, orb2, type);
+    max = 0;
+    for (i = 0; i < potential->maxrp; i++) {
+      dwork[i] *= yk[i];
+      a = fabs(dwork[i]);
+      if (a > max) max = a;
+    }
+    max1 = max*EPS5;
+    max = max*EPS4;
+    a = dwork[potential->maxrp-1];
+    for (i = potential->maxrp-2; i >= 0; i--) {
+      if (fabs(dwork[i] - a) > max1) {
+	break;
+      }
+    }
+    i1 = i;
+    for (i = i1; i >= 0; i--) {
+      b = fabs(a - dwork[i]);
+      dwork[i] = log(b);
+      if (b > max) {
+	break;
+      }
+    }
+    i0 = i;
+    if (i0 == i1) {
+      i0--;
+      b = fabs(a - dwork[i0]);
+      dwork[i0] = log(b);
+    }
+    syk->coeff[0] = a;
+    syk->npts = i0+1;
+    syk->yk = malloc(sizeof(float)*(syk->npts));
+    for (i = 0; i < syk->npts ; i++) {
+      syk->yk[i] = yk[i];
+    }
+    n = i1 - i0 + 1;
+    a = 0.0;
+    b = 0.0;
+    a2 = 0.0;
+    b2 = 0.0;
+    for (i = i0; i <= i1; i++) {
+      max = (potential->rad[i]-potential->rad[i0]);
+      a += max;
+      b += dwork[i];
+      a2 += max*max;
+      b2 += dwork[i]*max;
+    }
+    syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);
+    if (syk->coeff[1] >= 0) {
+      i1 = i0 + (i1-i0)*0.3;
+      if (i1 == i0) i1 = i0 + 1;
+      for (i = i0; i <= i1; i++) {
+	max = (potential->rad[i]-potential->rad[i0]);
+	a += max;
+	b += dwork[i];
+	a2 += max*max;
+	b2 += dwork[i]*max;
+      }
+      syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);
+    }
+    if (syk->coeff[1] >= 0) {
+      syk->coeff[1] = -10.0/(potential->rad[i1]-potential->rad[i0]);
+    }
+  } else {
+    for (i = syk->npts-1; i < potential->maxrp; i++) {
+      dwork[i] = pow(potential->rad[i], k);
+    }
+    for (i = 0; i < syk->npts; i++) {
+      yk[i] = syk->yk[i];
+    }
+    i0 = syk->npts-1;
+    a = syk->yk[i0]*dwork[i0];
+    for (i = syk->npts; i < potential->maxrp; i++) {
+      b = potential->rad[i] - potential->rad[i0];
+      b = syk->coeff[1]*b;
+      if (b < -20) {
+	yk[i] = syk->coeff[0];
+      } else {
+	yk[i] = (a - syk->coeff[0])*exp(b);
+	yk[i] += syk->coeff[0];
+      }
+      yk[i] /= dwork[i];
+    }
+  }
+  
+  return 0;
+}
+
 /* w - electron density distribution of the average config */
 static int PotentialHX(const cfac_t *cfac, double *u, double *w) {
   int i, j, k1, jmax, m, jm;
@@ -2482,148 +2624,6 @@ void SortSlaterKey(int *kd) {
     }
   }
 }
-
-/*
-** this is a better version of Yk than GetYk0.
-** note that on exit, rk contains r^k, which is used in GetYk
-*/      
-static int GetYk1(POTENTIAL *potential,
-    int k, double *yk, double *rk,
-    const ORBITAL *orb1, const ORBITAL *orb2, int type) {
-  int i, ilast;
-  double r0, a;
-  double dwork1[MAXRP];
-  double dwork2[MAXRP];
-  
-  ilast = Min(orb1->ilast, orb2->ilast);
-  r0 = sqrt(potential->rad[0]*potential->rad[ilast]);  
-  for (i = 0; i < potential->maxrp; i++) {
-    dwork1[i] = pow(potential->rad[i]/r0, k);
-  }
-  IntegrateF(potential, dwork1, orb1, orb2, type, dwork2, 0);
-  a = pow(r0, k);
-  for (i = 0; i < potential->maxrp; i++) {
-    yk[i] = dwork2[i]/dwork1[i];
-    rk[i] = dwork1[i]*a;
-  }  
-  for (i = 0; i < potential->maxrp; i++) {
-    dwork1[i] = (r0/potential->rad[i])/dwork1[i];
-  }
-  IntegrateF(potential, dwork1, orb1, orb2, type, dwork2, -1);
-  for (i = 0; i < potential->maxrp; i++) {
-    yk[i] += dwork2[i]/dwork1[i];
-  }
-      
-  return 0;
-}
-      
-int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 
-	  int k1, int k2, RadIntType type) {
-  int i, i0, i1, n;
-  double a, b, a2, b2, max, max1;
-  int index[3];
-  SLATER_YK *syk;
-  POTENTIAL *potential = cfac->potential;
-  double dwork[MAXRP];
-
-  if (k1 <= k2) {
-    index[0] = k1;
-    index[1] = k2;
-  } else {
-    index[0] = k2;
-    index[1] = k1;
-  }
-  index[2] = k;
-
-  syk = (SLATER_YK *) MultiSet(cfac->yk_array, index, NULL);
-  if (syk->npts < 0) {
-    GetYk1(potential, k, yk, dwork, orb1, orb2, type);
-    max = 0;
-    for (i = 0; i < potential->maxrp; i++) {
-      dwork[i] *= yk[i];
-      a = fabs(dwork[i]); 
-      if (a > max) max = a;
-    }
-    max1 = max*EPS5;
-    max = max*EPS4;
-    a = dwork[potential->maxrp-1];
-    for (i = potential->maxrp-2; i >= 0; i--) {
-      if (fabs(dwork[i] - a) > max1) {
-	break;
-      }
-    }
-    i1 = i;
-    for (i = i1; i >= 0; i--) {      
-      b = fabs(a - dwork[i]);
-      dwork[i] = log(b);
-      if (b > max) {
-	break;
-      }
-    }
-    i0 = i;
-    if (i0 == i1) {
-      i0--;
-      b = fabs(a - dwork[i0]);
-      dwork[i0] = log(b);
-    }
-    syk->coeff[0] = a;    
-    syk->npts = i0+1;
-    syk->yk = malloc(sizeof(float)*(syk->npts));
-    for (i = 0; i < syk->npts ; i++) {
-      syk->yk[i] = yk[i];
-    }
-    n = i1 - i0 + 1;
-    a = 0.0;
-    b = 0.0;
-    a2 = 0.0;
-    b2 = 0.0;
-    for (i = i0; i <= i1; i++) {      
-      max = (potential->rad[i]-potential->rad[i0]);
-      a += max;
-      b += dwork[i];
-      a2 += max*max;
-      b2 += dwork[i]*max;
-    }
-    syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);       
-    if (syk->coeff[1] >= 0) {
-      i1 = i0 + (i1-i0)*0.3;
-      if (i1 == i0) i1 = i0 + 1;
-      for (i = i0; i <= i1; i++) {      
-	max = (potential->rad[i]-potential->rad[i0]);
-	a += max;
-	b += dwork[i];
-	a2 += max*max;
-	b2 += dwork[i]*max;
-      }
-      syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);  
-    }
-    if (syk->coeff[1] >= 0) {
-      syk->coeff[1] = -10.0/(potential->rad[i1]-potential->rad[i0]);
-    } 
-  } else {
-    for (i = syk->npts-1; i < potential->maxrp; i++) {
-      dwork[i] = pow(potential->rad[i], k);
-    }
-    for (i = 0; i < syk->npts; i++) {
-      yk[i] = syk->yk[i];
-    }
-    i0 = syk->npts-1;
-    a = syk->yk[i0]*dwork[i0];
-    for (i = syk->npts; i < potential->maxrp; i++) {
-      b = potential->rad[i] - potential->rad[i0];
-      b = syk->coeff[1]*b;
-      if (b < -20) {
-	yk[i] = syk->coeff[0];
-      } else {
-	yk[i] = (a - syk->coeff[0])*exp(b);
-	yk[i] += syk->coeff[0];
-      }
-      yk[i] /= dwork[i];
-    }    
-  }
-      
-  return 0;
-}  
 
 /*
  * integrate a function given by f with two orbitals.

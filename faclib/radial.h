@@ -87,8 +87,6 @@ double ZerothResidualConfig(cfac_t *cfac, CONFIG *cfg);
 double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg);
 
 /* routines for radial integral calculations */
-int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2, 
-	  int k1, int k2, RadIntType type);
 int IntegrateF(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     RadIntType type, double x[], int id);
 int IntegrateS(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2, 

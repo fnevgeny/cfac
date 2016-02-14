@@ -570,7 +570,6 @@ static int OptimizeLoop(cfac_t *cfac) {
   AVERAGE_CONFIG *acfg = &cfac->acfg;
   double vbuf[MAXRP];
   
-  no_old = 0;
   iter = 0;
   tol = 1.0; 
   while (tol > cfac->optimize_control.tolerance) {
@@ -593,7 +592,7 @@ static int OptimizeLoop(cfac_t *cfac) {
 	no_old = 1;	
       } else {
 	orb = GetOrbital(cfac, k);
-	if (orb->wfun == NULL) {
+	if (orb->n <= 0) {
 	  orb_old.energy = 0.0;
 	  orb->energy = 1.0;
 	  orb->kappa = acfg->kappa[i];

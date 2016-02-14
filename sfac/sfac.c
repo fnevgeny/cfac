@@ -554,16 +554,23 @@ static int PConfigEnergy(int argc, char *argv[], int argt[],
   m = atoi(argv[0]);
   
   if (argc == 1 || m != 0) {
-    ConfigEnergy(cfac, m, 0, 0, NULL);
+    if (ConfigEnergy(cfac, m, 0, 0, NULL) < 0) {
+      return -1;
+    }
   } else {
     mr = atoi(argv[1]);
     if (argc == 2) {
-      ConfigEnergy(cfac, m, mr, 0, NULL);
+      if (ConfigEnergy(cfac, m, mr, 0, NULL) < 0) {
+        return -1;
+      }
     } else {
       for (i = 1; i < argc; i++) {
 	ng = DecodeGroupArgs(&kg, 1, argv+i, argt+i, variables);
 	if (ng < 0) return -1;
-	ConfigEnergy(cfac, m, mr, ng, kg);
+	if (ConfigEnergy(cfac, m, mr, ng, kg) < 0) {
+	  if (ng > 0) free(kg);
+          return -1;
+        }
 	if (ng > 0) free(kg);
       }
     }

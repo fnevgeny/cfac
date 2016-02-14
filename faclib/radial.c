@@ -574,7 +574,11 @@ static int OptimizeLoop(cfac_t *cfac) {
   iter = 0;
   tol = 1.0; 
   while (tol > cfac->optimize_control.tolerance) {
-    if (iter > cfac->optimize_control.maxiter) break;
+    if (iter > cfac->optimize_control.maxiter) {
+      printf("Max number of iterations reached (%d), optimization aborted!\n",
+        cfac->optimize_control.maxiter);
+      return -1;
+    }
     a = SetPotential(cfac, iter, vbuf);
     FreeYkArray(cfac);
     tol = 0.0;
@@ -1139,6 +1143,7 @@ ORBITAL *GetNewOrbital(cfac_t *cfac) {
   }
 
   cfac->n_orbitals++;
+  memset(orb, 0, sizeof(ORBITAL));
   return orb;
 }
 
@@ -1250,13 +1255,17 @@ int FreeContinua(cfac_t *cfac, double e) {
 int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg) {
   CONFIG_GROUP *g;
   CONFIG *cfg;
-  int k, i;
+  int k, i, iter;
 
   if (m == 0) {
     if (ng == 0) {
       ng = GetNumGroups(cfac);
       for (k = 0; k < ng; k++) {
-	OptimizeRadial(cfac, 1, &k, NULL);
+	iter = OptimizeRadial(cfac, 1, &k, NULL);
+        if (iter < 0) {
+            return -1;
+        }
+        
 	if (mr > 0) RefineRadial(cfac, mr, 0);
 	g = GetGroup(cfac, k);
 	for (i = 0; i < g->n_cfgs; i++) {
@@ -1267,7 +1276,10 @@ int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg) {
 	ClearOrbitalTable(cfac, 0);
       }
     } else {
-      OptimizeRadial(cfac, ng, kg, NULL);
+      iter = OptimizeRadial(cfac, ng, kg, NULL);
+      if (iter < 0) {
+          return -1;
+      }
       if (mr > 0) RefineRadial(cfac, mr, 0);
       for (k = 0; k < ng; k++) {
 	g = GetGroup(cfac, kg[k]);
@@ -2501,7 +2513,7 @@ double Breit(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
   return r;
 }
 
-/* calculate the slater integral of rank k */
+/* calculate the Slater integral of rank k */
 int Slater(const cfac_t *cfac,
     double *s, int k0, int k1, int k2, int k3, int k, int mode) {
   int index[5];
@@ -2532,7 +2544,7 @@ int Slater(const cfac_t *cfac,
     orb2 = GetOrbitalSolved(cfac, k2);
     orb3 = GetOrbitalSolved(cfac, k3);
     *s = 0.0;
-    if (!orb0 || !orb1 || !orb2 || !orb3) return -1;  
+    if (!orb0 || !orb1 || !orb2 || !orb3) return -1;
 
     npts = potential->maxrp;
     switch (mode) {
@@ -2595,7 +2607,7 @@ int Slater(const cfac_t *cfac,
 }
 
 
-/* reorder the orbital index appears in the slater integral, so that it is
+/* reorder the orbital index appears in the Slater integral, so that it is
    in a form: a <= b <= d, a <= c, and if (a == b), c <= d. */ 
 void SortSlaterKey(int *kd) {
   int i;

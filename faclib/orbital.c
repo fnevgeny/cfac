@@ -184,6 +184,7 @@ int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
 	  if (pot->Navg > 0) z -= pot->Navg - 1;
 	  orb->energy = EnergyH(z, (double)(orb->n), orb->kappa);
 	  orb->ilast = -1;
+	  if (orb->wfun) free(orb->wfun);
 	  orb->wfun = NULL;
 	  return 0;
 	}

@@ -597,7 +597,10 @@ static int OptimizeLoop(cfac_t *cfac) {
 	  no_old = 1;	
 	} else {
 	  orb_old.energy = orb->energy; 
-	  if (orb->wfun) free(orb->wfun);
+	  if (orb->wfun) {
+            free(orb->wfun);
+            orb->wfun = NULL;
+          }
 	  no_old = 0;
 	}
       }

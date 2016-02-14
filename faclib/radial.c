@@ -259,7 +259,7 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
   }
   index[2] = k;
 
-  syk = (SLATER_YK *) MultiSet(cfac->yk_array, index, NULL);
+  syk = MultiSet(cfac->yk_array, index, NULL);
   if (syk->npts < 0) {
     GetYk1(potential, k, yk, dwork, orb1, orb2, type);
     max = 0;
@@ -1472,7 +1472,7 @@ int ResidualPotential(const cfac_t *cfac, double *s, int k0, int k1) {
     index[1] = k1;
   }
   
-  p = (double *) MultiSet(cfac->residual_array, index, NULL);
+  p = MultiSet(cfac->residual_array, index, NULL);
   if (p && *p) {
     *s = *p;
     return 0;
@@ -1600,7 +1600,7 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
     index[2] = k1;
   }
   
-  q = (double *) MultiSet(cfac->moments_array, index, NULL);
+  q = MultiSet(cfac->moments_array, index, NULL);
  
   if (*q) {
     return *q;
@@ -1869,7 +1869,7 @@ double *GeneralizedMoments(cfac_t *cfac, int k1, int k2, int m) {
     orb2 = GetOrbitalSolved(cfac, k2);
   }
 
-  p = (double **) MultiSet(cfac->gos_array, index, NULL);
+  p = MultiSet(cfac->gos_array, index, NULL);
   if (*p) {
     return *p;
   }
@@ -2220,7 +2220,7 @@ double QED1E(cfac_t *cfac, int k0, int k1) {
     index[1] = k1;
   }
   
-  p = (double *) MultiSet(cfac->qed1e_array, index, NULL);
+  p = MultiSet(cfac->qed1e_array, index, NULL);
   if (p && *p) {
     return *p;
   }
@@ -2289,7 +2289,7 @@ double Vinti(cfac_t *cfac, int k0, int k1) {
   index[0] = k0;
   index[1] = k1;
   
-  p = (double *) MultiSet(cfac->vinti_array, index, NULL);
+  p = MultiSet(cfac->vinti_array, index, NULL);
   if (p && *p) {
     return *p;
   }
@@ -2418,7 +2418,7 @@ double BreitS(cfac_t *cfac, int k0, int k1, int k2, int k3, int k) {
   index[3] = k3;
   index[4] = k;
 
-  p = (double *) MultiSet(cfac->breit_array, index, NULL);
+  p = MultiSet(cfac->breit_array, index, NULL);
   if (p && *p) {
     r = *p;
   } else {
@@ -2520,7 +2520,7 @@ int Slater(const cfac_t *cfac,
 
   if (abs(mode) < 2) {
     SortSlaterKey(index);
-    p = (double *) MultiSet(cfac->slater_array, index, NULL);
+    p = MultiSet(cfac->slater_array, index, NULL);
   } else {
     p = NULL;
   }

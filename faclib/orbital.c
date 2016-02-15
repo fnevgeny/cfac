@@ -1010,8 +1010,6 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   SetPotentialW(pot, e, orb->kappa);
   SetVEffective(kl, pot);
   i2 = TurningPoints(orb->n, e, pot);
-  printf("orb->n = %d, orb->kappa = %d, i2 = %d, pot->asymp = %g\n",
-    orb->n, orb->kappa, i2, pot->asymp);
   if (i2 < pot->maxrp - 1.5*pot->asymp) {
     niter = 0;
     dn = orb->n;
@@ -1108,6 +1106,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
 
     if (i2p2 >= pot->maxrp) {
       free(p);
+      printf("Consider enlarging radial grid\n");
       return -5;
     }
     
@@ -1119,6 +1118,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
 
     if (i2p2 >= pot->maxrp) {
       free(p);
+      printf("Consider enlarging radial grid\n");
       return -5;
     }
 

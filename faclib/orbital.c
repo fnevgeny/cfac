@@ -1010,6 +1010,8 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   SetPotentialW(pot, e, orb->kappa);
   SetVEffective(kl, pot);
   i2 = TurningPoints(orb->n, e, pot);
+  printf("orb->n = %d, orb->kappa = %d, i2 = %d, pot->asymp = %g\n",
+    orb->n, orb->kappa, i2, pot->asymp);
   if (i2 < pot->maxrp - 1.5*pot->asymp) {
     niter = 0;
     dn = orb->n;
@@ -1103,11 +1105,23 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     if (pot->Navg <= 1) j = 3;
     else j = 1;
     i2p2 = pot->maxrp - j*pot->asymp - 5;
+
+    if (i2p2 >= pot->maxrp) {
+      free(p);
+      return -5;
+    }
+    
     for (i2 = pot->r_core; i2 < i2p2; i2++) {
       if (pot->veff[i2+1] > pot->veff[i2]) break;
     }
     i2 += j*pot->asymp;
     i2p2 = i2 + 2;
+
+    if (i2p2 >= pot->maxrp) {
+      free(p);
+      return -5;
+    }
+
     nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
     for (i = 0; i <= i2p2; i++) {
       p[i] = p[i] * pot->dr_drho2[i];
@@ -1690,6 +1704,14 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   
   m = i2 - i1 - 1;
   if (m < 0) return 0;
+  
+  if (i2 >= pot->maxrp || i2 < 0) {
+    printf("Radial index is outside of array bounds in IntegrateRadial(): %d\n",
+        i2);
+    abort();
+    return -1;
+  }
+  
   if (m == 0) {
     if (q == 0) {
       p[i1] = p1;
@@ -1766,7 +1788,7 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   gsl_vector_free(xv);
 
   if (info) {
-    printf("Error in Integrating the radial equation: %d\n", info);
+    printf("Error in integrating the radial equation: %d\n", info);
     exit(1);
   }
 

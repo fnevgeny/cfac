@@ -1994,29 +1994,46 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
 **              >=0: success, the number of shells in the average config.
 **               -1: error.
 ** SIDE EFFECT: 
-** NOTE:        there is a limit the highest n the shells in the average
-**              configuration can take. it is determined by the macro M.
-**              with M = 2500, the limit is about 50, which should be 
-**              more than enough (higher-n shells will be ignored).
+** NOTE:
 */
 int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
-#define M 2500 /* max # of shells may be present in an average config */
   AVERAGE_CONFIG *acfg = &cfac->acfg;
   int n_screen = cfac->optimize_control.n_screen;
   int *screened_n = cfac->optimize_control.screened_n;
   double screened_charge = cfac->optimize_control.screened_charge;
   int screened_kl = cfac->optimize_control.screened_kl;
 
-  double tnq[M];
-  int i, j, k, n, kappa, t;
+  double *tnq;
+  int i, j, k, kmax, n, kappa, t;
   int weight_allocated = 0;
 
   if (ng <= 0) return -1;
-  for(i = 0; i < M; i++) tnq[i] = 0.0;
+
+  kmax = 0;
+  for (i = 0; i < ng; i++) {
+    ARRAY *c = &(cfac->cfg_groups[kg[i]].cfg_list);
+    for (t = 0; t < cfac->cfg_groups[kg[i]].n_cfgs; t++) {
+      CONFIG *cfg = ArrayGet(c, t);
+      for (j = 0; j < cfg->n_shells; j++) {
+	n = cfg->shells[j].n;
+	kappa = cfg->shells[j].kappa;
+	k = ShellToInt(n, kappa);
+	if (k > kmax) {
+          kmax = k;
+        }
+      }
+    }
+  }
+  
+  tnq = calloc(kmax + 1, sizeof(double));
+  if (!tnq) return -1;
 
   if (weight == NULL) {
     weight = malloc(sizeof(double)*ng);
-    if (!weight) return -1;
+    if (!weight) {
+      free(tnq);
+      return -1;
+    }
   }
   
   for (i = 0; i < ng; i++) {
@@ -2033,26 +2050,23 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
 	n = cfg->shells[j].n;
 	kappa = cfg->shells[j].kappa;
 	k = ShellToInt(n, kappa);
-	if (k >= M) {
-          printf("A high-n (n = %d) shell is ignored in MakeAverageConfig\n", n);
-        } else {
-	  tnq[k] += cfg->shells[j].nq*weight[i]*a;
-        }
+	tnq[k] += cfg->shells[j].nq*weight[i]*a;
       }
     }
     acfg->n_cfgs += cfac->cfg_groups[kg[i]].n_cfgs;
   }
 
-  for (i = 0, j = 0; i < M; i++) {
+  for (i = 0, j = 0; i <= kmax; i++) {
     if (tnq[i] > EPS10) {
       j++;
     }
   }
-  
+
   if (!j) {
     if (weight_allocated) {
       free(weight);
     }
+    free(tnq);
     return 0;
   }
   
@@ -2066,10 +2080,11 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
     if (acfg->nq) free(acfg->nq);
     if (acfg->kappa) free(acfg->kappa);
     if (weight_allocated) free(weight);
+    free(tnq);
     return -1;
   }
 
-  for (i = 0, j = 0; i < M; i++) {
+  for (i = 0, j = 0; i <= kmax; i++) {
     if (tnq[i] > EPS10) {
       IntToShell(i, &n, &kappa);
       acfg->n[j] = n;
@@ -2124,10 +2139,10 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
   if (weight_allocated) {
     free(weight);
   }
+  
+  free(tnq);
 
   return j;
-
-#undef M
 }
 
 int IBisect(int b, int n, int *a) {

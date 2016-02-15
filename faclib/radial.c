@@ -220,6 +220,11 @@ static int GetYk1(POTENTIAL *potential,
   double dwork2[MAXRP];
   
   ilast = Min(orb1->ilast, orb2->ilast);
+  if (ilast < 0) {
+    printf("Negative orb->ilast in GetYk1()\n");
+    return -1;
+  }
+  
   r0 = sqrt(potential->rad[0]*potential->rad[ilast]);
   for (i = 0; i < potential->maxrp; i++) {
     dwork1[i] = pow(potential->rad[i]/r0, k);
@@ -261,7 +266,9 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 
   syk = MultiSet(cfac->yk_array, index, NULL);
   if (syk->npts < 0) {
-    GetYk1(potential, k, yk, dwork, orb1, orb2, type);
+    if (GetYk1(potential, k, yk, dwork, orb1, orb2, type) < 0) {
+      abort();
+    }
     max = 0;
     for (i = 0; i < potential->maxrp; i++) {
       dwork[i] *= yk[i];
@@ -2545,6 +2552,7 @@ int Slater(const cfac_t *cfac,
     orb3 = GetOrbitalSolved(cfac, k3);
     *s = 0.0;
     if (!orb0 || !orb1 || !orb2 || !orb3) return -1;
+    if (!orb0->wfun || !orb1->wfun || !orb2->wfun || !orb3->wfun) return -1;
 
     npts = potential->maxrp;
     switch (mode) {

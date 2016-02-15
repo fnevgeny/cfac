@@ -175,6 +175,7 @@
 #define QEDNMS             1
 #define QEDSMS             1
 #define QEDBREIT           5
+#define RCOREMIN           50
 
 /* structure */
 #define MAX_HAMS           2000

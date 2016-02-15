@@ -428,13 +428,13 @@ static double SetPotential(cfac_t *cfac, int iter, double *v) {
 
   jmax = PotentialHX(cfac, u, w);
   
-  c = potential->Navg - 1;
-  for (i = jmax; i > 50; i--) {
-    if (fabs(u[i] - c) > EPS6) break;
-  }
-  potential->r_core = i + 1;
-
   if (jmax > 0) {
+    c = potential->Navg - 1;
+    for (i = jmax; i >= RCOREMIN; i--) {
+      if (fabs(u[i] - c) > EPS6) break;
+    }
+    potential->r_core = i + 1;
+
     if (iter < 3) {
       r = 1.0;
       for (j = 0; j < potential->maxrp; j++) {
@@ -688,7 +688,7 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
   if (potential->Navg > 1) {
     potential->r_core = potential->maxrp - 5;
   } else {
-    potential->r_core = 50;
+    potential->r_core = RCOREMIN;
   }
 
   if (cfac->optimize_control.iset == 0) {

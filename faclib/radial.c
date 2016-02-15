@@ -354,7 +354,7 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *w) {
   int i, j, k1, jmax, m, jm;
   ORBITAL *orb1;
   double large, small, a, b, c, d0, d1, d;
-  POTENTIAL *potential = cfac->potential;
+  const POTENTIAL *potential = cfac->potential;
   const AVERAGE_CONFIG *acfg = &cfac->acfg;
   double yk[MAXRP];
   
@@ -414,11 +414,6 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *w) {
     u[j] = c - exp(u[j]);
   }
 
-  for (m = jmax; m > 50; m--) {
-    if (fabs(u[m]-c) > EPS6) break;
-  }
-  potential->r_core = m+1;
-
   return jmax;
 }
 
@@ -432,6 +427,12 @@ static double SetPotential(cfac_t *cfac, int iter, double *v) {
   u = potential->U;
 
   jmax = PotentialHX(cfac, u, w);
+  
+  c = potential->Navg - 1;
+  for (i = jmax; i > 50; i--) {
+    if (fabs(u[i] - c) > EPS6) break;
+  }
+  potential->r_core = i + 1;
 
   if (jmax > 0) {
     if (iter < 3) {
@@ -913,8 +914,8 @@ int WaveFuncTable(cfac_t *cfac, char *s, int n, int kappa, double e) {
     for (i = k; i <= orb->ilast; i++) {
       fprintf(f, "%-4d %14.8E %13.6E %13.6E %13.6E %13.6E\n", 
 	      i, potential->rad[i], 
-	      (potential->Vc[i])*potential->rad[i],
-	      potential->U[i] * potential->rad[i],
+	      potential->Vc[i]*potential->rad[i],
+	      potential->U[i]*potential->rad[i],
 	      Large(orb)[i], Small(orb)[i]); 
     }
   } else {
@@ -931,8 +932,8 @@ int WaveFuncTable(cfac_t *cfac, char *s, int n, int kappa, double e) {
     for (i = 0; i <= orb->ilast; i++) {
       fprintf(f, "%-4d %14.8E %13.6E %13.6E %13.6E %13.6E\n", 
 	      i, potential->rad[i],
-	      (potential->Vc[i])*potential->rad[i],
-	      potential->U[i] * potential->rad[i],
+	      potential->Vc[i]*potential->rad[i],
+	      potential->U[i]*potential->rad[i],
 	      Large(orb)[i], Small(orb)[i]); 
     }
     for (; i < potential->maxrp; i += 2) {

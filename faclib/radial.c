@@ -326,7 +326,9 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
 	a2 += max*max;
 	b2 += dwork[i]*max;
       }
-      syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);
+      if (a*a - n*a2 != 0.0) {
+        syk->coeff[1] = (a*b - n*b2)/(a*a - n*a2);
+      }
     }
     if (syk->coeff[1] >= 0) {
       syk->coeff[1] = -10.0/(potential->rad[i1]-potential->rad[i0]);

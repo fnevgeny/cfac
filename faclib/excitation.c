@@ -934,7 +934,9 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
 	    a = dqk[nklp]/rd;
 	    if (type == 0 || type > CBMULT) {
 	      c = dqk[nklp]/dqk[nklp-1];
-	      c = pow(c, 1.0/(pw_scratch.kl[nklp]-pw_scratch.kl[nklp-1]));
+	      if (c > 0) {
+                c = pow(c, 1.0/(pw_scratch.kl[nklp]-pw_scratch.kl[nklp-1]));
+              }
 	      if (c > 0 && c < 1) {
 		b = c/(1.0-c);
 	      } else {

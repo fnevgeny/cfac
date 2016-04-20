@@ -209,11 +209,16 @@
           <treecol label="Name"   flex="5"/>
           <splitter class="tree-splitter"/>
           <treecol label="Energy" flex="5"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="g"      flex="1" hidden="true"/>
+          <splitter class="tree-splitter"/>
+          <treecol label="P"      flex="1" hidden="true" sort="?p"/>
         </treecols>
 
         <template>
          <query>
-            SELECT id, name, e FROM levels
+            SELECT id, name, e, nele, g, p
+             FROM levels
              WHERE sid = :sid AND nele = :nele - :dnele
              <param class="sid" name="sid">0</param>
              <param class="nele" name="nele">1</param>
@@ -226,6 +231,8 @@
                  <treecell label="?id"/>
                  <treecell label="?name"/>
                  <treecell label="?e"/>
+                 <treecell label="?g"/>
+                 <treecell label="?p"/>
                 </treerow>
              </treeitem>
             </treechildren>

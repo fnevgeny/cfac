@@ -98,34 +98,22 @@ typedef struct _SHELL_RESTRICTION_ {
 #define GetNr(s)     ((s).Nr)
 
 /*
-** STRUCT:      CONFIG
-** PURPOSE:     a configuration.
-** FIELDS:      {int n_electrons},
-**              number of electrons of the configuration.
-**              {n_shells},
-**              number of the subshells.
-**              {n_csfs},
-**              number of states resulting from coupling.
-**              {SHELL *shells},
-**              the shell structure.
-**              {SHELL_STATE *csfs},
-**              a list specifying all states.
 ** NOTE:        shells and csfs have the shells in reverse order,
 **              i.e., the outermost shell is in the beginning of the list.
 */
 typedef struct _CONFIG_ {
   int uta;
   
-  int n_electrons;
-  int n_shells;
-  int n_csfs;
-  int nnrs;
+  int n_electrons;   /* number of electrons in the configuration   */
+  int n_shells;      /* number of subshells                        */
+  int n_csfs;        /* number of states resulting from coupling   */
+  int nnrs;          /* number of non-relativistic configurations  */
   double energy;
   double delta;
-  int *nrs;
-  int *symstate;
-  SHELL *shells;
-  SHELL_STATE *csfs; 
+  int *nrs;          /* mapped (by PackNRShell) non-relativistic
+                        configuration indices                      */
+  SHELL *shells;     /* array of shells                            */
+  SHELL_STATE *csfs; /* a list specifying all states               */
 } CONFIG;
 
 

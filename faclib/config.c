@@ -1762,9 +1762,6 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   if (m < cfg->n_shells) {
     cfg->nrs = realloc(cfg->nrs, sizeof(int)*m);
   }
-  if (cfg->n_csfs > 0) {
-    cfg->symstate = malloc(sizeof(int)*cfg->n_csfs);
-  }
   if (ArrayAppend(clist, cfg) == NULL) return -1;
   if (cfg->n_csfs > 0) {    
     AddConfigToSymmetry(cfac, k, cfgr->n_cfgs, cfg); 
@@ -1864,7 +1861,6 @@ int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg) {
     s.kgroup = kg;
     s.kcfg = kc;
     s.kstate = i;
-    cfg->symstate[m] = PackSymState(k, cfac->symmetry_list[k].n_states);
     st = &(cfac->symmetry_list[k].states);
     if (ArrayAppend(st, &s) == NULL) return -1;
     cfac->symmetry_list[k].n_states++;
@@ -2246,7 +2242,6 @@ void FreeConfigData(void *p) {
     c->n_shells = 0;
   }
   if (c->n_csfs > 0) {
-    free(c->symstate);
     free(c->csfs);
     c->n_csfs = 0;
   }

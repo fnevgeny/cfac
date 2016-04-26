@@ -1259,7 +1259,7 @@ static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
     goto END;
   }
 
-  if (!csf_i || !csf_j || !sbra || !sket) goto END;
+  if (!csf_i || !csf_j) goto END;
 
   /* determine the phase factor */
   (*idatum)->phase = 0;
@@ -1293,7 +1293,7 @@ static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
     (*idatum)->phase += 1;
   }
 
-  if (n_shells > 0) {
+  if (n_shells > 0 && sbra  && sket) {
     i = 0;
     j = 0;
       

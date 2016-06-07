@@ -1005,8 +1005,7 @@ static void HamiltonElement1E2E(cfac_t *cfac,
   int n_shells, i, j;
   INTERACT_DATUM *idatum;
   INTERACT_SHELL s[4];
-  double x, r;
-  int phase;
+  double r, prefactor;
 
   *x1 = 0.0;
   *x2 = 0.0;
@@ -1020,15 +1019,28 @@ static void HamiltonElement1E2E(cfac_t *cfac,
   if (cj->n_shells == 0) return;
   
   switch (cfac->confint) {
+  case -1:
+    return;
+    break;
   case 1:
-    if (ci != cj) return;
-  case 2:
-    if (ci->nnrs != cj->nnrs) return;
-    else {
-      if (memcmp(ci->nrs, cj->nrs, sizeof(int)*ci->nnrs)) return;
+    /* only CI within the same relativistic configuration */
+    if (ci != cj) {
+      return;
     }
+    break;
+  case 2:
+    /* only CI within the same non-relativistic configuration */
+    if (ci->nnrs != cj->nnrs ||
+        memcmp(ci->nrs, cj->nrs, sizeof(int)*ci->nnrs) != 0) {
+      return;
+    }
+    break;
   case 3:
-    if (si->kgroup != sj->kgroup) return;
+    /* only CI within the same configuration group */
+    if (si->kgroup != sj->kgroup) {
+      return;
+    }
+    break;
   }
     
   ki = si->kstate;
@@ -1042,7 +1054,6 @@ static void HamiltonElement1E2E(cfac_t *cfac,
   if (n_shells <= 0) return;
   memcpy(s, idatum->s, sizeof(INTERACT_SHELL)*4);
   bra = idatum->bra;
-  phase = idatum->phase;
 
   if (s[0].index >= 0 && s[3].index >= 0) {
     r = Hamilton2E(cfac, n_shells, sbra, sket, s);
@@ -1117,12 +1128,13 @@ static void HamiltonElement1E2E(cfac_t *cfac,
       }
     }
   }
+
   /* the prefactor in the Wigner-Eckart theorem should be included in 
      the matrix element. for a scalar operator, this is [J]^{-1/2} */
-  x = sqrt(sbra[0].totalJ + 1.0);
-  if (IsOdd(phase)) x = -x;
-  *x1 /= x;
-  *x2 /= x;
+  prefactor = 1/sqrt(sbra[0].totalJ + 1.0);
+  if (IsOdd(idatum->phase)) prefactor *= -1;
+  *x1 *= prefactor;
+  *x2 *= prefactor;
 
   if (isi == isj) {
     *x1 += ci->delta;

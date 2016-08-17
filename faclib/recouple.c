@@ -1092,7 +1092,6 @@ static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
   INTERACT_SHELL *s;
   int interaction[4] = {-1, -1, -1, -1};
   int n_shells;
-  int jmin, jmax;
 
   /* allocate memory. use the sum of two configs to avoid counting the
      exact size in advance */
@@ -1262,34 +1261,28 @@ static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
   if (!csf_i || !csf_j) goto END;
 
   /* determine the phase factor */
+  for (j = 0; j < 3; j++){
+    for (i = 3; i > j; i--) {
+      if (interaction[i] < interaction[i-1]) {
+	k = interaction[i];
+	interaction[i] = interaction[i-1];
+	interaction[i-1] = k;
+      }
+    }
+  }
+
   (*idatum)->phase = 0;
   if (interaction[0] >= 0) {
-    if (interaction[0] < interaction[1]) {
-      jmin = interaction[0] + 1;
-      jmax = interaction[1];
-    } else {
-      jmin = interaction[1] + 1;
-      jmax = interaction[0];
-    }
-    for (j = jmin; j <= jmax; j++) {
+    for (j = interaction[0]+1; j <= interaction[1]; j++) {
       (*idatum)->phase += bra[j].nq;
     }
-  } else {
-    (*idatum)->phase += 1;
-  }
-  
-  if (interaction[2] >= 0) {
-    if (interaction[2] < interaction[3]) {
-      jmin = interaction[2] + 1;
-      jmax = interaction[3];
-    } else {
-      jmin = interaction[3] + 1;
-      jmax = interaction[2];
-    }
-    for (j = jmin; j <= jmax; j++) {
+    for (j = interaction[2]+1; j <= interaction[3]; j++) {
       (*idatum)->phase += bra[j].nq;
     }
-  } else {
+  } else if (interaction[2] >= 0) {
+    for (j = interaction[2]+1; j <= interaction[3]; j++) {
+      (*idatum)->phase += bra[j].nq;
+    }
     (*idatum)->phase += 1;
   }
 

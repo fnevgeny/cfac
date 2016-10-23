@@ -287,8 +287,8 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     char *sql;
     
     sql = "INSERT INTO rtransitions" \
-          " (sid, ini_id, fin_id, mpole, rme, mode)" \
-          " VALUES (?, ?, ?, ?, ?, ?)";
+          " (sid, ini_id, fin_id, mpole, rme, mode, uta_de, uta_sd)" \
+          " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 

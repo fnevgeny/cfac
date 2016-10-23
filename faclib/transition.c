@@ -1059,13 +1059,9 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
   }
 
   e0 = lev2->energy - lev1->energy;
-  if (mpole < 0) {
-    rx->de = ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
-    rx->sdev = sqrt(ConfigEnergyVariance(cfac, ns, idatum->bra, ia, ib, m2));
-  } else {
-    rx->de = 0.0;
-    rx->sdev = 0.0;
-  }
+  
+  rx->de = ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
+  rx->sdev = sqrt(ConfigEnergyVariance(cfac, ns, idatum->bra, ia, ib, m2));
   
   /* for transitions between nearly degenerate levels, ignore the shift as
      largely meaningless */

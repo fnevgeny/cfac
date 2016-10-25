@@ -287,55 +287,55 @@ over the linear hybrid form is that for a given number of grid points, the
 modified form can cover a larger radial distance than the linear form, which is
 important for the calculation of highly excited states. 
 
-The minimum and maximum radial distances, $r_{min}$ and $r_{max}$, in setting
+The minimum and maximum radial distances, $r_\mathrm{min}$ and $r_\mathrm{max}$, in setting
 up the radial grid are chosen as 
 \begin{eqnarray}
-r_{min} &=& 10^{-5}/Z_{eff} \nonumber \\*
-r_{max} &=& 500/Z_{eff},
+r_\mathrm{min} &=& 10^{-5}/Z_\mathrm{eff} \nonumber \\*
+r_\mathrm{max} &=& 500/Z_\mathrm{eff},
 \end{eqnarray}
-where $Z_{eff}$ is the residual charge of the atomic ion that the electrons
-experience at large $r$. This ensures that $r_{min}$ is well within the
+where $Z_\mathrm{eff}$ is the residual charge of the atomic ion that the electrons
+experience at large $r$. This ensures that $r_\mathrm{min}$ is well within the
 nuclear charge distribution for any atomic system. The value of
-$r_{max}$ ensures that for excited states below $n \sim 20$, the bound energies
-are less than the Coulomb potential at $r_{max}$. These states have no nodes at
-$r > r_{max}$. For states with higher $n$, however, wavefunctions beyond
-$r_{max}$ may have additional nodes. Therefore, counting the nodes is no
+$r_\mathrm{max}$ ensures that for excited states below $n \sim 20$, the bound energies
+are less than the Coulomb potential at $r_\mathrm{max}$. These states have no nodes at
+$r > r_\mathrm{max}$. For states with higher $n$, however, wavefunctions beyond
+$r_\mathrm{max}$ may have additional nodes. Therefore, counting the nodes is no
 longer a valid method to pick out the right solution. Moreover, the
 wavefunctions can no longer be normalized by calculating their norm with simple
-numerical integration, since the contributions beyond $r_{max}$ cannot be
+numerical integration, since the contributions beyond $r_\mathrm{max}$ cannot be
 neglected. Actually, such contributions must be included for $n$ well within
-20. One may increase $r_{max}$ when highly excited states are needed. One
+20. One may increase $r_\mathrm{max}$ when highly excited states are needed. One
 must also increase the number of grid points as well to
 ensure the accuracy of numerical integration. However, wavefunctions
 at large radial distances are rarely needed, either because the interaction
 operators are negligible, or because the states that interact with
 such highly excited orbitals have negligible amplitudes at large distances. 
 In the present program, the low-$n$ and high-$n$ states are treated
-differently. The dividing $n_0$ is determined by the choice of $r_{max}$,
+differently. The dividing $n_0$ is determined by the choice of $r_\mathrm{max}$,
 specifically, $n_0
-= 0.5*\sqrt{Z_{eff}r_{max}}$. For $n \le n_0$, the orbitals are found by
+= 0.5\sqrt{Z_\mathrm{eff}r_\mathrm{max}}$. For $n \le n_0$, the orbitals are found by
 outward and inward integration of Eq.~(\ref{eq_Ga}) with zero amplitudes at
 both ends, and matching at the outer classical turning point. Node counting is
 used to pick out the appropriate solution corresponding to the quantum numbers
 $n$ and $l$. The wavefunctions are then normalized by 
 numerical integration. For $n > n_0$, Eq.~(\ref{eq_Ga}) is integrated
-outward until $r=r_{core}$, where the potential has reached its asymptotic
-Coulomb value. For $r > r_{core}$, the wavefunction is the exponentially
+outward until $r=r_\mathrm{core}$, where the potential has reached its asymptotic
+Coulomb value. For $r > r_\mathrm{core}$, the wavefunction is the exponentially
 decaying Whittaker function 
 \begin{equation}
 y_5(\nu, \lambda, \rho) = W_{\nu, \lambda+1/2}(2\rho/\nu),
 \end{equation}
-where $\nu^2 = -\frac{1}{2}Z_{eff}^2/\varepsilon$, $\rho = Z_{eff}r$, and
+where $\nu^2 = -\frac{1}{2}Z_\mathrm{eff}^2/\varepsilon$, $\rho = Z_\mathrm{eff}r$, and
 $\lambda = l$ in the non-relativistic limit \cite{seaton58}. In the
 relativistic case, the asymptotic behavior of the effective potential is
 modified according to Eq.~(\ref{eq_UW}), and corresponds to 
 \begin{eqnarray}
-Z_{eff}^\prime &=& Z_{eff}(1+\alpha^2\varepsilon) \nonumber\\*
-\nu^2 &=& -\frac{Z_{eff}^{\prime 2}}{2\varepsilon
+Z_\mathrm{eff}^\prime &=& Z_\mathrm{eff}(1+\alpha^2\varepsilon) \nonumber\\*
+\nu^2 &=& -\frac{Z_\mathrm{eff}^{\prime 2}}{2\varepsilon
 \left(1+\frac{1}{2}\alpha^2\varepsilon\right)} \nonumber\\*
-\lambda(\lambda+1) &=& l(l+1) - (Z_{eff}\alpha)^2 .
+\lambda(\lambda+1) &=& l(l+1) - (Z_\mathrm{eff}\alpha)^2 .
 \end{eqnarray}
-The Whittaker function and its derivative at $r_{core}$ are calculated
+The Whittaker function and its derivative at $r_\mathrm{core}$ are calculated
 using the program of \citet{thompson85} and matched with the solution
 obtained by outward integration. The program \cite{thompson85,thompson04} uses
 quadrupole precision floating point numbers in the calculation of 
@@ -349,12 +349,12 @@ normalize the wavefunction, we note that the correct normalization is given by
 \cite{seaton58}
 \begin{equation}
 \label{eq_norm}
-F(r > r_{core}) = K(\nu_n, \lambda)y_5(\nu_n, \lambda, \rho),
+F(r > r_\mathrm{core}) = K(\nu_n, \lambda)y_5(\nu_n, \lambda, \rho),
 \end{equation}
 where 
 \begin{equation}
 K(\nu,\lambda) =
-Z_{eff}^{\prime 1/2}\left[\zeta(\nu_n)\nu_n^2\Gamma(\nu_n+\lambda+1)
+Z_\mathrm{eff}^{\prime 1/2}\left[\zeta(\nu_n)\nu_n^2\Gamma(\nu_n+\lambda+1)
 \Gamma(\nu_n-\lambda)\right]^{-1/2}, 
 \end{equation}
 and 
@@ -831,7 +831,7 @@ P^k(\kappa_0\kappa_1;\beta_0\beta_1),
 where the summation over $\kappa$ is explicitly written out as the summation
 over the orbital and total angular
 momenta. $\tilde{Q}^k(l_0,l_1)$ is not calculated for every possible $l_0$
-and $l_1$. A suitable grid is chosen for $l_0$ from 0 to $l_{max}$. For each 
+and $l_1$. A suitable grid is chosen for $l_0$ from 0 to $l_\mathrm{max}$. For each 
 $l_0$ in this grid, $\tilde{Q}^k(l_0) = \sum_{l_1}\tilde{Q}^k(l_0,l_1)$ is
 calculated, where the values of $l_1$ are limited by the triangular
 relations. $\tilde{Q}^k(l_0)$ is a smooth function of $l_0$ especially when 
@@ -842,11 +842,11 @@ usually sufficient, which contains every value from $l_0 = 0$ to 5, after
 that, the interval between the successive points is doubled every two points,
 i.e., it is almost logarithmic. 
 
-The value of $l_{max}$ needed for the desired accuracy varies widely depending
+The value of $l_\mathrm{max}$ needed for the desired accuracy varies widely depending
 on the type of the transition and the collision energy. Many programs choose
-an arbitrary value for $l_{max}$, and the convergence is not guaranteed for
+an arbitrary value for $l_\mathrm{max}$, and the convergence is not guaranteed for
 all transitions at all energies. In the present program, 
-$l_{max}$ is not fixed \textit{a priori}. At each point in the $l_0$ grid, an
+$l_\mathrm{max}$ is not fixed \textit{a priori}. At each point in the $l_0$ grid, an
 estimate of the contributions from higher partial waves is made according to
 the method described below. The relative uncertainty in the resulting
 collision strength is also estimated if the truncated sum plus the estimated
@@ -898,8 +898,8 @@ For $k \ge 2$,
 the convergence to this asymptotic value is relatively fast. Therefore, we may
 approximate the summation over $l_0$ by
 \begin{equation}
-\sum_{l_0>l_{max}}\tilde{Q}^k_{CB}(l_0) =
-\tilde{Q}^k_{CB}(l_{max})\frac{\gamma_{\infty}}{1-\gamma_{\infty}}. 
+\sum_{l_0>l_\mathrm{max}}\tilde{Q}^k_{CB}(l_0) =
+\tilde{Q}^k_{CB}(l_\mathrm{max})\frac{\gamma_{\infty}}{1-\gamma_{\infty}}. 
 \end{equation}
 The difference between $\gamma_{\infty}$ and the value of 
 $\tilde{Q}^k(l_0+1)/\tilde{Q}^k(l_0)$ calculated with the actual wavefunctions
@@ -907,7 +907,7 @@ may be used to calculate the uncertainty introduced in this
 approximation. Suppose this 
 difference is $\delta$, the absolute uncertainty is given by
 \begin{equation}
-\Delta = \tilde{Q}^k_{CB}(l_{max})\frac{\delta}{(1-\gamma_{\infty})^2}.
+\Delta = \tilde{Q}^k_{CB}(l_\mathrm{max})\frac{\delta}{(1-\gamma_{\infty})^2}.
 \end{equation}
 This value is compared with the desired accuracy to determine whether the
 summation should be truncated.
@@ -1273,7 +1273,7 @@ $\overline{Q}^k(\alpha_0,\beta_0)$ involves the summation of the
 partial waves of all free electrons. The angular momentum of the ejected
 electron must satisfy the triangular relation $\Delta(j_{\alpha_0}, k, j)$,
 therefore, the limit on the rank $k$ in the expansion of the Coulomb
-interaction restricts the number of $\kappa$ terms. Usually $k_{max} = 6$ is
+interaction restricts the number of $\kappa$ terms. Usually $k_\mathrm{max} = 6$ is
 large enough to ensure the convergence. A further limit on the orbital angular
 momentum of 
 the ejected electron may also be specified. The summation over the partial

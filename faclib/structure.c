@@ -2237,7 +2237,7 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
     SYMMETRY *sym, *sym1;
     CONFIG *cfg, *cfg1, *c;
     SHELL_STATE *csf, *csf1;
-    LEVEL *lev, *lev1;
+    LEVEL *lev;
     ECORRECTION *ec;
     ORBITAL *orb;
     double e0, md, md1, a;
@@ -2300,7 +2300,11 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
 	  for (t = 0; t < cfac_get_ion_nlevels(cfac, nk); t++) {
 	    gion = ArrayGet(cfac->levels_per_ion+nk, t);
 	    for (q = gion->imin; q <= gion->imax; q++) {
-	      lev1 = GetLevel(cfac, q);
+	      LEVEL *lev1 = GetLevel(cfac, q);
+              if (lev1->uta) {
+                continue;
+              }
+
 	      sym1 = GetSymmetry(cfac, lev1->pj);
 	      s1 = ArrayGet(&(sym1->states), lev1->basis[lev1->kpb[ib]]);
 	      cfg1 = GetConfig(cfac, s1);

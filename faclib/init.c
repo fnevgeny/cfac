@@ -36,7 +36,7 @@ int Info(void) {
   printf("cFAC-%d.%d.%d http://github.com/fnevgeny/cfac\n\n",
     CFAC_VERSION, CFAC_SUBVERSION, CFAC_SUBSUBVERSION);
   printf("Based on the Flexible Atomic Code (FAC)\n");
-  printf("by Ming Feng Gu, mfgu@ssl.berkeley.edu\n");
+  printf("by Ming Feng Gu\n\n");
   printf("Maintained by Evgeny Stambulchik\n");
   printf("==========================================\n");
   return 0;

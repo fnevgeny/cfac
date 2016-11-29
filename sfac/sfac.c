@@ -190,7 +190,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       for (j = 0; j < nlevels; j++) {
 	lev = GetLevel(cfac, j);
 	
-        if (cfac->uta) {
+        if (lev->uta) {
           ig = lev->uta_cfg_g;
         } else {
           im = lev->pb;

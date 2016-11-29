@@ -81,7 +81,7 @@ $2p-2$ is not. Each shell may be followed by multiple conditions on the
 occupation number(s), separated by ``;'', e.g., $3*10;3s>0;3p>5$ generate
 configurations that have at least 1 electron in the $3s$ shell and at least 6
 electrons in the $3p$ shell. The logical relations allowed in conditions
-include $=$, $>$, and $<$. 
+include $=$, $>$, and $<$.
 
 The third form of invoking this function allows for running calculations in the
 {\em experimental} \hyperref[subsec:mixed_mode]{mixed mode}, with the \var{uta}
@@ -95,7 +95,7 @@ the \var{uta} flag omitted), the mode is set by the last preceeding call to
 This functions returns a list of non-relativistic configurations corresponding
 to the supplied configuration strings, which may contain wild casts as in the
 \funcref{Config} function. It is useful, e.g., when one wants to know the
-non-relativistic configurations of \key{1*2 2*2 3*1}. 
+non-relativistic configurations of \key{1*2 2*2 3*1}.
 \end{fundesc}
 
 \begin{fundesc}{ListConfig}{\opt{fn, g}}
@@ -116,7 +116,7 @@ effective only if the function \funcref{OptimizeRadial} is called with no
 arguments. Otherwise, the configurations given in that function are used to
 generate the mean configuration automatically. It is important that this
 function be called before \funcref{OptimizeRadial} and after
-\funcref[0]{ConfigEnergy}, if the later is used.
+\funcref[0]{ConfigEnergy}, if the latter is used.
 \end{fundesc}
 
 \begin{fundesc}{BasisTable}{fn\opt{,m}}
@@ -174,7 +174,7 @@ Print the radial potential obtained by \funcref{OptimizeRadial} to the file
 potential, $\lambda$ and $a$, in the formula
 \begin{equation}
 V_0(r) = -\frac{Z}{r} + \frac{N-1}{r}\left(1-\frac{\exp(-\lambda
-r)}{1+ar}\right). 
+r)}{1+ar}\right).
 \end{equation}
 After that, the mean configuration used to generate the potential is printed
 in 3 columns representing the principal quantum number, the relativistic
@@ -254,7 +254,7 @@ $m=3$, only CI within the same configuration group is included.
 Set the principal quantum number \var{n} and the orbital angular momentum
 \var{l}, beyond which, the hydrogenic approximation for the E1 multipole
 integrals should be used. If this routine is not called or the arguments are not
-given, the default values of \var{n} = 20 and \var{l} = 10 are used. 
+given, the default values of \var{n} = 20 and \var{l} = 10 are used.
 \end{fundesc}
 
 \begin{fundesc}{SetMaxRank}{k}
@@ -281,7 +281,7 @@ iterations allowed. \var{p}  specifies whether diagnostic information should be
 printed out during the optimization. This routine does not need to be called.
 The default for \var{t} is $10^{-6}$, \var{s} is determined dynamically
 according to the type of ion, \var{m} is 128, and \var{p} is 0 for no printing
-out of information. 
+out of information.
 \end{fundesc}
 
 \begin{fundesc}{SetOptimizeMaxIter}{m}
@@ -411,7 +411,7 @@ orbital in units of eV.
 
 \begin{fundesc}{SetTransitionGauge}{g}
 Set the gauge for radiative transition. 1 for Coulomb gauge (velocity form) and
-2 for Babushkin gauge (length form, which is the default). 
+2 for Babushkin gauge (length form, which is the default).
 \end{fundesc}
 
 \begin{fundesc}{SetTransitionMaxE}{max\_e}
@@ -537,7 +537,7 @@ Set the transition energy grid for collisional excitation. In the first form,
 the grid is given by a list \var{g}. In the second form, the grid is constructed
 with \var{n} points from  \var{e0} to \var{e1}. This routine does not need to be
 called. A 3-point grid is constructed by default. Calling this function with
-\var{n}=0 resets the grid to the system default. 
+\var{n}=0 resets the grid to the system default.
 \end{fundesc}
 
 \begin{fundesc}{SetUsrCEGrid}{g $\mid$ n\opt{, e0, e1}}
@@ -623,7 +623,7 @@ Calling this routine with \var{n}=0 resets the grid to the system default.
 
 \begin{fundesc}{SetUsrCIEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the user collision energy grid for collisional ionization. The collision
-strengths on this grid are output. 
+strengths on this grid are output.
 \end{fundesc}
 
 
@@ -644,7 +644,7 @@ configuration groups \var{b} and the free groups \var{f}, which are related to
 radiative recombination and photoionization cross sections. The optional
 multipole type \var{m} is set to -1 (E1) by default. In almost all cases, no
 other multipole types should be important. The results are saved in file
-\var{fn}. 
+\var{fn}.
 \end{fundesc}
 
 
@@ -655,7 +655,7 @@ and autoionization. In the first form, the grid is given by a list
 \var{e0} to \var{e1}. The energies are in units of eV. This function does not
 need to be called. A 6 point grid is constructed according to the transition
 array being considered by default. Calling this function with \var{n}=0 reset
-the grid to system default. 
+the grid to system default.
 \end{fundesc}
 
 \begin{fundesc}{SetPEGridLimits}{e0, e1}
@@ -734,7 +734,7 @@ autoionization rates greater than \var{c} a.u. are output. The default is 0.
 
 \begin{fundesc}{AppendTable}{fn}
 By default, when a new script is executed, existing binary files are
-overwritten. If instead the new data should be appended to a file, use 
+overwritten. If instead the new data should be appended to a file, use
 this function to set the append flag.
 \end{fundesc}
 
@@ -787,7 +787,7 @@ Exit SFAC.
 \end{fundesc}
 
 \begin{fundesc}{Info}{}
-Print out the version information of \cFAC. 
+Print out the version information of \cFAC.
 \end{fundesc}
 
 \begin{fundesc}{Pause}{}

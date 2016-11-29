@@ -26,20 +26,29 @@ magnetic and electric fields. If the optional \var{m} is 1, then the
 diamagnetic effects are ignored in the Hamiltonian.
 \end{fundesc}
 
-\begin{fundesc}{SetUTA}{m\opt{, ci}}
+\begin{fundesc}{SetUTA}{m}
 Set the flag for configuration average models. If $m=1$, all calculations are
 carried out in the configuration average approximation. The radiative transition
 rates output contains three additional fields, the transition energy including
 the UTA shift, the Gaussian standard deviation, and the correction to the line
 strengths due to the configuration interaction within the same non-relativistic
 configurations. If $m=0$, which is the default, the usual detailed term
-accounting method is used. This function should be called in the beginning of
-the script, before \funcref{Config} function, since it disables the angular
-momentum coupling performed by \funcref{Config}. The optional argument \var{ci}
-indicates whether the configuration interaction correction factors should be
-included when reading the \key{DB\_TR} files. These correction factors are
-always calculated in \funcref{TransitionTable} irrespective of the value of
-\var{ci}.
+accounting method is used. Normally, this function should be called in the
+beginning of the script, before invoking \funcref{Config}. However, see
+\hyperref[subsec:mixed_mode]{Mixed mode of calculations} below.
+
+\subsection{Mixed Mode of Calculations (experimental)}
+\label{subsec:mixed_mode}
+Normally, the \funcref{SetUTA} function should be called in the beginning of a
+script, before the \funcref{Config} call(s). However, since version 1.6.0, an
+experimental {\em mixed} mode of calculations, allowing for mixing detailed and
+UTA levels in the same calculations, is possible. To this end, one may call
+\funcref{SetUTA} several times in between \funcref{Config} calls, with each
+\funcref{Config} being treated in either UTA or non-UTA (detailed) mode
+depending on the last preceeding \funcref{SetUTA} setting.
+
+The other, preferred way of performing mixed-mode calculations is to pass the
+UTA flag to the \funcref{Config} function itself.
 \end{fundesc}
 
 \subsection{Electron Shell Configuration}
@@ -51,7 +60,7 @@ the spectroscopic notation. For example, \key{2s} for $2s$ shell, \key{2p-} for
 $2p_{1/2}$ shell, and \key{2p+} for $2p_{3/2}$ shell.
 \end{fundesc}
 
-\begin{fundesc}{Config}{c, ..., group=g $\mid$ g, c, ...}
+\begin{fundesc}{Config}{c, ..., group=g $\mid$ g, c, ... $\mid$ uta, g, c, ...}
 Add one or more configurations to the configuration group \var{g}. In the first
 form, the group name \var{g} is given as a keyword, while in the second form,
 the first argument must be a group name instead of a configuration. It takes one
@@ -73,6 +82,13 @@ occupation number(s), separated by ``;'', e.g., $3*10;3s>0;3p>5$ generate
 configurations that have at least 1 electron in the $3s$ shell and at least 6
 electrons in the $3p$ shell. The logical relations allowed in conditions
 include $=$, $>$, and $<$. 
+
+The third form of invoking this function allows for running calculations in the
+{\em experimental} \hyperref[subsec:mixed_mode]{mixed mode}, with the \var{uta}
+flag explicitly specifying whether the given configuration should be treated in
+the UTA (\var{uta} = 1) or detailed (\var{uta} = 0) way. By default (i.e., with
+the \var{uta} flag omitted), the mode is set by the last preceeding call to
+\funcref{SetUTA}.
 \end{fundesc}
 
 \begin{fundesc}{GetConfigNR}{c, ...}

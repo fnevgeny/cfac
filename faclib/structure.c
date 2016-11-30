@@ -1768,6 +1768,7 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     }
     
     lev.uta = 0;
+    lev.ibase = -1;
     
     lev.energy = h->mixing[i];
     lev.pj = h->pj;
@@ -2277,15 +2278,15 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
     if (s->kgroup > 0) {
       cfg = GetConfig(cfac, s);
       nk = cfg->n_electrons-1;
-      if (cfac_get_ion_nlevels(cfac, nk) == 0 || cfg->shells[0].nq > 1) {
-	lev->ibase = -1;
-      } else {
+      
+      lev->ibase = -1;
+      
+      if (cfac_get_ion_nlevels(cfac, nk) != 0 && cfg->shells[0].nq <= 1) {
         STATE *s1;
         CONFIG *cfg1;
 	double a = 0.0;
 	double md = 1E30;
 	csf = cfg->csfs + s->kstate;
-	lev->ibase = -1;
 	dn = cfg->shells[0].n - cfg->shells[1].n;
 	if (dn < MAXDN) {
 	  a = 0.0;

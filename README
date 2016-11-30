@@ -18,7 +18,7 @@ non-profit or academic use only, please see
 <http://cpc.cs.qub.ac.uk/licence/licence.html>.
 
 In order to compile in these CPC-licensed modules, you need to pass the
-"--with-cpc-module" configure flag and explicitly agree to the CPC licensing
+"--with-cpc-modules" configure flag and explicitly agree to the CPC licensing
 terms. Please note that as a result, the "sfac" executable will not be
 redistributable!
 

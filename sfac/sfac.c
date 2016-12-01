@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <gsl/gsl_ieee_utils.h>
+
 #include "global.h"
 #include "cfacP.h"
 #include "radial.h"
@@ -32,8 +34,9 @@
 #include "ionization.h"
 #include "recombination.h"
 #include "dbase.h"
-#include "init.h"
 #include "stoken.h"
+
+cfac_t *cfac = NULL;
 
 static void cfac_verinfo(void) {
   printf("cFAC-%d.%d.%d\n",
@@ -3162,6 +3165,23 @@ static void usage(FILE *fp, const char *progname) {
         progname);
     fprintf(fp, "       %s -h         display this help and exit\n",
         progname);
+}
+
+static int InitFac() {
+  gsl_ieee_env_setup();
+
+  cfac = cfac_new();
+  if (!cfac) {
+    printf("Initialization failed\n");
+    return -1;
+  }
+
+  InitDBase();
+  InitExcitation();
+  InitRecombination();
+  InitIonization(cfac);
+  
+  return 0;
 }
 
 int main(int argc, const char *argv[]) {

@@ -22,7 +22,6 @@
 #include <math.h>
 #include <gsl/gsl_sf_legendre.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "angular.h"
 #include "radial.h"
@@ -278,7 +277,7 @@ int SetCEPWGrid(int ns, int *n, int *step) {
   return 0;
 }
 
-int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k) {
+int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k) {
   int type, ko2, i, m, t, q;
   int kf0, kf1, kpp0, kpp1, km0, km1;
   int kl0, kl1, kl0p, kl1p;
@@ -512,7 +511,7 @@ double BornFormFactorK(double q, FORM_FACTOR *bform) {
   return r;
 }
 
-int CERadialQkBorn(int k0, int k1, int k2, int k3, int k, 
+int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, 
 		   double te, double e1, double *qk, int m) {
   int p0, p1, p2, p3;
   int m0, m1, m2, m3;
@@ -624,7 +623,7 @@ int CERadialQkBorn(int k0, int k1, int k2, int k3, int k,
   return ty;
 }
   
-int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
+int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int kp,
 		       double te, double e1,
 		       int nq, int *q, double *qk, int m) {
   int p0, p1, p2, p3;
@@ -769,7 +768,7 @@ int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
   return Max(ko2, ko2p);
 }
 
-static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
+static double *CERadialQkTable(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     int k0, int k1, int k2, int k3, int k) {
   int type = 0, t, ie, ite, ipk, ipkp, nqk;
   int i, j, kl0, kl1, kl, nkappa, nkl, nkappap, nklp;
@@ -807,7 +806,7 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
       e1 = egrid[ie];
       for (ite = 0; ite < n_tegrid; ite++) {
 	te = tegrid[ite];
-	type = CERadialQkBorn(k0, k1, k2, k3, k,
+	type = CERadialQkBorn(cfac, k0, k1, k2, k3, k,
 			      te, e1, &(rq[ite][ie]), mb);
 	drq[ite][ie] = rq[ite][ie];
       }
@@ -825,7 +824,7 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
       e1 = egrid[ie];
       for (ite = 0; ite < n_tegrid; ite++) {
 	te = tegrid[ite];
-	type = CERadialQkBorn(k0, k1, k2, k3, k,
+	type = CERadialQkBorn(cfac, k0, k1, k2, k3, k,
 			      te, e1, &(rq[ite][ie]), 1);
 	drq[ite][ie] = rq[ite][ie];
       }    
@@ -839,7 +838,7 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
       for (ite = 0; ite < n_tegrid; ite++) {
 	if (ieb[ite] == 2) {
 	  te = tegrid[ite];
-	  type = CERadialQkBorn(k0, k1, k2, k3, k,
+	  type = CERadialQkBorn(cfac, k0, k1, k2, k3, k,
 				te, e1, &(rq[ite][ie]), 0);
 	  drq[ite][ie] = rq[ite][ie];
 	} else {
@@ -847,9 +846,9 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
 	}
       }
       if (t == 0) continue;
-      type = CERadialPk(&cepk, ie, k0, k1, k);
+      type = CERadialPk(cfac, &cepk, ie, k0, k1, k);
       if (k2 != k0 || k3 != k1) {
-	type = CERadialPk(&cepkp, ie, k2, k3, k);
+	type = CERadialPk(cfac, &cepkp, ie, k2, k3, k);
       } else {
 	cepkp = cepk;
       }
@@ -982,7 +981,7 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
 	  }
 	}
 	if (ieb[ite]) {
-	  type = CERadialQkBorn(k0, k1, k2, k3, k,
+	  type = CERadialQkBorn(cfac, k0, k1, k2, k3, k,
 				te, e1, &(rq[ite][ie]), 0);
 	  drq[ite][ie] = rq[ite][ie];
 	  rq[ite][ie] += r-rd;
@@ -1024,7 +1023,7 @@ static double *CERadialQkTable(const cfac_cbcache_t *cbcache,
   return *p;
 }
 
-static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
+static double *CERadialQkMSubTable(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     int k0, int k1, int k2, int k3, int k, int kp) {
   int type1 = 0, type2 = 0, kl, nqk;
   int i, j, kl0, klp0, kl0_2, klp0_2, kl1;
@@ -1078,7 +1077,7 @@ static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
       }
       for (ite = 0; ite < n_tegrid; ite++) {
 	te = tegrid[ite];
-	type1 = CERadialQkBornMSub(k0, k1, k2, k3, k, kp, te, e1, 
+	type1 = CERadialQkBornMSub(cfac, k0, k1, k2, k3, k, kp, te, e1, 
 				   nq, q, rqt, mb);	
 	for (iq = 0; iq < nq; iq++) {
 	  rq[iq][ite][ie] = rqt[iq];
@@ -1093,7 +1092,7 @@ static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
       e1 = egrid[ie];
       for (ite = 0; ite < n_tegrid; ite++) {
 	te = tegrid[ite];
-	type1 = CERadialQkBornMSub(k0, k1, k2, k3, k, kp, te, e1, 
+	type1 = CERadialQkBornMSub(cfac, k0, k1, k2, k3, k, kp, te, e1, 
 				   nq, q, rqt, 1);	
 	for (iq = 0; iq < nq; iq++) {
 	  rq[iq][ite][ie] = rqt[iq];
@@ -1112,7 +1111,7 @@ static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
     }
     for (ie = 0; ie < n_egrid; ie++) {
       e1 = egrid[ie];
-      type1 = CERadialPk(&cepk, ie, k0, k1, k);
+      type1 = CERadialPk(cfac, &cepk, ie, k0, k1, k);
       nkl = cepk->nkl;
       nkappa = cepk->nkappa;
       kappa0 = cepk->kappa0;
@@ -1123,7 +1122,7 @@ static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
 	cepkp = cepk;
 	type2 = type1;
       } else {
-	type2 = CERadialPk(&cepkp, ie, k2, k3, kp);
+	type2 = CERadialPk(cfac, &cepkp, ie, k2, k3, kp);
       }
       nklp = cepkp->nkl;
       if (nklp < nkl) nkl = nklp;
@@ -1299,7 +1298,7 @@ static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
 	  }
         } 
 	if (ieb[ite]) {
-	  type1 = CERadialQkBornMSub(k0, k1, k2, k3, k, kp, te, e1, 
+	  type1 = CERadialQkBornMSub(cfac, k0, k1, k2, k3, k, kp, te, e1, 
 				     nq, q, rqt, 0);
 	  for (iq = 0; iq < nq; iq++) {
 	    rq[iq][ite][ie] += rqt[iq] - drq[iq][ite][ie];
@@ -1324,14 +1323,14 @@ static double *CERadialQkMSubTable(const cfac_cbcache_t *cbcache,
   return rqc;
 } 	
   
-int CERadialQk(const cfac_cbcache_t *cbcache,
+int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
   int i, nd, type;
   int j, m;
   double *rqe, rq[MAXNTE];
   double *xte, x0;
   
-  rqe = CERadialQkTable(cbcache, k0, k1, k2, k3, k);
+  rqe = CERadialQkTable(cfac, cbcache, k0, k1, k2, k3, k);
   if (n_tegrid == 1) {
     for (i = 0; i < n_egrid1; i++) {
       rqc[i] = rqe[i];
@@ -1389,14 +1388,14 @@ int CERadialQk(const cfac_cbcache_t *cbcache,
   return type;
 }
 
-int CERadialQkMSub(const cfac_cbcache_t *cbcache,
+int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *rqc, double te, int k0, int k1, int k2, int k3, int k, int kp) {
   int i, nd, iq, n;
   int j, m, type, nq;
   double *rqe, rq[MAXNTE];
   double *xte, x0;
   
-  rqe = CERadialQkMSubTable(cbcache, k0, k1, k2, k3, k, kp);
+  rqe = CERadialQkMSubTable(cfac, cbcache, k0, k1, k2, k3, k, kp);
   nq = Min(k, kp)/2 + 1;
 
   if (n_tegrid == 1) {
@@ -1550,7 +1549,7 @@ void RelativisticCorrection(int m, double *s, double *p, double te, double b) {
   }
 }
 
-int CollisionStrengthEB(const cfac_cbcache_t *cbcache,
+int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *qkt, double *e, double *bethe, int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
   double te, a, ap, c, cp, r, s[3];
@@ -1609,7 +1608,7 @@ int CollisionStrengthEB(const cfac_cbcache_t *cbcache,
 	      ap *= cp*angp[ip].coeff;
 	      if (fabs(ap) < EPS10) continue;
 	      r = a*ap/(ang[i].k + 1.0);
-	      k = CERadialQk(cbcache, rq, te, ang[i].k0, ang[i].k1, 
+	      k = CERadialQk(cfac, cbcache, rq, te, ang[i].k0, ang[i].k1, 
 			     angp[ip].k0, angp[ip].k1, ang[i].k);
 	      for (ie = 0; ie < n_egrid1; ie++) {
 		qkc[ie] += r*rq[ie];
@@ -1664,7 +1663,7 @@ int CollisionStrengthEB(const cfac_cbcache_t *cbcache,
   return 1;
 }
 
-int CollisionStrengthEBD(const cfac_cbcache_t *cbcache,
+int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *qkt, double *e, double *bethe, double *born, int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
   double te, a, ap, c, cp, r;
@@ -1729,7 +1728,7 @@ int CollisionStrengthEBD(const cfac_cbcache_t *cbcache,
 	      kkp = (ang[i].k + angp[ip].k)/2;
 	      qb = mlev1 - mlev2;
 	      qbp = mlev1p - mlev2p;
-	      CERadialQkMSub(cbcache, rq, te, ang[i].k0, ang[i].k1, 
+	      CERadialQkMSub(cfac, cbcache, rq, te, ang[i].k0, ang[i].k1, 
 				 angp[ip].k0, angp[ip].k1, ang[i].k, angp[ip].k);
 	      for (q = -nq; q <= nq; q++) {
 		m = abs(q);	
@@ -1789,7 +1788,7 @@ int CollisionStrengthEBD(const cfac_cbcache_t *cbcache,
   return 1;
 }
 
-double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
+double AngZCorrection(cfac_t *cfac, int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
   double r;
 
   if (nmk < t) return 0.0;
@@ -1814,7 +1813,7 @@ double AngZCorrection(int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
  * RETURN: 1 (or number of CS if msub is set) on success; -1 if fails
  * GLOBALS: FACin' lot...
  */
-int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
+int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSITION *tr,
     int msub, double *qkt, double *params, double *bethe) {
   int i, j, t, h, p, m, type, ty, p1, p2;  
   double te, c, r, s3j, c1;
@@ -1867,7 +1866,7 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
       if (!msub) {
 	if (ang[i].k != ang[j].k) continue;
 	c /= ang[i].k + 1.0;
-	ty = CERadialQk(cbcache, rq, te, ang[i].k0, ang[i].k1,
+	ty = CERadialQk(cfac, cbcache, rq, te, ang[i].k0, ang[i].k1,
 			ang[j].k0, ang[j].k1, ang[i].k);
 	t = ang[i].k/2;
 	c1 = c;
@@ -1877,7 +1876,7 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
 	  qkc[ie+n_egrid1] += c*rq[ie];
 	}
       } else {
-	ty = CERadialQkMSub(cbcache, rq, te, ang[i].k0, ang[i].k1,
+	ty = CERadialQkMSub(cfac, cbcache, rq, te, ang[i].k0, ang[i].k1,
 			    ang[j].k0, ang[j].k1, ang[i].k, ang[j].k);
 	nq = Min(ang[i].k, ang[j].k);
 	kkp = (ang[i].k + ang[j].k)/2;
@@ -2032,7 +2031,7 @@ int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
   }
 }
 
-int CollisionStrengthUTA(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
+int CollisionStrengthUTA(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSITION *tr,
     double *qkt, double *params, double *bethe) {
   INTERACT_DATUM *idatum;
   LEVEL *lev1, *lev2;
@@ -2090,7 +2089,7 @@ int CollisionStrengthUTA(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
   kmin = abs(j1-j2);
   kmax = j1 + j2;
   for (k = kmin; k <= kmax; k += 2) {
-    ty = CERadialQk(cbcache, rq, te, k0, k1, k0, k1, k);
+    ty = CERadialQk(cfac, cbcache, rq, te, k0, k1, k0, k1, k);
     if (ty > type) type = ty;
     for (ie = 0; ie < n_egrid1; ie++) {
       qkc[ie] += rq[ie]/(k+1.0);
@@ -2147,7 +2146,7 @@ int CollisionStrengthUTA(const cfac_cbcache_t *cbcache, const TRANSITION *tr,
   return 1;
 }
 
-int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
+int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub, char *fn) {
   int i, j, m;
   FILE *f;
   int nsub;
@@ -2446,9 +2445,9 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
 	if (tr.e < e0 || tr.e >= e1) continue;
 
 	if (tr.lup->uta || tr.llo->uta) {
-          k = CollisionStrengthUTA(&cbcache, &tr, qkc, params, bethe); 
+          k = CollisionStrengthUTA(cfac, &cbcache, &tr, qkc, params, bethe); 
         } else {
-          k = CollisionStrength(&cbcache, &tr, msub, qkc, params, bethe); 
+          k = CollisionStrength(cfac, &cbcache, &tr, msub, qkc, params, bethe); 
         }
 	if (k < 0) continue;
 	r.bethe = bethe[0];
@@ -2505,7 +2504,7 @@ int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn) {
   return 0;
 }
 
-int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
+int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, char *fn) {
   int nlow, *low, nup, *up;
   int i, j, k, m, ie;
   CEF_RECORD r;
@@ -2714,7 +2713,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 	  }
 	}	    
 	if (e < e0 || e >= e1) continue;
-	k = CollisionStrengthEB(&cbcache, qkc, &e, bethe, ilow, iup); 
+	k = CollisionStrengthEB(cfac, &cbcache, qkc, &e, bethe, ilow, iup); 
 	if (k < 0) continue;
 
 	r.bethe = bethe[0];
@@ -2752,7 +2751,7 @@ int SaveExcitationEB(int nlow0, int *low0, int nup0, int *up0, char *fn) {
   return 0;
 }
 
-int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
+int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, char *fn) {
   int nlow, *low, nup, *up;
   int i, j, k, m, ie;
   CEMF_RECORD r;
@@ -2973,7 +2972,7 @@ int SaveExcitationEBD(int nlow0, int *low0, int nup0, int *up0, char *fn) {
 	  }
 	}	    
 	if (e < e0 || e >= e1) continue;
-	k = CollisionStrengthEBD(&cbcache, qkc, &e, bethe, born, ilow, iup); 
+	k = CollisionStrengthEBD(cfac, &cbcache, qkc, &e, bethe, born, ilow, iup); 
 	if (k < 0) continue;
 	
 	for (ie = 0; ie < m; ie++) {

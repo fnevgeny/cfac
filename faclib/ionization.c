@@ -336,7 +336,7 @@ int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, 
 
       if (xborn) {
 	for (i = 0; i < n_tegrid; i++) {
-	  CERadialQkBorn(kb, kf, kbp, kf, k, tegrid[i]+e2, e1, &r, 0);
+	  CERadialQkBorn(cfac, kb, kf, kbp, kf, k, tegrid[i]+e2, e1, &r, 0);
 	  qk[i] += r;
 	}
 	continue;

@@ -22,7 +22,6 @@
 
 #include <gsl/gsl_ieee_utils.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "radial.h"
 #include "angular.h"
@@ -36,7 +35,7 @@
 #include "dbase.h"
 #include "stoken.h"
 
-cfac_t *cfac = NULL;
+static cfac_t *cfac = NULL;
 
 static void cfac_verinfo(void) {
   printf("cFAC-%d.%d.%d\n",
@@ -707,7 +706,7 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
     nlow = SelectNeleLevels(cfac, -1, &low);
     nup = nlow;
     up = low;
-    SaveExcitation(nlow, low, nup, up, 0, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 0, argv[0]);
   } else if (argc == 2) {
     if (argt[1] == STRING) {
       nlow = SelectLevels(&low, argv[1], argt[1], variables);
@@ -718,14 +717,14 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
       up = low;
     }
     if (nlow <= 0) return -1;
-    SaveExcitation(nlow, low, nlow, low, 0, argv[0]);
+    SaveExcitation(cfac, nlow, low, nlow, low, 0, argv[0]);
     free(low);
   } else if (argc == 3) {
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
     if (nlow <= 0) return -1;
     nup = SelectLevels(&up, argv[2], argt[2], variables);
     if (nup <= 0) return -1;
-    SaveExcitation(nlow, low, nup, up, 0, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 0, argv[0]);
     free(low);
     free(up);
   } else {
@@ -746,12 +745,12 @@ static int PCETableMSub(int argc, char *argv[], int argt[],
   
   if (argc == 1) {
     if (argt[0] != STRING ) return -1;
-    SaveExcitation(nlow, low, nup, up, 1, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 1, argv[0]);
   } else if (argc == 2) {
     if (argt[0] != STRING) return -1;
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
     if (nlow <= 0) return -1;
-    SaveExcitation(nlow, low, nlow, low, 1, argv[0]);
+    SaveExcitation(cfac, nlow, low, nlow, low, 1, argv[0]);
     free(low);
   } else if (argc == 3) {
     if (argt[0] != STRING) return -1;
@@ -759,7 +758,7 @@ static int PCETableMSub(int argc, char *argv[], int argt[],
     if (nlow <= 0) return -1;
     nup = SelectLevels(&up, argv[2], argt[2], variables);
     if (nup <= 0) return -1;
-    SaveExcitation(nlow, low, nup, up, 1, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 1, argv[0]);
     free(low);
     free(up);
   } else {
@@ -2962,9 +2961,9 @@ static int PCETableEB(int argc, char *argv[], int argt[],
   if (nup <= 0) return -1;
   
   if (m == 0) {
-    SaveExcitationEB(nlow, low, nup, up, argv[0]);
+    SaveExcitationEB(cfac, nlow, low, nup, up, argv[0]);
   } else {
-    SaveExcitationEBD(nlow, low, nup, up, argv[0]);
+    SaveExcitationEBD(cfac, nlow, low, nup, up, argv[0]);
   }
   
   free(low);

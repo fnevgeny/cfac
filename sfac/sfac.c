@@ -35,6 +35,13 @@
 #include "init.h"
 #include "stoken.h"
 
+static void cfac_verinfo(void) {
+  printf("cFAC-%d.%d.%d\n",
+    CFAC_VERSION, CFAC_SUBVERSION, CFAC_SUBSUBVERSION);
+  printf("Based on the Flexible Atomic Code (FAC) by Ming Feng Gu\n");
+  printf("Maintained by Evgeny Stambulchik\n");
+}
+
 static int PPrint(int argc, char *argv[], int argt[], ARRAY *variables) {
   int i;
   for (i = 0; i < argc; i++) {
@@ -897,7 +904,7 @@ static int PGetPotential(int argc, char *argv[], int argt[],
 
 static int PInfo(int argc, char *argv[], int argt[], ARRAY *variables) {
   if (argc != 0) return -1;
-  Info();
+  cfac_verinfo();
   return 0;
 }
 
@@ -3144,7 +3151,19 @@ static METHOD methods[] = {
   {"WaveFuncTable", PWaveFuncTable},
   {"", NULL}
 };
- 
+
+static void usage(FILE *fp, const char *progname) {
+    fprintf(fp, "Usage:\n");
+    fprintf(fp, "       %s            run in the interactive mode \n",
+        progname);
+    fprintf(fp, "       %s [FILE]...  execute commands in one or more files\n",
+        progname);
+    fprintf(fp, "       %s -V         print version info and exit\n",
+        progname);
+    fprintf(fp, "       %s -h         display this help and exit\n",
+        progname);
+}
+
 int main(int argc, const char *argv[]) {
   int i;
   FILE *f;
@@ -3179,12 +3198,21 @@ int main(int argc, const char *argv[]) {
     EvalFile(stdin, 1, methods);
   } else {
     for (i = 1; i < argc; i++) {
-      f = fopen(argv[i], "r");
-      if (!f) {
-	printf("Cannot open file %s, Skipping\n", argv[i]);
-	continue;
+      if (!strcmp(argv[i], "-h")) {
+        usage(stdout, argv[0]);
+        exit(0);
+      } else
+      if (!strcmp(argv[i], "-V")) {
+        cfac_verinfo();
+        exit(0);
+      } else {
+        f = fopen(argv[i], "r");
+        if (!f) {
+	  printf("Cannot open file %s, Skipping\n", argv[i]);
+	  continue;
+        }
+        EvalFile(f, 0, methods);
       }
-      EvalFile(f, 0, methods);
     }
   }
   

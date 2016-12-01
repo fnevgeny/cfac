@@ -795,7 +795,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
     double bethe;
     double qke[MAXNUSR], sigma[MAXNUSR];
     
-    kl0 = BoundFreeOS(qke, qkc, te, b, f, -1, iuta);
+    kl0 = BoundFreeOS(cfac, qke, qkc, te, b, f, -1, iuta);
     if (kl0 < 0) return kl0;
     
     for (i = 0; i < n_egrid; i++) {

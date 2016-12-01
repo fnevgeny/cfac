@@ -631,7 +631,7 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
     break;
   }
 
-  SaveAI(nlow, low, nup, up, fname, c, 0);
+  SaveAI(cfac, nlow, low, nup, up, fname, c, 0);
 
   if (nlow > 0) {
     free(low);
@@ -658,7 +658,7 @@ static int PAITableMSub(int argc, char *argv[], int argt[],
   
   nlow = SelectLevels(&low, argv[1], argt[1], variables);
   nup = SelectLevels(&up, argv[2], argt[2], variables);
-  SaveAI(nlow, low, nup, up, argv[0], c, 1);
+  SaveAI(cfac, nlow, low, nup, up, argv[0], c, 1);
   if (nlow > 0) free(low);
   if (nup > 0) free(up);
 
@@ -1091,7 +1091,7 @@ static int PRecStates(int argc, char *argv[], int argt[],
   ng = DecodeGroupArgs(&kg, 1, &(argv[1]), &(argt[1]), variables);
   if (ng <= 0) return -1;
   n = atoi(argv[2]);
-  if (RecStates(n, ng, kg, argv[0]) < 0) {
+  if (RecStates(cfac, n, ng, kg, argv[0]) < 0) {
     printf("RecStates Error\n");
     free(kg);
     return -1;
@@ -1118,7 +1118,7 @@ static int PRRMultipole(int argc, char *argv[], int argt[],
     if (argt[3] != NUMBER) return -1;
     m = atoi(argv[3]);
   }
-  SaveRRMultipole(nlow, low, nup, up, argv[0], m);
+  SaveRRMultipole(cfac, nlow, low, nup, up, argv[0], m);
 
   free(low);
   free(up);
@@ -1172,7 +1172,7 @@ static int PRRTable(int argc, char *argv[], int argt[],
     }
   }
 
-  SaveRecRR(nlow, low, nup, up, argv[0], m);
+  SaveRecRR(cfac, nlow, low, nup, up, argv[0], m);
 
   if (nlow) {
     free(low);

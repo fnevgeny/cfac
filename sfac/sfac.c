@@ -20,7 +20,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "global.h"
+#include <gsl/gsl_ieee_utils.h>
+
 #include "cfacP.h"
 #include "radial.h"
 #include "angular.h"
@@ -32,8 +33,16 @@
 #include "ionization.h"
 #include "recombination.h"
 #include "dbase.h"
-#include "init.h"
 #include "stoken.h"
+
+static cfac_t *cfac = NULL;
+
+static void cfac_verinfo(void) {
+  printf("cFAC-%d.%d.%d\n",
+    CFAC_VERSION, CFAC_SUBVERSION, CFAC_SUBSUBVERSION);
+  printf("Based on the Flexible Atomic Code (FAC) by Ming Feng Gu\n");
+  printf("Maintained by Evgeny Stambulchik\n");
+}
 
 static int PPrint(int argc, char *argv[], int argt[], ARRAY *variables) {
   int i;
@@ -190,7 +199,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       for (j = 0; j < nlevels; j++) {
 	lev = GetLevel(cfac, j);
 	
-        if (cfac->uta) {
+        if (lev->uta) {
           ig = lev->uta_cfg_g;
         } else {
           im = lev->pb;
@@ -631,7 +640,7 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
     break;
   }
 
-  SaveAI(nlow, low, nup, up, fname, c, 0);
+  SaveAI(cfac, nlow, low, nup, up, fname, c, 0);
 
   if (nlow > 0) {
     free(low);
@@ -658,7 +667,7 @@ static int PAITableMSub(int argc, char *argv[], int argt[],
   
   nlow = SelectLevels(&low, argv[1], argt[1], variables);
   nup = SelectLevels(&up, argv[2], argt[2], variables);
-  SaveAI(nlow, low, nup, up, argv[0], c, 1);
+  SaveAI(cfac, nlow, low, nup, up, argv[0], c, 1);
   if (nlow > 0) free(low);
   if (nup > 0) free(up);
 
@@ -697,7 +706,7 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
     nlow = SelectNeleLevels(cfac, -1, &low);
     nup = nlow;
     up = low;
-    SaveExcitation(nlow, low, nup, up, 0, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 0, argv[0]);
   } else if (argc == 2) {
     if (argt[1] == STRING) {
       nlow = SelectLevels(&low, argv[1], argt[1], variables);
@@ -708,14 +717,14 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
       up = low;
     }
     if (nlow <= 0) return -1;
-    SaveExcitation(nlow, low, nlow, low, 0, argv[0]);
+    SaveExcitation(cfac, nlow, low, nlow, low, 0, argv[0]);
     free(low);
   } else if (argc == 3) {
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
     if (nlow <= 0) return -1;
     nup = SelectLevels(&up, argv[2], argt[2], variables);
     if (nup <= 0) return -1;
-    SaveExcitation(nlow, low, nup, up, 0, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 0, argv[0]);
     free(low);
     free(up);
   } else {
@@ -736,12 +745,12 @@ static int PCETableMSub(int argc, char *argv[], int argt[],
   
   if (argc == 1) {
     if (argt[0] != STRING ) return -1;
-    SaveExcitation(nlow, low, nup, up, 1, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 1, argv[0]);
   } else if (argc == 2) {
     if (argt[0] != STRING) return -1;
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
     if (nlow <= 0) return -1;
-    SaveExcitation(nlow, low, nlow, low, 1, argv[0]);
+    SaveExcitation(cfac, nlow, low, nlow, low, 1, argv[0]);
     free(low);
   } else if (argc == 3) {
     if (argt[0] != STRING) return -1;
@@ -749,7 +758,7 @@ static int PCETableMSub(int argc, char *argv[], int argt[],
     if (nlow <= 0) return -1;
     nup = SelectLevels(&up, argv[2], argt[2], variables);
     if (nup <= 0) return -1;
-    SaveExcitation(nlow, low, nup, up, 1, argv[0]);
+    SaveExcitation(cfac, nlow, low, nup, up, 1, argv[0]);
     free(low);
     free(up);
   } else {
@@ -897,7 +906,7 @@ static int PGetPotential(int argc, char *argv[], int argt[],
 
 static int PInfo(int argc, char *argv[], int argt[], ARRAY *variables) {
   if (argc != 0) return -1;
-  Info();
+  cfac_verinfo();
   return 0;
 }
 
@@ -1091,7 +1100,7 @@ static int PRecStates(int argc, char *argv[], int argt[],
   ng = DecodeGroupArgs(&kg, 1, &(argv[1]), &(argt[1]), variables);
   if (ng <= 0) return -1;
   n = atoi(argv[2]);
-  if (RecStates(n, ng, kg, argv[0]) < 0) {
+  if (RecStates(cfac, n, ng, kg, argv[0]) < 0) {
     printf("RecStates Error\n");
     free(kg);
     return -1;
@@ -1118,7 +1127,7 @@ static int PRRMultipole(int argc, char *argv[], int argt[],
     if (argt[3] != NUMBER) return -1;
     m = atoi(argv[3]);
   }
-  SaveRRMultipole(nlow, low, nup, up, argv[0], m);
+  SaveRRMultipole(cfac, nlow, low, nup, up, argv[0], m);
 
   free(low);
   free(up);
@@ -1172,7 +1181,7 @@ static int PRRTable(int argc, char *argv[], int argt[],
     }
   }
 
-  SaveRecRR(nlow, low, nup, up, argv[0], m);
+  SaveRecRR(cfac, nlow, low, nup, up, argv[0], m);
 
   if (nlow) {
     free(low);
@@ -2952,9 +2961,9 @@ static int PCETableEB(int argc, char *argv[], int argt[],
   if (nup <= 0) return -1;
   
   if (m == 0) {
-    SaveExcitationEB(nlow, low, nup, up, argv[0]);
+    SaveExcitationEB(cfac, nlow, low, nup, up, argv[0]);
   } else {
-    SaveExcitationEBD(nlow, low, nup, up, argv[0]);
+    SaveExcitationEBD(cfac, nlow, low, nup, up, argv[0]);
   }
   
   free(low);
@@ -3144,7 +3153,36 @@ static METHOD methods[] = {
   {"WaveFuncTable", PWaveFuncTable},
   {"", NULL}
 };
- 
+
+static void usage(FILE *fp, const char *progname) {
+    fprintf(fp, "Usage:\n");
+    fprintf(fp, "       %s            run in the interactive mode \n",
+        progname);
+    fprintf(fp, "       %s [FILE]...  execute commands in one or more files\n",
+        progname);
+    fprintf(fp, "       %s -V         print version info and exit\n",
+        progname);
+    fprintf(fp, "       %s -h         display this help and exit\n",
+        progname);
+}
+
+static int InitFac() {
+  gsl_ieee_env_setup();
+
+  cfac = cfac_new();
+  if (!cfac) {
+    printf("Initialization failed\n");
+    return -1;
+  }
+
+  InitDBase();
+  InitExcitation();
+  InitRecombination();
+  InitIonization(cfac);
+  
+  return 0;
+}
+
 int main(int argc, const char *argv[]) {
   int i;
   FILE *f;
@@ -3179,12 +3217,21 @@ int main(int argc, const char *argv[]) {
     EvalFile(stdin, 1, methods);
   } else {
     for (i = 1; i < argc; i++) {
-      f = fopen(argv[i], "r");
-      if (!f) {
-	printf("Cannot open file %s, Skipping\n", argv[i]);
-	continue;
+      if (!strcmp(argv[i], "-h")) {
+        usage(stdout, argv[0]);
+        exit(0);
+      } else
+      if (!strcmp(argv[i], "-V")) {
+        cfac_verinfo();
+        exit(0);
+      } else {
+        f = fopen(argv[i], "r");
+        if (!f) {
+	  printf("Cannot open file %s, Skipping\n", argv[i]);
+	  continue;
+        }
+        EvalFile(f, 0, methods);
       }
-      EvalFile(f, 0, methods);
     }
   }
   

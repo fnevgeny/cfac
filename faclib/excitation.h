@@ -67,25 +67,25 @@ int SetCEEGrid(int n, double emin, double emax, double eth);
 int SetUsrCEEGridDetail(int n, double *x);
 int SetUsrCEEGrid(int n, double emin, double emax, double eth);
 
-int CERadialPk(CEPK **pk, int ie, int k0, int k1, int k);
-int CERadialQkBorn(int k0, int k1, int k2, int k3, int k, 
+int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k);
+int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, 
 		   double te, double e1, double *qk, int m);
-int CERadialQkBornMSub(int k0, int k1, int k2, int k3, int k, int kp,
+int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int kp,
 		       double te, double e1, 
 		       int nq, int *q, double *qk, int m);
-int CERadialQk(const cfac_cbcache_t *cbcache, double *r, double te, 
+int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *r, double te, 
 	       int k0, int k1, int k2, int k3, int k);
-int CERadialQkMSub(const cfac_cbcache_t *cbcache, double *rq, double te, int k0, int k1,
+int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *rq, double te, int k0, int k1,
 		   int k2, int k3, int k, int kp);
 void CERadialQkFromFit(int np, double *p, int n, double *x, double *logx,
 		       double *y, double *dy, int ndy, void *extra);
-int CollisionStrength(const cfac_cbcache_t *cbcache, const TRANSITION *tr, int msub,
+int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSITION *tr, int msub,
                       double *qkt, double *params, double *bethe);
-int SaveExcitation(int nlow, int *low, int nup, int *up, int msub, char *fn);
-int CollisionStrengthEB(const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, int lower, int upper);
-int CollisionStrengthEBD(const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, double *born,
+int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub, char *fn);
+int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, int lower, int upper);
+int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, double *born,
 			 int lower, int upper);
-int SaveExcitationEB(int nlow, int *low, int nup, int *up, char *fn);
-int SaveExcitationEBD(int nlow, int *low, int nup, int *up, char *fn);
+int SaveExcitationEB(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn);
+int SaveExcitationEBD(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn);
 
 #endif

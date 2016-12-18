@@ -22,7 +22,6 @@
 #include <time.h>
 #include <math.h>
 
-#include "global.h"
 #include "cfacP.h"
 #include "consts.h"
 #include "parser.h"
@@ -212,7 +211,7 @@ int ConstructRecGroupName(char *rgn, char *gn, int n) {
   return 0;
 }
 
-int IsRecombinedGroup(int i) {
+int IsRecombinedGroup(cfac_t *cfac, int i) {
   char *s;
   int n;
   s = GetGroup(cfac, i)->name;
@@ -221,7 +220,7 @@ int IsRecombinedGroup(int i) {
   return n;
 }
 
-int RecStates(int n, int k, int *kg, char *fn) {
+int RecStates(cfac_t *cfac, int n, int k, int *kg, char *fn) {
   int i, j, m, nsym, nlevels, ncfgs, kg0, t;
   ARRAY *clist;
   CONFIG *rcfg, *c;
@@ -246,7 +245,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
   if (pw_scratch.n_spec > nm) nm = pw_scratch.n_spec;
 
   if (n >= nm) {
-    i = RecStatesFrozen(n, k, kg, fn);
+    i = RecStatesFrozen(cfac, n, k, kg, fn);
     return i;
   }
 
@@ -319,7 +318,7 @@ int RecStates(int n, int k, int *kg, char *fn) {
   return 0;
 }
 
-int RecStatesFrozen(int n, int k, int *kg, char *fn) {
+int RecStatesFrozen(cfac_t *cfac, int n, int k, int *kg, char *fn) {
   int i, j, m, nlevels, nsym, nstates, ko;
   int kl2, j1, j2, p1, p, jmin, jmax, tj;
   LEVEL *lev;
@@ -505,7 +504,7 @@ void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx,
   }
 }
 
-int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
+int RRRadialMultipoleTable(cfac_t *cfac, double *qr, int k0, int k1, int m) {
   int index[3], k, nqk;
   double **p, *qk;
   int kappaf, jf, klf, kf;
@@ -569,7 +568,7 @@ int RRRadialMultipoleTable(double *qr, int k0, int k1, int m) {
   return 0;
 }
     
-int RRRadialQkTable(double *qr, int k0, int k1, int m) {
+int RRRadialQkTable(cfac_t *cfac, double *qr, int k0, int k1, int m) {
   int index[3], k, nqk;
   double **p, *qk, tq[MAXNE];
   double r0, r1, tq0[MAXNE];
@@ -699,12 +698,12 @@ int RRRadialQkTable(double *qr, int k0, int k1, int m) {
   return 0;
 }
   
-int RRRadialMultipole(double *rqc, double te, int k0, int k1, int m) {
+int RRRadialMultipole(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m) {
   int i, j, nd, k;
   double rq[MAXNTE];
   double x0, rqe[MAXNTE*MAXNE];
 
-  i = RRRadialMultipoleTable(rqe, k0, k1, m);
+  i = RRRadialMultipoleTable(cfac, rqe, k0, k1, m);
   if (i < 0) return -1;
   
   if (n_tegrid == 1) {
@@ -726,12 +725,12 @@ int RRRadialMultipole(double *rqc, double te, int k0, int k1, int m) {
   return 0;
 }
   
-int RRRadialQk(double *rqc, double te, int k0, int k1, int m) {
+int RRRadialQk(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m) {
   int i, j, nd, k;
   double rq[MAXNTE];
   double x0, rqe[MAXNTE*MAXNE];
 
-  i = RRRadialQkTable(rqe, k0, k1, m);
+  i = RRRadialQkTable(cfac, rqe, k0, k1, m);
   if (i < 0) return -1;
 
   if (n_tegrid == 1) {
@@ -753,7 +752,7 @@ int RRRadialQk(double *rqc, double te, int k0, int k1, int m) {
   return 0;
 }
 
-int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
+int BoundFreeMultipole(cfac_t *cfac, FILE *fp, int rec, int f, int m) {
   LEVEL *lev1, *lev2;
   ANGULAR_ZFB *ang;
   ORBITAL *orb;
@@ -804,7 +803,7 @@ int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
 	      (m > 0 && IsEven((klb+klf+k)/2))) {
 	    continue;
 	  }
-	  n = RRRadialMultipole(rq, eb, kb, kf, m);
+	  n = RRRadialMultipole(cfac, rq, eb, kb, kf, m);
 	  if (n < 0) continue;
 	  a = ang[i].coeff*sqrt(jt+1.0)*W6j(j2, jf, jt, k, j1, jb);
 	  if (IsOdd((jt+j1-k)/2)) a = -a;
@@ -828,7 +827,7 @@ int BoundFreeMultipole(FILE *fp, int rec, int f, int m) {
   return 0;
 }
 
-int BoundFreeOS(double *rqu, double *rqc, double *eb, 
+int BoundFreeOS(cfac_t *cfac, double *rqu, double *rqc, double *eb, 
 		int rec, int f, int m, int iuta) {
   LEVEL *lev1, *lev2;
   ORBITAL *orb = NULL;
@@ -881,7 +880,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   }
   
   if (iuta) {
-    k = RRRadialQk(rq, *eb, kb, kb, m);
+    k = RRRadialQk(cfac, rq, *eb, kb, kb, m);
     if (k < 0) {
       free(idatum->bra);
       free(idatum);
@@ -906,7 +905,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
         jbp = GetOrbital(cfac, kbp)->kappa;
         jbp = GetJFromKappa(jbp);
         if (jbp != jb) continue;
-        k = RRRadialQk(rq, *eb, kb, kbp, m);
+        k = RRRadialQk(cfac, rq, *eb, kb, kbp, m);
         if (k < 0) continue;
         a = ang[i].coeff*ang[j].coeff;
         if (j != i) {
@@ -999,7 +998,7 @@ int BoundFreeOS(double *rqu, double *rqc, double *eb,
   return nkl;
 }
 
-int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {  
+int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int msub) {  
   LEVEL *lev1, *lev2;
   ANGULAR_ZxZMIX *ang;
   ANGULAR_ZFB *zfb;
@@ -1065,7 +1064,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
 	klf = jf + ik;  	
 	if (IsOdd((klfp+klf)/2)) continue;
 	kappaf = GetKappaFromJL(jf, klf);
-	AIRadialPk(&ai_pk, k0, k1, kb, kappaf, ang[i].k);
+	AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, ang[i].k);
 	if (n_egrid > 1) {
 	  UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	} else {
@@ -1086,7 +1085,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
       GetJLFromKappa(kappaf, &jf, &klf);
       ij = jf - jmin;
       ik = klf - jf;
-      AIRadial1E(ai_pk0, kb, kappaf);
+      AIRadial1E(cfac, ai_pk0, kb, kappaf);
       if (n_egrid > 1) {
 	UVIP3P(n_egrid, log_egrid, ai_pk0, nt, &log_e, &s);
       } else {
@@ -1185,7 +1184,7 @@ int AutoionizeRate(double *rate, double *e, int rec, int f, int msub) {
   }
 }
 
-int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
+int AutoionizeRateUTA(cfac_t *cfac, double *rate, double *e, int rec, int f) {
   INTERACT_DATUM *idatum;
   LEVEL *lev1, *lev2;
   int j0, j1, jb, ns, q0, q1, qb;
@@ -1236,7 +1235,7 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
 	kappaf = GetKappaFromJL(jf, klf);
 	for (k = kmin; k <= kmax; k += 2) {
 	  if (!Triangle(j0, j1, k) || !Triangle(jb, jf, k)) continue;
-	  AIRadialPk(&ai_pk, k0, k1, kb, kappaf, k);
+	  AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, k);
 	  if (n_egrid > 1) {
 	    UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	  } else {
@@ -1266,7 +1265,7 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
 	    if (!Triangle(jb, jf, k)) continue;
 	    b = W6j(j, jf, j0, k, j1, j1);
 	    if (fabs(b) < EPS30) continue;
-	    AIRadialPk(&ai_pk, k0, k1, kb, kappaf, k);
+	    AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, k);
 	    if (n_egrid > 1) {
 	      UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	    } else {
@@ -1288,7 +1287,7 @@ int AutoionizeRateUTA(double *rate, double *e, int rec, int f) {
   return 0;
 }
 
-int AIRadial1E(double *ai_pk, int kb, int kappaf) {
+int AIRadial1E(cfac_t *cfac, double *ai_pk, int kb, int kappaf) {
   int kf;
   int i;
 
@@ -1299,7 +1298,7 @@ int AIRadial1E(double *ai_pk, int kb, int kappaf) {
   return 0;
 }  
 
-int AIRadialPk(double **ai_pk, int k0, int k1, int kb, int kappaf, int k) {
+int AIRadialPk(cfac_t *cfac, double **ai_pk, int k0, int k1, int kb, int kappaf, int k) {
   int i, kf;
   int ks[4];
   double e, sd, se;
@@ -1388,7 +1387,7 @@ int PrepRREGrids(double e, double emax0) {
   return 0;
 }
 
-int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
+int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m) {
   int i, j, k;
   FILE *f;
   LEVEL *lev1, *lev2;
@@ -1533,7 +1532,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
 	lev2 = GetLevel(cfac, low[j]);
 	e = lev1->energy - lev2->energy;
 	if (e < e0 || e >= e1) continue;
-	BoundFreeMultipole(f, low[j], up[i], m);
+	BoundFreeMultipole(cfac, f, low[j], up[i], m);
       }
     }
     
@@ -1551,7 +1550,7 @@ int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m) {
   return 0;
 }
     
-int SaveRecRR(int nlow, int *low, int nup, int *up, 
+int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
 	      char *fn, int m) {
   int i, j, k, ie, ip;
   FILE *f;
@@ -1733,7 +1732,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
 	} else {
 	  iuta = 0;
 	}
-	nq = BoundFreeOS(rqu, qc, &eb, low[j], up[i], m, iuta);
+	nq = BoundFreeOS(cfac, rqu, qc, &eb, low[j], up[i], m, iuta);
 	if (nq < 0) continue;
 	
         r.b = low[j];
@@ -1775,7 +1774,7 @@ int SaveRecRR(int nlow, int *low, int nup, int *up,
   return 0;
 }
       
-int SaveAI(int nlow, int *low, int nup, int *up, char *fn, 
+int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, 
 	   double eref, int msub) {
   int i, j, k, t;
   LEVEL *lev1, *lev2;
@@ -1930,6 +1929,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
       ai_hdr1.egrid = egrid;
       InitFile(f, &fhdr, &ai_hdr1);
     }
+    
     for (i = 0; i < nlow; i++) {
       lev1 = GetLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
@@ -1940,9 +1940,9 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 	if (!msub) {
 	  /* FIXME: generalize AutoionizeRateUTA to treat detailed mode */
           if (lev1->uta || lev2->uta) {
-	    k = AutoionizeRateUTA(&s, &e, low[i], up[j]);
+	    k = AutoionizeRateUTA(cfac, &s, &e, low[i], up[j]);
           } else {
-            k = AutoionizeRate(&s, &e, low[i], up[j], msub);
+            k = AutoionizeRate(cfac, &s, &e, low[i], up[j], msub);
           }
 	  if (k < 0) continue;
 	  if (s < ai_cut) continue;
@@ -1951,7 +1951,7 @@ int SaveAI(int nlow, int *low, int nup, int *up, char *fn,
 	  r.rate = s;
 	  WriteAIRecord(f, &r);
 	} else {
-	  k = AutoionizeRate(s1, &e, low[i], up[j], msub);
+	  k = AutoionizeRate(cfac, s1, &e, low[i], up[j], msub);
 	  if (k < 0) continue;
 	  r1.rate = rt;
 	  s = 0;

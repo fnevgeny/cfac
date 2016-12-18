@@ -50,25 +50,25 @@ int SetRecPWOptions(int kl_interp, int max_kl);
 int SetRecPWLimits(int m1, int m2);
 int SetRecSpectator(int n_frozen, int n_spec);
 int ConstructRecGroupName(char *rgn, char *gn, int n);
-int RecStates(int n, int k, int *kg, char *fn);
-int RecStatesFrozen(int n, int k, int *kg, char *fn);
-int RRRadialMultipoleTable(double *qr, int k0, int k1, int m);
-int RRRadialQkTable(double *qr, int k0, int k1, int m);
-int RRRadialMultipole(double *rqc, double te, int k0, int k1, int m);
-int RRRadialQk(double *rqc, double te, int k0, int k1, int m);
+int RecStates(cfac_t *cfac, int n, int k, int *kg, char *fn);
+int RecStatesFrozen(cfac_t *cfac, int n, int k, int *kg, char *fn);
+int RRRadialMultipoleTable(cfac_t *cfac, double *qr, int k0, int k1, int m);
+int RRRadialQkTable(cfac_t *cfac, double *qr, int k0, int k1, int m);
+int RRRadialMultipole(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m);
+int RRRadialQk(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m);
 void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx, 
 		       double *y, double *dy, int ndy, void *extra);
 void RRRadialQkHydrogenicParams(int np, double *p, double z, int n, int klb);
-int BoundFreeMultipole(FILE *fp, int rec, int f, int m);
-int BoundFreeOS(double *rqu, double *p, 
+int BoundFreeMultipole(cfac_t *cfac, FILE *fp, int rec, int f, int m);
+int BoundFreeOS(cfac_t *cfac, double *rqu, double *p, 
 		double *eb, int rec, int f, int m, int iuta);
 int PrepRREGrids(double eth, double emax0);
-int SaveRRMultipole(int nlow, int *low, int nup, int *up, char *fn, int m);
-int SaveRecRR(int nlow, int *low, int nup, int *up, char *fn, int m);
-int SaveAI(int nlow, int *low, int nup, int *up, char *fn, 
+int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
+int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
+int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, 
 	   double eref, int msub);
-int AIRadial1E(double *pk, int kb, int kappaf);
-int AIRadialPk(double **pk, int k0, int k1, int kb, int kappaf, int k);
-int AutoionizeRate(double *rate, double *e, int rec, int f, int msub);
+int AIRadial1E(cfac_t *cfac, double *pk, int kb, int kappaf);
+int AIRadialPk(cfac_t *cfac, double **pk, int k0, int k1, int kb, int kappaf, int k);
+int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int msub);
 
 #endif

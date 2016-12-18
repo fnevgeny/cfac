@@ -142,15 +142,13 @@ electron, and the $\pm$ sign indicates an even ($+$) or odd ($-$) parity state.
 \item[\texttt{int ilev}:] The index of the level.
 \item[\texttt{int ibase}:] The index of the base level. The base level
   obtained by peeling off the valence electron, and the resulting levels must
-  be present in the same level file. Other wise, its value is -1. It is not
+  be present in the same level file. Otherwise, its value is $-1$. It is not
   always possible to determine the base level, e.g., when the valence orbital
-  is occupied by more than one electrons. In such cases, \texttt{ibase} is
-  also -1. The value of \texttt{ibase} is primarily used in dealing with DR
-  and RE rates, where it may help the distinguish different resonance channels
-  and facilitate easy extrapolation. This variable is only added in version
-  FAC 1.0.4. So these later versions are not compatible with the binary
-  output of the earlier versions.
-\item[\texttt{energy}:] The energy of the level in Hartree.
+  is occupied by more than one electron. In such cases, \texttt{ibase} is
+  also $-1$. The value of \texttt{ibase} is primarily used in dealing with DR
+  and RE rates, where it may help to distinguish different resonance channels
+  and facilitate easy extrapolation.
+\item[\texttt{energy}:] The energy of the level in the atomic units (hartree).
 \item[\texttt{char ncomplex[LNCOMPLEX]}:] The complex name. It is in the format
 of \verb|n1*nq1 n2*nq2|$\cdots$, where \verb|n1| and \verb|n2| are the
 principle quantum numbers of the shell, \verb|nq1| and \verb|nq2| are the
@@ -227,7 +225,7 @@ typedef struct _TR_RECORD_ {
 gA = 2\alpha^3 \omega^2 gf,
 \end{equation}
 where $\alpha$ is the fine structure constant, and $\omega$ is transition
-energy in Hartree atomic units. 
+energy in hartree atomic units.
 
 In version 1.0.7 or newer, this stores the multipole matrix elements $M$
 instead. It is related to the $gf$ value as
@@ -507,7 +505,7 @@ $E_{th}$ is the ionization threshold, $p_0$, $p_1$, $p_2$, and $p_3$ are the
 parameters, and $l$ is the orbital angular momentum of the ionized
 shell. The asymptotic behavior represented by the power law only takes into
 account the ionization of the dominant basis in the wavefunction
-expansion. The result is in atomic unit Hartree$^{-1}$.
+expansion. The result is in atomic unit hartree$^{-1}$.
 \item[\texttt{float *strength}:] The weighted bound-free oscillator strength in
 atomic units. It is related to photoionization and radiative recombination as
 (in atomic units):

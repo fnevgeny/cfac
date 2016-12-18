@@ -336,7 +336,7 @@ int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, 
 
       if (xborn) {
 	for (i = 0; i < n_tegrid; i++) {
-	  CERadialQkBorn(kb, kf, kbp, kf, k, tegrid[i]+e2, e1, &r, 0);
+	  CERadialQkBorn(cfac, kb, kf, kbp, kf, k, tegrid[i]+e2, e1, &r, 0);
 	  qk[i] += r;
 	}
 	continue;
@@ -795,7 +795,7 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
     double bethe;
     double qke[MAXNUSR], sigma[MAXNUSR];
     
-    kl0 = BoundFreeOS(qke, qkc, te, b, f, -1, iuta);
+    kl0 = BoundFreeOS(cfac, qke, qkc, te, b, f, -1, iuta);
     if (kl0 < 0) return kl0;
     
     for (i = 0; i < n_egrid; i++) {

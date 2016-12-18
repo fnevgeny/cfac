@@ -1,6 +1,6 @@
 ##################################################
 #     System-independent Make.defs file for      #
-#            a cFAC auxiliary library            #
+#               the faclib library               #
 ##################################################
 
 LIB  = $(CFAC_FAC_LIB)
@@ -16,7 +16,6 @@ CSRCS = cfac.c \
 	dbase_sql.c \
 	excitation.c \
 	grid.c \
-	init.c \
 	interpolation.c \
 	ionization.c \
 	nucleus.c \

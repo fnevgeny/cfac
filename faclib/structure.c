@@ -1768,6 +1768,7 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     }
     
     lev.uta = 0;
+    lev.ibase = -1;
     
     lev.energy = h->mixing[i];
     lev.pj = h->pj;
@@ -2233,14 +2234,14 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
   }
 
   for (k = 0; k < n; k++) {
-    STATE *s, *s1;
-    SYMMETRY *sym, *sym1;
-    CONFIG *cfg, *cfg1, *c;
-    SHELL_STATE *csf, *csf1;
-    LEVEL *lev, *lev1;
+    STATE *s;
+    SYMMETRY *sym;
+    CONFIG *cfg, *c;
+    SHELL_STATE *csf;
+    LEVEL *lev;
     ECORRECTION *ec;
     ORBITAL *orb;
-    double e0, md, md1, a;
+    double e0, md1;
     int i, ib, dn, ik, si, ms, mst;
     
     i = start + k;
@@ -2273,17 +2274,20 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
       }
     }
 
+    /* update lev->ibase */
     if (s->kgroup > 0) {
       cfg = GetConfig(cfac, s);
       nk = cfg->n_electrons-1;
-      if (cfac_get_ion_nlevels(cfac, nk) == 0 || cfg->shells[0].nq > 1) {
-	lev->ibase = -1;
-      } else {
+      
+      lev->ibase = -1;
+      
+      if (cfac_get_ion_nlevels(cfac, nk) != 0 && cfg->shells[0].nq <= 1) {
+        STATE *s1;
+        CONFIG *cfg1;
+	double a = 0.0;
+	double md = 1E30;
 	csf = cfg->csfs + s->kstate;
-	md = 1E30;
-	lev->ibase = -1;
 	dn = cfg->shells[0].n - cfg->shells[1].n;
-	a = 0.0;
 	if (dn < MAXDN) {
 	  a = 0.0;
 	  for (t = 0; t < lev->n_basis; t++) {
@@ -2300,7 +2304,14 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
 	  for (t = 0; t < cfac_get_ion_nlevels(cfac, nk); t++) {
 	    gion = ArrayGet(cfac->levels_per_ion+nk, t);
 	    for (q = gion->imin; q <= gion->imax; q++) {
-	      lev1 = GetLevel(cfac, q);
+              SYMMETRY *sym1;
+              SHELL_STATE *csf1;
+	      LEVEL *lev1 = GetLevel(cfac, q);
+
+              if (lev1->uta) {
+                continue;
+              }
+
 	      sym1 = GetSymmetry(cfac, lev1->pj);
 	      s1 = ArrayGet(&(sym1->states), lev1->basis[lev1->kpb[ib]]);
 	      cfg1 = GetConfig(cfac, s1);

@@ -2423,7 +2423,6 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
   char jsym;
   char ashell[32];
   CONFIG *c;
-  SHELL_STATE *s = NULL;
   ORBITAL *orb;
   LEVEL *lev;
   SYMMETRY *sym;
@@ -2480,9 +2479,6 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
   nele = c->n_electrons;
   if (!name && !sname && !nc) return nele;
 
-  if (c->n_csfs > 0) {
-    s = c->csfs + basis->kstate;
-  }
   len = 0;
   if (name) name[0] = '\0';
   if (sname) sname[0] = '\0';
@@ -2499,7 +2495,8 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
       if (((nq < j+1) && nq > 0) || (i == 0 && name[0] == '\0')) {
 	SpecSymbol(symbol, kl);
 	if (c->n_csfs > 0) {
-	  sprintf(ashell, "%1d%s%c%1d(%1d)%1d ", 
+          SHELL_STATE *s = c->csfs + basis->kstate;
+          sprintf(ashell, "%1d%s%c%1d(%1d)%1d ",
 		  n, symbol, jsym, nq, s[i].shellJ, s[i].totalJ); 
 	} else {
 	  sprintf(ashell, "%1d%s%c%1d ", n, symbol, jsym, nq);

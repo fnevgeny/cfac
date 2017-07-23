@@ -44,6 +44,9 @@ cfacdbu$(EXE): $(COBJS) $(LIBCFACDB)
 fdemo$(EXE): $(FOBJS) $(LIBCFACDB)
 	$(FC) $(LDFLAGS) -o $@ $(FOBJS) $(LIBCFACDB) $(LIBS)
 
+cfacdbu.1: cfacdbu$(EXE)
+	help2man -s 1 -N cfacdbu$(EXE) -n "CFACDB utility" -S "cFAC" -o $@
+
 include Make.dep
 
 Make.dep: $(SRCS) $(SQLIS)
@@ -52,13 +55,15 @@ Make.dep: $(SRCS) $(SQLIS)
 	@$(CC) $(ALL_CFLAGS) -MM $(SRCS) >> $@
 	@echo "done"
 
-install: cfacdbu $(TOP)/include/cfacdb.h $(LIBCFACDB)
+install: cfacdbu$(EXE) cfacdbu.1 $(TOP)/include/cfacdb.h $(LIBCFACDB)
 	$(INSTALLDIR) $(BINDIR)
-	$(INSTALL) cfacdbu $(BINDIR)
+	$(INSTALL) cfacdbu$(EXE) $(BINDIR)
 	$(INSTALLDIR) $(INCDIR)
 	$(INSTALLDATA) $(TOP)/include/cfacdb.h $(INCDIR)
 	$(INSTALLDIR) $(LIBDIR)
 	$(INSTALLDATA) $(LIBCFACDB) $(LIBDIR)
+	$(INSTALLDIR) $(MANDIR)/man1
+	$(INSTALLDATA) cfacdbu.1 $(MANDIR)/man1
 
 check :
 

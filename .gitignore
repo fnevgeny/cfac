@@ -45,6 +45,7 @@ cfacdb/fdemo
 cfacdb/*.db
 cfacdb/xul/releases
 cfacdb/xul/keys/keyfile.pem
+cfacdb/cfacdbu.1
 
 *.xpi
 

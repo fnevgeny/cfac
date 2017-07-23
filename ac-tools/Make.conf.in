@@ -43,3 +43,4 @@ BINDIR  = @bindir@
 LIBDIR  = @libdir@
 INCDIR  = @includedir@
 DOCDIR  = @docdir@
+MANDIR  = @mandir@

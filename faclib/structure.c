@@ -4080,9 +4080,9 @@ int cfac_calculate_structure(cfac_t *cfac,
         free(int_gids);
     }
 
-    FinalizeLevels(cfac, nlevels_old, -1);
-    
     SortLevels(cfac, nlevels_old, -1, 0);
+    
+    FinalizeLevels(cfac, nlevels_old, -1);
     
     return 0;
 }

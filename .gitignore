@@ -42,6 +42,9 @@ demo/*/*.bin
 cfacdb/*.i
 cfacdb/cfacdbu
 cfacdb/fdemo
+cfacdb/*.db
+cfacdb/xul/releases
+cfacdb/xul/keys/keyfile.pem
 
 *.xpi
 

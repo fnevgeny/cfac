@@ -992,7 +992,7 @@ double ConfigEnergyShift(cfac_t *cfac,
   return e;
 }
 
-static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
+static int TRMultipoleUTA(cfac_t *cfac, double *rme, TR_EXTRA *rx,
 		   int mpole, int lower, int upper, int *ks) {
   int m2, ns, k0, k1, q1, q2;
   int p1, p2, j1, j2, ia, ib;
@@ -1002,7 +1002,7 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
   
   *ks = 0;
   
-  *strength = 0.0;
+  *rme = 0.0;
   lev1 = GetLevel(cfac, lower);
   if (lev1 == NULL) return -1;
   lev2 = GetLevel(cfac, upper);
@@ -1082,7 +1082,7 @@ static int TRMultipoleUTA(cfac_t *cfac, double *strength, TR_EXTRA *rx,
     r = MultipoleRadialFR(cfac, aw, mpole, k0, k1, cfac->tr_opts.gauge);
   }
 
-  *strength = sqrt(lev1->uta_g*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
+  *rme = sqrt(lev1->uta_g*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
   
   free(idatum->bra);
   free(idatum);

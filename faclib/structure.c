@@ -1019,9 +1019,6 @@ static void HamiltonElement1E2E(cfac_t *cfac,
   if (cj->n_shells == 0) return;
   
   switch (cfac->confint) {
-  case -1:
-    return;
-    break;
   case 1:
     /* only CI within the same relativistic configuration */
     if (ci != cj) {

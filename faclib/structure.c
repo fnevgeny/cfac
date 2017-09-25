@@ -4084,5 +4084,10 @@ int cfac_calculate_structure(cfac_t *cfac,
     
     FinalizeLevels(cfac, nlevels_old, -1);
     
+    /* If energy corrections have been applied, the order might have changed */
+    if (cfac->ecorrections->dim) {
+        SortLevels(cfac, nlevels_old, -1, 0);
+    }
+
     return 0;
 }

@@ -45,7 +45,7 @@ fdemo$(EXE): $(FOBJS) $(LIBCFACDB)
 	$(FC) $(LDFLAGS) -o $@ $(FOBJS) $(LIBCFACDB) $(LIBS)
 
 cfacdbu.1: cfacdbu$(EXE)
-	help2man -s 1 -N cfacdbu$(EXE) -n "CFACDB utility" -S "cFAC" -o $@
+	help2man -s 1 -N ./cfacdbu$(EXE) -n "CFACDB utility" -S "cFAC" -o $@
 
 include Make.dep
 

@@ -1,4 +1,4 @@
-# FAC and cFAC
+FAC and cFAC:
 
 FAC is a software package for the calculation of various atomic processes,
 written by Ming Feng Gu at the Space Science Laboratory of Berkeley.
@@ -25,13 +25,13 @@ terms. Please note that as a result, the "sfac" executable will not be
 redistributable!
 
 
-# Prerequisites
+Prerequisites:
 
 1) c and fortran compiler (such as gcc and gfortran).
 
 2) The GNU Scientific Library (GSL) <http://www.gnu.org/software/gsl/>,
    version 1.15 or above (earlier versions will NOT work).
-   
+
 3) The SQLite software library <http://www.sqlite.org/>.
 
 4) Document building tools, help2man, pdflatex.
@@ -52,7 +52,7 @@ In Ubuntu distribution,
 Does install everything required.
 
 
-# Installation:
+Installation:
 
 1) `autoconf -o configure ac-tools/configure.ac`
 

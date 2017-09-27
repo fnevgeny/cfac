@@ -74,7 +74,7 @@ This will run a test suite of demo scripts. Any error should be reported!
 This installs the "sfac" binary, as well as the CFACDB library, C header file,
 and utility.
 
-# Usage:
+Usage:
 The "sfac" executable accepts an input file as its only argument. See the "demo"
 directory for examples. For more details, please read the manual, and be sure to
 read the FAQ section of it.

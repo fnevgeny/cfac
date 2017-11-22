@@ -23,7 +23,7 @@
 /* Versioning */
 #define CFAC_VERSION        1
 #define CFAC_SUBVERSION     6
-#define CFAC_SUBSUBVERSION  1
+#define CFAC_SUBSUBVERSION  2
 
 #define CFAC_SUCCESS    0
 #define CFAC_FAILURE    1

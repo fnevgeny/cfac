@@ -226,7 +226,7 @@ int RecStates(cfac_t *cfac, int n, int k, int *kg, char *fn) {
   CONFIG *rcfg, *c;
   SHELL ns;
   CONFIG_GROUP *g;
-  char *gn, rgn[GROUP_NAME_LEN];
+  char *gn, rgn[GROUP_NAME_LEN + 20];
   int nm;
 
   nm = 0;

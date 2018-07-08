@@ -19,52 +19,49 @@ to integrate various atomic processes within a single theoretical framework,
 ensure the self-consistency between different parts, and provide a uniform,
 flexible and easy-to-use user interface for accessing all computational tasks. 
 
-Many computer programs now exist for the calculation of atomic processes,
-using either non-relativistic approximations (some including relativistic
-effects through the Breit-Pauli Hamiltonian) or fully relativistic
-methods. Most of them are mainly concerned with the atomic structure part and
-bound-bound processes, e.g., the non-relativistic configuration interaction
-codes CIV3 \cite{hibbert75} and SUPERSTRUCTURE \cite{eissner74}, the widely
-used program of \citet{cowan81}, the multi-configuration Hartree-Fock (MCHF)
-program of \citet{fischer00}, and the multi-configuration Dirac-Fock (MCDF)
-code of \citet{grant80}. Many newer programs for continuum processes make
-use of the output from these structure codes for bound state wave
-functions. This sometimes leads to 
-a different treatment of continuum states from that of bound states. More
-importantly, the communication between different programs tends to complicate
-the user interface, and makes it difficult for people other than the authors
-of the codes to efficiently use them. 
+Many computer programs now exist for the calculation of atomic processes, using
+either non-relativistic approximations (some including relativistic effects
+through the Breit-Pauli Hamiltonian) or fully relativistic methods. Most of them
+are mainly concerned with the atomic structure part and bound-bound processes,
+e.g., the non-relativistic configuration interaction codes CIV3
+\cite{hibbert:1975a} and SUPERSTRUCTURE \cite{eissner:1974a}, the widely used
+program of \citet{cowan:1981a}, the multi-configuration Hartree-Fock (MCHF)
+program~\cite{fischer:1997a} of \citet{fischer:2000a}, and the
+multi-configuration Dirac-Fock (MCDF) code of \citet{grant:1980a}. Many newer
+programs for continuum processes make use of the output from these structure
+codes for bound state wave functions. This sometimes leads to a different
+treatment of continuum states from that of bound states. More importantly, the
+communication between different programs tends to complicate the user interface,
+and makes it difficult for people other than the authors of the codes to
+efficiently use them. 
 
-There also exist several integrated
-packages for the calculation of a variety of atomic processes, e.g., the ATOM
-package \cite{amusia97}, the HULLAC package \cite{barshalom01}, and the fully
-relativistic code (SZ) developed by \citet{sampson89} and
-\citet{zhang89}. These programs treat continuum as well as bound
-processes. In  
-ATOM, the radial wave functions for bound and continuum orbitals are obtained
-using the self-consistent field Hartree-Fock method or the frozen-core
-Hartree-Fock method. A relativistic version based on the Dirac equation is
-also available. Such a procedure tends to be very time consuming, especially
-for continuum processes, where the number of continuum orbitals needed is
-large. The HULLAC package and SZ are both based on the Dirac equation, and use
-a single, local, central potential for the solution of radial orbitals. This
-approach is very efficient because the orthogonality of 
+There also exist several integrated packages for the calculation of a variety of
+atomic processes, e.g., the ATOM package \cite{amusia:1997a}, the HULLAC package
+\cite{barshalom:2001a}, and the fully relativistic code (SZ) developed by
+\citet{sampson:1989a} and \citet{zhang:1989a}. These programs treat continuum as
+well as bound processes. In   ATOM, the radial wave functions for bound and
+continuum orbitals are obtained using the self-consistent field Hartree-Fock
+method or the frozen-core Hartree-Fock method. A relativistic version based on
+the Dirac equation is also available. Such a procedure tends to be very time
+consuming, especially for continuum processes, where the number of continuum
+orbitals needed is large. The HULLAC package and SZ are both based on the Dirac
+equation, and use a single, local, central potential for the solution of radial
+orbitals. This approach is very efficient because the orthogonality of 
 different orbitals is automatically ensured. Both codes use the distorted wave
 (DW) approximation for continuum processes. The difference between them is
-mainly in the way the local central potential is obtained. In HULLAC, 
-a parametric potential is used and the parameters in the potential are derived
-by minimizing the average energies of some selected configurations
-\cite{klapisch77}. In SZ, one 
-constructs a fictitious mean configuration with fractional occupation numbers
-that takes into account the electron screening of all configurations involved
-in the physical processes to be calculated. A self-consistent
-Dirac-Fock-Slater iteration is then 
-performed on this mean configuration to derive the local central potential. 
-Although various results from these two codes have been published over the
-years, the programs are not available to the general public. The present
-package combines the strengths of these existing atomic codes, with
-modifications to numerical procedures made to extend the capability and
-improve the efficiency and robustness.
+mainly in the way the local central potential is obtained. In HULLAC,  a
+parametric potential is used and the parameters in the potential are derived by
+minimizing the average energies of some selected configurations
+\cite{klapisch:1977a}. In SZ, one  constructs a fictitious mean configuration
+with fractional occupation numbers that takes into account the electron
+screening of all configurations involved in the physical processes to be
+calculated. A self-consistent Dirac-Fock-Slater iteration is then  performed on
+this mean configuration to derive the local central potential.  Although various
+results from these two codes have been published over the years, the programs
+are not available to the general public. The present package combines the
+strengths of these existing atomic codes, with modifications to numerical
+procedures made to extend the capability and improve the efficiency and
+robustness.
 
 \section{Structure}
 \label{sec:structure}
@@ -133,12 +130,11 @@ Z, & r > R_N
 \end{array},
 \end{equation}
 where $R_N$ is the statistical model radius of the nucleus, which can be
-expressed in terms of the atomic mass $A$, $R_N = 2.2677\times 10^{-5}
-A^{1/3}$ \cite{chernysheva99}. In the standard Dirac-Fock-Slater method, which
-is the approach used by SZ, the electron-electron interaction includes the
-spherically averaged 
-classical potential due to the bound electrons, and a local approximation to
-the exchange interaction
+expressed in terms of the atomic mass $A$, $R_N = 2.2677\times 10^{-5} A^{1/3}$
+\cite{chernysheva:1999a}. In the standard Dirac-Fock-Slater method, which is the
+approach used by SZ, the electron-electron interaction includes the spherically
+averaged  classical potential due to the bound electrons, and a local
+approximation to the exchange interaction
 \begin{eqnarray}
 \label{eq_ee}
 V^{ee}(r) &=& V_c(r) - \left[\frac{3}{4\pi^2 r^2}\sum_{n\kappa}
@@ -217,7 +213,7 @@ known potential. As is
 standard, we convert Eq.~(\ref{eq_dirac}) into a Schr\"{o}dinger-like
 equation by 
 eliminating the small component and performing the transformation
-\cite{chernysheva99} 
+\cite{chernysheva:1999a} 
 \begin{eqnarray}
 \label{eq_transform}
 P_a &=& \xi_a(r) F_a(r) \nonumber \\*
@@ -265,70 +261,68 @@ r^2}\right)^2\Bigg\}.
 \end{eqnarray}
 
 Two types of $t(r)$ have been used in the past. One is a logarithmic
-transformation, $t(r) \propto \ln(r)$, which has been used in the MCHF code of
-\citet{fischer00}; the other is a hybrid form, $t(r) = c_1 r + c_2 \ln(r)$,
-e.g., as used in ATOM \cite{amusia97}. The logarithmic form is not
-suitable for 
-highly excited and continuum orbitals, because the radial grid interval may
-exceed the oscillation period of the wavefunction at large $r$. In the hybrid
-form, the grid interval approaches a constant at large $r$. For suitably
-chosen coefficients $c_1$ and $c_2$, it can be used in the calculation of
-highly excited orbitals and continua with energy below some limit. However,
-for free orbitals with sufficiently high energy, solving Eq.~(\ref{eq_Ga})
-in a conventional way becomes impractical. We shall use a different approach
-for continuum states, namely, the phase-amplitude method as used in
-HULLAC. For highly excited bound states, it is easily shown that the
-oscillation period of the 
-wavefunction is $\propto \sqrt{r}$ at large $r$. We therefore use a modified
-hybrid form, $t(r) = c_1\sqrt{r} + c_2\ln(r)$, so that 
-one oscillation period contains approximately the same number of grid points
-at large distances. The advantage of the modified form
-over the linear hybrid form is that for a given number of grid points, the
-modified form can cover a larger radial distance than the linear form, which is
-important for the calculation of highly excited states. 
+transformation, $t(r) \propto \ln(r)$, which has been used in the MCHF
+code~\cite{fischer:1997a}; the other is a hybrid form, $t(r) = c_1 r + c_2
+\ln(r)$, e.g., as used in ATOM \cite{amusia:1997a}. The logarithmic form is not
+suitable for  highly excited and continuum orbitals, because the radial grid
+interval may exceed the oscillation period of the wavefunction at large $r$. In
+the hybrid form, the grid interval approaches a constant at large $r$. For
+suitably chosen coefficients $c_1$ and $c_2$, it can be used in the calculation
+of highly excited orbitals and continua with energy below some limit. However,
+for free orbitals with sufficiently high energy, solving Eq.~(\ref{eq_Ga}) in a
+conventional way becomes impractical. We shall use a different approach for
+continuum states, namely, the phase-amplitude method as used in HULLAC. For
+highly excited bound states, it is easily shown that the oscillation period of
+the  wavefunction is $\propto \sqrt{r}$ at large $r$. We therefore use a
+modified hybrid form, $t(r) = c_1\sqrt{r} + c_2\ln(r)$, so that  one oscillation
+period contains approximately the same number of grid points at large distances.
+The advantage of the modified form over the linear hybrid form is that for a
+given number of grid points, the modified form can cover a larger radial
+distance than the linear form, which is important for the calculation of highly
+excited states. 
 
-The minimum and maximum radial distances, $r_\mathrm{min}$ and $r_\mathrm{max}$, in setting
-up the radial grid are chosen as 
+The minimum and maximum radial distances, $r_\mathrm{min}$ and $r_\mathrm{max}$,
+in setting up the radial grid are chosen as 
 \begin{eqnarray}
 r_\mathrm{min} &=& 10^{-5}/Z_\mathrm{eff} \nonumber \\*
 r_\mathrm{max} &=& 500/Z_\mathrm{eff},
 \end{eqnarray}
-where $Z_\mathrm{eff}$ is the residual charge of the atomic ion that the electrons
-experience at large $r$. This ensures that $r_\mathrm{min}$ is well within the
-nuclear charge distribution for any atomic system. The value of
-$r_\mathrm{max}$ ensures that for excited states below $n \sim 20$, the bound energies
-are less than the Coulomb potential at $r_\mathrm{max}$. These states have no nodes at
-$r > r_\mathrm{max}$. For states with higher $n$, however, wavefunctions beyond
-$r_\mathrm{max}$ may have additional nodes. Therefore, counting the nodes is no
-longer a valid method to pick out the right solution. Moreover, the
-wavefunctions can no longer be normalized by calculating their norm with simple
-numerical integration, since the contributions beyond $r_\mathrm{max}$ cannot be
-neglected. Actually, such contributions must be included for $n$ well within
-20. One may increase $r_\mathrm{max}$ when highly excited states are needed. One
-must also increase the number of grid points as well to
-ensure the accuracy of numerical integration. However, wavefunctions
-at large radial distances are rarely needed, either because the interaction
-operators are negligible, or because the states that interact with
-such highly excited orbitals have negligible amplitudes at large distances. 
-In the present program, the low-$n$ and high-$n$ states are treated
-differently. The dividing $n_0$ is determined by the choice of $r_\mathrm{max}$,
-specifically, $n_0
-= 0.5\sqrt{Z_\mathrm{eff}r_\mathrm{max}}$. For $n \le n_0$, the orbitals are found by
-outward and inward integration of Eq.~(\ref{eq_Ga}) with zero amplitudes at
+where $Z_\mathrm{eff}$ is the residual charge of the atomic ion that the
+electrons experience at large $r$. This ensures that $r_\mathrm{min}$ is well
+within the nuclear charge distribution for any atomic system. The value of
+$r_\mathrm{max}$ ensures that for excited states below $n \sim 20$, the bound
+energies are less than the Coulomb potential at $r_\mathrm{max}$. These states
+have no nodes at $r > r_\mathrm{max}$. For states with higher $n$, however,
+wavefunctions beyond $r_\mathrm{max}$ may have additional nodes. Therefore,
+counting the nodes is no longer a valid method to pick out the right solution.
+Moreover, the wavefunctions can no longer be normalized by calculating their
+norm with simple numerical integration, since the contributions beyond
+$r_\mathrm{max}$ cannot be neglected. Actually, such contributions must be
+included for $n$ well within 20. One may increase $r_\mathrm{max}$ when highly
+excited states are needed. One must also increase the number of grid points as
+well to ensure the accuracy of numerical integration. However, wavefunctions at
+large radial distances are rarely needed, either because the interaction
+operators are negligible, or because the states that interact with such highly
+excited orbitals have negligible amplitudes at large distances.  In the present
+program, the low-$n$ and high-$n$ states are treated differently. The dividing
+$n_0$ is determined by the choice of $r_\mathrm{max}$, specifically, $n_0 =
+0.5\sqrt{Z_\mathrm{eff}r_\mathrm{max}}$. For $n \le n_0$, the orbitals are found
+by outward and inward integration of Eq.~(\ref{eq_Ga}) with zero amplitudes at
 both ends, and matching at the outer classical turning point. Node counting is
 used to pick out the appropriate solution corresponding to the quantum numbers
-$n$ and $l$. The wavefunctions are then normalized by 
-numerical integration. For $n > n_0$, Eq.~(\ref{eq_Ga}) is integrated
-outward until $r=r_\mathrm{core}$, where the potential has reached its asymptotic
-Coulomb value. For $r > r_\mathrm{core}$, the wavefunction is the exponentially
-decaying Whittaker function 
+$n$ and $l$. The wavefunctions are then normalized by  numerical integration.
+For $n > n_0$, Eq.~(\ref{eq_Ga}) is integrated outward until
+$r=r_\mathrm{core}$, where the potential has reached its asymptotic Coulomb
+value. For $r > r_\mathrm{core}$, the wavefunction is the exponentially decaying
+Whittaker function 
 \begin{equation}
 y_5(\nu, \lambda, \rho) = W_{\nu, \lambda+1/2}(2\rho/\nu),
 \end{equation}
-where $\nu^2 = -\frac{1}{2}Z_\mathrm{eff}^2/\varepsilon$, $\rho = Z_\mathrm{eff}r$, and
-$\lambda = l$ in the non-relativistic limit \cite{seaton58}. In the
-relativistic case, the asymptotic behavior of the effective potential is
-modified according to Eq.~(\ref{eq_UW}), and corresponds to 
+where $\nu^2 = -\frac{1}{2}Z_\mathrm{eff}^2/\varepsilon$, $\rho =
+Z_\mathrm{eff}r$, and $\lambda = l$ in the non-relativistic limit
+\cite{seaton:1958a}. In the relativistic case, the asymptotic behavior of the
+effective potential is modified according to Eq.~(\ref{eq_UW}), and corresponds
+to 
 \begin{eqnarray}
 Z_\mathrm{eff}^\prime &=& Z_\mathrm{eff}(1+\alpha^2\varepsilon) \nonumber\\*
 \nu^2 &=& -\frac{Z_\mathrm{eff}^{\prime 2}}{2\varepsilon
@@ -336,17 +330,17 @@ Z_\mathrm{eff}^\prime &=& Z_\mathrm{eff}(1+\alpha^2\varepsilon) \nonumber\\*
 \lambda(\lambda+1) &=& l(l+1) - (Z_\mathrm{eff}\alpha)^2 .
 \end{eqnarray}
 The Whittaker function and its derivative at $r_\mathrm{core}$ are calculated
-using the program of \citet{thompson85} and matched with the solution
-obtained by outward integration. The program \cite{thompson85,thompson04} uses
-quadrupole precision floating point numbers in the calculation of 
-hypergeometric function to achieve the desired accuracy. Since not all computer
-platforms implement the quadrupole precision floating point numbers natively,
-we have modified the program to use a pure software quadrupole precision
-arithmetics to increase the portability of the
-program. Since for highly excited states, the quantum defect is 
-small, the solution with $\nu \sim n$ is picked out without node counting. To
-normalize the wavefunction, we note that the correct normalization is given by
-\cite{seaton58}
+using the program of \citet{thompson:1985a} and matched with the solution
+obtained by outward integration. The program \cite{thompson:1985a,
+thompson:2004a} uses quadrupole precision floating point numbers in the
+calculation of  hypergeometric function to achieve the desired accuracy. Since
+not all computer platforms implement the quadrupole precision floating point
+numbers natively, we have modified the program to use a pure software quadrupole
+precision arithmetics to increase the portability of the program. Since for
+highly excited states, the quantum defect is small, the solution with $\nu \sim
+n$ is picked out without node counting. To normalize the wavefunction, we note
+that the correct normalization is given by
+\cite{seaton:1958a}
 \begin{equation}
 \label{eq_norm}
 F(r > r_\mathrm{core}) = K(\nu_n, \lambda)y_5(\nu_n, \lambda, \rho),
@@ -371,7 +365,7 @@ traditional method of evaluating their matrix elements is to expand them into a
 sum, with each term being a product of an angular part and a radial part. The
 angular part is then calculated using Racah algebra. In doing so, the initial
 and final basis states need to be recoupled, which are often carried out by
-the recoupling program of \citet{grant76}. Recently, \citet{gaigalas97}
+the recoupling program of \citet{grant:1976a}. Recently, \citet{gaigalas:1997a}
 proposed a new method of performing angular integration, which is based on the
 second quantization form of the operators and extends the use of Racah algebra
 to the quasi-spin space. In this method, instead of recoupling basis states,
@@ -384,7 +378,7 @@ angular momenta
 are involved in the recoupling independent of the shell structure of the
 basis states. In the conventional method, the recoupling of basis states can
 be quite complicated for complex configurations. The present code adopts the
-new method and the program of \citet{gaigalas01} is used for the reduced
+new method and the program of \citet{gaigalas:2001a} is used for the reduced
 matrix elements of creation and annihilation operators.
 
 \subsubsection{One-electron Operators}
@@ -415,16 +409,13 @@ Z^L_M(\alpha,\beta) =
 \tilde{a}_{\hat{\beta}}\right]^L_M,
 \end{equation}
 where $[L] = 2L+1$, and $\tilde{a}_{\hat{\beta}} = (-1)^{j_\beta -
-m_\beta}a_{-\hat{\beta}}$ 
-with $-\hat{\beta}$ being understood as the single electron state
-$n_\beta\kappa_\beta -\!m_\beta$, i.e., having the magnetic quantum number
-negated. Such a transformation is necessary   
-since it is $\tilde{a}_{\hat{\beta}}$ that form an irreducible tensorial set
-with rank 
-$j_\beta$ \cite{judd67}. The tensorial coupling has the usual meaning. The
-angular integration is equivalent to the 
-evaluation of the reduced matrix elements of $Z^L_M$ between basis states
-\cite{gaigalas97}.
+m_\beta}a_{-\hat{\beta}}$  with $-\hat{\beta}$ being understood as the single
+electron state $n_\beta\kappa_\beta -\!m_\beta$, i.e., having the magnetic
+quantum number negated. Such a transformation is necessary since it is
+$\tilde{a}_{\hat{\beta}}$ that form an irreducible tensorial set with rank 
+$j_\beta$ \cite{judd:1967a}. The tensorial coupling has the usual meaning. The
+angular integration is equivalent to the evaluation of the reduced matrix
+elements of $Z^L_M$ between basis states \cite{gaigalas:1997a}.
 
 \subsubsection{Two-electron Operators}
 After some algebraic manipulation \cite{barshalom:1988a}, the
@@ -444,14 +435,14 @@ X^k(\alpha\beta;\gamma\delta) = <\alpha||C^k||\gamma><\beta||C^k||\delta>
 R^k(\alpha\beta;\gamma\delta),
 \end{equation}
 where $C^k$ is the normalized spherical harmonic tensor as defined in
-\citet{cowan81}, and $R^k$ is the generalized Slater integral
+\citet{cowan:1981a}, and $R^k$ is the generalized Slater integral
 \begin{equation}
 R^k(\alpha\beta;\gamma\delta) = \int \frac{r_<^k}{r_>^{k+1}}
 \rho_{\alpha\gamma}(r_1)\rho_{\beta\delta}(r_2)d r_1 d r_2.
 \end{equation}
 The calculation of the 
 matrix elements of $Z^k(\alpha,\gamma)\cdot Z^k(\beta,\delta)$ follows
-\citet{gaigalas97}.
+\citet{gaigalas:1997a}.
 
 \subsection{Large Scale Configuration Interaction}
 It is sometimes necessary to carry out calculations with a very large number of
@@ -529,7 +520,7 @@ S_{fi} &=& \left|<\psi_f||O^L_M||\psi_i>\right|^2 \nonumber\\*
 M^L_{\alpha\beta}\right|^2 ,
 \end{eqnarray} 
 where $M^L_{\alpha\beta}$ is the radial part of the single-electron multipole
-operator as defined by \citet{grant74}.
+operator as defined by \citet{grant:1974a}.
 The weighted oscillator strength and transition rates are given by 
 \begin{eqnarray}
 gf_{fi} &=& [L]^{-1}\omega(\alpha\omega)^{2L-2} S_{fi} \\*
@@ -538,7 +529,7 @@ gA_{fi} &=& 2\alpha^3 \omega^2 gf_{fi},
 where $\omega = E_i - E_f$ is the transition energy. 
 
 $M^L_{\alpha\beta}$ may be calculated using the fully relativistic
-expressions of \citet{grant74}. However, in most cases (except for M1
+expressions of \citet{grant:1974a}. However, in most cases (except for M1
 transitions, where the use of the fully relativistic expressions is
 essential), their non-relativistic 
 limits are sufficiently accurate, which has the advantage that these operators
@@ -549,56 +540,52 @@ depend on the transition energy in a trivial manner.
 \label{sec:eie}
 \subsection{Introduction}
 Two classes of methods are commonly used in the calculation of electron impact
-excitation (EIE) cross
-sections. The first is based on a set of close-coupling (CC) equations, which
-takes into account the coupling of various excitation channels
-\cite{seaton75}. In these methods, resonances can be included in a
+excitation (EIE) cross sections. The first is based on a set of close-coupling
+(CC) equations, which takes into account the coupling of various excitation
+channels \cite{seaton:1976a}. In these methods, resonances can be included in a
 natural way by including the coupling to closed channels. Several
-implementations of this method exist. The most widely used is the R-matrix
-code developed by a group at the Queens University of Belfast
-\cite{berrington95}. The second class of methods is based on the first order
-Born approximation, which assumes independent excitation channels. The
-coupling to closed channels, which results in resonances, may be included in a
-perturbative fashion \cite{eissner72}. Different variants exist according to
+implementations of this method exist. The most widely used is the R-matrix code
+developed by a group at the Queens University of Belfast
+\cite{berrington:1995a}. The second class of methods is based on the first order
+Born approximation, which assumes independent excitation channels. The coupling
+to closed channels, which results in resonances, may be included in a
+perturbative fashion \cite{eissner:1972a}. Different variants exist according to
 the different treatments of the continuum wavefunctions. The plane-wave (PW)
 Born approximation uses an unperturbed plane wave for the free orbital. The
 Coulomb-wave (CW) Born approximation takes into account the distortion of the
 continuum due to a pure Coulomb potential. The most accurate of this class is
-the DW Born approximation, in which the free orbitals are
-calculated in a more realistic potential taking into account the electronic
-structure of the target ion.
-The majority of the computer programs in this class implement the DW
+the DW Born approximation, in which the free orbitals are calculated in a more
+realistic potential taking into account the electronic structure of the target
+ion. The majority of the computer programs in this class implement the DW
 approximation, since it yields significantly better results than the PW and CW
-methods with minimal increase in the complexity. Many DW codes are in use
-today. For example, the non-relativistic DW code from University College
-London \cite{eissner98}, the relativistic code of \citet{hagelstein87}, the
-HULLAC package \cite{barshalom:1988a}, the code by \citet{zhang89}, and that of
-\citet{chen96}, just to name some. The present DW implementation in FAC is
-in principle similar to any of the relativistic codes listed above.
+methods with minimal increase in the complexity. Many DW codes are in use today.
+For example, the non-relativistic DW code from University College London
+\cite{eissner:1998a}, the relativistic code of \citet{hagelstein:1987a}, the
+HULLAC package \cite{barshalom:1988a}, the code by \citet{zhang:1989a}, and that
+of \citet{chen:1996a}, just to name some. The present DW implementation in FAC
+is in principle similar to any of the relativistic codes listed above.
 
-In the present implementation, the factorized formula of the collision
-strength is used, which separates the angular integration from the radial
-integrals, and permits efficient interpolation of the radial integrals. To
-avoid the difficulties in the radial integration arising from the oscillatory
-behavior of the continuum wavefunctions, we use a different technique from
-that for bound orbitals to solve the Dirac equation for free electrons. In the
-inner region where the wavefunction is not oscillatory or when one oscillation
-period contains 
-a sufficient number of radial grid points to ensure the accuracy of numerical
-integration, we use the standard Numerov method to integrate the equation 
-outward. In the outer region, a phase-amplitude method is used. The position
-where the outer solution is matched to the inner solution depends on the
-energy and angular momentum of the continuum orbital. This method allows us to
-evaluate the radial integrals involving the continuum orbitals to sufficiently
-large radial distance without using a prohibitively dense grid. The collision
-strength is calculated using the standard partial wave summation. A
+In the present implementation, the factorized formula of the collision strength
+is used, which separates the angular integration from the radial integrals, and
+permits efficient interpolation of the radial integrals. To avoid the
+difficulties in the radial integration arising from the oscillatory behavior of
+the continuum wavefunctions, we use a different technique from that for bound
+orbitals to solve the Dirac equation for free electrons. In the inner region
+where the wavefunction is not oscillatory or when one oscillation period
+contains  a sufficient number of radial grid points to ensure the accuracy of
+numerical integration, we use the standard Numerov method to integrate the
+equation  outward. In the outer region, a phase-amplitude method is used. The
+position where the outer solution is matched to the inner solution depends on
+the energy and angular momentum of the continuum orbital. This method allows us
+to evaluate the radial integrals involving the continuum orbitals to
+sufficiently large radial distance without using a prohibitively dense grid. The
+collision strength is calculated using the standard partial wave summation. A
 quasi-logarithmic grid is constructed for the orbital angular momenta of the
-free electrons. Detailed calculations are only carried out on this
-grid. Partial collision strengths for all other orbital angular momenta are
-obtained by interpolation. Very large
-angular momentum contributions to the allowed transitions
-are taken into account by the rapid Coulomb-Bethe approximation
-\cite{burgess74}. 
+free electrons. Detailed calculations are only carried out on this grid. Partial
+collision strengths for all other orbital angular momenta are obtained by
+interpolation. Very large angular momentum contributions to the allowed
+transitions are taken into account by the rapid Coulomb-Bethe approximation
+\cite{burgess:1974a}. 
 
 \subsection{Factorized Collision Strength}
 The EIE cross subsection $\sigma_{01}$ from the initial state $\psi_0$ to the
@@ -799,7 +786,7 @@ radial variable $r$.
 
 \subsection{Quasi-relativistic Approximation}
 In most cases, it is not necessary to solve the continuum radial equation fully
-relativistically. As noted by \citet{zhang89}, the quasi-relativistic
+relativistically. As noted by \citet{zhang:1989a}, the quasi-relativistic
 approximation, in which the two wavefunctions with the same $l$ but different
 $j$ are treated in the same way, and the small components are neglected, often
 yields final collision strengths very close to the fully relativistic results
@@ -829,40 +816,37 @@ Q^k &=& \sum_{l_0}\sum_{l_1} \tilde{Q}^k(l_0,l_1) \nonumber\\*
 P^k(\kappa_0\kappa_1;\beta_0\beta_1),
 \end{eqnarray}
 where the summation over $\kappa$ is explicitly written out as the summation
-over the orbital and total angular
-momenta. $\tilde{Q}^k(l_0,l_1)$ is not calculated for every possible $l_0$
-and $l_1$. A suitable grid is chosen for $l_0$ from 0 to $l_\mathrm{max}$. For each 
-$l_0$ in this grid, $\tilde{Q}^k(l_0) = \sum_{l_1}\tilde{Q}^k(l_0,l_1)$ is
-calculated, where the values of $l_1$ are limited by the triangular
-relations. $\tilde{Q}^k(l_0)$ is a smooth function of $l_0$ especially when 
-$l_0$ is relatively large. Therefore, for any $l_0$ that is missing in the
-grid, its value can be obtained by interpolation. The $l_0$ grid used
-in the code may be specified in the input. However, the default grid is
-usually sufficient, which contains every value from $l_0 = 0$ to 5, after
-that, the interval between the successive points is doubled every two points,
-i.e., it is almost logarithmic. 
+over the orbital and total angular momenta. $\tilde{Q}^k(l_0,l_1)$ is not
+calculated for every possible $l_0$ and $l_1$. A suitable grid is chosen for
+$l_0$ from 0 to $l_\mathrm{max}$. For each  $l_0$ in this grid,
+$\tilde{Q}^k(l_0) = \sum_{l_1}\tilde{Q}^k(l_0,l_1)$ is calculated, where the
+values of $l_1$ are limited by the triangular relations. $\tilde{Q}^k(l_0)$ is a
+smooth function of $l_0$ especially when  $l_0$ is relatively large. Therefore,
+for any $l_0$ that is missing in the grid, its value can be obtained by
+interpolation. The $l_0$ grid used in the code may be specified in the input.
+However, the default grid is usually sufficient, which contains every value from
+$l_0 = 0$ to 5, after that, the interval between the successive points is
+doubled every two points, i.e., it is almost logarithmic. 
 
-The value of $l_\mathrm{max}$ needed for the desired accuracy varies widely depending
-on the type of the transition and the collision energy. Many programs choose
-an arbitrary value for $l_\mathrm{max}$, and the convergence is not guaranteed for
-all transitions at all energies. In the present program, 
-$l_\mathrm{max}$ is not fixed \textit{a priori}. At each point in the $l_0$ grid, an
-estimate of the contributions from higher partial waves is made according to
-the method described below. The relative uncertainty in the resulting
-collision strength is also estimated if the truncated sum plus the estimated
-higher partial wave contribution is taken to be the final result. Once this
-relative uncertainty becomes less than a prescribed accuracy (usually 5\%),
+The value of $l_\mathrm{max}$ needed for the desired accuracy varies widely
+depending on the type of the transition and the collision energy. Many programs
+choose an arbitrary value for $l_\mathrm{max}$, and the convergence is not
+guaranteed for all transitions at all energies. In the present program, 
+$l_\mathrm{max}$ is not fixed \textit{a priori}. At each point in the $l_0$
+grid, an estimate of the contributions from higher partial waves is made
+according to the method described below. The relative uncertainty in the
+resulting collision strength is also estimated if the truncated sum plus the
+estimated higher partial wave contribution is taken to be the final result. Once
+this relative uncertainty becomes less than a prescribed accuracy (usually 5\%),
 the summation is truncated at this point.
 
-For strictly forbidden transitions, which have non-zero collision strengths
-only due to the exchange interaction, the high partial wave contributions are
-not important, no special difficulties arise regarding the convergence of the
-summation. 
-For allowed transitions (including all multipole types), we use the
-Coulomb-Bethe approximation to estimate the high partial wave contributions
-and calculate the uncertainties in such estimates. In this
-method, the exchange term in $P^k$ is neglected, and the direct term is
-approximated by 
+For strictly forbidden transitions, which have non-zero collision strengths only
+due to the exchange interaction, the high partial wave contributions are not
+important, no special difficulties arise regarding the convergence of the
+summation. For allowed transitions (including all multipole types), we use the
+Coulomb-Bethe approximation to estimate the high partial wave contributions and
+calculate the uncertainties in such estimates. In this method, the exchange term
+in $P^k$ is neglected, and the direct term is approximated by 
 \begin{equation}
 \label{eq_PkApprox}
 P^k_{CB}(\kappa_0\kappa_1;\alpha_0\alpha_1) = 
@@ -919,36 +903,35 @@ energy is high. For such cases, we make use of the well known non-relativistic
 recursive relations which connect
 $\tilde{Q}^k_{CB}(l_0,l_1)$ with different $l_0$ to calculate the ratio
 $\gamma(l_0)$ until it converges to 
-$\gamma_{\infty}$ \cite{burgess74}. These ratios are then used to estimate
+$\gamma_{\infty}$ \cite{burgess:1974a}. These ratios are then used to estimate
 the high partial wave contributions and the uncertainties in these estimates.
 
 \subsection{Electron Collisional Excitation Between Magnetic Sublevels}
 \subsubsection{Introduction}
 Electron collisional excitation cross sections are required for calculation of
-the level population and line emission of hot plasmas, such as those
-encountered in astrophysical environments. In many cases, only the total
-excitation cross sections are of importance, at least when the electron
-distribution functions are isotropic. However, there exist situations where
-aligned excitation produces polarized line emission. Suggestions have been
-made to use such polarized light to study beam-plasma interactions in solar
-flares \citep{haug72, haug81} and the properties of tokamak plasmas
-\citep{fujimoto96}. Line polarization is also an important factor to take into
-account in the analysis of laboratory spectroscopic data involving a
-directional electron beam, such as electron beam ion traps
-\citep{beiersdorfer96, takacs96}. 
+the level population and line emission of hot plasmas, such as those encountered
+in astrophysical environments. In many cases, only the total excitation cross
+sections are of importance, at least when the electron distribution functions
+are isotropic. However, there exist situations where aligned excitation produces
+polarized line emission. Suggestions have been made to use such polarized light
+to study beam-plasma interactions in solar flares \citep{haug:1972a, haug:1981a}
+and the properties of tokamak plasmas \citep{fujimoto:1996a}. Line polarization
+is also an important factor to take into account in the analysis of laboratory
+spectroscopic data involving a directional electron beam, such as electron beam
+ion traps \citep{beiersdorfer:1996a, takacs:1996a}. 
 
 In order to determine the degree of polarization and angular distribution of
 emitted lines driven by electron collisional excitation, one needs detailed
 cross sections between the magnetic sublevels of lower and upper states. Several
 authors have made calculations of such cross sections involving magnetic
 sublevels. \citet{mitroy:1988a} and \citet{mitroy:1988b} used a nonrelativistic
-LS-coupling approach. \citet{inal87} made distorted-wave (DW) calculations using
-nonrelativistic radial wavefunctions, but they included intermediate-coupling
-effects by transforming the reactance matrices from LS-coupling to relativistic
-pair-coupling scheme \citep{eissner72, saraph:1978a}. \citet{zhang90} performed
-the first fully relativistic DW calculations of magnetic sublevel collision
-strengths with a modified version of their previous program for total cross
-sections.
+LS-coupling approach. \citet{inal:1987a} made distorted-wave (DW) calculations
+using nonrelativistic radial wavefunctions, but they included
+intermediate-coupling effects by transforming the reactance matrices from
+LS-coupling to relativistic pair-coupling scheme \citep{eissner:1972a,
+saraph:1978a}. \citet{zhang:1990b} performed the first fully relativistic DW
+calculations of magnetic sublevel collision strengths with a modified version of
+their previous program for total cross sections.
 
 Since the pioneering work of \citet{barshalom:1988a}, the factorization theory
 of DW collisional excitation is in wide use for calculating total cross
@@ -961,7 +944,7 @@ to the excitation of magnetic sublevels and present its computer implementation.
 
 \subsubsection{Factorization Theory}
 The scattering amplitude $B_{m_{si}}^{m_{sf}}$ can be written as
-(given in \citet{zhang:1990b})
+(given in \citet{zhang:1990a})
 \begin{eqnarray}
 B_{m_{si}}^{m_{sf}}&=&\frac{2\pi}{k_i}
   \sum_{l_i,m_{li},j_i,m_i \atop l_f,m_{lf},j_f,m_f}
@@ -1123,49 +1106,35 @@ $m_i$ gives $\delta_{l_i l_i^\prime}$,
 therefore cancels the phase factors, we recover the HULLAC factorization 
 for the total cross sections.
 
-
-
-
-
-
-
-
-
-
-
-
-
 \section{Electron Impact Ionization}
 \subsection{Introduction}
-Several DW programs have been developed for the calculation of
-electron impact ionization
-(EII) cross
-sections in the past decades, in either non-relativistic \cite{younger80} or
-relativistic \cite{pindzola88, sampson91} approximations. The present program
-is similar to that of \citet{sampson91} in particular,  which extends the
-efficient factorization-interpolation method of \citet{barshalom:1988a} to the
-calculation of EII cross sections, and leads to great simplifications for
-complex ions. The essence of the factorization method is the separation of
-the angular and radial parts in the formula of EII cross sections. The angular
-part depends on the angular momentum coupling of the target states, while the
-radial part only depends on the one-electron radial orbitals, without
-explicit reference to the initial and final states involved in the
-process. Different initial and final states affect the radial part only
-implicitly through the ionization energy due to the energy conservation. Such
-a separation enables the rapid calculation of the radial integrals on a few
+Several DW programs have been developed for the calculation of electron impact
+ionization (EII) cross sections in the past decades, in either non-relativistic
+\cite{younger:1980a} or relativistic \cite{pindzola:1988a, sampson:1992a}
+approximations. The present program is similar to that of \citet{sampson:1992a}
+in particular,  which extends the efficient factorization-interpolation method
+of \citet{barshalom:1988a} to the calculation of EII cross sections, and leads
+to great simplifications for complex ions. The essence of the factorization
+method is the separation of the angular and radial parts in the formula of EII
+cross sections. The angular part depends on the angular momentum coupling of the
+target states, while the radial part only depends on the one-electron radial
+orbitals, without explicit reference to the initial and final states involved in
+the process. Different initial and final states affect the radial part only
+implicitly through the ionization energy due to the energy conservation. Such a
+separation enables the rapid calculation of the radial integrals on a few
 ionization energy points, the integrals at actual ionization energies are
 obtained by interpolation.  
 
 The present program also implements much more efficient methods based on the
 Coulomb-Born-exchange (CBE) approximation or the Binary-Encounter-Dipole (BED)
-theory of \citet{kim94}. The CBE implementation makes use of the parameterized
-reduced cross sections of \citet{golden:1977a, golden:1980a}, and the BED
-implementation uses the bound-free differential oscillator strengths calculated
-by the present program. The CBE results are close to the non-relativistic DW
-cross sections, while the BED cross sections are substantially smaller at low
-energies due to a scaling factor deliberately introduced into the theory, which
-appear to improve the agreements with experimental results in many cases
-\cite{kim94}.
+theory of \citet{kim:1994a}. The CBE implementation makes use of the
+parameterized reduced cross sections of \citet{golden:1977a, golden:1980a}, and
+the BED implementation uses the bound-free differential oscillator strengths
+calculated by the present program. The CBE results are close to the
+non-relativistic DW cross sections, while the BED cross sections are
+substantially smaller at low energies due to a scaling factor deliberately
+introduced into the theory, which appear to improve the agreements with
+experimental results in many cases \cite{kim:1994a}.
  
 \subsection{Relativistic Distorted-Wave Theory}
 The formula for EII cross subsection, differential in energy of the ejected
@@ -1235,51 +1204,47 @@ over the energy of the ejected electron, $\varepsilon$
 \sigma(\varepsilon_0) = \int\nolimits_0^{\frac{\varepsilon_0-I}{2}}
 \sigma(\varepsilon_0,\varepsilon) d\varepsilon,
 \end{equation}
-where $I$ is the ionization energy. The ionization energy enters the
-radial integral $Q^k$ implicitly, since $\varepsilon_0 =
-I+\varepsilon_1+\varepsilon$, where $\varepsilon_1$ is the energy of the
-scattered electron. We choose to calculate $Q^k$ as a function of $I$,
-$\varepsilon_1$, and $\varepsilon$. For a given transition array, we first set
-up a three dimensional grid on these three energies. The integrals $Q^k$ are 
-only calculated on this grid, values for arbitrary energies are obtained by
-interpolation. For a given ionization channel with
-ionization energy of $I_{01}$ and the incident electron energy of
+where $I$ is the ionization energy. The ionization energy enters the radial
+integral $Q^k$ implicitly, since $\varepsilon_0 = I+\varepsilon_1+\varepsilon$,
+where $\varepsilon_1$ is the energy of the scattered electron. We choose to
+calculate $Q^k$ as a function of $I$, $\varepsilon_1$, and $\varepsilon$. For a
+given transition array, we first set up a three dimensional grid on these three
+energies. The integrals $Q^k$ are  only calculated on this grid, values for
+arbitrary energies are obtained by interpolation. For a given ionization channel
+with ionization energy of $I_{01}$ and the incident electron energy of
 $\varepsilon_t + I_{01}$, where $\varepsilon_t$ is the sum of the energies of
 the two final free electrons, the calculation of the total cross subsection
-proceeds as 
-following. The first step is the interpolation on the $I$ grid to obtain, for
-each point on the $(\varepsilon_1,\varepsilon)$ grid, the values of
+proceeds as  following. The first step is the interpolation on the $I$ grid to
+obtain, for each point on the $(\varepsilon_1,\varepsilon)$ grid, the values of
 $\overline{Q}^k(I_{01})$ at the actual ionization energy, $I_{01}$. We then
-establish another grid for the energy of the ejected electron in the range 
-from 0 to $\varepsilon_t/2$ for the purpose of the numerical integration in
-Eq.~(\ref{eq_total}). For each 
-point on this grid, the value of $\varepsilon_1 = \varepsilon_t-\varepsilon$
-is determined. A two dimensional interpolation is then performed on the array
-$\overline{Q}^k(I_{01},\varepsilon_1,\varepsilon)$ to obtain the radial
-integrals at these specific 
-energies. Finally the integral in Eq.~(\ref{eq_total}) is evaluated to
-yield the total cross subsection. In practice, we find such a procedure
-minimizes the number of radial integrals need to be computed explicitly. The
-number of grid points for the ionization energy is chosen similarly as for the
-excitation energies of EIE, that is, 2 points with linear interpolation when
-the ionization energies vary by less than 20\%, and 3 points with cubic spline
-interpolation otherwise. The grids for the $\varepsilon_1$ and $\varepsilon$
-are usually chosen to have 6 points spanning the range necessary to cover the
-collision energies where the total cross sections are needed.
+establish another grid for the energy of the ejected electron in the range  from
+0 to $\varepsilon_t/2$ for the purpose of the numerical integration in
+Eq.~(\ref{eq_total}). For each  point on this grid, the value of $\varepsilon_1
+= \varepsilon_t-\varepsilon$ is determined. A two dimensional interpolation is
+then performed on the array $\overline{Q}^k(I_{01},\varepsilon_1,\varepsilon)$
+to obtain the radial integrals at these specific  energies. Finally the integral
+in Eq.~(\ref{eq_total}) is evaluated to yield the total cross subsection. In
+practice, we find such a procedure minimizes the number of radial integrals need
+to be computed explicitly. The number of grid points for the ionization energy
+is chosen similarly as for the excitation energies of EIE, that is, 2 points
+with linear interpolation when the ionization energies vary by less than 20\%,
+and 3 points with cubic spline interpolation otherwise. The grids for the
+$\varepsilon_1$ and $\varepsilon$ are usually chosen to have 6 points spanning
+the range necessary to cover the collision energies where the total cross
+sections are needed.
 
 For each point on the three dimensional grid $(I,\varepsilon_1, \varepsilon)$,
 and bound orbitals $\alpha_0$ and $\beta_0$, the evaluation of
-$\overline{Q}^k(\alpha_0,\beta_0)$ involves the summation of the 
-partial waves of all free electrons. The angular momentum of the ejected
-electron must satisfy the triangular relation $\Delta(j_{\alpha_0}, k, j)$,
-therefore, the limit on the rank $k$ in the expansion of the Coulomb
-interaction restricts the number of $\kappa$ terms. Usually $k_\mathrm{max} = 6$ is
-large enough to ensure the convergence. A further limit on the orbital angular
-momentum of 
-the ejected electron may also be specified. The summation over the partial
-waves of the incident and scattered electrons proceeds exactly the same way as
-in the calculation of EIE cross sections, using the Coulomb-Bethe
-approximation for the high partial waves in the case of allowed integrals.
+$\overline{Q}^k(\alpha_0,\beta_0)$ involves the summation of the  partial waves
+of all free electrons. The angular momentum of the ejected electron must satisfy
+the triangular relation $\Delta(j_{\alpha_0}, k, j)$, therefore, the limit on
+the rank $k$ in the expansion of the Coulomb interaction restricts the number of
+$\kappa$ terms. Usually $k_\mathrm{max} = 6$ is large enough to ensure the
+convergence. A further limit on the orbital angular momentum of  the ejected
+electron may also be specified. The summation over the partial waves of the
+incident and scattered electrons proceeds exactly the same way as in the
+calculation of EIE cross sections, using the Coulomb-Bethe approximation for the
+high partial waves in the case of allowed integrals.
 
 \subsection{Coulomb-Born-Exchange Approximation}
 The computation of radial integrals in the DW approximation is very time
@@ -1295,10 +1260,10 @@ Q_R(\alpha_0) = I_{\alpha_0}I
 \end{equation}
 where $I_{\alpha_0}$ is the binding energy of the orbital $\alpha_0$. It is well
 known that the reduced radial integrals are not very sensitive to the difference
-in the electronic structures and nuclear charges \cite{zhang90}. We therefore
-use the hydrogenic values calculated under the CBE approximation
+in the electronic structures and nuclear charges \cite{zhang:1990b}. We
+therefore use the hydrogenic values calculated under the CBE approximation
 \cite{golden:1977a, golden:1980a}, in the place of detailed DW radial integrals.
-A simple parameterized formula as given in \citet{zhang90} is used for this
+A simple parameterized formula as given in \citet{zhang:1990b} is used for this
 purpose. 
 \begin{equation}
 Q_R = A\ln(u)+D\left(1-\frac{1}{u}\right)^2+
@@ -1308,7 +1273,7 @@ where $u=\varepsilon_0/I$. In fact, even in the detailed DW calculations, the
 computed radial integrals are fitted with this formula, fixing the coefficient
 $A$ according to the correct Bethe limit. The parameters are then used to
 obtain total ionization cross sections at many incident energies. It is also
-possible to use the parameters given by \citet{fontes93} instead of the CBE
+possible to use the parameters given by \citet{fontes:1993a} instead of the CBE
 values to bring the results in better agreement with the detailed DW
 calculations. 
 
@@ -1317,19 +1282,19 @@ The CBE approximation discussed above tries to capture the detail of the ionic
 structure through a universal reduced radial integral. The BED theory combines
 the Mott cross subsection and binary encounter cross subsection, taking into
 account the high energy Bethe limit, to derive a semi-empirical formula for the
-radial integrals \cite{kim94}. The computation of bound-free differential
+radial integrals \cite{kim:1994a}. The computation of bound-free differential
 oscillator strengths, which are related to the Bethe coefficients, is much
 simpler than the DW calculation of ionization radial integrals. Therefore the
 BED implementation is very efficient in practice. A unique feature of the BED
 theory is the energy denominator $\varepsilon_0+I$ (for neutral atoms, the
 average kinetic energy of the active bound electron should also be added), as
-opposed to $\varepsilon_0$ in various first order Born approximations
-(including DW). This modification effectively introduces a scaling factor
+opposed to $\varepsilon_0$ in various first order Born approximations (including
+DW). This modification effectively introduces a scaling factor
 $\varepsilon_0/(\varepsilon_0+I)$, which reduces the ionization cross sections
 at low energies. Comparison with experimental results for low-Z near neutral
 ions indicates that such scaling brings the theoretical results in better
-agreement with experiments \cite{kim94}. However, for highly charged ions, we
-find that this scaling reduces the cross sections by a too large factor. A
+agreement with experiments \cite{kim:1994a}. However, for highly charged ions,
+we find that this scaling reduces the cross sections by a too large factor. A
 modified scaling factor is therefore introduced as
 $\varepsilon_0/(\varepsilon_0+I_s)$ with
 \begin{equation}
@@ -1342,35 +1307,32 @@ number.
 \section{Photoionization and Radiative Recombination}
 \label{sec:pirr}
 \subsection{Introduction}
-The most accurate methods for calculating low energy
-non-resonant photoionization (PI) and
-recombination---both radiative recombination (RR) and dielectronic
-recombination (DR) cross sections, are ones
-based on the close-coupling (CC) approximation. The most widely used
-implementation of the CC approximation is the 
-R-matrix method \cite{hummer93, berrington95}. In this method, resonances are
-treated in the most natural way through the coupling to closed channels. The
-main drawback of the CC approximation is the prohibitively long computing time
-required, especially at high energies \cite{zhang98}. The other class of
-methods is based on the DW approximation, and ignores the inter-channel
-coupling. The non-resonant background and the resonances are calculated
-separately. Here, we only discuss the non-resonant
-PI and RR. Many calculations have been carried out using the DW approximation
+The most accurate methods for calculating low energy non-resonant
+photoionization (PI) and recombination---both radiative recombination (RR) and
+dielectronic recombination (DR) cross sections, are ones based on the
+close-coupling (CC) approximation. The most widely used implementation of the CC
+approximation is the R-matrix method \cite{hummer:1993a, berrington:1995a}. In
+this method, resonances are treated in the most natural way through the coupling
+to closed channels. The main drawback of the CC approximation is the
+prohibitively long computing time required, especially at high energies
+\cite{zhang:1998a}. The other class of methods is based on the DW approximation,
+and ignores the inter-channel coupling. The non-resonant background and the
+resonances are calculated separately. Here, we only discuss the non-resonant PI
+and RR. Many calculations have been carried out using the DW approximation
 employing different approaches to the bound and continuum wavefunctions
-\cite{reilman79, clark86, verner93}. Most of previous theoretical results are
-for PI from or RR onto a specific non-relativistic subshell, not for the
-specific atomic states. \citet{zhang98} has extended their fully
-relativistic code originally developed for the electron impact excitation
-(EIE) to the 
-calculation of PI and RR, and provided high energy PI cross sections to
-complement the Opacity Project database \cite{seaton87}. The
-present code is similar in technique to the program of \citet{zhang98}. To
-improve the efficiency, we have extended the factorization-interpolation
-procedure of \citet{barshalom:1988a} first developed for the calculation of EIE
-cross sections to the calculation of PI and RR cross sections. 
-In addition, we have implemented the option to calculate PI and RR cross
-sections through multipole operators other than electric dipole (E1), although
-no interference between different multipoles is taken into account. 
+\cite{reilman:1979a, clark:1986a, verner:1993a}. Most of previous theoretical
+results are for PI from or RR onto a specific non-relativistic subshell, not for
+the specific atomic states. \citet{zhang:1998a} has extended their fully
+relativistic code originally developed for the electron impact excitation (EIE)
+to the calculation of PI and RR, and provided high energy PI cross sections to
+complement the Opacity Project database \cite{seaton:1987a}. The present code is
+similar in technique to the program of \citet{zhang:1998a}. To improve the
+efficiency, we have extended the factorization-interpolation procedure of
+\citet{barshalom:1988a} first developed for the calculation of EIE cross
+sections to the calculation of PI and RR cross sections. In addition, we have
+implemented the option to calculate PI and RR cross sections through multipole
+operators other than electric dipole (E1), although no interference between
+different multipoles is taken into account. 
 
 \subsection{Factorized Formula for Cross Sections}
 The partial PI cross section can be expressed in terms of the differential
@@ -1476,7 +1438,7 @@ $<\psi_f||\tilde{a}_{\tilde{\beta}}||\psi_i>$ are calculated as
 where $b_\mu$ are the mixing coefficients. The reduced matrix elements
 $<\Phi_\mu||\tilde{a}_{\tilde{\beta}}||\Phi_\nu>$, which are related to the
 coefficients of fractional parentage, are calculated using the method of
-\citet{gaigalas97}. 
+\citet{gaigalas:1997a}. 
 
 \subsection{Construction of Recombined Bound States}
 In the calculation of PI and RR cross sections, bound states in two
@@ -1548,7 +1510,7 @@ strength of EIE with free electrons now replaced with the spectators
 The radial integrals $M^L_{\kappa\beta}$ are the same as those involved in the
 the calculation of bound-bound radiative transitions, with a free electron
 replacing one of the bound orbitals. They may be calculated with the fully
-relativistic expressions of \citet{grant74}. These expressions depend on
+relativistic expressions of \citet{grant:1974a}. These expressions depend on
 both the photon and the ejected photo-electron energies. However, when the
 photon energy is not too high, the non-relativistic limits of the multipole
 operators suffices. Using non-relativistic multipole operators to
@@ -1568,36 +1530,34 @@ minimum is present, few points are needed for accurate interpolation. However,
 when the PI cross sections show Cooper minima in the low energy region, which
 often occurs in neutral or near neutral ions, a dense grid
 should be used. On the other hand, the DW approximation at such low energies
-in neutral or near neutral ions is rather inaccurate \cite{zhang98}.
+in neutral or near neutral ions is rather inaccurate \cite{zhang:1998a}.
 
 
 \section{Autoionization and Dielectronic Recombination}
 \subsection{Introduction}
 The most accurate methods used today for treating resonances are ones based on
 the close-coupling (CC) approximation, which yield unified results for both
-background and resonant contributions. The efficient R-matrix implementation
-of the CC approximation has been used extensively in the past to calculate
+background and resonant contributions. The efficient R-matrix implementation of
+the CC approximation has been used extensively in the past to calculate
 photoionization, recombination and electron impact excitation cross sections
-\cite{hummer93, berrington95}. The main drawback of this approximation is
-that it is very CPU-time consuming. Therefore, the number of coupled
-channels are often limited in realistic calculations. Fortunately, in many
-applications, especially for highly 
-ionized ions, methods based on the distorted-wave (DW) approximation are
-proven to be reasonably accurate even for resonant processes, e.g., as
-indicated by the comparison between various DW calculations and experimental 
-measurements of the dielectronic recombination (DR) rate coefficients for
-O-like and F-like iron \cite{savin99}. In the DW methods, resonances are
-usually treated as 
-multi-step processes, one or more of these steps involve autoionization (AI)
-or its inverse process, radiationless
-electron capture. For example, the first step of DR is the radiationless
-electron capture, followed by radiative decay, which competes with
-autoionization. Therefore, the calculation of autoionization rates is the
-major task in any DW treatments of resonant processes. Several DW programs
-have been developed for this purpose in the past decades \cite{pindzola80,
-kim87, oreg91}. The present method is most similar to that of
-\citet{oreg91}, which uses an efficient factorization-interpolation procedure
-for the calculation of the autoionization radial integrals. 
+\cite{hummer:1993a, berrington:1995a}. The main drawback of this approximation
+is that it is very CPU-time consuming. Therefore, the number of coupled channels
+are often limited in realistic calculations. Fortunately, in many applications,
+especially for highly  ionized ions, methods based on the distorted-wave (DW)
+approximation are proven to be reasonably accurate even for resonant processes,
+e.g., as indicated by the comparison between various DW calculations and
+experimental  measurements of the dielectronic recombination (DR) rate
+coefficients for O-like and F-like iron \cite{savin:1999a}. In the DW methods,
+resonances are usually treated as  multi-step processes, one or more of these
+steps involve autoionization (AI) or its inverse process, radiationless electron
+capture. For example, the first step of DR is the radiationless electron
+capture, followed by radiative decay, which competes with autoionization.
+Therefore, the calculation of autoionization rates is the major task in any DW
+treatments of resonant processes. Several DW programs have been developed for
+this purpose in the past decades \cite{pindzola:1980a, kim:1987a, oreg:1991a}.
+The present method is most similar to that of \citet{oreg:1991a}, which uses an
+efficient factorization-interpolation procedure for the calculation of the
+autoionization radial integrals. 
 
 In the first order perturbation theory, the AI rate can be written as (in
 atomic units) 
@@ -1629,7 +1589,7 @@ electrons in these integrals are different due to the conservation of
 energy. It is 
 computationally demanding to calculate such integrals for each transition
 individually. Fortunately, the dependence of $P^k$ on the free electron energy
-is rather weak, as noticed by \citet{oreg91}. Therefore, it is possible to
+is rather weak, as noticed by \citet{oreg:1991a}. Therefore, it is possible to
 calculate $P^k$ at a few energies, and the integrals at actual transition
 energies are obtained by interpolation from these values. Usually, for a given
 class of 
@@ -1671,9 +1631,9 @@ Eq.~(\ref{eq_B}), that is
 \label{eq_BApprox}B(i) = \frac{\sum_k A^r(i\to k)}
 {\sum_{k^\prime}A^a(i\to k^\prime) + \sum_k A^r(i\to k)}.
 \end{equation}
-This approximation turns out to be fairly good even if the decay to
-autoionizing levels is not completely negligible as demonstrated and explained
-by \citet{behar95, behar96}. The DR strength $S_{DR}$ is the product of DC
+This approximation turns out to be fairly good even if the decay to autoionizing
+levels is not completely negligible as demonstrated and explained by
+\citet{behar:1995a, behar:1996a}. The DR strength $S_{DR}$ is the product of DC
 strength and the branching ratio.
 
 In plasma modeling, the DR rate coefficients, $\alpha_{DR}$, for electrons in
@@ -1870,6 +1830,6 @@ S_{fi} = \sum_M\left|\sum_{\mu\nu}b_{f\mu}b_{i\nu}\sum_{\alpha\beta}
 M^1_{\alpha\beta}\right|^2 ,
 \end{equation}
 where $M^1_{\alpha\beta}$ is the radial part of the relativistic
-single-electron E1 transition operator, as defined by \citet{grant74}. The
+single-electron E1 transition operator, as defined by \citet{grant:1974a}. The
 oscillator strength and transition rates are proportional to the line
 strengths.

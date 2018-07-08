@@ -608,7 +608,6 @@ static int PAddConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
 
 static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   int nlow = 0, *low = NULL, nup = 0, *up = NULL;
-  double c = 0.0;
   char *fname;
   int nele;
 
@@ -618,11 +617,6 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   fname = argv[0];
 
   switch (argc) {
-  case 4:
-    if (argt[3] != NUMBER) {
-      return -1;
-    }
-    c = atof(argv[3]);
   case 3:
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
     nup  = SelectLevels(&up, argv[2], argt[2], variables);
@@ -640,7 +634,7 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
     break;
   }
 
-  SaveAI(cfac, nlow, low, nup, up, fname, c, 0);
+  SaveAI(cfac, nlow, low, nup, up, fname, 0);
 
   if (nlow > 0) {
     free(low);
@@ -655,19 +649,13 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
 static int PAITableMSub(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
   int nlow, *low, nup, *up;
-  double c;
 
-  if (argc != 3 && argc != 4) return -1;
+  if (argc != 3) return -1;
   if (argt[0] != STRING) return -1;
-  
-  if (argc == 4) {
-    if (argt[3] != NUMBER) return -1;
-    c = atof(argv[3]);
-  } else c = 0.0;
   
   nlow = SelectLevels(&low, argv[1], argt[1], variables);
   nup = SelectLevels(&up, argv[2], argt[2], variables);
-  SaveAI(cfac, nlow, low, nup, up, argv[0], c, 1);
+  SaveAI(cfac, nlow, low, nup, up, argv[0], 1);
   if (nlow > 0) free(low);
   if (nup > 0) free(up);
 

@@ -709,19 +709,16 @@ this grid. It is forced to be same as that set by \funcref{SetPEGrid} if
 
 \subsection{Autoionization}
 
-\begin{fundesc}{AITable}{fn, b, f\opt{, c}}
+\begin{fundesc}{AITable}{fn, b, f}
 Calculate the autoionization rates between the bound configuration group
 \var{b} and the free configuration group \var{f}. The results are saved in
-file \var{fn}. The optional channel number \var{c} can be supplied as an
-identification of the transition array.
+file \var{fn}.
 \end{fundesc}
 
-\begin{fundesc}{AITableMSub}{fn, b, f\opt{, c}}
+\begin{fundesc}{AITableMSub}{fn, b, f}
 Calculate the magnetic sublevel autoionization rates and dielectronic capture
 strength between the bound configuration group \var{b} and the free
-configuration group \var{f}. The results are saved in file \var{fn}. The
-optional channel number \var{c} can be supplied as an identification of the
-transition array.
+configuration group \var{f}. The results are saved in file \var{fn}.
 \end{fundesc}
 
 \begin{fundesc}{SetAICut}{c}

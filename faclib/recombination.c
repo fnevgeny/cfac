@@ -1775,7 +1775,7 @@ int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 }
       
 int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, 
-	   double eref, int msub) {
+	   int msub) {
   int i, j, k, t;
   LEVEL *lev1, *lev2;
   AI_RECORD r;
@@ -1784,7 +1784,7 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
   AIM_HEADER ai_hdr1;
   F_HEADER fhdr;
   double emin, emax;
-  double e, s, a, s1[MAXAIM];
+  double e, s, s1[MAXAIM];
   float rt[MAXAIM];
   FILE *f;
   ARRAY subte;
@@ -1819,7 +1819,6 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
 
   nc = OverlapLowUp(nlow, low, nup, up);
 
-  eref /= HARTREE_EV;
   emin = 1E10;
   emax = 1E-10;
   k = 0;
@@ -1832,11 +1831,10 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
         continue;
       }
       
-      a = lev1->energy - lev2->energy;
-      if (a < 0) a -= eref;
-      if (a > 0) k++;
-      if (a < emin && a > 0) emin = a;
-      if (a > emax) emax = a;
+      e = lev1->energy - lev2->energy;
+      if (e > 0) k++;
+      if (e < emin && e > 0) emin = e;
+      if (e > emax) emax = e;
     }
   }
   if (k == 0) {
@@ -1872,10 +1870,10 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
   fhdr.atom = cfac_get_atomic_number(cfac);
   if (!msub) {
     ai_hdr.nele = GetNumElectrons(cfac, low[0]);
-    ai_hdr.emin = eref;
+    ai_hdr.emin = 0.0;
   } else {
     ai_hdr1.nele = GetNumElectrons(cfac, low[0]);
-    ai_hdr1.emin = eref;
+    ai_hdr1.emin = 0.0;
   }
   f = OpenFile(fn, &fhdr);
 
@@ -1890,11 +1888,10 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
       lev1 = GetLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
 	lev2 = GetLevel(cfac, up[j]);
-	a = lev1->energy - lev2->energy;
-	if (a < 0) a -= eref;
-	if (a < e0 || a >= e1) continue;
-	if (a < emin) emin = a;
-	if (a > emax) emax = a;
+	e = lev1->energy - lev2->energy;
+	if (e < e0 || e >= e1) continue;
+	if (e < emin) emin = e;
+	if (e > emax) emax = e;
 	k++;
       }
     }
@@ -1903,7 +1900,7 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
       continue;
     }
     if (!e_set) {
-      a = (emax-emin)/(0.5*(emax+emin));
+      double a = (emax-emin)/(0.5*(emax+emin));
       if (a < EPS3) {
 	a = 0.5*(emin+emax);
 	SetPEGrid(1, a, a, 0.0);
@@ -1935,7 +1932,6 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
       for (j = 0; j < nup; j++) {
 	lev2 = GetLevel(cfac, up[j]);
 	e = lev1->energy - lev2->energy;
-	if (e < 0 && lev1->ibase != up[j]) e -= eref;
 	if (e < e0 || e >= e1) continue;
 	if (!msub) {
 	  /* FIXME: generalize AutoionizeRateUTA to treat detailed mode */

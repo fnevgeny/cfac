@@ -66,7 +66,7 @@ int PrepRREGrids(double eth, double emax0);
 int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, 
-	   double eref, int msub);
+	   int msub);
 int AIRadial1E(cfac_t *cfac, double *pk, int kb, int kappaf);
 int AIRadialPk(cfac_t *cfac, double **pk, int k0, int k1, int kb, int kappaf, int k);
 int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int msub);

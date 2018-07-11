@@ -474,6 +474,14 @@ void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh,
   r->strength = &(mr->strength[k*mh->n_egrid]);
 }
 
+static void FreeMemENTable(void) {
+  if (mem_en_table) {
+    free(mem_en_table);
+    mem_en_table = NULL;
+    mem_en_table_size = 0;
+  }
+}
+
 int InitDBase(void) {
   int i;
   for (i = 0; i < NDB; i++) {
@@ -488,46 +496,15 @@ int InitDBase(void) {
     fheader[i].nblocks = 0;
   }
 
-  mem_en_table = NULL;
-  mem_en_table_size = 0;
+  FreeMemENTable();
+
   mem_enf_table = NULL;
   mem_enf_table_size = 0;
+
   iground = 0;
 
   return 0;
 }
-
-int ReinitDBase(int m) {
-  int i;
-
-  if (m < 0) return 0;
-  if (mem_en_table) {
-    free(mem_en_table);
-    mem_en_table = NULL;
-    mem_en_table_size = 0;
-  }
-  if (mem_enf_table) {
-    free(mem_enf_table);
-    mem_enf_table = NULL;
-    mem_enf_table_size = 0;
-  }
-  if (m == 0) {
-    return InitDBase();
-  } else {
-    iground = 0;
-    if (m > NDB) return -1;
-    i = m-1;
-    fheader[i].tsession = (long int) time(0);
-    fheader[i].version = CFAC_VERSION;
-    fheader[i].sversion = CFAC_SUBVERSION;
-    fheader[i].ssversion = CFAC_SUBSUBVERSION;
-    fheader[i].type = 0;
-    fheader[i].atom = 0;
-    fheader[i].nblocks = 0;
-    return 0;
-  }
-}
-
 
 int WriteFHeader(FILE *f, F_HEADER *fh) {
   int n, m = 0;
@@ -1962,6 +1939,69 @@ int DeinitFile(FILE *f, F_HEADER *fhdr) {
   return 0;
 }
 
+static int MemENFTable(char *fn) {
+  F_HEADER fh;
+  ENF_HEADER h;
+  ENF_RECORD r;
+  FILE *f;
+  int n, i, nlevels;
+  int swp, sr;
+
+  f = fopen(fn, "rb");
+  if (f == NULL) return -1;
+
+  n = ReadFHeader(f, &fh, &swp);
+  if (n == 0) return 0;
+
+  sr = sizeof(r.ilev) + sizeof(r.energy) + sizeof(r.pbasis);
+
+  if (mem_enf_table) free(mem_enf_table);
+
+  nlevels = 0;
+  for (i = 0; i < fh.nblocks; i++) {
+    n = ReadENFHeader(f, &h, swp);
+    if (n == 0) break;
+    nlevels = h.nlevels;
+    if (h.length > sr) {
+      if (fseek(f, h.length-sr, SEEK_CUR) != 0) {
+        printf("Error parsing file %s!\n", fn);
+        fclose(f);
+        return -1;
+      }
+    }
+    n = ReadENFRecord(f, &r, swp);
+    if (r.ilev >= nlevels) nlevels = r.ilev+1;
+  }
+
+  if (nlevels <= 0) {
+    printf("No levels found in the DB file %s!\n", fn);
+    fclose(f);
+    return -1;
+  }
+
+  mem_enf_table = (EN_SRECORD *) malloc(sizeof(EN_SRECORD)*nlevels);
+  if (!mem_enf_table) {
+    return -1;
+  }
+  mem_enf_table_size = nlevels;
+
+  fseek(f, SIZE_F_HEADER, SEEK_SET);
+  while (1) {
+    n = ReadENFHeader(f, &h, swp);
+    if (n == 0) break;
+    for (i = 0; i < h.nlevels; i++) {
+      n = ReadENFRecord(f, &r, swp);
+      if (n == 0) break;
+      mem_enf_table[r.ilev].energy = r.energy;
+      DecodeBasisEB(r.pbasis, &mem_enf_table[r.ilev].p, &mem_enf_table[r.ilev].j);
+    }
+  }
+
+  fclose(f);
+
+  return 0;
+}
+
 int PrintTable(char *ifn, char *ofn, int v) {
   F_HEADER fh;
   FILE *f1, *f2;
@@ -1982,9 +2022,22 @@ int PrintTable(char *ifn, char *ofn, int v) {
     goto DONE;
   }
 
-  if (v && mem_en_table == NULL) {
+  if (v) {
+    if (fh.type == DB_EN && mem_en_table == NULL) {
+      MemENTable(ifn);
+    } else
+    if (fh.type == DB_ENF && mem_enf_table == NULL) {
+      MemENFTable(ifn);
+    }
+  }
+
+  if (v && !mem_en_table) {
     printf("Energy level table has not been built in memory.\n");
     return -1;
+  }
+  if (v && fh.type >= DB_ENF && mem_enf_table == NULL) {
+    printf("Field dependent energy table has not been built in memory.\n");
+    goto DONE;
   }
 
   fprintf(f2, "cFAC %d.%d.%d\n", fh.version, fh.sversion, fh.ssversion);
@@ -2048,18 +2101,6 @@ int PrintTable(char *ifn, char *ofn, int v) {
   return n;
 }
 
-int FreeMemENTable(void) {
-  if (mem_en_table) free(mem_en_table);
-  mem_en_table = NULL;
-  mem_en_table_size = 0;
-  return 0;
-}
-
-EN_SRECORD *GetMemENTable(int *s) {
-  *s = mem_en_table_size;
-  return mem_en_table;
-}
-
 EN_SRECORD *GetMemENFTable(int *s) {
   *s = mem_enf_table_size;
   return mem_enf_table;
@@ -2076,7 +2117,7 @@ int IBaseFromENRecord(EN_RECORD *r) {
 }
 
 int MemENTable(char *fn) {
-  F_HEADER fh;  
+  F_HEADER fh;
   EN_HEADER h;
   EN_RECORD r;
   FILE *f;
@@ -2087,21 +2128,17 @@ int MemENTable(char *fn) {
   f = fopen(fn, "rb");
   if (f == NULL) return -1;
 
-  n = ReadFHeader(f, &fh, &swp);  
+  n = ReadFHeader(f, &fh, &swp);
   if (n == 0) return 0;
-  if (fh.type == DB_ENF) {
-    fclose(f);
-    return MemENFTable(fn);
-  }
+
   if (fh.type != DB_EN) {
     printf("File type is not DB_EN\n");
     fclose(f);
     return -1;
   }
+
   if (version_read[DB_EN-1] < 109) sr = sizeof(EN_RECORD);
   else sr = SIZE_EN_RECORD;
-
-  if (mem_en_table) free(mem_en_table);
 
   nlevels = 0;
   for (i = 0; i < fh.nblocks; i++) {
@@ -2126,6 +2163,9 @@ int MemENTable(char *fn) {
   }
 
   mem_en_table = (EN_SRECORD *) malloc(sizeof(EN_SRECORD)*nlevels);
+  if (!mem_en_table) {
+    return -1;
+  }
   mem_en_table_size = nlevels;
 
   e0 = 0.0;
@@ -2152,66 +2192,6 @@ int MemENTable(char *fn) {
   }
 
   fclose(f);
-  return 0;
-}    
-
-int MemENFTable(char *fn) {
-  F_HEADER fh;  
-  ENF_HEADER h;
-  ENF_RECORD r;
-  FILE *f;
-  int n, i, nlevels;
-  int swp, sr;
-
-  f = fopen(fn, "rb");
-  if (f == NULL) return -1;
-
-  n = ReadFHeader(f, &fh, &swp);  
-  if (n == 0) return 0;
-
-  sr = sizeof(r.ilev) + sizeof(r.energy) + sizeof(r.pbasis);
-
-  if (mem_enf_table) free(mem_enf_table);
-
-  nlevels = 0;
-  for (i = 0; i < fh.nblocks; i++) {
-    n = ReadENFHeader(f, &h, swp);
-    if (n == 0) break;
-    nlevels = h.nlevels;
-    if (h.length > sr) {
-      if (fseek(f, h.length-sr, SEEK_CUR) != 0) {
-        printf("Error parsing file %s!\n", fn);
-        fclose(f);
-        return -1;
-      }
-    }
-    n = ReadENFRecord(f, &r, swp);
-    if (r.ilev >= nlevels) nlevels = r.ilev+1;
-  }
-  
-  if (nlevels <= 0) {
-    printf("No levels found in the DB file %s!\n", fn);
-    fclose(f);
-    return -1;
-  }
-  
-  mem_enf_table = (EN_SRECORD *) malloc(sizeof(EN_SRECORD)*nlevels);
-  mem_enf_table_size = nlevels;
-
-  fseek(f, SIZE_F_HEADER, SEEK_SET);
-  while (1) {
-    n = ReadENFHeader(f, &h, swp);
-    if (n == 0) break;
-    for (i = 0; i < h.nlevels; i++) {
-      n = ReadENFRecord(f, &r, swp);
-      if (n == 0) break;
-      mem_enf_table[r.ilev].energy = r.energy;
-      DecodeBasisEB(r.pbasis, &mem_enf_table[r.ilev].p, &mem_enf_table[r.ilev].j);
-    }
-  }
-
-  fclose(f);
-
   return 0;
 }    
 

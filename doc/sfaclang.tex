@@ -21,9 +21,11 @@ are not set, the standard values are used.
 
 \begin{fundesc}{SetFields}{b, e, a\opt{, m}}
 Set the magnetic and electric fields. \var{b} is the magnetic fields in gauss,
-\var{e} is the electric fields in V/cm. \var{a} is the angle between the
-magnetic and electric fields. If the optional \var{m} is 1, then the
-diamagnetic effects are ignored in the Hamiltonian.
+\var{e} is the electric fields in V/cm, and \var{a} is the angle (in degrees)
+between them. Both fields are assumed to lie in the $x$--$z$ plane. If $a \ge
+0$, $\vec{b}$ is along the $z$ axis, otherwise, $\vec{e}$ is along the $z$ axis.
+If the optional \var{m} is 1, then the diamagnetic effects are ignored in the
+Hamiltonian.
 \end{fundesc}
 
 \begin{fundesc}{SetUTA}{m}

@@ -2101,11 +2101,6 @@ int PrintTable(char *ifn, char *ofn, int v) {
   return n;
 }
 
-EN_SRECORD *GetMemENFTable(int *s) {
-  *s = mem_enf_table_size;
-  return mem_enf_table;
-}
-
 int JFromENRecord(EN_RECORD *r) {
   if (r->j < 0) return r->ibase;
   else return r->j;

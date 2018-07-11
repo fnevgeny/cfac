@@ -403,7 +403,6 @@ int InitFile(FILE *f, F_HEADER *fhdr, void *rhdr);
 int DeinitFile(FILE *f, F_HEADER *fhdr);
 int PrintTable(char *ifn, char *ofn, int v);
 int MemENTable(char *fn);
-EN_SRECORD *GetMemENFTable(int *s);
 int WriteENRecord(FILE *f, EN_RECORD *r);
 int WriteENFRecord(FILE *f, ENF_RECORD *r);
 int PrintENTable(FILE *f1, FILE *f2, int v, int swp);

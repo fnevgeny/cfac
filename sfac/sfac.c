@@ -2916,25 +2916,6 @@ static int PTransitionTableEB(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PPolarizeCoeff(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
-  int i0, i1;
-
-  if (argc < 2 || argc > 4) return -1;
-  i0 = -1;
-  i1 = -1;
-  if (argc > 2) {
-    i0 = atoi(argv[2]);
-    if (argc > 3) {
-      i1 = atoi(argv[3]);
-    }
-  }
-
-  PolarizeCoeff(argv[0], argv[1], i0, i1);
-
-  return 0;
-}
-
 static int PCETableEB(int argc, char *argv[], int argt[], 
 		      ARRAY *variables) {
   int nlow, nup, *low, *up, m;
@@ -3051,7 +3032,6 @@ static METHOD methods[] = {
   {"MemENTable", PMemENTable},
   {"OptimizeRadial", POptimizeRadial},
   {"Pause", PPause},
-  {"PolarizeCoeff", PPolarizeCoeff}, 
   {"PrepAngular", PPrepAngular},
   {"Print", PPrint},
   {"PrintTable", PPrintTable},

@@ -1852,7 +1852,7 @@ void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c) {
   }
 }
   
-static int CompareBasis(double m1, double m2, SYMMETRY *sym) { 
+static int CompareBasis(double m1, double m2) {
   if (fabs(m1) > fabs(m2)) return 1;
   else if (fabs(m1) < fabs(m2)) return -1;
   else return 0;
@@ -1885,14 +1885,14 @@ int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
     
     while (i < j) {
       while (i < j) {
-	if (CompareBasis(*m1, *mp, sym) < 0) break;
+	if (CompareBasis(*m1, *mp) < 0) break;
 	i++;
 	m1 = mix + i;
 	b1 = basis + i;
 	s1 = ibasis + i;
       }
       while (i < j) {
-	if (CompareBasis(*mp, *m2, sym) < 0) break;
+	if (CompareBasis(*mp, *m2) < 0) break;
 	j--;
 	m2 = mix + j;
 	b2 = basis + j;
@@ -1914,7 +1914,7 @@ int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
 	s1 = ibasis + i;
       }
     }
-    if (CompareBasis(*m1, *mp, sym)) {
+    if (CompareBasis(*m1, *mp)) {
       tmp = *m1;
       *m1 = *mp;
       *mp = tmp;

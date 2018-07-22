@@ -10,7 +10,7 @@ development up to version 1.1.1, is kept as doc/ChangeLog.MFG.
 
 Recently, Ming Feng Gu kindly agreed to release the FAC sources under the GPL
 (version 3 or higher) license, and the repository is currently made public on
-GitHub, <https://github.com/fnevgeny/fac/>.
+GitHub, <https://github.com/flexible-atomic-code/fac>.
 
 Some bits of the FAC sources, which are still used in cFAC, were published in
 the Computer Physics Communications journal, and as such, are licensed for

@@ -5,6 +5,11 @@
 /* Define if the CPC license is accepted */
 #undef WITH_CPC_ACCEPTED
 
+#undef HAVE_DECL_ISFINITE
+#if !HAVE_DECL_ISFINITE
+#define isfinite finite
+#endif
+
 #undef f2cFortran
 #undef NAGf90Fortran
 #undef hpuxFortran

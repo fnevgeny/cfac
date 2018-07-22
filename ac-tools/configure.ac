@@ -185,6 +185,8 @@ then
   AC_CHECK_LIB([m],[cos])
 fi
 
+AC_CHECK_DECLS([isfinite], [], [], [[#include <math.h>]])
+
 # GSL libs 
 AC_CHECK_LIB([gslcblas],[cblas_dgemm])
 AC_CHECK_LIB([gsl],[gsl_odeiv2_driver_apply],[],

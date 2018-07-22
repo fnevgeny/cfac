@@ -23,34 +23,45 @@ terms. Please note that as a result, the "sfac" executable will not be
 redistributable!
 
 Prerequisites:
-1) The GNU Scientific Library (GSL) <http://www.gnu.org/software/gsl/>,
+1) C and FORTRAN compilers (such as gcc and gfortran).
+2) The GNU Scientific Library (GSL) <http://www.gnu.org/software/gsl/>,
    version 1.15 or above (earlier versions will NOT work).
-2) The SQLite software library <http://www.sqlite.org/>.
+3) The SQLite software library <http://www.sqlite.org/>.
 
 Note: If you install the above software using a package manager of your OS, make
       sure you select the development packages (*-dev*).
+      For example, in Debian/Ubuntu, do
+      "sudo apt-get install gcc gfortran libgsl0-dev libsqlite3-dev".
+
+4) In addition, if compiling a snapshot from GitHub (strongly not recommended
+   for "production" calculations), GNU Automake, help2man, and a fairly
+   complete LaTeX installation will be required.
 
 Installation:
-1) ./configure
+1) Get the latest _release_ from <https://github.com/fnevgeny/cfac/releases>.
+   The filename should be like cfac-1.6.2.tar.gz. Unpack it and change to the
+   newly created directory.
+2) ./configure
 Note 1: Specify --prefix=my/dir, if the default /usr/local is not what you 
         want.
 Note 2: Use the "--with-extrainc" and "--with-extralib" options if the
         third-party libraries are not installed in the default system place.
 Note 3: Run ./configure --help for more options.
 
-2) make
+3) make
 
-3) make check
-This will run a test suite of demo scripts. Any error should be reported!
+4) make check
+This will run a test suite of demo scripts and compare output against
+"reference" results. Please report any failure.
 
-4) make install
-This installs the "sfac" binary, as well as the CFACDB library, C header file,
-and utility.
+5) make install
+This installs the "sfac" binary, and the manual, as well as the CFACDB library,
+C header file, and utility.
 
 Usage:
 The "sfac" executable accepts an input file as its only argument. See the "demo"
 directory for examples. For more details, please read the manual, and be sure to
-read the FAQ section of it. 
+read the FAQ section of it.
 
 Evgeny Stambulchik
 Department of Particle Physics and Astrophysics

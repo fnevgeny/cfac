@@ -55,7 +55,7 @@ This will run a test suite of demo scripts and compare output against
 "reference" results. Please report any failure.
 
 5) make install
-This installs the "sfac" binary, and the manual, as well as the CFACDB library,
+This installs the "sfac" executable and manual, as well as the CFACDB library,
 C header file, and utility.
 
 Usage:

@@ -1671,6 +1671,7 @@ static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     
     k = GetPrincipleBasis(mix, h->dim, NULL);
     
+    lev.uta = 0;
     lev.energy = h->mixing[i];
     lev.pj = h->pj;
     lev.iham = -1;

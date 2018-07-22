@@ -1656,7 +1656,7 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
   return 0;
 }
 
-/* It is assumed that the zero-field AddToLevels() have already been made */
+/* It is assumed that the zero-field AddToLevels() have already been called */
 static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
   int j = cfac->n_eblevels, i;
   double *mix;
@@ -2638,7 +2638,7 @@ void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
   DiagonalizeHamilton(cfac, h);
   
   k = cfac->n_eblevels;
-  AddToLevels(cfac, h, 0, NULL);
+  AddToLevelsEB(cfac, h, 0, NULL);
   SortLevels(cfac, k, -1, 1);
   SaveEBLevels(cfac, fn, k, -1);
 }

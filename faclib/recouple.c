@@ -77,7 +77,7 @@ static void FreeInteractDatum(void *p) {
 **              actual value.
 ** RETURN:      {int}
 **              always 0.
-** SIDE EFFECT: the static cfac->recouple.max_rank is set to k.
+** SIDE EFFECT: 
 ** NOTE:        
 */
 int SetMaxRank(cfac_t *cfac, int k) {

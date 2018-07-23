@@ -31,6 +31,7 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_sf_coupling.h>
 
+#include "cfacP.h"
 #include "consts.h"
 #include "angular.h"
 
@@ -296,4 +297,63 @@ double WignerDMatrix(double a, int j2, int m2, int n2) {
   x *= c;
 
   return x;
+}
+
+int cfac_w3j_cache_init(cfac_w3j_cache_t *w3j_cache,
+    unsigned int j2, unsigned int max_rank2)
+{
+    w3j_cache->j2 = j2;
+    w3j_cache->size = max_rank2*max_rank2/4 + max_rank2;
+    w3j_cache->cache = calloc(w3j_cache->size*w3j_cache->size, sizeof(double));
+    if (w3j_cache->cache) {
+        return 0;
+    } else {
+        w3j_cache->size = 0;
+        return 1;
+    }
+}
+
+void cfac_w3j_cache_free(cfac_w3j_cache_t *w3j_cache)
+{
+    if (w3j_cache->cache) {
+        free(w3j_cache->cache);
+        w3j_cache->cache = NULL;
+    }
+    w3j_cache->size = 0;
+}
+
+/* Calculate W3J using cached values if possible. Currently, cache is valid
+   only for the same j2 */
+double cfac_w3j_cacheable(cfac_w3j_cache_t *cache,
+    int j1, int j2, int j3, int m1, int m2, int m3)
+{
+    int i1, i2;
+
+    /* check for the triangle condition from the onset for performance */
+    if ((j2 < abs(j1 - j3)) || (j2 > j1 + j3) || IsOdd(j1 + j2 + j3)) {
+        return 0;
+    }
+
+    /* indices of the pseudo-2D cache matrix */
+    if (IsEven(j1)) {
+        i1 = j1*j1/4 + (j1 + m1)/2;
+        i2 = j3*j3/4 + (j3 + m3)/2;
+    } else {
+        i1 = (j1*j1 - 1)/4 + (j1 + m1)/2;
+        i2 = (j3*j3 - 1)/4 + (j3 + m3)/2;
+    }
+
+    if (cache && cache->j2 == j2 &&
+        i1 < cache->size && i1 >= 0 &&
+        i2 < cache->size && i2 >= 0) {
+        int i = cache->size*i1 + i2;
+        double v = cache->cache[i];
+        if (!v) {
+            v = W3j(j1, j2, j3, m1, m2, m3);
+            cache->cache[i] = v;
+        }
+        return v;
+    } else {
+        return W3j(j1, j2, j3, m1, m2, m3);
+    }
 }

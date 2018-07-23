@@ -175,11 +175,28 @@ typedef struct {
     double *cb[MAXNE][MAXNTE][MAXNE][MAXNCB];
 } cfac_cbcache_t;
 
+typedef struct {
+    unsigned int j2;
+    unsigned int size;
+    double *cache;
+} cfac_w3j_cache_t;
+
+
 /* config.c */
 void
 FreeConfigData(void *p);
 void
 InitConfigData(void *p, int n);
+
+/* angular.c */
+int
+cfac_w3j_cache_init(cfac_w3j_cache_t *w3j_cache,
+    unsigned int j2, unsigned int max_rank2);
+void
+cfac_w3j_cache_free(cfac_w3j_cache_t *w3j_cache);
+double
+cfac_w3j_cacheable(cfac_w3j_cache_t *cache,
+    int j1, int j2, int j3, int m1, int m2, int m3);
 
 /* recouple */
 int

@@ -2127,9 +2127,13 @@ int MemENTable(char *fn) {
   if (n == 0) return 0;
 
   if (fh.type != DB_EN) {
-    printf("File type is not DB_EN\n");
     fclose(f);
-    return -1;
+    if (fh.type == DB_ENF) {
+      return MemENFTable(fn);
+    } else {
+      printf("File type is neither DB_EN nor DB_ENF\n");
+      return -1;
+    }
   }
 
   if (version_read[DB_EN-1] < 109) sr = sizeof(EN_RECORD);

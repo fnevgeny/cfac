@@ -46,7 +46,7 @@ int SaveTransitionEB(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
 	       int nlow0, const int *low0, int nup0, const int *up0);
 
-int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m,
-                  int lower, int upper);
+int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
+    double *strength, double *energy, int m, int lower, int upper);
 
 #endif

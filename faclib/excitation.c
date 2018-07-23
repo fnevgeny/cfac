@@ -1631,7 +1631,7 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   bte = (te + bte)/bms;
   SetTransitionMode(cfac, M_NR);
   SetTransitionGauge(cfac, G_BABUSHKIN);
-  k = TRMultipoleEB(cfac, s, &te, -1, lower, upper);
+  k = TRMultipoleEB(cfac, NULL, s, &te, -1, lower, upper);
   if (k != 0) bethe[0] = 0;
   else {
     r = 0.0;

@@ -209,7 +209,8 @@ int TRMultipole(cfac_t *cfac, double *rme, double *energy,
   return res;
 }  
 
-int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m, int lower, int upper) {
+int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
+    double *strength, double *energy, int m, int lower, int upper) {
   LEVEL *lev1, *lev2;
   int i1, m2, q;
 
@@ -243,19 +244,28 @@ int TRMultipoleEB(cfac_t *cfac, double *strength, double *energy, int m, int low
 
       if (lev2->mixing[i2] == 0) continue;
 
-      c = lev1->mixing[i1]*lev2->mixing[i2];
       DecodeBasisEB(lev2->basis[i2], &ilev2, &mlev2);
+
+      if (abs(mlev1-mlev2) > m2) {
+        continue;
+      }
+
       plev2 = GetLevel(cfac, ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
       
-      if (TRMultipole(cfac, &r, NULL, m, ilev1, ilev2) != 0) {
+      if (TRMultipole(cfac, &r, NULL, m, ilev1, ilev2) != 0 || r == 0) {
         continue;
       }
       
-      a = W3j(j1, m2, j2, -mlev1, mlev1-mlev2, mlev2);
+      a = cfac_w3j_cacheable(w3j_cache, j1, m2, j2, -mlev1, mlev1-mlev2, mlev2);
+      if (a == 0) {
+        continue;
+      }
       if (IsOdd((j1-mlev1)/2)) a = -a;
+
+      c = lev1->mixing[i1]*lev2->mixing[i2];
      
-      q = (mlev1-mlev2)/2+abs(m);
+      q = (mlev1-mlev2 + m2)/2;
       strength[q] += c*r*a;
       /*
       printf("%d %d %d %d %2d %2d %2d %10.3E %10.3E %10.3E %10.3E %10.3E\n",
@@ -277,6 +287,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   TRF_RECORD r;
   LEVEL *lev1, *lev2;
   FILE *f;
+  cfac_w3j_cache_t w3j_cache;
   
   if (nlow <= 0 || nup <= 0) return -1;
   if (m == 1 || cfac->tr_opts.mode == M_FR) {
@@ -331,9 +342,11 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   f = OpenFile(fn, &fhdr);
   InitFile(f, &fhdr, &tr_hdr);
 
+  cfac_w3j_cache_init(&w3j_cache, 2*abs(m), GetMaxRank(cfac));
+
   for (j = 0; j < nup; j++) {
     for (i = 0; i < nlow; i++) {
-      k = TRMultipoleEB(cfac, s, &et, m, low[i], up[j]);
+      k = TRMultipoleEB(cfac, &w3j_cache, s, &et, m, low[i], up[j]);
       if (k != 0) continue;
       e0 = 0.0;
       for (k = 0; k < nq; k++) {
@@ -346,7 +359,9 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       WriteTRFRecord(f, &r);
     }
   }
-  
+
+  cfac_w3j_cache_free(&w3j_cache);
+
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);
   free(r.strength);

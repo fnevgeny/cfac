@@ -634,6 +634,8 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
     break;
   }
 
+  if (nlow <= 0 || nup <= 0) return -1;
+
   SaveAI(cfac, nlow, low, nup, up, fname, 0);
 
   if (nlow > 0) {
@@ -775,10 +777,10 @@ static int PCITable(int argc, char *argv[], int argt[], ARRAY *variables) {
     }
   } else {
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
-    if (nlow <= 0) return -1;
     nup = SelectLevels(&up, argv[2], argt[2], variables);
-    if (nup <= 0) return -1;
   }
+
+  if (nlow <= 0 || nup <= 0) return -1;
   
   if (SaveIonization(cfac, nlow, low, nup, up, argv[0]) < 0) return -1;
 
@@ -1159,15 +1161,15 @@ static int PRRTable(int argc, char *argv[], int argt[],
     }
     
     nlow = SelectLevels(&low, argv[1], argt[1], variables);
-    if (nlow <= 0) return -1;
     nup = SelectLevels(&up, argv[2], argt[2], variables);
-    if (nup <= 0) return -1;
     
     if (argc == 4) {
       if (argt[3] != NUMBER) return -1;
       m = atoi(argv[3]);
     }
   }
+
+  if (nlow <= 0 || nup <= 0) return -1;
 
   SaveRecRR(cfac, nlow, low, nup, up, argv[0], m);
 

@@ -1792,28 +1792,7 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
   int isub, n_egrid0;
   int e_set;
 
-  int *alev;
   int nc;
-
-  /* if low or up not given, assume all levels */
-  alev = NULL;
-  if (nlow == 0 || nup == 0) {
-    int n = cfac_get_num_levels(cfac);
-    if (n <= 0) return -1;
-    alev = malloc(sizeof(int)*n);
-    if (!alev) return -1;
-    
-    for (i = 0; i < n; i++) alev[i] = i;
-
-    if (nlow == 0) {
-      nlow = n; 
-      low = alev;
-    }
-    if (nup == 0) {
-      nup = n;
-      up = alev;
-    }
-  }
 
   if (nup <= 0 || nlow <= 0) return -1;
 

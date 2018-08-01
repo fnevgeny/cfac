@@ -634,7 +634,13 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
     break;
   }
 
-  if (nlow <= 0 || nup <= 0) return -1;
+  if (nlow == 0 || nup == 0) {
+    printf("Empty set of initial or final levels in AITable(), skipping\n");
+    return 0;
+  } else
+  if (nlow < 0 || nup < 0) {
+    return -1;
+  }
 
   SaveAI(cfac, nlow, low, nup, up, fname, 0);
 
@@ -685,19 +691,14 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
   low = NULL;
   up = NULL;
   
-  if (argc < 1 || argc > 3) {
+  if (argc < 2 || argc > 3) {
     return -1;
   }
   if (argt[0] != STRING ) {
     return -1;
   }
   
-  if (argc == 1) {
-    nlow = SelectNeleLevels(cfac, -1, &low);
-    nup = nlow;
-    up = low;
-    SaveExcitation(cfac, nlow, low, nup, up, 0, argv[0]);
-  } else if (argc == 2) {
+  if (argc == 2) {
     if (argt[1] == STRING) {
       nlow = SelectLevels(&low, argv[1], argt[1], variables);
     } else {
@@ -780,7 +781,13 @@ static int PCITable(int argc, char *argv[], int argt[], ARRAY *variables) {
     nup = SelectLevels(&up, argv[2], argt[2], variables);
   }
 
-  if (nlow <= 0 || nup <= 0) return -1;
+  if (nlow == 0 || nup == 0) {
+    printf("Empty set of initial or final levels in CITable(), skipping\n");
+    return 0;
+  } else
+  if (nlow < 0 || nup < 0) {
+    return -1;
+  }
   
   if (SaveIonization(cfac, nlow, low, nup, up, argv[0]) < 0) return -1;
 
@@ -1169,7 +1176,13 @@ static int PRRTable(int argc, char *argv[], int argt[],
     }
   }
 
-  if (nlow <= 0 || nup <= 0) return -1;
+  if (nlow == 0 || nup == 0) {
+    printf("Empty set of initial or final levels in RRTable(), skipping\n");
+    return 0;
+  } else
+  if (nlow < 0 || nup < 0) {
+    return -1;
+  }
 
   SaveRecRR(cfac, nlow, low, nup, up, argv[0], m);
 
@@ -2528,55 +2541,37 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
   up = NULL;
   m = -1;
 
-  if (argc < 1) {
-    return -1;
-  }
-  
+  if (argc < 3 || argc > 4) return -1;
+
   if (argt[0] != STRING) {
     return -1;
   }
   
-  switch (argc) {
-  case 2:
-    if (argt[1] != NUMBER) {
-      return -1;
-    } else {
-      m = atoi(argv[1]);
-    }
-    break;
-  case 4:
+  if (argc == 4) {
     if (argt[3] != NUMBER) {
       return -1;
-    }
-    m = atoi(argv[3]);
-  case 3:
-    if (argt[1] == NUMBER && argt[2] == NUMBER) {
-      int nele = atoi(argv[1]);
-      m = atoi(argv[2]);
-      nlow = SelectNeleLevels(cfac, nele, &low);
-      nup = nlow;
-      up = low;
     } else {
-      nlow = SelectLevels(&low, argv[1], argt[1], variables);
-      nup  = SelectLevels(&up, argv[2], argt[2], variables);
+      m = atoi(argv[3]);
     }
-    if (nlow <= 0 || nup <= 0) {
-      return -1;
-    }
-    break;
+  }
+
+  if (argt[1] == NUMBER && argt[2] == NUMBER) {
+    int nele = atoi(argv[1]);
+    m = atoi(argv[2]);
+    nlow = SelectNeleLevels(cfac, nele, &low);
+    nup = nlow;
+    up = low;
+  } else {
+    nlow = SelectLevels(&low, argv[1], argt[1], variables);
+    nup  = SelectLevels(&up, argv[2], argt[2], variables);
+  }
+  if (nlow <= 0 || nup <= 0) {
+    return -1;
   }
     
   if (m == 0) {
     printf("m cannot be zero\n");
     return -1;
-  }
-
-  if (argc < 3) {
-    nup = SelectNeleLevels(cfac, -1, &up);
-    if (nup <= 0) return -1;
-    
-    low = up;
-    nlow = nup;
   }
 
   SaveTransition(cfac, nlow, (unsigned int*) low, nup, (unsigned int*) up,

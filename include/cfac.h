@@ -17,6 +17,10 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #ifndef __CFAC_H_
 #define __CFAC_H_
 
@@ -86,3 +90,7 @@ crac_calculate_rtrans(cfac_t *cfac,
     cfac_tr_sink_t sink, void *udata);
 
 #endif /* __CFAC_H_ */
+
+#if defined(__cplusplus)
+}
+#endif

@@ -17,6 +17,10 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #ifndef __CFACP_H_
 #define __CFACP_H_
 
@@ -239,3 +243,7 @@ void
 cfac_hamiltonian_free(HAMILTON *h);
 
 #endif /* __CFACP_H_ */
+
+#if defined(__cplusplus)
+}
+#endif

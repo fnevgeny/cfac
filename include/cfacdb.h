@@ -16,6 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #ifndef _CFACDB_H
 #define _CFACDB_H
 
@@ -179,3 +183,7 @@ double cfacdb_intext(const cfacdb_intext_t *intext, double x);
 int cfacdb_attach_cache(cfacdb_t *cdb, const char *fname);
 
 #endif /* _CFACDB_H */
+
+#if defined(__cplusplus)
+}
+#endif

@@ -16,10 +16,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 #ifndef _CFACDBP_H
 #define _CFACDBP_H
 
@@ -60,7 +56,3 @@ int cfacdb_crates_cached(cfacdb_t *cdb,
 
 
 #endif /* _CFACDBP_H */
-
-#if defined(__cplusplus)
-}
-#endif

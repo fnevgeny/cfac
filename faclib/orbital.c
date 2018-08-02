@@ -1295,6 +1295,9 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
   po1 = p[i2p];
 
   da = Amplitude(p, e, orb->kappa, pot, i2);
+  if (!da) {
+    return -1;
+  }
   cs = p[i2] * qo - da*po;
   si = po / p[i2];
   dfact = (si*si + cs*cs);
@@ -1484,7 +1487,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   double a, b, xi, r2 = 0.0, r3 = 0.0;
   double z, dk, r0, r_o[MAXRP], v_o[MAXRP], w, v1;
   
-  double y[2], rtol = EPS4, atol = 0.0, h0 = -0.01;
+  double y[2], rtol = EPS4, atol = EPS12, h0 = -0.01;
 
   gsl_odeiv2_system ode_sys;
   gsl_odeiv2_driver *ode_drv;
@@ -1550,7 +1553,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
     gsl_status = gsl_odeiv2_driver_apply(ode_drv, &r0, r_o[i], y);
     if (gsl_status != GSL_SUCCESS) {
        printf ("ORI ODE error %d\n", gsl_status);
-       exit(1);
+       return 0;
     }
   }
   p[n] = y[0];
@@ -1566,7 +1569,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
     gsl_status = gsl_odeiv2_driver_apply(ode_drv, &r0, r, y);
     if (gsl_status != GSL_SUCCESS) {
        printf ("IRI ODE error %d\n", gsl_status);
-       exit(1);
+       return 0;
     }
     p[i] = y[0];
   }

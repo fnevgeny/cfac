@@ -30,7 +30,7 @@ typedef enum {
     INT_P1Q2pQ1P2 = 4,    /* P1*Q2 + Q1*P2 */
     INT_P1Q2mQ1P2 = 5,    /* P1*Q2 - Q1*P2 */
     INT_P1Q2      = 6,    /* P1*Q2         */
-    INT_Q1P2      = 7     /* P1*Q2         */
+    INT_Q1P2      = 7     /* Q1*P2         */
 } RadIntType;
 
 typedef struct _SLATER_YK_ {

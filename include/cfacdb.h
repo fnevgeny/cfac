@@ -184,17 +184,17 @@ typedef struct {
  */
 typedef struct {
     unsigned int ndata; /*!< Number of data points.                   */
-    double      *e;     /*!< Energy grid.                             */
-    double      *d;     /*!< Data.                                    */
+    double      *e;     /*!< Energy-grid array, length = ndata.       */
+    double      *d;     /*!< Data array, length = ndata.              */
 
     double       ap[5]; /*!< Asymptote parameters.                    */
 
     double       d0;    /*!< Threshold limit.                         */
     double       let;   /*!< Low-E tangent.                           */
 
-    int          cube;  /*!< Cubic interpolation.                     */
+    int          cube;  /*!< Cubic interpolation flag.                */
     double     (*f_asymptote)(double x, const double *ap);
-                        /*!< Function for evaluating high-E asymtote. */
+                        /*!< Function for evaluating high-E asymptote.*/
 } cfacdb_intext_t;
 
 /*!

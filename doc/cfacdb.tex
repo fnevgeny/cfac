@@ -1,0 +1,28 @@
+\chapter{The cFACdb API}
+\label{cha:cfacdb}
+
+The cFACdb library hides all the complexity of working with \cFAC-generated
+databases in the SQLite format behind a simple application programming interface
+(API). The API is available both for C and Fortran programming languages. The
+data are returned via user-provided ``sink'' callback routines.
+
+\section{The C API}
+\input{cfacdbdoc/cfacdb_8h}
+
+\section{The C Data Structures}
+\input{cfacdbdoc/structcfacdb__aitrans__data__t}
+\input{cfacdbdoc/structcfacdb__crates__data__t}
+\input{cfacdbdoc/structcfacdb__cstates__data__t}
+\input{cfacdbdoc/structcfacdb__ctrans__data__t}
+\input{cfacdbdoc/structcfacdb__intext__t}
+\input{cfacdbdoc/structcfacdb__levels__data__t}
+\input{cfacdbdoc/structcfacdb__rtrans__data__t}
+\input{cfacdbdoc/structcfacdb__sessions__data__t}
+\input{cfacdbdoc/structcfacdb__stats__t}
+
+\section{The FORTRAN API}
+
+An F77 demo program is shown in the listing below.
+ 
+\lstset{language=[77]Fortran,numbers=left,caption=An F77 demo}
+\lstinputlisting{../cfacdb/fdemo.f}

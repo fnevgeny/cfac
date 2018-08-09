@@ -1200,12 +1200,7 @@ The SQL scheme used by \cFAC to store the data in this format is listed below.
 \lstset{caption=SQL schema}
 \includecode[sql]{../faclib/schema.sql}
 
-However, it is not expected to be used directly; instead, the CFACDB library,
+However, it is not expected to be used directly; instead, the cFACdb library,
 which is part of the \cFAC distribution, is provided. The library hides all the
 complexity of working with an SQL database behind a simple application
-programming interface (API). The API is available both for C and Fortran
-programming languages. The data are returned via user-provided ``sink'' callback
-routines. An F77 demo program is shown in the listing below.
-
-\lstset{language=[77]Fortran,numbers=left,caption=An F77 demo}
-\lstinputlisting{../cfacdb/fdemo.f}
+programming interface (API), see Chapter~\ref{cha:cfacdb}.

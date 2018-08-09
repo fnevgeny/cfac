@@ -63,6 +63,11 @@
 \makeindex
 \usepackage[totoc]{idxlayout}
 
+% Doxygen stuff
+\usepackage{cfacdbdoc/doxygen}
+\renewcommand{\familydefault}{\sfdefault}
+\newcommand{\+}{\discretionary{\mbox{\scriptsize$\hookleftarrow$}}{}{}}
+
 \begin{document}
 
 \title{\cFAC--\facversion Manual}
@@ -81,6 +86,8 @@
 \include{sfaclang}
 
 \include{fformat}
+
+\include{cfacdb}
 
 \include{faq}
 

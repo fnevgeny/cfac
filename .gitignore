@@ -31,6 +31,9 @@ doc/*.out
 doc/*.toc
 doc/*.lol
 
+# Doxygen generated files
+doc/cfacdbdoc
+
 # Compiled TeX docs
 doc/manual.pdf
 

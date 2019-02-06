@@ -77,8 +77,6 @@ int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *r, double te
 	       int k0, int k1, int k2, int k3, int k);
 int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *rq, double te, int k0, int k1,
 		   int k2, int k3, int k, int kp);
-void CERadialQkFromFit(int np, double *p, int n, double *x, double *logx,
-		       double *y, double *dy, int ndy, void *extra);
 int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSITION *tr, int msub,
                       double *qkt, double *params, double *bethe);
 int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub, char *fn);

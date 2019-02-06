@@ -1376,95 +1376,6 @@ int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   return type;
 }
 
-void BornFromFit(int np, double *p, int n, double *x, double *logx,
-		 double *y, double *dy, int ndy, void *extra) {
-  double a, b;
-
-  int i, k;
-
-  if (ndy <= 0) {
-    for (i = 0; i < n; i++) {
-      a = (1.0 + p[1])/(x[i] + p[1]);
-      y[i] = p[0] + p[2]*a + p[3]*a*a;
-    }
-  } else {
-    for (i = 0; i < n; i++) {
-      a = x[i] + p[1];
-      b = (x[i] - 1.0)/(a*a);
-      a = (1.0 + p[1])/a;
-      k = i;
-      dy[k] = 1.0;
-      k += ndy;
-      dy[k] = p[2]*b + 2.0*p[3]*b*a;
-      k += ndy;
-      dy[k] = a;
-      k += ndy;
-      dy[k] = a*a;
-    }
-  }
-}
-
-void CERadialQkFromFit(int np, double *p, int n, double *x, double *logx,
-		       double *y, double *dy, int ndy, void *extra) {
-  double a, b, c, d, D;
-  int i, k;
-
-  D = *((double *) extra);
-  if (D >= 0.0) {
-    if (ndy <= 0) {
-      for (i = 0; i < n; i++) {
-	a = p[1]*p[1];
-	b = 1.0 - x[i];
-	c = pow(x[i], a);
-	d = pow(b, p[3]*p[3]);
-	y[i] = p[0]*c + p[2]*d;
-      }
-    } else {
-      for (i = 0; i < n; i++) {
-	a = p[1]*p[1];
-	b = 1.0 - x[i];
-	c = pow(x[i], a);
-	d = pow(b, p[3]*p[3]);
-	k = i;
-	dy[k] = c;
-	k += ndy;
-	c *= p[0]*logx[i];
-	dy[k] = 2.0*c*p[1];
-	k += ndy;
-	dy[k] = d;
-	k += ndy;
-	d *= p[2]*log(b);
-	dy[k] = 2.0*d*p[3];
-      }
-    }
-  } else {
-    if (ndy <= 0) {
-      for (i = 0; i < n; i++) {
-	a = 1.0/(x[i]+p[3]);
-	b = a*a;
-	c = -2.0 + p[1]*a + p[2]*b;
-	y[i] = p[0]*pow(x[i], c);
-      }
-    } else {
-      for (i = 0; i < n; i++) {
-	a = 1.0/(p[3] + x[i]);
-	b = a*a;
-	c = -2.0 + p[1]*a + p[2]*b;
-	d = pow(x[i], c);
-	k = i;
-	dy[k] = d;
-	k += ndy;
-	d = p[0]*d*logx[i];
-	dy[k] = d*a;
-	k += ndy;
-	dy[k] = d*b;
-	k += ndy;
-	dy[k] = -d*(p[1]*b + 2.0*p[2]*b*a);
-      }
-    }
-  }
-}
- 
 void RelativisticCorrection(int m, double *s, double *p, double te, double b) {
   int i, j, k;
   double a, c, b1, b0;
@@ -1720,20 +1631,6 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
 
   RelativisticCorrection(0, qkt, NULL, te, bethe[0]);
   return 1;
-}
-
-double AngZCorrection(cfac_t *cfac, int nmk, double *mbk, ANGULAR_ZMIX *ang, int t) {
-  double r;
-
-  if (nmk < t) return 0.0;
-  if (t <= 0) return 0.0;
-  r = mbk[t-1];
-  if (1.0 + r == 1.0) return 0.0;
-  r /= MultipoleRadialNR(cfac, -t, ang->k0, ang->k1, G_BABUSHKIN);
-  if (ang->coeff < 0) r = -r;
-  r /= mbk[nmk+t-1];
-
-  return r;
 }
 
 /*

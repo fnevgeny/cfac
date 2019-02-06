@@ -17,37 +17,34 @@ a unique integer, which corresponds to a macro define in the file
 \verb|faclib/dbase.h|. These types are
 \begin{description}
 \item[\texttt{DB\_EN = 1}] Energy levels produced by the function
-\verb|Structure|. 
+\funcref{Structure}.
 \item[\texttt{DB\_TR = 2}] Radiative transition rates produced by
-\verb|TransitionTable|.
+\funcref{TransitionTable}.
 \item[\texttt{DB\_CE = 3}] Collisional excitation cross sections produced by
-\verb|CETable|. 
+\funcref{CETable}.
 \item[\texttt{DB\_RR = 4}] Radiative recombination and photoionization cross
-sections produced by \verb|RRTable|.
-\item[\texttt{DB\_AI = 5}] Autoionization rates produced by \verb|AITable|.
+sections produced by \funcref{RRTable}.
+\item[\texttt{DB\_AI = 5}] Autoionization rates produced by \funcref{AITable}.
 \item[\texttt{DB\_CI = 6}] Collisional ionization cross sections produced by
-\verb|CITable|. 
-\item[\texttt{DB\_AIM = 10}] Magnetic sublevel autoionization rates and DR
-capture strengths produced by \verb|AITableMSub|.
-\item[\texttt{DB\_CIM = 11}] Magnetic sublevel collisional ionization cross
-  sections produced by \verb|CITableMSub|.
+\funcref{CITable}.
+\item[\texttt{DB\_AIM = 7}] Magnetic sublevel autoionization rates and DR
+capture strengths produced by \funcref{AITableMSub}.
+\item[\texttt{DB\_CIM = 8}] Magnetic sublevel collisional ionization cross
+  sections produced by \funcref{CITableMSub}.
+\item[\texttt{DB\_ENF = 9}] Energy levels produced by the function
+\funcref{StructureEB}.
+\item[\texttt{DB\_TRF = 10}] Radiative transition rates produced by
+\funcref{TRTableEB}.
+\item[\texttt{DB\_CEF = 11}] Collisional excitation cross sections produced by
+\funcref{CETableEB}.
+\item[\texttt{DB\_CEMF = 12}] Collisional excitation cross sections produced by
+\funcref{CETableEB} with \verb|m| = 1.
 \end{description}
 
 All files have a common structure. It consists of a file header and one or
 more data blocks. Each data block is comprised of a data header and one or
 more data records. In the following, we show the C definition of all structs
-and describe each field in detail. When one field is a pointer, it means that
-an array is saved in the database. The pointer points to the memory location
-where the data is stored. In versions 1.0.8 or earlier, the value of the
-pointer itself is also saved in the file followed by the data stored in the
-array. Obviously, the saved pointer itself has no meaning once the program
-exits (since it is a memory location). When reading out the data from the
-database file, these pointer values should be ignored. In version 1.0.9 or
-later, the pointers are no longer saved, and the file IO are rewritten in a
-platform independent way, i.e., the structure fields are written and read one
-by one, instead of dealing with the structure as an integrated object. This
-avoids the different memory padding added by the compilers which may be
-different on different machines.
+and describe each field in detail.
 
 \subsection{\texttt{F\_HEADER}}
 \index{F\_HEADER}

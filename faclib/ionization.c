@@ -1477,6 +1477,11 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   double delta, emin, emax, e, emax0;
   int nq, i, j, k, ie;
 
+  if (qk_mode != QK_DW) {
+    printf("Only DW mode is supported in SaveIonizationMSub()\n");
+    exit(1);
+  }
+
   emin = 1E10;
   emax = 1E-10;
   k = 0;

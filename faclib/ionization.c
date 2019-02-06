@@ -1385,30 +1385,29 @@ double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
   return r;
 }
 
-int IonizeStrengthMSub(cfac_t *cfac, double *qku, double *te, int b, int f) {
+int IonizeStrengthMSub(cfac_t *cfac, double *qku, int b, int f) {
   LEVEL *lev1, *lev2;
   ANGULAR_ZFB *ang;
   double c, d, x[MAXNE], logx[MAXNE];
   double qkc[MAXMSUB*MAXNE], *rqk;
   int j1, j2, m1, m2, nz, i, ip, ie, kb, kbp;
+  double te;
   
   lev1 = GetLevel(cfac, b);
   lev2 = GetLevel(cfac, f);
-  *te = lev2->energy - lev1->energy;
-  if (*te <= 0) return -1;
+  te = lev2->energy - lev1->energy;
+  if (te <= 0) return -1;
   
-  j1 = lev1->pj;
-  j2 = lev2->pj;
-  DecodePJ(j1, NULL, &j1);
-  DecodePJ(j2, NULL, &j2);
+  DecodePJ(lev1->pj, NULL, &j1);
+  DecodePJ(lev2->pj, NULL, &j2);
 
   for (i = 0; i < n_usr; i++) {
-    xusr[i] = usr_egrid[i]/(*te);
+    xusr[i] = usr_egrid[i]/te;
     if (usr_egrid_type == 1) xusr[i] += 1.0;
     log_xusr[i] = log(xusr[i]);
   }
   for (i = 0; i < n_egrid; i++) {
-    x[i] = (*te + egrid[i])/(*te);
+    x[i] = (te + egrid[i])/te;
     logx[i] = log(x[i]);
   }
 
@@ -1424,6 +1423,9 @@ int IonizeStrengthMSub(cfac_t *cfac, double *qku, double *te, int b, int f) {
 
 
   nz = AngularZFreeBound(cfac, &ang, f, b);
+  if (nz <= 0) {
+    return -1;
+  }
   for (i = 0; i < nz; i++) {
     kb = ang[i].kb;
     for (ip = 0; ip <= i; ip++) {
@@ -1435,16 +1437,13 @@ int IonizeStrengthMSub(cfac_t *cfac, double *qku, double *te, int b, int f) {
 	for (m2 = -j2; m2 <= j2; m2 += 2) {
 	  for (ie = 0; ie < n_egrid; ie++) {
 	    d = CIRadialQkIntegratedMSub(cfac, j1, m1, j2, m2,
-					 kb, kbp, *te, egrid[ie]);
+					 kb, kbp, te, egrid[ie]);
 	    rqk[ie] += c*d;
 	  }
 	  rqk += n_egrid;
 	}
       }
     }
-  }
-  if (nz <= 0) {
-    return -1;
   }
 
   free(ang);
@@ -1557,11 +1556,8 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   InitFile(file, &fhdr, &ci_hdr);
   
   for (i = 0; i < nb; i++) {
-    lev1 = GetLevel(cfac, b[i]);
     for (j = 0; j < nf; j++) {
-      lev2 = GetLevel(cfac, f[j]);
-      e = lev2->energy - lev1->energy;
-      nq = IonizeStrengthMSub(cfac, qku, &e, b[i], f[j]);
+      nq = IonizeStrengthMSub(cfac, qku, b[i], f[j]);
       if (nq < 0) continue;
       r.b = b[i];
       r.f = f[j];

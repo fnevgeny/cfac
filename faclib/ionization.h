@@ -57,7 +57,7 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
 		      double e1, double e2, double e0);
 double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
 				int k0, int k1, double te, double e12);
-int IonizeStrengthMSub(cfac_t *cfac, double *qku, double *e, int b, int f);
+int IonizeStrengthMSub(cfac_t *cfac, double *qku, int b, int f);
 int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn);
 double BEScale(cfac_t *cfac, int k, double e);
 

@@ -1618,19 +1618,6 @@ static int PSetBornFormFactor(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetBornMass(int argc, char *argv[], int argt[],
-			ARRAY *variables) {
-  double m;
-
-  if (argc != 1) return -1;
-  if (argt[0] != NUMBER) return -1;
-  m = atof(argv[0]);
-
-  SetBornMass(m);
-  
-  return 0;
-}
-
 static int PSetCIEGrid(int argc, char *argv[], int argt[], 
 		       ARRAY *variables) {  int n, ng, i, err;
   double xg[MAXNE];
@@ -3043,7 +3030,6 @@ static METHOD methods[] = {
   {"SetAtom", PSetAtom},
   {"SetAvgConfig", PSetAvgConfig},
   {"SetBornFormFactor", PSetBornFormFactor},
-  {"SetBornMass", PSetBornMass},
   {"SetBreit", PSetBreit},
   {"SetCEBorn", PSetCEBorn},
   {"SetCEGrid", PSetCEGrid},

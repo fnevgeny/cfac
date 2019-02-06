@@ -169,11 +169,10 @@ int SetCEEGridDetail(int n, double *xg) {
 }
 
 int SetCEEGrid(int n, double emin, double emax, double eth) {
-  double bms, bte;
+  double bte;
 
   BornFormFactorTE(&bte);
-  bms = BornMass();
-  eth = (eth + bte)/bms;
+  eth = eth + bte;
   n_egrid = SetEGrid(egrid, log_egrid, n, emin, emax, eth);
   return n_egrid;
 }
@@ -188,7 +187,7 @@ int SetUsrCEEGridDetail(int n, double *xg) {
 }
  
 int SetUsrCEEGrid(int n, double emin, double emax, double eth) {
-  double bms, bte;
+  double bte;
 
   if (n > MAXNUSR) {
     printf("Max # of grid points reached \n");
@@ -196,8 +195,7 @@ int SetUsrCEEGrid(int n, double emin, double emax, double eth) {
   }
 
   BornFormFactorTE(&bte);
-  bms = BornMass();
-  eth = (eth + bte)/bms;
+  eth = eth + bte;
   n_usr = SetEGrid(usr_egrid, log_usr, n, emin, emax, eth);
   return n_usr;
 }
@@ -520,7 +518,7 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
   double r, c0, c1, dk;
   double x, d, c, a, h, a0 = 0.0, a1 = 0.0;
   double *g1, *g2, *x1, *x2;
-  double bte, bms;
+  double bte;
   FORM_FACTOR *bform;
 
   ko2 = k/2;  
@@ -556,8 +554,7 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
   x2 = g2 + NGOSK;
 
   bnk = BornFormFactorTE(&bte);
-  bms = BornMass();
-  c0 = e1 + (te + bte)/bms;
+  c0 = e1 + te + bte;
   if (m <= 0) {
     a0 = FINE_STRUCTURE_CONST2*c0;
     a1 = FINE_STRUCTURE_CONST2*e1;
@@ -569,8 +566,8 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
     c0 = 2.0*c0;
     c1 = 2.0*e1;
   }
-  c0 = bms * sqrt(c0);
-  c1 = bms * sqrt(c1);
+  c0 = sqrt(c0);
+  c1 = sqrt(c1);
   nk = NKINT-1;
   kint[0] = c0 - c1;
   kint[nk] = c0 + c1;
@@ -600,11 +597,10 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
     for (t = 0; t < nk; t++) {
       c = 0.5*(c0*c0 + c1*c1 - kint[t]*kint[t]);
       h = c/(c0*c1);
-      c /= bms*bms;
       c = 1 + d*c;
       c *= c;
       h = 1.0 - h;
-      x = (c0/bms)*(c1/bms);
+      x = c0*c1;
       h *= x*x;
       h *= d*d;
       gosint[t] *= a*(c + h);
@@ -633,7 +629,7 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
   int kkp, iq, bnk;
   double xc;
   double r, c0, c1, c01, dk, a0 = 0.0, a1 = 0.0;
-  double x, d, c, a, h, bte, bms;  
+  double x, d, c, a, h, bte;
   double *g1, *g2, *x1, *x2;
   double gosm1[MAXMSUB][NKINT];
   double gosm2[MAXMSUB][NKINT];
@@ -672,8 +668,7 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
   x2 = g2 + NGOSK;
 
   bnk = BornFormFactorTE(&bte);
-  bms = BornMass();  
-  c0 = e1 + (te + bte)/bms; 
+  c0 = e1 + te + bte;
   if (m <= 0) {
     a0 = FINE_STRUCTURE_CONST2*c0;
     a1 = FINE_STRUCTURE_CONST2*e1;
@@ -685,9 +680,9 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
     c0 = 2.0*c0;
     c1 = 2.0*e1;
   }
-  c01 = (c0 - c1)*bms;
-  c0 = bms * sqrt(c0);
-  c1 = bms * sqrt(c1);
+  c01 = c0 - c1;
+  c0 = sqrt(c0);
+  c1 = sqrt(c1);
   nk = NKINT-1;
   kint[0] = c0 - c1;
   kint[nk] = c0 + c1;
@@ -717,11 +712,10 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
     for (t = 0; t < nk; t++) {
       c = 0.5*(c0*c0 + c1*c1 - kint[t]*kint[t]);
       h = c/(c0*c1);
-      c /= bms*bms;
       c = 1 + d*c;
       c *= c;
       h = 1.0 - h;
-      x = (c0/bms)*(c1/bms);
+      x = c0*c1;
       h *= x*x;
       h *= d*d;
       gost[t] *= a*(c + h);
@@ -1559,7 +1553,7 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   int j1, j2, j1p, j2p, mlev1, mlev2, mlev1p, mlev2p;
   int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k;
   ANGULAR_ZMIX *ang, *angp;
-  double bte, bms;
+  double bte;
         
   lev1 = GetEBLevel(cfac, lower);
   if (lev1 == NULL) return -1;
@@ -1627,8 +1621,7 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   }
 
   BornFormFactorTE(&bte);
-  bms = BornMass();
-  bte = (te + bte)/bms;
+  bte = te + bte;
   SetTransitionMode(cfac, M_NR);
   SetTransitionGauge(cfac, G_BABUSHKIN);
   k = TRMultipoleEB(cfac, NULL, s, &te, -1, lower, upper);
@@ -1675,7 +1668,7 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   int j1, j2, j1p, j2p, mlev1, mlev2, mlev1p, mlev2p;
   int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp;
   ANGULAR_ZMIX *ang, *angp;
-  double bte, bms;
+  double bte;
       
   lev1 = GetEBLevel(cfac, lower);
   if (lev1 == NULL) return -1;
@@ -1758,8 +1751,7 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   }
 
   BornFormFactorTE(&bte);
-  bms = BornMass();
-  bte = (te + bte)/bms;
+  bte = te + bte;
   m = n_egrid1*n_thetagrid*n_phigrid;
   for (ie = 0; ie < m; ie++) {
     qkt[ie] *= 8.0;
@@ -1823,7 +1815,7 @@ int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSIT
   double qkc[MAXMSUB*(MAXNE+1)];
   double *rqk, *rqkt;
   double born_egrid, born_cross, bt, ubt[MAXNUSR];
-  double bte, bms;
+  double bte;
 
   if (!tr) {
     return -1;
@@ -1906,8 +1898,7 @@ int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSIT
   }
 
   BornFormFactorTE(&bte);
-  bms = BornMass();
-  bte = (te + bte)/bms;
+  bte = te + bte;
 
   if (msub) {
     for (t = 0; t < MAXMSUB; t++) {
@@ -2040,7 +2031,7 @@ int CollisionStrengthUTA(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRAN
   double te, *rqk;
   double rq[MAXMSUB*(MAXNE+1)], qkc[MAXMSUB*(MAXNE+1)];
   double born_egrid, born_cross, c, d, r;
-  double bte, bms;
+  double bte;
 
   if (!tr) {
     return -1;
@@ -2110,8 +2101,7 @@ int CollisionStrengthUTA(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRAN
       r = OscillatorStrength(-1, te, r, NULL);
       bethe[0] = d*2.0*r/te;
       BornFormFactorTE(&bte);
-      bms = BornMass();
-      bte = (te + bte)/bms;
+      bte = te + bte;
     } else {
       bethe[0] = 0.0;
     }

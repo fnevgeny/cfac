@@ -214,11 +214,10 @@ int SetUsrCIEGridType(int type) {
 }
 
 int SetCIEGrid(int n, double emin, double emax, double eth) {
-  double bms, bte;
+  double bte;
 
   BornFormFactorTE(&bte);
-  bms = BornMass();
-  eth = (eth + bte)/bms;
+  eth = eth + bte;
   n_egrid = SetEGrid(egrid, log_egrid, n, emin, emax, eth);
   return n_egrid;
 }
@@ -233,15 +232,14 @@ int SetUsrCIEGridDetail(int n, double *xg) {
 }
 
 int SetUsrCIEGrid(int n, double emin, double emax, double eth) {
-  double bms, bte;
+  double bte;
 
   if (n > MAXNUSR) {
     printf("Max # of grid points reached \n");
     return -1;
   }
   BornFormFactorTE(&bte);
-  bms = BornMass();
-  eth = (eth + bte)/bms;
+  eth = eth + bte;
   n_usr = SetEGrid(usr_egrid, log_usr, n, emin, emax, eth);
   return n_usr;
 }
@@ -565,7 +563,7 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   int index[2], ie, ite, i, k, nqk, qlog;
   double **p, *qkc, e1, e2;
   double yint[NINT], integrand[NINT];
-  double ymin, ymax, dy, y, bte, bms;
+  double ymin, ymax, dy, y, bte;
   double yegrid[NINT0], qi[MAXNTE], qt[MAXNTE][NINT0];
 
   index[0] = kb;
@@ -580,7 +578,6 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   *p = malloc(sizeof(double)*nqk);
   qkc = *p;
   
-  bms = BornMass();
   BornFormFactorTE(&bte);
   for (ie = 0; ie < n_egrid; ie++) {
     for (ite = 0; ite < n_tegrid; ite++) {
@@ -589,9 +586,7 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
       }
     }
     ymin = ((bte+tegrid[0])*YEG0)/egrid[ie];
-    ymax = ((bte+tegrid[n_tegrid-1])*YEG1)/egrid[ie];
-    if (ymax >= 0.99*bms) ymax = 0.99*bms;
-    if (fabs(bms-1) < EPS3 && ymax > 0.5) ymax = 0.5;
+    ymax = 0.5;
     ymin = log(ymin);
     ymax = log(ymax);
     dy = (ymax - ymin)/(NINT0-1.0);
@@ -607,7 +602,7 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
     for (i = 0; i < NINT0; i++) {
       y = exp(yegrid[i]);
       e2 = egrid[ie]*y;
-      e1 = egrid[ie]*(1.0-y/bms);
+      e1 = egrid[ie]*(1.0-y);
       for (k = 0; k <= pw_scratch.max_k; k += 2) {
 	CIRadialQk(cfac, qi, e1, e2, kb, kbp, k);
 	for (ite = 0; ite < n_tegrid; ite++) {
@@ -1354,16 +1349,13 @@ double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
 				int k0, int k1, double te, double e12) {
   double e0, e1, e2, d, r;
   double x[NINT0], y[NINT0], xi[NINT], yi[NINT];
-  double ymin, ymax, bms, bte;
+  double ymin, ymax, bte;
   int i, qlog;
 
-  bms = BornMass();
   BornFormFactorTE(&bte);
   e0 = te + e12;
   ymin = (YEG0*(bte+te))/e12;
-  ymax = (YEG1*(bte+te))/e12;
-  if (ymax > 0.99*bms) ymax = 0.99*bms;
-  if (fabs(bms-1) < EPS3 && ymax > 0.5) ymax = 0.5;
+  ymax = 0.5;
   ymin = log(ymin);
   ymax = log(ymax);
 
@@ -1376,7 +1368,7 @@ double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
   for (i = 0; i < NINT0; i++) {
     r = exp(x[i]);
     e2 = e12*r;
-    e1 = e12 - e2/bms;
+    e1 = e12 - e2;
     y[i] = CIRadialQkMSub(cfac, j1, m1, j2, m2, k0, k1, e1, e2, e0);
     y[i] *= r;
   }

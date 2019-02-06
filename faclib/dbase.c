@@ -50,7 +50,6 @@ static int mem_enf_table_size = 0;
 static int iground;
 static int iuta = 0;
 
-static double born_mass = 1.0;
 static FORM_FACTOR bform = {0.0, -1, NULL, NULL, NULL};
 
 #define _WSF0(sv, f) {					\
@@ -77,15 +76,6 @@ static FORM_FACTOR bform = {0.0, -1, NULL, NULL, NULL};
 #define WSF1(sv, s, k) _WSF1(sv, s, k, f)
 #define RSF0(sv) _RSF0(sv, f)
 #define RSF1(sv, s, k) _RSF1(sv, s, k, f)
-
-void SetBornMass(double m) {
-  if (m > 0) born_mass = m*AMU;
-  else born_mass = 1.0;
-}
-
-double BornMass(void) {
-  return born_mass;
-}
 
 void SetBornFormFactor(double te, char *fn) {
   int i, n;
@@ -2376,11 +2366,10 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
   int nb;
   int k, p2;
   float a, e = 0.0;
-  double bte, bms, be;
+  double bte, be;
 
   nb = 0;
   BornFormFactorTE(&bte);
-  bms = BornMass();  
   while (1) {
     n = ReadCEHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2438,7 +2427,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
 		r.bethe, r.born[0], r.born[1]);
       }
       
-      be = (e + bte)/bms;
+      be = e + bte;
       p2 = 0;
       for (k = 0; k < r.nsub; k++) {
 	if (h.msub) {
@@ -2483,12 +2472,11 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t;
   int nb;
   float a, e = 0.0;
-  double bte, bms, be;
+  double bte, be;
 
   nb = 0;
  
   BornFormFactorTE(&bte);
-  bms = BornMass();  
   while (1) {
     n = ReadCEFHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2537,7 +2525,7 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
 		r.bethe, r.born[0], r.born[1]);
       }
       
-      be = (e + bte)/bms;
+      be = e + bte;
       for (t = 0; t < h.n_egrid; t++) {
 	if (v) {
 	  a = h.egrid[t];
@@ -2569,12 +2557,11 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
   int nb;
   int k, na, ith, iph;
   float a, e = 0.0;
-  double bte, bms, be;
+  double bte, be;
 
   nb = 0;
  
   BornFormFactorTE(&bte);
-  bms = BornMass(); 
   while (1) {
     n = ReadCEMFHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2636,7 +2623,7 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
 	    fprintf(f2, "%11.4E %11.4E %11.4E\n", 
 		    r.bethe[k], r.born[k], r.born[na]);
 	  }      
-	  be = (e + bte)/bms;
+	  be = e + bte;
 	  for (t = 0; t < h.n_egrid; t++) {
 	    if (v) {
 	      a = h.egrid[t];
@@ -2888,12 +2875,11 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t;
   int nb;
   float e = 0.0, a;
-  double bte, bms, be;
+  double bte, be;
 
   nb = 0;
  
   BornFormFactorTE(&bte);
-  bms = BornMass(); 
   while (1) {
     n = ReadCIHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2949,7 +2935,7 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
 	fprintf(f2, "%11.4E ", r.params[t]);
       }
       fprintf(f2, "\n");
-      be = (e + bte)/bms;
+      be = e + bte;
       for (t = 0; t < h.n_usr; t++) {
 	if (v) {
 	  a = h.usr_egrid[t];
@@ -2983,12 +2969,11 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t, q;
   int nb, k;
   float e, a;
-  double bte, bms, be;
+  double bte, be;
 
   nb = 0;
  
   BornFormFactorTE(&bte);
-  bms = BornMass(); 
   while (1) {
     n = ReadCIMHeader(f1, &h, swp);
     if (n == 0) break;
@@ -3029,7 +3014,7 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
 	fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.nsub);
       }
 
-      be = (e + bte)/bms;
+      be = e + bte;
       if (v) {
 	q = 0;
 	for (k = 0; k < r.nsub; k ++) {

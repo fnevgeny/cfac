@@ -458,8 +458,6 @@ int ISearch(int i, int n, int *ia);
 void SetBornFormFactor(double te, char *fn);
 int BornFormFactorTE(double *te);
 FORM_FACTOR *BornFormFactor(void);
-void SetBornMass(double m);
-double BornMass(void);
 
 int StoreInit(const cfac_t *cfac,
     const char *fn, int reset, sqlite3 **db, unsigned long *sid);

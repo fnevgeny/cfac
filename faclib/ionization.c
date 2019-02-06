@@ -577,7 +577,8 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
       }
     }
     ymin = (tegrid[0]*YEG0)/egrid[ie];
-    ymax = 0.5;
+    ymax = (tegrid[n_tegrid-1]*YEG1)/egrid[ie];
+    if (ymax > 0.5) ymax = 0.5;
     ymin = log(ymin);
     ymax = log(ymax);
     dy = (ymax - ymin)/(NINT0-1.0);
@@ -924,13 +925,8 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 	qkc[i] = 0.0;
       }
       tol = qk_fit_tolerance;
-      if (ip < 0) {
-	SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx, 
-	       qke, sigma, CIRadialQkBasis);
-      } else {
-	SVDFit(NPARAMS, qkc, tol, n_egrid, x, logx, 
-	       qke, sigma, CIRadialQkBasis0);
-      }
+      SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
+	     qke, sigma, CIRadialQkBasis);
       if (usr_different) {
 	for (i = 0; i < n_usr; i++) {
 	  xusr[i] = usr_egrid[i]/(*te);
@@ -1340,7 +1336,8 @@ double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
 
   e0 = te + e12;
   ymin = (YEG0*te)/e12;
-  ymax = 0.5;
+  ymax = (YEG1*te)/e12;
+  if (ymax > 0.5) ymax = 0.5;
   ymin = log(ymin);
   ymax = log(ymax);
 

@@ -9,7 +9,7 @@ that worked with FAC will likely continue to with \cFAC unmodifed.
 
 \cFAC adds possibility to store the calculated results in an SQLite-based
 format, allowing for selecting subsets of data for various uses based on the
-powerful SQL query language. The CFACDB library, which is part of the \cFAC
+powerful SQL query language. The cFACdb library, which is part of the \cFAC
 distribution, is provided to facilitate access to the SQLite \cFAC databases
 from third-party C and Fortran codes.}
 
@@ -110,7 +110,7 @@ the exchanged photon. Vacuum polarization and self-energy corrections are
 treated in the screened hydrogenic approximation.}
 
 \section{Collisional Excitation}
-\faq{Why is there multiple data blocks in the output corresponding to a single
+\faq{Why are there multiple data blocks in the output corresponding to a single
 call of \funcref{CETable} sometimes}{
 Sometimes, the transition array corresponding to a given call to \funcref{CETable}
 include transitions with a wide range of excitation energies. This typically
@@ -156,7 +156,7 @@ to an empty orbital.}
 \faq{Why do the bound--free oscillator strengths differ from some other
 theoretical calculation by a constant factor}{
 The bound--free differential oscillator strengths calculated by \cFAC have units
-of Hartree$^{-1}$. Also the values depend on the normalization of continuum
+of hartree$^{-1}$. Also the values depend on the normalization of continuum
 orbitals. It is therefore possible that they differ from other theoretical
 calculations by a constant factor. One should always use the formula in this
 manual to convert them to photoionization or
@@ -165,21 +165,17 @@ radiative recombination cross sections.}
 \faq{Can I use only the fitting formula and ignore the tabulated $gf$
 values}{
 The fitting formula and the parameters given for the bound--free oscillator
-strengths is only valid at high energies (beyond the largest energy of the
+strengths are only valid at high energies (beyond the largest energy of the
 photo-electron energy grid). This means that the $gf$ values at energies
 within the photo-electron energy grid should be calculated by interpolation
-instead of the fitting formula. However, this is often only necessary for the
+instead of the fitting formula. Often, however, this is only necessary for the
 ionization of valence shells of near neutral ions and atoms, since only in
 these cases, the near threshold behavior of the $gf$ values differ from the
 fitting formula significantly.}
 
 \section{Autoionization and Dielectronic Recombination}{
-\faq{What does the channel number in the call to \funcref{AITable} mean}{
-It does not mean anything. It is simply an identifier which may be useful
-sometimes to tag a certain autoionization channel.}
-
 \faq{How do I improve the energies of low-lying $\Delta n = 0$ resonances}{
-The energies of low-lying $\Delta n = 0$ resonances can not the calculated
+The energies of low-lying $\Delta n = 0$ resonances can not be calculated
 accurately. This greatly reduces the reliability of the resulting dielectronic
 recombination rates. In \cFAC, there is a method to improve the accuracy of
 these energies by adjusting the core transition energies according to the
@@ -196,15 +192,6 @@ states in different complexes. e.g., KLL and KLM resonances should be
 calculated with two separate calls to \funcref{AITable}.}
 
 \section{Collisional Ionization}
-\faq{Why are \cFAC ionization cross sections calculated with \key{BED} mode
-usually much smaller at near threshold energies as compared with
-distorted-wave calculations}{
-When using \key{BED} mode to calculate the ionization radial integrals, the
-total ionization cross sections are scaled by a factor $E/(E+I)$, where $E$ is
-the energy of incident electron, and $I$ is the ionization threshold
-energy. The result of this scaling is usually desirable as distorted-wave
-method overestimates the near threshold cross sections.}
-
 \faq{Why is the \key{DW} mode so slow compared to the \key{BED} and \key{CB}
 modes}{
 In the \key{DW} mode, the ionization radial integrals are calculated by

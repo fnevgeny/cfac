@@ -1602,22 +1602,6 @@ static int PSetCIBorn(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetBornFormFactor(int argc, char *argv[], int argt[],
-			      ARRAY *variables) {
-  double te;
-  char *fn;
-
-  if (argc < 1 || argc > 2) return -1;
-  if (argt[0] != NUMBER) return -1;
-  te = atof(argv[0]);
-  if (argc == 2) fn = argv[1];
-  else fn = NULL;
-  
-  SetBornFormFactor(te, fn);
-  
-  return 0;
-}
-
 static int PSetCIEGrid(int argc, char *argv[], int argt[], 
 		       ARRAY *variables) {  int n, ng, i, err;
   double xg[MAXNE];
@@ -3029,7 +3013,6 @@ static METHOD methods[] = {
   {"SetAngleGrid", PSetAngleGrid},
   {"SetAtom", PSetAtom},
   {"SetAvgConfig", PSetAvgConfig},
-  {"SetBornFormFactor", PSetBornFormFactor},
   {"SetBreit", PSetBreit},
   {"SetCEBorn", PSetCEBorn},
   {"SetCEGrid", PSetCEGrid},

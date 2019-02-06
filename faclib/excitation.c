@@ -169,10 +169,6 @@ int SetCEEGridDetail(int n, double *xg) {
 }
 
 int SetCEEGrid(int n, double emin, double emax, double eth) {
-  double bte;
-
-  BornFormFactorTE(&bte);
-  eth = eth + bte;
   n_egrid = SetEGrid(egrid, log_egrid, n, emin, emax, eth);
   return n_egrid;
 }
@@ -187,15 +183,11 @@ int SetUsrCEEGridDetail(int n, double *xg) {
 }
  
 int SetUsrCEEGrid(int n, double emin, double emax, double eth) {
-  double bte;
-
   if (n > MAXNUSR) {
     printf("Max # of grid points reached \n");
     return -1;
   }
 
-  BornFormFactorTE(&bte);
-  eth = eth + bte;
   n_usr = SetEGrid(usr_egrid, log_usr, n, emin, emax, eth);
   return n_usr;
 }
@@ -485,41 +477,15 @@ static void InterpolateGOS(int n, double *x, double *g,
   }
 }
 
-double BornFormFactorK(double q, FORM_FACTOR *bform) {
-  double a, r;
-
-  r = 1.0;
-  if (bform->nk == 0) {
-    a = 1.0/(1.0 + 0.25*q*q);
-    a *= a;
-    if (bform->te > 0) {
-      r = 1.0 - a*a;
-    } else {
-      r = (1-a) * (1-a);
-    }
-  } else if (bform->nk > 0) {
-    if (q <= bform->k[0]) r = bform->fk[0];
-    else if (q >= bform->k[bform->nk-1]) r = bform->fk[bform->nk-1];
-    else {   
-      q = log(q);
-      UVIP3P(bform->nk, bform->logk, bform->fk, 1, &q, &r);
-    }
-  }
-
-  return r;
-}
-
 int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, 
 		   double te, double e1, double *qk, int m) {
   int p0, p1, p2, p3;
   int m0, m1, m2, m3;
   int j0, j1, j2, j3;
-  int ko2, t, nk, ty, bnk;
+  int ko2, t, nk, ty;
   double r, c0, c1, dk;
   double x, d, c, a, h, a0 = 0.0, a1 = 0.0;
   double *g1, *g2, *x1, *x2;
-  double bte;
-  FORM_FACTOR *bform;
 
   ko2 = k/2;  
   ty = ko2;
@@ -553,8 +519,7 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
   g2 = GeneralizedMoments(cfac, k2, k3, ko2);
   x2 = g2 + NGOSK;
 
-  bnk = BornFormFactorTE(&bte);
-  c0 = e1 + te + bte;
+  c0 = e1 + te;
   if (m <= 0) {
     a0 = FINE_STRUCTURE_CONST2*c0;
     a1 = FINE_STRUCTURE_CONST2*e1;
@@ -606,13 +571,6 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
       gosint[t] *= a*(c + h);
     }
   }
-  if (bnk >= 0) {
-    bform = BornFormFactor();
-    for (t = 0; t < nk; t++) {
-      a = BornFormFactorK(kint[t], bform);
-      gosint[t] *= a;
-    }
-  }
   a = dk*Simpson(gosint, 0, nk-1);
   *qk += a;
     
@@ -626,14 +584,13 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
   int m0, m1, m2, m3;
   int j0, j1, j2, j3;
   int ko2, ko2p, t, nk;
-  int kkp, iq, bnk;
+  int kkp, iq;
   double xc;
   double r, c0, c1, c01, dk, a0 = 0.0, a1 = 0.0;
-  double x, d, c, a, h, bte;
+  double x, d, c, a, h;
   double *g1, *g2, *x1, *x2;
   double gosm1[MAXMSUB][NKINT];
   double gosm2[MAXMSUB][NKINT];
-  FORM_FACTOR *bform;
   
   for (iq = 0; iq < nq; iq++) {
     qk[iq] = 0.0;
@@ -667,8 +624,7 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
   g2 = GeneralizedMoments(cfac, k2, k3, ko2p);
   x2 = g2 + NGOSK;
 
-  bnk = BornFormFactorTE(&bte);
-  c0 = e1 + te + bte;
+  c0 = e1 + te;
   if (m <= 0) {
     a0 = FINE_STRUCTURE_CONST2*c0;
     a1 = FINE_STRUCTURE_CONST2*e1;
@@ -719,14 +675,6 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
       h *= x*x;
       h *= d*d;
       gost[t] *= a*(c + h);
-    }
-  }
-
-  if (bnk >= 0) {
-    bform = BornFormFactor();
-    for (t = 0; t < nk; t++) {
-      a = BornFormFactorK(kint[t], bform);
-      gost[t] *= a;
     }
   }
 
@@ -1553,7 +1501,6 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   int j1, j2, j1p, j2p, mlev1, mlev2, mlev1p, mlev2p;
   int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp, k;
   ANGULAR_ZMIX *ang, *angp;
-  double bte;
         
   lev1 = GetEBLevel(cfac, lower);
   if (lev1 == NULL) return -1;
@@ -1620,8 +1567,6 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     }
   }
 
-  BornFormFactorTE(&bte);
-  bte = te + bte;
   SetTransitionMode(cfac, M_NR);
   SetTransitionGauge(cfac, G_BABUSHKIN);
   k = TRMultipoleEB(cfac, NULL, s, &te, -1, lower, upper);
@@ -1636,7 +1581,7 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   ie = n_egrid;
   born_cross = qkc[ie]*8.0;
   if (born_cross > 0) {
-    c = egrid[ie] + bte;
+    c = egrid[ie] + te;
     born_egrid = c/te;
     if (bethe[0] > 0) bethe[1] = born_cross-bethe[0]*log(born_egrid);
     else bethe[1] = born_cross;
@@ -1651,7 +1596,7 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     qkt[ie] = 8.0*qkc[ie];
   }
 
-  RelativisticCorrection(0, qkt, NULL, bte, bethe[0]);
+  RelativisticCorrection(0, qkt, NULL, te, bethe[0]);
 
   return 1;
 }
@@ -1668,7 +1613,6 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   int j1, j2, j1p, j2p, mlev1, mlev2, mlev1p, mlev2p;
   int ilev1, ilev2, ilev1p, ilev2p, i, ip, nz, nzp;
   ANGULAR_ZMIX *ang, *angp;
-  double bte;
       
   lev1 = GetEBLevel(cfac, lower);
   if (lev1 == NULL) return -1;
@@ -1750,8 +1694,6 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     }
   }
 
-  BornFormFactorTE(&bte);
-  bte = te + bte;
   m = n_egrid1*n_thetagrid*n_phigrid;
   for (ie = 0; ie < m; ie++) {
     qkt[ie] *= 8.0;
@@ -1761,10 +1703,10 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   for (i = 0; i < m; i++) {
     born_cross = qkt[ie + i*n_egrid1];
     d = qkt[ie-1 + i*n_egrid1];
-    c = egrid[ie] + bte;
+    c = egrid[ie] + te;
     born_egrid = c/te;
     d1 = log(born_egrid);
-    c = egrid[ie-1] + bte;
+    c = egrid[ie-1] + te;
     d2 = log(c/te);
     if (born_cross > d) {
       bethe[i] = (born_cross-d)/(d1-d2);
@@ -1776,7 +1718,7 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   }
   born[m] = egrid[ie];
 
-  RelativisticCorrection(0, qkt, NULL, bte, bethe[0]);
+  RelativisticCorrection(0, qkt, NULL, te, bethe[0]);
   return 1;
 }
 
@@ -1815,7 +1757,6 @@ int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSIT
   double qkc[MAXMSUB*(MAXNE+1)];
   double *rqk, *rqkt;
   double born_egrid, born_cross, bt, ubt[MAXNUSR];
-  double bte;
 
   if (!tr) {
     return -1;
@@ -1897,9 +1838,6 @@ int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSIT
     }
   }
 
-  BornFormFactorTE(&bte);
-  bte = te + bte;
-
   if (msub) {
     for (t = 0; t < MAXMSUB; t++) {
       params[t] = 0.0;
@@ -1963,7 +1901,7 @@ int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSIT
       born_cross = bt*8.0;      
     }
     if (born_cross > 0) {
-      c = egrid[ie] + bte;
+      c = egrid[ie] + te;
       born_egrid = c/te;
       if (bethe[0] > 0) bethe[1] = born_cross - bethe[0]*log(born_egrid);
       else bethe[1] = born_cross;
@@ -1988,7 +1926,7 @@ int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSIT
       qkt[ie] = 8.0*qkc[ie];
     }
     
-    RelativisticCorrection(0, qkt, NULL, bte, bethe[0]);
+    RelativisticCorrection(0, qkt, NULL, te, bethe[0]);
     return 1;
   } else {
     rqk = qkc;
@@ -2017,7 +1955,7 @@ int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSIT
 	rqkt += n_usr;
       }
     }
-    RelativisticCorrection(p, qkt, ubt, bte, bethe[0]);
+    RelativisticCorrection(p, qkt, ubt, te, bethe[0]);
     return p;
   }
 }
@@ -2031,7 +1969,6 @@ int CollisionStrengthUTA(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRAN
   double te, *rqk;
   double rq[MAXMSUB*(MAXNE+1)], qkc[MAXMSUB*(MAXNE+1)];
   double born_egrid, born_cross, c, d, r;
-  double bte;
 
   if (!tr) {
     return -1;
@@ -2091,7 +2028,6 @@ int CollisionStrengthUTA(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRAN
   for (ie = 0; ie < n_egrid1; ie++) {
     qkc[ie] *= d;
   }
-  bte = te;
   if (type >= 0) {
     r = 0.0;
     if (Triangle(j1, j2, 2) && IsOdd(p1+p2)) {
@@ -2100,15 +2036,13 @@ int CollisionStrengthUTA(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRAN
     if (fabs(r) > 0.0) {
       r = OscillatorStrength(-1, te, r, NULL);
       bethe[0] = d*2.0*r/te;
-      BornFormFactorTE(&bte);
-      bte = te + bte;
     } else {
       bethe[0] = 0.0;
     }
     ie = n_egrid;
     born_cross = qkc[ie]*8.0;
     if (born_cross > 0) {
-      c = egrid[ie] + bte;
+      c = egrid[ie] + te;
       born_egrid = c/te;
       if (bethe[0] > 0) bethe[1] = born_cross - bethe[0]*log(born_egrid);
       else bethe[1] = born_cross;
@@ -2131,7 +2065,7 @@ int CollisionStrengthUTA(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRAN
     qkt[ie] = 8.0*qkc[ie];
   }
   
-  RelativisticCorrection(0, qkt, params, bte, bethe[0]);
+  RelativisticCorrection(0, qkt, params, te, bethe[0]);
   
   return 1;
 }

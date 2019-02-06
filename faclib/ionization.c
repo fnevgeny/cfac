@@ -214,10 +214,6 @@ int SetUsrCIEGridType(int type) {
 }
 
 int SetCIEGrid(int n, double emin, double emax, double eth) {
-  double bte;
-
-  BornFormFactorTE(&bte);
-  eth = eth + bte;
   n_egrid = SetEGrid(egrid, log_egrid, n, emin, emax, eth);
   return n_egrid;
 }
@@ -232,14 +228,10 @@ int SetUsrCIEGridDetail(int n, double *xg) {
 }
 
 int SetUsrCIEGrid(int n, double emin, double emax, double eth) {
-  double bte;
-
   if (n > MAXNUSR) {
     printf("Max # of grid points reached \n");
     return -1;
   }
-  BornFormFactorTE(&bte);
-  eth = eth + bte;
   n_usr = SetEGrid(usr_egrid, log_usr, n, emin, emax, eth);
   return n_usr;
 }
@@ -563,7 +555,7 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   int index[2], ie, ite, i, k, nqk, qlog;
   double **p, *qkc, e1, e2;
   double yint[NINT], integrand[NINT];
-  double ymin, ymax, dy, y, bte;
+  double ymin, ymax, dy, y;
   double yegrid[NINT0], qi[MAXNTE], qt[MAXNTE][NINT0];
 
   index[0] = kb;
@@ -578,14 +570,13 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   *p = malloc(sizeof(double)*nqk);
   qkc = *p;
   
-  BornFormFactorTE(&bte);
   for (ie = 0; ie < n_egrid; ie++) {
     for (ite = 0; ite < n_tegrid; ite++) {
       for (i = 0; i < NINT0; i++) {
 	qt[ite][i] = 0.0;
       }
     }
-    ymin = ((bte+tegrid[0])*YEG0)/egrid[ie];
+    ymin = (tegrid[0]*YEG0)/egrid[ie];
     ymax = 0.5;
     ymin = log(ymin);
     ymax = log(ymax);
@@ -921,11 +912,6 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 	    }
 	  }
         }
-      }
-      
-      ip = BornFormFactorTE(NULL);
-      if (ip >= 0) {
-	bethe = 0.0;
       }
       
       for (i = 0; i < n_egrid; i++) {
@@ -1349,12 +1335,11 @@ double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
 				int k0, int k1, double te, double e12) {
   double e0, e1, e2, d, r;
   double x[NINT0], y[NINT0], xi[NINT], yi[NINT];
-  double ymin, ymax, bte;
+  double ymin, ymax;
   int i, qlog;
 
-  BornFormFactorTE(&bte);
   e0 = te + e12;
-  ymin = (YEG0*(bte+te))/e12;
+  ymin = (YEG0*te)/e12;
   ymax = 0.5;
   ymin = log(ymin);
   ymax = log(ymax);

@@ -41,12 +41,6 @@
 #define LSNAME      24
 #define LNAME       56
 
-typedef struct _FORM_FACTOR_ {  
-  double te;
-  int nk;
-  double *k, *logk, *fk;
-} FORM_FACTOR;
-
 typedef struct _F_HEADER_ {
   long int tsession;
   int version;
@@ -455,9 +449,6 @@ int AppendTable(char *fn);
 int JoinTable(char *fn1, char *fn2, char *fn);
 int FindLevelByName(char *fn, int nele, char *nc, char *cnr, char *cr);
 int ISearch(int i, int n, int *ia);
-void SetBornFormFactor(double te, char *fn);
-int BornFormFactorTE(double *te);
-FORM_FACTOR *BornFormFactor(void);
 
 int StoreInit(const cfac_t *cfac,
     const char *fn, int reset, sqlite3 **db, unsigned long *sid);

@@ -50,8 +50,6 @@ static int mem_enf_table_size = 0;
 static int iground;
 static int iuta = 0;
 
-static FORM_FACTOR bform = {0.0, -1, NULL, NULL, NULL};
-
 #define _WSF0(sv, f) {					\
     n = fwrite(&(sv), sizeof(sv), 1, f);		\
     if (n != 1) return 0;				\
@@ -76,69 +74,6 @@ static FORM_FACTOR bform = {0.0, -1, NULL, NULL, NULL};
 #define WSF1(sv, s, k) _WSF1(sv, s, k, f)
 #define RSF0(sv) _RSF0(sv, f)
 #define RSF1(sv, s, k) _RSF1(sv, s, k, f)
-
-void SetBornFormFactor(double te, char *fn) {
-  int i, n;
-  double dk, df;
-  FILE *f;
-  char buf[1024];
-
-  if (bform.nk > 0) {
-    free(bform.k);
-    free(bform.logk);
-    free(bform.fk);
-    bform.k = NULL;
-    bform.logk = NULL;
-    bform.fk = NULL;
-  }
-  if (te < 0) {
-    bform.nk = -1;
-    bform.te = 0.0;
-  } else {
-    bform.te = te/HARTREE_EV;
-    if (fn == NULL) {
-      bform.nk = 0;
-    } else {
-      f = fopen(fn, "w");
-      if (f == NULL) {
-	printf("cannot open file %s\n", fn);
-	exit(1);
-      }
-      i = 0;
-      while (1) {
-	if (NULL == fgets(buf, 1024, f)) break;
-	n = sscanf(buf, "%lf %lf\n", &dk, &df);
-	if (n != 2) continue;
-	i++;
-      }
-      fseek(f, 0, SEEK_SET);
-      bform.nk = i;
-      bform.k = malloc(sizeof(double)*bform.nk);
-      bform.logk = malloc(sizeof(double)*bform.nk);
-      bform.fk = malloc(sizeof(double)*bform.nk);
-      i = 0;
-      while (1) {
-	if (NULL == fgets(buf, 1024, f)) break;
-	n = sscanf(buf, "%lf %lf\n", &dk, &df);
-	if (n != 2) continue;
-	bform.k[i] = dk;
-	bform.fk[i] = df;
-	bform.logk[i] = log(dk);
-	i++;
-      }
-      fclose(f);
-    }
-  }
-}
-
-int BornFormFactorTE(double *bte) {
-  if (bte) *bte = bform.te;
-  return bform.nk;
-}
-
-FORM_FACTOR *BornFormFactor(void) {
-  return &bform;
-}
 
 void SetVersionRead(int t, int v) {
   version_read[t-1] = v;
@@ -2366,10 +2301,8 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
   int nb;
   int k, p2;
   float a, e = 0.0;
-  double bte, be;
 
   nb = 0;
-  BornFormFactorTE(&bte);
   while (1) {
     n = ReadCEHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2427,7 +2360,6 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
 		r.bethe, r.born[0], r.born[1]);
       }
       
-      be = e + bte;
       p2 = 0;
       for (k = 0; k < r.nsub; k++) {
 	if (h.msub) {
@@ -2436,7 +2368,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
 	for (t = 0; t < h.n_usr; t++) {
 	  if (v) {
 	    a = h.usr_egrid[t];
-	    if (h.usr_egrid_type == 1) a += be;
+	    if (h.usr_egrid_type == 1) a += e;
 	    a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
 	    a = M_PI * AREA_AU20/a;
 	    if (!h.msub) a /= (mem_en_table[r.lower].j+1.0);
@@ -2472,11 +2404,9 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t;
   int nb;
   float a, e = 0.0;
-  double bte, be;
 
   nb = 0;
  
-  BornFormFactorTE(&bte);
   while (1) {
     n = ReadCEFHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2525,11 +2455,10 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
 		r.bethe, r.born[0], r.born[1]);
       }
       
-      be = e + bte;
       for (t = 0; t < h.n_egrid; t++) {
 	if (v) {
 	  a = h.egrid[t];
-	  a += be;
+	  a += e;
 	  a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
 	  a = M_PI * AREA_AU20/a;
 	  a *= r.strength[t];
@@ -2557,11 +2486,9 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
   int nb;
   int k, na, ith, iph;
   float a, e = 0.0;
-  double bte, be;
 
   nb = 0;
  
-  BornFormFactorTE(&bte);
   while (1) {
     n = ReadCEMFHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2623,11 +2550,10 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
 	    fprintf(f2, "%11.4E %11.4E %11.4E\n", 
 		    r.bethe[k], r.born[k], r.born[na]);
 	  }      
-	  be = e + bte;
 	  for (t = 0; t < h.n_egrid; t++) {
 	    if (v) {
 	      a = h.egrid[t];
-	      a += be;
+	      a += e;
 	      a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
 	      a = M_PI * AREA_AU20/a;
 	      a *= r.strength[t+h.n_egrid*k];
@@ -2875,11 +2801,9 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t;
   int nb;
   float e = 0.0, a;
-  double bte, be;
 
   nb = 0;
  
-  BornFormFactorTE(&bte);
   while (1) {
     n = ReadCIHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2935,11 +2859,10 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
 	fprintf(f2, "%11.4E ", r.params[t]);
       }
       fprintf(f2, "\n");
-      be = e + bte;
       for (t = 0; t < h.n_usr; t++) {
 	if (v) {
 	  a = h.usr_egrid[t];
-	  if (h.usr_egrid_type == 1) a += be;
+	  if (h.usr_egrid_type == 1) a += e;
 	  a *= 1.0 + 0.5*FINE_STRUCTURE_CONST2*a;
 	  a = AREA_AU20/(2.0*a*(mem_en_table[r.b].j + 1.0));
 	  a *= r.strength[t];
@@ -2969,11 +2892,9 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i, t, q;
   int nb, k;
   float e, a;
-  double bte, be;
 
   nb = 0;
  
-  BornFormFactorTE(&bte);
   while (1) {
     n = ReadCIMHeader(f1, &h, swp);
     if (n == 0) break;
@@ -3014,13 +2935,12 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
 	fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.nsub);
       }
 
-      be = e + bte;
       if (v) {
 	q = 0;
 	for (k = 0; k < r.nsub; k ++) {
 	  for (t = 0; t < h.n_usr; t++) {
 	    a = h.usr_egrid[t];
-	    if (h.usr_egrid_type == 1) a += be;
+	    if (h.usr_egrid_type == 1) a += e;
 	    a *= 1.0 + 0.5*FINE_STRUCTURE_CONST2*a;
 	    a = AREA_AU20/(2.0*a);
 	    a *= r.strength[q];

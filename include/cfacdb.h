@@ -153,7 +153,7 @@ typedef struct {
     
     unsigned int type;  /*!< Process type.                      */
     
-    double de;          /*!< Transition energy.                 */
+    double de;          /*!< Transition (threshold) energy.     */
     unsigned int kl;    /*!< Dominant L of the ionized shell.   */
     double ap0;         /*!< A fit/extrapolation parameter.     */
     double ap1;         /*!< A fit/extrapolation parameter.     */
@@ -161,7 +161,7 @@ typedef struct {
     double ap3;         /*!< A fit/extrapolation parameter.     */
     
     unsigned int nd;    /*!< Number of collision-strength data. */
-    double *e;          /*!< Energy mesh.                       */
+    double *e;          /*!< Energy mesh (in unis of de).       */
     double *d;          /*!< Collision-strength data.           */
 } cfacdb_ctrans_data_t;
 

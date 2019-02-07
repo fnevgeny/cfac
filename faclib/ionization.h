@@ -31,7 +31,6 @@ void SetCILMax(int m);
 void SetCILMaxEject(int m);
 void SetCILCB(int m);
 void SetCITol(double t);
-int SetCIPWOptions(int qr, int max, int max_eject, int kl_cb, double tol);
 int SetCIPWGrid(int ns, int *n, int *step);
 int SetCIFormat(int m);
 int SetCIEGrid(int n, double emin, double emax, double eth);

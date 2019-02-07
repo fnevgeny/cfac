@@ -1709,37 +1709,6 @@ static int PSetIEGrid(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetCIPWOptions(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
-  int qr, max, max_1, kl_cb;
-  double tol;
-
-  qr = IONLQR;
-  max = IONLMAX;
-  max_1 = IONLEJEC;
-  kl_cb = IONLCB;
-  tol = IONTOL;
-  
-  if (argc < 1 || argc > 5) return -1;
-  tol = atof(argv[0]);
-  if (argc > 1) {
-    max = atoi(argv[1]);
-    if (argc > 2) {
-      max_1 = atoi(argv[2]);
-      if (argc > 3) {
-	qr = atoi(argv[3]);
-	if (argc > 4) {
-	  kl_cb = atoi(argv[4]);
-	}
-      }
-    }
-  }
-
-  SetCIPWOptions(qr, max, max_1, kl_cb, tol);
-
-  return 0;
-}
-
 static int PSetCIPWGrid(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {  int ns, i;
   int n;
@@ -2721,19 +2690,6 @@ static int PSetCILCB(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetCITol(int argc, char *argv[], int argt[], 
-		     ARRAY *variables) {
-  double m;
-  
-  if (argc != 1 || argt[0] != NUMBER) {
-    return -1;
-  }
-
-  m = atof(argv[0]);
-  SetCITol(m);
-  return 0;
-}
-
 static int PSetTransitionMode(int argc, char *argv[], int argt[], 
 			      ARRAY *variables) {
   int m;
@@ -3033,9 +2989,7 @@ static METHOD methods[] = {
   {"SetCILQR", PSetCILQR},
   {"SetCILevel", PSetCILevel},
   {"SetCIPWGrid", PSetCIPWGrid},
-  {"SetCIPWOptions", PSetCIPWOptions},
   {"SetCIQkMode", PSetCIQkMode},
-  {"SetCITol", PSetCITol},
   {"SetFields", PSetFields},    
   {"SetHydrogenicNL", PSetHydrogenicNL},
   {"SetIEGrid", PSetIEGrid},

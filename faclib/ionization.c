@@ -113,14 +113,13 @@ static struct {
   int max_kl;
   int max_kl_eject;
   int kl_cb;
-  double tolerance;
   int nkl0;
   int nkl;
   int ns;
   double kl[MAXNKL+1];
   double log_kl[MAXNKL];
 } pw_scratch = {IONMAXK, IONLQR, IONLMAX, IONLEJEC, 
-		IONLCB, IONTOL, 0, 0, 0, {0.0}, {0.0}};
+		IONLCB, 0, 0, 0, {0.0}, {0.0}};
 
 static MULTI *qk_array;
 
@@ -172,11 +171,7 @@ void SetCILCB(int m) {
   pw_scratch.kl_cb = m;
 }
 
-void SetCITol(double t) {
-  pw_scratch.tolerance = t;
-}
-
-int SetCIPWOptions(int qr, int max, int max_eject, int kl_cb, double tol) {
+static int SetCIPWOptions(int qr, int max, int max_eject, int kl_cb) {
   pw_scratch.qr = qr;
   if (max > MAXKL) {
     printf("The maximum partial wave reached in Ionization: %d\n", MAXKL);
@@ -185,7 +180,6 @@ int SetCIPWOptions(int qr, int max, int max_eject, int kl_cb, double tol) {
   pw_scratch.max_kl = max;
   pw_scratch.max_kl_eject = max_eject;
   pw_scratch.kl_cb = kl_cb;
-  pw_scratch.tolerance = tol;
   pw_scratch.nkl0 = 1;
   pw_scratch.kl[0] = 0;
   pw_scratch.log_kl[0] = -100.0;
@@ -1605,7 +1599,7 @@ int InitIonization(cfac_t *cfac) {
   tegrid[0] = -1.0;
   usr_egrid[0] = -1.0;
   SetCIQkMode(QK_DEFAULT, 1E-3);
-  SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB, IONTOL);
+  SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB);
 
   return 0;
 }
@@ -1625,7 +1619,7 @@ int ReinitIonization(int m) {
   usr_egrid[0] = -1.0;
   /*
   SetCIQkMode(QK_DEFAULT, 1E-3);
-  SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB, IONTOL);
+  SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB);
   */
   return 0;
 }  

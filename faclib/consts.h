@@ -241,7 +241,6 @@
 #define IONLMAX            36
 #define IONLEJEC           4
 #define IONLCB             36
-#define IONTOL             5E-2
 
 /* recombination */
 #define RECNSPEC           8

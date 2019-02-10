@@ -1205,6 +1205,9 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
   double y[MAXNKL], r, rp, d, ph0, ph0p, sd, se, c, d1, d2;
   double w6j1, w6j2, w3j1, w3j2, w3j3, w3j4, w3j5, w3j6, w3j7, w3j8;
 
+  cfac_w3j_cache_t w3j_cache_1;
+  cfac_w3j_cache_init(&w3j_cache_1, 1, 30);
+
   orb0 = GetOrbital(cfac, k0);
   jk0 = GetJFromKappa(orb0->kappa);
   orb1 = GetOrbital(cfac, k1);
@@ -1218,7 +1221,13 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
       kappa1 = GetKappaFromJL(j1, kl1);
       ks[3] = OrbitalIndex(cfac, 0, kappa1, e1);
       for (k = 0; k <= pw_scratch.max_k; k += 2) {
-	for (kp = 0; kp <= pw_scratch.max_k; kp += 2) {
+        cfac_w3j_cache_t w3j_cache_k;
+        cfac_w3j_cache_init(&w3j_cache_k, k, 30);
+
+        for (kp = 0; kp <= pw_scratch.max_k; kp += 2) {
+          cfac_w3j_cache_t w3j_cache_kp;
+          cfac_w3j_cache_init(&w3j_cache_kp, kp, 30);
+
 	  kmax = Min(k, kp);
 	  j2max = jk0 + k;
 	  j2min = abs(jk0 - k);
@@ -1227,6 +1236,9 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
 	  j2max = Min(j2max, j2pmax);
 	  j2min = Max(j2min, j2pmin);
 	  for (j2 = j2min; j2 <= j2max; j2 += 2) {
+            cfac_w3j_cache_t w3j_cache_j2;
+            cfac_w3j_cache_init(&w3j_cache_j2, j2, 30);
+
 	    for (kl2 = j2-1; kl2 <= j2+1; kl2 += 2) {
 	      if (kl2/2 > pw_scratch.max_kl_eject) continue;
 	      kappa2 = GetKappaFromJL(j2, kl2);
@@ -1269,21 +1281,21 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
 			  w6j2 = W6j(J1, j2, Jp, kp, J0, jk1);
 			  d2 = (J+1.0)*(Jp+1.0)*w6j1*w6j2;
 			  for (m0 = -1; m0 <= 1; m0 += 2) {
-			    w3j1 = W3j(j0, 1, kl0, -m0, m0, 0);
-			    w3j2 = W3j(j0p, 1, kl0p, -m0, m0, 0);	
+			    w3j1 = cfac_w3j_cacheable(&w3j_cache_1, j0, 1, kl0, -m0, m0, 0);
+			    w3j2 = cfac_w3j_cacheable(&w3j_cache_1, j0p, 1, kl0p, -m0, m0, 0);
 			    for (q = -kmax; q <= kmax; q += 2) {
 			      m1 = m0 + q;
-			      if (m1 > j1) continue;
+			      if (abs(m1) > j1) continue;
 			      M = M0 - q;
-			      if (M > J || M > Jp) continue;
+			      if (abs(M) > J || abs(M) > Jp) continue;
 			      m2 = M-M1;
-			      if (m2 > j2) continue;
-			      w3j3 = W3j(j0, k, j1, -m0, -q, m1);
-			      w3j5 = W3j(J0, k, J, -M0, q, M);
-			      w3j7 = W3j(J1, j2, J, M1, m2, -M);
-			      w3j4 = W3j(j0p, kp, j1, -m0, -q, m1);
-			      w3j6 = W3j(J0, kp, Jp, -M0, q, M);
-			      w3j8 = W3j(J1, j2, Jp, M1, m2, -M);
+			      if (abs(m2) > j2) continue;
+			      w3j3 = cfac_w3j_cacheable(&w3j_cache_k, j0, k, j1, -m0, -q, m1);
+			      w3j5 = cfac_w3j_cacheable(&w3j_cache_k, J0, k, J, -M0, q, M);
+			      w3j7 = cfac_w3j_cacheable(&w3j_cache_j2, J1, j2, J, M1, m2, -M);
+			      w3j4 = cfac_w3j_cacheable(&w3j_cache_kp, j0p, kp, j1, -m0, -q, m1);
+			      w3j6 = cfac_w3j_cacheable(&w3j_cache_kp, J0, kp, Jp, -M0, q, M);
+			      w3j8 = cfac_w3j_cacheable(&w3j_cache_j2, J1, j2, Jp, M1, m2, -M);
 			      d = w3j1*w3j2*w3j3*w3j4*w3j5*w3j6*w3j7*w3j8;
 			      d *= d1*d2;
 			      if (IsOdd(abs(jk0-jk1)/2)) d = -d;
@@ -1298,11 +1310,16 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
 		}
 	      }
 	    }
-	  }
+	    cfac_w3j_cache_free(&w3j_cache_j2);
+          }
+          cfac_w3j_cache_free(&w3j_cache_kp);
 	}
+        cfac_w3j_cache_free(&w3j_cache_k);
       }
     }
   }
+
+  cfac_w3j_cache_free(&w3j_cache_1);
 
   r = y[0];
   for (t = 1; t < pw_scratch.nkl; t++) {

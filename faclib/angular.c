@@ -303,21 +303,24 @@ int cfac_w3j_cache_init(cfac_w3j_cache_t *w3j_cache,
     unsigned int j2, unsigned int max_rank2)
 {
     w3j_cache->j2 = j2;
-    w3j_cache->size = max_rank2*max_rank2/4 + max_rank2;
-    w3j_cache->cache = calloc(w3j_cache->size*w3j_cache->size, sizeof(double));
-    if (w3j_cache->cache) {
+    w3j_cache->size = max_rank2*max_rank2/4 + max_rank2/2;
+    w3j_cache->cache_e = calloc(w3j_cache->size*w3j_cache->size, sizeof(double));
+    w3j_cache->cache_o = calloc(w3j_cache->size*w3j_cache->size, sizeof(double));
+    if (w3j_cache->cache_e && w3j_cache->cache_o) {
         return 0;
     } else {
-        w3j_cache->size = 0;
+        cfac_w3j_cache_free(w3j_cache);
         return 1;
     }
 }
 
 void cfac_w3j_cache_free(cfac_w3j_cache_t *w3j_cache)
 {
-    if (w3j_cache->cache) {
-        free(w3j_cache->cache);
-        w3j_cache->cache = NULL;
+    if (w3j_cache->size) {
+        free(w3j_cache->cache_e);
+        free(w3j_cache->cache_o);
+        w3j_cache->cache_e = NULL;
+        w3j_cache->cache_o = NULL;
     }
     w3j_cache->size = 0;
 }
@@ -327,30 +330,47 @@ void cfac_w3j_cache_free(cfac_w3j_cache_t *w3j_cache)
 double cfac_w3j_cacheable(cfac_w3j_cache_t *cache,
     int j1, int j2, int j3, int m1, int m2, int m3)
 {
-    int i1, i2;
+    int i1, i3;
+    double *c;
 
-    /* check for the triangle condition from the onset for performance */
+    /* check for trivial zeros from the onset for performance */
+    if (m1 + m2 + m3 != 0) {
+        return 0;
+    }
+    if (abs(m1) > j1 || abs(m2) > j2 || abs(m3) > j3) {
+        return 0;
+    }
+    /* the triangle condition */
     if ((j2 < abs(j1 - j3)) || (j2 > j1 + j3) || IsOdd(j1 + j2 + j3)) {
         return 0;
+    }
+
+    if (IsEven(j1)) {
+        c = cache->cache_e;
+    } else {
+        c = cache->cache_o;
     }
 
     /* indices of the pseudo-2D cache matrix */
     if (IsEven(j1)) {
         i1 = j1*j1/4 + (j1 + m1)/2;
-        i2 = j3*j3/4 + (j3 + m3)/2;
     } else {
         i1 = (j1*j1 - 1)/4 + (j1 + m1)/2;
-        i2 = (j3*j3 - 1)/4 + (j3 + m3)/2;
+    }
+    if (IsEven(j3)) {
+        i3 = j3*j3/4 + (j3 + m3)/2;
+    } else {
+        i3 = (j3*j3 - 1)/4 + (j3 + m3)/2;
     }
 
     if (cache && cache->j2 == j2 &&
         i1 < cache->size && i1 >= 0 &&
-        i2 < cache->size && i2 >= 0) {
-        int i = cache->size*i1 + i2;
-        double v = cache->cache[i];
+        i3 < cache->size && i3 >= 0) {
+        int i = cache->size*i1 + i3;
+        double v = c[i];
         if (!v) {
             v = W3j(j1, j2, j3, m1, m2, m3);
-            cache->cache[i] = v;
+            c[i] = v;
         }
         return v;
     } else {

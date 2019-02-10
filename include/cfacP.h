@@ -178,7 +178,8 @@ typedef struct {
 typedef struct {
     unsigned int j2;
     unsigned int size;
-    double *cache;
+    double *cache_e;
+    double *cache_o;
 } cfac_w3j_cache_t;
 
 

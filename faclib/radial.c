@@ -2135,15 +2135,21 @@ int SlaterTotal(cfac_t *cfac,
     *sd = d;
   }
   
-  if (!se) goto EXIT;
+  if (!se) {
+    return 0;
+  }
 
   if (abs(mode) == 2) {
     *se = 0.0;
-    goto EXIT;
+    return 0;
   }
   *se = 0.0;
-  if (k0 == k1 && (orb0->n > 0 || orb1->n > 0)) goto EXIT;
-  if (k2 == k3 && (orb2->n > 0 || orb3->n > 0)) goto EXIT;
+  if (k0 == k1 && (orb0->n > 0 || orb1->n > 0)) {
+    return 0;
+  }
+  if (k2 == k3 && (orb2->n > 0 || orb3->n > 0)) {
+    return 0;
+  }
   tmin = abs(js[0] - js[3]);
   tt = abs(js[1] - js[2]);
   tmin = Max(tt, tmin);
@@ -2176,7 +2182,6 @@ int SlaterTotal(cfac_t *cfac,
     }
   }
 
- EXIT:
   return 0;
 }
 

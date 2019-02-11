@@ -278,8 +278,7 @@ int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, 
   r = GetRMax(cfac);
   z = GetResidualZ(cfac);
   t = r*sqrt(e1+2.0*z/r);
-  kl_max0 = pw_scratch.max_kl;
-  kl_max0 = Min(kl_max0, t);
+  kl_max0 = Min(pw_scratch.max_kl, t);
 
   orb = GetOrbital(cfac, kb);
   kappab = orb->kappa;
@@ -290,10 +289,8 @@ int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, 
   jb1 = jb + 1.0;
 
   t = r*sqrt(e2+2.0*z/r);
-  kl_max2 = pw_scratch.max_kl_eject + klb;
-  kl_max2 = Min(kl_max2, t);
-  kl_min2 = klb - pw_scratch.max_kl_eject;
-  if (kl_min2 < 0) kl_min2 = 0;
+  kl_max2 = Min(pw_scratch.max_kl_eject + klb, t);
+  kl_min2 = Max(klb - pw_scratch.max_kl_eject, 0);
 
   for (j = jmin; j <= jmax; j += 2) {
     for (klp = j - 1; klp <= j + 1; klp += 2) {

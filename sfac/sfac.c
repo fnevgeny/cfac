@@ -96,7 +96,7 @@ static int IntFromList(char *argv, int tp, ARRAY *variables, int **k) {
 }
 
 static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
-			   ARRAY *variables) {
+                           ARRAY *variables) {
   char *s;
   int i, k, ng;
   char *v[MAXNARGS];
@@ -107,31 +107,31 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
   if (ng > 0) {
     if (argt[0] == LIST || argt[0] == TUPLE) {
       if (ng > 1) {
-	printf("there should be only one list or tuple\n");
-	return -1;
+        printf("there should be only one list or tuple\n");
+        return -1;
       }
       ng = DecodeArgs(argv[0], v, t, variables);
       nv = ng;
     } else {
       for (i = 0; i < ng; i++) {
-	v[i] = argv[i];
-	t[i] = argt[i];
+        v[i] = argv[i];
+        t[i] = argt[i];
       }
     }
     (*kg) = malloc(sizeof(int)*ng);
     for (i = 0; i < ng; i++) {
       if (t[i] != STRING) {
-	printf("argument must be a group name\n");
-	free((*kg));
-	return -1;
+        printf("argument must be a group name\n");
+        free((*kg));
+        return -1;
       }
       s = v[i];
       k = GroupExists(cfac, s);
       
       if (k < 0) {
-	free((*kg));
-	printf("group does not exist\n");
-	return -1;
+        free((*kg));
+        printf("group does not exist\n");
+        return -1;
       }
 
       (*kg)[i] = k;
@@ -190,28 +190,28 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
     if (at[0] == STRING) {
       ng = DecodeGroupArgs(&kg, n, v, at, variables);
       if (ng <= 0) {
-	rv = -1;
-	goto END;
+        rv = -1;
+        goto END;
       }
       nlevels = cfac_get_num_levels(cfac);
       (*t) = malloc(sizeof(int)*nlevels);
       k = 0;
       for (j = 0; j < nlevels; j++) {
-	lev = GetLevel(cfac, j);
-	
+        lev = GetLevel(cfac, j);
+        
         if (lev->uta) {
           ig = lev->uta_cfg_g;
         } else {
           im = lev->pb;
-	  sym = GetSymmetry(cfac, lev->pj);
-	  s = GetSymmetryState(sym, im);
-	  ig = s->kgroup;
+          sym = GetSymmetry(cfac, lev->pj);
+          s = GetSymmetryState(sym, im);
+          ig = s->kgroup;
         }
-	
+        
         if (InGroups(ig, ng, kg)) {
-	  (*t)[k] = j;
-	  k++;
-	}
+          (*t)[k] = j;
+          k++;
+        }
       }
       free(kg);
       (*t) = realloc(*t, k*sizeof(int));
@@ -219,27 +219,27 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       goto END;
     } else if (at[0] == LIST) {
       if (n != 2) {
-	printf("recombined states specification unrecoganized\n");
-	rv = -1;
-	goto END;
+        printf("recombined states specification unrecoganized\n");
+        rv = -1;
+        goto END;
       }
       ng = DecodeGroupArgs(&kg, 1, v, at, variables);
       if (ng <= 0) {
-	rv = -1;
-	goto END;
+        rv = -1;
+        goto END;
       }
       if (at[1] == LIST) {
-	m0 = 0;
-	n = DecodeArgs(v[1], v1, at1, variables);
-	nv1 = n;
+        m0 = 0;
+        n = DecodeArgs(v[1], v1, at1, variables);
+        nv1 = n;
       } else if (at[1] == NUMBER) {
-	m0 = 1;
-	v1[1] = v[1];
-	at1[1] = at[1];
+        m0 = 1;
+        v1[1] = v[1];
+        at1[1] = at[1];
       } else {
-	printf("Level specification unrecoganized\n");
-	rv = -1;
-	goto END;
+        printf("Level specification unrecoganized\n");
+        rv = -1;
+        goto END;
       }
     
       nrg = ng;
@@ -247,37 +247,37 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       nlevels = cfac_get_num_levels(cfac);
       (*t) = malloc(sizeof(int)*nlevels);
       if (!(*t)) {
-	rv = -1;
-	goto END;
+        rv = -1;
+        goto END;
       }
       k = 0;
       for (m = m0; m < n; m++) {
-	if (at1[m] != NUMBER) {
-	  rv = -1;
-	  goto END;
-	}
-	nrec = atoi(v1[m]);
-	for (i = 0; i < nrg; i++) {
-	  ConstructRecGroupName(rgn, GetGroup(cfac, kg[i])->name, nrec);
-	  krg[i] = GroupExists(cfac, rgn);
-	}
-	for (j = 0; j < nlevels; j++) {
-	  lev = GetLevel(cfac, j);
-	  im = lev->pb;
-	  sym = GetSymmetry(cfac, lev->pj);
-	  s = GetSymmetryState(sym, im);
-	  ig = s->kgroup;
-	  if (ig < 0) {
-	    if (!ValidBasis(cfac, s, ng, kg, nrec)) continue;
-	    (*t)[k] = j;
-	    k++;
-	  } else {
-	    if (InGroups(ig, nrg, krg)) {
-	      (*t)[k] = j;
-	      k++;
-	    }
-	  }
-	}
+        if (at1[m] != NUMBER) {
+          rv = -1;
+          goto END;
+        }
+        nrec = atoi(v1[m]);
+        for (i = 0; i < nrg; i++) {
+          ConstructRecGroupName(rgn, GetGroup(cfac, kg[i])->name, nrec);
+          krg[i] = GroupExists(cfac, rgn);
+        }
+        for (j = 0; j < nlevels; j++) {
+          lev = GetLevel(cfac, j);
+          im = lev->pb;
+          sym = GetSymmetry(cfac, lev->pj);
+          s = GetSymmetryState(sym, im);
+          ig = s->kgroup;
+          if (ig < 0) {
+            if (!ValidBasis(cfac, s, ng, kg, nrec)) continue;
+            (*t)[k] = j;
+            k++;
+          } else {
+            if (InGroups(ig, nrg, krg)) {
+              (*t)[k] = j;
+              k++;
+            }
+          }
+        }
       }
       
       free(krg);
@@ -288,8 +288,8 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
     } else {
       (*t) = malloc(sizeof(int)*n);
       for (i = 0; i < n; i++) {
-	if (at[i] != NUMBER) return -1;
-	(*t)[i] = atoi(v[i]);
+        if (at[i] != NUMBER) return -1;
+        (*t)[i] = atoi(v[i]);
       }
       rv = n;
       goto END;
@@ -416,15 +416,15 @@ static int PClosed(int argc, char *argv[], int argt[], ARRAY *variables) {
       while (*p == ' ') p++;
       ncfg = GetConfigFromStringNR(&cfg, p);
       for (j = ncfg-1; j >= 0; j--) {
-	if (cfg[j].n_shells != 1) return -1;
-	n = (cfg[j].shells)[0].n;
-	kl = (cfg[j].shells)[0].kappa;
-	nq = 2*(kl + 1);
-	kl = kl/2;
-	SpecSymbol(s, kl);
-	sprintf(st, "%d%s%d ", n, s, nq);
-	strcat(_closed_shells, st);
-	free(cfg[j].shells);
+        if (cfg[j].n_shells != 1) return -1;
+        n = (cfg[j].shells)[0].n;
+        kl = (cfg[j].shells)[0].kappa;
+        nq = 2*(kl + 1);
+        kl = kl/2;
+        SpecSymbol(s, kl);
+        sprintf(st, "%d%s%d ", n, s, nq);
+        strcat(_closed_shells, st);
+        free(cfg[j].shells);
       }
       if (ncfg > 0) free(cfg);
       while (*p) p++;
@@ -447,16 +447,16 @@ static int PGetConfigNR(int argc, char *argv[], int argt[], ARRAY *variables) {
     for (j = 0; j < ncfg; j++) {
       scfg[0] = '\0';
       for (t = cfg[j].n_shells-1; t >= 0; t--) {
-	sprintf(s, "%d", (cfg[j].shells)[t].n);
-	strcat(scfg, s);
-	SpecSymbol(s, (cfg[j].shells)[t].kappa/2);
-	strcat(scfg, s);
-	if (t == 0) {
-	  sprintf(s, "%d", (cfg[j].shells)[t].nq);
-	} else {
-	  sprintf(s, "%d ", (cfg[j].shells)[t].nq);
-	}
-	strcat(scfg, s);
+        sprintf(s, "%d", (cfg[j].shells)[t].n);
+        strcat(scfg, s);
+        SpecSymbol(s, (cfg[j].shells)[t].kappa/2);
+        strcat(scfg, s);
+        if (t == 0) {
+          sprintf(s, "%d", (cfg[j].shells)[t].nq);
+        } else {
+          sprintf(s, "%d ", (cfg[j].shells)[t].nq);
+        }
+        strcat(scfg, s);
       }
       printf("%s\n", scfg);
     }
@@ -477,8 +477,8 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   for (i = 0; i < argc; i++) {
     if (argt[i] == KEYWORD) {
       if (strcmp(argv[i], "group") != 0) {
-	printf("The keyword must be group=gname\n");
-	return -1;
+        printf("The keyword must be group=gname\n");
+        return -1;
       }
       if (i > argc-2) return -1;
       if (argt[i+1] != STRING) return -1;
@@ -555,7 +555,7 @@ static int PListConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
 }
 
 static int PConfigEnergy(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
+                         ARRAY *variables) {
   int m, mr, i;
   int ng, *kg;
 
@@ -574,13 +574,13 @@ static int PConfigEnergy(int argc, char *argv[], int argt[],
       }
     } else {
       for (i = 1; i < argc; i++) {
-	ng = DecodeGroupArgs(&kg, 1, argv+i, argt+i, variables);
-	if (ng < 0) return -1;
-	if (ConfigEnergy(cfac, m, mr, ng, kg) < 0) {
-	  if (ng > 0) free(kg);
+        ng = DecodeGroupArgs(&kg, 1, argv+i, argt+i, variables);
+        if (ng < 0) return -1;
+        if (ConfigEnergy(cfac, m, mr, ng, kg) < 0) {
+          if (ng > 0) free(kg);
           return -1;
         }
-	if (ng > 0) free(kg);
+        if (ng > 0) free(kg);
       }
     }
   }
@@ -655,7 +655,7 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
 }
 
 static int PAITableMSub(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int nlow, *low, nup, *up;
 
   if (argc != 3) return -1;
@@ -726,7 +726,7 @@ static int PCETable(int argc, char *argv[], int argt[], ARRAY *variables) {
 }
 
 static int PCETableMSub(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int nlow, nup, *low, *up;
 
   nlow = 0;
@@ -798,7 +798,7 @@ static int PCITable(int argc, char *argv[], int argt[], ARRAY *variables) {
 }
 
 static int PCITableMSub(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int nlow, *low, nup, *up;
   
   if (argc != 3) return -1;
@@ -816,7 +816,7 @@ static int PCITableMSub(int argc, char *argv[], int argt[],
 }
 
 static int PCorrectEnergy(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
+                          ARRAY *variables) {
   int n, k, kref;
   double e;
   int i, ie, ii, nmin;
@@ -846,10 +846,10 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
       }
       e /= HARTREE_EV;
       if (k < 0) {
-	k = -k;
-	kref = k;
+        k = -k;
+        kref = k;
       } else if (i == 0) {
-	kref = k;
+        kref = k;
       }
       AddECorrection(cfac, kref, k, e, nmin);
       i++;
@@ -872,10 +872,10 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
       e = atof(ev[i]);
       e /= HARTREE_EV;
       if (k < 0) {
-	k = -k;
-	kref = k;
+        k = -k;
+        kref = k;
       } else if (i == 0) {
-	kref = k;
+        kref = k;
       }
       AddECorrection(cfac, kref, k, e, nmin);
     }
@@ -895,7 +895,7 @@ static int PExit(int argc, char *argv[], int argt[], ARRAY *variables) {
 }
 
 static int PGetPotential(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
+                         ARRAY *variables) {
   if (argc != 1 || argt[0] != STRING) return -1;
   GetPotential(cfac, argv[0]);
   return 0;
@@ -908,7 +908,7 @@ static int PInfo(int argc, char *argv[], int argt[], ARRAY *variables) {
 }
 
 static int PMemENTable(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
+                       ARRAY *variables) {
 
   if (argc != 1) return -1;
   if (argt[0] != STRING) return -1;
@@ -919,7 +919,7 @@ static int PMemENTable(int argc, char *argv[], int argt[],
 }
 
 static int POptimizeRadial(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
+                           ARRAY *variables) {
   int ng, i, k;
   int *kg;
   double z;
@@ -952,24 +952,24 @@ static int POptimizeRadial(int argc, char *argv[], int argt[],
       k = DecodeArgs(argv[1], vw, iw, variables);
       ni = k;
       if (k < 0 || k > ng) {
-	printf("weights must be a sequence\n");
-	return -1;
+        printf("weights must be a sequence\n");
+        return -1;
       } 
       weight = malloc(sizeof(double)*ng);
       z = 0.0;
       for (i = 0; i < k; i++) {
-	if (iw[i] != NUMBER) {
-	  return -1;
-	} 
-	weight[i] = atof(vw[i]);
-	z += weight[i];
+        if (iw[i] != NUMBER) {
+          return -1;
+        } 
+        weight[i] = atof(vw[i]);
+        z += weight[i];
       }
       for (i = k; i < ng; i++) {
-	if (z >= 1.0) {
-	  weight[i] = weight[k-1];
-	} else {
-	  weight[i] = (1.0-z)/(ng-k);
-	}
+        if (z >= 1.0) {
+          weight[i] = weight[k-1];
+        } else {
+          weight[i] = (1.0-z)/(ng-k);
+        }
       }
     }
   }
@@ -989,7 +989,7 @@ static int POptimizeRadial(int argc, char *argv[], int argt[],
 }
 
 static int PRefineRadial(int argc, char *argv[], int argt[], 
-		  ARRAY *variables) {
+                  ARRAY *variables) {
   int maxfun, msglvl;
   
   maxfun = 0;
@@ -1005,7 +1005,7 @@ static int PRefineRadial(int argc, char *argv[], int argt[],
 }
 
 static int PPause(int argc, char *argv[], int argt[], 
-		  ARRAY *variables) {
+                  ARRAY *variables) {
   char s[10];
 
   while (1) {
@@ -1017,7 +1017,7 @@ static int PPause(int argc, char *argv[], int argt[],
 }
 
 static int PPrintTable(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   int v;
 
   if (argc != 2 && argc != 3) return -1;
@@ -1038,7 +1038,7 @@ static sqlite3 *db = NULL;
 static char *cmdline = NULL;
 
 static int PStoreInit(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   int reset = 0;
   if (argc != 1 && argc != 2) return -1;
 
@@ -1059,7 +1059,7 @@ static int PStoreInit(int argc, char *argv[], int argt[],
 }
 
 static int PStoreTable(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   if (argc != 1) return -1;
   if (argt[0] != STRING) return -1;
   
@@ -1072,7 +1072,7 @@ static int PStoreTable(int argc, char *argv[], int argt[],
 }
 
 static int PStoreClose(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   if (argc != 0) return -1;
   
   if (!sid) {
@@ -1087,7 +1087,7 @@ static int PStoreClose(int argc, char *argv[], int argt[],
 }
 
 static int PRecStates(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int ng, *kg, n;
 
   if (argc != 3 || argt[0] != STRING || 
@@ -1109,7 +1109,7 @@ static int PRecStates(int argc, char *argv[], int argt[],
 }
 
 static int PRRMultipole(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int nlow, *low, nup, *up, m;
   
   m = -1;
@@ -1133,7 +1133,7 @@ static int PRRMultipole(int argc, char *argv[], int argt[],
 }
   
 static int PRRTable(int argc, char *argv[], int argt[], 
-		    ARRAY *variables) {
+                    ARRAY *variables) {
   int nlow, *low, nup, *up, m;
   
   m = -1;
@@ -1197,7 +1197,7 @@ static int PRRTable(int argc, char *argv[], int argt[],
 }
 
 static int PSetAICut(int argc, char *argv[], int argt[], 
-		     ARRAY *variables) {
+                     ARRAY *variables) {
   double c;
 
   if (argc != 1 || argt[0] != NUMBER) return -1;
@@ -1209,7 +1209,7 @@ static int PSetAICut(int argc, char *argv[], int argt[],
 }
 
 static int PSetAngZOptions(int argc, char *argv[], int argt[],
-			   ARRAY *variables) {
+                           ARRAY *variables) {
   int n;
   double c, mc;
 
@@ -1228,7 +1228,7 @@ static int PSetAngZOptions(int argc, char *argv[], int argt[],
 }
 
 static int PSetCILevel(int argc, char *argv[], int argt[],
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   int i;
   
   if (argc != 1 || argt[0] != NUMBER) return -1;
@@ -1239,7 +1239,7 @@ static int PSetCILevel(int argc, char *argv[], int argt[],
 }
 
 static int PSetAngZCut(int argc, char *argv[], int argt[],
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   double c;
   
   if (argc != 1 || argt[0] != NUMBER) return -1;
@@ -1250,7 +1250,7 @@ static int PSetAngZCut(int argc, char *argv[], int argt[],
 }
 
 static int PSetMixCut(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   double c, c2;
   
   if (argc < 1 || argc > 2) return -1;
@@ -1267,7 +1267,7 @@ static int PSetMixCut(int argc, char *argv[], int argt[],
 }
 
 static int PSetAtom(int argc, char *argv[], int argt[], 
-		    ARRAY *variables) {
+                    ARRAY *variables) {
   double mass, rn;
   int z;
 
@@ -1281,7 +1281,7 @@ static int PSetAtom(int argc, char *argv[], int argt[],
     if (argc > 2) {
       mass = atof(argv[2]);
       if (argc > 3) {
-	rn = atof(argv[3]);
+        rn = atof(argv[3]);
       }
     }
   }
@@ -1292,7 +1292,7 @@ static int PSetAtom(int argc, char *argv[], int argt[],
 }
 
 static int PSetAvgConfig(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
+                         ARRAY *variables) {
   int ns, i, j;
   int *n, *kappa;
   double *nq;
@@ -1331,7 +1331,7 @@ static int PSetAvgConfig(int argc, char *argv[], int argt[],
 }
 
 static int PSetCEGrid(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int n, ng, i, err;
   double xg[MAXNE];
   double emin, emax, eth;
@@ -1348,9 +1348,9 @@ static int PSetCEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	xg[i] = atof(vg[i]);
-	free(vg[i]);
-	xg[i] /= HARTREE_EV;
+        xg[i] = atof(vg[i]);
+        free(vg[i]);
+        xg[i] /= HARTREE_EV;
       }
       err = SetCEEGridDetail(ng, xg);
     } else {
@@ -1374,7 +1374,7 @@ static int PSetCEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetAngleGrid(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
+                         ARRAY *variables) {
   int n, ng, i, err, m;
   double xg[MAXNTHETA+MAXNPHI];
   double emin, emax;
@@ -1388,19 +1388,19 @@ static int PSetAngleGrid(int argc, char *argv[], int argt[],
     if (argt[1] == NUMBER) {
       ng = atoi(argv[1]);
       if (m == 0) {
-	emin = 0.0;
-	emax = M_PI;
+        emin = 0.0;
+        emax = M_PI;
       } else {
-	emin = 0.0;
-	emax = TWO_PI;
+        emin = 0.0;
+        emax = TWO_PI;
       }
       err = SetAngleGrid(m, ng, emin, emax);
     } else if (argt[1] == LIST || argt[1] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	xg[i] = atof(vg[i]);
-	free(vg[i]);
-	xg[i] /= HARTREE_EV;
+        xg[i] = atof(vg[i]);
+        free(vg[i]);
+        xg[i] /= HARTREE_EV;
       }
       err = SetAngleGridDetail(m, ng, xg);
     } else {
@@ -1423,7 +1423,7 @@ static int PSetAngleGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetCEGridLimits(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
+                            ARRAY *variables) {
   double emin, emax;
   int type;
 
@@ -1436,7 +1436,7 @@ static int PSetCEGridLimits(int argc, char *argv[], int argt[],
     if (argc > 1) {
       emax = atof(argv[1]);
       if (argc > 2) {
-	type = atoi(argv[2]);
+        type = atoi(argv[2]);
       }
     }
   }
@@ -1447,14 +1447,14 @@ static int PSetCEGridLimits(int argc, char *argv[], int argt[],
 }
 
 static int PSetCEGridType(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
+                          ARRAY *variables) {
   if (argc != 1 || argt[0] != NUMBER) return -1;
   SetCEEGridType(atoi(argv[0]));
   return 0;
 }
 
 static int PSetTEGrid(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int i, n;
   double xg[MAXNTE];
   int ng, err;
@@ -1470,10 +1470,10 @@ static int PSetTEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	if (ig[i] != NUMBER) return -1;
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        if (ig[i] != NUMBER) return -1;
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetCETEGridDetail(ng, xg);
     } else {
@@ -1496,7 +1496,7 @@ static int PSetTEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetCEPWOptions(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
+                           ARRAY *variables) {
   int qr, max, kl_cb;
 
   qr = EXCLQR;
@@ -1519,7 +1519,7 @@ static int PSetCEPWOptions(int argc, char *argv[], int argt[],
 }
 
 static int PSetCEPWGridType(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
+                            ARRAY *variables) {
   if (argc != 1 || argt[0] != NUMBER) return -1;
   SetCEPWGridType(atoi(argv[0]));
 
@@ -1527,7 +1527,7 @@ static int PSetCEPWGridType(int argc, char *argv[], int argt[],
 }
 
 static int PSetCEPWGrid(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int ns, i;
   int n;
   int *m, *step;
@@ -1562,7 +1562,7 @@ static int PSetCEPWGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetCEBorn(int argc, char *argv[], int argt[],
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   double eb, x, x1, x0;
 
   if (argc < 1 || argc > 4) return -1;
@@ -1590,7 +1590,7 @@ static int PSetCEBorn(int argc, char *argv[], int argt[],
 }
 
 static int PSetCIBorn(int argc, char *argv[], int argt[],
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int x;
 
   if (argc != 1) return -1;
@@ -1603,7 +1603,7 @@ static int PSetCIBorn(int argc, char *argv[], int argt[],
 }
 
 static int PSetCIEGrid(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {  int n, ng, i, err;
+                       ARRAY *variables) {  int n, ng, i, err;
   double xg[MAXNE];
   double emin, emax, eth;
   char *vg[MAXNARGS];
@@ -1619,9 +1619,9 @@ static int PSetCIEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetCIEGridDetail(ng, xg);
     } else {
@@ -1645,7 +1645,7 @@ static int PSetCIEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetCIEGridLimits(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
+                             ARRAY *variables) {
   double emin, emax;
   int type;
 
@@ -1658,7 +1658,7 @@ static int PSetCIEGridLimits(int argc, char *argv[], int argt[],
     if (argc > 1) {
       emax = atof(argv[1]);
       if (argc > 2) {
-	type = atoi(argv[2]);
+        type = atoi(argv[2]);
       }
     }
   }
@@ -1669,7 +1669,7 @@ static int PSetCIEGridLimits(int argc, char *argv[], int argt[],
 }
 
 static int PSetIEGrid(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {  int i, n;
+                      ARRAY *variables) {  int i, n;
   double xg[MAXNTE];
   int ng, err;
   double emin, emax;
@@ -1684,10 +1684,10 @@ static int PSetIEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	if (ig[i] != NUMBER) return -1;
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        if (ig[i] != NUMBER) return -1;
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetIEGridDetail(ng, xg);
     } else {
@@ -1710,7 +1710,7 @@ static int PSetIEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetCIPWGrid(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {  int ns, i;
+                        ARRAY *variables) {  int ns, i;
   int n;
   int *m, *step;
   char *v1[MAXNARGS], *v2[MAXNARGS];
@@ -1744,7 +1744,7 @@ static int PSetCIPWGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetCIQkMode(int argc, char *argv[], int argt[],
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int m;
   double tol;
   
@@ -1774,7 +1774,7 @@ static int PSetCIQkMode(int argc, char *argv[], int argt[],
 }
 
 static int PSetMaxRank(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   if (argc != 1 || argt[0] != NUMBER) {
     return -1;
   }
@@ -1784,7 +1784,7 @@ static int PSetMaxRank(int argc, char *argv[], int argt[],
 }
 
 static int PSetOptimizeControl(int argc, char *argv[], int argt[], 
-			       ARRAY *variables) {
+                               ARRAY *variables) {
   int maxiter, iprint;
   double tol, s;
 
@@ -1802,7 +1802,7 @@ static int PSetOptimizeControl(int argc, char *argv[], int argt[],
 }
 
 static int PSetHydrogenicNL(int argc, char *argv[], int argt[], 
-			    ARRAY *variables){
+                            ARRAY *variables){
   int n, k, nm, km;
   
   n = -1;
@@ -1815,10 +1815,10 @@ static int PSetHydrogenicNL(int argc, char *argv[], int argt[],
     if (argc > 1) {
       k = atoi(argv[1]);
       if (argc > 2) {
-	nm = atoi(argv[2]);
-	if (argc > 3) {
-	  km = atoi(argv[3]);
-	}
+        nm = atoi(argv[2]);
+        if (argc > 3) {
+          km = atoi(argv[3]);
+        }
       }
     }
   }
@@ -1828,7 +1828,7 @@ static int PSetHydrogenicNL(int argc, char *argv[], int argt[],
 }  
 
 static int PSetPEGrid(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) { int n, ng, i, err;
+                      ARRAY *variables) { int n, ng, i, err;
   double xg[MAXNE];
   double emin, emax, eth;
   char *vg[MAXNARGS];
@@ -1844,9 +1844,9 @@ static int PSetPEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetPEGridDetail(ng, xg);
     } else {
@@ -1871,7 +1871,7 @@ static int PSetPEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetPEGridLimits(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) { 
+                            ARRAY *variables) { 
   double emin, emax;
   int type;
 
@@ -1884,7 +1884,7 @@ static int PSetPEGridLimits(int argc, char *argv[], int argt[],
     if (argc > 1) {
       emax = atof(argv[1]);
       if (argc > 2) {
-	type = atoi(argv[2]);
+        type = atoi(argv[2]);
       }
     }
   }
@@ -1895,7 +1895,7 @@ static int PSetPEGridLimits(int argc, char *argv[], int argt[],
 }
 
 static int PSetRecPWOptions(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
+                            ARRAY *variables) {
   int kl_interp, max_kl;
   
   max_kl = -1;
@@ -1919,7 +1919,7 @@ static int PSetRecPWOptions(int argc, char *argv[], int argt[],
 }
 
 static int PSetRecQkMode(int argc, char *argv[], int argt[],
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int m;
   double tol;
   
@@ -1949,7 +1949,7 @@ static int PSetRecQkMode(int argc, char *argv[], int argt[],
 }
 
 static int PSetRadialGrid(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
+                          ARRAY *variables) {
   double rmin = -1.0, ratio = -1.0, asym = -1.0;
   int maxrp;
 
@@ -1972,7 +1972,7 @@ static int PSetRadialGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetRecPWLimits(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
+                           ARRAY *variables) {
   int m1, m2;
 
   if (argc == 2) {
@@ -1990,7 +1990,7 @@ static int PSetRecPWLimits(int argc, char *argv[], int argt[],
 }
 
 static int PSetRecSpectator(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
+                            ARRAY *variables) {
   int n_spec, n_frozen;
 
   n_spec = 0;
@@ -2010,7 +2010,7 @@ static int PSetRecSpectator(int argc, char *argv[], int argt[],
 }
 
 static int PSetRRTEGrid(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int i, n;
   double xg[MAXNTE];
   int ng, err;
@@ -2026,10 +2026,10 @@ static int PSetRRTEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	if (ig[i] != NUMBER) return -1;
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        if (ig[i] != NUMBER) return -1;
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetRRTEGridDetail(ng, xg);
     } else {
@@ -2052,7 +2052,7 @@ static int PSetRRTEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetSE(int argc, char *argv[], int argt[], 
-		  ARRAY *variables) {
+                  ARRAY *variables) {
   int c;
 
   if (argc != 1) return -1;
@@ -2064,7 +2064,7 @@ static int PSetSE(int argc, char *argv[], int argt[],
 }
 
 static int PSetVP(int argc, char *argv[], int argt[], 
-		  ARRAY *variables) {
+                  ARRAY *variables) {
   int c;
 
   if (argc != 1) return -1;
@@ -2076,7 +2076,7 @@ static int PSetVP(int argc, char *argv[], int argt[],
 }
 
 static int PSetBreit(int argc, char *argv[], int argt[], 
-		  ARRAY *variables) {
+                  ARRAY *variables) {
   int c;
 
   if (argc != 1) return -1;
@@ -2088,7 +2088,7 @@ static int PSetBreit(int argc, char *argv[], int argt[],
 }
 
 static int PSetMS(int argc, char *argv[], int argt[], 
-		  ARRAY *variables) {
+                  ARRAY *variables) {
   int c1, c2;
 
   if (argc != 2) return -1;
@@ -2101,7 +2101,7 @@ static int PSetMS(int argc, char *argv[], int argt[],
 }
 
 static int PSetScreening(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
+                         ARRAY *variables) {
   int n_screen;
   int *screened_n = NULL;
   double screened_charge;
@@ -2136,14 +2136,14 @@ static int PSetScreening(int argc, char *argv[], int argt[],
 }
 
 static int PSetTransitionCut(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
+                             ARRAY *variables) {
   printf("SetTransitionCut() is defunct\n");
-						  
+                                                  
   return 0;
 }
 
 static int PSetTransitionOptions(int argc, char *argv[], int argt[], 
-				 ARRAY *variables) {
+                                 ARRAY *variables) {
   int gauge, mode, max_m, max_e;
 
   max_e = 4;
@@ -2166,7 +2166,7 @@ static int PSetTransitionOptions(int argc, char *argv[], int argt[],
 }
 
 static int PSetUsrCEGrid(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {  int n, ng, i, err;
+                         ARRAY *variables) {  int n, ng, i, err;
   double xg[MAXNUSR];
   double emin, emax, eth;
   char *vg[MAXNARGS];
@@ -2182,9 +2182,9 @@ static int PSetUsrCEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetUsrCEEGridDetail(ng, xg);
     } else {
@@ -2208,14 +2208,14 @@ static int PSetUsrCEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetUsrCEGridType(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
+                             ARRAY *variables) {
   if (argc != 1 || argt[0] != NUMBER) return -1;
   SetUsrCEEGridType(atoi(argv[0]));
   return 0;
 }
 
 static int PSetUsrCIEGrid(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
+                          ARRAY *variables) {
   int n, ng, i, err;
   double xg[MAXNUSR];
   double emin, emax, eth;
@@ -2232,9 +2232,9 @@ static int PSetUsrCIEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetUsrCIEGridDetail(ng, xg);
     } else {
@@ -2258,14 +2258,14 @@ static int PSetUsrCIEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetUsrCIEGridType(int argc, char *argv[], int argt[], 
-			      ARRAY *variables) {
+                              ARRAY *variables) {
   if (argc != 1 || argt[0] != NUMBER) return -1;
   SetUsrCIEGridType(atoi(argv[0]));
   return 0;
 }
 
 static int PSetUsrPEGrid(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
+                         ARRAY *variables) {
   int n, ng, i, err;
   double xg[MAXNUSR];
   double emin, emax, eth;
@@ -2282,9 +2282,9 @@ static int PSetUsrPEGrid(int argc, char *argv[], int argt[],
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
-	xg[i] = atof(vg[i]);
-	xg[i] /= HARTREE_EV;
-	free(vg[i]);
+        xg[i] = atof(vg[i]);
+        xg[i] /= HARTREE_EV;
+        free(vg[i]);
       }
       err = SetUsrPEGridDetail(ng, xg);
     } else {
@@ -2308,14 +2308,14 @@ static int PSetUsrPEGrid(int argc, char *argv[], int argt[],
 }
 
 static int PSetUsrPEGridType(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
+                             ARRAY *variables) {
   if (argc != 1 || argt[0] != NUMBER) return -1;
   SetUsrPEGridType(atoi(argv[0]));
   return 0;
 }
 
 static int PSolveBound(int argc, char *argv[], int argt[], 
-		       ARRAY *variables) {
+                       ARRAY *variables) {
   int n, kappa;
   ORBITAL *orb;
   int k;
@@ -2342,7 +2342,7 @@ static int PSolveBound(int argc, char *argv[], int argt[],
 }
 
 static int PCutMixing(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int nlev, n, *ilev, *kg;
   double c;
   
@@ -2366,7 +2366,7 @@ static int PCutMixing(int argc, char *argv[], int argt[],
 }
 
 static int PSetSymmetry(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   if (argc == 2 && argt[0] == NUMBER) {
     int nj, ip, *kg;
     ip = atoi(argv[0]);
@@ -2380,7 +2380,7 @@ static int PSetSymmetry(int argc, char *argv[], int argt[],
 }
 
 static int PStructure(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int ng, ngp;
   int ip, nlevels;
   int *kg, *kgp;
@@ -2405,7 +2405,7 @@ static int PStructure(int argc, char *argv[], int argt[],
     int nele = atoi(argv[1]);
     ng = SelectNeleGroups(nele, &kg);
   } else {
-    if (argc == 4) ip = atoi(argv[3]);		  
+    if (argc == 4) ip = atoi(argv[3]);                  
     if (argt[0] != STRING) return -1;
     if (argt[1] != LIST && argt[1] != TUPLE) return -1;
     ng = DecodeGroupArgs(&kg, 1, &(argv[1]), &(argt[1]), variables);
@@ -2447,7 +2447,7 @@ static int PSetUTA(int argc, char *argv[], int argt[],
 }
 
 static int PPrepAngular(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int nlow, nup, *low, *up;
 
   nlow = 0; 
@@ -2471,7 +2471,7 @@ static int PPrepAngular(int argc, char *argv[], int argt[],
 }
 
 static int PTransitionTable(int argc, char *argv[], int argt[], 
-			    ARRAY *variables) {
+                            ARRAY *variables) {
   int m;
   int nlow, nup, *low, *up;
   
@@ -2528,7 +2528,7 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
 }
 
 static int PWaveFuncTable(int argc, char *argv[], int argt[], 
-			  ARRAY *variables) {
+                          ARRAY *variables) {
   int k, n;
   double e;
 
@@ -2548,7 +2548,7 @@ static int PWaveFuncTable(int argc, char *argv[], int argt[],
 }
 
 static int PSetOptimizeMaxIter(int argc, char *argv[], int argt[], 
-			       ARRAY *variables) {
+                               ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2561,7 +2561,7 @@ static int PSetOptimizeMaxIter(int argc, char *argv[], int argt[],
 }
 
 static int PSetOptimizeStabilizer(int argc, char *argv[], int argt[], 
-				  ARRAY *variables) {
+                                  ARRAY *variables) {
   double m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2574,7 +2574,7 @@ static int PSetOptimizeStabilizer(int argc, char *argv[], int argt[],
 }
 
 static int PSetOptimizePrint(int argc, char *argv[], int argt[], 
-			     ARRAY *variables) {
+                             ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2587,7 +2587,7 @@ static int PSetOptimizePrint(int argc, char *argv[], int argt[],
 }
 
 static int PSetOptimizeTolerance(int argc, char *argv[], int argt[], 
-				 ARRAY *variables) {
+                                 ARRAY *variables) {
   double m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2600,7 +2600,7 @@ static int PSetOptimizeTolerance(int argc, char *argv[], int argt[],
 }
 
 static int PSetCELQR(int argc, char *argv[], int argt[], 
-		     ARRAY *variables) {
+                     ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2613,7 +2613,7 @@ static int PSetCELQR(int argc, char *argv[], int argt[],
 }
 
 static int PSetCELMax(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2626,7 +2626,7 @@ static int PSetCELMax(int argc, char *argv[], int argt[],
 }
 
 static int PSetCELCB(int argc, char *argv[], int argt[], 
-		     ARRAY *variables) {
+                     ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2639,7 +2639,7 @@ static int PSetCELCB(int argc, char *argv[], int argt[],
 }
 
 static int PSetCILQR(int argc, char *argv[], int argt[], 
-		     ARRAY *variables) {
+                     ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2652,7 +2652,7 @@ static int PSetCILQR(int argc, char *argv[], int argt[],
 }
 
 static int PSetCILMax(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2665,7 +2665,7 @@ static int PSetCILMax(int argc, char *argv[], int argt[],
 }
 
 static int PSetCILMaxEject(int argc, char *argv[], int argt[], 
-			   ARRAY *variables) {
+                           ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2678,7 +2678,7 @@ static int PSetCILMaxEject(int argc, char *argv[], int argt[],
 }
 
 static int PSetCILCB(int argc, char *argv[], int argt[], 
-		     ARRAY *variables) {
+                     ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2691,7 +2691,7 @@ static int PSetCILCB(int argc, char *argv[], int argt[],
 }
 
 static int PSetTransitionMode(int argc, char *argv[], int argt[], 
-			      ARRAY *variables) {
+                              ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2704,7 +2704,7 @@ static int PSetTransitionMode(int argc, char *argv[], int argt[],
 }
 
 static int PSetTransitionGauge(int argc, char *argv[], int argt[], 
-			       ARRAY *variables) {
+                               ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2717,7 +2717,7 @@ static int PSetTransitionGauge(int argc, char *argv[], int argt[],
 }
 
 static int PSetTransitionMaxE(int argc, char *argv[], int argt[], 
-			      ARRAY *variables) {
+                              ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2730,7 +2730,7 @@ static int PSetTransitionMaxE(int argc, char *argv[], int argt[],
 }
 
 static int PSetTransitionMaxM(int argc, char *argv[], int argt[], 
-			      ARRAY *variables) {
+                              ARRAY *variables) {
   int m;
   
   if (argc != 1 || argt[0] != NUMBER) {
@@ -2743,7 +2743,7 @@ static int PSetTransitionMaxM(int argc, char *argv[], int argt[],
 }
 
 static int PSetSlaterCut(int argc, char *argv[], int argt[], 
-			 ARRAY *variables) {
+                         ARRAY *variables) {
   int k0, k1;
 
   if (argc != 2) return -1;
@@ -2758,7 +2758,7 @@ static int PSetSlaterCut(int argc, char *argv[], int argt[],
 
 
 static int PAppendTable(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {  
+                        ARRAY *variables) {  
   if (argc != 1) return -1;
   AppendTable(argv[0]);
   
@@ -2766,7 +2766,7 @@ static int PAppendTable(int argc, char *argv[], int argt[],
 }
 
 static int PJoinTable(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   if (argc != 3) return -1;
   
   JoinTable(argv[0], argv[1], argv[2]);
@@ -2775,7 +2775,7 @@ static int PJoinTable(int argc, char *argv[], int argt[],
 }
 
 static int PSetFields(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int m;
   double b, e, a;
 
@@ -2794,7 +2794,7 @@ static int PSetFields(int argc, char *argv[], int argt[],
 }
 
 static int PStructureEB(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int n, *ilev;
 
   if (argc != 2 || argt[0] != STRING || argt[1] != LIST) return -1;
@@ -2809,7 +2809,7 @@ static int PStructureEB(int argc, char *argv[], int argt[],
 }
 
 static int PTransitionTableEB(int argc, char *argv[], int argt[], 
-			      ARRAY *variables) {
+                              ARRAY *variables) {
   int m, nlow, *low, nup, *up;
 
   if (argc < 3 || argc > 4) return -1;
@@ -2841,7 +2841,7 @@ static int PTransitionTableEB(int argc, char *argv[], int argt[],
 }
 
 static int PCETableEB(int argc, char *argv[], int argt[], 
-		      ARRAY *variables) {
+                      ARRAY *variables) {
   int nlow, nup, *low, *up, m;
 
   if (argc < 3 || argc > 4) return -1;
@@ -2866,7 +2866,7 @@ static int PCETableEB(int argc, char *argv[], int argt[],
 }
 
 static int PSlaterCoeff(int argc, char *argv[], int argt[], 
-			ARRAY *variables) {
+                        ARRAY *variables) {
   int nlev, *ilev, na, nb, i, *n, *kappa;
   double *nq;
   SHELL *sa, *sb;
@@ -2912,7 +2912,7 @@ static int PSlaterCoeff(int argc, char *argv[], int argt[],
 }
 
 static int PGeneralizedMoment(int argc, char *argv[], int argt[], 
-			      ARRAY *variables) {
+                              ARRAY *variables) {
   int n0, k0, n1, k1, m;
   double e1;
   
@@ -3115,8 +3115,8 @@ int main(int argc, const char *argv[]) {
       } else {
         f = fopen(argv[i], "r");
         if (!f) {
-	  printf("Cannot open file %s, Skipping\n", argv[i]);
-	  continue;
+          printf("Cannot open file %s, Skipping\n", argv[i]);
+          continue;
         }
         EvalFile(f, 0, methods);
       }

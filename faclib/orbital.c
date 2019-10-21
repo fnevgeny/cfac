@@ -1262,12 +1262,12 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
 
   e = orb->energy;
   if (e < 0.0) { 
-    printf("Energy < 0 in Free\n");
+    printf("Energy < 0 in RadialFree\n");
     return -1;
   }
   kl = orb->kappa;
   if (orb->kappa == 0) {
-    printf("Kappa == 0 in Free\n");
+    printf("Kappa == 0 in RadialFree\n");
     return -1;
   }
   SetPotentialW(pot, e, kl);

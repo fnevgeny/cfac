@@ -1050,21 +1050,15 @@ int OrbitalIndex(cfac_t *cfac, int n, int kappa, double energy) {
 	  orb->energy > 0.0 &&
 	  fabs(orb->energy - energy) < EPS10) {
 	if (orb->wfun == NULL) {
-	  if (RestoreOrbital(i) == 0) return i;
-	  else {
-	    resolve_dirac = 1;
-	    break;
-	  }
+	  resolve_dirac = 1;
+	  break;
 	}
 	return i;
       }
     } else if (orb->n == n && orb->kappa == kappa) {
       if (orb->wfun == NULL) {
-	if (RestoreOrbital(i) == 0) return i;
-	else {
-	  resolve_dirac = 1;
-	  break;
-	}
+	resolve_dirac = 1;
+	break;
       }
       return i;
     }
@@ -1190,14 +1184,6 @@ int ClearOrbitalTable(cfac_t *cfac, int m) {
   return 0;
 }
 
-int SaveOrbital(int i) {
-  return 0;
-}
-
-int RestoreOrbital(int i) {
-  return -1;
-}
-
 int FreeOrbital(cfac_t *cfac, int i) {
   ORBITAL *orb;
   orb = GetOrbital(cfac, i);
@@ -1211,7 +1197,6 @@ int SaveAllContinua(cfac_t *cfac, int mode) {
   for (i = 0; i < cfac->n_orbitals; i++) {
     orb = GetOrbital(cfac, i);
     if (orb->n == 0 && orb->wfun != NULL) {
-      if (SaveOrbital(i) < 0) return -1;
       if (mode) {
 	FreeOrbital(cfac, i);
       }
@@ -1228,7 +1213,6 @@ int SaveContinua(cfac_t *cfac, double e, int mode) {
     if (orb->n == 0 && 
 	orb->wfun != NULL &&
 	fabs(orb->energy - e) < EPS3) {
-      if (SaveOrbital(i) < 0) return -1;
       if (mode) FreeOrbital(cfac, i);
     }
   }

@@ -124,8 +124,6 @@ double InterpolateMultipole(double aw2, int n, double *x, double *y);
 double *GeneralizedMoments(cfac_t *cfac, int k0, int k1, int m);
 void PrintGeneralizedMoments(cfac_t *cfac,
     char *fn, int m, int n0, int k0, int n1, int k1, double e1);
-int SaveOrbital(int i);
-int RestoreOrbital(int i); 
 int FreeOrbital(cfac_t *cfac, int i);
 int SaveAllContinua(cfac_t *cfac, int mode); 
 int SaveContinua(cfac_t *cfac, double e, int mode);

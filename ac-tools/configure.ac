@@ -86,7 +86,7 @@ then
 fi
 if test -n "$G77"
 then
-    FFLAGS="$FFLAGS -fno-common -Wall -Wextra"
+    FFLAGS="-std=legacy $FFLAGS -fno-common -Wall -Wextra"
     FFLAGS="$FFLAGS -Wno-compare-reals -Wno-unused-dummy-argument -Wno-unused-parameter"
 fi
 

@@ -2506,8 +2506,10 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
     e = 0.0;
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
-      PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
-		       pw_scratch.nkl, pw_scratch.kl, 0);
+      if (PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
+		       pw_scratch.nkl, pw_scratch.kl, 0) != 0) {
+        return -1;
+      }
     }
     ce_hdr.nele = GetNumElectrons(cfac, low0[0]);
     ce_hdr.n_tegrid = n_tegrid;
@@ -2759,8 +2761,10 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
     e = 0.0;
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
-    PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
-		     pw_scratch.nkl, pw_scratch.kl, 1);
+      if (PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
+		     pw_scratch.nkl, pw_scratch.kl, 1) != 0) {
+        return -1;
+      }
     }
     ce_hdr.nele = GetNumElectrons(cfac, low0[0]);
     ce_hdr.n_tegrid = n_tegrid;

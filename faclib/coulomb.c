@@ -406,8 +406,8 @@ int PrepCoulombBethe(cfac_cbcache_t *cbcache,
   double w2, w3, *wr, *ws, *wt, *w, *tcb, *r[CBMULT];
   
   if (ne2 > MAXNE || ne1 > MAXNE || nte > MAXNTE) {
-    printf("Array multipoles not large enough in CoulombMultipoles\n");
-    exit(1);
+    printf("Array multipoles not large enough in PrepCoulombBethe\n");
+    return -1;
   }
   
   for (i = 0; i < CBMULT; i++) {

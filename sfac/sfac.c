@@ -1513,9 +1513,7 @@ static int PSetCEPWOptions(int argc, char *argv[], int argt[],
     }
   }
 
-  SetCEPWOptions(qr, max, kl_cb);
-
-  return 0;
+  return SetCEPWOptions(qr, max, kl_cb);
 }
 
 static int PSetCEPWGridType(int argc, char *argv[], int argt[], 
@@ -3064,7 +3062,9 @@ static int InitFac() {
   }
 
   InitDBase();
-  InitExcitation();
+  if (InitExcitation() != 0) {
+    return -1;
+  }
   InitRecombination();
   InitIonization(cfac);
   

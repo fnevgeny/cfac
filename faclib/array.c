@@ -352,8 +352,13 @@ static int Hash2(int *id, ub4 length, ub4 initval, int n) {
   c += length;
   switch(len) {
     /* c is reserved for the length */
-  case 2 : b+=k[1];
-  case 1 : a+=k[0];
+  case 2:
+    b += k[1];
+    a += k[0];
+    break;
+  case 1:
+    a += k[0];
+    break;
     /* case 0: nothing left to add */
   }
   Mix(a,b,c);

@@ -3121,89 +3121,91 @@ int IntegrateSubRegion(POTENTIAL *potential, int i0, int i1,
     break;
 
   case 1: /* mode = 1 */
-    if (type == INT_P1Q2) { /* type INT_P1Q2 needs special treatments */
-      large1 = Large(orb1);
-      large2 = Large(orb2);
-      small1 = Small(orb1);
-      small2 = Small(orb2);
-      e1 = orb1->energy;
-      e2 = orb2->energy;
-      a2 = 0.5*FINE_STRUCTURE_CONST2;
-      j = 0;
-      for (i = i0; i <= i1; i+= 2) {
-	ip = i+1;
-	x[j] = large1[i] * small2[ip];
-	x[j] *= f[i];
-	y[j] = large1[i] * small2[i] * f[i];
-	_phase[j] = large2[ip];
-	_dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
-	  /(large2[i]*large2[i]);
-	j++;
-      }
-      if (i < potential->maxrp) {
-	ip = i+1;
-	if (i > orb1->ilast && orb1->n == 0) { 
-	  a = sin(large1[ip]);
-	  b = cos(large1[ip]);
-	  b = small1[i]*b + small1[ip]*a;
-	  a = large1[i]*a;
-	  x[j] = a * small2[ip];
-	  x[j] *= f[i];
-	  y[j] = a * small2[i] * f[i];
-	  _phase[j] = large2[ip];
-	  _dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
-	    /(large2[i]*large2[i]);
-	  j++;
-	  i2 = i;
-	}
-      }
-      IntegrateSinCos(potential, j, x, y, _phase, _dphase, i0, r, last_only);
-      if (IsOdd(i2)) r[i2] = r[i2-1];
-      break;
-    } else if (type == INT_Q1P2) {
-      large1 = Large(orb1);
-      large2 = Large(orb2);
-      small1 = Small(orb1);
-      small2 = Small(orb2);
-      e1 = orb1->energy;
-      e2 = orb2->energy;
-      a2 = 0.5*FINE_STRUCTURE_CONST2;
-      j = 0;
-      for (i = i0; i <= i1; i+= 2) {
-	ip = i+1;
-	x[j] = small1[i] * large2[i];
-	x[j] *= f[i];
-	_phase[j] = large2[ip];
-	_dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
-	  /(large2[i]*large2[i]);
-	j++;	
-      }
-      if (i < potential->maxrp) {
-	ip = i+1;
-	if (i > orb1->ilast && orb1->n == 0) { 
-	  a = sin(large1[ip]);
-	  b = cos(large1[ip]);
-	  b = small1[i]*b + small1[ip]*a;
-	  x[j] = b * large2[i];
-	  x[j] *= f[i];
-	  _phase[j] = large2[ip];
-	  _dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
-	    /(large2[i]*large2[i]);
-	  j++;
-	  i2 = i;
-	}
-      }
-      IntegrateSinCos(potential, j, x, NULL, _phase, _dphase, i0, r, last_only);
-      if (IsOdd(i2)) r[i2] = r[i2-1];
-      break;
-    }
   case 2: /* mode = 2 */
-    /* type INT_P1Q2/INT_Q1P2 is treated in mode = 1 */
-    if (mode == 2) {
+    if (mode == 1) {
+      if (type == INT_P1Q2) { /* type INT_P1Q2 needs special treatments */
+        large1 = Large(orb1);
+        large2 = Large(orb2);
+        small1 = Small(orb1);
+        small2 = Small(orb2);
+        e1 = orb1->energy;
+        e2 = orb2->energy;
+        a2 = 0.5*FINE_STRUCTURE_CONST2;
+        j = 0;
+        for (i = i0; i <= i1; i+= 2) {
+	  ip = i+1;
+	  x[j] = large1[i] * small2[ip];
+	  x[j] *= f[i];
+	  y[j] = large1[i] * small2[i] * f[i];
+	  _phase[j] = large2[ip];
+	  _dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
+	    /(large2[i]*large2[i]);
+	  j++;
+        }
+        if (i < potential->maxrp) {
+	  ip = i+1;
+	  if (i > orb1->ilast && orb1->n == 0) {
+	    a = sin(large1[ip]);
+	    b = cos(large1[ip]);
+	    b = small1[i]*b + small1[ip]*a;
+	    a = large1[i]*a;
+	    x[j] = a * small2[ip];
+	    x[j] *= f[i];
+	    y[j] = a * small2[i] * f[i];
+	    _phase[j] = large2[ip];
+	    _dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
+	      /(large2[i]*large2[i]);
+	    j++;
+	    i2 = i;
+	  }
+        }
+        IntegrateSinCos(potential, j, x, y, _phase, _dphase, i0, r, last_only);
+        if (IsOdd(i2)) r[i2] = r[i2-1];
+        break;
+      } else if (type == INT_Q1P2) {
+        large1 = Large(orb1);
+        large2 = Large(orb2);
+        small1 = Small(orb1);
+        small2 = Small(orb2);
+        e1 = orb1->energy;
+        e2 = orb2->energy;
+        a2 = 0.5*FINE_STRUCTURE_CONST2;
+        j = 0;
+        for (i = i0; i <= i1; i+= 2) {
+	  ip = i+1;
+	  x[j] = small1[i] * large2[i];
+	  x[j] *= f[i];
+	  _phase[j] = large2[ip];
+	  _dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
+	    /(large2[i]*large2[i]);
+	  j++;
+        }
+        if (i < potential->maxrp) {
+	  ip = i+1;
+	  if (i > orb1->ilast && orb1->n == 0) {
+	    a = sin(large1[ip]);
+	    b = cos(large1[ip]);
+	    b = small1[i]*b + small1[ip]*a;
+	    x[j] = b * large2[i];
+	    x[j] *= f[i];
+	    _phase[j] = large2[ip];
+	    _dphase[j] = (1.0 + a2*(e2-potential->U[i]-potential->Vc[i]))
+	      /(large2[i]*large2[i]);
+	    j++;
+	    i2 = i;
+	  }
+        }
+        IntegrateSinCos(potential, j, x, NULL, _phase, _dphase, i0, r, last_only);
+        if (IsOdd(i2)) r[i2] = r[i2-1];
+        break;
+      }
+    } else {
+      /* type INT_P1Q2/INT_Q1P2 is treated in mode = 1 */
       const ORBITAL *tmp = orb1;
       orb1 = orb2;
       orb2 = tmp;
     }
+
     large1 = Large(orb1);
     large2 = Large(orb2);
     small1 = Small(orb1);
@@ -3354,7 +3356,7 @@ int IntegrateSubRegion(POTENTIAL *potential, int i0, int i1,
       }
       if (i < potential->maxrp) {
 	ip = i+1;
-	if (i > orb1->ilast && orb1->n == 0) { 
+	if (i > orb1->ilast && orb1->n == 0) {
 	  a = sin(large1[ip]);
 	  b = cos(large1[ip]);
 	  b = small1[i]*b + small1[ip]*a;
@@ -3602,6 +3604,7 @@ int IntegrateSubRegion(POTENTIAL *potential, int i0, int i1,
     default:
       return -1;
     }
+    break;
   default:
     return -1; 
   }

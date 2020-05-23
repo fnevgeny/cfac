@@ -315,9 +315,10 @@ int Parse(char *token, int tokmax, char *line,
 	goto OUT;
       }
     } else {
-      switch (state) {
-      case IN_WHITE:
+      if (state == IN_WHITE) {
 	state = IN_TOKEN;
+      }
+      switch (state) {
       case IN_TOKEN:
       case IN_QUOTE:
 	chstore(token, tokmax, c);

@@ -261,7 +261,7 @@ int RecStates(cfac_t *cfac, int n, int k, int *kg, char *fn) {
     kg[i] = AddGroup(cfac, rgn);
     if (kg[i] < 0) {
       printf("Can not add more Groups\n");
-      exit(1);
+      return -2;
     }
     ArrayAppend(rec_complex[n_complex].rg, kg+i);
     clist = &(g->cfg_list);

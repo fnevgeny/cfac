@@ -70,7 +70,7 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
   
   alfa = FINE_STRUCTURE_CONST;
   nr = n - abs(kappa);
-  fk = fabs(kappa);
+  fk = abs(kappa);
   zalfa = z*alfa;
   gamma = sqrt(fk*fk - zalfa*zalfa);
   twogp1 = gamma*2.0 + 1.0;

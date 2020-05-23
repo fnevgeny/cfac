@@ -175,7 +175,7 @@ static int SetCIPWOptions(int qr, int max, int max_eject, int kl_cb) {
   pw_scratch.qr = qr;
   if (max > MAXKL) {
     printf("The maximum partial wave reached in Ionization: %d\n", MAXKL);
-    exit(1);
+    return -1;
   }
   pw_scratch.max_kl = max;
   pw_scratch.max_kl_eject = max_eject;
@@ -1622,9 +1622,7 @@ int InitIonization(cfac_t *cfac) {
   tegrid[0] = -1.0;
   usr_egrid[0] = -1.0;
   SetCIQkMode(QK_DEFAULT, 1E-3);
-  SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB);
-
-  return 0;
+  return SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB);
 }
 
 int ReinitIonization(int m) {

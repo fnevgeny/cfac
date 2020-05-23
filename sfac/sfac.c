@@ -3061,12 +3061,18 @@ static int InitFac() {
     return -1;
   }
 
-  InitDBase();
+  if (InitDBase() != 0) {
+    return -1;
+  }
   if (InitExcitation() != 0) {
     return -1;
   }
-  InitRecombination();
-  InitIonization(cfac);
+  if (InitRecombination() != 0) {
+    return -1;
+  }
+  if (InitIonization(cfac) != 0) {
+    return -1;
+  }
   
   return 0;
 }

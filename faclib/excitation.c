@@ -2076,6 +2076,9 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
 
   for (isub = 0; isub < subte.dim - 1; isub++) {
     CE_HEADER ce_hdr;
@@ -2446,6 +2449,9 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
   for (isub = 1; isub < subte.dim; isub++) {
     e1 = *((double *) ArrayGet(&subte, isub));
     if (isub == subte.dim-1) e1 = e1*1.001;
@@ -2704,6 +2710,9 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
   for (isub = 1; isub < subte.dim; isub++) {
     e1 = *((double *) ArrayGet(&subte, isub));
     if (isub == subte.dim-1) e1 = e1*1.001;

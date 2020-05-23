@@ -1592,12 +1592,12 @@ FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
   if (f == NULL) {
     if (fheader[ihdr].nblocks > 0) {
       printf("A single file for one DB type must be used in one session.\n");
-      exit(1);
+      return NULL;
     }
     f = fopen(fn, "wb");
     if (f == NULL) {
       printf("cannot open file %s\n", fn);
-      exit(1);
+      return NULL;
     }
   } else {
     if (fheader[ihdr].nblocks == 0) {
@@ -1608,7 +1608,7 @@ FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
 
   if (f == NULL) {
     printf("cannot open file %s\n", fn);
-    exit(1);
+    return NULL;
   }
 
   fheader[ihdr].type = fhdr->type;
@@ -3217,6 +3217,9 @@ int SaveTransition(cfac_t *cfac,
   tr_hdr.mode = mode;
   
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
   InitFile(f, &fhdr, &tr_hdr);
   
   crac_calculate_rtrans(cfac, nlow, low, nup, up, mpole, mode, tr_sink, f);

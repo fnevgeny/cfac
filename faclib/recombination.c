@@ -1642,6 +1642,9 @@ int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   rr_hdr.nparams = nqk;
   rr_hdr.multipole = m;
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
   
   e0 = emin*0.999;
   for (isub = 1; isub < subte.dim; isub++) {
@@ -1855,6 +1858,9 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
     ai_hdr1.emin = 0.0;
   }
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
 
   e0 = emin*0.999;
   for (isub = 1; isub < subte.dim; isub++) {

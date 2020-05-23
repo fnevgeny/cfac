@@ -1030,6 +1030,9 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   ci_hdr.egrid_type = egrid_type;
   ci_hdr.usr_egrid_type = usr_egrid_type;
   file = OpenFile(fn, &fhdr);
+  if (!file) {
+    return -1;
+  }
 
   e0 = emin*0.999;
   for (isub = 1; isub < subte.dim; isub++) {
@@ -1555,6 +1558,9 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   ci_hdr.egrid_type = egrid_type;
   ci_hdr.usr_egrid_type = usr_egrid_type;
   file = OpenFile(fn, &fhdr);
+  if (!file) {
+    return -1;
+  }
 
   yegrid0[0] = log(1E-5);
   delta = (log(0.5)-yegrid0[0])/(NINT-1.0);

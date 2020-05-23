@@ -2196,6 +2196,9 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
 
   lev = GetEBLevel(cfac, n0);
   DecodeBasisEB(lev->pb, &ilev, &mlev);

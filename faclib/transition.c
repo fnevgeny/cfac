@@ -340,6 +340,9 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   GetFields(cfac, &tr_hdr.bfield, &tr_hdr.efield, &tr_hdr.fangle);
     
   f = OpenFile(fn, &fhdr);
+  if (!f) {
+    return -1;
+  }
   InitFile(f, &fhdr, &tr_hdr);
 
   cfac_w3j_cache_init(&w3j_cache, 2*abs(m), GetMaxRank(cfac));

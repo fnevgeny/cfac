@@ -8,7 +8,6 @@ LIB  = $(CFAC_FAC_LIB)
 CSRCS = cfac.c \
 	angular.c \
 	array.c \
-	cfp.c \
 	config.c \
 	coulrad.c \
 	coulomb.c \

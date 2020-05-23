@@ -1098,7 +1098,7 @@ static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
   (*idatum)->bra = malloc(sizeof(SHELL)*(cbra->n_shells + cket->n_shells));
   if ((*idatum)->bra == NULL) {
     printf("error allocating idatam->bra.\n");
-    exit(1);
+    return -1;
   }
   
   bra = (*idatum)->bra;

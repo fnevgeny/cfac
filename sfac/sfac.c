@@ -404,7 +404,7 @@ static int PClosed(int argc, char *argv[], int argt[], ARRAY *variables) {
   CONFIG *cfg;
   int i, j, kl, n, nq, ncfg;
   char *p;
-  char s[16], st[16];
+  char s[8], st[16];
   int ns, k;
 
   if (argc == 0) _closed_shells[0] = '\0';
@@ -468,7 +468,7 @@ static int PGetConfigNR(int argc, char *argv[], int argt[], ARRAY *variables) {
   
 static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   CONFIG *cfg;
-  static char gname[GROUP_NAME_LEN] = "_all_";
+  static char gname[GROUP_NAME_LEN + 1] = "_all_";
   int i, j, k, t, ncfg;
   char scfg[MCHSHELL];
   int iuta = cfac->uta;

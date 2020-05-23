@@ -1612,7 +1612,8 @@ FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
   }
 
   fheader[ihdr].type = fhdr->type;
-  strncpy(fheader[ihdr].symbol, fhdr->symbol, 2);
+  memcpy(fheader[ihdr].symbol, fhdr->symbol, 2);
+  fheader[ihdr].symbol[2] = '\0';
   fheader[ihdr].atom = fhdr->atom;
   WriteFHeader(f, &(fheader[ihdr]));
 
@@ -3132,9 +3133,9 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     } else {
       r.p = -vnl;
     }
-    strncpy(r.name, name, LNAME);
-    strncpy(r.sname, sname, LSNAME);
-    strncpy(r.ncomplex, nc, LNCOMPLEX);
+    memcpy(r.name, name, LNAME);
+    memcpy(r.sname, sname, LSNAME);
+    memcpy(r.ncomplex, nc, LNCOMPLEX);
     r.name[LNAME-1] = '\0';
     r.sname[LSNAME-1] = '\0';
     r.ncomplex[LNCOMPLEX-1] = '\0';

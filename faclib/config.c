@@ -1031,7 +1031,7 @@ int GetAverageConfigFromString(int **n, int **kappa,
 */
 int GetJLFromSymbol(char *s, int *j, int *kl) {
   int i;
-  char s0[16], *p;
+  char s0[17], *p;
 
   strncpy(s0, s, 16);
   p = s0;

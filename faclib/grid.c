@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "consts.h"
+#include "cfacP.h"
 #include "grid.h"
 
 static int AddPW(int *nkl0, double *kl, double *logkl, 
@@ -31,14 +31,14 @@ static int AddPW(int *nkl0, double *kl, double *logkl,
     if (i >= MAXNKL) {
       printf("Maximum partial wave grid points reached: "); 
       printf("%d > %d in constructing grid\n",  i, MAXNKL);
-      exit(1);
+      return CFAC_FAILURE;
     }
     kl[i] = kl[i-1] + step;
     logkl[i] = log(kl[i]);
     if ((int)(kl[i]) > maxkl) break;
   }
   (*nkl0) = i;
-  return 0;
+  return CFAC_SUCCESS;
 }
 
 int SetPWGrid(int *nkl0, double *kl, double *logkl, 
@@ -47,27 +47,33 @@ int SetPWGrid(int *nkl0, double *kl, double *logkl,
 
   if ((*ns) > 0) {
     for (i = 0; i < (*ns); i++) {
-      AddPW(nkl0, kl, logkl, maxkl, n[i], step[i]);
+      if (AddPW(nkl0, kl, logkl, maxkl, n[i], step[i]) != CFAC_SUCCESS) {
+        return CFAC_FAILURE;
+      }
     }
     k = step[(*ns)-1]*2;
     j = 2;
   } else {
     (*ns) = -(*ns);
     if ((*ns) == 0) (*ns) = 8;
-    AddPW(nkl0, kl, logkl, maxkl, (*ns), 1);
+    if (AddPW(nkl0, kl, logkl, maxkl, (*ns), 1) != CFAC_SUCCESS) {
+      return CFAC_FAILURE;
+    }
     k = 2;
     j = 2;
   }   
 
   m = kl[(*nkl0)-1];
   while (m+k <= maxkl) {
-    AddPW(nkl0, kl, logkl, maxkl, j, k);
+    if (AddPW(nkl0, kl, logkl, maxkl, j, k) != CFAC_SUCCESS) {
+      return CFAC_FAILURE;
+    }
     m = kl[(*nkl0)-1];
     if (k < 8) k *= 2;
     else k += 4;
   }
   kl[(*nkl0)] = maxkl+1;
-  return (*nkl0);
+  return CFAC_SUCCESS;
 }
 
 int SetTEGridDetail(double *te, double *logte, int n, double *x) {

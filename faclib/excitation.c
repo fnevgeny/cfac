@@ -258,13 +258,18 @@ int SetCEPWOptions(int qr, int max, int kl_cb) {
 }
 
 int SetCEPWGrid(int ns, int *n, int *step) {
-  pw_scratch.nkl = SetPWGrid(&(pw_scratch.nkl0),
-			     pw_scratch.kl,
-			     pw_scratch.log_kl,
-			     pw_scratch.max_kl,
-			     &ns, n, step);
-  pw_scratch.ns = ns;  
-  return 0;
+  int retval = SetPWGrid(&(pw_scratch.nkl0),
+			   pw_scratch.kl,
+			   pw_scratch.log_kl,
+			   pw_scratch.max_kl,
+			   &ns, n, step);
+  if (retval != CFAC_SUCCESS) {
+    return CFAC_FAILURE;
+  } else {
+    pw_scratch.nkl = pw_scratch.nkl0;
+    pw_scratch.ns = ns;
+    return CFAC_SUCCESS;
+  }
 }
 
 int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k) {
@@ -2062,7 +2067,9 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
   egrid_type = 1;
   usr_egrid_type = 1;
   if (pw_scratch.nkl == 0) {
-    SetCEPWGrid(0, NULL, NULL);
+    if (SetCEPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+      return -1;
+    }
   }
 
   fhdr.type = DB_CE;
@@ -2419,7 +2426,9 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
   egrid_type = 1;
 
   if (pw_scratch.nkl == 0) {
-    SetCEPWGrid(0, NULL, NULL);
+    if (SetCEPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+      return -1;
+    }
   }
 
   e = (emin + emax)*0.5;
@@ -2671,7 +2680,9 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
   egrid_type = 1;
 
   if (pw_scratch.nkl == 0) {
-    SetCEPWGrid(0, NULL, NULL);
+    if (SetCEPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+      return -1;
+    }
   }
 
   e = (emin + emax)*0.5;

@@ -231,13 +231,18 @@ int SetUsrCIEGrid(int n, double emin, double emax, double eth) {
 }
 
 int SetCIPWGrid(int ns, int *n, int *step) {
-  pw_scratch.nkl = SetPWGrid(&(pw_scratch.nkl0),
-			     pw_scratch.kl,
-			     pw_scratch.log_kl,
-			     pw_scratch.max_kl,
-			     &ns, n, step);
-  pw_scratch.ns = ns;
-  return 0;
+  int retval = SetPWGrid(&(pw_scratch.nkl0),
+			   pw_scratch.kl,
+			   pw_scratch.log_kl,
+			   pw_scratch.max_kl,
+			   &ns, n, step);
+  if (retval != CFAC_SUCCESS) {
+    return CFAC_FAILURE;
+  } else {
+    pw_scratch.nkl = pw_scratch.nkl0;
+    pw_scratch.ns = ns;
+    return CFAC_SUCCESS;
+  }
 }
 
 int SetCIQkMode(int m, double tol) {
@@ -1130,7 +1135,9 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
     }
 
     if (pw_scratch.nkl == 0) {
-      SetCIPWGrid(0, NULL, NULL);
+      if (SetCIPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+        return -1;
+      }
     }
 
     r.strength = malloc(sizeof(float)*n_usr);
@@ -1559,7 +1566,9 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   }
 
   if (pw_scratch.nkl == 0) {
-    SetCIPWGrid(0, NULL, NULL);
+    if (SetCIPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+      return -1;
+    }
   }
     
   ci_hdr.n_egrid = n_egrid;

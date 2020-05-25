@@ -272,7 +272,7 @@ int SetCEPWGrid(int ns, int *n, int *step) {
   }
 }
 
-int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k) {
+static int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k) {
   int type, ko2, i, m, t, q;
   int kf0, kf1, kpp0, kpp1, km0, km1;
   int kl0, kl1, kl0p, kl1p;
@@ -406,9 +406,13 @@ int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k) {
 	    if (noex[i] == 0) {
 	      if (kl1 >= pw_scratch.qr &&
 		  kl0 >= pw_scratch.qr) {
-		SlaterTotal(cfac, &sd, &se, js, ks, k, -1);
+		if (SlaterTotal(cfac, &sd, &se, js, ks, k, -1) != 0) {
+                  return -1;
+                }
 	      } else {
-		SlaterTotal(cfac, &sd, &se, js, ks, k, 1);
+		if (SlaterTotal(cfac, &sd, &se, js, ks, k, 1) != 0) {
+                  return -1;
+                }
 	      }
 	      if (i == 0) {
 		if (1.0+sd == 1.0 && 1.0+se == 1.0) {
@@ -421,9 +425,13 @@ int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k) {
 	      se = 0.0;
 	      if (kl1 >= pw_scratch.qr &&
 		  kl0 >= pw_scratch.qr) {
-		SlaterTotal(cfac, &sd, NULL, js, ks, k, -1);
+		if (SlaterTotal(cfac, &sd, NULL, js, ks, k, -1) != 0) {
+                  return -1;
+                }
 	      } else {
-		SlaterTotal(cfac, &sd, NULL, js, ks, k, 1);
+		if (SlaterTotal(cfac, &sd, NULL, js, ks, k, 1) != 0) {
+                  return -1;
+                }
 	      }
 	      if (i == 0) {
 		if (1.0+sd == 1.0) {
@@ -520,8 +528,11 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
   r = ReducedCL(j0, k, j1) * ReducedCL(j2, k, j3);
   r *= (k+1.0)*(k+1.0);
   g1 = GeneralizedMoments(cfac, k0, k1, ko2);
-  x1 = g1 + NGOSK;
   g2 = GeneralizedMoments(cfac, k2, k3, ko2);
+  if (!g1 || !g2) {
+    return -1;
+  }
+  x1 = g1 + NGOSK;
   x2 = g2 + NGOSK;
 
   c0 = e1 + te;
@@ -625,8 +636,11 @@ int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int 
   r = ReducedCL(j0, k, j1) * ReducedCL(j2, kp, j3);
   r *= (k+1.0)*(kp+1.0);
   g1 = GeneralizedMoments(cfac, k0, k1, ko2);
-  x1 = g1 + NGOSK;
   g2 = GeneralizedMoments(cfac, k2, k3, ko2p);
+  if (!g1 || !g2) {
+    return -1;
+  }
+  x1 = g1 + NGOSK;
   x2 = g2 + NGOSK;
 
   c0 = e1 + te;

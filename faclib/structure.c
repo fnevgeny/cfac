@@ -906,7 +906,9 @@ double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
       ks[1] = a2[i].k2;
       ks[2] = a2[i].k1;
       ks[3] = a2[i].k3;
-      SlaterTotal(cfac, &sd, &se, NULL, ks, a2[i].k, 0);
+      if (SlaterTotal(cfac, &sd, &se, NULL, ks, a2[i].k, 0) != 0) {
+        return 0.0;
+      }
       a = (sd + se)*a2[i].coeff;
       r += a;
     }
@@ -979,7 +981,9 @@ double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
     if (fabs(r0) < EPS30) continue;
     ks[0] = ang[i].k0;
     ks[2] = ang[i].k1;
-    SlaterTotal(cfac, &sd, &se, NULL, ks, ang[i].k, 0);
+    if (SlaterTotal(cfac, &sd, &se, NULL, ks, ang[i].k, 0) != 0) {
+      return 0.0;
+    }
     r0 *= ang[i].coeff*(sd+se);
     a += r0;
   }
@@ -1483,10 +1487,14 @@ double Hamilton2E(cfac_t *cfac,
     sd = 0;
     se = 0;
     if (fabs(ang[i]) > EPS30) {
-      SlaterTotal(cfac, &sd, &se, js, ks, kk[i], 0);
+      if (SlaterTotal(cfac, &sd, &se, js, ks, kk[i], 0) != 0) {
+        return 0.0;
+      }
       x += ang[i] * (sd+se);
     } else if (nk0 > 0) {
-      SlaterTotal(cfac, &sd, NULL, js, ks, kk[i], 0);
+      if (SlaterTotal(cfac, &sd, NULL, js, ks, kk[i], 0) != 0) {
+        return 0.0;
+      }
     }
     if (nk0 > 0) x -= z0 * sd;
   }

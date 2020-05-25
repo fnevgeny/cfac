@@ -616,7 +616,9 @@ static double FKB(cfac_t *cfac, int ka, int kb, int k) {
   if (!Triangle(ia, k, ia) || !Triangle(ib, k, ib)) return 0.0;
   a = W3j(ja, k, ja, 1, 0, -1)*W3j(jb, k, jb, 1, 0, -1);
   if (fabs(a) < EPS30) return 0.0;
-  Slater(cfac, &b, ka, kb, ka, kb, k/2, 0);
+  if (Slater(cfac, &b, ka, kb, ka, kb, k/2, 0) < 0) {
+    return 0.0;
+  }
   
   b *= a*(ja+1.0)*(jb+1.0);
   if (IsEven((ja+jb)/2)) b = -b;
@@ -634,7 +636,9 @@ static double GKB(cfac_t *cfac, int ka, int kb, int k) {
   if (IsOdd((ia+k+ib)/2) || !Triangle(ia, k, ib)) return 0.0;
   a = W3j(ja, k, jb, 1, 0, -1);
   if (fabs(a) < EPS30) return 0.0;
-  Slater(cfac, &b, ka, kb, kb, ka, k/2, 0);
+  if (Slater(cfac, &b, ka, kb, kb, ka, k/2, 0) < 0) {
+    return 0.0;
+  }
   
   b *= a*a*(ja+1.0)*(jb+1.0);
   if (IsEven((ja+jb)/2)) b = -b;

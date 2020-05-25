@@ -1330,7 +1330,9 @@ int AIRadialPk(cfac_t *cfac, double **ai_pk, int k0, int k1, int kb, int kappaf,
     ks[1] = kf;
     ks[2] = k1;
     ks[3] = kb;
-    SlaterTotal(cfac, &sd, &se, NULL, ks, k, 0);
+    if (SlaterTotal(cfac, &sd, &se, NULL, ks, k, 0) != 0) {
+      return -1;
+    }
     (*ai_pk)[i] = sd+se;
   }
 

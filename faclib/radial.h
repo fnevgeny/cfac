@@ -51,17 +51,12 @@ int GetPotential(const cfac_t *cfac, char *s);
 double GetResidualZ(const cfac_t *cfac);
 double GetRMax(cfac_t *cfac);
 
-/* solve the dirac equation for the given orbital */
-int SolveDirac(const cfac_t *cfac, ORBITAL *orb);
 int WaveFuncTable(cfac_t *cfac, char *s, int n, int kappa, double e);
 
 /* get the index of the given orbital in the table */
 int OrbitalIndex(cfac_t *cfac, int n, int kappa, double energy);
 int OrbitalExists(const cfac_t *cfac, int n, int kappa, double energy);
-int AddOrbital(cfac_t *cfac, ORBITAL *orb);
 ORBITAL *GetOrbital(const cfac_t *cfac, int k);
-ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k);
-ORBITAL *GetNewOrbital(cfac_t *cfac);
 int GetNumBounds(const cfac_t *cfac);
 int GetNumOrbitals(const cfac_t *cfac);
 int GetNumContinua(const cfac_t *cfac);
@@ -118,7 +113,6 @@ int FreeGOSArray(cfac_t *cfac);
 
 double RadialMoments(const cfac_t *cfac, int m, int k1, int k2);
 double MultipoleRadialNR(cfac_t *cfac, int m, int k1, int k2, int guage);
-int MultipoleRadialFRGrid(cfac_t *cfac, double **p, int m, int k1, int k2, int guage);
 double MultipoleRadialFR(cfac_t *cfac, double aw, int m, int k1, int k2, int guage);
 double InterpolateMultipole(double aw2, int n, double *x, double *y);
 double *GeneralizedMoments(cfac_t *cfac, int k0, int k1, int m);

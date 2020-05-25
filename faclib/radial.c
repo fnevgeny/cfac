@@ -33,6 +33,12 @@
 #define Large(orb) ((orb)->wfun)
 #define Small(orb) ((orb)->wfun + potential->maxrp)
 
+/* solve the dirac equation for the given orbital */
+static int SolveDirac(const cfac_t *cfac, ORBITAL *orb);
+
+static ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k);
+static ORBITAL *GetNewOrbital(cfac_t *cfac);
+
 void InitOrbitalData(void *p, int n) {
   ORBITAL *d;
   int i;
@@ -246,8 +252,9 @@ static int GetYk1(POTENTIAL *potential,
   return 0;
 }
 
-int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
-	  int k1, int k2, RadIntType type) {
+static int GetYk(const cfac_t *cfac,
+                 int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
+	         int k1, int k2, RadIntType type) {
   int i, i0, i1, n;
   double a, b, a2, b2, max, max1;
   int index[3];
@@ -267,7 +274,7 @@ int GetYk(const cfac_t *cfac, int k, double *yk, ORBITAL *orb1, ORBITAL *orb2,
   syk = MultiSet(cfac->yk_array, index, NULL);
   if (syk->npts < 0) {
     if (GetYk1(potential, k, yk, dwork, orb1, orb2, type) < 0) {
-      abort();
+      return -1;
     }
     max = 0;
     for (i = 0; i < potential->maxrp; i++) {
@@ -394,7 +401,9 @@ static int PotentialHX(const cfac_t *cfac, double *u, double *w) {
     if (k1 < 0) continue;
     orb1 = GetOrbital(cfac, k1);
     if (orb1->wfun == NULL) continue;
-    GetYk(cfac, 0, yk, orb1, orb1, k1, k1, 1);
+    if (GetYk(cfac, 0, yk, orb1, orb1, k1, k1, 1) != 0) {
+      return -1;
+    }
     for (m = 0; m <= jmax; m++) {    
       u[m] += acfg->nq[i]*yk[m];
       if (w[m]) {
@@ -523,7 +532,9 @@ int GetPotential(const cfac_t *cfac, char *fn) {
   fprintf(f, "# r_core = %10.3E\n", potential->rad[potential->r_core]);
   fprintf(f, "#     nb = %d\n",     potential->nb);
 
-  PotentialHX(cfac, u, w);
+  if (PotentialHX(cfac, u, w) < 0) {
+    return -1;
+  }
 
   fprintf(f, "# Mean configuration:\n");
   for (i = 0; i < acfg->n_shells; i++) {
@@ -596,6 +607,9 @@ static int OptimizeLoop(cfac_t *cfac) {
       if (k < 0) {
 	orb_old.energy = 0.0;
 	orb = GetNewOrbital(cfac);
+        if (!orb) {
+          return -1;
+        }
 	orb->kappa = acfg->kappa[i];
 	orb->n = acfg->n[i];
 	orb->energy = 1.0;
@@ -732,11 +746,15 @@ static double AverageEnergyAvgConfig(cfac_t *cfac) {
     
     t = 0.0;
     for (kk = 2; kk <= j2; kk += 2) {
-      Slater(cfac, &y, k, k, k, k, kk, 0);
+      if (Slater(cfac, &y, k, k, k, k, kk, 0) < 0) {
+        return 0.0;
+      }
       q = W3j(j2, 2*kk, j2, -1, 0, 1);
       t += y * q * q ;
     }
-    Slater(cfac, &y, k, k, k, k, 0, 0);
+    if (Slater(cfac, &y, k, k, k, k, 0, 0) < 0) {
+      return 0.0;
+    }
     b = ((nq-1.0)/2.0) * (y - (1.0 + 1.0/j2)*t);
     
     t = 0.0;
@@ -753,11 +771,15 @@ static double AverageEnergyAvgConfig(cfac_t *cfac) {
       if (IsOdd((kkmin + kl + klp)/2)) kkmin += 2;
       a = 0.0;
       for (kk = kkmin; kk <= kkmax; kk += 4) {
-	Slater(cfac, &y, k, kp, kp, k, kk/2, 0);
+	if (Slater(cfac, &y, k, kp, kp, k, kk/2, 0) < 0) {
+          return 0.0;
+        }
 	q = W3j(j2, kk, j2p, -1, 0, 1);
 	a += y * q * q;
       }
-      Slater(cfac, &y, k, kp, k, kp, 0, 0);
+      if (Slater(cfac, &y, k, kp, k, kp, 0, 0) < 0) {
+        return 0.0;
+      }
 
       t += nqp * (y - a);
     }
@@ -881,7 +903,7 @@ int RefineRadial(cfac_t *cfac, int maxfun, int msglvl) {
   return 0;
 }
 
-int SolveDirac(const cfac_t *cfac, ORBITAL *orb) {
+static int SolveDirac(const cfac_t *cfac, ORBITAL *orb) {
   int err;
   POTENTIAL *potential = cfac->potential;
 
@@ -891,10 +913,10 @@ int SolveDirac(const cfac_t *cfac, ORBITAL *orb) {
   if (err) { 
     printf("Error ocuured in RadialSolver, %d\n", err);
     printf("%d %d %10.3E\n", orb->n, orb->kappa, orb->energy);
-    exit(1);
+    return -1;
   }
 
-  return err;
+  return 0;
 }
 
 int WaveFuncTable(cfac_t *cfac, char *s, int n, int kappa, double e) {
@@ -911,6 +933,9 @@ int WaveFuncTable(cfac_t *cfac, char *s, int n, int kappa, double e) {
   if (!f) return -1;
   
   orb = GetOrbitalSolved(cfac, k);
+  if (!orb) {
+    return -1;
+  }
   
   fprintf(f, "#      n = %2d\n", n);
   fprintf(f, "#  kappa = %2d\n", kappa);
@@ -999,6 +1024,10 @@ double GetPhaseShift(cfac_t *cfac, int k) {
   POTENTIAL *potential = cfac->potential;
 
   orb = GetOrbitalSolved(cfac, k);
+  if (!orb) {
+    return -1;
+  }
+
   if (orb->n > 0) return 0.0;
 
   if (orb->phase) return orb->phase;
@@ -1066,6 +1095,9 @@ int OrbitalIndex(cfac_t *cfac, int n, int kappa, double energy) {
   
   if (!resolve_dirac) {
     orb = GetNewOrbital(cfac);
+    if (!orb) {
+      abort();
+    }
   } 
 
   orb->n = n;
@@ -1074,7 +1106,7 @@ int OrbitalIndex(cfac_t *cfac, int n, int kappa, double energy) {
   j = SolveDirac(cfac, orb);
   if (j < 0) {
     printf("Error occured in solving Dirac eq. err = %d\n", j);
-    exit(1);
+    return -1;
   }
   
   if (n == 0 && !resolve_dirac) {
@@ -1100,49 +1132,32 @@ int OrbitalExists(const cfac_t *cfac, int n, int kappa, double energy) {
   return -1;
 }
 
-int AddOrbital(cfac_t *cfac, ORBITAL *orb) {
-
-  if (orb == NULL) return -1;
-
-  orb = ArrayAppend(cfac->orbitals, orb);
-  if (!orb) {
-    printf("Not enough memory for orbitals array\n");
-    exit(1);
-  }
-
-  if (orb->n == 0) {
-    cfac->n_continua++;
-  }
-  cfac->n_orbitals++;
-  return cfac->n_orbitals - 1;
-}
-
 ORBITAL *GetOrbital(const cfac_t *cfac, int k) {
   return ArrayGet(cfac->orbitals, k);
 }
 
-ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k) {
+static ORBITAL *GetOrbitalSolved(const cfac_t *cfac, int k) {
   ORBITAL *orb;
   int i;
   
   orb = ArrayGet(cfac->orbitals, k);
-  if (orb->wfun == NULL) {
+  if (orb != NULL && orb->wfun == NULL) {
     i = SolveDirac(cfac, orb);
     if (i < 0) {
       printf("Error occured in solving Dirac eq. err = %d\n", i);
-      exit(1);
+      return NULL;
     }
   }
   return orb;
 }
 
-ORBITAL *GetNewOrbital(cfac_t *cfac) {
+static ORBITAL *GetNewOrbital(cfac_t *cfac) {
   ORBITAL *orb;
 
   orb = ArrayAppend(cfac->orbitals, NULL);
   if (!orb) {
     printf("Not enough memory for orbitals array\n");
-    exit(1);
+    return NULL;
   }
 
   cfac->n_orbitals++;
@@ -1375,7 +1390,9 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
       for (kk = 1; kk <= j2; kk += 1) {
 	y = 0;
 	if (IsEven(kk)) {
-	  Slater(cfac, &y, k, k, k, k, kk, 0);
+	  if (Slater(cfac, &y, k, k, k, k, kk, 0) < 0) {
+            return 0.0;
+          }
 	}
 	if (cfac->qed.br < 0 || n <= cfac->qed.br) {
 	  y += Breit(cfac, k, k, k, k, kk, kl, kl, kl, kl);
@@ -1385,7 +1402,9 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
 	  t += y * q * q ;
 	}
       }
-      Slater(cfac, &y, k, k, k, k, 0, 0);
+      if (Slater(cfac, &y, k, k, k, k, 0, 0) < 0) {
+        return 0.0;
+      }
       if (cfac->qed.br < 0 || (n > 0 && n <= cfac->qed.br)) {
 	y += Breit(cfac, k, k, k, k, 0, kl, kl, kl, kl);
       }
@@ -1415,7 +1434,9 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
 	int kk2 = kk/2;
 	y = 0.0;
 	if (IsEven((kl+klp+kk)/2)) {
-	  Slater(cfac, &y, k, kp, kp, k, kk2, 0);
+	  if (Slater(cfac, &y, k, kp, kp, k, kk2, 0) < 0) {
+            return 0.0;
+          }
 	  if (kk == 2 && cfac->qed.sms) {
 	    double v = Vinti(cfac, k, kp)*Vinti(cfac, kp, k);
 	    y -= v/am;
@@ -1430,7 +1451,9 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg) {
  	}
       }
       y = 0.0;
-      Slater(cfac, &y, k, kp, k, kp, 0, 0);
+      if (Slater(cfac, &y, k, kp, k, kp, 0, 0) < 0) {
+        return 0.0;
+      }
       bi = 0.0;
       if (cfac->qed.br < 0 || maxn <= cfac->qed.br) {
 	bi = Breit(cfac, k, kp, k, kp, 0, kl, klp, kl, klp);
@@ -1559,6 +1582,10 @@ double RadialMoments(const cfac_t *cfac, int m, int k1, int k2) {
   
   orb1 = GetOrbitalSolved(cfac, k1);
   orb2 = GetOrbitalSolved(cfac, k2);
+  if (!orb1 || !orb2) {
+    return 0.0;
+  }
+
   n1 = orb1->n;
   n2 = orb2->n;
   kl1 = GetLFromKappa(orb1->kappa)/2;
@@ -1670,7 +1697,7 @@ double MultipoleRadialNR(cfac_t *cfac, int m, int k1, int k2, int gauge) {
     m = -m;
     if (gauge != G_BABUSHKIN) {
       printf("the velocity form is not implemented yet\n");
-      abort();
+      return 0.0;
     }
 
     r = RadialMoments(cfac, m, k1, k2);
@@ -1682,7 +1709,7 @@ double MultipoleRadialNR(cfac_t *cfac, int m, int k1, int k2, int gauge) {
   return r;
 }
 
-int MultipoleRadialFRGrid(cfac_t *cfac,
+static int MultipoleRadialFRGrid(cfac_t *cfac,
     double **p0, int m, int k1, int k2, int gauge) {
   double q, ip, ipm, im, imm;
   int kappa1, kappa2;
@@ -1715,6 +1742,7 @@ int MultipoleRadialFRGrid(cfac_t *cfac,
 
   orb1 = GetOrbitalSolved(cfac, k1);
   orb2 = GetOrbitalSolved(cfac, k2);
+  if (!orb1 || !orb2) return -1;
   
   kappa1 = orb1->kappa;
   kappa2 = orb2->kappa;
@@ -1821,6 +1849,10 @@ double MultipoleRadialFR(cfac_t *cfac,
 
   orb1 = GetOrbitalSolved(cfac, k1);
   orb2 = GetOrbitalSolved(cfac, k2);
+  if (!orb1 || !orb2) {
+    return 0.0;
+  }
+
   if (orb1->wfun == NULL || orb2->wfun == NULL) {
     if (m == -1) {
       return MultipoleRadialNR(cfac, m, k1, k2, gauge);
@@ -1830,7 +1862,7 @@ double MultipoleRadialFR(cfac_t *cfac,
   }
   
   n = MultipoleRadialFRGrid(cfac, &y, m, k1, k2, gauge);
-  if (n == 0) return 0.0;
+  if (n <= 0) return 0.0;
   
   ef = Max(orb1->energy, orb2->energy);
   if (ef > 0.0) {
@@ -1872,6 +1904,9 @@ double *GeneralizedMoments(cfac_t *cfac, int k1, int k2, int m) {
     index[2] = k2;
     orb1 = GetOrbitalSolved(cfac, k1);
     orb2 = GetOrbitalSolved(cfac, k2);
+  }
+  if (!orb1 || !orb2) {
+    return NULL;
   }
 
   p = MultiSet(cfac->gos_array, index, NULL);
@@ -1975,6 +2010,9 @@ void PrintGeneralizedMoments(cfac_t *cfac, char *fn, int m, int n0, int k0,
     return;
   }
   g = GeneralizedMoments(cfac, i0, i1, m);
+  if (!g) {
+    return;
+  }
   x = g + NGOSK;
   for (i = 0; i < NGOSK; i++) {
     fprintf(f, "%15.8E %15.8E %15.8E\n", x[i], exp(x[i]), g[i]);
@@ -2017,6 +2055,9 @@ int SlaterTotal(cfac_t *cfac,
   orb1 = GetOrbitalSolved(cfac, k1);
   orb2 = GetOrbitalSolved(cfac, k2);
   orb3 = GetOrbitalSolved(cfac, k3);
+  if (!orb0 || !orb1 || !orb2 || !orb3) {
+    return -1;
+  }
 
   if (orb0->n <= 0) {
     maxn = -1;
@@ -2098,7 +2139,9 @@ int SlaterTotal(cfac_t *cfac,
     d = 0.0;
     if (Triangle(js[0], js[2], k) && Triangle(js[1], js[3], k)) {
       if (IsEven((kl0+kl2)/2+kk) && IsEven((kl1+kl3)/2+kk)) {	
-	Slater(cfac, &d, k0, k1, k2, k3, kk, mode);
+	if (Slater(cfac, &d, k0, k1, k2, k3, kk, mode) < 0) {
+          return 0.0;
+        }
 	if (kk == 1 && cfac->qed.sms && maxn > 0) {
 	  a1 = Vinti(cfac, k0, k2);
 	  a2 = Vinti(cfac, k1, k3);
@@ -2148,7 +2191,9 @@ int SlaterTotal(cfac_t *cfac,
     if (fabs(a) > EPS30) {
       e = 0.0;
       if (IsEven((kl0+kl3+t)/2) && IsEven((kl1+kl2+t)/2)) {
-	Slater(cfac, &e, k0, k1, k3, k2, t/2, mode);
+	if (Slater(cfac, &e, k0, k1, k3, k2, t/2, mode) < 0) {
+          return 0.0;
+        }
 	if (t == 2 && cfac->qed.sms && maxn > 0) {
 	  e -= Vinti(cfac, k0, k3) * Vinti(cfac, k1, k2) / am;
 	}
@@ -2214,6 +2259,9 @@ double QED1E(cfac_t *cfac, int k0, int k1) {
 
   orb1 = GetOrbitalSolved(cfac, k0);
   orb2 = GetOrbitalSolved(cfac, k1);
+  if (!orb1 || !orb2) {
+    return 0.0;
+  }
 
   if (orb1->n <= 0 || orb2->n <= 0) {
     return 0.0;
@@ -2288,6 +2336,9 @@ double Vinti(cfac_t *cfac, int k0, int k1) {
 
   orb1 = GetOrbitalSolved(cfac, k0);
   orb2 = GetOrbitalSolved(cfac, k1);
+  if (!orb1 || !orb2) {
+    return 0.0;
+  }
 
   if (orb1->n <= 0 || orb2->n <= 0) {
     return 0.0;
@@ -2549,7 +2600,9 @@ int Slater(const cfac_t *cfac,
     switch (mode) {
     case 0: /* fall through to case 1 */
     case 1: /* full relativistic with distorted free orbitals */
-      GetYk(cfac, k, yk, orb0, orb2, k0, k2, 1); 
+      if (GetYk(cfac, k, yk, orb0, orb2, k0, k2, 1) != 0) {
+        return -1;
+      }
       if (orb1->n > 0) ilast = orb1->ilast;
       else ilast = npts-1;
       if (orb3->n > 0) ilast = Min(ilast, orb3->ilast);

@@ -67,7 +67,6 @@ int SetCEEGrid(int n, double emin, double emax, double eth);
 int SetUsrCEEGridDetail(int n, double *x);
 int SetUsrCEEGrid(int n, double emin, double emax, double eth);
 
-int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k);
 int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, 
 		   double te, double e1, double *qk, int m);
 int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int kp,

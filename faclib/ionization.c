@@ -252,7 +252,8 @@ int SetCIQkMode(int m, double tol) {
   return 0;
 }  
 
-int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, int k) {
+static int CIRadialQk(cfac_t *cfac,
+    double *qk, double e1, double e2, int kb, int kbp, int k) {
   double pk[MAXNTE][MAXNKL], pkp[MAXNTE][MAXNKL];
   double e0, te;
   ORBITAL *orb;
@@ -377,9 +378,13 @@ int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, 
 		ks[0] = kb;
 		if (kl1 >= pw_scratch.qr &&
 		    kl0 >= pw_scratch.qr) {
-		  SlaterTotal(cfac, &sd, &se, js, ks, k, -1);
+		  if (SlaterTotal(cfac, &sd, &se, js, ks, k, -1) != 0) {
+                    return -1;
+                  }
 		} else {
-		  SlaterTotal(cfac, &sd, &se, js, ks, k, 1);
+		  if (SlaterTotal(cfac, &sd, &se, js, ks, k, 1) != 0) {
+                    return -1;
+                  }
 		} 
 		r = sd + se;
                 if (!r) break;
@@ -389,9 +394,13 @@ int CIRadialQk(cfac_t *cfac, double *qk, double e1, double e2, int kb, int kbp, 
 		  ks[0] = kbp;
 		  if (kl1 >= pw_scratch.qr &&
 		      kl0 >= pw_scratch.qr) {
-		    SlaterTotal(cfac, &sd, &se, js, ks, k, -1);
+		    if (SlaterTotal(cfac, &sd, &se, js, ks, k, -1) != 0) {
+                      return -1;
+                    }
 		  } else {
-		    SlaterTotal(cfac, &sd, &se, js, ks, k, 1);
+		    if (SlaterTotal(cfac, &sd, &se, js, ks, k, 1) != 0) {
+                      return -1;
+                    }
 		  } 
 		  rp = sd + se;
                   if (!rp) break;
@@ -547,7 +556,7 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
   return 0;
 }
 
-double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
+static double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   int index[2], ie, ite, i, k, nqk, qlog;
   double **p, *qkc, e1, e2;
   double yint[NINT], integrand[NINT];
@@ -592,7 +601,9 @@ double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
       e2 = egrid[ie]*y;
       e1 = egrid[ie]*(1.0-y);
       for (k = 0; k <= pw_scratch.max_k; k += 2) {
-	CIRadialQk(cfac, qi, e1, e2, kb, kbp, k);
+	if (CIRadialQk(cfac, qi, e1, e2, kb, kbp, k) != 0) {
+          return NULL;
+        }
 	for (ite = 0; ite < n_tegrid; ite++) {
 	  qi[ite] /= (k + 1.0);
 	  qt[ite][i] += qi[ite];
@@ -1260,7 +1271,9 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
 		  ks[1] = OrbitalIndex(cfac, 0, kappa0, e0);
 		  ph0 = GetPhaseShift(cfac, ks[1]);
 		  ks[0] = k0;
-		  SlaterTotal(cfac, &sd, &se, NULL, ks, k, 1);
+		  if (SlaterTotal(cfac, &sd, &se, NULL, ks, k, 1) != 0) {
+                    return 0.0;
+                  }
 		  r = sd + se;
 		  for (j0p = j0pmin; j0p <= j0pmax; j0p += 2) {
 		    for (kl0p = j0p - 1; kl0p <= j0p + 1; kl0p += 2) {
@@ -1268,7 +1281,9 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
 		      ks[1] = OrbitalIndex(cfac, 0, kappa0p, e0);
 		      ph0p = GetPhaseShift(cfac, ks[1]);
 		      ks[0] = k1;
-		      SlaterTotal(cfac, &sd, &se, NULL, ks, kp, 1);
+		      if (SlaterTotal(cfac, &sd, &se, NULL, ks, kp, 1) != 0) {
+                        return 0.0;
+                      }
 		      rp = sd + se;
 		      Jmin = abs(J0 - k);
 		      Jmax = J0 + k;

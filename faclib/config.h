@@ -236,7 +236,6 @@ int          GroupExists(const cfac_t *cfac, const char *name);
 int          AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg);
 int          AddGroup(cfac_t *cfac, const char *name);
 CONFIG_GROUP *GetGroup(const cfac_t *cfac, int k);
-CONFIG_GROUP *GetNewGroup(cfac_t *cfac);
 int          GetNumGroups(const cfac_t *cfac);
 int          GetNumConfigs(const cfac_t *cfac);
 int          ConfigParity(CONFIG *c);
@@ -244,7 +243,6 @@ CONFIG       *GetConfig(const cfac_t *cfac, const STATE *s);
 CONFIG       *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc);
 int          AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate, 
 				int parity, int j);
-int          AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg);
 SYMMETRY     *GetSymmetry(const cfac_t *cfac, int k);
 STATE        *GetSymmetryState(SYMMETRY *sym, int isym);
 void         DecodePJ(int i, int *p, int *j);

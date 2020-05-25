@@ -44,6 +44,8 @@
 */
 static char spec_symbols[MAX_SPEC_SYMBOLS+2] = "spdfghiklmnoqrtuvwxyz*"; 
 
+static int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg);
+
 /* 
 ** FUNCTION:    DistributeElectronsShell
 ** PURPOSE:     distribute nq electrons among the specified shells
@@ -257,7 +259,7 @@ int ShellsFromString(char *scfg, double *dnq, SHELL **shell) {
     nn = StrSplit(token, ',');
     if (nn > 16) {
       printf("number of n's in a single shell must be <= 16\n");
-      exit(1);
+      return -1;
     }
     s = token;
     for (i = 0; i < nn; i++) {
@@ -281,7 +283,7 @@ int ShellsFromString(char *scfg, double *dnq, SHELL **shell) {
     if (brkpos == MAX_SPEC_SYMBOLS) {
       if (n[nn-1] >= 512) {
 	printf("not all L-terms are allowed for n >= %d\n", 512);
-	exit(1);
+	return -1;
       }
       nkl = n[nn-1];
       for (i = 0; i < nkl; i++) {
@@ -302,14 +304,14 @@ int ShellsFromString(char *scfg, double *dnq, SHELL **shell) {
     *dnq = atof(&(scfg[next]));
     if (*dnq < 0) {
       printf("negative occupation number, use brackets to indicate j-1/2 shell\n");
-      exit(1);
+      return -1;
     }
     if (*dnq == 0 && !(isdigit(scfg[next]))) *dnq = 1;
   } else if (quotepos == 0) {
     nkl = StrSplit(token, ',');
     if (nkl > 512) {
       printf("number of L-terms must < 512\n");
-      exit(1);
+      return -1;
     }
     s = token;
     nkappa = 0;
@@ -377,7 +379,7 @@ int ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell) {
     nn = StrSplit(token, ',');
     if (nn > 16) {
       printf("number of n's in a single shell must be <= 16\n");
-      exit(1);
+      return -1;
     }
     s = token;
     for (i = 0; i < nn; i++) {
@@ -401,7 +403,7 @@ int ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell) {
     if (brkpos == MAX_SPEC_SYMBOLS) {
       if (n[nn-1] >= 512) {
 	printf("not all L-terms are allowed for n >= %d\n", 512);
-	exit(1);
+        return -1;
       }
       nkl = n[nn-1];
       for (i = 0; i < nkl; i++) {
@@ -423,7 +425,7 @@ int ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell) {
     nkl = StrSplit(token, ',');
     if (nkl > 512) {
       printf("number of L-terms must < 512\n");
-      exit(1);
+      return -1;
     }
     s = token;
     nkappa = 0;
@@ -1618,7 +1620,7 @@ int AddGroup(cfac_t *cfac, const char *name) {
   if (name == NULL) return -1;
   if (cfac->n_groups == MAX_GROUPS) {
     printf("Max # groups reached\n");
-    exit(1);
+    return -1;
   }
   strncpy(cfac->cfg_groups[cfac->n_groups].name, name, GROUP_NAME_LEN);
   cfac->n_groups++;
@@ -1638,24 +1640,6 @@ int AddGroup(cfac_t *cfac, const char *name) {
 CONFIG_GROUP *GetGroup(const cfac_t *cfac, int k) {
   if (k < 0 || k >= cfac->n_groups) return NULL;
   return cfac->cfg_groups+k;
-}
-
-/* 
-** FUNCTION:    GetNewGroup
-** PURPOSE:     add a new group and return its pointer.
-** INPUT:       
-** RETURN:      {CONFIG_GROUP *},
-**              pointer to the added group.
-** SIDE EFFECT: 
-** NOTE:        the name of the group is initialized as '_all_'.
-*/
-CONFIG_GROUP *GetNewGroup(cfac_t *cfac) {
-  if (cfac->n_groups == MAX_GROUPS) {
-    printf("Max # groups reached\n");
-    exit(1);
-  }
-  cfac->n_groups++;
-  return cfac->cfg_groups+cfac->n_groups-1;
 }
 
 /* 
@@ -1764,7 +1748,9 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   }
   if (ArrayAppend(clist, cfg) == NULL) return -1;
   if (cfg->n_csfs > 0) {    
-    AddConfigToSymmetry(cfac, k, cfgr->n_cfgs, cfg); 
+    if (AddConfigToSymmetry(cfac, k, cfgr->n_cfgs, cfg) != 0) {
+      return -1;
+    }
   }
   cfgr->n_cfgs++;
 
@@ -1793,7 +1779,7 @@ int AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate, int parity, int
   k = IsEven(parity)? 2*j : (2*j+1);
   if (k >= MAX_SYMMETRIES) {
     printf("Maximum symmetry reached: %d %d\n", MAX_SYMMETRIES, k);
-    exit(1);
+    return -1;
   }
 
   s.kgroup = kg;
@@ -1839,7 +1825,7 @@ void UnpackSymState(int st, int *s, int *k) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg) {
+static int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg) {
   int parity;
   int i, j, k, m;
   STATE s;
@@ -1856,7 +1842,7 @@ int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg) {
     k = IsEven(parity)? 2*j : (2*j+1);
     if (k >= MAX_SYMMETRIES) {
       printf("Maximum symmetry reached: %d %d\n", MAX_SYMMETRIES, k);
-      exit(1);
+      return -1;
     }
     s.kgroup = kg;
     s.kcfg = kc;

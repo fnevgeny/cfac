@@ -360,7 +360,9 @@ int RecStatesFrozen(cfac_t *cfac, int n, int k, int *kg, char *fn) {
 	jmin = abs(j2 - j1);
 	jmax = j2 + j1;
 	for (tj = jmin; tj <= jmax; tj += 2) {
-	  AddStateToSymmetry(cfac, -(i+1), ko, tj, p, tj);
+	  if (AddStateToSymmetry(cfac, -(i+1), ko, tj, p, tj) != 0) {
+            return -1;
+          }
 	  nstates++;
 	}
       }

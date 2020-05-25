@@ -305,7 +305,9 @@ int RecStates(cfac_t *cfac, int n, int k, int *kg, char *fn) {
     if (!h) continue;
     j = DiagonalizeHamilton(cfac, h);
     if (!j) {
-      AddToLevels(cfac, h, 0, NULL);
+      if (AddToLevels(cfac, h, 0, NULL) != 0) {
+        return -2;
+      }
     }
     cfac_hamiltonian_free(h);
     if (j < 0) return -1;
@@ -386,7 +388,9 @@ int RecStatesFrozen(cfac_t *cfac, int n, int k, int *kg, char *fn) {
 	  h = ConstructHamiltonFrozen(cfac, i, j, NULL, n, 0, NULL);
 	  if (!h) continue;
 	  if (DiagonalizeHamilton(cfac, h) < 0) return -2;
-	  AddToLevels(cfac, h, 0, NULL);
+	  if (AddToLevels(cfac, h, 0, NULL) != 0) {
+            return -2;
+          }
 	}
 	i0 = rec_complex[t].s1+1;
       }
@@ -394,7 +398,9 @@ int RecStatesFrozen(cfac_t *cfac, int n, int k, int *kg, char *fn) {
       h = ConstructHamiltonFrozen(cfac, i, k, kg, n, 0, NULL);
       if (!h) continue;
       if (DiagonalizeHamilton(cfac, h) == 0) {
-        AddToLevels(cfac, h, 0, NULL);
+        if (AddToLevels(cfac, h, 0, NULL) != 0) {
+          return -2;
+        }
         cfac_hamiltonian_free(h);
       } else {
         cfac_hamiltonian_free(h);

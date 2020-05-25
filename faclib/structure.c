@@ -227,10 +227,6 @@ static void FlagClosed(cfac_t *cfac, SHAMILTON *hs) {
 static int IsClosedShell(const cfac_t *cfac, int ih, int k) {
   int i, j;
   
-  if (ih >= MAX_HAMS) {
-    abort();
-  }
-
   i = k/8;
   if (i >= MBCLOSE) return 0;
   j = k%8;
@@ -445,7 +441,7 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
 
     if (cfac->nhams >= MAX_HAMS) {
         printf("Number of Hamiltonians exceeded the maximum %d\n", MAX_HAMS);
-        exit(1);
+        return NULL;
     }
     
     hs = &cfac->hams[cfac->nhams];
@@ -1537,7 +1533,7 @@ int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h) {
   if (h->n_basis < h->dim) {
     printf("h->n_basis < h->dim in DiagonalizeHamilton(), %d %d\n",
         h->n_basis, h->dim);
-    abort();
+    return -2;
   }
   
   if (cfac->confint == -1) {
@@ -1654,7 +1650,7 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
       lev.energy = c->energy;
       if (ArrayAppend(cfac->levels, &lev) == NULL) {
 	printf("Not enough memory for levels array\n");
-	exit(1);
+	return -1;
       }
 
       cfac->n_levels++;
@@ -1705,7 +1701,7 @@ static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
 
     if (ArrayAppend(cfac->eblevels, &lev) == NULL) {
       printf("Not enough memory for levels array\n");
-      exit(1);
+      return -1;
     }
     j++;
     mix += h->n_basis;
@@ -1819,7 +1815,7 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
 
     if (ArrayAppend(cfac->levels, &lev) == NULL) {
       printf("Not enough memory for levels array\n");
-      exit(1);
+      return -1;
     }
     j++;
     mix += h->n_basis;
@@ -2641,17 +2637,21 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
   return 0;
 }
 
-void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
+int StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
   int k;
   
   HAMILTON *h = ConstructHamiltonEB(cfac, n, ilev);
 
-  DiagonalizeHamilton(cfac, h);
+  if (DiagonalizeHamilton(cfac, h) < 0) {
+    return -1;
+  }
   
   k = cfac->n_eblevels;
   AddToLevelsEB(cfac, h, 0, NULL);
   SortLevels(cfac, k, -1, 1);
   SaveEBLevels(cfac, fn, k, -1);
+
+  return 0;
 }
 
 int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
@@ -2671,7 +2671,11 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   SHELL_STATE *sbra, *sket;
   ANGULAR_ZMIX **a, *ang;
   int kmax = GetMaxRank(cfac);
-  
+
+  if (ih1 >= MAX_HAMS || ih2 >= MAX_HAMS) {
+    return -1;
+  }
+
   iz = ih1*MAX_HAMS + ih2;
   *ad = &(cfac->angz_array[iz]);
   ns = (*ad)->ns;
@@ -2750,7 +2754,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       ang = malloc(sizeof(ANGULAR_ZMIX)*nz);
       if (!ang) {
 	printf("failed allocating memory for ang %d %d\n", nz, ns);
-	exit(1);
+	return -1;
       }
       if (s[0].index >= 0) {
 	nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1, kmax);
@@ -3524,7 +3528,9 @@ int AngularZMix(cfac_t *cfac,
     } else {
       lev = NULL;
     }
-    AngularZMixStates(cfac, &ad, lev1->iham, lev2->iham);
+    if (AngularZMixStates(cfac, &ad, lev1->iham, lev2->iham) < 0) {
+      return -1;
+    }
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
@@ -4059,7 +4065,9 @@ int cfac_calculate_structure(cfac_t *cfac,
        both branches, always assuming the mixed/hybrid mode */
     
     /* UTA branch */
-    AddToLevelsUTA(cfac, ng, gids);
+    if (AddToLevelsUTA(cfac, ng, gids) != 0) {
+        return -1;
+    }
     
     /* non-UTA branch */
     for (isym = 0; isym < MAX_SYMMETRIES; isym++) {
@@ -4077,9 +4085,13 @@ int cfac_calculate_structure(cfac_t *cfac,
         }
 
         if (int_ng != ng) {
-            AddToLevels(cfac, h, ng, gids);
+            if (AddToLevels(cfac, h, ng, gids) != 0) {
+              return -1;
+            }
         } else {
-            AddToLevels(cfac, h, 0, NULL);
+            if (AddToLevels(cfac, h, 0, NULL) != 0) {
+              return -1;
+            }
         }
 
         cfac_hamiltonian_free(h);

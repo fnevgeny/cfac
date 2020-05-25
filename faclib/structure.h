@@ -187,7 +187,7 @@ void GetFields(const cfac_t *cfac, double *b, double *e, double *a);
 int CodeBasisEB(int s, int m);
 void DecodeBasisEB(int k, int *s, int *m);
 HAMILTON *ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev);
-void StructureEB(cfac_t *cfac, char *fn, int n, int *ilev);
+int StructureEB(cfac_t *cfac, char *fn, int n, int *ilev);
 double HamiltonElementEB(const cfac_t *cfac, HAMILTON *h, int i0, int j0);
 
 int SlaterCoeff(cfac_t *cfac,

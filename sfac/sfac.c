@@ -2793,17 +2793,21 @@ static int PSetFields(int argc, char *argv[], int argt[],
 
 static int PStructureEB(int argc, char *argv[], int argt[], 
 			ARRAY *variables) {
-  int n, *ilev;
+  int n, *ilev, res;
 
   if (argc != 2 || argt[0] != STRING || argt[1] != LIST) return -1;
 
   n = SelectLevels(&ilev, argv[1], argt[1], variables);
   if (n <= 0) return -1;
   
-  StructureEB(cfac, argv[0], n, ilev);
+  res = StructureEB(cfac, argv[0], n, ilev);
   free(ilev);
 
-  return 0;
+  if (res != 0) {
+    return -1;
+  } else {
+    return 0;
+  }
 }
 
 static int PTransitionTableEB(int argc, char *argv[], int argt[], 

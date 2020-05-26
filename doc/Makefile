@@ -17,11 +17,11 @@ all : $(DOCS)
 include $(TOP)/Make.conf
 
 manual.pdf : manual.tex $(CHAPTERS) facref.bib $(INCLISTINGS) $(REFMAN)
-	pdflatex manual
+	TEXINPUTS=".:./cfacdbdoc:" pdflatex manual
 	bibtex manual
-	makeindex manual
-	pdflatex manual
-	pdflatex manual
+	TEXINPUTS=".:./cfacdbdoc:" makeindex manual
+	TEXINPUTS=".:./cfacdbdoc:" pdflatex manual
+	TEXINPUTS=".:./cfacdbdoc:" pdflatex manual
 
 $(REFMAN) : $(TOP)/include/cfacdb.h cfacdb-doxy.cfg
 	doxygen cfacdb-doxy.cfg

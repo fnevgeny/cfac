@@ -123,6 +123,8 @@ static struct {
 
 static MULTI *qk_array;
 
+static int ReinitIonization(int m);
+
 void SetCIBorn(int x) {
   if (x >= 0) {
     xborn = x;
@@ -132,7 +134,12 @@ void SetCIBorn(int x) {
   }
 }
 
-void FreeIonizationQkData(void *p) {
+static int FreeIonizationQk(void) {
+  MultiFreeData(qk_array);
+  return 0;
+}
+
+static void FreeIonizationQkData(void *p) {
   double *dp;
   dp = *((double **) p);
   free(dp);
@@ -444,7 +451,7 @@ static int CIRadialQk(cfac_t *cfac,
   return 0;
 }
 
-void CIRadialQkBasis(int npar, double *yb, double x, double log_x) {
+static void CIRadialQkBasis(int npar, double *yb, double x, double log_x) {
   double y1, y2;
 
   y1 = 1.0/x;
@@ -454,18 +461,7 @@ void CIRadialQkBasis(int npar, double *yb, double x, double log_x) {
   yb[2] = yb[1]*y1;
 }
 
-void CIRadialQkBasis0(int npar, double *yb, double x, double log_x) {
-  double y1, y2;
-
-  y1 = 1.0/x;
-  y2 = 1.0 - y1;
-  yb[0] = log_x;
-  yb[1] = y2*y2;
-  yb[2] = y2*y1 ;
-  yb[3] = yb[1]*y1;
-}
-
-void CIRadialQkFromFit(int np, double *p, int n, 
+static void CIRadialQkFromFit(int np, double *p, int n, 
 		       double *x, double *logx, double *y) {
   double a, c, d;
   int i;
@@ -481,7 +477,7 @@ void CIRadialQkFromFit(int np, double *p, int n,
   }
 }
 
-int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
+static int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
 		  double *xe, double *logxe, double *q, double *p, double te) {
   double integrand[NINT];
   double x[NINT], y[NINT], t[NINT], s[NINT], d;
@@ -644,7 +640,8 @@ static double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
   return (*p);
 }
 
-int CIRadialQkIntegrated(cfac_t *cfac, double *qke, double te, int kb, int kbp) {
+static int CIRadialQkIntegrated(cfac_t *cfac,
+    double *qke, double te, int kb, int kbp) {
   int i, j, k, nd, nq;
   double *qk, qkc[MAXNTE];
 
@@ -672,7 +669,7 @@ int CIRadialQkIntegrated(cfac_t *cfac, double *qke, double te, int kb, int kbp) 
   return 0;
 }
  
-double BEScale(cfac_t *cfac, int k, double e) {
+static double BEScale(cfac_t *cfac, int k, double e) {
   double z, a, b, c;
   ORBITAL *orb;
 
@@ -689,11 +686,11 @@ double BEScale(cfac_t *cfac, int k, double e) {
   return b;
 }
 
-int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te, 
+static int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te, 
 		   int b, int f) {
   LEVEL *lev1, *lev2;
   int i, ip, ierr;
-  double b0;
+  double b0 = 0.0;
   int kb, nqk = NPARAMS;
   double tol, x[MAXNE], logx[MAXNE];
   ORBITAL *orb;
@@ -1216,8 +1213,9 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   return 0;
 }
 
-double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int k1, 
-		      double e1, double e2, double e0) {
+static double CIRadialQkMSub(cfac_t *cfac,
+    int J0, int M0, int J1, int M1, int k0, int k1,
+    double e1, double e2, double e0) {
   ORBITAL *orb0, *orb1;
   int jk0, jk1, t, kl1, j1, kappa1, k, ks[4];
   int Jmax, Jmin, kp, Jpmax, Jpmin, J, Jp;
@@ -1364,8 +1362,8 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
   return r;
 }
 
-double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
-				int k0, int k1, double te, double e12) {
+static double CIRadialQkIntegratedMSub(cfac_t *cfac,
+    int j1, int m1, int j2, int m2, int k0, int k1, double te, double e12) {
   double e0, e1, e2, d, r;
   double x[NINT0], y[NINT0], xi[NINT], yi[NINT];
   double ymin, ymax;
@@ -1422,7 +1420,7 @@ double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
   return r;
 }
 
-int IonizeStrengthMSub(cfac_t *cfac, double *qku, int b, int f) {
+static int IonizeStrengthMSub(cfac_t *cfac, double *qku, int b, int f) {
   LEVEL *lev1, *lev2;
   ANGULAR_ZFB *ang;
   double c, d, x[MAXNE], logx[MAXNE];
@@ -1625,11 +1623,6 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   return 0;
 }
 
-int FreeIonizationQk(void) {
-  MultiFreeData(qk_array);
-  return 0;
-}
-
 int InitIonization(cfac_t *cfac) {
   int blocks[2] = {MULTI_BLOCK2,MULTI_BLOCK2};
   int ndim = 2;
@@ -1650,7 +1643,7 @@ int InitIonization(cfac_t *cfac) {
   return SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB);
 }
 
-int ReinitIonization(int m) {
+static int ReinitIonization(int m) {
 
   if (m < 0) return 0;
 

@@ -23,29 +23,8 @@
 #include "consts.h"
 #include "transition.h"
 
-typedef struct _CEPW_SCRATCH_ {
-  int qr;
-  int max_kl;
-  int kl_cb;
-  int nkl0;
-  int nkl;
-  int ns;
-  double kl[MAXNKL+1];
-  double log_kl[MAXNKL];
-} CEPW_SCRATCH;
-
-typedef struct _CEPK_ {
-  short nkl;
-  short nkappa;
-  short *kappa0;
-  short *kappa1;
-  double *pkd;
-  double *pke;
-} CEPK;
-
-int FreeExcitationQk(void);
 int InitExcitation(void);
-int ReinitExcitation(int m);
+
 int SetCETEGrid(int n, double emin, double emax);
 int SetCETEGridDetail(int n, double *x);
 int SetAngleGrid(int m, int n, double xmin, double xmax);
@@ -69,19 +48,8 @@ int SetUsrCEEGrid(int n, double emin, double emax, double eth);
 
 int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, 
 		   double te, double e1, double *qk, int m);
-int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int kp,
-		       double te, double e1, 
-		       int nq, int *q, double *qk, int m);
-int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *r, double te, 
-	       int k0, int k1, int k2, int k3, int k);
-int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *rq, double te, int k0, int k1,
-		   int k2, int k3, int k, int kp);
-int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSITION *tr, int msub,
-                      double *qkt, double *params, double *bethe);
+
 int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub, char *fn);
-int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, int lower, int upper);
-int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache, double *s, double *e, double *bethe, double *born,
-			 int lower, int upper);
 int SaveExcitationEB(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn);
 int SaveExcitationEBD(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn);
 

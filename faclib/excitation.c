@@ -36,6 +36,26 @@
 #define MAXMSUB  32
 #define NPARAMS  4
 
+typedef struct _CEPW_SCRATCH_ {
+  int qr;
+  int max_kl;
+  int kl_cb;
+  int nkl0;
+  int nkl;
+  int ns;
+  double kl[MAXNKL+1];
+  double log_kl[MAXNKL];
+} CEPW_SCRATCH;
+
+typedef struct _CEPK_ {
+  short nkl;
+  short nkappa;
+  short *kappa0;
+  short *kappa1;
+  double *pkd;
+  double *pke;
+} CEPK;
+
 static int egrid_type = -1;
 static int usr_egrid_type = -1;
 static int pw_type = -1;
@@ -78,6 +98,8 @@ static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 0, 0, 10, {0.0}, {0.0}};
 static MULTI *pk_array;
 static MULTI *qk_array;
 
+static int ReinitExcitation(int m);
+
 static void InitCEPK(void *p, int n) {
   CEPK *d;
   int i;
@@ -101,12 +123,19 @@ void FreeExcitationPkData(void *p) {
   dp->nkl = -1;
 }
 
-void FreeExcitationQkData(void *p) {
+static void FreeExcitationQkData(void *p) {
   double *dp;
 
   dp = *((double **) p);
   free(dp);
   *((double **) p) = NULL;
+}
+
+
+static int FreeExcitationQk(void) {
+  MultiFreeData(qk_array);
+  MultiFreeData(pk_array);
+  return 0;
 }
 
 int SetCEBorn(double eb, double x, double x1, double x0) {
@@ -593,9 +622,9 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
   return ty;
 }
   
-int CERadialQkBornMSub(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, int kp,
-		       double te, double e1,
-		       int nq, int *q, double *qk, int m) {
+static int CERadialQkBornMSub(cfac_t *cfac,
+    int k0, int k1, int k2, int k3, int k, int kp,
+    double te, double e1, int nq, int *q, double *qk, int m) {
   int p0, p1, p2, p3;
   int m0, m1, m2, m3;
   int j0, j1, j2, j3;
@@ -1284,7 +1313,7 @@ static double *CERadialQkMSubTable(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   return rqc;
 } 	
   
-int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
+static int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *rqc, double te, int k0, int k1, int k2, int k3, int k) {
   int i, nd, type;
   int j, m;
@@ -1349,7 +1378,7 @@ int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   return type;
 }
 
-int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache,
+static int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *rqc, double te, int k0, int k1, int k2, int k3, int k, int kp) {
   int i, nd, iq, n;
   int j, m, type, nq;
@@ -1421,7 +1450,7 @@ void RelativisticCorrection(int m, double *s, double *p, double te, double b) {
   }
 }
 
-int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
+static int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *qkt, double *e, double *bethe, int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
   double te, a, ap, c, cp, r, s[3];
@@ -1531,7 +1560,7 @@ int CollisionStrengthEB(cfac_t *cfac, const cfac_cbcache_t *cbcache,
   return 1;
 }
 
-int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
+static int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
     double *qkt, double *e, double *bethe, double *born, int lower, int upper) {
   LEVEL *lev1, *lev2, *plev1, *plev1p, *plev2, *plev2p;
   double te, a, ap, c, cp, r;
@@ -1663,8 +1692,8 @@ int CollisionStrengthEBD(cfac_t *cfac, const cfac_cbcache_t *cbcache,
  * RETURN: 1 (or number of CS if msub is set) on success; -1 if fails
  * GLOBALS: FACin' lot...
  */
-int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache, const TRANSITION *tr,
-    int msub, double *qkt, double *params, double *bethe) {
+static int CollisionStrength(cfac_t *cfac, const cfac_cbcache_t *cbcache,
+    const TRANSITION *tr, int msub, double *qkt, double *params, double *bethe) {
   int i, j, t, h, p, m, type, ty, p1, p2;  
   double te, c, r, s3j, c1;
   ANGULAR_ZMIX *ang;
@@ -2884,12 +2913,6 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
   return 0;
 }
 
-int FreeExcitationQk(void) {
-  MultiFreeData(qk_array);
-  MultiFreeData(pk_array);
-  return 0;
-}
-
   
 int InitExcitation(void) {
   int blocks1[] = {MULTI_BLOCK3,MULTI_BLOCK3,MULTI_BLOCK3};
@@ -2924,7 +2947,7 @@ int InitExcitation(void) {
   return 0;
 }
 
-int ReinitExcitation(int m) {
+static int ReinitExcitation(int m) {
   
   if (m < 0) return 0;
   

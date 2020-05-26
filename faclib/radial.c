@@ -2028,7 +2028,7 @@ double InterpolateMultipole(double aw, int n, double *x, double *y) {
     r = y[0];
   } else {
     nd = 1;
-    UVIP3P(n, x, y, nd, &aw, &r);
+    uvip3p(n, x, y, nd, &aw, &r);
   }
 
   return r;
@@ -3727,15 +3727,15 @@ int IntegrateSinCos(POTENTIAL *potential, int j, double *x, double *y,
     if (i1 > i) {
       u[i] = potential->rad[n];
     }
-    UVIP3P(i1, u, phase, i, w, w1);
+    uvip3p(i1, u, phase, i, w, w1);
     if (x) {
-      UVIP3P(i1, u, x, i, w, u1);
+      uvip3p(i1, u, x, i, w, u1);
       for (m = 0, n = i0+1; m < i; m++, n += 2) {
         z[n] += u1[m]*sin(w1[m]);
       }
     }
     if (y) {
-      UVIP3P(i1, u, y, i, w, u1);
+      uvip3p(i1, u, y, i, w, u1);
       for (m = 0, n = i0+1; m < i; m++, n += 2) {
         z[n] += u1[m]*cos(w1[m]);
       }
@@ -3764,7 +3764,7 @@ int IntegrateSinCos(POTENTIAL *potential, int j, double *x, double *y,
       u[n] = potential->rad[s];
       z[n] = potential->rad[s+1];
     }
-    UVIP3P(j-i1, u+i1, phase+i1, m, z+q, w+q);
+    uvip3p(j-i1, u+i1, phase+i1, m, z+q, w+q);
   }
 
   /* interpolate (calculate spline coefficients of) x & y on the phase axis */
@@ -3772,13 +3772,13 @@ int IntegrateSinCos(POTENTIAL *potential, int j, double *x, double *y,
     for (n = i1; n < j; n++) {
       x[n] /= dphase[n];
     }
-    UVIP3C(j-i1, phase+i1, x+i1, xa1, xa2, xa3);
+    uvip3c(j-i1, phase+i1, x+i1, xa1, xa2, xa3);
   }
   if (y != NULL) {
     for (n = i1; n < j; n++) {
       y[n] /= dphase[n];
     }
-    UVIP3C(j-i1, phase+i1, y+i1, ya1, ya2, ya3);
+    uvip3c(j-i1, phase+i1, y+i1, ya1, ya2, ya3);
   }
 
   /* analytic piecewise integration of cubic spline with sin or cos */

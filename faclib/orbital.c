@@ -1252,7 +1252,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     for (np = i; np <= j; np++) {
       dq[np] = -dq[np];
     }
-    UVIP3P(nme, &(dq[i]), &(en[i]), one, &zero, &e);
+    uvip3p(nme, &(dq[i]), &(en[i]), one, &zero, &e);
     i2p2 = pot->maxrp-1;
     nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
     if (nodes < 0) {

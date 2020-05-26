@@ -428,7 +428,7 @@ static int CIRadialQk(cfac_t *cfac,
 	kl1 = pw_scratch.kl[j];
 	for (kl = kl0+1; kl < kl1; kl++) {
 	  logj = LnInteger(kl);
-	  UVIP3P(t, pw_scratch.log_kl, pk[i], one, &logj, &s);
+	  uvip3p(t, pw_scratch.log_kl, pk[i], one, &logj, &s);
 	  r += s;
 	}
       } 
@@ -513,7 +513,7 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
   if (i < NINT) {
     n = NINT-i;
     n1 = n_egrid;
-    UVIP3P(n1, logxe, q, n, &(t[i]), &(integrand[i]));
+    uvip3p(n1, logxe, q, n, &(t[i]), &(integrand[i]));
     for (; i < NINT; i++) {
       integrand[i] = exp(integrand[i]);
     }
@@ -547,7 +547,7 @@ int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
     for (i = 0; i < n_egrid; i++) {
       x0[i] = 1.0/xe[i];
     }
-    UVIP3P(n, t, y, n_egrid, x0, dp);
+    uvip3p(n, t, y, n_egrid, x0, dp);
   }
   
   if (!isfinite(*bethe)) {
@@ -627,7 +627,7 @@ static double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
 	  qt[ite][i] = log(qt[ite][i]);
 	}
       }
-      UVIP3P(NINT0, yegrid, qt[ite], NINT, yint, integrand);
+      uvip3p(NINT0, yegrid, qt[ite], NINT, yint, integrand);
       if (qlog) {
 	for (i = 0; i < NINT; i++) {
 	  integrand[i] = exp(integrand[i]);
@@ -662,7 +662,7 @@ int CIRadialQkIntegrated(cfac_t *cfac, double *qke, double te, int kb, int kbp) 
 	qkc[j] = qk[k];
 	k += n_egrid;
       }
-      UVIP3P(n_tegrid, tegrid, qkc, nd, &te, &qke[i]);
+      uvip3p(n_tegrid, tegrid, qkc, nd, &te, &qke[i]);
     }
   } else {
     for (i = 0; i < nq; i++) {
@@ -873,8 +873,10 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       }
       
       tol = qk_fit_tolerance;
-      SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx, 
-	     qke, sigma, CIRadialQkBasis);
+      if (SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
+	     qke, sigma, CIRadialQkBasis) != CFAC_SUCCESS) {
+        return -1;
+      }
 
       if (usr_different) {
 	for (i = 0; i < n_usr; i++) {
@@ -932,8 +934,10 @@ int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
 	qkc[i] = 0.0;
       }
       tol = qk_fit_tolerance;
-      SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
-	     qke, sigma, CIRadialQkBasis);
+      if (SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
+	     qke, sigma, CIRadialQkBasis) != CFAC_SUCCESS) {
+        return -1;
+      }
       if (usr_different) {
 	for (i = 0; i < n_usr; i++) {
 	  xusr[i] = usr_egrid[i]/(*te);
@@ -1350,7 +1354,7 @@ double CIRadialQkMSub(cfac_t *cfac, int J0, int M0, int J1, int M1, int k0, int 
     kl1 = pw_scratch.kl[t];
     for (kl2 = kl0+1; kl2 < kl1; kl2++) {
       rp = LnInteger(kl2); 
-      UVIP3P(pw_scratch.nkl, pw_scratch.log_kl, y, 1, &rp, &d);
+      uvip3p(pw_scratch.nkl, pw_scratch.log_kl, y, 1, &rp, &d);
       r += d;
     }
   }
@@ -1405,7 +1409,7 @@ double CIRadialQkIntegratedMSub(cfac_t *cfac, int j1, int m1, int j2, int m2,
       y[i] = log(y[i]);
     }
   }
-  UVIP3P(NINT0, x, y, NINT, xi, yi);
+  uvip3p(NINT0, x, y, NINT, xi, yi);
   if (qlog) {
     for (i = 0; i < NINT; i++) {
       yi[i] = exp(yi[i]);
@@ -1485,7 +1489,7 @@ int IonizeStrengthMSub(cfac_t *cfac, double *qku, int b, int f) {
   for (m1 = -j1; m1 <= 0; m1 += 2) {
     for (m2 = -j2; m2 <= j2; m2 += 2) {
       if (n_egrid > 1) {
-	UVIP3P(n_egrid, logx, rqk, n_usr, log_xusr, qku);
+	uvip3p(n_egrid, logx, rqk, n_usr, log_xusr, qku);
       } else {
 	for (ie = 0; ie < n_usr; ie++) {
 	  qku[ie] = rqk[0];

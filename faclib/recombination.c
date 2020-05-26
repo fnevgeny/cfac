@@ -727,7 +727,7 @@ int RRRadialMultipole(cfac_t *cfac, double *rqc, double te, int k0, int k1, int 
 	rq[k] = rqe[j];
 	j += n_egrid;
       }
-      UVIP3P(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
+      uvip3p(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
     }
   }
   return 0;
@@ -754,7 +754,7 @@ int RRRadialQk(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m) {
 	rq[k] = rqe[j];
 	j += n_egrid;
       }
-      UVIP3P(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
+      uvip3p(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
     }
   }
   return 0;
@@ -979,7 +979,7 @@ int BoundFreeOS(cfac_t *cfac, double *rqu, double *rqc, double *eb,
       for (ie = 0; ie < n_egrid; ie++) {
 	tq[ie] = log(tq[ie]);
       }
-      UVIP3P(n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
+      uvip3p(n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
       for (ie = 0; ie < n_usr; ie++) {
 	rqu[ie] = exp(rqu[ie]);
       }
@@ -1074,7 +1074,7 @@ int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int ms
 	kappaf = GetKappaFromJL(jf, klf);
 	AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, ang[i].k);
 	if (n_egrid > 1) {
-	  UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	  uvip3p(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	} else {
 	  s = ai_pk[0];
 	}
@@ -1095,7 +1095,7 @@ int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int ms
       ik = klf - jf;
       AIRadial1E(cfac, ai_pk0, kb, kappaf);
       if (n_egrid > 1) {
-	UVIP3P(n_egrid, log_egrid, ai_pk0, nt, &log_e, &s);
+	uvip3p(n_egrid, log_egrid, ai_pk0, nt, &log_e, &s);
       } else {
 	s = ai_pk0[0];
       }
@@ -1166,7 +1166,7 @@ int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int ms
 		ai_pk0[ik] -= GetPhaseShift(cfac, k1);
 	      }	      
 	      if (n_egrid > 1) {
-		UVIP3P(n_egrid, log_egrid, ai_pk0, nt, &log_e, &a);
+		uvip3p(n_egrid, log_egrid, ai_pk0, nt, &log_e, &a);
 	      } else {
 		a = ai_pk0[0];
 	      }
@@ -1245,7 +1245,7 @@ int AutoionizeRateUTA(cfac_t *cfac, double *rate, double *e, int rec, int f) {
 	  if (!Triangle(j0, j1, k) || !Triangle(jb, jf, k)) continue;
 	  AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, k);
 	  if (n_egrid > 1) {
-	    UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	    uvip3p(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	  } else {
 	    s = ai_pk[0];
 	  }
@@ -1275,7 +1275,7 @@ int AutoionizeRateUTA(cfac_t *cfac, double *rate, double *e, int rec, int f) {
 	    if (fabs(b) < EPS30) continue;
 	    AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, k);
 	    if (n_egrid > 1) {
-	      UVIP3P(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+	      uvip3p(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
 	    } else {
 	      s = ai_pk[0];
 	    } 

@@ -473,7 +473,7 @@ static void InterpolateGOS(int n, double *x, double *g,
 			   int ni, double *xi, double *gi) {
   int t;
 
-  UVIP3P(n, x, g, ni, xi, gi);
+  uvip3p(n, x, g, ni, xi, gi);
   for (t = 0; t < ni; t++) {
     if (xi[t] < x[0]) {
       gi[t] = g[0];
@@ -879,10 +879,10 @@ static double *CERadialQkTable(cfac_t *cfac, const cfac_cbcache_t *cbcache,
 	  kl1 = pw_scratch.kl[i];
 	  for (j = kl0+1; j < kl1; j++) {
 	    logj = LnInteger(j);
-	    UVIP3P(nkl, pw_scratch.log_kl, qk, 
+	    uvip3p(nkl, pw_scratch.log_kl, qk,
 		   one, &logj, &s);
 	    r += s;
-	    UVIP3P(nkl, pw_scratch.log_kl, dqk, 
+	    uvip3p(nkl, pw_scratch.log_kl, dqk,
 		   one, &logj, &s);
 	    rd += s;
 	  }
@@ -1186,10 +1186,10 @@ static double *CERadialQkMSubTable(cfac_t *cfac, const cfac_cbcache_t *cbcache,
 	    kl1 = pw_scratch.kl[i]; 
 	    for (j = kl0+1; j < kl1; j++) {       
 	      logj = LnInteger(j);
-	      UVIP3P(nkl, pw_scratch.log_kl, qk[iq],
+	      uvip3p(nkl, pw_scratch.log_kl, qk[iq],
 		     one, &logj, &s);
 	      r += s;
-	      UVIP3P(nkl, pw_scratch.log_kl, dqk[iq],
+	      uvip3p(nkl, pw_scratch.log_kl, dqk[iq],
 		     one, &logj, &s);
 	      rd += s;
 	    }      
@@ -1313,7 +1313,7 @@ int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
 	rq[m] = rqe[j];
 	j += n_egrid1;
       }
-      UVIP3P(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+      uvip3p(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
     }
   }
 
@@ -1340,7 +1340,7 @@ int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
 	    rq[m] = rqe[j];
 	    j += n_egrid1;
 	  }
-	  UVIP3P(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+	  uvip3p(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
 	}
       }
     }
@@ -1386,7 +1386,7 @@ int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache,
 	  rq[m] = rqe[j];
 	  j += n_egrid1;
 	}
-	UVIP3P(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+	uvip3p(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
       }
       rqe += n;
       rqc += n_egrid1;

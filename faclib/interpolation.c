@@ -23,6 +23,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multifit_nlin.h>
 
+#include "cfacP.h"
 #include "interpolation.h"
 
 /* closed Newton-Cotes formulae coeff. */
@@ -35,7 +36,7 @@ static double _CNC[5][5] = {
 };
 
 
-void SVDFit(int np, double *coeff, double tol,
+int SVDFit(int np, double *coeff, double tol,
 	    int nd, double *x, double *logx, double *y, double *sig,
 	    void Basis(int, double *, double, double)) {
   int i, j;
@@ -86,7 +87,7 @@ void SVDFit(int np, double *coeff, double tol,
     
   if (infor != 0) {
     fprintf(stderr, "gsl_linalg_SV_decomp() failed with %d\n", infor);
-    abort();
+    return CFAC_FAILURE;
   }
     
   wmax = gsl_vector_get(Sv, 0);
@@ -101,6 +102,8 @@ void SVDFit(int np, double *coeff, double tol,
   gsl_vector_free(Sv);
   gsl_matrix_free(Am);
   gsl_matrix_free(Vm);
+
+  return CFAC_SUCCESS;
 }
 
 typedef struct {

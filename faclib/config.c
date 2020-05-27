@@ -2255,7 +2255,11 @@ int cfac_add_config(cfac_t *cfac,
     CONFIG *cfgs;
     int j, gidx, ncfgs;
     char *tmpstr;
-    
+
+    if (!gname || !cfg_str) {
+        return -1;
+    }
+
     gidx = GroupIndex(cfac, gname);
     if (gidx < 0) {
         return -1;

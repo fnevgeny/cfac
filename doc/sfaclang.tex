@@ -291,17 +291,17 @@ Set the maximum number of iterations allowed in \funcref{OptimizeRadial}. See
 \funcref{SetOptimizeControl}.
 \end{fundesc}
 
-\begin{fundesc}{SetOptimizePrint}{m}
+\begin{fundesc}{SetOptimizePrint}{p}
 Set the printing option in \funcref{OptimizeRadial}. See
 \funcref{SetOptimizeControl}.
 \end{fundesc}
 
-\begin{fundesc}{SetOptimizeStabilizer}{m}
+\begin{fundesc}{SetOptimizeStabilizer}{s}
 Set the stabilizer factor in \funcref{OptimizeRadial}. See
 \funcref{SetOptimizeControl}.
 \end{fundesc}
 
-\begin{fundesc}{SetOptimizeTolerance}{m}
+\begin{fundesc}{SetOptimizeTolerance}{t}
 Set the tolerance factor in \funcref{OptimizeRadial}. See
 \funcref{SetOptimizeControl}.
 \end{fundesc}
@@ -528,12 +528,6 @@ in collisional excitation. The default is 0, i.e., always use the
 quasi-relativistic approximation.
 \end{fundesc}
 
-\begin{fundesc}{SetCEQkMode}{mode}
-Set the computation mode for the excitation radial integrals. \var{mode} may
-be a string or an integer specifying the mode. These values are listed in the
-variable \key{QKMODE}.
-\end{fundesc}
-
 \begin{fundesc}{SetTEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the transition energy grid for collisional excitation. In the first form,
 the grid is given by a list \var{g}. In the second form, the grid is constructed
@@ -544,8 +538,7 @@ called. A 3-point grid is constructed by default. Calling this function with
 
 \begin{fundesc}{SetUsrCEGrid}{g $\mid$ n\opt{, e0, e1}}
 Set the user collision energy grid for collisional excitation. The collision
-strengths on this grid are output. It is forced to be same as that set by
-\funcref{SetCEGrid} if \key{QKMODE} is \key{'exact'}.
+strengths on this grid are output.
 \end{fundesc}
 
 

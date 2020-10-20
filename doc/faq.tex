@@ -124,21 +124,12 @@ energies does not vary by more than a factor of 5. A different transition
 energy grid and collision energy grid are used for different groups, and
 therefore, corresponding to different data blocks in the output.}
 
-\faq{Why is the default \key{QKMODE} for excitation is \key{EXACT}, not
-\key{FIT}}{
-It used to be in the \key{FIT} mode. However, the fitting formulae sometimes
-fail to reproduce the calculated collision strengths. After playing with
-different fitting formulae for a while, it was decided that the user should do
-the fitting (if one is desired) on the case-by-case basis. The function
-\funcref{SetCEQkMode} may be used to specify a different \key{QKMODE}.}
-
 \faq{Can I use a different collision energy grid}{
 A collision energy grid in terms of the energy of the scattered electron is
 automatically constructed if one is not specified prior to calling
-\funcref{CETable}. One may use the function \funcref{SetCEGrid} to specify a different
-grid. Or one may use \funcref{SetUsrCEGrid} to have a user grid different from the
-grid on which the collision strengths are calculated, and use
-\key{INTERPOLATE} mode for the \key{QKMODE}.}
+\funcref{CETable}. One may use the function \funcref{SetCEGrid} to specify a
+different grid. Or one may use \funcref{SetUsrCEGrid} to have a user grid
+different from the grid on which the collision strengths are calculated.}
 
 \faq{Why are collision strengths at very high energies incorrect}{
 Due to a limited radial grid size, the collision strengths at energies much

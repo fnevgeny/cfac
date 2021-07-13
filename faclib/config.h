@@ -195,18 +195,18 @@ typedef struct _SYMMETRY_ {
   ARRAY states;
 } SYMMETRY;
 
-int          ShellsFromString(char *scfg, double *dnq, SHELL **shell);
-int          ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell);
-int          GetRestriction(char *scfg, SHELL_RESTRICTION **sr, int m);
+int          ShellsFromString(const char *scfg, double *dnq, SHELL **shell);
+int          ShellsFromStringNR(const char *scfg, double *dnq, SHELL **shell);
+int          GetRestriction(const char *scfg, SHELL_RESTRICTION **sr, int m);
 int          ApplyRestriction(int ncfg, CONFIG *cfg, int nc, SHELL_RESTRICTION *sr);
-int          DistributeElectrons(CONFIG **cfg, double *nq, char *scfg);
-int          DistributeElectronsNR(CONFIG **cfg, char *scfg);
+int          DistributeElectrons(CONFIG **cfg, double *nq, const char *scfg);
+int          DistributeElectronsNR(CONFIG **cfg, const char *scfg);
 int          GetConfigOrAverageFromString(CONFIG **cfg, 
-					  double **nq, char *scfg);
-int          GetConfigFromStringNR(CONFIG **cfg, char *scfg);
-int          GetConfigFromString(CONFIG **cfg, char *scfg);
+					  double **nq, const char *scfg);
+int          GetConfigFromStringNR(CONFIG **cfg, const char *scfg);
+int          GetConfigFromString(CONFIG **cfg, const char *scfg);
 int          GetAverageConfigFromString(int **n, int **kappa, 
-					double **nq, char *scfg);
+					double **nq, const char *scfg);
 int          Couple(CONFIG *cfg);
 int          CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner);
 int          GetSingleShell(CONFIG *cfg);

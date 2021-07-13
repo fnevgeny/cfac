@@ -235,7 +235,7 @@ static int DistributeElectronsShellNR(CONFIG **cfg, int ns, SHELL *shell,
   return ncfg;
 }
 
-int ShellsFromString(char *scfg, double *dnq, SHELL **shell) {
+int ShellsFromString(const char *scfg, double *dnq, SHELL **shell) {
   char token[128];
   int r, brkpos, quotepos, next;
   int nn, nkl, nkappa;
@@ -355,7 +355,7 @@ int ShellsFromString(char *scfg, double *dnq, SHELL **shell) {
   return ns;
 }
 
-int ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell) {
+int ShellsFromStringNR(const char *scfg, double *dnq, SHELL **shell) {
   char token[128];
   int r, brkpos, quotepos, next;
   int nn, nkl, nkappa;
@@ -464,11 +464,12 @@ int ShellsFromStringNR(char *scfg, double *dnq, SHELL **shell) {
   return ns;
 }
 
-int GetRestriction(char *scfg, SHELL_RESTRICTION **sr, int m) {
+int GetRestriction(const char *iscfg, SHELL_RESTRICTION **sr, int m) {
   int nc, i;
   double dnq;
   char *s;
 
+  char *scfg = strdup(iscfg);
   nc = StrSplit(scfg, ';');
   nc--;
 
@@ -517,6 +518,7 @@ int GetRestriction(char *scfg, SHELL_RESTRICTION **sr, int m) {
     scfg = s;
   }
   
+  free(scfg);
   return nc;
 }
 
@@ -599,7 +601,7 @@ int ApplyRestriction(int ncfg, CONFIG *cfg, int nc, SHELL_RESTRICTION *sr) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */    
-int DistributeElectrons(CONFIG **cfg, double *nq, char *scfg) {
+int DistributeElectrons(CONFIG **cfg, double *nq, const char *scfg) {
   SHELL *shell;
   int ncfg, *maxq, ns, nc, i, j, inq;
   double dnq;
@@ -652,7 +654,7 @@ int DistributeElectrons(CONFIG **cfg, double *nq, char *scfg) {
   return ncfg;
 }
 
-int DistributeElectronsNR(CONFIG **cfg, char *scfg) {
+int DistributeElectronsNR(CONFIG **cfg, const char *scfg) {
   SHELL *shell;
   int ncfg, *maxq, ns, nc, i, inq;
   double dnq;
@@ -705,7 +707,7 @@ int DistributeElectronsNR(CONFIG **cfg, char *scfg) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */       
-int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
+int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
   CONFIG **dcfg, **p1;
   double *dnq, *p2, a, b;
   char *s;
@@ -713,6 +715,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
   int size, size_old, tmp;
   int i, t, j, k, ns;
 
+  char *scfg = strdup(iscfg);
   StrTrim(scfg, '\0');
   ns = QuotedStrSplit(scfg, ' ', '[', ']');
   if (ns == 0) {
@@ -721,6 +724,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
     (*cfg)->n_shells = 1;
     (*cfg)->shells = (SHELL *) malloc(sizeof(SHELL));
     PackShell((*cfg)->shells, 1, 0, 1, 0);
+    free(scfg);
     return 1;
   }
 
@@ -752,6 +756,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
       free(dcfg);
       free(dnc);
       free(isp);
+      free(scfg);
       return -1;
     }
     if (dnc[t] > 1 || (*p1)->n_shells > 0) {
@@ -772,6 +777,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
     PackShell((*cfg)->shells, 1, 0, 1, 0);
     free(dcfg);
     free(dnc);
+    free(scfg);
     return 1;
   }
 
@@ -847,17 +853,19 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, char *scfg) {
   }
   free(dcfg);
   free(dnc);
+  free(scfg);
 
   return ncfg;
 }
 
-int GetConfigFromStringNR(CONFIG **cfg, char *scfg) {
+int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
   CONFIG **dcfg, **p1;
   char *s;
   int *isp, ncfg, *dnc;  
   int size, size_old, tmp;
   int i, t, j, k, ns;
 
+  char *scfg = strdup(iscfg);
   StrTrim(scfg, '\0');
   ns = QuotedStrSplit(scfg, ' ', '[', ']');
   if (ns == 0) {
@@ -890,6 +898,7 @@ int GetConfigFromStringNR(CONFIG **cfg, char *scfg) {
       free(dcfg);
       free(dnc);
       free(isp);
+      free(scfg);
       return -1;
     }
     if (dnc[t] > 1 || (*p1)->n_shells > 0) {      
@@ -910,6 +919,7 @@ int GetConfigFromStringNR(CONFIG **cfg, char *scfg) {
     (*cfg)->shells->kappa = 0;
     free(dcfg);
     free(dnc);
+    free(scfg);
     return 1;
   }
 
@@ -955,6 +965,7 @@ int GetConfigFromStringNR(CONFIG **cfg, char *scfg) {
   }
   free(dcfg);
   free(dnc);
+  free(scfg);
 
   return ncfg;
 }
@@ -971,7 +982,7 @@ int GetConfigFromStringNR(CONFIG **cfg, char *scfg) {
 ** SIDE EFFECT: 
 ** NOTE:        
 */
-int GetConfigFromString(CONFIG **cfg, char *scfg) {
+int GetConfigFromString(CONFIG **cfg, const char *scfg) {
   return GetConfigOrAverageFromString(cfg, NULL, scfg);
 }
 
@@ -990,7 +1001,7 @@ int GetConfigFromString(CONFIG **cfg, char *scfg) {
 ** NOTE:        
 */
 int GetAverageConfigFromString(int **n, int **kappa, 
-			       double **nq, char *scfg) {
+			       double **nq, const char *scfg) {
   CONFIG *cfg;
   int i, ns;
 

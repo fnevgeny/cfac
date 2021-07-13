@@ -27,7 +27,7 @@ int SetParserQuote(char *qbegin, char *qend);
 int SetParserBreak(char *brkch);
 int SetParserEscape(char escape);
 int SetParserWhite(char *white);
-int Parse(char *token, int tokmax, char *line, 
+int Parse(char *token, int tokmax, const char *line,
 	  int *brkpos, int *next, int *quoted);
 
 #endif

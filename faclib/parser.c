@@ -213,7 +213,7 @@ static void chstore(char *s, int max, char ch) {
   }
 }
 
-int Parse(char *token, int tokmax, char *line, 
+int Parse(char *token, int tokmax, const char *line,
 	  int *next, int *brkpos, int *quotepos) {
   int qp;
   int i, c, nc;

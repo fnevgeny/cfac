@@ -322,43 +322,6 @@ static int SelectNeleLevels(cfac_t *cfac, int nele, int **levels)
     return j;
 }
 
-static int ConfigListToC(char *clist, CONFIG **cfg, ARRAY *variables, int iuta) {
-  SHELL *shells;
-  int i, j, k, m;
-  int n_shells, n;
-  char *argv[MAXNARGS], *sv[MAXNARGS];
-  int argt[MAXNARGS], st[MAXNARGS], na, ns;
-  
-  na = 0;
-  ns = 0;
-
-  (*cfg) = malloc(sizeof(CONFIG));
-  n_shells = DecodeArgs(clist, argv, argt, variables);
-  na = n_shells;
-  (*cfg)->uta = iuta;
-  (*cfg)->n_shells = n_shells;
-  (*cfg)->shells = malloc(sizeof(SHELL)*n_shells);
-  shells = (*cfg)->shells;
-
-  for (i = 0, m = n_shells-1; i < n_shells; i++, m--) {
-    if (argt[i] != TUPLE) return -1;
-    n = DecodeArgs(argv[i], sv, st, variables);
-    ns = n;
-    if (n != 4) return -1;
-    shells[m].n = atoi(sv[0]);
-    k = atoi(sv[1]);
-    j = atoi(sv[2]);
-    if (j > 0) k = -(k+1);
-    shells[m].kappa = k;
-    shells[m].nq = atoi(sv[3]);
-  }
-
-  for (i = 0; i < na; i++) free(argv[i]);
-  for (i = 0; i < ns; i++) free(sv[i]);
-
-  return 0;     
-}  
-
 static int PAvgConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   int ns, *n, *kappa;
   double *nq;
@@ -585,24 +548,6 @@ static int PConfigEnergy(int argc, char *argv[], int argt[],
     }
   }
 
-  return 0;
-}
-
-static int PAddConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
-  CONFIG *cfg = NULL;
-  int k;
-  
-  if (argc != 2) return -1;
-  if (argt[0] != STRING) return -1;
-  if (argt[1] != LIST) return -1;
-  if (ConfigListToC(argv[1], &cfg, variables, cfac->uta) < 0) return -1;
-  if (Couple(cfg) < 0) return -1;
-
-  k = GroupIndex(cfac, argv[0]);
-  if (k < 0) return -1;
-  if (AddConfigToList(cfac, k, cfg) < 0) return -1;
-  free(cfg);
-  
   return 0;
 }
 
@@ -2933,7 +2878,6 @@ static int PGeneralizedMoment(int argc, char *argv[], int argt[],
 static METHOD methods[] = {
   {"AITable", PAITable},
   {"AITableMSub", PAITableMSub},
-  {"AddConfig", PAddConfig},
   {"AppendTable", PAppendTable}, 
   {"AvgConfig", PAvgConfig},
   {"BasisTable", PBasisTable},

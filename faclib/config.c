@@ -1686,6 +1686,24 @@ CONFIG *GetConfig(const cfac_t *cfac, const STATE *s) {
   return c;
 }
 
+static int configs_are_equal(const CONFIG *cfg1, const CONFIG *cfg2) {
+    if (cfg1->n_csfs != cfg2->n_csfs) {
+        return 0;
+    }
+    if (cfg1->n_shells != cfg2->n_shells) {
+        return 0;
+    }
+
+    if (memcmp(cfg1->csfs, cfg2->csfs, cfg1->n_csfs*sizeof(SHELL_STATE)) != 0) {
+        return 0;
+    }
+    if (memcmp(cfg1->shells, cfg2->shells, cfg1->n_shells*sizeof(SHELL)) != 0) {
+        return 0;
+    }
+
+    return 1;
+}
+
 CONFIG *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc) {
   if (kg < 0 || kg >= cfac->n_groups) {
     return NULL;
@@ -1710,7 +1728,7 @@ CONFIG *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc) {
 */
 int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   ARRAY *clist;  
-  int n0, kl0, nq0, m, i, n, kl, j, nq;
+  int n0, kl0, nq0, m, i, n, kl, j, nq, ig;
   CONFIG_GROUP *cfgr;
 
   if (k < 0 || k >= cfac->n_groups) return -1;
@@ -1757,6 +1775,26 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   if (m < cfg->n_shells) {
     cfg->nrs = realloc(cfg->nrs, sizeof(int)*m);
   }
+
+  /* Make sure that all configs are unique */
+  for (ig = 0; ig < cfac->n_groups; ig++) {
+    CONFIG_GROUP *tcfgr = &cfac->cfg_groups[ig];
+    ARRAY *tclist;
+
+    if (tcfgr->n_cfgs == 0 || tcfgr->n_electrons != cfg->n_electrons) {
+      continue;
+    }
+
+    tclist = &(tcfgr->cfg_list);
+    for (i = 0; i < tclist->dim; i++) {
+      CONFIG *tcfg = ArrayGet(tclist, i);
+      if (configs_are_equal(cfg, tcfg)) {
+        printf("Error: overlapping configurations detected\n");
+        return -1;
+      }
+    }
+  }
+
   if (ArrayAppend(clist, cfg) == NULL) return -1;
   if (cfg->n_csfs > 0) {    
     if (AddConfigToSymmetry(cfac, k, cfgr->n_cfgs, cfg) != 0) {

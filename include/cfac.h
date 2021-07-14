@@ -27,7 +27,7 @@ extern "C" {
 /* Versioning */
 #define CFAC_VERSION        1
 #define CFAC_SUBVERSION     6
-#define CFAC_SUBSUBVERSION  3
+#define CFAC_SUBSUBVERSION  4
 
 #define CFAC_SUCCESS    0
 #define CFAC_FAILURE    1

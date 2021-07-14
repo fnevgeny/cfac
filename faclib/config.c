@@ -467,10 +467,11 @@ int ShellsFromStringNR(const char *scfg, double *dnq, SHELL **shell) {
 int GetRestriction(const char *iscfg, SHELL_RESTRICTION **sr, int m) {
   int nc, i;
   double dnq;
-  char *s;
+  char *s, *p;
 
-  char *scfg = strdup(iscfg);
-  nc = StrSplit(scfg, ';');
+  char * const scfg = strdup(iscfg);
+  p = scfg;
+  nc = StrSplit(p, ';');
   nc--;
 
   if (nc > 0) {
@@ -480,9 +481,9 @@ int GetRestriction(const char *iscfg, SHELL_RESTRICTION **sr, int m) {
   }
  
   for (i = 0; i < nc; i++) {     
-    while (*scfg) scfg++;
-    scfg++;
-    s = scfg;
+    while (*p) p++;
+    p++;
+    s = p;
     (*sr)[i].nq = -1;
     while (*s) {
       switch (*s) {
@@ -507,15 +508,15 @@ int GetRestriction(const char *iscfg, SHELL_RESTRICTION **sr, int m) {
       s++;
     }
     if (m == 0) {
-      (*sr)[i].ns = ShellsFromString(scfg, &dnq, &((*sr)[i].shells));
+      (*sr)[i].ns = ShellsFromString(p, &dnq, &((*sr)[i].shells));
     } else {
-      (*sr)[i].ns = ShellsFromStringNR(scfg, &dnq, &((*sr)[i].shells));
+      (*sr)[i].ns = ShellsFromStringNR(p, &dnq, &((*sr)[i].shells));
     }
     if ((*sr)[i].nq < 0) {
       (*sr)[i].op = 0;
       (*sr)[i].nq = dnq;
     }
-    scfg = s;
+    p = s;
   }
   
   free(scfg);
@@ -715,7 +716,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
   int size, size_old, tmp;
   int i, t, j, k, ns;
 
-  char *scfg = strdup(iscfg);
+  char * const scfg = strdup(iscfg);
   StrTrim(scfg, '\0');
   ns = QuotedStrSplit(scfg, ' ', '[', ']');
   if (ns == 0) {
@@ -865,7 +866,7 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
   int size, size_old, tmp;
   int i, t, j, k, ns;
 
-  char *scfg = strdup(iscfg);
+  char * const scfg = strdup(iscfg);
   StrTrim(scfg, '\0');
   ns = QuotedStrSplit(scfg, ' ', '[', ']');
   if (ns == 0) {

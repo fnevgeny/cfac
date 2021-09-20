@@ -3094,9 +3094,9 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     LEVEL *lev;
     EN_RECORD r;
     int p, j, nele, vnl, ibase;
-    char name[LEVEL_NAME_LEN];
     char sname[LEVEL_NAME_LEN];
     char nc[LEVEL_NAME_LEN];
+    int size;
     
     int i = start + k;
     lev = GetLevel(cfac, i);
@@ -3127,13 +3127,18 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     r.ibase = ibase;
     r.energy = lev->energy;
 
-    nele = ConstructLevelName(cfac, s, name, sname, nc, &vnl);
+    nele = ConstructLevelName(cfac, s, NULL, sname, nc, &vnl);
     if (p == 0) {
       r.p = vnl;
     } else {
       r.p = -vnl;
     }
-    memcpy(r.name, name, LNAME);
+    if (LNAME > strlen(lev->name)) {
+        size = strlen(lev->name) + 1;
+    } else {
+        size = LNAME;
+    }
+    memcpy(r.name, lev->name, size);
     memcpy(r.sname, sname, LSNAME);
     memcpy(r.ncomplex, nc, LNCOMPLEX);
     r.name[LNAME-1] = '\0';

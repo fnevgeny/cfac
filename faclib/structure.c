@@ -169,6 +169,7 @@ void InitLevelData(void *p, int n) {
   lev = p;
   for (k = 0; k < n; k++, lev++) {
     lev->n_basis = 0;
+    lev->name = NULL;
   }
 }
 
@@ -1780,6 +1781,7 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     lev.ibasis = malloc(sizeof(short)*h->n_basis);
     lev.basis = malloc(sizeof(int)*h->n_basis);
     lev.mixing = malloc(sizeof(double)*h->n_basis);
+    lev.name = NULL;
     if (!lev.ibasis || !lev.basis || !lev.mixing) {
       printf("Not enough memory for new level\n");
       return -1;
@@ -2151,6 +2153,44 @@ int SortLevels(cfac_t *cfac, int start, int n, int EB) {
   return 0;
 }
 
+/* Assign level names, ensuring no duplicates (within the same charge state) */
+void NameLevels(cfac_t *cfac, int start, int n) {
+    int i1, i2, stop;
+    char name[LEVEL_NAME_LEN];
+
+    if (n < 0) {
+        stop = cfac->n_levels;
+    } else {
+        stop = start + n;
+    }
+
+    for (i1 = start; i1 < stop; i1++) {
+        LEVEL *lev = GetLevel(cfac, i1);
+        STATE *s, sp;
+
+        if (lev->uta) {
+            sp.kgroup = lev->uta_cfg_g;
+            sp.kcfg = lev->uta_g_cfg;
+            sp.kstate = 0;
+            s = &sp;
+        } else {
+            SYMMETRY *sym = GetSymmetry(cfac, lev->pj);
+            s = GetSymmetryState(sym, lev->pb);
+        }
+
+        ConstructLevelName(cfac, s, name, NULL, NULL, NULL);
+
+        for (i2 = start; i2 < i1; i2++) {
+            LEVEL *lev2 = GetLevel(cfac, i2);
+            if (!strcmp(lev2->name, name)) {
+                strcat(name, "*");
+            }
+        }
+
+        lev->name = strdup(name);
+    }
+}
+
 int GetLevNumElectrons(const cfac_t *cfac, const LEVEL *lev) {
   SYMMETRY *sym;
   STATE *s;
@@ -2439,25 +2479,23 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
   char jsym;
   char ashell[32];
   CONFIG *c;
-  ORBITAL *orb;
   LEVEL *lev;
-  SYMMETRY *sym;
-  int si;
   int n0, kl0, nq0;
 
   symbol[0] = '\0';
   if (basis->kgroup < 0) {
-    i = basis->kgroup;
-    i = -(i + 1);
+    SYMMETRY *sym;
+    int si;
+    i = -(basis->kgroup + 1);
+    lev = GetLevel(cfac, i);
+    si = lev->pb;
+    sym = GetSymmetry(cfac, lev->pj);
     if (basis->kcfg < 0) {
-      lev = GetLevel(cfac, i);
-      si = lev->pb;
-      sym = GetSymmetry(cfac, lev->pj);
       basis = ArrayGet(&(sym->states), si);
       nele = ConstructLevelName(cfac, basis, name, sname, nc, vnl);
       return nele;
     } else {
-      orb = GetOrbital(cfac, basis->kcfg);
+      ORBITAL *orb = GetOrbital(cfac, basis->kcfg);
       GetJLFromKappa(orb->kappa, &j, &kl);
       if (vnl) {
 	*vnl = (kl/2) + 100*(orb->n);
@@ -2471,21 +2509,14 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
 	sprintf(name, "%5d + %d%s%c1(%d)%d ", 
 		i, orb->n, symbol, jsym, j, basis->kstate);
       }
-      lev = GetLevel(cfac, i);
-      si = lev->pb;
-      sym = GetSymmetry(cfac, lev->pj);
       basis = GetSymmetryState(sym, si);
-      if (sname || nc) {
-	nele = ConstructLevelName(cfac, basis, NULL, sname, nc, NULL);
-	if (nc) {
-	  if (nele == 0) {
-	    nc[0] = '\0';
-	  }
-	  sprintf(ashell, "%1d*1", orb->n);
-	  strcat(nc, ashell);
+      nele = ConstructLevelName(cfac, basis, NULL, sname, nc, NULL);
+      if (nc) {
+	if (nele == 0) {
+	  nc[0] = '\0';
 	}
-      } else {
-	nele = ConstructLevelName(cfac, basis, NULL, NULL, NULL, NULL);
+	sprintf(ashell, "%1d*1", orb->n);
+	strcat(nc, ashell);
       }
       return nele+1;
     }
@@ -3981,6 +4012,9 @@ void FreeLevelData(void *p) {
     free(lev->mixing);
     lev->n_basis = 0;
   }
+  if (lev->name) {
+    free(lev->name);
+  }
 }
 
 void FreeHamsArray(cfac_t *cfac) {
@@ -4036,7 +4070,7 @@ int cfac_calculate_structure(cfac_t *cfac,
     int isym, nlevels_old;
     int int_ng, extra_ng, *int_gids;
     const int *extra_gids;
-    
+
     if (!ng || !gids) {
         return -1;
     }
@@ -4104,6 +4138,7 @@ int cfac_calculate_structure(cfac_t *cfac,
     SortLevels(cfac, nlevels_old, -1, 0);
     
     FinalizeLevels(cfac, nlevels_old, -1);
+    NameLevels(cfac, nlevels_old, -1);
     
     /* If energy corrections have been applied, the order might have changed */
     if (cfac->ecorrections->dim) {

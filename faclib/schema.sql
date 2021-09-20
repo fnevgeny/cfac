@@ -30,7 +30,8 @@ CREATE TABLE levels (
     ibase    INTEGER,
     ncomplex TEXT    NOT NULL,
     sname    TEXT    NOT NULL,
-    PRIMARY KEY(sid, id)
+    PRIMARY KEY(sid, id),
+    CONSTRAINT unique_name UNIQUE (sid, nele, name)
 );
 
 CREATE TABLE rtransitions (

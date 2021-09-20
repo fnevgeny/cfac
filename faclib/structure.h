@@ -66,6 +66,8 @@ typedef struct _LEVEL_ {
   int uta_p;           /* used to be pj in UTA                              */
   int uta_cfg_g;       /* used to be iham in UTA                            */
   int uta_g_cfg;       /* used to be pb in UTA                              */
+
+  char *name;          /* level name, unique within the same charge state   */
 } LEVEL;
 
 typedef struct _LEVEL_ION_ {

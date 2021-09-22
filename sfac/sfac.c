@@ -802,7 +802,7 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
     fclose(f);
   } else if (argc == 3) {
     if (argt[0] != LIST || argt[1] != LIST) {
-      printf("The last two of three arguments ");
+      printf("The first two of three arguments ");
       printf("for CorrectEnergy must be two Lists\n");
       return -1;
     }

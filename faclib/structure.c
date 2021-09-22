@@ -2154,7 +2154,7 @@ int SortLevels(cfac_t *cfac, int start, int n, int EB) {
 }
 
 /* Assign level names, ensuring no duplicates (within the same charge state) */
-void NameLevels(cfac_t *cfac, int start, int n) {
+static void NameLevels(cfac_t *cfac, int start, int n) {
     int i1, i2, stop;
     char name[LEVEL_NAME_LEN];
 
@@ -2266,44 +2266,49 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   return 0;
 }  
 
-int FinalizeLevels(cfac_t *cfac, int start, int n) {
-  int k;
-  int nele, nele0;
-  int q, t, nk, n0;
-  LEVEL_ION *gion, gion1;
+/* All levels must belong to the same ion */
+static int FinalizeLevels(cfac_t *cfac, int start, int n) {
+  int stop, ilevel;
+  int nele;
+  int t;
 
-  nele0 = -1;
-  n0 = start;
   if (n < 0) {
-    n = cfac->n_levels - start;
+    stop = cfac->n_levels;
+  } else {
+    stop = start + n;
   }
 
-  for (k = 0; k < n; k++) {
+  /* update the cfac->levels_per_ion array */
+  nele = GetLevNumElectrons(cfac, GetLevel(cfac, start));
+  t = cfac_get_ion_nlevels(cfac, nele);
+  if (t > 0) {
+    LEVEL_ION *gion = ArrayGet(cfac->levels_per_ion + nele, t - 1);
+    gion->imax = stop - 1;
+  } else {
+    LEVEL_ION gion1;
+    gion1.imin = start;
+    gion1.imax = stop - 1;
+    ArrayAppend(cfac->levels_per_ion + nele, &gion1);
+  }
+
+  for (ilevel = start; ilevel < stop; ilevel++) {
     STATE *s;
     SYMMETRY *sym;
-    CONFIG *cfg, *c;
-    SHELL_STATE *csf;
-    LEVEL *lev;
-    ECORRECTION *ec;
-    ORBITAL *orb;
-    double e0, md1;
-    int i, ib, dn, ik, si, ms, mst;
+    double e0;
+    int ib, dn, si, ms, mst;
     
-    i = start + k;
-    
-    lev = GetLevel(cfac, i);
-    if (lev->uta) {
-      continue;
-    }
+    LEVEL *lev = GetLevel(cfac, ilevel);
     
     si = lev->pb;
     sym = GetSymmetry(cfac, lev->pj);
     s = ArrayGet(&(sym->states), si);
+
+    /* apply energy correction */
     if (cfac->ncorrections > 0) {
       int p;
       for (p = 0; p < cfac->ecorrections->dim; p++) {
-	ec = ArrayGet(cfac->ecorrections, p);
-	if (ec->ilev == i) {
+	ECORRECTION *ec = ArrayGet(cfac->ecorrections, p);
+	if (ec->ilev == ilevel) {
 	  if (ec->ilev == ec->iref) {
 	    e0 = lev->energy;
 	  } else {
@@ -2319,39 +2324,44 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
       }
     }
 
-    /* update lev->ibase */
+    /* update lev->ibase for non-UTA levels */
+    if (lev->uta) {
+      continue;
+    }
+
     if (s->kgroup > 0) {
-      cfg = GetConfig(cfac, s);
-      nk = cfg->n_electrons-1;
+      CONFIG *cfg = GetConfig(cfac, s);
+      int nk = nele - 1;
       
       lev->ibase = -1;
       
       if (cfac_get_ion_nlevels(cfac, nk) != 0 && cfg->shells[0].nq <= 1) {
         STATE *s1;
         CONFIG *cfg1;
-	double a = 0.0;
-	double md = 1E30;
-	csf = cfg->csfs + s->kstate;
+	double mix_norm = 0.0;
+	double md_min = 1E30, dE_min = 1E30;
+	SHELL_STATE *csf = cfg->csfs + s->kstate;
+
 	dn = cfg->shells[0].n - cfg->shells[1].n;
 	if (dn < MAXDN) {
-	  a = 0.0;
 	  for (t = 0; t < lev->n_basis; t++) {
 	    s1 = ArrayGet(&(sym->states), lev->basis[t]);
 	    cfg1 = GetConfig(cfac, s1);
 	    if (cfg1->shells[0].n == cfg->shells[0].n &&
 		cfg1->shells[0].nq == 1) {
-	      a += (lev->mixing[t])*(lev->mixing[t]);
+	      mix_norm += (lev->mixing[t])*(lev->mixing[t]);
 	    }
 	  }
-	  a = 1.0/a;
 	}
-	for (ib = 0; ib < NPRINCIPLE; ib++) {
+
+	for (ib = 0; ib < NPRINCIPLE && lev->ibase < 0; ib++) {
 	  for (t = 0; t < cfac_get_ion_nlevels(cfac, nk); t++) {
-	    gion = ArrayGet(cfac->levels_per_ion+nk, t);
-	    for (q = gion->imin; q <= gion->imax; q++) {
+	    int ilevel1;
+            LEVEL_ION *gion1 = ArrayGet(cfac->levels_per_ion+nk, t);
+	    for (ilevel1 = gion1->imin; ilevel1 <= gion1->imax; ilevel1++) {
               SYMMETRY *sym1;
               SHELL_STATE *csf1;
-	      LEVEL *lev1 = GetLevel(cfac, q);
+	      LEVEL *lev1 = GetLevel(cfac, ilevel1);
 
               if (lev1->uta) {
                 continue;
@@ -2367,98 +2377,31 @@ int FinalizeLevels(cfac_t *cfac, int start, int n) {
 		  memcmp(cfg->shells+1, cfg1->shells, ms) == 0 &&
 		  memcmp(csf+1, csf1, mst) == 0) {
 		if (dn < MAXDN) {
-		  md1 = fabs(fabs(a*lev->mixing[lev->kpb[0]]) - 
-			     fabs(lev1->mixing[lev1->kpb[ib]]));
-		  if (md1 < md) {
-		    md = md1;
-		    lev->ibase = q;
+		  double md = fabs(fabs(lev->mixing[lev->kpb[0]]/mix_norm) -
+			         fabs(lev1->mixing[lev1->kpb[ib]]));
+		  if (md < md_min) {
+		    md_min = md;
+		    lev->ibase = ilevel1;
 		  }
 		} else {
-		  int p;
-                  ik = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-		  orb = GetOrbital(cfac, ik);
-		  a = lev->energy - orb->energy;
-		  for (p = 0; p < cfac->ecorrections->dim; p++) {
-		    ec = ArrayGet(cfac->ecorrections, p);
-		    if (-(q+1) == ec->ilev) {
-		      a += ec->e;
-		      break;
-		    }
-		  }
-		  md1 = fabs(lev1->energy - a);
-		  if (md1 < md) {
-		    md = md1;
-		    lev->ibase = q;
+                  int ik = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
+		  ORBITAL *orb = GetOrbital(cfac, ik);
+		  double dE = fabs(lev1->energy - lev->energy + orb->energy);
+		  if (dE < dE_min) {
+		    dE_min = dE;
+		    lev->ibase = ilevel1;
 		  }
 		}
 	      }
 	    }
 	  }
-	  if (lev->ibase >= 0) {
-	    break;
-	  }
 	}
       }
-
-      if (lev->ibase >= 0) {
-	int p;
-        for (p = 0; p < cfac->ecorrections->dim; p++) {
-	  ec = ArrayGet(cfac->ecorrections, p);
-	  if (-(i+1) == ec->ilev) break;
-	  if (-(lev->ibase + 1) == ec->ilev && cfg->shells[0].n >= ec->nmin) {
-	    lev->energy += ec->e;
-	    break;
-	  }
-	}
-      } 
     } else {
       lev->ibase = -(s->kgroup + 1);
     }
- 
-    c = GetConfig(cfac, s);
-    nele = c->n_electrons;
-
-    if (nele != nele0) {
-      if (nele0 >= 0) {
-	q = 0;
-	nk = nele0;
-	t = cfac_get_ion_nlevels(cfac, nk);
-	if (t > 0) {
-	  gion = ArrayGet(cfac->levels_per_ion+nk, t-1);
-	  if (gion->imax+1 == n0) {
-	    gion->imax = cfac->n_levels-1;
-	    q = 1;
-	  }
-	}
-	if (q == 0) {
-	  gion1.imin = n0;
-	  gion1.imax = i-1;
-	  ArrayAppend(cfac->levels_per_ion+nk, &gion1);
-	}
-      }
-      n0 = i;
-      nele0 = nele;
-    }
   }
 
-  q = 0;
-  nk = nele0;
-  if (nk >= 0) {
-    t = cfac_get_ion_nlevels(cfac, nk);
-    if (t > 0) {
-      gion = ArrayGet(cfac->levels_per_ion+nk, t-1);
-      if (gion->imax+1 == n0) {
-	gion->imax = cfac->n_levels-1;
-	q = 1;
-      }
-    }
-    if (q == 0 && cfac->n_levels > n0) {
-      gion1.imin = n0;
-      gion1.imax = cfac->n_levels-1;
-      ArrayAppend(cfac->levels_per_ion+nk, &gion1);
-    }
-  }
-  
   return 0;
 }
 
@@ -4068,13 +4011,33 @@ void ClearAngularFrozen(cfac_t *cfac) {
 int cfac_calculate_structure(cfac_t *cfac,
     int ng, const int *gids, int npg, const int *pgids, int no_ci) {
     int isym, nlevels_old;
-    int int_ng, extra_ng, *int_gids;
+    int ig, int_ng, extra_ng, *int_gids;
     const int *extra_gids;
+    int nele = -1;
 
     if (!ng || !gids) {
         return -1;
     }
     
+    /* Ensure all groups belong to the same ion */
+    for (ig = 0; ig < ng; ig++) {
+        CONFIG_GROUP *cg = GetGroup(cfac, gids[ig]);
+        if (ig == 0) {
+            nele = cg->n_electrons;
+        } else
+        if (cg->n_electrons != nele) {
+            printf("Groups with different nele cannot be mixed\n");
+            return -1;
+        }
+    }
+    for (ig = 0; ig < npg; ig++) {
+        CONFIG_GROUP *cg = GetGroup(cfac, pgids[ig]);
+        if (cg->n_electrons != nele) {
+            printf("Groups with different nele cannot be mixed\n");
+            return -1;
+        }
+    }
+
     if (npg && !no_ci) {
         int_ng = ng + npg;
         int_gids = malloc(sizeof(int)*int_ng);
@@ -4091,7 +4054,7 @@ int cfac_calculate_structure(cfac_t *cfac,
         extra_ng   = npg;
         extra_gids = pgids;
     }
-    
+
     nlevels_old = cfac_get_num_levels(cfac);
     
     /* AddToLevelsUTA(), AddToLevels(), and ConstructHamilton() know to filter

@@ -2363,7 +2363,9 @@ static int PStructure(int argc, char *argv[], int argt[],
   
   nlevels = cfac_get_num_levels(cfac);
   
-  cfac_calculate_structure(cfac, ng, kg, ngp, kgp, ip);
+  if (cfac_calculate_structure(cfac, ng, kg, ngp, kgp, ip) != 0) {
+    return -1;
+  }
   
   SaveLevels(cfac, argv[0], nlevels, -1);
 

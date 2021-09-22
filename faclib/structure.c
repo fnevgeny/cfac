@@ -2154,7 +2154,7 @@ int SortLevels(cfac_t *cfac, int start, int n, int EB) {
 }
 
 /* Assign level names, ensuring no duplicates (within the same charge state) */
-static void NameLevels(cfac_t *cfac, int start, int n) {
+static void cfac_name_levels(cfac_t *cfac, int start, int n) {
     int i1, i2, stop;
     char name[LEVEL_NAME_LEN];
 
@@ -2266,6 +2266,49 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   return 0;
 }  
 
+/* Apply energy corrections; return number of levels updated */
+static int cfac_apply_ecorrections(cfac_t *cfac, int start, int n) {
+    int stop, ilevel, ncorr = 0;
+
+    if (n < 0) {
+        stop = cfac->n_levels;
+    } else {
+        stop = start + n;
+    }
+
+    for (ilevel = start; ilevel < stop; ilevel++) {
+        STATE *s;
+        SYMMETRY *sym;
+        int si, p;
+
+        LEVEL *lev = GetLevel(cfac, ilevel);
+
+        si = lev->pb;
+        sym = GetSymmetry(cfac, lev->pj);
+        s = ArrayGet(&(sym->states), si);
+
+        for (p = 0; p < cfac->ecorrections->dim; p++) {
+            ECORRECTION *ec = ArrayGet(cfac->ecorrections, p);
+            if (ec->ilev == ilevel) {
+                double e0;
+	        if (ec->ilev == ec->iref) {
+	            e0 = lev->energy;
+	        } else {
+	            e0 = GetLevel(cfac, ec->iref)->energy;
+	        }
+	        ec->e = e0 + ec->e - lev->energy;
+	        lev->energy += ec->e;
+	        ec->s = s;
+	        ec->ilev = -(ec->ilev+1);
+	        ncorr++;
+	        break;
+            }
+        }
+    }
+
+    return ncorr;
+}
+
 /* All levels must belong to the same ion */
 static int FinalizeLevels(cfac_t *cfac, int start, int n) {
   int stop, ilevel;
@@ -2291,10 +2334,10 @@ static int FinalizeLevels(cfac_t *cfac, int start, int n) {
     ArrayAppend(cfac->levels_per_ion + nele, &gion1);
   }
 
+  /* update lev->ibase for non-UTA levels */
   for (ilevel = start; ilevel < stop; ilevel++) {
     STATE *s;
     SYMMETRY *sym;
-    double e0;
     int ib, dn, si, ms, mst;
     
     LEVEL *lev = GetLevel(cfac, ilevel);
@@ -2303,28 +2346,6 @@ static int FinalizeLevels(cfac_t *cfac, int start, int n) {
     sym = GetSymmetry(cfac, lev->pj);
     s = ArrayGet(&(sym->states), si);
 
-    /* apply energy correction */
-    if (cfac->ncorrections > 0) {
-      int p;
-      for (p = 0; p < cfac->ecorrections->dim; p++) {
-	ECORRECTION *ec = ArrayGet(cfac->ecorrections, p);
-	if (ec->ilev == ilevel) {
-	  if (ec->ilev == ec->iref) {
-	    e0 = lev->energy;
-	  } else {
-	    e0 = GetLevel(cfac, ec->iref)->energy;
-	  }
-	  ec->e = e0 + ec->e - lev->energy;
-	  lev->energy += ec->e;
-	  ec->s = s;
-	  ec->ilev = -(ec->ilev+1);
-	  cfac->ncorrections -= 1;
-	  break;
-	}
-      }
-    }
-
-    /* update lev->ibase for non-UTA levels */
     if (lev->uta) {
       continue;
     }
@@ -4098,15 +4119,24 @@ int cfac_calculate_structure(cfac_t *cfac,
         free(int_gids);
     }
 
+    /* Sort by energy in the ascending order */
     SortLevels(cfac, nlevels_old, -1, 0);
     
-    FinalizeLevels(cfac, nlevels_old, -1);
-    NameLevels(cfac, nlevels_old, -1);
-    
-    /* If energy corrections have been applied, the order might have changed */
-    if (cfac->ecorrections->dim) {
-        SortLevels(cfac, nlevels_old, -1, 0);
+    /* Give level names */
+    cfac_name_levels(cfac, nlevels_old, -1);
+
+    /* Apply energy corrections */
+    if (cfac->ncorrections) {
+        int ncorr = cfac_apply_ecorrections(cfac, nlevels_old, -1);
+
+        if (ncorr) {
+            /* The order might have changed, sort again */
+            SortLevels(cfac, nlevels_old, -1, 0);
+            cfac->ncorrections -= ncorr;
+        }
     }
+
+    FinalizeLevels(cfac, nlevels_old, -1);
 
     return 0;
 }

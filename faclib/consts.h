@@ -85,7 +85,7 @@
 ** PURPOSE:     1 Hartree in eV.
 ** NOTE:        
 */
-#define HARTREE_EV 27.2113962 
+#define HARTREE_EV 27.2113862
 
 /*
 ** VARIABLE:    RATE_AU
@@ -101,7 +101,7 @@
 ** PURPOSE:     atomic units of area in 10^-20 cm2
 ** NOTE:        
 */
-#define AREA_AU20  2.80028560859E3
+#define AREA_AU20  2.800285206E3
 
 /*
 ** VARIABLE:    RBOHR
@@ -109,7 +109,7 @@
 ** PURPOSE:     Bohr radius in cm.
 ** NOTE:        
 */
-#define RBOHR      5.29177249e-9
+#define RBOHR      5.29177211e-9
 
 /*
 ** VARIABLE:    MBOHR
@@ -117,7 +117,7 @@
 ** PURPOSE:     Bohr magneton in eV/Gauss.
 ** NOTE:        
 */
-#define MBOHR      5.78838263E-9
+#define MBOHR      5.78838183E-9
 
 /*
 ** VARIABLE:    FINE_STRUCTURE_CONST, FINE_STRUCTURE_CONST2
@@ -125,8 +125,8 @@
 ** PURPOSE:     fine structure constant and its square.
 ** NOTE:        
 */
-#define FINE_STRUCTURE_CONST  7.29735308E-3
-#define FINE_STRUCTURE_CONST2 5.32513620E-5
+#define FINE_STRUCTURE_CONST  7.29735257E-3
+#define FINE_STRUCTURE_CONST2 5.32513545E-5
 #define AMU  1836.153
 
 /* radial QK modes */

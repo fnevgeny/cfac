@@ -762,74 +762,61 @@ static int PCITableMSub(int argc, char *argv[], int argt[],
 
 static int PCorrectEnergy(int argc, char *argv[], int argt[], 
 			  ARRAY *variables) {
-  int n, k, kref;
-  double e;
-  int i, ie, ii, nmin;
-  FILE *f;
-  char *iv[MAXNARGS], *ev[MAXNARGS];
-  int it[MAXNARGS], et[MAXNARGS];
-
-  ii = 0; 
-  ie = 0;
-  kref = 0;
   if (argc == 2) {
-    if (argt[0] != STRING) {
+    FILE *f;
+    int nele;
+    char *refname = NULL;
+    if (argt[0] != STRING || argt[1] != NUMBER) {
       return -1;
     }
-    nmin = atoi(argv[1]);
+
+    nele = atoi(argv[1]);
+
     f = fopen(argv[0], "r");
     if (!f) {
       printf("Cannot open file %s\n", argv[0]);
       return -1;
     }
-    n = -1;
-    i = 0;
+
     while (1) {
-      int nf = fscanf(f, "%d%lf\n", &k, &e);
-      if (nf != 2 || nf == EOF) {
+      double e;
+      char strbuf[1024], *q, *name;
+      if (fgets(strbuf, 1024, f) == NULL) {
         break;
       }
-      e /= HARTREE_EV;
-      if (k < 0) {
-	k = -k;
-	kref = k;
-      } else if (i == 0) {
-	kref = k;
+
+      if (strbuf[0] == '#') {
+        continue;
       }
-      AddECorrection(cfac, kref, k, e, nmin);
-      i++;
+
+      if ((q = strchr(strbuf, ',')) == NULL) {
+        printf("Failed parsing line '%s'\n", strbuf);
+        return -1;
+      }
+
+      *q = '\0';
+      name = strbuf;
+
+      int nf = sscanf(q + 1, "%lf", &e);
+      if (nf != 1) {
+        printf("Failed parsing line '%s'\n", strbuf);
+        return -1;
+      }
+
+      if (refname == NULL) {
+        refname = strdup(name);
+      }
+
+      e /= HARTREE_EV;
+      AddECorrection(cfac, nele, name, refname, e);
+    }
+    if (refname) {
+      free(refname);
     }
     fclose(f);
-  } else if (argc == 3) {
-    if (argt[0] != LIST || argt[1] != LIST) {
-      printf("The first two of three arguments ");
-      printf("for CorrectEnergy must be two Lists\n");
-      return -1;
-    }
-    nmin = atoi(argv[2]);
-    ii = DecodeArgs(argv[0], iv, it, variables);
-    ie = DecodeArgs(argv[1], ev, et, variables);
-    if (ii != ie) return -1;
-    n = ii;
-    for (i = 0; i < n; i++) {
-      if (it[i] != NUMBER || et[i] != NUMBER) return -1;
-      k = atoi(iv[i]);
-      e = atof(ev[i]);
-      e /= HARTREE_EV;
-      if (k < 0) {
-	k = -k;
-	kref = k;
-      } else if (i == 0) {
-	kref = k;
-      }
-      AddECorrection(cfac, kref, k, e, nmin);
-    }
   } else {
     return -1;
   }
-
-  for (i = 0; i < ii; i++) free(iv[i]);
-  for (i = 0; i < ie; i++) free(ev[i]);
 
   return 0;
 }

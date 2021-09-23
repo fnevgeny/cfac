@@ -113,11 +113,12 @@ typedef struct _ANGULAR_FROZEN_ {
 } ANGULAR_FROZEN;
 
 typedef struct _ECORRECTION_ {
-  int iref;
-  int ilev;
-  double e;
-  int nmin;
-  STATE *s;
+  int nele;      /* number of electrons                                     */
+  char *name;    /* level name                                              */
+  double e;      /* corrected energy                                        */
+  char *refname; /* name of the reference level                             */
+  LEVEL *ref;    /* reference level, when resolved                          */
+  int applied;   /* boolean flag indicating the correction has been applied */
 } ECORRECTION;
 
 HAMILTON *ConstructHamilton(cfac_t *cfac,
@@ -134,7 +135,8 @@ double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra,
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h);
 int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg);
-int AddECorrection(cfac_t *cfac, int kref, int k, double e, int nmin);
+int AddECorrection(cfac_t *cfac, int nele, const char *name,
+    const char *refname, double e);
 LEVEL *GetLevel(const cfac_t *cfac, int k);
 LEVEL *GetEBLevel(const cfac_t *cfac, int k);
 int LevelTotalJ(cfac_t *cfac, int k);

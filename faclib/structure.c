@@ -1951,15 +1951,17 @@ int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
   return 0;
 }
   
-int AddECorrection(cfac_t *cfac, int iref, int ilev, double e, int nmin) {
+int AddECorrection(cfac_t *cfac, int nele, const char *name,
+    const char *refname, double e) {
   ECORRECTION c;
 
-  c.iref = iref;
-  c.ilev = ilev;
+  memset(&c, 0, sizeof(ECORRECTION));
+  c.nele = nele;
+  c.name = strdup(name);
+  c.refname = strdup(refname);
   c.e = e;
-  c.nmin = nmin;
   ArrayAppend(cfac->ecorrections, &c);
-  cfac->ncorrections += 1;
+  cfac->ncorrections++;
 
   return 0;
 }
@@ -2268,7 +2270,7 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
 
 /* Apply energy corrections; return number of levels updated */
 static int cfac_apply_ecorrections(cfac_t *cfac, int start, int n) {
-    int stop, ilevel, ncorr = 0;
+    int stop, ilevel, nele, p, ncorr = 0;
 
     if (n < 0) {
         stop = cfac->n_levels;
@@ -2276,30 +2278,37 @@ static int cfac_apply_ecorrections(cfac_t *cfac, int start, int n) {
         stop = start + n;
     }
 
+    nele = GetLevNumElectrons(cfac, GetLevel(cfac, start));
+
+    /* first, try resolving all reference levels in the list of corrections */
+    for (p = 0; p < cfac->ecorrections->dim; p++) {
+        ECORRECTION *ec = ArrayGet(cfac->ecorrections, p);
+        /* skip over other ions or already resolved refs */
+        if (ec->nele != nele || ec->ref != NULL) {
+            continue;
+        }
+
+        for (ilevel = start; ilevel < stop; ilevel++) {
+            LEVEL *lev = GetLevel(cfac, ilevel);
+            if (!strcmp(lev->name, ec->refname)) {
+	        ec->ref = lev;
+                break;
+            }
+        }
+    }
+
     for (ilevel = start; ilevel < stop; ilevel++) {
-        STATE *s;
-        SYMMETRY *sym;
-        int si, p;
-
         LEVEL *lev = GetLevel(cfac, ilevel);
-
-        si = lev->pb;
-        sym = GetSymmetry(cfac, lev->pj);
-        s = ArrayGet(&(sym->states), si);
 
         for (p = 0; p < cfac->ecorrections->dim; p++) {
             ECORRECTION *ec = ArrayGet(cfac->ecorrections, p);
-            if (ec->ilev == ilevel) {
-                double e0;
-	        if (ec->ilev == ec->iref) {
-	            e0 = lev->energy;
-	        } else {
-	            e0 = GetLevel(cfac, ec->iref)->energy;
-	        }
-	        ec->e = e0 + ec->e - lev->energy;
-	        lev->energy += ec->e;
-	        ec->s = s;
-	        ec->ilev = -(ec->ilev+1);
+            if (ec->nele != nele || ec->applied || ec->ref == NULL) {
+                continue;
+            }
+
+            if (!strcmp(lev->name, ec->name)) {
+	        lev->energy = ec->e + ec->ref->energy;
+                ec->applied = 1;
 	        ncorr++;
 	        break;
             }

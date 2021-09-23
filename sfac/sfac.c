@@ -3001,8 +3001,6 @@ int main(int argc, const char *argv[]) {
     strcat(cmdline, argv[i]);
   }
 
-  SetModName("fac");
-
   if (argc == 1) {
     EvalFile(stdin, 1, methods);
   } else {

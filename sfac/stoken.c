@@ -19,17 +19,6 @@
 
 #include "stoken.h"
 
-static char _mod_name0[128];
-static char _mod_name1[128];
-static int _mod_name0_len, _mod_name1_len;
-
-void SetModName(char *nm) {
-  sprintf(_mod_name0, "%s.", nm);
-  sprintf(_mod_name1, "pfac.%s.", nm);
-  _mod_name0_len = strlen(_mod_name0);
-  _mod_name1_len = strlen(_mod_name1);
-}
-
 VARIABLE *VariableExists(char *name, ARRAY *variables) {
   VARIABLE *v;
   int i;
@@ -189,13 +178,8 @@ int TokenizeLine(int nline, char *line, METHOD *methods,
   next = 0;
   r = Parse(token, MAXLINELENGTH, line, &next, &brkpos, &quotepos);
   if (r) return ERR_SYNTAX;
-  if (strncmp(token, _mod_name1, _mod_name1_len) == 0) {
-    t = token+_mod_name1_len;
-  } else if (strncmp(token, _mod_name0, _mod_name0_len) == 0) {
-    t = token+_mod_name0_len;
-  } else {
-    t = token;
-  }
+
+  t = token;
   i = MethodIndex(t, methods);
   if (i >= 0) {
     fs = (STATEMENT *) ArraySet(statements, statements->dim, NULL);

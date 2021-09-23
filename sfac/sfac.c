@@ -2327,10 +2327,6 @@ static int PStructure(int argc, char *argv[], int argt[],
     ng = DecodeGroupArgs(&kg, 0, NULL, NULL, variables);
     if (ng < 0) return -1;
   } else
-  if (argc == 2 && argt[0] == NUMBER) {
-    printf("Structure(p, J) is obsolete; use SetSymmetry(p, J) instead.\n");
-    return PSetSymmetry(argc, argv, argt, variables);
-  } else
   if (argc == 2 && argt[0] == STRING && argt[1] == NUMBER) {
     int nele = atoi(argv[1]);
     ng = SelectNeleGroups(nele, &kg);

@@ -374,7 +374,7 @@ configuration transitions for dipole transitions. The 13th column is the number
 to be added to $g_2$ to form relative intensities for quadrupole transitions.
 \end{fundesc}
 
-\begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}} $\mid$ p, j}
+\begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}}}
 Diagonalize the Hamiltonian for configurations in the groups \var{g}. The
 configurations in the optional groups \var{p} are allowed to interact with
 \var{g} but only states within \var{g} are added to the energy level table. If
@@ -382,9 +382,6 @@ configurations in the optional groups \var{p} are allowed to interact with
 exactly, if \var{ip}=1, this interaction is treated approximately in a way that
 the non-diagonal elements within \var{p} are neglected. The energy levels are
 output to the file \var{fn}.
-
-The second, obsolete form of this function corresponds to
-\funcref[p, j]{SetSymmetry}.
 \end{fundesc}
 
 \begin{fundesc}{StructureEB}{fn, g}

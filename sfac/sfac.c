@@ -3062,6 +3062,10 @@ int main(int argc, const char *argv[]) {
     }
   }
   
+  if (cfac->ncorrections > 0) {
+    printf("Warning: %d energy correction(s) have not been applied\n",
+        cfac->ncorrections);
+  }
   cfac_free(cfac);
   
   return 0;

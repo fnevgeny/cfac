@@ -74,9 +74,8 @@ int GetValidLine(FILE *f, char *line, int *nlines);
 int MethodIndex(char *name, METHOD *methods);
 int TokenizeLine(int nline, char *line, METHOD *methods,
                  ARRAY *statements, ARRAY *variables);
-int EvalFile(FILE *f, int exebyline, METHOD *methods);
+int EvalFile(FILE *f, int exebyline, METHOD *methods, FILE *ferr);
 int EvalStatement(STATEMENT *st, METHOD *methods, ARRAY *variables);
-void ErrorOcurred(int ierr, int loc);
-void SetModName(char *s);
+void ErrorOcurred(int ierr, int loc, FILE *ferr);
 
 #endif

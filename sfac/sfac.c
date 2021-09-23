@@ -107,7 +107,7 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
   if (ng > 0) {
     if (argt[0] == LIST || argt[0] == TUPLE) {
       if (ng > 1) {
-        printf("there should be only one list or tuple\n");
+        fprintf(stderr, "there should be only one list or tuple\n");
         return -1;
       }
       ng = DecodeArgs(argv[0], v, t, variables);
@@ -121,7 +121,7 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
     (*kg) = malloc(sizeof(int)*ng);
     for (i = 0; i < ng; i++) {
       if (t[i] != STRING) {
-        printf("argument must be a group name\n");
+        fprintf(stderr, "argument must be a group name\n");
         free((*kg));
         return -1;
       }
@@ -130,7 +130,7 @@ static int DecodeGroupArgs(int **kg, int n, char *argv[], int argt[],
 
       if (k < 0) {
         free((*kg));
-        printf("group does not exist\n");
+        fprintf(stderr, "group does not exist\n");
         return -1;
       }
 
@@ -219,7 +219,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
       goto END;
     } else if (at[0] == LIST) {
       if (n != 2) {
-        printf("recombined states specification unrecoganized\n");
+        fprintf(stderr, "recombined states specification unrecognized\n");
         rv = -1;
         goto END;
       }
@@ -237,7 +237,7 @@ static int SelectLevels(int **t, char *argv, int argt, ARRAY *variables) {
         v1[1] = v[1];
         at1[1] = at[1];
       } else {
-        printf("Level specification unrecoganized\n");
+        fprintf(stderr, "Level specification unrecognized\n");
         rv = -1;
         goto END;
       }
@@ -349,7 +349,7 @@ static int PCheckEndian(int argc, char *argv[], int argt[], ARRAY *variables) {
   } else {
     f = fopen(argv[0], "rb");
     if (f == NULL) {
-      printf("Cannot open file %s\n", argv[0]);
+      fprintf(stderr, "Cannot open file %s\n", argv[0]);
       return -1;
     }
     ReadFHeader(f, &fh, &swp);
@@ -440,7 +440,7 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   for (i = 0; i < argc; i++) {
     if (argt[i] == KEYWORD) {
       if (strcmp(argv[i], "group") != 0) {
-        printf("The keyword must be group=gname\n");
+        fprintf(stderr, "The keyword must be group=gname\n");
         return -1;
       }
       if (i > argc-2) return -1;
@@ -580,7 +580,7 @@ static int PAITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   }
 
   if (nlow == 0 || nup == 0) {
-    printf("Empty set of initial or final levels in AITable(), skipping\n");
+    fprintf(stderr, "Empty set of initial or final levels in AITable(), skipping\n");
     return 0;
   } else
   if (nlow < 0 || nup < 0) {
@@ -727,7 +727,7 @@ static int PCITable(int argc, char *argv[], int argt[], ARRAY *variables) {
   }
 
   if (nlow == 0 || nup == 0) {
-    printf("Empty set of initial or final levels in CITable(), skipping\n");
+    fprintf(stderr, "Empty set of initial or final levels in CITable(), skipping\n");
     return 0;
   } else
   if (nlow < 0 || nup < 0) {
@@ -774,7 +774,7 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
 
     f = fopen(argv[0], "r");
     if (!f) {
-      printf("Cannot open file %s\n", argv[0]);
+      fprintf(stderr, "Cannot open file %s\n", argv[0]);
       return -1;
     }
 
@@ -790,7 +790,7 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
       }
 
       if ((q = strchr(strbuf, ',')) == NULL) {
-        printf("Failed parsing line '%s'\n", strbuf);
+        fprintf(stderr, "Failed parsing line '%s'\n", strbuf);
         return -1;
       }
 
@@ -799,7 +799,7 @@ static int PCorrectEnergy(int argc, char *argv[], int argt[],
 
       int nf = sscanf(q + 1, "%lf", &e);
       if (nf != 1) {
-        printf("Failed parsing line '%s'\n", strbuf);
+        fprintf(stderr, "Failed parsing line '%s'\n", strbuf);
         return -1;
       }
 
@@ -884,7 +884,7 @@ static int POptimizeRadial(int argc, char *argv[], int argt[],
       k = DecodeArgs(argv[1], vw, iw, variables);
       ni = k;
       if (k < 0 || k > ng) {
-        printf("weights must be a sequence\n");
+        fprintf(stderr, "weights must be a sequence\n");
         return -1;
       }
       weight = malloc(sizeof(double)*ng);
@@ -975,7 +975,7 @@ static int PStoreInit(int argc, char *argv[], int argt[],
   if (argc != 1 && argc != 2) return -1;
 
   if (sid) {
-    printf("Store has already been initialized\n");
+    fprintf(stderr, "Store has already been initialized\n");
     return -1;
   }
 
@@ -996,7 +996,7 @@ static int PStoreTable(int argc, char *argv[], int argt[],
   if (argt[0] != STRING) return -1;
 
   if (!sid) {
-    printf("Store has not been initialized yet\n");
+    fprintf(stderr, "Store has not been initialized yet\n");
     return -1;
   }
 
@@ -1008,7 +1008,7 @@ static int PStoreClose(int argc, char *argv[], int argt[],
   if (argc != 0) return -1;
 
   if (!sid) {
-    printf("Store has not been initialized yet\n");
+    fprintf(stderr, "Store has not been initialized yet\n");
     return -1;
   }
 
@@ -1030,7 +1030,7 @@ static int PRecStates(int argc, char *argv[], int argt[],
   if (ng <= 0) return -1;
   n = atoi(argv[2]);
   if (RecStates(cfac, n, ng, kg, argv[0]) < 0) {
-    printf("RecStates Error\n");
+    fprintf(stderr, "RecStates Error\n");
     free(kg);
     return -1;
   }
@@ -1109,7 +1109,7 @@ static int PRRTable(int argc, char *argv[], int argt[],
   }
 
   if (nlow == 0 || nup == 0) {
-    printf("Empty set of initial or final levels in RRTable(), skipping\n");
+    fprintf(stderr, "Empty set of initial or final levels in RRTable(), skipping\n");
     return 0;
   } else
   if (nlow < 0 || nup < 0) {
@@ -2067,7 +2067,7 @@ static int PSetScreening(int argc, char *argv[], int argt[],
 
 static int PSetTransitionCut(int argc, char *argv[], int argt[],
                              ARRAY *variables) {
-  printf("SetTransitionCut() is defunct\n");
+  fprintf(stderr, "SetTransitionCut() is defunct\n");
 
   return 0;
 }
@@ -2246,13 +2246,13 @@ static int PSolveBound(int argc, char *argv[], int argt[],
   kappa = atoi(argv[1]);
 
   if (n <= 0) {
-    printf("n must be greater than 0 for SolveBound\n");
+    fprintf(stderr, "n must be greater than 0 for SolveBound\n");
     return -1;
   }
 
   k = OrbitalIndex(cfac, n, kappa, 0.0);
   if (k < 0) {
-    printf("Fetal error in sloving dirac equation\n");
+    fprintf(stderr, "Fatal error in solving Dirac equation\n");
     return -1;
   }
 
@@ -2429,7 +2429,7 @@ static int PTransitionTable(int argc, char *argv[], int argt[],
   }
 
   if (m == 0) {
-    printf("m cannot be zero\n");
+    fprintf(stderr, "m cannot be zero\n");
     return -1;
   }
 
@@ -2715,18 +2715,18 @@ static int PTransitionTableEB(int argc, char *argv[], int argt[],
   else m = -1;
 
   if (m == 0) {
-    printf("m cannot be zero\n");
+    fprintf(stderr, "m cannot be zero\n");
     return -1;
   }
 
   nlow = SelectLevels(&low, argv[1], argt[1], variables);
   if (nlow <= 0) {
-    printf("cannot determine levels in lower\n");
+    fprintf(stderr, "cannot determine levels in lower\n");
     return -1;
   }
   nup = SelectLevels(&up, argv[2], argt[2], variables);
   if (nup <= 0) {
-    printf("cannot determine levels in upper\n");
+    fprintf(stderr, "cannot determine levels in upper\n");
     return -1;
   }
 
@@ -2953,7 +2953,7 @@ static int InitFac() {
 
   cfac = cfac_new();
   if (!cfac) {
-    printf("Initialization failed\n");
+    fprintf(stderr, "Initialization failed\n");
     return -1;
   }
 
@@ -2985,7 +2985,7 @@ int main(int argc, const char *argv[]) {
 #endif
 
   if (InitFac() < 0) {
-    printf("initialization failed\n");
+    fprintf(stderr, "Initialization failed\n");
     exit(1);
   }
 
@@ -3002,7 +3002,7 @@ int main(int argc, const char *argv[]) {
   }
 
   if (argc == 1) {
-    EvalFile(stdin, 1, methods);
+    EvalFile(stdin, 1, methods, stderr);
   } else {
     for (i = 1; i < argc; i++) {
       if (!strcmp(argv[i], "-h")) {
@@ -3015,16 +3015,16 @@ int main(int argc, const char *argv[]) {
       } else {
         f = fopen(argv[i], "r");
         if (!f) {
-          printf("Cannot open file %s, Skipping\n", argv[i]);
+          fprintf(stderr, "Cannot open file %s, Skipping\n", argv[i]);
           continue;
         }
-        EvalFile(f, 0, methods);
+        EvalFile(f, 0, methods, stderr);
       }
     }
   }
 
   if (cfac->ncorrections > 0) {
-    printf("Warning: %d energy correction(s) have not been applied\n",
+    fprintf(stderr, "Warning: %d energy correction(s) have not been applied\n",
         cfac->ncorrections);
   }
   cfac_free(cfac);

@@ -20,11 +20,10 @@
 #include "stoken.h"
 
 VARIABLE *VariableExists(char *name, ARRAY *variables) {
-  VARIABLE *v;
   int i;
 
   for (i = 0; i < variables->dim; i++) {
-    v = (VARIABLE *) ArrayGet(variables, i);
+    VARIABLE *v = ArrayGet(variables, i);
     if (strcmp(v->name, name) == 0) return v;
   }
 
@@ -277,7 +276,7 @@ static void FreeVariableData(void *p) {
   free(v->value);
 }
 
-int EvalFile(FILE *f, int exebyline, METHOD *methods) {
+int EvalFile(FILE *f, int exebyline, METHOD *methods, FILE *ferr) {
   ARRAY statements;
   ARRAY variables;
   STATEMENT *st;
@@ -294,17 +293,17 @@ int EvalFile(FILE *f, int exebyline, METHOD *methods) {
   while (1) {
     i = GetValidLine(f, buf, &nlines);
     if (i == 0) break;
-    if (i < 0) ErrorOcurred(i, nlines);
+    if (i < 0) ErrorOcurred(i, nlines, ferr);
     i = TokenizeLine(nlines, buf, methods, &statements, &variables);
     if (i < 0) {
-      ErrorOcurred(i, nlines);
+      ErrorOcurred(i, nlines, ferr);
       if (!exebyline) exit(1);
     }
     if (exebyline && i > 0) {
       st = (STATEMENT *) ArrayGet(&statements, statements.dim-1);
       ierr = EvalStatement(st, methods, &variables);
       if (ierr < 0) {
-        ErrorOcurred(ERR_EVAL, st->nline);
+        ErrorOcurred(ERR_EVAL, st->nline, ferr);
       }
     }
   }
@@ -314,7 +313,7 @@ int EvalFile(FILE *f, int exebyline, METHOD *methods) {
       st = (STATEMENT *) ArrayGet(&statements, i);
       ierr = EvalStatement(st, methods, &variables);
       if (ierr < 0) {
-        ErrorOcurred(ERR_EVAL, st->nline);
+        ErrorOcurred(ERR_EVAL, st->nline, ferr);
         exit(1);
       }
     }
@@ -330,26 +329,26 @@ int EvalStatement(STATEMENT *st, METHOD *methods, ARRAY *variables) {
   return methods[st->imethod].func(st->argc, st->argv, st->argt, variables);
 }
 
-void ErrorOcurred(int ierr, int loc) {
-  printf("Error at Line %d: ", loc);
+void ErrorOcurred(int ierr, int loc, FILE *ferr) {
+  fprintf(ferr, "Error at Line %d: ", loc);
   switch (ierr) {
   case ERR_LINEUNTERMINATED:
-    printf("Line Unterminated\n");
+    fprintf(ferr, "Line Unterminated\n");
     break;
   case ERR_LINETOOLONG:
-    printf("Line Too Long, MaxLength: %d\n", MAXLINELENGTH);
+    fprintf(ferr, "Line Too Long, MaxLength: %d\n", MAXLINELENGTH);
     break;
   case ERR_NOVARIABLE:
-    printf("Variable does not exist\n");
+    fprintf(ferr, "Variable does not exist\n");
     break;
   case ERR_ARGSTOOMANY:
-    printf("Arguments Too Many, Max: %d\n", MAXNARGS);
+    fprintf(ferr, "Arguments Too Many, Max: %d\n", MAXNARGS);
     break;
   case ERR_SYNTAX:
-    printf("Syntax Error\n");
+    fprintf(ferr, "Syntax Error\n");
     break;
   case ERR_EVAL:
-    printf("Evaluation Error\n");
+    fprintf(ferr, "Evaluation Error\n");
     break;
   default:
     break;

@@ -1950,7 +1950,27 @@ int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
   }
   return 0;
 }
-  
+
+void InitECorrectionData(void *p, int n) {
+  ECORRECTION *ec = p;
+  int k;
+
+  for (k = 0; k < n; k++, ec++) {
+    ec->name = NULL;
+    ec->refname = NULL;
+  }
+}
+
+void FreeECorrectionData(void *p) {
+  ECORRECTION *ec = p;
+  if (ec->name) {
+    free(ec->name);
+  }
+  if (ec->refname) {
+    free(ec->refname);
+  }
+}
+
 int AddECorrection(cfac_t *cfac, int nele, const char *name,
     const char *refname, double e) {
   ECORRECTION c;

@@ -263,7 +263,8 @@ cfac_t *cfac_new(void)
         cfac_free(cfac);
         return NULL;
     }
-    ArrayInit(cfac->ecorrections, sizeof(ECORRECTION), 512, NULL, NULL);
+    ArrayInit(cfac->ecorrections, sizeof(ECORRECTION), 512,
+        FreeECorrectionData, InitECorrectionData);
 
 
     cfac->angz_array = malloc(sizeof(ANGZ_DATUM)*MAX_HAMS2);

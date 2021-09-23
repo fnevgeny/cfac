@@ -135,8 +135,12 @@ double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra,
 		  SHELL_STATE *sket,INTERACT_SHELL *s);
 int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h);
 int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg);
+
 int AddECorrection(cfac_t *cfac, int nele, const char *name,
     const char *refname, double e);
+void InitECorrectionData(void *p, int n);
+void FreeECorrectionData(void *p);
+
 LEVEL *GetLevel(const cfac_t *cfac, int k);
 LEVEL *GetEBLevel(const cfac_t *cfac, int k);
 int LevelTotalJ(cfac_t *cfac, int k);

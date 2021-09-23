@@ -374,14 +374,15 @@ configuration transitions for dipole transitions. The 13th column is the number
 to be added to $g_2$ to form relative intensities for quadrupole transitions.
 \end{fundesc}
 
-\begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}}}
+\begin{fundesc}{Structure}{fn, g\opt{, p\opt{, ip}} $\mid$ fn, nele}
 Diagonalize the Hamiltonian for configurations in the groups \var{g}. The
 configurations in the optional groups \var{p} are allowed to interact with
 \var{g} but only states within \var{g} are added to the energy level table. If
 \var{ip}=0 (default), the interaction between \var{g} and \var{p} are treated
 exactly, if \var{ip}=1, this interaction is treated approximately in a way that
 the non-diagonal elements within \var{p} are neglected. The energy levels are
-output to the file \var{fn}.
+output to the file \var{fn}. In the second form, all states of the ion with
+\var{nele} electrons are included.
 \end{fundesc}
 
 \begin{fundesc}{StructureEB}{fn, g}
@@ -424,14 +425,16 @@ are always calculated in the fully relativistic mode anyway).
 A convenience function combining the four functions above in a single call.
 \end{fundesc}
 
-\begin{fundesc}{TransitionTable}{fn, low, up\opt{, m}}
+\begin{fundesc}{TransitionTable}{fn, low, up\opt{, m} $\mid$ fn, nele \opt{, m}}
 Calculate the weighted oscillator strength and radiative transition rates from
 states in configuration group list \var{up} to states in the configuration list
 \var{low} with multipole type \var{m}. The default for \var{m} is -1, i.e., E1
-transitions. The results are saved to file \var{fn}.
+transitions. The results are saved to file \var{fn}. In the second form, all
+possible transitions between states of the ion with \var{nele} electrons are
+calculated.
 \end{fundesc}
 
-\begin{fundesc}{TRTable}{fn, low, up\opt{, m}}
+\begin{fundesc}{TRTable}{fn, low, up\opt{, m} $\mid$ fn, nele \opt{, m}}
 Same as \funcref{TransitionTable}
 \end{fundesc}
 
@@ -443,10 +446,11 @@ electric fields.
 
 \subsection{Collisional Excitation}
 
-\begin{fundesc}{CETable}{fn, low, up}
+\begin{fundesc}{CETable}{fn, low, up $\mid$ fn, nele}
 Calculate the collision strength for the excitation of states in the
 configuration group list \var{low} to those in the group list\var{up}. The
-results are saved in the file \var{fn}.
+results are saved in the file \var{fn}. In the second form, all possible
+transitions between states of the ion with \var{nele} electrons are calculated.
 \end{fundesc}
 
 \begin{fundesc}{CETableEB}{fn, low, up\opt{, m}}
@@ -535,10 +539,13 @@ strengths on this grid are output.
 
 \subsection{Collisional Ionization}
 
-\begin{fundesc}{CITable}{fn, b, f}
+\begin{fundesc}{CITable}{fn, b, f $\mid$ fn, nele}
 Calculate the collision strength for the ionization of states in the bound
-configuration groups \var{b} to those in the free configuration groups
-\var{f}. The results are saved in the file \var{fn}.
+configuration groups \var{b} to those in the free configuration groups \var{f}.
+The results are saved in the file \var{fn}. In the second form, all possible
+transitions between states of ions with \var{nele} and \var{nele}$-1$ electrons
+are calculated.
+
 \end{fundesc}
 
 \begin{fundesc}{CITableMSub}{fn, b, f}
@@ -618,13 +625,14 @@ described in the header of the file itself. The remaining arguments are
 identical to those of \funcref{RRTable}.
 \end{fundesc}
 
-\begin{fundesc}{RRTable}{fn, b, f\opt{, m}}
+\begin{fundesc}{RRTable}{fn, b, f\opt{, m} $\mid$ fn, nele}
 Calculate the bound-free differential oscillator strengths between the bound
 configuration groups \var{b} and the free groups \var{f}, which are related to
 radiative recombination and photoionization cross sections. The optional
 multipole type \var{m} is set to -1 (E1) by default. In almost all cases, no
 other multipole types should be important. The results are saved in file
-\var{fn}.
+\var{fn}. In the second form, all possible transitions between states of ions
+with \var{nele} and \var{nele}$-1$ electrons are calculated.
 \end{fundesc}
 
 
@@ -689,10 +697,11 @@ this grid. It is forced to be same as that set by \funcref{SetPEGrid} if
 
 \subsection{Autoionization}
 
-\begin{fundesc}{AITable}{fn, b, f}
-Calculate the autoionization rates between the bound configuration group
-\var{b} and the free configuration group \var{f}. The results are saved in
-file \var{fn}.
+\begin{fundesc}{AITable}{fn, b, f $\mid$ fn, nele}
+Calculate the autoionization rates between the bound configuration group \var{b}
+and the free configuration group \var{f}. The results are saved in file
+\var{fn}. In the second form, all possible transitions between states of
+ions with \var{nele} and \var{nele}$-1$ electrons are calculated.
 \end{fundesc}
 
 \begin{fundesc}{AITableMSub}{fn, b, f}

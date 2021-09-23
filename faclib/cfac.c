@@ -283,8 +283,6 @@ cfac_t *cfac_new(void)
 
     cfac->tr_opts.gauge = DGAUGE;
     cfac->tr_opts.mode  = DMODE;
-    cfac->tr_opts.max_e = ERANK;
-    cfac->tr_opts.max_m = MRANK;
     cfac->tr_opts.fr_interpolate = 1;
 
     return cfac;

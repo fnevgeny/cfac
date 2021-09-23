@@ -1126,7 +1126,7 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
     }
 
     if (qk_mode != QK_CB) {
-      SetTransitionOptions(cfac, G_BABUSHKIN, M_NR, 4, 4);
+      SetTransitionOptions(cfac, G_BABUSHKIN, M_NR);
       SetRRTEGrid(1, e, e);
       SetPEGridLimits(egrid_min, egrid_max, egrid_limits_type);
       SetPEGridDetail(n_egrid, egrid);

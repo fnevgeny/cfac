@@ -32,9 +32,7 @@ int GetTransition(const cfac_t *cfac,
     int nlo, int nup, TRANSITION *tr, int *swapped);
 void SetTransitionMode(cfac_t *cfac, int m);
 void SetTransitionGauge(cfac_t *cfac, int m);
-void SetTransitionMaxE(cfac_t *cfac, int m);
-void SetTransitionMaxM(cfac_t *cfac, int m);
-void SetTransitionOptions(cfac_t *cfac, int gauge, int mode, int max_e, int max_m);
+void SetTransitionOptions(cfac_t *cfac, int gauge, int mode);
 int GetTransitionGauge(const cfac_t *cfac);
 int GetTransitionMode(const cfac_t *cfac);
 int TRMultipole(cfac_t *cfac, double *rme, double *energy,

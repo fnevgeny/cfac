@@ -2074,23 +2074,14 @@ static int PSetTransitionCut(int argc, char *argv[], int argt[],
 
 static int PSetTransitionOptions(int argc, char *argv[], int argt[],
                                  ARRAY *variables) {
-  int gauge, mode, max_m, max_e;
+  int gauge, mode;
 
-  max_e = 4;
-  max_m = 4;
-
-  if (argc < 2 || argc > 4) return -1;
+  if (argc != 2) return -1;
 
   gauge = atoi(argv[0]);
   mode = atoi(argv[1]);
-  if (argc > 2) {
-    max_e = atoi(argv[2]);
-    if (argc > 3) {
-      max_m = atoi(argv[3]);
-    }
-  }
 
-  SetTransitionOptions(cfac, gauge, mode, max_e, max_m);
+  SetTransitionOptions(cfac, gauge, mode);
 
   return 0;
 }
@@ -2644,32 +2635,6 @@ static int PSetTransitionGauge(int argc, char *argv[], int argt[],
   return 0;
 }
 
-static int PSetTransitionMaxE(int argc, char *argv[], int argt[],
-                              ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) {
-    return -1;
-  }
-
-  m = atoi(argv[0]);
-  SetTransitionMaxE(cfac, m);
-  return 0;
-}
-
-static int PSetTransitionMaxM(int argc, char *argv[], int argt[],
-                              ARRAY *variables) {
-  int m;
-
-  if (argc != 1 || argt[0] != NUMBER) {
-    return -1;
-  }
-
-  m = atoi(argv[0]);
-  SetTransitionMaxM(cfac, m);
-  return 0;
-}
-
 static int PSetSlaterCut(int argc, char *argv[], int argt[],
                          ARRAY *variables) {
   int k0, k1;
@@ -2947,8 +2912,6 @@ static METHOD methods[] = {
   {"SetTEGrid", PSetTEGrid},
   {"SetTransitionCut", PSetTransitionCut},
   {"SetTransitionGauge", PSetTransitionGauge},
-  {"SetTransitionMaxE", PSetTransitionMaxE},
-  {"SetTransitionMaxM", PSetTransitionMaxM},
   {"SetTransitionMode", PSetTransitionMode},
   {"SetTransitionOptions", PSetTransitionOptions},
   {"SetUTA", PSetUTA},

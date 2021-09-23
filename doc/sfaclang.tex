@@ -407,22 +407,14 @@ Set the gauge for radiative transition. 1 for Coulomb gauge (velocity form) and
 2 for Babushkin gauge (length form, which is the default).
 \end{fundesc}
 
-\begin{fundesc}{SetTransitionMaxE}{max\_e}
-Set the maximum rank of electric multipole transitions. Default is 4.
-\end{fundesc}
-
-\begin{fundesc}{SetTransitionMaxM}{max\_m}
-Set the maximum rank of magnetic multipole transitions. Default is 4.
-\end{fundesc}
-
 \begin{fundesc}{SetTransitionMode}{m}
 Set the mode for the multipole integral calculation. 0 for fully relativistic
 and 1 for non-relativistic approximation (the default is 1, but $M1$ transitions
 are always calculated in the fully relativistic mode anyway).
 \end{fundesc}
 
-\begin{fundesc}{SetTransitionOptions}{g, m\opt{, max\_e, max\_m}}
-A convenience function combining the four functions above in a single call.
+\begin{fundesc}{SetTransitionOptions}{g, m}
+A convenience function combining the two functions above in a single call.
 \end{fundesc}
 
 \begin{fundesc}{TransitionTable}{fn, low, up\opt{, m} $\mid$ fn, nele \opt{, m}}

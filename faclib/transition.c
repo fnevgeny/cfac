@@ -37,20 +37,9 @@ void SetTransitionGauge(cfac_t *cfac, int m) {
   cfac->tr_opts.gauge = m;
 }
 
-void SetTransitionMaxE(cfac_t *cfac, int m) {
-  cfac->tr_opts.max_e = m;
-}
-
-void SetTransitionMaxM(cfac_t *cfac, int m) {
-  cfac->tr_opts.max_m = m;
-}
-
-void SetTransitionOptions(cfac_t *cfac, int gauge, int mode,
-                          int max_e, int max_m) {
+void SetTransitionOptions(cfac_t *cfac, int gauge, int mode) {
   cfac->tr_opts.gauge = gauge;
   cfac->tr_opts.mode = mode;
-  cfac->tr_opts.max_e = max_e;
-  cfac->tr_opts.max_m = max_m;
 }
 
 int GetTransitionGauge(const cfac_t *cfac) {

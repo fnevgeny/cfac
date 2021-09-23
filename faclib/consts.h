@@ -198,8 +198,6 @@
 #define M_NR               1
 #define DGAUGE             G_BABUSHKIN
 #define DMODE              M_NR
-#define ERANK              4
-#define MRANK              4
 
 /* recouple */
 #define MAXRANK            20

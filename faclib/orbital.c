@@ -39,8 +39,9 @@ static const double wave_zero = 1E-10;
 static int SetVEffective(int kl, POTENTIAL *pot);
 static int TurningPoints(int n, double e, const POTENTIAL *pot);
 static int CountNodes(double *p, int i1, int i2);
-static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
-                           int i1, double p1, int i2, double p2, int q);
+static int IntegrateRadial(const cfac_t *cfac,
+    double *p, double e, const POTENTIAL *pot,
+    int i1, double p1, int i2, double p2, int q);
 static double Amplitude(double *p, double e, int kl, POTENTIAL *pot, int i1);
 static int Phase(double *p, POTENTIAL *pot, int i1, double p0);
 static int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2);
@@ -171,10 +172,10 @@ int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
 
   if (orb->n > 0) {
     if (orb->n == 1000000) {
-      ierr = RadialFreeInner(orb, pot);
+      ierr = RadialFreeInner(cfac, orb, pot);
     } else {
       if (pot->ib > 0 && orb->n > pot->nb) {
-        ierr = RadialBasis(orb, pot);
+        ierr = RadialBasis(cfac, orb, pot);
       } else {
         GetHydrogenicNL(cfac, NULL, NULL, &nm, &km);
         k = GetLFromKappa(orb->kappa);
@@ -189,16 +190,16 @@ int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
           return 0;
         }
         if (orb->n < pot->nmax) {
-          ierr = RadialBound(orb, pot);
+          ierr = RadialBound(cfac, orb, pot);
         } else {
-          ierr = RadialRydberg(orb, pot);
+          ierr = RadialRydberg(cfac, orb, pot);
         }
       }
     }
   } else if (orb->n == 0) {
-    ierr = RadialFree(orb, pot);
+    ierr = RadialFree(cfac, orb, pot);
   } else {
-    ierr = RadialBasisOuter(orb, pot);
+    ierr = RadialBasisOuter(cfac, orb, pot);
   }
   return ierr;
 }
@@ -293,7 +294,7 @@ static double DpDr(int kappa, int i1, double e, const POTENTIAL *pot, double b) 
   return bqp;
 }
 
-int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
+int RadialBasisOuter(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot) {
   double e, de, delta, emin, emax, dr, ke;
   double *p, p1, qo, qi, bqp, bqp1;
   int n, i, kl, nr, nodes, nnodes, niter;
@@ -306,7 +307,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   n = -orb->n;
   nr = n - kl - 1;
   if (kl < 0 || kl >= n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+    cfac_errmsg(cfac, "Invalid orbital angular momentum, L=%d, %d %d\n",
            kl, orb->n, orb->kappa);
     return -1;
   }
@@ -337,7 +338,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
     bqp = DpDr(orb->kappa, pot->ib, e, pot, 0.0);
     bqp1 = DpDr(orb->kappa, pot->ib1, e, pot, 0.0);
     i2 = TurningPoints(orb->n, e, pot);
-    nodes = IntegrateRadial(p, e, pot, ib0, bqp, i2, 1.0, 2);
+    nodes = IntegrateRadial(cfac, p, e, pot, ib0, bqp, i2, 1.0, 2);
     if (nodes < 0) {
       return -1;
     }
@@ -345,7 +346,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
       i2 = LastMaximum(p, pot->ib+20, i2);
       nodes = CountNodes(p, ib0, i2);
     }
-    nnodes = IntegrateRadial(p, e, pot, i2, 1.0, ib1, bqp1, 1);
+    nnodes = IntegrateRadial(cfac, p, e, pot, i2, 1.0, ib1, bqp1, 1);
     if (nnodes < 0) {
       return -1;
     }
@@ -360,7 +361,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
     }
   }
   if (niter == max_iteration) {
-    printf("Max iteration before finding correct nodes in RadialBasisOuter %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding correct nodes in RadialBasisOuter %d %d\n",
            nodes, nr);
     free(p);
     return -2;
@@ -380,7 +381,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
       bqp = DpDr(orb->kappa, pot->ib, e, pot, 0.0);
       bqp1 = DpDr(orb->kappa, pot->ib1, e, pot, 0.0);
       i2 = TurningPoints(orb->n, e, pot);
-      nodes = IntegrateRadial(p, e, pot, ib0, bqp, i2, 1.0, 2);
+      nodes = IntegrateRadial(cfac, p, e, pot, ib0, bqp, i2, 1.0, 2);
       if (nodes < 0) {
         return -1;
       }
@@ -388,7 +389,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
         i2 = LastMaximum(p, pot->ib+20, i2);
         nodes = CountNodes(p, ib0, i2);
       }
-      nnodes = IntegrateRadial(p, e, pot, i2, 1.0, ib1, bqp1, 1);
+      nnodes = IntegrateRadial(cfac, p, e, pot, i2, 1.0, ib1, bqp1, 1);
       if (nnodes < 0) {
         return -1;
       }
@@ -398,7 +399,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
     nodes = nr;
   }
   if (niter == max_iteration) {
-    printf("Max iteration before finding solution in RadialBasisOuter %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding solution in RadialBasisOuter %d %d\n",
            nodes, nr);
     free(p);
     return -3;
@@ -419,7 +420,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
         bqp = DpDr(orb->kappa, pot->ib, e, pot, 0.0);
         bqp1 = DpDr(orb->kappa, pot->ib1, e, pot, 0.0);
         i2 = TurningPoints(orb->n, e, pot);
-        nodes = IntegrateRadial(p, e, pot, ib0, bqp, i2, 1.0, 2);
+        nodes = IntegrateRadial(cfac, p, e, pot, ib0, bqp, i2, 1.0, 2);
         if (nodes < 0) {
           return -1;
         }
@@ -427,7 +428,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
           i2 = LastMaximum(p, pot->ib+20, i2);
           nodes = CountNodes(p, ib0, i2);
         }
-        nnodes = IntegrateRadial(p, e, pot, i2, 1.0, ib1, bqp1, 1);
+        nnodes = IntegrateRadial(cfac, p, e, pot, i2, 1.0, ib1, bqp1, 1);
         if (nnodes < 0) {
           return -1;
         }
@@ -437,7 +438,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
       nodes = nr;
     }
     if (niter == max_iteration) {
-      printf("Max iteration before finding solution in RadialBasisOuter %d %d\n",
+      cfac_errmsg(cfac, "Max iteration before finding solution in RadialBasisOuter %d %d\n",
              nodes, nr);
       free(p);
       return -4;
@@ -454,7 +455,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
     bqp1 = DpDr(orb->kappa, pot->ib1, e, pot, 0.0);
     i2 = TurningPoints(orb->n, e, pot);
     i2p2 = i2 + 2;
-    nodes = IntegrateRadial(p, e, pot, ib0, bqp, i2p2, 1.0, 2);
+    nodes = IntegrateRadial(cfac, p, e, pot, ib0, bqp, i2p2, 1.0, 2);
     if (nodes < 0) {
       return -1;
     }
@@ -472,7 +473,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
     qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m1]
           + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
     qo /= p[i2];
-    if (IntegrateRadial(p, e, pot, i2m2, p1, ib1, bqp1, 1) < 0) {
+    if (IntegrateRadial(cfac, p, e, pot, i2m2, p1, ib1, bqp1, 1) < 0) {
       return -1;
     }
     for (i = i2m2; i <= ib1; i++) {
@@ -498,7 +499,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   }
 
   if (niter == max_iteration) {
-    printf("Max iteration before finding solution in RadialBasisOuter %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding solution in RadialBasisOuter %d %d\n",
            nodes, nr);
     free(p);
     return -5;
@@ -520,7 +521,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   return 0;
 }
 
-int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
+int RadialBasis(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot) {
   double z, z0, e, de, delta, emin, emax;
   double *p, p1, p2 = 0.0, qo, qi, bqp;
   int i, k, kl, nr, nodes, niter;
@@ -530,7 +531,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   kl = (kl < 0)? (-kl-1):kl;
 
   if (kl < 0 || kl >= orb->n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+    cfac_errmsg(cfac, "Invalid orbital angular momentum, L=%d, %d %d\n",
            kl, orb->n, orb->kappa);
     return -1;
   }
@@ -566,7 +567,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     if (i2 < 0) {
       nodes = -1;
     } else {
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -575,7 +576,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     e = e*2.0;
   }
   if (niter == max_iteration) {
-    printf("Max iteration before finding correct nodes in RadialBasis %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding correct nodes in RadialBasis %d %d\n",
            nodes, nr);
     free(p);
     return -2;
@@ -593,7 +594,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
       if (i2 < 0) {
         nodes = -1;
       } else {
-        nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+        nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
         if (nodes < 0) {
           return -1;
         }
@@ -604,7 +605,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     }
     emin = e;
     if (niter == max_iteration) {
-      printf("Max iteration before finding correct nodes in RadialBasis %d %d\n",
+      cfac_errmsg(cfac, "Max iteration before finding correct nodes in RadialBasis %d %d\n",
              nodes, nr);
       free(p);
       return -3;
@@ -615,7 +616,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     SetPotentialW(pot, e, orb->kappa);
     SetVEffective(kl, pot);
     i2 = TurningPoints(orb->n, e, pot);
-    nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+    nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
     if (nodes < 0) {
       return -1;
     }
@@ -629,7 +630,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     }
   }
   if (niter == max_iteration) {
-    printf("Max iteration before finding correct nodes in RadialBasis %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding correct nodes in RadialBasis %d %d\n",
            nodes, nr);
     free(p);
     return -4;
@@ -643,7 +644,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
       SetPotentialW(pot, e, orb->kappa);
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -668,7 +669,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
         nodes = -1;
         break;
       }
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -688,7 +689,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
       i2m2 = i2 - 2;
       i2p1 = i2 + 1;
       i2p2 = i2 + 2;
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -732,7 +733,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
       p1 /= pot->dr_drho2[i1];
       p2 -= p1;
       i2p2 = i2 + 2;
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -751,7 +752,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
       qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m1]
             + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
       qo /= p[i2];
-      if (IntegrateRadial(p, e, pot, i2m2, p1, i1+1, p2, 1) < 0) {
+      if (IntegrateRadial(cfac, p, e, pot, i2m2, p1, i1+1, p2, 1) < 0) {
         return -1;
       }
       for (i = i2m2; i <= pot->ib+1; i++) {
@@ -774,14 +775,14 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   }
 
   if (niter == max_iteration) {
-    printf("Max iteration before finding solution in RadialBasis %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding solution in RadialBasis %d %d\n",
            nodes, nr);
     free(p);
     return -7;
   }
 
   if (i2 == pot->ib) {
-    nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+    nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
     if (nodes < 0) {
       return -1;
     }
@@ -820,7 +821,7 @@ static double InnerProduct(int i1, int i2, const double *p1, const double *p2,
     return Simpson(dwork, i1, i2);
 }
 
-int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
+int RadialBound(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot) {
   double z, z0, e, de, ep, delta, emin, emax;
   double *p, norm2, fact, p1, p2, qo, qi;
   int i, kl, nr, nodes = 0, niter;
@@ -830,7 +831,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   kl = (kl < 0)? (-kl-1):kl;
 
   if (kl < 0 || kl >= orb->n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+    cfac_errmsg(cfac, "Invalid orbital angular momentum, L=%d, %d %d\n",
            kl, orb->n, orb->kappa);
     return -1;
   }
@@ -863,7 +864,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     SetVEffective(kl, pot);
     i2 = TurningPoints(orb->n, e, pot);
     if (i2 > 0) {
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -872,7 +873,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     e *= 0.5;
   }
   if (niter == max_iteration) {
-    printf("Max iteration before finding correct nodes in RadialBound %d %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding correct nodes in RadialBound %d %d %d\n",
            nodes, nr, i2);
     free(p);
     return -2;
@@ -891,7 +892,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
       if (i2 < 0) {
         nodes = -1;
       } else {
-        nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+        nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
         if (nodes < 0) {
           return -1;
         }
@@ -902,7 +903,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     }
     emin = e;
     if (niter == max_iteration) {
-      printf("Max iteration before finding correct nodes in RadialBound %d %d\n",
+      cfac_errmsg(cfac, "Max iteration before finding correct nodes in RadialBound %d %d\n",
              nodes, nr);
       free(p);
       return -3;
@@ -917,7 +918,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     if (i2 < 0) {
       nodes = -1;
     } else {
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -932,7 +933,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     }
   }
   if (niter == max_iteration) {
-    printf("Max iteration before finding correct nodes in RadialBound %d %d\n",
+    cfac_errmsg(cfac, "Max iteration before finding correct nodes in RadialBound %d %d\n",
            nodes, nr);
     free(p);
     return -4;
@@ -946,7 +947,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
       SetPotentialW(pot, e, orb->kappa);
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -963,7 +964,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     SetVEffective(kl, pot);
     i2 = TurningPoints(orb->n, e, pot);
     i2p2 = i2 + 2;
-    nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+    nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
     if (nodes < 0) {
       return -1;
     }
@@ -981,7 +982,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
           + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
     qo /= p2*pot->dr_drho[i2];
     norm2 = InnerProduct(0, i2, p, p, pot);
-    if (IntegrateRadial(p, e, pot, i2m2, p1, pot->maxrp-1, 0.0, 0) < 0) {
+    if (IntegrateRadial(cfac, p, e, pot, i2m2, p1, pot->maxrp-1, 0.0, 0) < 0) {
       return -1;
     }
     for (i = i2m2; i < pot->maxrp; i++) {
@@ -1000,7 +1001,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     if (fabs(delta) < ep) break;
   }
   if (niter == max_iteration) {
-    printf("Max iteration reached in RadialBound\n");
+    cfac_errmsg(cfac, "Max iteration reached in RadialBound\n");
     free(p);
     return -5;
   }
@@ -1036,7 +1037,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     }
   }
   if (nodes != nr) {
-    printf("RadialBound: No. nodes changed in iteration %d %d\n", nodes, nr);
+    cfac_errmsg(cfac, "RadialBound: No. nodes changed in iteration %d %d\n", nodes, nr);
     free(p);
     return -6;
   }
@@ -1052,7 +1053,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   return 0;
 }
 
-int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
+int RadialRydberg(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot) {
 #define ME 20
   double z, e, e0;
   int i, kl, niter, ierr;
@@ -1067,7 +1068,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   kl = orb->kappa;
   kl = (kl < 0)? (-kl-1):kl;
   if (kl < 0 || kl >= orb->n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+    cfac_errmsg(cfac, "Invalid orbital angular momentum, L=%d, %d %d\n",
            kl, orb->n, orb->kappa);
     return -1;
   }
@@ -1088,11 +1089,11 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-        printf("The orbital angular momentum = %d too high\n", kl);
+        cfac_errmsg(cfac, "The orbital angular momentum = %d too high\n", kl);
         return -2;
       }
       i2p2 = i2 + 2;
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -1109,11 +1110,11 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-        printf("The orbital angular momentum = %d too high\n", kl);
+        cfac_errmsg(cfac, "The orbital angular momentum = %d too high\n", kl);
         return -2;
       }
       i2p2 = i2 + 2;
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -1125,11 +1126,11 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-        printf("The orbital angular momentum = %d too high\n", kl);
+        cfac_errmsg(cfac, "The orbital angular momentum = %d too high\n", kl);
         return -2;
       }
       i2p2 = i2 + 2;
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -1148,7 +1149,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       qo /= p2*pot->dr_drho[i2];
       norm2 = InnerProduct(0, i2, p, p, pot);
 
-      if (IntegrateRadial(p, e, pot, i2m2, p1, pot->maxrp-1, 0.0, 0) < 0) {
+      if (IntegrateRadial(cfac, p, e, pot, i2m2, p1, pot->maxrp-1, 0.0, 0) < 0) {
         return -1;
       }
       for (i = i2m2; i < pot->maxrp; i++) {
@@ -1174,7 +1175,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       }
     }
     if (niter == max_iteration) {
-      printf("Max iteration reached in RadialRydberg\n");
+      cfac_errmsg(cfac, "Max iteration reached in RadialRydberg\n");
       free(p);
       return -3;
     }
@@ -1186,7 +1187,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
 
     if (i2p2 >= pot->maxrp) {
       free(p);
-      printf("Consider enlarging radial grid\n");
+      cfac_errmsg(cfac, "Consider enlarging radial grid\n");
       return -5;
     }
 
@@ -1198,11 +1199,11 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
 
     if (i2p2 >= pot->maxrp) {
       free(p);
-      printf("Consider enlarging radial grid\n");
+      cfac_errmsg(cfac, "Consider enlarging radial grid\n");
       return -5;
     }
 
-    nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+    nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
     if (nodes < 0) {
       return -1;
     }
@@ -1222,7 +1223,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       en[j] = e;
       SetPotentialW(pot, e, orb->kappa);
       SetVEffective(kl, pot);
-      nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+      nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
@@ -1233,7 +1234,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       x0 = pot->rad[i2];
       DCOUL(z, e, orb->kappa, x0, &pp, &qq, &ppi, &qqi, &ierr);
       if (ierr) {
-        printf("DCOUL failed with ierr = %d\n", ierr);
+        cfac_errmsg(cfac, "DCOUL failed with ierr = %d\n", ierr);
         return -4;
       }
       p1 = (qq/pp)*2.0*x0/FINE_STRUCTURE_CONST - orb->kappa;
@@ -1252,9 +1253,9 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     for (np = i; np <= j; np++) {
       dq[np] = -dq[np];
     }
-    uvip3p(nme, &(dq[i]), &(en[i]), one, &zero, &e);
+    uvip3p(cfac, nme, &(dq[i]), &(en[i]), one, &zero, &e);
     i2p2 = pot->maxrp-1;
-    nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+    nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
     if (nodes < 0) {
       return -1;
     }
@@ -1265,7 +1266,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     x0 = pot->rad[i2];
     DCOUL(z, e, orb->kappa, x0, &pp, &qq, &ppi, &qqi, &ierr);
     if (ierr) {
-      printf("DCOUL failed with ierr = %d\n", ierr);
+      cfac_errmsg(cfac, "DCOUL failed with ierr = %d\n", ierr);
       return -4;
     }
     norm2 = pp;
@@ -1301,7 +1302,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
 #undef ME
 }
 
-int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
+int RadialFreeInner(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot) {
   int i, kl;
   int i2;
   double *p, e;
@@ -1309,11 +1310,11 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
   e = orb->energy;
   kl = orb->kappa;
   if (orb->kappa == 0) {
-    printf("Kappa == 0 in RadialFreeInner\n");
+    cfac_errmsg(cfac, "Kappa == 0 in RadialFreeInner\n");
     return -1;
   }
   if (pot->ib1 <= 0 && pot->ib <= 0) {
-    printf("Boundary not set\n");
+    cfac_errmsg(cfac, "Boundary not set\n");
     return -2;
   }
   SetPotentialW(pot, e, kl);
@@ -1324,7 +1325,7 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
 
   i2 = pot->ib1;
   i2 = Max(i2,pot->ib) + 2;
-  if (IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0) < 0) {
+  if (IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2, 1.0, 0) < 0) {
     return -1;
   }
   for (i = i2; i >= 0; i--) {
@@ -1345,7 +1346,7 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
 
 /* note that the free states are normalized to have asymptotic
    amplitude of 1/sqrt(k), */
-int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
+int RadialFree(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot) {
   int i, kl, nodes;
   int i2, i2p, i2m, i2p2, i2m2;
   double *p, po, qo, e, po1;
@@ -1353,12 +1354,12 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
 
   e = orb->energy;
   if (e < 0.0) {
-    printf("Energy < 0 in RadialFree\n");
+    cfac_errmsg(cfac, "Energy < 0 in RadialFree\n");
     return -1;
   }
   kl = orb->kappa;
   if (orb->kappa == 0) {
-    printf("Kappa == 0 in RadialFree\n");
+    cfac_errmsg(cfac, "Kappa == 0 in RadialFree\n");
     return -1;
   }
   SetPotentialW(pot, e, kl);
@@ -1373,7 +1374,7 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
   i2m2 = i2 - 2;
   i2p2 = i2 + 2;
 
-  nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
+  nodes = IntegrateRadial(cfac, p, e, pot, 0, 0.0, i2p2, 1.0, 0);
   if (nodes < 0) {
     return -1;
   }
@@ -1790,8 +1791,9 @@ static double get_dirac_rhs(const POTENTIAL *pot, double e, unsigned int i)
    store result in p[i1]..p[i2]. Return node count.
    q = {0,1,2} determines the boundary conditions (value/derivative) for WF
    matching: both, left, or right */
-static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
-                           int i1, double p1, int i2, double p2, int q) {
+static int IntegrateRadial(const cfac_t *cfac,
+    double *p, double e, const POTENTIAL *pot,
+    int i1, double p1, int i2, double p2, int q) {
 #define NN  4 /* stride of ABAND */
   double x, p0;
   int i, info, m, k, nodes;
@@ -1803,7 +1805,7 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   if (m < 0) return 0;
 
   if (i2 >= pot->maxrp || i2 < 0) {
-    printf("Radial index is outside of array bounds in IntegrateRadial(): %d\n",
+    cfac_errmsg(cfac, "Radial index is outside of array bounds in IntegrateRadial(): %d\n",
         i2);
     return -1;
   }
@@ -1884,7 +1886,7 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   gsl_vector_free(xv);
 
   if (info) {
-    printf("Error in integrating the radial equation: %d\n", info);
+    cfac_errmsg(cfac, "Error in integrating the radial equation: %d\n", info);
     return -1;
   }
 
@@ -1913,7 +1915,8 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
 #undef NN
 
 /* solving "a*sqrt(r) + b*log(r) = rho" for r using r0 as an initial guess */
-static double GetRFromRho(double rho, double a, double b, double r0) {
+static double GetRFromRho(const cfac_t *cfac,
+    double rho, double a, double b, double r0) {
     double e, d1;
     int i;
 
@@ -1921,7 +1924,8 @@ static double GetRFromRho(double rho, double a, double b, double r0) {
     i = 0;
     while (fabs(e) > 1E-10) {
         if (i > 100) {
-            printf("Newton iteration failed to converge in GetRFromRho\n");
+            cfac_errmsg(cfac,
+                "Newton iteration failed to converge in GetRFromRho\n");
             return -1.0;
         }
 
@@ -1972,7 +1976,7 @@ int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
       !pot->W        ||
       !pot->uehling  ||
       !pot->veff) {
-    printf("Memory allocation failed in SetOrbitalRGrid()\n");
+    cfac_errmsg(cfac, "Memory allocation failed in SetOrbitalRGrid()\n");
     return -1;
   }
 
@@ -2017,8 +2021,8 @@ int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
   d2 = sqrt(rmax) - sqrt(rmin);
   b = (pot->maxrp - 1 - a*d2)/d1;
   if (b < c) {
-    printf("Not enough radial mesh points, ");
-    printf("enlarge to at least %d\n", (int) (1 + a*d2 + c*d1));
+    cfac_errmsg(cfac, "Not enough radial mesh points, ");
+    cfac_errmsg(cfac, "enlarge to at least %d\n", (int) (1 + a*d2 + c*d1));
     return -1;
   }
 
@@ -2028,7 +2032,7 @@ int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
   rho = a*sqrt(rmin) + b*log(rmin);
   for (i = 1; i < pot->maxrp; i++) {
     rho += drho;
-    pot->rad[i] = GetRFromRho(rho, a, b, pot->rad[i-1]);
+    pot->rad[i] = GetRFromRho(cfac, rho, a, b, pot->rad[i-1]);
     if (pot->rad[i] < 0) {
       return -1;
     }

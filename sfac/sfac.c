@@ -328,7 +328,7 @@ static int PAvgConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
 
   if (argc != 1 || argt[0] != STRING) return -1;
 
-  ns = GetAverageConfigFromString(&n, &kappa, &nq, argv[0]);
+  ns = GetAverageConfigFromString(cfac, &n, &kappa, &nq, argv[0]);
   if (ns <= 0) return -1;
 
   if (SetAverageConfig(cfac, ns, n, kappa, nq) < 0) return -1;
@@ -377,7 +377,7 @@ static int PClosed(int argc, char *argv[], int argt[], ARRAY *variables) {
     p = argv[i];
     for (k = 0; k < ns; k++) {
       while (*p == ' ') p++;
-      ncfg = GetConfigFromStringNR(&cfg, p);
+      ncfg = GetConfigFromStringNR(cfac, &cfg, p);
       for (j = ncfg-1; j >= 0; j--) {
         if (cfg[j].n_shells != 1) return -1;
         n = (cfg[j].shells)[0].n;
@@ -406,7 +406,7 @@ static int PGetConfigNR(int argc, char *argv[], int argt[], ARRAY *variables) {
     if (argt[i] != STRING) return -1;
     strncpy(scfg, _closed_shells, MCHSHELL);
     strncat(scfg, argv[i], MCHSHELL - 1);
-    ncfg = GetConfigFromStringNR(&cfg, scfg);
+    ncfg = GetConfigFromStringNR(cfac, &cfg, scfg);
     for (j = 0; j < ncfg; j++) {
       scfg[0] = '\0';
       for (t = cfg[j].n_shells-1; t >= 0; t--) {
@@ -476,7 +476,7 @@ static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
     if (argt[i] != STRING) return -1;
     strncpy(scfg, _closed_shells, MCHSHELL);
     strncat(scfg, argv[i], MCHSHELL - 1);
-    ncfg = GetConfigFromString(&cfg, scfg);
+    ncfg = GetConfigFromString(cfac, &cfg, scfg);
     for (j = 0; j < ncfg; j++) {
       cfg[j].uta = iuta;
       if (Couple(&cfg[j]) < 0) return -1;
@@ -845,7 +845,7 @@ static int PMemENTable(int argc, char *argv[], int argt[],
   if (argc != 1) return -1;
   if (argt[0] != STRING) return -1;
 
-  MemENTable(argv[0]);
+  MemENTable(cfac, argv[0]);
 
   return 0;
 }
@@ -961,7 +961,7 @@ static int PPrintTable(int argc, char *argv[], int argt[],
     v = atoi(argv[2]);
   }
 
-  PrintTable(argv[0], argv[1], v);
+  PrintTable(cfac, argv[0], argv[1], v);
   return 0;
 }
 
@@ -1012,7 +1012,7 @@ static int PStoreClose(int argc, char *argv[], int argt[],
     return -1;
   }
 
-  StoreClose(db, sid, cmdline);
+  StoreClose(cfac, db, sid, cmdline);
 
   sid = 0;
   return 0;
@@ -1276,7 +1276,7 @@ static int PSetCEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetCEEGrid(ng, -1.0, -1.0, 0.0);
+      err = SetCEEGrid(cfac, ng, -1.0, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -1284,7 +1284,7 @@ static int PSetCEGrid(int argc, char *argv[], int argt[],
         free(vg[i]);
         xg[i] /= HARTREE_EV;
       }
-      err = SetCEEGridDetail(ng, xg);
+      err = SetCEEGridDetail(cfac, ng, xg);
     } else {
       return -1;
     }
@@ -1296,7 +1296,7 @@ static int PSetCEGrid(int argc, char *argv[], int argt[],
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
     if (eth > 0) eth /= HARTREE_EV;
-    err = SetCEEGrid(ng, emin, emax, eth);
+    err = SetCEEGrid(cfac, ng, emin, emax, eth);
   } else {
     return -1;
   }
@@ -1334,7 +1334,7 @@ static int PSetAngleGrid(int argc, char *argv[], int argt[],
         free(vg[i]);
         xg[i] /= HARTREE_EV;
       }
-      err = SetAngleGridDetail(m, ng, xg);
+      err = SetAngleGridDetail(cfac, m, ng, xg);
     } else {
       return -1;
     }
@@ -1398,7 +1398,7 @@ static int PSetTEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetCETEGrid(ng, -1.0, 0.0);
+      err = SetCETEGrid(cfac, ng, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -1407,7 +1407,7 @@ static int PSetTEGrid(int argc, char *argv[], int argt[],
         xg[i] /= HARTREE_EV;
         free(vg[i]);
       }
-      err = SetCETEGridDetail(ng, xg);
+      err = SetCETEGridDetail(cfac, ng, xg);
     } else {
       return -1;
     }
@@ -1417,7 +1417,7 @@ static int PSetTEGrid(int argc, char *argv[], int argt[],
     emax = atof(argv[2]);
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
-    err = SetCETEGrid(ng, emin, emax);
+    err = SetCETEGrid(cfac, ng, emin, emax);
   } else {
     return -1;
   }
@@ -1445,7 +1445,7 @@ static int PSetCEPWOptions(int argc, char *argv[], int argt[],
     }
   }
 
-  return SetCEPWOptions(qr, max, kl_cb);
+  return SetCEPWOptions(cfac, qr, max, kl_cb);
 }
 
 static int PSetCEPWGridType(int argc, char *argv[], int argt[],
@@ -1468,7 +1468,7 @@ static int PSetCEPWGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] != NUMBER) return -1;
     ns = atoi(argv[0]);
-    SetCEPWGrid(-ns, NULL, NULL);
+    SetCEPWGrid(cfac, -ns, NULL, NULL);
   } else {
     if (argt[0] != LIST || argt[1] != LIST) return -1;
     ns = DecodeArgs(argv[0], v1, t1, variables);
@@ -1483,7 +1483,7 @@ static int PSetCEPWGrid(int argc, char *argv[], int argt[],
       free(v1[i]);
       free(v2[i]);
     }
-    SetCEPWGrid(ns, m, step);
+    SetCEPWGrid(cfac, ns, m, step);
     free(m);
     free(step);
   }
@@ -1545,7 +1545,7 @@ static int PSetCIEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetCIEGrid(ng, -1.0, -1.0, 0.0);
+      err = SetCIEGrid(cfac, ng, -1.0, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -1565,7 +1565,7 @@ static int PSetCIEGrid(int argc, char *argv[], int argt[],
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
     if (eth > 0) eth /= HARTREE_EV;
-    err = SetCIEGrid(ng, emin, emax, eth);
+    err = SetCIEGrid(cfac, ng, emin, emax, eth);
   } else {
     return -1;
   }
@@ -1610,7 +1610,7 @@ static int PSetIEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetIEGrid(ng, -1.0, 0.0);
+      err = SetIEGrid(cfac, ng, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -1619,7 +1619,7 @@ static int PSetIEGrid(int argc, char *argv[], int argt[],
         xg[i] /= HARTREE_EV;
         free(vg[i]);
       }
-      err = SetIEGridDetail(ng, xg);
+      err = SetIEGridDetail(cfac, ng, xg);
     } else {
       return -1;
     }
@@ -1629,7 +1629,7 @@ static int PSetIEGrid(int argc, char *argv[], int argt[],
     emax = atof(argv[2]);
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
-    err = SetIEGrid(ng, emin, emax);
+    err = SetIEGrid(cfac, ng, emin, emax);
   } else {
     return -1;
   }
@@ -1650,7 +1650,7 @@ static int PSetCIPWGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] != NUMBER) return -1;
     ns = atoi(argv[0]);
-    SetCIPWGrid(-ns, NULL, NULL);
+    SetCIPWGrid(cfac, -ns, NULL, NULL);
   } else {
     if (argt[0] != LIST || argt[1] != LIST) return -1;
     ns = DecodeArgs(argv[0], v1, t1, variables);
@@ -1665,7 +1665,7 @@ static int PSetCIPWGrid(int argc, char *argv[], int argt[],
       free(v1[i]);
       free(v2[i]);
     }
-    SetCIPWGrid(ns, m, step);
+    SetCIPWGrid(cfac, ns, m, step);
     free(m);
     free(step);
   }
@@ -1770,7 +1770,7 @@ static int PSetPEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetPEGrid(ng, -1.0, -1.0, 0.0);
+      err = SetPEGrid(cfac, ng, -1.0, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -1790,7 +1790,7 @@ static int PSetPEGrid(int argc, char *argv[], int argt[],
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
     if (eth > 0) eth /= HARTREE_EV;
-    err = SetPEGrid(ng, emin, emax, eth);
+    err = SetPEGrid(cfac, ng, emin, emax, eth);
   } else {
     return -1;
   }
@@ -1952,7 +1952,7 @@ static int PSetRRTEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetRRTEGrid(ng, -1.0, 0.0);
+      err = SetRRTEGrid(cfac, ng, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -1961,7 +1961,7 @@ static int PSetRRTEGrid(int argc, char *argv[], int argt[],
         xg[i] /= HARTREE_EV;
         free(vg[i]);
       }
-      err = SetRRTEGridDetail(ng, xg);
+      err = SetRRTEGridDetail(cfac, ng, xg);
     } else {
       return -1;
     }
@@ -1971,7 +1971,7 @@ static int PSetRRTEGrid(int argc, char *argv[], int argt[],
     emax = atof(argv[2]);
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
-    err = SetRRTEGrid(ng, emin, emax);
+    err = SetRRTEGrid(cfac, ng, emin, emax);
   } else {
     return -1;
   }
@@ -2099,7 +2099,7 @@ static int PSetUsrCEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetUsrCEEGrid(ng, -1.0, -1.0, 0.0);
+      err = SetUsrCEEGrid(cfac, ng, -1.0, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -2107,7 +2107,7 @@ static int PSetUsrCEGrid(int argc, char *argv[], int argt[],
         xg[i] /= HARTREE_EV;
         free(vg[i]);
       }
-      err = SetUsrCEEGridDetail(ng, xg);
+      err = SetUsrCEEGridDetail(cfac, ng, xg);
     } else {
       return -1;
     }
@@ -2119,7 +2119,7 @@ static int PSetUsrCEGrid(int argc, char *argv[], int argt[],
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
     if (eth > 0) eth /= HARTREE_EV;
-    err = SetUsrCEEGrid(ng, emin, emax, eth);
+    err = SetUsrCEEGrid(cfac, ng, emin, emax, eth);
   } else {
     return -1;
   }
@@ -2149,7 +2149,7 @@ static int PSetUsrCIEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetUsrCIEGrid(ng, -1.0, -1.0, 0.0);
+      err = SetUsrCIEGrid(cfac, ng, -1.0, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -2157,7 +2157,7 @@ static int PSetUsrCIEGrid(int argc, char *argv[], int argt[],
         xg[i] /= HARTREE_EV;
         free(vg[i]);
       }
-      err = SetUsrCIEGridDetail(ng, xg);
+      err = SetUsrCIEGridDetail(cfac, ng, xg);
     } else {
       return -1;
     }
@@ -2169,7 +2169,7 @@ static int PSetUsrCIEGrid(int argc, char *argv[], int argt[],
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
     if (eth > 0) eth /= HARTREE_EV;
-    err = SetUsrCIEGrid(ng, emin, emax, eth);
+    err = SetUsrCIEGrid(cfac, ng, emin, emax, eth);
   } else {
     return -1;
   }
@@ -2199,7 +2199,7 @@ static int PSetUsrPEGrid(int argc, char *argv[], int argt[],
   if (n == 1) {
     if (argt[0] == NUMBER) {
       ng = atoi(argv[0]);
-      err = SetUsrPEGrid(ng, -1.0, -1.0, 0.0);
+      err = SetUsrPEGrid(cfac, ng, -1.0, -1.0, 0.0);
     } else if (argt[0] == LIST || argt[0] == TUPLE) {
       ng = DecodeArgs(argv[0], vg, ig, variables);
       for (i = 0; i < ng; i++) {
@@ -2207,7 +2207,7 @@ static int PSetUsrPEGrid(int argc, char *argv[], int argt[],
         xg[i] /= HARTREE_EV;
         free(vg[i]);
       }
-      err = SetUsrPEGridDetail(ng, xg);
+      err = SetUsrPEGridDetail(cfac, ng, xg);
     } else {
       return -1;
     }
@@ -2219,7 +2219,7 @@ static int PSetUsrPEGrid(int argc, char *argv[], int argt[],
     emin /= HARTREE_EV;
     emax /= HARTREE_EV;
     if (eth > 0) eth /= HARTREE_EV;
-    err = SetUsrPEGrid(ng, emin, emax, eth);
+    err = SetUsrPEGrid(cfac, ng, emin, emax, eth);
   } else {
     return -1;
   }
@@ -2653,7 +2653,7 @@ static int PSetSlaterCut(int argc, char *argv[], int argt[],
 static int PAppendTable(int argc, char *argv[], int argt[],
                         ARRAY *variables) {
   if (argc != 1) return -1;
-  AppendTable(argv[0]);
+  AppendTable(cfac, argv[0]);
 
   return 0;
 }
@@ -2662,7 +2662,7 @@ static int PJoinTable(int argc, char *argv[], int argt[],
                       ARRAY *variables) {
   if (argc != 3) return -1;
 
-  JoinTable(argv[0], argv[1], argv[2]);
+  JoinTable(cfac, argv[0], argv[1], argv[2]);
 
   return 0;
 }
@@ -2774,7 +2774,7 @@ static int PSlaterCoeff(int argc, char *argv[], int argt[],
   if (argt[3] != STRING) return -1;
 
   nlev = SelectLevels(&ilev, argv[1], argt[1], variables);
-  na = GetAverageConfigFromString(&n, &kappa, &nq, argv[2]);
+  na = GetAverageConfigFromString(cfac, &n, &kappa, &nq, argv[2]);
   sa = malloc(sizeof(SHELL)*na);
   for (i = 0; i < na; i++) {
     sa[i].n = n[i];
@@ -2785,7 +2785,7 @@ static int PSlaterCoeff(int argc, char *argv[], int argt[],
     free(kappa);
     free(nq);
   }
-  nb = GetAverageConfigFromString(&n, &kappa, &nq, argv[3]);
+  nb = GetAverageConfigFromString(cfac, &n, &kappa, &nq, argv[3]);
   sb = malloc(sizeof(SHELL)*nb);
   for (i = 0; i < nb; i++) {
     sb[i].n = n[i];
@@ -2960,7 +2960,7 @@ static int InitFac() {
   if (InitDBase() != 0) {
     return -1;
   }
-  if (InitExcitation() != 0) {
+  if (InitExcitation(cfac) != 0) {
     return -1;
   }
   if (InitRecombination() != 0) {
@@ -2977,7 +2977,6 @@ int main(int argc, const char *argv[]) {
   int i;
   FILE *f;
   int cmdlen = 0;
-
 
 /* fix non-standard number of exponent digits in the MSVC runtime */
 #ifdef _WIN32

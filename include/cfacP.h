@@ -20,6 +20,8 @@
 #ifndef __CFACP_H_
 #define __CFACP_H_
 
+#include <stdio.h>
+
 #include "cfac.h"
 #include "array.h"
 #include "config.h"
@@ -166,6 +168,8 @@ struct _cfac_t {
         int mode;             /* mode (relativistic/non-relativistic)        */
         int fr_interpolate;   /* use interpolation for FR m. elements        */
     } tr_opts;
+
+    FILE *err_fp;             /* stream to output errors/warnings            */
 };
 
 typedef struct {
@@ -180,6 +184,8 @@ typedef struct {
     double *cache_o;
 } cfac_w3j_cache_t;
 
+void
+cfac_errmsg(const cfac_t *cfac, const char *fmt, ...);
 
 /* config.c */
 void

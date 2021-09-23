@@ -36,14 +36,14 @@ int FreeRecPk(void);
 int FreeRecQk(void);
 int FreeRecAngZ(void);
 int SetAICut(double c);
-int SetRRTEGrid(int n, double emin, double emax);
-int SetRRTEGridDetail(int n, double *x);
-int SetPEGrid(int n, double emin, double emax, double eth);
+int SetRRTEGrid(const cfac_t *cfac, int n, double emin, double emax);
+int SetRRTEGridDetail(const cfac_t *cfac, int n, double *x);
+int SetPEGrid(const cfac_t *cfac, int n, double emin, double emax, double eth);
 int SetPEGridDetail(int n, double *x);
 int SetPEGridLimits(double min, double max, int type);
 int SetUsrPEGridType(int type);
-int SetUsrPEGrid(int n, double emin, double emax, double eth);
-int SetUsrPEGridDetail(int n, double *x);
+int SetUsrPEGrid(const cfac_t *cfac, int n, double emin, double emax, double eth);
+int SetUsrPEGridDetail(const cfac_t *cfac, int n, double *x);
 int AddRecPW(int n, int step);
 int SetRecQkMode(int m, double tol);
 int SetRecPWOptions(int kl_interp, int max_kl);
@@ -62,7 +62,7 @@ void RRRadialQkHydrogenicParams(int np, double *p, double z, int n, int klb);
 int BoundFreeMultipole(cfac_t *cfac, FILE *fp, int rec, int f, int m);
 int BoundFreeOS(cfac_t *cfac, double *rqu, double *p,
                 double *eb, int rec, int f, int m, int iuta);
-int PrepRREGrids(double eth, double emax0);
+int PrepRREGrids(const cfac_t *cfac, double eth, double emax0);
 int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,

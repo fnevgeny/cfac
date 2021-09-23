@@ -97,13 +97,13 @@ int SetAICut(double c) {
   return 0;
 }
 
-int SetRRTEGrid(int n, double emin, double emax) {
-  n_tegrid = SetTEGrid(tegrid, log_te, n, emin, emax);
+int SetRRTEGrid(const cfac_t *cfac, int n, double emin, double emax) {
+  n_tegrid = SetTEGrid(cfac, tegrid, log_te, n, emin, emax);
   return n_tegrid;
 }
 
-int SetRRTEGridDetail(int n, double *x) {
-  n_tegrid = SetTEGridDetail(tegrid, log_te, n, x);
+int SetRRTEGridDetail(const cfac_t *cfac, int n, double *x) {
+  n_tegrid = SetTEGridDetail(cfac, tegrid, log_te, n, x);
   return n_tegrid;
 }
 
@@ -126,26 +126,27 @@ int SetPEGridDetail(int n, double *xg) {
   return n_egrid;
 }
 
-int SetPEGrid(int n, double emin, double emax, double eth) {
-  n_egrid = SetEGrid(egrid, log_egrid, n, emin, emax, eth);
+int SetPEGrid(const cfac_t *cfac, int n, double emin, double emax, double eth) {
+  n_egrid = SetEGrid(cfac, egrid, log_egrid, n, emin, emax, eth);
   return n_egrid;
 }
 
-int SetUsrPEGridDetail(int n, double *xg) {
+int SetUsrPEGridDetail(const cfac_t *cfac, int n, double *xg) {
   if (n > MAXNUSR) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
   n_usr = SetEGridDetail(usr_egrid, log_usr, n, xg);
   return n_usr;
 }
 
-int SetUsrPEGrid(int n, double emin, double emax, double eth) {
+int SetUsrPEGrid(const cfac_t *cfac,
+    int n, double emin, double emax, double eth) {
   if (n > MAXNUSR) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
-  n_usr = SetEGrid(usr_egrid, log_usr, n, emin, emax, eth);
+  n_usr = SetEGrid(cfac, usr_egrid, log_usr, n, emin, emax, eth);
   return n_usr;
 }
 
@@ -260,7 +261,7 @@ int RecStates(cfac_t *cfac, int n, int k, int *kg, char *fn) {
     if ((kg[i] = GroupExists(cfac, rgn)) >= 0) continue;
     kg[i] = AddGroup(cfac, rgn);
     if (kg[i] < 0) {
-      printf("Can not add more Groups\n");
+      cfac_errmsg(cfac, "Can not add more Groups\n");
       return -2;
     }
     ArrayAppend(rec_complex[n_complex].rg, kg+i);
@@ -727,7 +728,7 @@ int RRRadialMultipole(cfac_t *cfac, double *rqc, double te, int k0, int k1, int 
         rq[k] = rqe[j];
         j += n_egrid;
       }
-      uvip3p(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
+      uvip3p(cfac, n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
     }
   }
   return 0;
@@ -754,7 +755,7 @@ int RRRadialQk(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m) {
         rq[k] = rqe[j];
         j += n_egrid;
       }
-      uvip3p(n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
+      uvip3p(cfac, n_tegrid, tegrid, rq, nd, &x0, &rqc[i]);
     }
   }
   return 0;
@@ -979,7 +980,7 @@ int BoundFreeOS(cfac_t *cfac, double *rqu, double *rqc, double *eb,
       for (ie = 0; ie < n_egrid; ie++) {
         tq[ie] = log(tq[ie]);
       }
-      uvip3p(n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
+      uvip3p(cfac, n_egrid, log_egrid, tq, n_usr, log_usr, rqu);
       for (ie = 0; ie < n_usr; ie++) {
         rqu[ie] = exp(rqu[ie]);
       }
@@ -1074,7 +1075,7 @@ int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int ms
         kappaf = GetKappaFromJL(jf, klf);
         AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, ang[i].k);
         if (n_egrid > 1) {
-          uvip3p(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+          uvip3p(cfac, n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
         } else {
           s = ai_pk[0];
         }
@@ -1095,7 +1096,7 @@ int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int ms
       ik = klf - jf;
       AIRadial1E(cfac, ai_pk0, kb, kappaf);
       if (n_egrid > 1) {
-        uvip3p(n_egrid, log_egrid, ai_pk0, nt, &log_e, &s);
+        uvip3p(cfac, n_egrid, log_egrid, ai_pk0, nt, &log_e, &s);
       } else {
         s = ai_pk0[0];
       }
@@ -1166,7 +1167,7 @@ int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int ms
                 ai_pk0[ik] -= GetPhaseShift(cfac, k1);
               }
               if (n_egrid > 1) {
-                uvip3p(n_egrid, log_egrid, ai_pk0, nt, &log_e, &a);
+                uvip3p(cfac, n_egrid, log_egrid, ai_pk0, nt, &log_e, &a);
               } else {
                 a = ai_pk0[0];
               }
@@ -1245,7 +1246,7 @@ int AutoionizeRateUTA(cfac_t *cfac, double *rate, double *e, int rec, int f) {
           if (!Triangle(j0, j1, k) || !Triangle(jb, jf, k)) continue;
           AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, k);
           if (n_egrid > 1) {
-            uvip3p(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+            uvip3p(cfac, n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
           } else {
             s = ai_pk[0];
           }
@@ -1275,7 +1276,7 @@ int AutoionizeRateUTA(cfac_t *cfac, double *rate, double *e, int rec, int f) {
             if (fabs(b) < EPS30) continue;
             AIRadialPk(cfac, &ai_pk, k0, k1, kb, kappaf, k);
             if (n_egrid > 1) {
-              uvip3p(n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
+              uvip3p(cfac, n_egrid, log_egrid, ai_pk, nt, &log_e, &s);
             } else {
               s = ai_pk[0];
             }
@@ -1347,7 +1348,7 @@ int AIRadialPk(cfac_t *cfac, double **ai_pk, int k0, int k1, int kb, int kappaf,
   return 0;
 }
 
-int PrepRREGrids(double e, double emax0) {
+int PrepRREGrids(const cfac_t *cfac, double e, double emax0) {
   double rmin, rmax;
   double emin, emax;
   int j;
@@ -1372,13 +1373,13 @@ int PrepRREGrids(double e, double emax0) {
     n_egrid = 6;
   }
   if (egrid[0] < 0.0) {
-    SetPEGrid(n_egrid, emin, emax, e);
+    SetPEGrid(cfac, n_egrid, emin, emax, e);
   }
   if (n_usr <= 0) {
-    SetUsrPEGridDetail(n_egrid, egrid);
+    SetUsrPEGridDetail(cfac, n_egrid, egrid);
     usr_egrid_type = 1;
   } else if (usr_egrid[0] < 0) {
-    SetUsrPEGrid(n_usr, emin, emax, e);
+    SetUsrPEGrid(cfac, n_usr, emin, emax, e);
     usr_egrid_type = 1;
   }
 
@@ -1506,13 +1507,13 @@ int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn
       e = (emax - emin)/(0.5*(emin+emax));
       if (!te_set) {
         if (e < 0.1) {
-          SetRRTEGrid(1, emin, emax);
+          SetRRTEGrid(cfac, 1, emin, emax);
         } else if (e < 0.5) {
-          SetRRTEGrid(2, emin, emax);
+          SetRRTEGrid(cfac, 2, emin, emax);
         } else {
           if (k == 2) n_tegrid = 2;
           else if (n_tegrid0 == 0) n_tegrid = 3;
-          SetRRTEGrid(n_tegrid, emin, emax);
+          SetRRTEGrid(cfac, n_tegrid, emin, emax);
         }
       }
       FreeMultipoleArray(cfac);
@@ -1526,7 +1527,7 @@ int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn
         SetAWGrid(cfac, 3, awmin, awmax);
       }
     } else {
-      SetRRTEGrid(1, emin, emax);
+      SetRRTEGrid(cfac, 1, emin, emax);
     }
 
     n_egrid = n_egrid0;
@@ -1534,7 +1535,7 @@ int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn
     if (!usr_set) usr_egrid[0] = -1.0;
     if (!e_set) egrid[0] = -1.0;
     e = 0.5*(emin + emax);
-    PrepRREGrids(e, emax0);
+    PrepRREGrids(cfac, e, emax0);
 
     for (i = 0; i < nup; i++) {
       lev1 = GetLevel(cfac, up[i]);
@@ -1579,8 +1580,8 @@ int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   double c, e0, e1;
 
   if (m != -1 && GetTransitionGauge(cfac) != G_BABUSHKIN && qk_mode == QK_FIT) {
-    printf("QK_FIT mode is only available to LENGTH form of E1 transitions\n");
-    printf("Changing QK_FIT to QK_INTERPOLATE.\n");
+    cfac_errmsg(cfac, "QK_FIT mode is only available to LENGTH form of E1 transitions\n");
+    cfac_errmsg(cfac, "Changing QK_FIT to QK_INTERPOLATE.\n");
     SetRecQkMode(QK_INTERPOLATE, -1.0);
   }
 
@@ -1651,7 +1652,7 @@ int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   rr_hdr.qk_mode = qk_mode;
   rr_hdr.nparams = nqk;
   rr_hdr.multipole = m;
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -1684,13 +1685,13 @@ int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       e = (emax - emin)/(0.5*(emin+emax));
       if (!te_set) {
         if (e < EPS3) {
-          SetRRTEGrid(1, emin, emax);
+          SetRRTEGrid(cfac, 1, emin, emax);
         } else if (e < 0.5) {
-          SetRRTEGrid(2, emin, emax);
+          SetRRTEGrid(cfac, 2, emin, emax);
         } else {
           if (k == 2) n_tegrid = 2;
           else if (n_tegrid0 == 0) n_tegrid = 3;
-          SetRRTEGrid(n_tegrid, emin, emax);
+          SetRRTEGrid(cfac, n_tegrid, emin, emax);
         }
       }
       FreeMultipoleArray(cfac);
@@ -1704,7 +1705,7 @@ int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up,
         SetAWGrid(cfac, 3, awmin, awmax);
       }
     } else {
-      SetRRTEGrid(1, emin, emax);
+      SetRRTEGrid(cfac, 1, emin, emax);
     }
 
     n_egrid = n_egrid0;
@@ -1712,10 +1713,10 @@ int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     if (!usr_set) usr_egrid[0] = -1.0;
     if (!e_set) egrid[0] = -1.0;
     e = 0.5*(emin + emax);
-    PrepRREGrids(e, emax0);
+    PrepRREGrids(cfac, e, emax0);
 
     if (qk_mode == QK_FIT && n_egrid <= NPARAMS) {
-      printf("n_egrid must > %d to use QK_FIT mode\n", NPARAMS);
+      cfac_errmsg(cfac, "n_egrid must > %d to use QK_FIT mode\n", NPARAMS);
       return -1;
     }
     rr_hdr.n_tegrid = n_tegrid;
@@ -1867,7 +1868,7 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
     ai_hdr1.nele = GetNumElectrons(cfac, low[0]);
     ai_hdr1.emin = 0.0;
   }
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -1898,17 +1899,17 @@ int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
       double a = (emax-emin)/(0.5*(emax+emin));
       if (a < EPS3) {
         a = 0.5*(emin+emax);
-        SetPEGrid(1, a, a, 0.0);
+        SetPEGrid(cfac, 1, a, a, 0.0);
       } else if (a < 0.4) {
-        SetPEGrid(2, emin, emax, 0.0);
+        SetPEGrid(cfac, 2, emin, emax, 0.0);
       } else if (a < 1.0) {
         if (k == 2) n_egrid = 2;
         else if (n_egrid0 == 0) n_egrid = 3;
-        SetPEGrid(n_egrid, emin, emax, 0.0);
+        SetPEGrid(cfac, n_egrid, emin, emax, 0.0);
       } else {
         if (k == 2) n_egrid = 2;
         else if (n_egrid0 == 0) n_egrid = 4;
-        SetPEGrid(n_egrid, emin, emax, 0.0);
+        SetPEGrid(cfac, n_egrid, emin, emax, 0.0);
       }
     }
 

@@ -36,7 +36,7 @@ static double _CNC[5][5] = {
 };
 
 
-int SVDFit(int np, double *coeff, double tol,
+int SVDFit(const cfac_t *cfac, int np, double *coeff, double tol,
             int nd, double *x, double *logx, double *y, double *sig,
             void Basis(int, double *, double, double)) {
   int i, j;
@@ -86,7 +86,7 @@ int SVDFit(int np, double *coeff, double tol,
   gsl_vector_free(wv);
 
   if (infor != 0) {
-    fprintf(stderr, "gsl_linalg_SV_decomp() failed with %d\n", infor);
+    cfac_errmsg(cfac, "gsl_linalg_SV_decomp() failed with %d\n", infor);
     return CFAC_FAILURE;
   }
 
@@ -358,7 +358,7 @@ int NewtonCotes(double r[], const double x[], int ilast,
 }
 
 /* Imitate F77 UVIP3P by Hiroshi Akima (NP=3) */
-void uvip3p(int nd, const double *xd, const double *yd,
+void uvip3p(const cfac_t *cfac, int nd, const double *xd, const double *yd,
                  int ni, const double *xi, double *yi)
 {
     int i;
@@ -397,7 +397,7 @@ void uvip3p(int nd, const double *xd, const double *yd,
         } else {
             int gsl_status = gsl_spline_eval_e(spline, xi[i], acc, &yi[i]);
             if (gsl_status != GSL_SUCCESS) {
-                fprintf(stderr,
+                cfac_errmsg(cfac,
                     "gsl_spline_eval_e failed with status %d\n", gsl_status);
                 abort();
             }
@@ -439,7 +439,7 @@ coeff_calc (const double c_array[], double dy, double dx, size_t index,
 }
 
 /* Imitate F77 UVIP3C (NP=3) */
-void uvip3c(int nd, const double xd[], const double yd[],
+void uvip3c(const cfac_t *cfac, int nd, const double xd[], const double yd[],
                  double c1[], double c2[], double c3[])
 {
     int i;
@@ -457,7 +457,7 @@ void uvip3c(int nd, const double xd[], const double yd[],
     if (nd == 2) {
         type = gsl_interp_linear;
     } else {
-        fprintf(stderr, "uvip3c() called with nd = %d\n", nd);
+        cfac_errmsg(cfac, "uvip3c() called with nd = %d\n", nd);
         abort();
     }
 

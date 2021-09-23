@@ -146,13 +146,13 @@ static void FreeIonizationQkData(void *p) {
   *((double **) p) = NULL;
 }
 
-int SetIEGrid(int n, double emin, double emax) {
-  n_tegrid = SetTEGrid(tegrid, log_te, n, emin, emax);
+int SetIEGrid(const cfac_t *cfac, int n, double emin, double emax) {
+  n_tegrid = SetTEGrid(cfac, tegrid, log_te, n, emin, emax);
   return n_tegrid;
 }
 
-int SetIEGridDetail(int n, double *x) {
-  n_tegrid = SetTEGridDetail(tegrid, log_te, n, x);
+int SetIEGridDetail(const cfac_t *cfac, int n, double *x) {
+  n_tegrid = SetTEGridDetail(cfac, tegrid, log_te, n, x);
   return n_tegrid;
 }
 
@@ -178,10 +178,11 @@ void SetCILCB(int m) {
   pw_scratch.kl_cb = m;
 }
 
-static int SetCIPWOptions(int qr, int max, int max_eject, int kl_cb) {
+static int SetCIPWOptions(const cfac_t *cfac,
+  int qr, int max, int max_eject, int kl_cb) {
   pw_scratch.qr = qr;
   if (max > MAXKL) {
-    printf("The maximum partial wave reached in Ionization: %d\n", MAXKL);
+    cfac_errmsg(cfac, "The maximum partial wave reached in Ionization: %d\n", MAXKL);
     return -1;
   }
   pw_scratch.max_kl = max;
@@ -214,31 +215,33 @@ int SetUsrCIEGridType(int type) {
   return 0;
 }
 
-int SetCIEGrid(int n, double emin, double emax, double eth) {
-  n_egrid = SetEGrid(egrid, log_egrid, n, emin, emax, eth);
+int SetCIEGrid(const cfac_t *cfac,
+  int n, double emin, double emax, double eth) {
+  n_egrid = SetEGrid(cfac, egrid, log_egrid, n, emin, emax, eth);
   return n_egrid;
 }
 
-int SetUsrCIEGridDetail(int n, double *xg) {
+int SetUsrCIEGridDetail(const cfac_t *cfac, int n, double *xg) {
   if (n > MAXNUSR) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
   n_usr = SetEGridDetail(usr_egrid, log_usr, n, xg);
   return n_usr;
 }
 
-int SetUsrCIEGrid(int n, double emin, double emax, double eth) {
+int SetUsrCIEGrid(const cfac_t *cfac,
+  int n, double emin, double emax, double eth) {
   if (n > MAXNUSR) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
-  n_usr = SetEGrid(usr_egrid, log_usr, n, emin, emax, eth);
+  n_usr = SetEGrid(cfac, usr_egrid, log_usr, n, emin, emax, eth);
   return n_usr;
 }
 
-int SetCIPWGrid(int ns, int *n, int *step) {
-  int retval = SetPWGrid(&(pw_scratch.nkl0),
+int SetCIPWGrid(const cfac_t *cfac, int ns, int *n, int *step) {
+  int retval = SetPWGrid(cfac, &(pw_scratch.nkl0),
                            pw_scratch.kl,
                            pw_scratch.log_kl,
                            pw_scratch.max_kl,
@@ -435,7 +438,7 @@ static int CIRadialQk(cfac_t *cfac,
         kl1 = pw_scratch.kl[j];
         for (kl = kl0+1; kl < kl1; kl++) {
           logj = LnInteger(kl);
-          uvip3p(t, pw_scratch.log_kl, pk[i], one, &logj, &s);
+          uvip3p(cfac, t, pw_scratch.log_kl, pk[i], one, &logj, &s);
           r += s;
         }
       }
@@ -477,8 +480,9 @@ static void CIRadialQkFromFit(int np, double *p, int n,
   }
 }
 
-static int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
-                  double *xe, double *logxe, double *q, double *p, double te) {
+static int CIRadialQkBED(const cfac_t *cfac,
+    double *dp, double *bethe, double *b, int kl,
+    double *xe, double *logxe, double *q, double *p, double te) {
   double integrand[NINT];
   double x[NINT], y[NINT], t[NINT], s[NINT], d;
   double x0[MAXNUSR];
@@ -509,7 +513,7 @@ static int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
   if (i < NINT) {
     n = NINT-i;
     n1 = n_egrid;
-    uvip3p(n1, logxe, q, n, &(t[i]), &(integrand[i]));
+    uvip3p(cfac, n1, logxe, q, n, &(t[i]), &(integrand[i]));
     for (; i < NINT; i++) {
       integrand[i] = exp(integrand[i]);
     }
@@ -543,7 +547,7 @@ static int CIRadialQkBED(double *dp, double *bethe, double *b, int kl,
     for (i = 0; i < n_egrid; i++) {
       x0[i] = 1.0/xe[i];
     }
-    uvip3p(n, t, y, n_egrid, x0, dp);
+    uvip3p(cfac, n, t, y, n_egrid, x0, dp);
   }
 
   if (!isfinite(*bethe)) {
@@ -623,7 +627,7 @@ static double *CIRadialQkIntegratedTable(cfac_t *cfac, int kb, int kbp) {
           qt[ite][i] = log(qt[ite][i]);
         }
       }
-      uvip3p(NINT0, yegrid, qt[ite], NINT, yint, integrand);
+      uvip3p(cfac, NINT0, yegrid, qt[ite], NINT, yint, integrand);
       if (qlog) {
         for (i = 0; i < NINT; i++) {
           integrand[i] = exp(integrand[i]);
@@ -659,7 +663,7 @@ static int CIRadialQkIntegrated(cfac_t *cfac,
         qkc[j] = qk[k];
         k += n_egrid;
       }
-      uvip3p(n_tegrid, tegrid, qkc, nd, &te, &qke[i]);
+      uvip3p(cfac, n_tegrid, tegrid, qkc, nd, &te, &qke[i]);
     }
   } else {
     for (i = 0; i < nq; i++) {
@@ -797,7 +801,7 @@ static int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       }
     }
 
-    CIRadialQkBED(qku, &bethe, &b0, kl0, x, logx, qke, qkc, *te);
+    CIRadialQkBED(cfac, qku, &bethe, &b0, kl0, x, logx, qke, qkc, *te);
 
     if (!iuta) {
       nz = AngularZFreeBound(cfac, &ang, f, b);
@@ -854,7 +858,7 @@ static int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
         qku[i] *= (x[i]/(es + x[i]));
 
         if (qku[i] < 0.0) {
-            printf("Warning: qku[%d] = %g < 0, setting to zero\n", i, qku[i]);
+            cfac_errmsg(cfac, "Warning: qku[%d] = %g < 0, setting to zero\n", i, qku[i]);
             qku[i] = 0.0;
         }
       }
@@ -870,7 +874,7 @@ static int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
       }
 
       tol = qk_fit_tolerance;
-      if (SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
+      if (SVDFit(cfac, NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
              qke, sigma, CIRadialQkBasis) != CFAC_SUCCESS) {
         return -1;
       }
@@ -931,7 +935,7 @@ static int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
         qkc[i] = 0.0;
       }
       tol = qk_fit_tolerance;
-      if (SVDFit(NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
+      if (SVDFit(cfac, NPARAMS-1, qkc+1, tol, n_egrid, x, logx,
              qke, sigma, CIRadialQkBasis) != CFAC_SUCCESS) {
         return -1;
       }
@@ -1041,7 +1045,7 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   ci_hdr.pw_type = pw_type;
   ci_hdr.egrid_type = egrid_type;
   ci_hdr.usr_egrid_type = usr_egrid_type;
-  file = OpenFile(fn, &fhdr);
+  file = OpenFile(cfac, fn, &fhdr);
   if (!file) {
     return -1;
   }
@@ -1070,7 +1074,7 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
     }
 
     if (qk_mode == QK_CB) {
-      SetIEGrid(1, emin, emax);
+      SetIEGrid(cfac, 1, emin, emax);
     } else {
       if (n_tegrid0 == 0) {
         n_tegrid = 3;
@@ -1078,12 +1082,12 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
       if (!te_set) {
         e = 2.0*(emax-emin)/(emax+emin);
         if (e < EPS3) {
-          SetIEGrid(1, emin, emax);
+          SetIEGrid(cfac, 1, emin, emax);
         } else if (e < 0.5) {
-          SetIEGrid(2, emin, emax);
+          SetIEGrid(cfac, 2, emin, emax);
         } else {
           if (k == 2) n_tegrid = 2;
-          SetIEGrid(n_tegrid, emin, emax);
+          SetIEGrid(cfac, n_tegrid, emin, emax);
         }
       }
     }
@@ -1110,27 +1114,27 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
       n_egrid = 6;
     }
     if (egrid[0] < 0.0) {
-      SetCIEGrid(n_egrid, emin, emax, e);
+      SetCIEGrid(cfac, n_egrid, emin, emax, e);
     }
 
     usr_different = 1;
     if (n_usr > 0 && usr_egrid[0] < 0.0) {
-      SetUsrCIEGrid(n_usr, emin, emax, e);
+      SetUsrCIEGrid(cfac, n_usr, emin, emax, e);
       usr_egrid_type = 1;
       usr_different = 0;
     }
     if (n_usr <= 0) {
-      SetUsrCIEGridDetail(n_egrid, egrid);
+      SetUsrCIEGridDetail(cfac, n_egrid, egrid);
       usr_egrid_type = 1;
       usr_different = 0;
     }
 
     if (qk_mode != QK_CB) {
       SetTransitionOptions(cfac, G_BABUSHKIN, M_NR);
-      SetRRTEGrid(1, e, e);
+      SetRRTEGrid(cfac, 1, e, e);
       SetPEGridLimits(egrid_min, egrid_max, egrid_limits_type);
       SetPEGridDetail(n_egrid, egrid);
-      PrepRREGrids(e, emax0);
+      PrepRREGrids(cfac, e, emax0);
     }
 
     for (ie = 0; ie < n_egrid; ie++) {
@@ -1150,7 +1154,7 @@ int SaveIonization(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
     }
 
     if (pw_scratch.nkl == 0) {
-      if (SetCIPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+      if (SetCIPWGrid(cfac, 0, NULL, NULL) != CFAC_SUCCESS) {
         return -1;
       }
     }
@@ -1352,7 +1356,7 @@ static double CIRadialQkMSub(cfac_t *cfac,
     kl1 = pw_scratch.kl[t];
     for (kl2 = kl0+1; kl2 < kl1; kl2++) {
       rp = LnInteger(kl2);
-      uvip3p(pw_scratch.nkl, pw_scratch.log_kl, y, 1, &rp, &d);
+      uvip3p(cfac, pw_scratch.nkl, pw_scratch.log_kl, y, 1, &rp, &d);
       r += d;
     }
   }
@@ -1407,7 +1411,7 @@ static double CIRadialQkIntegratedMSub(cfac_t *cfac,
       y[i] = log(y[i]);
     }
   }
-  uvip3p(NINT0, x, y, NINT, xi, yi);
+  uvip3p(cfac, NINT0, x, y, NINT, xi, yi);
   if (qlog) {
     for (i = 0; i < NINT; i++) {
       yi[i] = exp(yi[i]);
@@ -1487,7 +1491,7 @@ static int IonizeStrengthMSub(cfac_t *cfac, double *qku, int b, int f) {
   for (m1 = -j1; m1 <= 0; m1 += 2) {
     for (m2 = -j2; m2 <= j2; m2 += 2) {
       if (n_egrid > 1) {
-        uvip3p(n_egrid, logx, rqk, n_usr, log_xusr, qku);
+        uvip3p(cfac, n_egrid, logx, rqk, n_usr, log_xusr, qku);
       } else {
         for (ie = 0; ie < n_usr; ie++) {
           qku[ie] = rqk[0];
@@ -1513,7 +1517,7 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   int nq, i, j, k, ie;
 
   if (qk_mode != QK_DW) {
-    printf("Only DW mode is supported in SaveIonizationMSub()\n");
+    cfac_errmsg(cfac, "Only DW mode is supported in SaveIonizationMSub()\n");
     return -1;
   }
 
@@ -1557,14 +1561,14 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   if (usr_egrid_type < 0) usr_egrid_type = 1;
   if (n_egrid <= 0) n_egrid = 6;
   if (egrid[0] < 0.0) {
-    SetCIEGrid(n_egrid, emin, emax, e);
+    SetCIEGrid(cfac, n_egrid, emin, emax, e);
   }
   if (n_usr > 0 && usr_egrid[0] < 0.0) {
-    SetUsrCIEGrid(n_usr, emin, emax, e);
+    SetUsrCIEGrid(cfac, n_usr, emin, emax, e);
     usr_egrid_type = 1;
   }
   if (n_usr <= 0) {
-    SetUsrCIEGridDetail(n_egrid, egrid);
+    SetUsrCIEGridDetail(cfac, n_egrid, egrid);
     usr_egrid_type = 1;
   }
 
@@ -1574,7 +1578,7 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   ci_hdr.nele = GetNumElectrons(cfac, b[0]);
   ci_hdr.egrid_type = egrid_type;
   ci_hdr.usr_egrid_type = usr_egrid_type;
-  file = OpenFile(fn, &fhdr);
+  file = OpenFile(cfac, fn, &fhdr);
   if (!file) {
     return -1;
   }
@@ -1589,7 +1593,7 @@ int SaveIonizationMSub(cfac_t *cfac, int nb, int *b, int nf, int *f, char *fn) {
   }
 
   if (pw_scratch.nkl == 0) {
-    if (SetCIPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+    if (SetCIPWGrid(cfac, 0, NULL, NULL) != CFAC_SUCCESS) {
       return -1;
     }
   }
@@ -1640,7 +1644,7 @@ int InitIonization(cfac_t *cfac) {
   tegrid[0] = -1.0;
   usr_egrid[0] = -1.0;
   SetCIQkMode(QK_DEFAULT, 1E-3);
-  return SetCIPWOptions(IONLQR, IONLMAX, IONLEJEC, IONLCB);
+  return SetCIPWOptions(cfac, IONLQR, IONLMAX, IONLEJEC, IONLCB);
 }
 
 static int ReinitIonization(int m) {

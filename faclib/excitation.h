@@ -23,28 +23,28 @@
 #include "consts.h"
 #include "transition.h"
 
-int InitExcitation(void);
+int InitExcitation(const cfac_t *cfac);
 
-int SetCETEGrid(int n, double emin, double emax);
-int SetCETEGridDetail(int n, double *x);
+int SetCETEGrid(const cfac_t *cfac, int n, double emin, double emax);
+int SetCETEGridDetail(const cfac_t *cfac, int n, double *x);
 int SetAngleGrid(int m, int n, double xmin, double xmax);
-int SetAngleGridDetail(int m, int n, double *xg);
+int SetAngleGridDetail(const cfac_t *cfac, int m, int n, double *xg);
 int SetCEBorn(double e, double x, double x1, double x0);
 void SetCELQR(int m);
 void SetCELMax(int m);
 void SetCELCB(int m);
-int SetCEPWOptions(int qr, int max, int kl_cb);
+int SetCEPWOptions(const cfac_t *cfac, int qr, int max, int kl_cb);
 int AddCEPW(int n, int step);
 int SetCEFormat(int m);
-int SetCEPWGrid(int ns, int *n, int *step);
+int SetCEPWGrid(const cfac_t *cfac, int ns, int *n, int *step);
 int SetCEEGridLimits(double min, double max, int type);
 int SetCEEGridType(int type);
 int SetUsrCEEGridType(int type);
 int SetCEPWGridType(int type);
-int SetCEEGridDetail(int n, double *x);
-int SetCEEGrid(int n, double emin, double emax, double eth);
-int SetUsrCEEGridDetail(int n, double *x);
-int SetUsrCEEGrid(int n, double emin, double emax, double eth);
+int SetCEEGridDetail(const cfac_t *cfac, int n, double *x);
+int SetCEEGrid(const cfac_t *cfac, int n, double emin, double emax, double eth);
+int SetUsrCEEGridDetail(const cfac_t *cfac, int n, double *x);
+int SetUsrCEEGrid(const cfac_t *cfac, int n, double emin, double emax, double eth);
 
 int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
                    double te, double e1, double *qk, int m);

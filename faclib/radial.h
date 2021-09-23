@@ -82,15 +82,17 @@ double ZerothResidualConfig(cfac_t *cfac, CONFIG *cfg);
 double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg);
 
 /* routines for radial integral calculations */
-int IntegrateF(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
+int IntegrateF(const cfac_t *cfac, POTENTIAL *potential,
+    const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     RadIntType type, double x[], int id);
-int IntegrateS(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
+int IntegrateS(const cfac_t *cfac, POTENTIAL *potential,
+    const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     RadIntType type, double *r, int id);
-int IntegrateSubRegion(POTENTIAL *potential, int i0, int i1,
+int IntegrateSubRegion(const cfac_t *cfac, POTENTIAL *potential, int i0, int i1,
                        const double *f,
                        const ORBITAL *orb1, const ORBITAL *orb2,
                        RadIntType type, double *r, int m, int last_only);
-int IntegrateSinCos(POTENTIAL *potential, int j, double *x, double *y,
+int IntegrateSinCos(const cfac_t *cfac, POTENTIAL *potential, int j, double *x, double *y,
                     double *phase, double *dphase,
                     int i0, double *r, int last_only);
 int SlaterTotal(cfac_t *cfac,
@@ -114,7 +116,7 @@ int FreeGOSArray(cfac_t *cfac);
 double RadialMoments(const cfac_t *cfac, int m, int k1, int k2);
 double MultipoleRadialNR(cfac_t *cfac, int m, int k1, int k2, int guage);
 double MultipoleRadialFR(cfac_t *cfac, double aw, int m, int k1, int k2, int guage);
-double InterpolateMultipole(double aw2, int n, double *x, double *y);
+double InterpolateMultipole(const cfac_t *cfac, double aw2, int n, double *x, double *y);
 double *GeneralizedMoments(cfac_t *cfac, int k0, int k1, int m);
 void PrintGeneralizedMoments(cfac_t *cfac,
     char *fn, int m, int n0, int k0, int n1, int k1, double e1);

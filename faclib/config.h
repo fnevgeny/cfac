@@ -203,11 +203,12 @@ int          GetRestriction(const char *scfg, SHELL_RESTRICTION **sr, int m);
 int          ApplyRestriction(int ncfg, CONFIG *cfg, int nc, SHELL_RESTRICTION *sr);
 int          DistributeElectrons(CONFIG **cfg, double *nq, const char *scfg);
 int          DistributeElectronsNR(CONFIG **cfg, const char *scfg);
-int          GetConfigOrAverageFromString(CONFIG **cfg,
+int          GetConfigOrAverageFromString(const cfac_t *cfac, CONFIG **cfg,
                                           double **nq, const char *scfg);
-int          GetConfigFromStringNR(CONFIG **cfg, const char *scfg);
-int          GetConfigFromString(CONFIG **cfg, const char *scfg);
-int          GetAverageConfigFromString(int **n, int **kappa,
+int          GetConfigFromStringNR(const cfac_t *cfac,
+                                   CONFIG **cfg, const char *scfg);
+int          GetConfigFromString(const cfac_t *cfac, CONFIG **cfg, const char *scfg);
+int          GetAverageConfigFromString(const cfac_t *cfac, int **n, int **kappa,
                                         double **nq, const char *scfg);
 int          Couple(CONFIG *cfg);
 int          CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner);

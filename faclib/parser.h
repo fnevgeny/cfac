@@ -20,8 +20,10 @@
 #ifndef _PARSER_H_
 #define _PARSER_H_ 1
 
+#include "cfacP.h"
+
 char StrTrim(char *s, char c);
-int QuotedStrSplit(char *s, char sep, char qb, char qe);
+int QuotedStrSplit(const cfac_t *cfac, char *s, char sep, char qb, char qe);
 int StrSplit(char *s, char sep);
 int SetParserQuote(char *qbegin, char *qend);
 int SetParserBreak(char *brkch);

@@ -708,7 +708,8 @@ int DistributeElectronsNR(CONFIG **cfg, const char *scfg) {
 ** SIDE EFFECT:
 ** NOTE:
 */
-int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
+int GetConfigOrAverageFromString(const cfac_t *cfac,
+    CONFIG **cfg, double **nq, const char *iscfg) {
   CONFIG **dcfg, **p1;
   double *dnq, *p2, a, b;
   char *s;
@@ -718,7 +719,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
 
   char * const scfg = strdup(iscfg);
   StrTrim(scfg, '\0');
-  ns = QuotedStrSplit(scfg, ' ', '[', ']');
+  ns = QuotedStrSplit(cfac, scfg, ' ', '[', ']');
   if (ns == 0) {
     *cfg = (CONFIG *) malloc(sizeof(CONFIG));
     (*cfg)->uta = 0;
@@ -859,7 +860,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
   return ncfg;
 }
 
-int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
+int GetConfigFromStringNR(const cfac_t *cfac, CONFIG **cfg, const char *iscfg) {
   CONFIG **dcfg, **p1;
   char *s;
   int *isp, ncfg, *dnc;
@@ -868,7 +869,7 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
 
   char * const scfg = strdup(iscfg);
   StrTrim(scfg, '\0');
-  ns = QuotedStrSplit(scfg, ' ', '[', ']');
+  ns = QuotedStrSplit(cfac, scfg, ' ', '[', ']');
   if (ns == 0) {
     *cfg = (CONFIG *) malloc(sizeof(CONFIG));
     (*cfg)->n_shells = 1;
@@ -983,8 +984,8 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
 ** SIDE EFFECT:
 ** NOTE:
 */
-int GetConfigFromString(CONFIG **cfg, const char *scfg) {
-  return GetConfigOrAverageFromString(cfg, NULL, scfg);
+int GetConfigFromString(const cfac_t *cfac, CONFIG **cfg, const char *scfg) {
+  return GetConfigOrAverageFromString(cfac, cfg, NULL, scfg);
 }
 
 /*
@@ -1001,12 +1002,12 @@ int GetConfigFromString(CONFIG **cfg, const char *scfg) {
 ** SIDE EFFECT:
 ** NOTE:
 */
-int GetAverageConfigFromString(int **n, int **kappa,
+int GetAverageConfigFromString(const cfac_t *cfac, int **n, int **kappa,
                                double **nq, const char *scfg) {
   CONFIG *cfg;
   int i, ns;
 
-  ns = GetConfigOrAverageFromString(&cfg, nq, scfg);
+  ns = GetConfigOrAverageFromString(cfac, &cfg, nq, scfg);
   if (ns <= 0) return ns;
 
   *n = (int *) malloc(sizeof(int)*ns);
@@ -2318,7 +2319,7 @@ int cfac_add_config(cfac_t *cfac,
     tmpstr = malloc((strlen(cfg_str) + 1)*sizeof(char));
     strcpy(tmpstr, cfg_str);
 
-    ncfgs = GetConfigFromString(&cfgs, tmpstr);
+    ncfgs = GetConfigFromString(cfac, &cfgs, tmpstr);
     free(tmpstr);
     for (j = 0; j < ncfgs; j++) {
         CONFIG *cfg = &cfgs[j];

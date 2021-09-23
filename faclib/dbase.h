@@ -391,12 +391,12 @@ int CheckEndian(F_HEADER *fh);
 void SwapEndian(char *p, int size);
 int SwapEndianFHeader(F_HEADER *h);
 int InitDBase(void);
-FILE *OpenFile(const char *fn, F_HEADER *fhdr);
+FILE *OpenFile(const cfac_t *cfac, const char *fn, F_HEADER *fhdr);
 int CloseFile(FILE *f, F_HEADER *fhdr);
 int InitFile(FILE *f, F_HEADER *fhdr, void *rhdr);
 int DeinitFile(FILE *f, F_HEADER *fhdr);
-int PrintTable(char *ifn, char *ofn, int v);
-int MemENTable(char *fn);
+int PrintTable(const cfac_t *cfac, char *ifn, char *ofn, int v);
+int MemENTable(const cfac_t *cfac, char *fn);
 int WriteENRecord(FILE *f, EN_RECORD *r);
 int WriteENFRecord(FILE *f, ENF_RECORD *r);
 int PrintENTable(FILE *f1, FILE *f2, int v, int swp);
@@ -445,8 +445,8 @@ int WriteCIMRecord(FILE *f, CIM_RECORD *r);
 int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp);
 int SwapEndianCIMHeader(CIM_HEADER *h);
 int SwapEndianCIMRecord(CIM_RECORD *r);
-int AppendTable(char *fn);
-int JoinTable(char *fn1, char *fn2, char *fn);
+int AppendTable(const cfac_t *cfac, char *fn);
+int JoinTable(const cfac_t *cfac, char *fn1, char *fn2, char *fn);
 int FindLevelByName(char *fn, int nele, char *nc, char *cnr, char *cr);
 int ISearch(int i, int n, int *ia);
 
@@ -454,13 +454,19 @@ int StoreInit(const cfac_t *cfac,
     const char *fn, int reset, sqlite3 **db, unsigned long *sid);
 int StoreTable(const cfac_t *cfac,
     sqlite3 *db, unsigned long int sid, const char *ifn);
-int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
+int StoreENTable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp);
+int StoreTRTable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp);
+int StoreCETable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp);
 int StoreRRTable(const cfac_t *cfac,
     sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
-int StoreClose(sqlite3 *db,unsigned long int sid, const char *cmdline);
+int StoreAITable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp);
+int StoreCITable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp);
+int StoreClose(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, const char *cmdline);
 
 #endif

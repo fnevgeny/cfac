@@ -20,7 +20,7 @@
 #ifndef _INTERPOLATION_H_
 #define _INTERPOLATION_H_
 
-int SVDFit(int np, double *coeff, double tol,
+int SVDFit(const cfac_t *cfac, int np, double *coeff, double tol,
             int nd, double *x, double *logx, double *y, double *sig,
             void Basis(int, double *, double, double));
 int NLSQFit(int np, double *p, double tol,
@@ -33,10 +33,10 @@ double Simpson(const double *y, int ia, int ib);
 int NewtonCotes(double r[], const double x[], int ilast,
                 int last_only, int id);
 
-void uvip3p(int nd, const double *xd, const double *yd,
+void uvip3p(const cfac_t *cfac, int nd, const double *xd, const double *yd,
                  int ni, const double *xi, double *yi);
 
-void uvip3c(int nd, const double xd[], const double yd[],
+void uvip3c(const cfac_t *cfac, int nd, const double xd[], const double yd[],
                  double c1[], double c2[], double c3[]);
 
 #endif

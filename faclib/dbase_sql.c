@@ -91,14 +91,14 @@ int StoreInit(const cfac_t *cfac,
 
     rc = sqlite3_open(fn, db);
     if (rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(*db));
+        cfac_errmsg(cfac, "Can't open database: %s\n", sqlite3_errmsg(*db));
         sqlite3_close(*db);
         return -1;
     }
 
     rc = sqlite3_exec(*db, "PRAGMA foreign_keys = ON", NULL, NULL, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        cfac_errmsg(cfac, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         sqlite3_close(*db);
         return -1;
@@ -110,7 +110,7 @@ int StoreInit(const cfac_t *cfac,
         while ((sql = schema_str[i])) {
             rc = sqlite3_exec(*db, sql, NULL, NULL, &errmsg);
             if (rc != SQLITE_OK) {
-                fprintf(stderr, "SQL error: %s\n", errmsg);
+                cfac_errmsg(cfac, "SQL error: %s\n", errmsg);
                 sqlite3_free(errmsg);
                 sqlite3_close(*db);
                 retval = -1;
@@ -129,7 +129,7 @@ int StoreInit(const cfac_t *cfac,
 
         rc = sqlite3_step(stmt);
         if (rc != SQLITE_DONE) {
-            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(*db));
+            cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(*db));
             sqlite3_close(*db);
             retval = -1;
         }
@@ -139,14 +139,14 @@ int StoreInit(const cfac_t *cfac,
         sql = "SELECT value FROM cfacdb WHERE property = 'format'";
         rc = sqlite3_exec(*db, sql, format_cb, &db_format, &errmsg);
         if (rc != SQLITE_OK) {
-            fprintf(stderr, "SQL error: %s\n", errmsg);
+            cfac_errmsg(cfac, "SQL error: %s\n", errmsg);
             sqlite3_free(errmsg);
             sqlite3_close(*db);
             return -1;
         }
 
         if (db_format != CFACDB_FORMAT_VERSION) {
-            fprintf(stderr, "Incompatible DB format %d, expected %d\n",
+            cfac_errmsg(cfac, "Incompatible DB format %d, expected %d\n",
                 db_format, CFACDB_FORMAT_VERSION);
             sqlite3_free(errmsg);
             sqlite3_close(*db);
@@ -167,7 +167,7 @@ int StoreInit(const cfac_t *cfac,
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(*db));
+        cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(*db));
         sqlite3_close(*db);
         retval = -1;
     }
@@ -184,7 +184,7 @@ int StoreInit(const cfac_t *cfac,
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(*db));
+        cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(*db));
         sqlite3_close(*db);
         retval = -1;
     }
@@ -194,7 +194,8 @@ int StoreInit(const cfac_t *cfac,
     return retval;
 }
 
-int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreENTable(const cfac_t *cfac,
+    sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 {
     int retval = 0;
     int rc;
@@ -263,7 +264,7 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {
-                fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
                 retval = -1;
                 break;
             }
@@ -278,7 +279,8 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     return retval;
 }
 
-int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreTRTable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp)
 {
     int retval = 0;
     int rc;
@@ -326,7 +328,7 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {
-                fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
                 retval = -1;
                 break;
             }
@@ -341,7 +343,8 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     return retval;
 }
 
-int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreAITable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp)
 {
     int retval = 0;
     int rc;
@@ -382,7 +385,7 @@ int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {
-                fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
                 retval = -1;
                 break;
             }
@@ -411,7 +414,8 @@ static int StoreCTransitionCB(void *udata,
     return 0;
 }
 
-static int StoreCTransition(sqlite3 *db, unsigned long int sid,
+static int StoreCTransition(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid,
     int type, int qk_mode, int ini_id, int fin_id, int kl,
     double ap0, double ap1, double ap2, double ap3,
     unsigned long int *cid)
@@ -446,7 +450,7 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
         sqlite3_finalize(stmt);
         return -1;
     }
@@ -456,7 +460,7 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
 
     rc = sqlite3_exec(db, sql, StoreCTransitionCB, cid, &errmsg);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "SQL error: %s\n", errmsg);
+        cfac_errmsg(cfac, "SQL error: %s\n", errmsg);
         sqlite3_free(errmsg);
         retval = -1;
     }
@@ -464,7 +468,8 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
     return retval;
 }
 
-int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreCETable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp)
 {
     int retval = 0;
     int rc;
@@ -499,7 +504,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                 break;
             }
 
-            retval = StoreCTransition(db, sid,
+            retval = StoreCTransition(cfac, db, sid,
                 CFACDB_CS_CE, QK_EXACT, r.lower, r.upper,
                 0, r.bethe, r.born[0], r.born[1], 0.0,
                 &cid);
@@ -520,7 +525,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
                     rc = sqlite3_step(stmt);
                     if (rc != SQLITE_DONE) {
-                        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                        cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
                         retval = -1;
                         break;
                     }
@@ -546,7 +551,8 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     return retval;
 }
 
-int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreCITable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp)
 {
     int retval = 0;
     int rc;
@@ -581,7 +587,7 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                 break;
             }
 
-            retval = StoreCTransition(db, sid,
+            retval = StoreCTransition(cfac, db, sid,
                 CFACDB_CS_CI, h.qk_mode, r.b, r.f,
                 r.kl, r.params[0], r.params[1], r.params[2], r.params[3],
                 &cid);
@@ -597,7 +603,7 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
                 rc = sqlite3_step(stmt);
                 if (rc != SQLITE_DONE) {
-                    fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                    cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
                     retval = -1;
                     break;
                 }
@@ -620,8 +626,8 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     return retval;
 }
 
-int StoreRRTable(const cfac_t *cfac,
-    sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+int StoreRRTable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp)
 {
     int retval = 0;
     int rc;
@@ -673,7 +679,7 @@ int StoreRRTable(const cfac_t *cfac,
                 ap1 = ap2 = ap3 = 0.0;
             }
 
-            retval = StoreCTransition(db, sid,
+            retval = StoreCTransition(cfac, db, sid,
                 CFACDB_CS_PI, h.qk_mode, r.b, r.f,
                 r.kl, ap0, ap1, ap2, ap3,
                 &cid);
@@ -689,7 +695,7 @@ int StoreRRTable(const cfac_t *cfac,
 
                 rc = sqlite3_step(stmt);
                 if (rc != SQLITE_DONE) {
-                    fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+                    cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
                     retval = -1;
                     break;
                 }
@@ -712,7 +718,8 @@ int StoreRRTable(const cfac_t *cfac,
     return retval;
 }
 
-int StoreClose(sqlite3 *db, unsigned long int sid, const char *cmdline)
+int StoreClose(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, const char *cmdline)
 {
     int retval = 0;
     int rc;
@@ -731,7 +738,7 @@ int StoreClose(sqlite3 *db, unsigned long int sid, const char *cmdline)
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
+        cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
         retval = -1;
     }
 

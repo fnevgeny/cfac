@@ -1082,10 +1082,11 @@ int AngularZxZ0(double **coeff, int **kk, int nk,
    coeff. The latter does not include the phase resulting from the
    reordering of operators; it is calculated in AngularZxZ0 and
    AngularZ0 */
-static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
-                      INTERACT_DATUM **idatum,
-                      const SHELL_STATE *csf_i, const SHELL_STATE *csf_j,
-                      SHELL_STATE **sbra, SHELL_STATE **sket) {
+static int InteractingShells(const cfac_t *cfac,
+    const CONFIG *cbra, const CONFIG *cket,
+    INTERACT_DATUM **idatum,
+    const SHELL_STATE *csf_i, const SHELL_STATE *csf_j,
+    SHELL_STATE **sbra, SHELL_STATE **sket) {
   int i, j, k, m, pb, pk;
   int n, kl, jj, nq, nq_plus, nq_minus, qd;
   SHELL *bra;
@@ -1097,7 +1098,7 @@ static int InteractingShells(const CONFIG *cbra, const CONFIG *cket,
      exact size in advance */
   (*idatum)->bra = malloc(sizeof(SHELL)*(cbra->n_shells + cket->n_shells));
   if ((*idatum)->bra == NULL) {
-    printf("error allocating idatam->bra.\n");
+    cfac_errmsg(cfac, "error allocating idatam->bra.\n");
     return -1;
   }
 
@@ -1434,13 +1435,13 @@ int GetInteract(cfac_t *cfac, INTERACT_DATUM **idatum,
         cip.n_csfs = 0;
         csf_ip = NULL;
       }
-      n_shells = InteractingShells(&cip, cj, idatum, csf_ip, csf_j, sbra, sket);
+      n_shells = InteractingShells(cfac, &cip, cj, idatum, csf_ip, csf_j, sbra, sket);
       free(cip.shells);
       if (csf_i) {
         free(cip.csfs);
       }
     } else {
-      n_shells = InteractingShells(ci, cj, idatum, csf_i, csf_j, sbra, sket);
+      n_shells = InteractingShells(cfac, ci, cj, idatum, csf_i, csf_j, sbra, sket);
     }
   }
 

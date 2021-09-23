@@ -166,7 +166,8 @@ double HydrogenicExpectation(double z, int m, int n, int kl) {
   return r;
 }
 
-double HydrogenicSelfEnergy(double z, int n, int k) {
+double HydrogenicSelfEnergy(const cfac_t *cfac, int n, int k) {
+  double z = cfac->nucleus.anum;
   double zd[12] = {1.0, 10.0, 20.0, 30.0, 40.0, 50.0,
                    60.0, 70.0, 80.0, 90.0, 100.0, 110};
   double sd[16][12] = {{10.3168,4.6540,3.2460,2.5519,
@@ -243,7 +244,7 @@ double HydrogenicSelfEnergy(double z, int n, int k) {
     return 0.0;
   }
 
-  uvip3p(nx, zd, sd[id], m, &z, &r);
+  uvip3p(cfac, nx, zd, sd[id], m, &z, &r);
 
   c = FINE_STRUCTURE_CONST*z;
   c = c*c*c*c;
@@ -396,7 +397,7 @@ double PartialOmega(int k0, double *r, int k) {
   return x;
 }
 
-int PrepCoulombBethe(cfac_cbcache_t *cbcache,
+int PrepCoulombBethe(const cfac_t *cfac, cfac_cbcache_t *cbcache,
                      int ne2, int nte, int ne1, double z,
                      double *e2, double *te, double *e1,
                      int nkl, double *kl, int mode) {
@@ -406,7 +407,7 @@ int PrepCoulombBethe(cfac_cbcache_t *cbcache,
   double w2, w3, *wr, *ws, *wt, *w, *tcb, *r[CBMULT];
 
   if (ne2 > MAXNE || ne1 > MAXNE || nte > MAXNTE) {
-    printf("Array multipoles not large enough in PrepCoulombBethe\n");
+    cfac_errmsg(cfac, "Array multipoles not large enough in PrepCoulombBethe\n");
     return -1;
   }
 
@@ -467,7 +468,7 @@ int PrepCoulombBethe(cfac_cbcache_t *cbcache,
                     r[i], &ierr);
           }
           if (ierr != 0) {
-            printf("error in CMULTIP: %d\n", ierr);
+            cfac_errmsg(cfac, "error in CMULTIP: %d\n", ierr);
             return -1;
           }
           for (k = q0; k <= q1; k++) {

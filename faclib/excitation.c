@@ -98,7 +98,7 @@ static CEPW_SCRATCH pw_scratch = {1, MAXKL, 100, 0, 0, 10, {0.0}, {0.0}};
 static MULTI *pk_array;
 static MULTI *qk_array;
 
-static int ReinitExcitation(int m);
+static int ReinitExcitation(const cfac_t *cfac, int m);
 
 static void InitCEPK(void *p, int n) {
   CEPK *d;
@@ -182,51 +182,52 @@ int SetCEPWGridType(int type) {
   return 0;
 }
 
-int SetCETEGridDetail(int n, double *x) {
-  n_tegrid = SetTEGridDetail(tegrid, log_te, n, x);
+int SetCETEGridDetail(const cfac_t *cfac, int n, double *x) {
+  n_tegrid = SetTEGridDetail(cfac, tegrid, log_te, n, x);
   return n_tegrid;
 }
 
-int SetCETEGrid(int n, double emin, double emax) {
-  n_tegrid = SetTEGrid(tegrid, log_te, n, emin, emax);
+int SetCETEGrid(const cfac_t *cfac, int n, double emin, double emax) {
+  n_tegrid = SetTEGrid(cfac, tegrid, log_te, n, emin, emax);
   return n_tegrid;
 }
 
-int SetCEEGridDetail(int n, double *xg) {
+int SetCEEGridDetail(const cfac_t *cfac, int n, double *xg) {
   n_egrid = SetEGridDetail(egrid, log_egrid, n, xg);
   return n_egrid;
 }
 
-int SetCEEGrid(int n, double emin, double emax, double eth) {
-  n_egrid = SetEGrid(egrid, log_egrid, n, emin, emax, eth);
+int SetCEEGrid(const cfac_t *cfac,
+  int n, double emin, double emax, double eth) {
+  n_egrid = SetEGrid(cfac, egrid, log_egrid, n, emin, emax, eth);
   return n_egrid;
 }
 
-int SetUsrCEEGridDetail(int n, double *xg) {
+int SetUsrCEEGridDetail(const cfac_t *cfac, int n, double *xg) {
   if (n > MAXNUSR) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
   n_usr = SetEGridDetail(usr_egrid, log_usr, n, xg);
   return n_usr;
 }
 
-int SetUsrCEEGrid(int n, double emin, double emax, double eth) {
+int SetUsrCEEGrid(const cfac_t *cfac, int n, double emin, double emax, double eth) {
   if (n > MAXNUSR) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
 
-  n_usr = SetEGrid(usr_egrid, log_usr, n, emin, emax, eth);
+  n_usr = SetEGrid(cfac, usr_egrid, log_usr, n, emin, emax, eth);
   return n_usr;
 }
 
-int SetAngleGridDetail(int m, int n, double *xg) {
+int SetAngleGridDetail(const cfac_t *cfac, int m, int n, double *xg) {
   int i;
 
   if (m == 0) {
     if (n > MAXNTHETA) {
-      printf("Max # of grid points reached\n");
+      cfac_errmsg(cfac, "Max # of grid points reached\n");
       return -1;
     }
 
@@ -236,7 +237,7 @@ int SetAngleGridDetail(int m, int n, double *xg) {
     }
   } else {
     if (n > MAXNPHI) {
-      printf("Max # of grid points reached\n");
+      cfac_errmsg(cfac, "Max # of grid points reached\n");
       return -1;
     }
 
@@ -270,10 +271,10 @@ void SetCELCB(int m) {
   pw_scratch.kl_cb = m;
 }
 
-int SetCEPWOptions(int qr, int max, int kl_cb) {
+int SetCEPWOptions(const cfac_t *cfac, int qr, int max, int kl_cb) {
   pw_scratch.qr = qr;
   if (max > MAXKL) {
-    printf("The maximum partial wave reached in Excitation: %d > %d\n",
+    cfac_errmsg(cfac, "The maximum partial wave reached in Excitation: %d > %d\n",
            max, MAXKL);
     return -1;
   }
@@ -286,8 +287,8 @@ int SetCEPWOptions(int qr, int max, int kl_cb) {
   return 0;
 }
 
-int SetCEPWGrid(int ns, int *n, int *step) {
-  int retval = SetPWGrid(&(pw_scratch.nkl0),
+int SetCEPWGrid(const cfac_t *cfac, int ns, int *n, int *step) {
+  int retval = SetPWGrid(cfac, &(pw_scratch.nkl0),
                            pw_scratch.kl,
                            pw_scratch.log_kl,
                            pw_scratch.max_kl,
@@ -498,11 +499,11 @@ static int CERadialPk(cfac_t *cfac, CEPK **pk, int ie, int k0, int k1, int k) {
 }
 
 
-static void InterpolateGOS(int n, double *x, double *g,
+static void InterpolateGOS(const cfac_t *cfac, int n, double *x, double *g,
                            int ni, double *xi, double *gi) {
   int t;
 
-  uvip3p(n, x, g, ni, xi, gi);
+  uvip3p(cfac, n, x, g, ni, xi, gi);
   for (t = 0; t < ni; t++) {
     if (xi[t] < x[0]) {
       gi[t] = g[0];
@@ -595,8 +596,8 @@ int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
   }
 
   nk = NKINT;
-  InterpolateGOS(NGOSK, x1, g1, nk, log_kint, gos1);
-  InterpolateGOS(NGOSK, x2, g2, nk, log_kint, gos2);
+  InterpolateGOS(cfac, NGOSK, x1, g1, nk, log_kint, gos1);
+  InterpolateGOS(cfac, NGOSK, x2, g2, nk, log_kint, gos2);
 
   for (t = 0; t < nk; t++) {
     gosint[t] = r*gos1[t]*gos2[t];
@@ -704,8 +705,8 @@ static int CERadialQkBornMSub(cfac_t *cfac,
   }
 
   nk = NKINT;
-  InterpolateGOS(NGOSK, x1, g1, nk, log_kint, gos1);
-  InterpolateGOS(NGOSK, x2, g2, nk, log_kint, gos2);
+  InterpolateGOS(cfac, NGOSK, x1, g1, nk, log_kint, gos1);
+  InterpolateGOS(cfac, NGOSK, x2, g2, nk, log_kint, gos2);
 
   for (t = 0; t < nk; t++) {
     gost[t] = r*gos1[t]*gos2[t];
@@ -908,10 +909,10 @@ static double *CERadialQkTable(cfac_t *cfac, const cfac_cbcache_t *cbcache,
           kl1 = pw_scratch.kl[i];
           for (j = kl0+1; j < kl1; j++) {
             logj = LnInteger(j);
-            uvip3p(nkl, pw_scratch.log_kl, qk,
+            uvip3p(cfac, nkl, pw_scratch.log_kl, qk,
                    one, &logj, &s);
             r += s;
-            uvip3p(nkl, pw_scratch.log_kl, dqk,
+            uvip3p(cfac, nkl, pw_scratch.log_kl, dqk,
                    one, &logj, &s);
             rd += s;
           }
@@ -1215,10 +1216,10 @@ static double *CERadialQkMSubTable(cfac_t *cfac, const cfac_cbcache_t *cbcache,
             kl1 = pw_scratch.kl[i];
             for (j = kl0+1; j < kl1; j++) {
               logj = LnInteger(j);
-              uvip3p(nkl, pw_scratch.log_kl, qk[iq],
+              uvip3p(cfac, nkl, pw_scratch.log_kl, qk[iq],
                      one, &logj, &s);
               r += s;
-              uvip3p(nkl, pw_scratch.log_kl, dqk[iq],
+              uvip3p(cfac, nkl, pw_scratch.log_kl, dqk[iq],
                      one, &logj, &s);
               rd += s;
             }
@@ -1342,7 +1343,7 @@ static int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
         rq[m] = rqe[j];
         j += n_egrid1;
       }
-      uvip3p(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+      uvip3p(cfac, n_tegrid, xte, rq, nd, &x0, &rqc[i]);
     }
   }
 
@@ -1369,7 +1370,7 @@ static int CERadialQk(cfac_t *cfac, const cfac_cbcache_t *cbcache,
             rq[m] = rqe[j];
             j += n_egrid1;
           }
-          uvip3p(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+          uvip3p(cfac, n_tegrid, xte, rq, nd, &x0, &rqc[i]);
         }
       }
     }
@@ -1415,7 +1416,7 @@ static int CERadialQkMSub(cfac_t *cfac, const cfac_cbcache_t *cbcache,
           rq[m] = rqe[j];
           j += n_egrid1;
         }
-        uvip3p(n_tegrid, xte, rq, nd, &x0, &rqc[i]);
+        uvip3p(cfac, n_tegrid, xte, rq, nd, &x0, &rqc[i]);
       }
       rqe += n;
       rqc += n_egrid1;
@@ -2046,7 +2047,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
       }
 
       if ((tr.lup->uta || tr.llo->uta) && msub) {
-        printf("cannot set MSub and UTA mode simultaneously\n");
+        cfac_errmsg(cfac, "cannot set MSub and UTA mode simultaneously\n");
         return -1;
       }
 
@@ -2110,7 +2111,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
   egrid_type = 1;
   usr_egrid_type = 1;
   if (pw_scratch.nkl == 0) {
-    if (SetCEPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+    if (SetCEPWGrid(cfac, 0, NULL, NULL) != CFAC_SUCCESS) {
       return -1;
     }
   }
@@ -2118,7 +2119,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
   fhdr.type = DB_CE;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -2216,7 +2217,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
         n_tegrid = 4;
       }
 
-      SetCETEGrid(n_tegrid, emin, emax);
+      SetCETEGrid(cfac, n_tegrid, emin, emax);
     }
 
     if (egrid_limits_type == 0) {
@@ -2236,17 +2237,17 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
       n_egrid = 6;
     }
     if (!e_set) {
-      SetCEEGrid(n_egrid, g_emin, g_emax, te0);
+      SetCEEGrid(cfac, n_egrid, g_emin, g_emax, te0);
     }
     if (n_usr0 <= 0) {
-      SetUsrCEEGridDetail(n_egrid, egrid);
+      SetUsrCEEGridDetail(cfac, n_egrid, egrid);
       usr_egrid_type = 1;
     } else if (!usr_set) {
-      SetUsrCEEGrid(n_usr, g_emin, g_emax, te0);
+      SetUsrCEEGrid(cfac, n_usr, g_emin, g_emax, te0);
       usr_egrid_type = 1;
     }
     if (n_egrid > MAXNE) {
-      printf("n_egrid exceeded MAXNE=%d\n", MAXNE);
+      cfac_errmsg(cfac, "n_egrid exceeded MAXNE=%d\n", MAXNE);
       return -1;
     }
 
@@ -2266,9 +2267,10 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
       ebuf = 0.0;
-      if (PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
+      if (PrepCoulombBethe(cfac, &cbcache,
+                       1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
                        pw_scratch.nkl, pw_scratch.kl, msub) != 0) {
-        printf("PrepCoulombBethe() failed, skipping CE transitions" \
+        cfac_errmsg(cfac, "PrepCoulombBethe() failed, skipping CE transitions" \
                " in energy block %g - %g eV (ei = %g eV)\n",
                e0*HARTREE_EV, e1*HARTREE_EV, ei*HARTREE_EV);
         continue;
@@ -2369,7 +2371,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
     ReinitRadial(cfac, 2);
   }
 
-  if (ReinitExcitation(1) != 0) {
+  if (ReinitExcitation(cfac, 1) != 0) {
     return -1;
   }
 
@@ -2472,7 +2474,7 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
   egrid_type = 1;
 
   if (pw_scratch.nkl == 0) {
-    if (SetCEPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+    if (SetCEPWGrid(cfac, 0, NULL, NULL) != CFAC_SUCCESS) {
       return -1;
     }
   }
@@ -2491,7 +2493,7 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
   fhdr.type = DB_CEF;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -2520,17 +2522,17 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
     if (!te_set) {
       e = emax/emin;
       if (e < 1.001) {
-        SetCETEGrid(1, emin, emax);
+        SetCETEGrid(cfac, 1, emin, emax);
       } else if (e < 1.5) {
-        SetCETEGrid(2, emin, emax);
+        SetCETEGrid(cfac, 2, emin, emax);
       } else if (e < 5.0) {
         if (m == 2) n_tegrid = 2;
         else if (n_tegrid0 == 0) n_tegrid = 3;
-        SetCETEGrid(n_tegrid, emin, emax);
+        SetCETEGrid(cfac, n_tegrid, emin, emax);
       } else {
         if (m == 2) n_tegrid = 2;
         else if (n_tegrid0 == 0) n_tegrid = 4;
-        SetCETEGrid(n_tegrid, emin, emax);
+        SetCETEGrid(cfac, n_tegrid, emin, emax);
       }
     }
 
@@ -2548,10 +2550,10 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
       n_egrid = 6;
     }
     if (!e_set) {
-      SetCEEGrid(n_egrid, emin, emax, ce_hdr.te0);
+      SetCEEGrid(cfac, n_egrid, emin, emax, ce_hdr.te0);
     }
     if (n_egrid > MAXNE) {
-      printf("n_egrid exceeded MAXNE=%d\n", MAXNE);
+      cfac_errmsg(cfac, "n_egrid exceeded MAXNE=%d\n", MAXNE);
       return -1;
     }
     n_egrid1 = n_egrid + 1;
@@ -2566,7 +2568,8 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
     e = 0.0;
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
-      if (PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
+      if (PrepCoulombBethe(cfac, &cbcache,
+                       1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
                        pw_scratch.nkl, pw_scratch.kl, 0) != 0) {
         return -1;
       }
@@ -2623,7 +2626,7 @@ int SaveExcitationEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, cha
     ReinitRadial(cfac, 2);
   }
 
-  if (ReinitExcitation(1) != 0) {
+  if (ReinitExcitation(cfac, 1) != 0) {
     return -1;
   }
 
@@ -2729,7 +2732,7 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
   egrid_type = 1;
 
   if (pw_scratch.nkl == 0) {
-    if (SetCEPWGrid(0, NULL, NULL) != CFAC_SUCCESS) {
+    if (SetCEPWGrid(cfac, 0, NULL, NULL) != CFAC_SUCCESS) {
       return -1;
     }
   }
@@ -2752,7 +2755,7 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
   fhdr.type = DB_CEMF;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -2781,17 +2784,17 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
     if (!te_set) {
       e = emax/emin;
       if (e < 1.001) {
-        SetCETEGrid(1, emin, emax);
+        SetCETEGrid(cfac, 1, emin, emax);
       } else if (e < 1.5) {
-        SetCETEGrid(2, emin, emax);
+        SetCETEGrid(cfac, 2, emin, emax);
       } else if (e < 5.0) {
         if (m == 2) n_tegrid = 2;
         else if (n_tegrid0 == 0) n_tegrid = 3;
-        SetCETEGrid(n_tegrid, emin, emax);
+        SetCETEGrid(cfac, n_tegrid, emin, emax);
       } else {
         if (m == 2) n_tegrid = 2;
         else if (n_tegrid0 == 0) n_tegrid = 4;
-        SetCETEGrid(n_tegrid, emin, emax);
+        SetCETEGrid(cfac, n_tegrid, emin, emax);
       }
     }
 
@@ -2809,10 +2812,10 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
       n_egrid = 6;
     }
     if (!e_set) {
-      SetCEEGrid(n_egrid, emin, emax, ce_hdr.te0);
+      SetCEEGrid(cfac, n_egrid, emin, emax, ce_hdr.te0);
     }
     if (n_egrid > MAXNE) {
-      printf("n_egrid exceeded MAXNE=%d\n", MAXNE);
+      cfac_errmsg(cfac, "n_egrid exceeded MAXNE=%d\n", MAXNE);
       return -1;
     }
     n_egrid1 = n_egrid + 2;
@@ -2828,7 +2831,8 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
     e = 0.0;
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
-      if (PrepCoulombBethe(&cbcache, 1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
+      if (PrepCoulombBethe(cfac, &cbcache,
+                     1, n_tegrid, n_egrid, c, &e, tegrid, egrid,
                      pw_scratch.nkl, pw_scratch.kl, 1) != 0) {
         return -1;
       }
@@ -2900,7 +2904,7 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
   free(bethe);
   free(born);
   free(qkc);
-  if (ReinitExcitation(1) != 0) {
+  if (ReinitExcitation(cfac, 1) != 0) {
     return -1;
   }
 
@@ -2914,7 +2918,7 @@ int SaveExcitationEBD(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0, ch
 }
 
 
-int InitExcitation(void) {
+int InitExcitation(const cfac_t *cfac) {
   int blocks1[] = {MULTI_BLOCK3,MULTI_BLOCK3,MULTI_BLOCK3};
   int blocks2[] = {MULTI_BLOCK5,MULTI_BLOCK5,MULTI_BLOCK5,
                    MULTI_BLOCK5,MULTI_BLOCK5};
@@ -2937,7 +2941,7 @@ int InitExcitation(void) {
   SetCEEGridLimits(0.05, 8.0, 0);
   usr_egrid[0] = -1.0;
   tegrid[0] = -1.0;
-  if (SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB) != 0) {
+  if (SetCEPWOptions(cfac, EXCLQR, EXCLMAX, EXCLCB) != 0) {
     return -1;
   }
 
@@ -2947,7 +2951,7 @@ int InitExcitation(void) {
   return 0;
 }
 
-static int ReinitExcitation(int m) {
+static int ReinitExcitation(const cfac_t *cfac, int m) {
 
   if (m < 0) return 0;
 
@@ -2958,5 +2962,5 @@ static int ReinitExcitation(int m) {
   usr_egrid[0] = -1.0;
   tegrid[0] = -1.0;
 
-  return SetCEPWOptions(EXCLQR, EXCLMAX, EXCLCB);
+  return SetCEPWOptions(cfac, EXCLQR, EXCLMAX, EXCLCB);
 }

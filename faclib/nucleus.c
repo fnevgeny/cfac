@@ -59,7 +59,7 @@ int cfac_set_atom(cfac_t *cfac, const char *s,
     if (!cfac || !s) return -1;
     if (strlen(s) == 0) {
         if (z <= 0) {
-            printf("atomic symbol and z cannot be both unset\n");
+            cfac_errmsg(cfac, "atomic symbol and z cannot be both unset\n");
         }
         s = _ename[z - 1];
     }

@@ -171,11 +171,12 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang,
                     int n_shells, int phase, SHELL_STATE *sbra,
                     SHELL_STATE *sket, INTERACT_SHELL *s, int m);
-int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang,
-                       int k, int k0, int k1, int k2, int k3, double coeff);
-int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
+int AddToAngularZxZMix(const cfac_t *cfac,
+    int *n, int *nz, ANGULAR_ZxZMIX **ang,
+    int k, int k0, int k1, int k2, int k3, double coeff);
+int AddToAngularZMix(const cfac_t *cfac, int *n, int *nz, ANGULAR_ZMIX **ang,
                      int k, int k0, int k1, double coeff);
-int AddToAngularZFB(int *n, int *nz, ANGULAR_ZFB **ang,
+int AddToAngularZFB(const cfac_t *cfac, int *n, int *nz, ANGULAR_ZFB **ang,
                     int kb, double coeff);
 int AngularZxZFreeBound(cfac_t *cfac, ANGULAR_ZxZMIX **ang, int lower, int upper);
 int GetBasisTable(cfac_t *cfac, char *fn, int m);

@@ -22,23 +22,24 @@
 
 int InitIonization(cfac_t *cfac);
 
-int SetIEGrid(int n, double emin, double emax);
-int SetIEGridDetail(int n, double *x);
+int SetIEGrid(const cfac_t *cfac, int n, double emin, double emax);
+int SetIEGridDetail(const cfac_t *cfac, int n, double *x);
 void SetCIBorn(int x);
 void SetCILQR(int m);
 void SetCILMax(int m);
 void SetCILMaxEject(int m);
 void SetCILCB(int m);
 void SetCITol(double t);
-int SetCIPWGrid(int ns, int *n, int *step);
+int SetCIPWGrid(const cfac_t *cfac, int ns, int *n, int *step);
 int SetCIFormat(int m);
-int SetCIEGrid(int n, double emin, double emax, double eth);
+int SetCIEGrid(const cfac_t *cfac, int n, double emin, double emax, double eth);
 int SetCIEGridDetail(int n, double *x);
 int SetCIFormat(int m);
 int SetCIEGridLimits(double min, double max, int type);
 int SetUsrCIEGridType(int type);
-int SetUsrCIEGrid(int n, double emin, double emax, double eth);
-int SetUsrCIEGridDetail(int n, double *x);
+int SetUsrCIEGrid(const cfac_t *cfac,
+    int n, double emin, double emax, double eth);
+int SetUsrCIEGridDetail(const cfac_t *cfac, int n, double *x);
 int SetCIQkMode(int m, double tol);
 int SetCIMaxK(cfac_t *cfac, int k);
 

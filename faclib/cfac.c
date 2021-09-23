@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "cfacP.h"
 
@@ -49,7 +50,7 @@ static int cfac_init_radial(cfac_t *cfac)
         return 1;
     }
     if (ArrayInit(cfac->orbitals, sizeof(ORBITAL), ORBITALS_BLOCK,
-      FreeOrbitalData, InitOrbitalData) < 0) {
+        FreeOrbitalData, InitOrbitalData) < 0) {
         return 1;
     }
 
@@ -172,6 +173,8 @@ cfac_t *cfac_new(void)
     }
     memset(cfac, 0, sizeof(cfac_t));
 
+    cfac->err_fp = stderr;
+
     cfac->confint = 0;
 
     cfac->angz_maxn = 0;
@@ -286,6 +289,25 @@ cfac_t *cfac_new(void)
     cfac->tr_opts.fr_interpolate = 1;
 
     return cfac;
+}
+
+void cfac_errmsg(const cfac_t *cfac, const char *fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    vfprintf(cfac->err_fp, fmt, args);
+    va_end(args);
+}
+
+int cfac_set_err_fp(cfac_t *cfac, FILE *fp)
+{
+    if (cfac && fp) {
+        cfac->err_fp = fp;
+        return CFAC_SUCCESS;
+    } else {
+        return CFAC_FAILURE;
+    }
 }
 
 static void cfac_potential_free(POTENTIAL *pot)

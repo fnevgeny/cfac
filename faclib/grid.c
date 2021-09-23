@@ -24,13 +24,13 @@
 #include "cfacP.h"
 #include "grid.h"
 
-static int AddPW(int *nkl0, double *kl, double *logkl,
+static int AddPW(const cfac_t *cfac, int *nkl0, double *kl, double *logkl,
           int maxkl, int n, int step) {
   int i;
   for (i = *nkl0; i < n+(*nkl0); i++) {
     if (i >= MAXNKL) {
-      printf("Maximum partial wave grid points reached: ");
-      printf("%d > %d in constructing grid\n",  i, MAXNKL);
+      cfac_errmsg(cfac, "Maximum partial wave grid points reached: ");
+      cfac_errmsg(cfac, "%d > %d in constructing grid\n",  i, MAXNKL);
       return CFAC_FAILURE;
     }
     kl[i] = kl[i-1] + step;
@@ -41,13 +41,13 @@ static int AddPW(int *nkl0, double *kl, double *logkl,
   return CFAC_SUCCESS;
 }
 
-int SetPWGrid(int *nkl0, double *kl, double *logkl,
+int SetPWGrid(const cfac_t *cfac, int *nkl0, double *kl, double *logkl,
               int maxkl, int *ns, int *n, int *step) {
   int i, m, k, j;
 
   if ((*ns) > 0) {
     for (i = 0; i < (*ns); i++) {
-      if (AddPW(nkl0, kl, logkl, maxkl, n[i], step[i]) != CFAC_SUCCESS) {
+      if (AddPW(cfac, nkl0, kl, logkl, maxkl, n[i], step[i]) != CFAC_SUCCESS) {
         return CFAC_FAILURE;
       }
     }
@@ -56,7 +56,7 @@ int SetPWGrid(int *nkl0, double *kl, double *logkl,
   } else {
     (*ns) = -(*ns);
     if ((*ns) == 0) (*ns) = 8;
-    if (AddPW(nkl0, kl, logkl, maxkl, (*ns), 1) != CFAC_SUCCESS) {
+    if (AddPW(cfac, nkl0, kl, logkl, maxkl, (*ns), 1) != CFAC_SUCCESS) {
       return CFAC_FAILURE;
     }
     k = 2;
@@ -65,7 +65,7 @@ int SetPWGrid(int *nkl0, double *kl, double *logkl,
 
   m = kl[(*nkl0)-1];
   while (m+k <= maxkl) {
-    if (AddPW(nkl0, kl, logkl, maxkl, j, k) != CFAC_SUCCESS) {
+    if (AddPW(cfac, nkl0, kl, logkl, maxkl, j, k) != CFAC_SUCCESS) {
       return CFAC_FAILURE;
     }
     m = kl[(*nkl0)-1];
@@ -76,11 +76,12 @@ int SetPWGrid(int *nkl0, double *kl, double *logkl,
   return CFAC_SUCCESS;
 }
 
-int SetTEGridDetail(double *te, double *logte, int n, double *x) {
+int SetTEGridDetail(const cfac_t *cfac,
+  double *te, double *logte, int n, double *x) {
   int i;
 
   if (n > MAXNTE) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
 
@@ -91,7 +92,8 @@ int SetTEGridDetail(double *te, double *logte, int n, double *x) {
   return n;
 }
 
-int SetTEGrid(double *te, double *logte, int n, double emin, double emax) {
+int SetTEGrid(const cfac_t *cfac,
+  double *te, double *logte, int n, double emin, double emax) {
   int i;
   double del;
 
@@ -106,7 +108,7 @@ int SetTEGrid(double *te, double *logte, int n, double emin, double emax) {
   }
 
   if (n > MAXNTE) {
-    printf("Max # of grid points reached \n");
+    cfac_errmsg(cfac, "Max # of grid points reached \n");
     return -1;
   }
 
@@ -127,7 +129,7 @@ int SetTEGrid(double *te, double *logte, int n, double emin, double emax) {
   }
 
   if (emax < emin) {
-    printf("emin must > 0 and emax < emin in SetTEGrid\n");
+    cfac_errmsg(cfac, "emin must > 0 and emax < emin in SetTEGrid\n");
     return -1;
   }
 
@@ -154,7 +156,7 @@ int SetEGridDetail(double *e, double *log_e, int n, double *xg) {
   return n;
 }
 
-double EFromX(double x, double b) {
+static double EFromX(const cfac_t *cfac, double x, double b) {
   double x0, e, a, d;
   int i;
 
@@ -168,12 +170,12 @@ double EFromX(double x, double b) {
     a = 1.0/e + b;
     e = e - d/a;
   }
-  printf("Newton iteration failed to converge in EFromX, %10.3E %10.3E %10.3E\n",
+  cfac_errmsg(cfac, "Newton iteration failed to converge in EFromX, %10.3E %10.3E %10.3E\n",
          x, e, d);
   return e;
 }
 
-int SetEGrid(double *e, double *log_e,
+int SetEGrid(const cfac_t *cfac, double *e, double *log_e,
              int n, double emin, double emax, double eth) {
   double del, et, b;
   int i;
@@ -188,7 +190,7 @@ int SetEGrid(double *e, double *log_e,
   }
 
   if (emax < emin) {
-    printf("emin must > 0 and emax < emin in SetEGrid\n");
+    cfac_errmsg(cfac, "emin must > 0 and emax < emin in SetEGrid\n");
     return -1;
   }
 
@@ -208,7 +210,7 @@ int SetEGrid(double *e, double *log_e,
     del = (log_e[n-1] - log_e[0])/(n-1.0);
     for (i = 1; i < n-1; i++) {
       log_e[i] = log_e[i-1]+del;
-      e[i] = EFromX(log_e[i], b);
+      e[i] = EFromX(cfac, log_e[i], b);
     }
   DONE1:
     for (i = 0; i < n; i++) {

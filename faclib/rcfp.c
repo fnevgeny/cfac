@@ -852,7 +852,7 @@ double ReducedCFP(int no_bra, int no_ket) {
 
   default:
     /*
-    printf("improper input in ReducedCFP\n");
+    cfac_errmsg(cfac, "improper input in ReducedCFP\n");
     */
     return 0.0;
   }
@@ -1156,7 +1156,7 @@ double CompleteReducedW3(REDUCED_COEFF *w3_o, REDUCED_COEFF *w3_e,
     denom = w3_e[i].denom;
   } else {
     /*
-    printf("improper input in CompleteReducedW3\n");
+    cfac_errmsg(cfac, "improper input in CompleteReducedW3\n");
     */
     return 0.0;
   }
@@ -1187,7 +1187,7 @@ double CompleteReducedW5(REDUCED_COEFF *w5_o, REDUCED_COEFF *w5_e,
     denom = w5_e[i].denom;
   } else {
     /*
-    printf("improper input in CompleteReducedW5\n");
+    cfac_errmsg(cfac, "improper input in CompleteReducedW5\n");
     */
     return 0.0;
   }
@@ -1317,7 +1317,7 @@ double ReducedW(RCFP_STATE *bra, RCFP_STATE *ket,
     UnpackRCFPState(ket->state, &jket, &run_nu, &Jket);
     if (ket->nq > 2 || bra->nq > 2) {
       /*
-      printf("1. improper input in ReducedW, \n");
+      cfac_errmsg(cfac, "1. improper input in ReducedW, \n");
       */
       return 0.0;
     }
@@ -1357,7 +1357,7 @@ double ReducedW(RCFP_STATE *bra, RCFP_STATE *ket,
     if (IsOdd((Jbra + Jket + kj2)/2)) coeff = -coeff;
   } else {
     /*
-    printf("2. improper input in ReducedW\n");
+    cfac_errmsg(cfac, "2. improper input in ReducedW\n");
     */
     return 0.0;
   }
@@ -1444,7 +1444,7 @@ double ReducedWxW0(RCFP_STATE *bra, RCFP_STATE *ket,
       break;
     default:
       /*
-      printf("improper input in ReducedWxW0\n");
+      cfac_errmsg(cfac, "improper input in ReducedWxW0\n");
       */
       return 0.0;
     }
@@ -1553,7 +1553,7 @@ double ReducedAxW(RCFP_STATE *bra, RCFP_STATE *ket,
       break;
     default:
       /*
-      printf("improper input in ReducedAxW\n");
+      cfac_errmsg(cfac, "improper input in ReducedAxW\n");
       */
       return 0.0;
     }
@@ -1661,7 +1661,7 @@ double ReducedWxA(RCFP_STATE *bra, RCFP_STATE *ket,
       break;
     default:
       /*
-      printf("improper input in ReducedWxA\n");
+      cfac_errmsg(cfac, "improper input in ReducedWxA\n");
       */
       return 0.0;
     }
@@ -1739,7 +1739,7 @@ double ReducedA(RCFP_STATE *bra, RCFP_STATE *ket, int q_m) {
     }
   } else {
     /*
-    printf("improper input in ReducedA\n");
+    cfac_errmsg(cfac, "improper input in ReducedA\n");
     */
     return 0.0;
   }
@@ -1971,7 +1971,7 @@ double ReducedOperator(RCFP_STATE *bra, RCFP_STATE *ket,
         break;
       default:
         /*
-        printf("improper input for ReducedOperator\n");
+        cfac_errmsg(cfac, "improper input for ReducedOperator\n");
         */
         return 0.0;
       }

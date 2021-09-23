@@ -81,11 +81,11 @@ int GetNMax(const POTENTIAL *pot);
 double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
                           double z, int n, int kappa);
 int RadialSolver(const cfac_t *cfac, ORBITAL *orb);
-int RadialBasis(ORBITAL *orb, POTENTIAL *pot);
-int RadialRydberg(ORBITAL *orb, POTENTIAL *pot);
-int RadialBound(ORBITAL *orb, POTENTIAL *pot);
-int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot);
-int RadialFree(ORBITAL *orb, POTENTIAL *pot);
+int RadialBasis(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot);
+int RadialRydberg(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot);
+int RadialBound(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot);
+int RadialFreeInner(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot);
+int RadialFree(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot);
 void Differential(double *p, double *dp, int i1, int i2);
 int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot);
 int SetPotentialZ(cfac_t *cfac);
@@ -93,6 +93,6 @@ int SetPotentialUehling(cfac_t *cfac, int vp);
 int SetPotentialVc(POTENTIAL *pot);
 int SetPotentialU(POTENTIAL *pot, int n);
 int SetPotentialW (POTENTIAL *pot, double e, int kappa);
-int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot);
+int RadialBasisOuter(const cfac_t *cfac, ORBITAL *orb, POTENTIAL *pot);
 
 #endif

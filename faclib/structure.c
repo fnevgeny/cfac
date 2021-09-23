@@ -359,7 +359,7 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
 
     h = AllocHamMem(n, n_basis);
     if (!h) {
-        printf("ConstructHamilton allocation error\n");
+        cfac_errmsg(cfac, "ConstructHamilton allocation error\n");
         return NULL;
     }
 
@@ -441,7 +441,7 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
     }
 
     if (cfac->nhams >= MAX_HAMS) {
-        printf("Number of Hamiltonians exceeded the maximum %d\n", MAX_HAMS);
+        cfac_errmsg(cfac, "Number of Hamiltonians exceeded the maximum %d\n", MAX_HAMS);
         return NULL;
     }
 
@@ -498,7 +498,7 @@ HAMILTON *ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
 
   h = AllocHamMem(n_basis, n_basis);
   if (!h) {
-    printf("ConstructHamiltonEB Error\n");
+    cfac_errmsg(cfac, "ConstructHamiltonEB Error\n");
     return NULL;
   }
 
@@ -1532,7 +1532,7 @@ int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h) {
   int i, j;
 
   if (h->n_basis < h->dim) {
-    printf("h->n_basis < h->dim in DiagonalizeHamilton(), %d %d\n",
+    cfac_errmsg(cfac, "h->n_basis < h->dim in DiagonalizeHamilton(), %d %d\n",
         h->n_basis, h->dim);
     return -2;
   }
@@ -1650,7 +1650,7 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
       }
       lev.energy = c->energy;
       if (ArrayAppend(cfac->levels, &lev) == NULL) {
-        printf("Not enough memory for levels array\n");
+        cfac_errmsg(cfac, "Not enough memory for levels array\n");
         return -1;
       }
 
@@ -1686,7 +1686,7 @@ static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     lev.basis = malloc(sizeof(int)*h->n_basis);
     lev.mixing = malloc(sizeof(double)*h->n_basis);
     if (!lev.ibasis || !lev.basis || !lev.mixing) {
-      printf("Not enough memory for new level\n");
+      cfac_errmsg(cfac, "Not enough memory for new level\n");
       return -1;
     }
     lev.n_basis = h->n_basis;
@@ -1701,7 +1701,7 @@ static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     GetPrincipleBasis(lev.mixing, h->n_basis, lev.kpb);
 
     if (ArrayAppend(cfac->eblevels, &lev) == NULL) {
-      printf("Not enough memory for levels array\n");
+      cfac_errmsg(cfac, "Not enough memory for levels array\n");
       return -1;
     }
     j++;
@@ -1783,7 +1783,7 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     lev.mixing = malloc(sizeof(double)*h->n_basis);
     lev.name = NULL;
     if (!lev.ibasis || !lev.basis || !lev.mixing) {
-      printf("Not enough memory for new level\n");
+      cfac_errmsg(cfac, "Not enough memory for new level\n");
       return -1;
     }
     a = fabs(cfac->mix_cut * mix[k]);
@@ -1816,7 +1816,7 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     lev.uta_g_cfg = s->kcfg;
 
     if (ArrayAppend(cfac->levels, &lev) == NULL) {
-      printf("Not enough memory for levels array\n");
+      cfac_errmsg(cfac, "Not enough memory for levels array\n");
       return -1;
     }
     j++;
@@ -2261,7 +2261,7 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   fhdr.type = DB_ENF;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -2778,7 +2778,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       nz = ANGZ_BLOCK;
       ang = malloc(sizeof(ANGULAR_ZMIX)*nz);
       if (!ang) {
-        printf("failed allocating memory for ang %d %d\n", nz, ns);
+        cfac_errmsg(cfac, "failed allocating memory for ang %d %d\n", nz, ns);
         return -1;
       }
       if (s[0].index >= 0) {
@@ -2788,7 +2788,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
           orb1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
           for (p = 0; p < nkk; p++) {
             if (IsOdd(phase)) r[p] = -r[p];
-            AddToAngularZMix(&n, &nz, &ang, k[p], orb0, orb1, r[p]);
+            AddToAngularZMix(cfac, &n, &nz, &ang, k[p], orb0, orb1, r[p]);
           }
           free(r);
           free(k);
@@ -2821,7 +2821,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
             for (p = 0; p < nkk; p++) {
               if (fabs(r[p]) < EPS30) continue;
               if (IsOdd(phase)) r[p] = -r[p];
-              AddToAngularZMix(&n, &nz, &ang, k[p], orb0, orb1, r[p]);
+              AddToAngularZMix(cfac, &n, &nz, &ang, k[p], orb0, orb1, r[p]);
             }
             free(r);
             free(k);
@@ -3136,7 +3136,7 @@ int PrepAngular(cfac_t *cfac, int n1, int *is1, int n2, int *is2) {
   if (cfac->angmz_array == NULL) {
     cfac->angmz_array = malloc(sizeof(ANGZ_DATUM)*MAX_HAMS2);
     if (!cfac->angmz_array) {
-      printf("cannot allocate memory for cfac->angmz_array %d\n", MAX_HAMS2);
+      cfac_errmsg(cfac, "cannot allocate memory for cfac->angmz_array %d\n", MAX_HAMS2);
     }
     for (i = 0; i < MAX_HAMS2; i++) {
       cfac->angmz_array[i].ns = 0;
@@ -3285,7 +3285,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
         r0 = mix2*sqrt_j2;
         if (fabs(r0) < cfac->angz_cut) continue;
         if (IsEven((j2+jf-j1)/2)) r0 = -r0;
-        AddToAngularZFB(&n, &nz, ang, kb, r0);
+        AddToAngularZFB(cfac, &n, &nz, ang, kb, r0);
       }
     }
   } else {
@@ -3311,7 +3311,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
           kb = ang_sub->kb;
           r0 *= ang_sub->coeff;
           if (fabs(r0) < cfac->angz_cut) continue;
-          AddToAngularZFB(&n, &nz, ang, kb, r0);
+          AddToAngularZFB(cfac, &n, &nz, ang, kb, r0);
         }
       }
     }
@@ -3468,7 +3468,7 @@ int AngularZMix(cfac_t *cfac,
             r0 *= a*sqrt_j12;
             if (fabs(r0) < cfac->angz_cut) continue;
             if (IsEven((j1+jb2-jlow-ik)/2+j2)) r0 = -r0;
-            AddToAngularZMix(&n, &nz, ang, ik, kb1, kb2, r0);
+            AddToAngularZMix(cfac, &n, &nz, ang, ik, kb1, kb2, r0);
           }
         }
         if (kb1 == kb2){
@@ -3483,7 +3483,7 @@ int AngularZMix(cfac_t *cfac,
             if (fabs(r0) < cfac->angz_cut) continue;
             r0 *= sqrt_j12;
             if (IsOdd((jlow+jb1+j2+ang_sub[m].k)/2)) r0 = -r0;
-            AddToAngularZMix(&n, &nz, ang, ang_sub[m].k,
+            AddToAngularZMix(cfac, &n, &nz, ang, ang_sub[m].k,
                                   ang_sub[m].k0, ang_sub[m].k1, r0);
           }
           if (nz_sub > 0) free(ang_sub);
@@ -3512,7 +3512,7 @@ int AngularZMix(cfac_t *cfac,
           r0 *= mix1*afb[m].coeff*sqrt(j1+1.0);
           if (fabs(r0) < cfac->angz_cut) continue;
           if (IsOdd((j1+j2-ik)/2)) r0 = -r0;
-          AddToAngularZMix(&n, &nz, ang, ik, kb1, afb[m].kb, r0);
+          AddToAngularZMix(cfac, &n, &nz, ang, ik, kb1, afb[m].kb, r0);
         }
       }
       if (nfb > 0) free(afb);
@@ -3539,7 +3539,7 @@ int AngularZMix(cfac_t *cfac,
           r0 *= mix2*afb[m].coeff*sqrt(j2+1.0);
           if (fabs(r0) < cfac->angz_cut) continue;
           if (IsOdd((2*j1-ik+jb1-jb2)/2)) r0 = -r0;
-          AddToAngularZMix(&n, &nz, ang, ik, afb[m].kb, kb2, r0);
+          AddToAngularZMix(cfac, &n, &nz, ang, ik, afb[m].kb, kb2, r0);
         }
       }
       if (nfb > 0) free(afb);
@@ -3575,7 +3575,7 @@ int AngularZMix(cfac_t *cfac,
             if (ang_sub[m].k > kmax || ang_sub[m].k < kmin) continue;
             r0 = ang_sub[m].coeff*a;
             if (fabs(r0) < cfac->angz_cut) continue;
-            AddToAngularZMix(&n, &nz, ang, ang_sub[m].k,
+            AddToAngularZMix(cfac, &n, &nz, ang, ang_sub[m].k,
                                   ang_sub[m].k0, ang_sub[m].k1, r0);
           }
         }
@@ -3660,7 +3660,7 @@ int AngularZxZFreeBound(cfac_t *cfac,
           if (IsOdd((jup+jf+j2)/2)) r0 = -r0;
           r0 *= r;
           if (fabs(r0) < cfac->angz_cut) continue;
-          AddToAngularZxZMix(&n, &nz, ang, ang_z[i].k,
+          AddToAngularZxZMix(cfac, &n, &nz, ang, ang_z[i].k,
                                   jf, kb, orb0, orb1, r0);
         }
       }
@@ -3686,7 +3686,7 @@ int AngularZxZFreeBound(cfac_t *cfac,
           for (m = 0; m < nz_sub; m++) {
             r0 = ang_sub[m].coeff*r;
             if (fabs(r0) < cfac->angz_cut) continue;
-            AddToAngularZxZMix(&n, &nz, ang,
+            AddToAngularZxZMix(cfac, &n, &nz, ang,
                                     ang_sub[m].k, ang_sub[m].k0,
                                     ang_sub[m].k1, ang_sub[m].k2,
                                     ang_sub[m].k3, r0);
@@ -3902,7 +3902,7 @@ int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang,
     for (p = 0; p < nkk; p++) {
       if (fabs(r[p]) < EPS30) continue;
       if (IsOdd(phase)) r[p] = -r[p];
-      AddToAngularZxZMix(n, nz, ang, k[p],
+      AddToAngularZxZMix(cfac, n, nz, ang, k[p],
                               orb0, orb1, kk0, kk1, r[p]);
     }
     free(r);
@@ -3912,8 +3912,9 @@ int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang,
   return 0;
 }
 
-int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang,
-                       int k, int k0, int k1, int k2, int k3, double r) {
+int AddToAngularZxZMix(const cfac_t *cfac,
+    int *n, int *nz, ANGULAR_ZxZMIX **ang,
+    int k, int k0, int k1, int k2, int k3, double r) {
   int im;
 
   im = *n;
@@ -3922,7 +3923,7 @@ int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang,
     *nz += ANGZxZ_BLOCK;
     *ang = realloc((*ang), (*nz)*sizeof(ANGULAR_ZxZMIX));
     if (!(*ang)) {
-      printf("Can't enlarge AngularZxZMix array\n");
+      cfac_errmsg(cfac, "Can't enlarge AngularZxZMix array\n");
       return -1;
     }
   }
@@ -3936,7 +3937,7 @@ int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang,
   return 0;
 }
 
-int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
+int AddToAngularZMix(const cfac_t *cfac, int *n, int *nz, ANGULAR_ZMIX **ang,
                      int k, int k0, int k1, double coeff) {
   int im;
 
@@ -3946,7 +3947,7 @@ int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
     *nz += ANGZ_BLOCK;
     *ang = realloc((*ang), (*nz)*sizeof(ANGULAR_ZMIX));
     if (!(*ang)) {
-      printf("Can't enlarge AngularZMix array\n");
+      cfac_errmsg(cfac, "Can't enlarge AngularZMix array\n");
       return -1;
     }
   }
@@ -3958,7 +3959,7 @@ int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
   return 0;
 }
 
-int AddToAngularZFB(int *n, int *nz, ANGULAR_ZFB **ang,
+int AddToAngularZFB(const cfac_t *cfac, int *n, int *nz, ANGULAR_ZFB **ang,
                     int kb, double coeff) {
   int im;
 
@@ -3968,7 +3969,7 @@ int AddToAngularZFB(int *n, int *nz, ANGULAR_ZFB **ang,
     *nz += ANGZ_BLOCK;
     *ang = realloc((*ang), (*nz)*sizeof(ANGULAR_ZFB));
     if (!(*ang)) {
-      printf("Cannot enlarge AngularZFB array\n");
+      cfac_errmsg(cfac, "Cannot enlarge AngularZFB array\n");
       return -1;
     }
   }
@@ -4077,14 +4078,14 @@ int cfac_calculate_structure(cfac_t *cfac,
             nele = cg->n_electrons;
         } else
         if (cg->n_electrons != nele) {
-            printf("Groups with different nele cannot be mixed\n");
+            cfac_errmsg(cfac, "Groups with different nele cannot be mixed\n");
             return -1;
         }
     }
     for (ig = 0; ig < npg; ig++) {
         CONFIG_GROUP *cg = GetGroup(cfac, pgids[ig]);
         if (cg->n_electrons != nele) {
-            printf("Groups with different nele cannot be mixed\n");
+            cfac_errmsg(cfac, "Groups with different nele cannot be mixed\n");
             return -1;
         }
     }

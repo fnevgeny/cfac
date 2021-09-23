@@ -41,6 +41,9 @@ cfac_new(void);
 void
 cfac_free(cfac_t *cfac);
 
+int
+cfac_set_err_fp(cfac_t *cfac, FILE *fp);
+
 /* nucleus.c */
 int
 cfac_set_atom(cfac_t *cfac, const char *s, int z, double mass, double rn);

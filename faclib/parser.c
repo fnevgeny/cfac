@@ -105,7 +105,7 @@ char StrTrim(char *s, char c) {
   return r;
 }
 
-int QuotedStrSplit(char *s, char sep, char qb, char qe) {
+int QuotedStrSplit(const cfac_t *cfac, char *s, char sep, char qb, char qe) {
   char *p;
   int ns, qopen;
 
@@ -121,7 +121,7 @@ int QuotedStrSplit(char *s, char sep, char qb, char qe) {
     else if (*p == qe) {
       qopen--;
       if (qopen < 0) {
-        printf("The quoted string %s does not have matched quotes\n", s);
+        cfac_errmsg(cfac, "The quoted string %s does not have matched quotes\n", s);
         return -1;
       }
     }
@@ -143,7 +143,7 @@ int QuotedStrSplit(char *s, char sep, char qb, char qe) {
   }
 
   if (qopen != 0) {
-    printf("The quoted string %s does not have matched quotes\n", s);
+    cfac_errmsg(cfac, "The quoted string %s does not have matched quotes\n", s);
     return -1;
   }
 

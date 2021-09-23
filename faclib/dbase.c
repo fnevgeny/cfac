@@ -1582,7 +1582,7 @@ int ReadCIMRecord(FILE *f, CIM_RECORD *r, int swp, CIM_HEADER *h) {
   return m;
 }
 
-FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
+FILE *OpenFile(const cfac_t *cfac, const char *fn, F_HEADER *fhdr) {
   int ihdr;
   FILE *f;
 
@@ -1591,12 +1591,12 @@ FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
   f = fopen(fn, "r+b");
   if (f == NULL) {
     if (fheader[ihdr].nblocks > 0) {
-      printf("A single file for one DB type must be used in one session.\n");
+      cfac_errmsg(cfac, "A single file for one DB type must be used in one session.\n");
       return NULL;
     }
     f = fopen(fn, "wb");
     if (f == NULL) {
-      printf("cannot open file %s\n", fn);
+      cfac_errmsg(cfac, "cannot open file %s\n", fn);
       return NULL;
     }
   } else {
@@ -1607,7 +1607,7 @@ FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
   }
 
   if (f == NULL) {
-    printf("cannot open file %s\n", fn);
+    cfac_errmsg(cfac, "cannot open file %s\n", fn);
     return NULL;
   }
 
@@ -1865,7 +1865,7 @@ int DeinitFile(FILE *f, F_HEADER *fhdr) {
   return 0;
 }
 
-static int MemENFTable(char *fn) {
+static int MemENFTable(const cfac_t *cfac, char *fn) {
   F_HEADER fh;
   ENF_HEADER h;
   ENF_RECORD r;
@@ -1890,7 +1890,7 @@ static int MemENFTable(char *fn) {
     nlevels = h.nlevels;
     if (h.length > sr) {
       if (fseek(f, h.length-sr, SEEK_CUR) != 0) {
-        printf("Error parsing file %s!\n", fn);
+        cfac_errmsg(cfac, "Error parsing file %s!\n", fn);
         fclose(f);
         return -1;
       }
@@ -1900,7 +1900,7 @@ static int MemENFTable(char *fn) {
   }
 
   if (nlevels <= 0) {
-    printf("No levels found in the DB file %s!\n", fn);
+    cfac_errmsg(cfac, "No levels found in the DB file %s!\n", fn);
     fclose(f);
     return -1;
   }
@@ -1928,7 +1928,7 @@ static int MemENFTable(char *fn) {
   return 0;
 }
 
-int PrintTable(char *ifn, char *ofn, int v) {
+int PrintTable(const cfac_t *cfac, char *ifn, char *ofn, int v) {
   F_HEADER fh;
   FILE *f1, *f2;
   int n, swp;
@@ -1950,19 +1950,19 @@ int PrintTable(char *ifn, char *ofn, int v) {
 
   if (v) {
     if (fh.type == DB_EN && mem_en_table == NULL) {
-      MemENTable(ifn);
+      MemENTable(cfac, ifn);
     } else
     if (fh.type == DB_ENF && mem_enf_table == NULL) {
-      MemENFTable(ifn);
+      MemENFTable(cfac, ifn);
     }
   }
 
   if (v && !mem_en_table) {
-    printf("Energy level table has not been built in memory.\n");
+    cfac_errmsg(cfac, "Energy level table has not been built in memory.\n");
     return -1;
   }
   if (v && fh.type >= DB_ENF && mem_enf_table == NULL) {
-    printf("Field dependent energy table has not been built in memory.\n");
+    cfac_errmsg(cfac, "Field dependent energy table has not been built in memory.\n");
     goto DONE;
   }
 
@@ -2037,7 +2037,7 @@ int IBaseFromENRecord(EN_RECORD *r) {
   else return r->ibase;
 }
 
-int MemENTable(char *fn) {
+int MemENTable(const cfac_t *cfac, char *fn) {
   F_HEADER fh;
   EN_HEADER h;
   EN_RECORD r;
@@ -2055,9 +2055,9 @@ int MemENTable(char *fn) {
   if (fh.type != DB_EN) {
     fclose(f);
     if (fh.type == DB_ENF) {
-      return MemENFTable(fn);
+      return MemENFTable(cfac, fn);
     } else {
-      printf("File type is neither DB_EN nor DB_ENF\n");
+      cfac_errmsg(cfac, "File type is neither DB_EN nor DB_ENF\n");
       return -1;
     }
   }
@@ -2072,7 +2072,7 @@ int MemENTable(char *fn) {
     nlevels = h.nlevels;
     if (h.length > sr) {
       if (fseek(f, h.length-sr, SEEK_CUR) != 0) {
-        printf("Error parsing file %s!\n", fn);
+        cfac_errmsg(cfac, "Error parsing file %s!\n", fn);
         fclose(f);
         return -1;
       }
@@ -2082,7 +2082,7 @@ int MemENTable(char *fn) {
   }
 
   if (nlevels <= 0) {
-    printf("No levels found in the DB file %s!\n", fn);
+    cfac_errmsg(cfac, "No levels found in the DB file %s!\n", fn);
     fclose(f);
     return -1;
   }
@@ -2973,7 +2973,7 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
   return nb;
 }
 
-int AppendTable(char *fn) {
+int AppendTable(const cfac_t *cfac, char *fn) {
   F_HEADER fh;
   FILE *f;
   int n, swp;
@@ -2985,7 +2985,7 @@ int AppendTable(char *fn) {
     return 1;
   }
   if (swp) {
-    printf("File %s is in different byte-order\n", fn);
+    cfac_errmsg(cfac, "File %s is in different byte-order\n", fn);
     fclose(f);
     return -1;
   }
@@ -2995,7 +2995,7 @@ int AppendTable(char *fn) {
   return 0;
 }
 
-int JoinTable(char *fn1, char *fn2, char *fn) {
+int JoinTable(const cfac_t *cfac, char *fn1, char *fn2, char *fn) {
   F_HEADER fh1, fh2;
   FILE *f1, *f2, *f;
   int n, swp1, swp2;
@@ -3020,15 +3020,15 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
     return 0;
   }
   if (swp1 != swp2) {
-    printf("Files %s and %s have different byte-order\n", fn1, fn2);
+    cfac_errmsg(cfac, "Files %s and %s have different byte-order\n", fn1, fn2);
     return -1;
   }
   if (fh1.type != fh2.type) {
-    printf("Files %s and %s are of different type\n", fn1, fn2);
+    cfac_errmsg(cfac, "Files %s and %s are of different type\n", fn1, fn2);
     return -1;
   }
   if (fh1.atom != fh2.atom) {
-    printf("Files %s and %s are for different element\n", fn1, fn2);
+    cfac_errmsg(cfac, "Files %s and %s are for different element\n", fn1, fn2);
     return -1;
   }
 
@@ -3041,7 +3041,7 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
     n = fread(buf, 1, NBUF, f1);
     if (n > 0) {
       if (n > fwrite(buf, 1, n, f)) {
-        printf("write error\n");
+        cfac_errmsg(cfac, "write error\n");
         return -1;
       }
     }
@@ -3051,7 +3051,7 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
     n = fread(buf, 1, NBUF, f2);
     if (n > 0) {
       if (n > fwrite(buf, 1, n, f)) {
-        printf("write error\n");
+        cfac_errmsg(cfac, "write error\n");
         return -1;
       }
     }
@@ -3083,7 +3083,7 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
 
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -3220,7 +3220,7 @@ int SaveTransition(cfac_t *cfac,
   tr_hdr.gauge = GetTransitionGauge(cfac);
   tr_hdr.mode = mode;
 
-  f = OpenFile(fn, &fhdr);
+  f = OpenFile(cfac, fn, &fhdr);
   if (!f) {
     return -1;
   }
@@ -3257,22 +3257,22 @@ int StoreTable(const cfac_t *cfac,
 
     switch (fh.type) {
     case DB_EN:
-        retval = StoreENTable(db, sid, fp, swp);
+        retval = StoreENTable(cfac, db, sid, fp, swp);
         break;
     case DB_TR:
-        retval = StoreTRTable(db, sid, fp, swp);
+        retval = StoreTRTable(cfac, db, sid, fp, swp);
         break;
     case DB_CE:
-        retval = StoreCETable(db, sid, fp, swp);
+        retval = StoreCETable(cfac, db, sid, fp, swp);
         break;
     case DB_RR:
         retval = StoreRRTable(cfac, db, sid, fp, swp);
         break;
     case DB_AI:
-        retval = StoreAITable(db, sid, fp, swp);
+        retval = StoreAITable(cfac, db, sid, fp, swp);
         break;
     case DB_CI:
-        retval = StoreCITable(db, sid, fp, swp);
+        retval = StoreCITable(cfac, db, sid, fp, swp);
         break;
     default:
         break;

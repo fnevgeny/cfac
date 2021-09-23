@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -43,7 +43,7 @@ static int format_cb(void *udata,
     if (argc != 1 || !argv[0]) {
         return -1;
     }
-    
+
     *db_format = atol(argv[0]);
 
     return 0;
@@ -59,14 +59,14 @@ int StoreInit(const cfac_t *cfac,
     const char *sql;
     char *errmsg;
     int need_truncate = 0, need_init = 0;
-    
+
     *sid = (unsigned long) time(NULL);
 
     if (reset) {
         need_truncate = 1;
         need_init     = 1;
     }
-    
+
     if (stat(fn, &sb) == -1) {
         if (errno == ENOENT) {
             need_truncate = 0;
@@ -118,7 +118,7 @@ int StoreInit(const cfac_t *cfac,
             }
             i++;
         }
-        
+
         sql = "INSERT INTO cfacdb" \
               " (property, value)" \
               " VALUES ('format', ?)";
@@ -144,7 +144,7 @@ int StoreInit(const cfac_t *cfac,
             sqlite3_close(*db);
             return -1;
         }
-        
+
         if (db_format != CFACDB_FORMAT_VERSION) {
             fprintf(stderr, "Incompatible DB format %d, expected %d\n",
                 db_format, CFACDB_FORMAT_VERSION);
@@ -172,11 +172,11 @@ int StoreInit(const cfac_t *cfac,
         retval = -1;
     }
     sqlite3_reset(stmt);
-    
+
     sql = "INSERT INTO species (sid, symbol, anum, mass) VALUES (?, ?, ?, ?)";
-    
+
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
-    
+
     sqlite3_bind_int   (stmt, 1, *sid);
     SQLITE3_BIND_STR   (stmt, 2, cfac_get_atomic_symbol(cfac));
     sqlite3_bind_int   (stmt, 3, cfac_get_atomic_number(cfac));
@@ -188,7 +188,7 @@ int StoreInit(const cfac_t *cfac,
         sqlite3_close(*db);
         retval = -1;
     }
-    
+
     sqlite3_finalize(stmt);
 
     return retval;
@@ -199,53 +199,53 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *sql;
 
     sql = "INSERT INTO levels" \
           " (sid, id, nele, name, e, g, vn, vl, p, ibase, ncomplex, sname)" \
           " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt,  1, sid);
 
     sqlite3_exec(db, "BEGIN", 0, 0, 0);
-    
+
     while (retval == 0) {
         EN_HEADER h;
         int i, n;
-        
+
         n = ReadENHeader(fp, &h, swp);
         if (n == 0) {
             break;
         }
-        
+
         sqlite3_bind_int(stmt,  3, h.nele);
 
         for (i = 0; i < h.nlevels; i++) {
             EN_RECORD r;
             int p, vnl, vn, vl, g, ibase;
-            
+
             n = ReadENRecord(fp, &r, swp);
             if (n == 0) {
                 break;
             }
 
             if (r.p < 0) {
-	      p = 1;
-	      vnl = -r.p;
+              p = 1;
+              vnl = -r.p;
             } else {
-	      p = 0;
-	      vnl = r.p;
+              p = 0;
+              vnl = r.p;
             }
-            
+
             g = JFromENRecord(&r) + 1;
             vn = vnl/100;
             vl = vnl - 100*vn;
-            
+
             ibase = IBaseFromENRecord(&r);
-    
+
             sqlite3_bind_int   (stmt,  2, r.ilev);
             SQLITE3_BIND_STR   (stmt,  4, r.name);
             sqlite3_bind_double(stmt,  5, r.energy);
@@ -272,7 +272,7 @@ int StoreENTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     }
 
     sqlite3_exec(db, "COMMIT", 0, 0, 0);
-    
+
     sqlite3_finalize(stmt);
 
     return retval;
@@ -283,9 +283,9 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *sql;
-    
+
     sql = "INSERT INTO rtransitions" \
           " (sid, ini_id, fin_id, mpole, rme, mode, uta_de, uta_sd)" \
           " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -293,13 +293,13 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt,  1, sid);
-    
+
     sqlite3_exec(db, "BEGIN", 0, 0, 0);
 
     while (retval == 0) {
         TR_HEADER h;
         int n, i;
-        
+
         n = ReadTRHeader(fp, &h, swp);
         if (n == 0) {
             break;
@@ -315,7 +315,7 @@ int StoreTRTable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             if (n == 0) {
                 break;
             }
-            
+
             sqlite3_bind_int   (stmt,  2, r.lower);
             sqlite3_bind_int   (stmt,  3, r.upper);
             sqlite3_bind_int   (stmt,  4, h.multipole);
@@ -346,17 +346,17 @@ int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *sql;
 
     sql = "INSERT INTO aitransitions" \
           " (sid, ini_id, fin_id, rate)" \
           " VALUES (?, ?, ?, ?)";
-    
+
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt,  1, sid);
-    
+
     sqlite3_exec(db, "BEGIN", 0, 0, 0);
 
     while (retval == 0) {
@@ -370,12 +370,12 @@ int StoreAITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
 
         for (i = 0; i < h.ntransitions; i++) {
             AI_RECORD r;
-            
+
             n = ReadAIRecord(fp, &r, swp);
             if (n == 0) {
                 break;
             }
-            
+
             sqlite3_bind_int   (stmt,  2, r.b);
             sqlite3_bind_int   (stmt,  3, r.f);
             sqlite3_bind_double(stmt,  4, r.rate);
@@ -405,7 +405,7 @@ static int StoreCTransitionCB(void *udata,
     if (argc != 1) {
         return -1;
     }
-    
+
     *cid = atol(argv[0]);
 
     return 0;
@@ -419,16 +419,16 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *errmsg;
     const char *sql;
-    
+
     *cid = 0;
 
     sql = "INSERT INTO ctransitions" \
           " (sid, type, qk_mode, ini_id, fin_id, kl, ap0, ap1, ap2, ap3)" \
           " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt, 1, sid);
@@ -438,12 +438,12 @@ static int StoreCTransition(sqlite3 *db, unsigned long int sid,
     sqlite3_bind_int(stmt, 5, fin_id);
 
     sqlite3_bind_int(stmt, 6, kl);
-    
+
     sqlite3_bind_double(stmt, 7, ap0);
     sqlite3_bind_double(stmt, 8, ap1);
     sqlite3_bind_double(stmt, 9, ap2);
     sqlite3_bind_double(stmt, 10, ap3);
-    
+
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
@@ -469,13 +469,13 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *sql;
 
     sql = "INSERT INTO cstrengths" \
           " (cid, e, strength)" \
           " VALUES (?, ?, ?)";
-    
+
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_exec(db, "BEGIN", 0, 0, 0);
@@ -493,7 +493,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             CE_RECORD r;
             unsigned long int cid;
             int k, p2;
-            
+
             n = ReadCERecord(fp, &r, swp, &h);
             if (n == 0) {
                 break;
@@ -506,7 +506,7 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             if (retval != 0) {
                 break;
             }
-            
+
             sqlite3_bind_int(stmt, 1, cid);
 
             p2 = 0;
@@ -514,10 +514,10 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                 int t;
                 /* TODO: msub */
 
-	        for (t = 0; t < h.n_usr; t++, p2++) {
+                for (t = 0; t < h.n_usr; t++, p2++) {
                     sqlite3_bind_double(stmt, 2, h.usr_egrid[t]);
                     sqlite3_bind_double(stmt, 3, r.strength[p2]);
-                    
+
                     rc = sqlite3_step(stmt);
                     if (rc != SQLITE_DONE) {
                         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
@@ -525,9 +525,9 @@ int StoreCETable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                         break;
                     }
                     sqlite3_reset(stmt);
-	        }
+                }
             }
-                  
+
             if (h.msub) {
                 free(r.params);
             }
@@ -551,13 +551,13 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *sql;
 
     sql = "INSERT INTO cstrengths" \
           " (cid, e, strength)" \
           " VALUES (?, ?, ?)";
-    
+
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_exec(db, "BEGIN", 0, 0, 0);
@@ -575,7 +575,7 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
             CI_RECORD r;
             unsigned long int cid;
             int t;
-            
+
             n = ReadCIRecord(fp, &r, swp, &h);
             if (n == 0) {
                 break;
@@ -604,7 +604,7 @@ int StoreCITable(sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
                 sqlite3_reset(stmt);
             }
 
-            free(r.params); 
+            free(r.params);
             free(r.strength);
         }
 
@@ -626,18 +626,18 @@ int StoreRRTable(const cfac_t *cfac,
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *sql;
 
     sql = "INSERT INTO cstrengths" \
           " (cid, e, strength)" \
           " VALUES (?, ?, ?)";
-    
+
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt, 1, sid);
     sqlite3_bind_int(stmt, 2, CFACDB_CS_PI);
-    
+
     sqlite3_exec(db, "BEGIN", 0, 0, 0);
 
     while (retval == 0) {
@@ -656,12 +656,12 @@ int StoreRRTable(const cfac_t *cfac,
             unsigned long int cid;
             int t;
             double ap0, ap1, ap2, ap3;
-            
+
             n = ReadRRRecord(fp, &r, swp, &h);
             if (n == 0) {
                 break;
             }
-            
+
             if (h.qk_mode == QK_FIT && r.params[0]) {
                 ap0 = r.params[0];
                 ap1 = r.params[1];
@@ -696,7 +696,7 @@ int StoreRRTable(const cfac_t *cfac,
                 sqlite3_reset(stmt);
             }
 
-            free(r.params); 
+            free(r.params);
             free(r.strength);
         }
 
@@ -717,13 +717,13 @@ int StoreClose(sqlite3 *db, unsigned long int sid, const char *cmdline)
     int retval = 0;
     int rc;
     sqlite3_stmt *stmt;
-    
+
     char *sql;
 
     sql = "UPDATE sessions" \
           " SET cmdline = ?" \
           " WHERE sid = ?";
-    
+
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
     SQLITE3_BIND_STR(stmt, 1, cmdline);
@@ -734,8 +734,8 @@ int StoreClose(sqlite3 *db, unsigned long int sid, const char *cmdline)
         fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(db));
         retval = -1;
     }
-    
+
     sqlite3_close(db);
-    
+
     return retval;
 }

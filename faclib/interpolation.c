@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -37,8 +37,8 @@ static double _CNC[5][5] = {
 
 
 int SVDFit(int np, double *coeff, double tol,
-	    int nd, double *x, double *logx, double *y, double *sig,
-	    void Basis(int, double *, double, double)) {
+            int nd, double *x, double *logx, double *y, double *sig,
+            void Basis(int, double *, double, double)) {
   int i, j;
   double *afunc;
   double thresh, wmax;
@@ -46,12 +46,12 @@ int SVDFit(int np, double *coeff, double tol,
   gsl_matrix *Am, *Vm;
   gsl_vector *bv, *Sv, *wv;
   gsl_vector_view xv;
- 
+
   Am = gsl_matrix_alloc(nd, np);
   Vm = gsl_matrix_alloc(np, np);
   bv = gsl_vector_alloc(nd);
   Sv = gsl_vector_alloc(np);
-  
+
   wv = gsl_vector_alloc(np);
 
   xv = gsl_vector_view_array(coeff, np);
@@ -60,36 +60,36 @@ int SVDFit(int np, double *coeff, double tol,
 
   for (i = 0; i < nd; i++) {
     double weight;
-    
+
     if (logx) {
       Basis(np, afunc, x[i], logx[i]);
     } else {
       Basis(np, afunc, x[i], 0.0);
     }
-    
+
     if (sig) {
       weight = 1.0/sig[i];
     } else {
       weight = 1.0;
     }
-    
+
     for (j = 0; j < np; j++) {
       gsl_matrix_set(Am, i, j, afunc[j]*weight);
     }
     gsl_vector_set(bv, i, y[i]*weight);
   }
-  
+
   free(afunc);
 
   infor = gsl_linalg_SV_decomp(Am, Vm, Sv, wv);
-  
+
   gsl_vector_free(wv);
-    
+
   if (infor != 0) {
     fprintf(stderr, "gsl_linalg_SV_decomp() failed with %d\n", infor);
     return CFAC_FAILURE;
   }
-    
+
   wmax = gsl_vector_get(Sv, 0);
   thresh = tol*wmax;
   for (j = 0; j < np; j++) {
@@ -97,7 +97,7 @@ int SVDFit(int np, double *coeff, double tol,
   }
 
   gsl_linalg_SV_solve(Am, Vm, Sv, bv, &xv.vector);
-  
+
   gsl_vector_free(bv);
   gsl_vector_free(Sv);
   gsl_matrix_free(Am);
@@ -114,26 +114,26 @@ typedef struct {
     double *fvec;
     double *fjac;
     void *extra;
-    void (*function)(int np, double *p, int n, double *x, double *logx, 
-		     double *y, double *dy, int ndy, void *extra);
+    void (*function)(int np, double *p, int n, double *x, double *logx,
+                     double *y, double *dy, int ndy, void *extra);
 } nlfit_data;
 
 static int nlsqfit_f(const gsl_vector *p, void *data, gsl_vector *f)
 {
     nlfit_data *nldata = (nlfit_data *) data;
-    
+
     unsigned int i, n, np, ndy;
-    
+
     double *fvec = nldata->fvec;
     double *x    = p->data;
-    
+
     np = p->size;
     n  = f->size;
 
     ndy = 0;
     nldata->function(np, x, n, nldata->x,
-			    nldata->logx, fvec, 
-			    NULL, ndy, nldata->extra);
+                            nldata->logx, fvec,
+                            NULL, ndy, nldata->extra);
 
     for (i = 0; i < n; i++) {
         fvec[i] = fvec[i] - nldata->y[i];
@@ -151,28 +151,28 @@ static int nlsqfit_df(const gsl_vector *p, void *data, gsl_matrix *J)
     nlfit_data *nldata = (nlfit_data *) data;
 
     unsigned int i, j, k, n, np, ndy;
-    
+
     double *x    = p->data;
     double *fjac = nldata->fjac;
-    
+
     np = p->size;
     n  = J->size1;
 
     ndy = n;
     nldata->function(np, x, n, nldata->x,
-			    nldata->logx, NULL, 
-			    fjac, ndy, nldata->extra);
+                            nldata->logx, NULL,
+                            fjac, ndy, nldata->extra);
 
     /* Jacobian matrix J(i,j) = dfi / dxj */
     for (i = 0; i < n; i++) {
-	k = i;
-	for (j = 0; j < np; j++) {
+        k = i;
+        for (j = 0; j < np; j++) {
             if (nldata->sigma) {
                 fjac[k] /= nldata->sigma[i];
             }
-            gsl_matrix_set(J, i, j, fjac[k]); 
-	    k += ndy;
-	}
+            gsl_matrix_set(J, i, j, fjac[k]);
+            k += ndy;
+        }
     }
 
     return GSL_SUCCESS;
@@ -188,12 +188,12 @@ static int nlsqfit_fdf(const gsl_vector *x,
 }
 
 int NLSQFit(int np, double *p, double tol,
-	    double *fvec, double *fjac,
-	    int n, double *x, double *logx, double *y, double *sigma,
-	    void Func(int np, double *p, int n, double *x, double *logx, 
-		     double *y, double *dy, int ndy, void *extra), 
-	    void *extra) {
-  
+            double *fvec, double *fjac,
+            int n, double *x, double *logx, double *y, double *sigma,
+            void Func(int np, double *p, int n, double *x, double *logx,
+                     double *y, double *dy, int ndy, void *extra),
+            void *extra) {
+
     const gsl_multifit_fdfsolver_type *T;
     gsl_multifit_fdfsolver *s;
     int status;
@@ -203,7 +203,7 @@ int NLSQFit(int np, double *p, double tol,
     gsl_vector_view xv = gsl_vector_view_array(p, np);
 
     unsigned int i, maxfev = 5000*np;
-    
+
     nlfit_data nldata;
     nldata.x = x;
     nldata.logx = logx;
@@ -213,7 +213,7 @@ int NLSQFit(int np, double *p, double tol,
     nldata.function = Func;
     nldata.fvec = fvec;
     nldata.fjac = fjac;
-    
+
     f.f = &nlsqfit_f;
     f.df = &nlsqfit_df;
     f.fdf = &nlsqfit_fdf;
@@ -228,7 +228,7 @@ int NLSQFit(int np, double *p, double tol,
     do {
         iter++;
         status = gsl_multifit_fdfsolver_iterate(s);
-        
+
         if (status) {
             break;
         }
@@ -239,7 +239,7 @@ int NLSQFit(int np, double *p, double tol,
     for (i = 0; i < np; i++) {
         p[i] = gsl_vector_get(s->x, i);
     }
-    
+
     gsl_multifit_fdfsolver_free(s);
 
     return status;
@@ -291,32 +291,32 @@ int NewtonCotes(double r[], const double x[], int ilast,
       r[ilast] = x[0];
       a = 0.0;
       for (i = 1; i < ilast; i += 2) {
-	a += x[i];
+        a += x[i];
       }
       r[ilast] += 4.0*a;
       a = 0.0;
       k = ilast-1;
       for (i = 2; i < k; i += 2) {
-	a += x[i];
+        a += x[i];
       }
       r[ilast] += 2.0*a;
       if (i == ilast) {
-	r[ilast] += x[ilast];
-	r[ilast] /= 3.0;
+        r[ilast] += x[ilast];
+        r[ilast] /= 3.0;
       } else {
-	r[ilast] += x[k];
-	r[ilast] /= 3.0;
-	r[ilast] += 0.5*(x[k] + x[ilast]);
+        r[ilast] += x[k];
+        r[ilast] /= 3.0;
+        r[ilast] += 0.5*(x[k] + x[ilast]);
       }
       r[ilast] += r[0];
     } else {
       for (i = 2; i <= ilast; i += 2) {
-	r[i] = r[i-2] + _CNC[2][0]*(x[i-2]+x[i]) + _CNC[2][1]*x[i-1];
-	r[i-1] = r[i-2] + 0.5*(x[i-2] + x[i-1]);
+        r[i] = r[i-2] + _CNC[2][0]*(x[i-2]+x[i]) + _CNC[2][1]*x[i-1];
+        r[i-1] = r[i-2] + 0.5*(x[i-2] + x[i-1]);
       }
       if (i == ilast+1) {
-	k = ilast-1;
-	r[ilast] = r[k] + 0.5*(x[k]+x[ilast]);
+        k = ilast-1;
+        r[ilast] = r[k] + 0.5*(x[k]+x[ilast]);
       }
     }
   } else {
@@ -324,32 +324,32 @@ int NewtonCotes(double r[], const double x[], int ilast,
       r[ilast] = x[ilast];
       a = 0.0;
       for (i = ilast-1; i > 0; i -= 2) {
-	a += x[i];
+        a += x[i];
       }
       r[ilast] += 4.0*a;
       a = 0.0;
       k = 1;
       for (i = ilast-2; i > k; i -= 2) {
-	a += x[i];
+        a += x[i];
       }
       r[ilast] += 2.0*a;
       if (i == 0) {
-	r[ilast] += x[0];
-	r[ilast] /= 3.0;
+        r[ilast] += x[0];
+        r[ilast] /= 3.0;
       } else {
-	r[ilast] += x[k];
-	r[ilast] /= 3.0;
-	r[ilast] += 0.5*(x[k] + x[0]);
+        r[ilast] += x[k];
+        r[ilast] /= 3.0;
+        r[ilast] += 0.5*(x[k] + x[0]);
       }
       r[ilast] += r[0];
     } else {
       for (i = ilast-2; i >= 0; i -= 2) {
-	r[i] = r[i+2] + _CNC[2][0]*(x[i+2]+x[i]) + _CNC[2][1]*x[i+1];
-	r[i+1] = r[i+2] + 0.5*(x[i+2] + x[i+1]);
+        r[i] = r[i+2] + _CNC[2][0]*(x[i+2]+x[i]) + _CNC[2][1]*x[i+1];
+        r[i+1] = r[i+2] + 0.5*(x[i+2] + x[i+1]);
       }
       if (i == -1) {
-	k = 1;
-	r[0] = r[k] + 0.5*(x[k]+x[0]);
+        k = 1;
+        r[0] = r[k] + 0.5*(x[k]+x[0]);
       }
     }
   }
@@ -359,14 +359,14 @@ int NewtonCotes(double r[], const double x[], int ilast,
 
 /* Imitate F77 UVIP3P by Hiroshi Akima (NP=3) */
 void uvip3p(int nd, const double *xd, const double *yd,
-		 int ni, const double *xi, double *yi)
+                 int ni, const double *xi, double *yi)
 {
     int i;
     const gsl_interp_type *type;
     gsl_interp_accel *acc;
     gsl_spline *spline;
     double xmin, xmax;
-    
+
     switch (nd) {
     case 2:
         type = gsl_interp_linear;
@@ -379,7 +379,7 @@ void uvip3p(int nd, const double *xd, const double *yd,
         type = gsl_interp_akima;
         break;
     }
-    
+
     acc = gsl_interp_accel_alloc();
     spline = gsl_spline_alloc(type, nd);
 
@@ -387,7 +387,7 @@ void uvip3p(int nd, const double *xd, const double *yd,
 
     xmin = xd[0];
     xmax = xd[nd - 1];
-    
+
     for (i = 0; i < ni; i++) {
         if (xi[i] < xmin && nd >= 2) {
             yi[i] = yd[0];
@@ -403,7 +403,7 @@ void uvip3p(int nd, const double *xd, const double *yd,
             }
         }
     }
-    
+
     gsl_spline_free(spline);
     gsl_interp_accel_free(acc);
 
@@ -428,7 +428,7 @@ typedef struct
 } akima_state_t;
 
 static inline void
-coeff_calc (const double c_array[], double dy, double dx, size_t index,  
+coeff_calc (const double c_array[], double dy, double dx, size_t index,
             double * b, double * c, double * d)
 {
   const double c_i = c_array[index];
@@ -440,14 +440,14 @@ coeff_calc (const double c_array[], double dy, double dx, size_t index,
 
 /* Imitate F77 UVIP3C (NP=3) */
 void uvip3c(int nd, const double xd[], const double yd[],
-		 double c1[], double c2[], double c3[])
+                 double c1[], double c2[], double c3[])
 {
     int i;
     const gsl_interp_type *type;
     gsl_spline *spline;
     gsl_interp *interp;
-    
-    
+
+
     if (nd > 4) {
         type = gsl_interp_akima;
     } else
@@ -460,13 +460,13 @@ void uvip3c(int nd, const double xd[], const double yd[],
         fprintf(stderr, "uvip3c() called with nd = %d\n", nd);
         abort();
     }
-    
+
     spline = gsl_spline_alloc(type, nd);
 
     gsl_spline_init(spline, xd, yd, nd);
-    
+
     interp = spline->interp;
-    
+
     if (nd > 4) {
         const akima_state_t* as = (akima_state_t *) interp->state;
         memcpy(c1, as->b, sizeof(double)*(nd - 1));
@@ -478,7 +478,7 @@ void uvip3c(int nd, const double xd[], const double yd[],
         for (i = 0; i < nd - 1; i++) {
             double dx = xd[i + 1] - xd[i];
             double dy = yd[i + 1] - yd[i];
-            
+
             coeff_calc(cs->c, dy, dx, i, &c1[i], &c2[i], &c3[i]);
         }
     } else {

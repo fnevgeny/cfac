@@ -9,17 +9,17 @@
 typedef struct {
     const char *db_fname;
     const char *cache_fname;
-    
+
     int print_info;
-    
+
     long sid;
-    
+
     int nele_min;
     int nele_max;
-    
+
     unsigned long *sids;
     unsigned long nsid;
-    
+
     double T;
 } cfacdbu_t;
 
@@ -46,7 +46,7 @@ static void usage(FILE *fp, const char *progname)
     fprintf(fp, "  -c, --cache FILE       create (if needed) and attach a cache DB [none]\n");
     fprintf(fp, "  -T, --temperature T    populate the cache DB with rate coefficients,\n" \
                 "                         calculated at temperature T (a.u.)\n");
-    
+
     fprintf(fp, "  -V, --version          print version info and exit\n");
     fprintf(fp, "  -h, --help             display this help and exit\n");
 }
@@ -54,7 +54,7 @@ static void usage(FILE *fp, const char *progname)
 static int parse_args(cfacdbu_t *u, unsigned int argc, char *const *argv)
 {
     int optc;
-    
+
     while (CFACDB_TRUE) {
         static struct option long_options[] = {
             {"session",          required_argument, NULL,  's'},
@@ -67,7 +67,7 @@ static int parse_args(cfacdbu_t *u, unsigned int argc, char *const *argv)
             {"help",             no_argument,       NULL,  'h'},
             {NULL,               0,                 NULL,    0}
         };
-        
+
         /* `getopt_long' stores the option index here. */
         int option_index = 0;
 
@@ -131,7 +131,7 @@ static int parse_args(cfacdbu_t *u, unsigned int argc, char *const *argv)
             return CFACDB_FAILURE;
         }
     }
-    
+
     if (optind == argc - 1) {
         u->db_fname = argv[optind];
         optind++;
@@ -139,7 +139,7 @@ static int parse_args(cfacdbu_t *u, unsigned int argc, char *const *argv)
         usage(stderr, argv[0]);
         return CFACDB_FAILURE;
     }
-    
+
     /* Print any remaining command line arguments (not options). */
     if (optind < argc - 1) {
         fprintf(stderr, "unrecognized argument(s): ");
@@ -150,13 +150,13 @@ static int parse_args(cfacdbu_t *u, unsigned int argc, char *const *argv)
         usage(stderr, argv[0]);
         return CFACDB_FAILURE;
     }
-    
+
     if (u->nele_min > u->nele_max) {
         fprintf(stderr, "nele-min > nele-max: %d > %d!\n",
             u->nele_min, u->nele_max);
         return CFACDB_FAILURE;
     }
-    
+
     return CFACDB_SUCCESS;
 }
 
@@ -164,19 +164,19 @@ static int sessions_sink(const cfacdb_t *cdb,
     cfacdb_sessions_data_t *cbdata, void *udata)
 {
     cfacdbu_t *cdu = udata;
-    
+
     cdu->sids[cdu->nsid] = cbdata->sid;
     cdu->nsid++;
-    
+
     if (cdu->print_info) {
         printf("Session #%lu (sid = %ld):\n",
-	          cdu->nsid, cbdata->sid);
+                  cdu->nsid, cbdata->sid);
         printf("\t%s (Z = %d, mass = %.2f) nele = %d ... %d, UTA = %s \n",
-	          cbdata->sym, cbdata->anum, cbdata->mass,
+                  cbdata->sym, cbdata->anum, cbdata->mass,
                   cbdata->nele_min, cbdata->nele_max,
                   cbdata->uta ? "true":"false");
     }
-    
+
     if (cdu->nele_min > cbdata->nele_max) {
         fprintf(stderr,
             "\tWarning: resetting nele-min to %d!\n", cbdata->nele_max);
@@ -203,15 +203,15 @@ int main(int argc, char *const *argv)
     cfacdbu_t cdu;
     cfacdb_stats_t stats;
     unsigned int i, nsessions;
-    
+
     memset(&cdu, 0, sizeof(cdu));
     cdu.nele_min = 0;
     cdu.nele_max = 100;
-    
+
     if (parse_args(&cdu, argc, argv) != CFACDB_SUCCESS) {
         exit(1);
     }
-    
+
     cdb = cfacdb_open(cdu.db_fname, CFACDB_TEMP_DEFAULT);
     if (!cdb) {
         exit(1);
@@ -224,7 +224,7 @@ int main(int argc, char *const *argv)
                 cdu.cache_fname, cdu.db_fname);
         }
     }
-    
+
     nsessions = cfacdb_get_nsessions(cdb);
     if (cdu.print_info) {
         printf("%s: %d session%s\n",
@@ -235,11 +235,11 @@ int main(int argc, char *const *argv)
         cfacdb_close(cdb);
         exit(0);
     }
-    
+
     cdu.sids = malloc(nsessions*sizeof(unsigned long));
 
     cfacdb_sessions(cdb, sessions_sink, &cdu);
-    
+
     /* choose the latest session by default */
     if (cdu.sid == 0) {
         cdu.sid = cdu.sids[nsessions - 1];
@@ -250,10 +250,10 @@ int main(int argc, char *const *argv)
         nsessions = 1;
         cdu.sids[0] = cdu.sid;
     }
-    
+
     for (i = 0; i < nsessions; i++) {
         unsigned long sid = cdu.sids[i];
-        
+
         if (cfacdb_init(cdb, sid, cdu.nele_min, cdu.nele_max)
             != CFACDB_SUCCESS) {
             fprintf(stderr, "Initialization of session ID %lu failed\n", sid);
@@ -281,8 +281,8 @@ int main(int argc, char *const *argv)
     }
 
     free(cdu.sids);
-    
+
     cfacdb_close(cdb);
-    
+
     exit(0);
 }

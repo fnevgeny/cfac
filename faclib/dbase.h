@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -322,7 +322,7 @@ typedef struct _CIM_RECORD_ {
 } CIM_RECORD;
 
 /* these read functions interface with the binary data files.
- * they can be used in custom c/c++ codes to read the binary 
+ * they can be used in custom c/c++ codes to read the binary
  * files directly. to do so, copy consts.h, dbase.h, and dbase.c
  * into a working directory, and compile and link dbase.c against the
  * custom code using these functions.
@@ -354,11 +354,11 @@ int ReadCIRecord(FILE *f, CI_RECORD *r, int swp, CI_HEADER *h);
 int ReadCIMRecord(FILE *f, CIM_RECORD *r, int swp, CIM_HEADER *h);
 
 void CEMF2CEFHeader(CEMF_HEADER *mh, CEF_HEADER *h);
-void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh, 
-		    int ith, int iph);
+void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh,
+                    int ith, int iph);
 /* to accommadate for the possible larger statistical weight of UTA levels.
- * the eqivalent 2j value for them are stored in r.ibase of the EN_RECORD for 
- * UTA. The two functions here are wrappers to determine the 2j and ibase for 
+ * the eqivalent 2j value for them are stored in r.ibase of the EN_RECORD for
+ * UTA. The two functions here are wrappers to determine the 2j and ibase for
  * the level, depending on whether r.j < 0.
  */
 int JFromENRecord(EN_RECORD *r);

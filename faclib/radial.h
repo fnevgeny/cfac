@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -26,7 +26,7 @@
 typedef enum {
     INT_P1P2pQ1Q2 = 1,    /* P1*P2 + Q1*Q2 */
     INT_P1P2      = 2,    /* P1*P2         */
-    INT_Q1Q2      = 3,    /* Q1*Q2         */ 
+    INT_Q1Q2      = 3,    /* Q1*Q2         */
     INT_P1Q2pQ1P2 = 4,    /* P1*Q2 + Q1*P2 */
     INT_P1Q2mQ1P2 = 5,    /* P1*Q2 - Q1*P2 */
     INT_P1Q2      = 6,    /* P1*Q2         */
@@ -69,10 +69,10 @@ void SetOptimizeMaxIter(cfac_t *cfac, int m);
 void SetOptimizeStabilizer(cfac_t *cfac, double m);
 void SetOptimizeTolerance(cfac_t *cfac, double c);
 void SetOptimizePrint(cfac_t *cfac, int m);
-void SetOptimizeControl(cfac_t *cfac, double tolerence, double stablizer, 
-			int maxiter, int iprint);
-void SetScreening(cfac_t *cfac, int n_screen, int *screened_n, 
-		  double screened_harge, int kl);
+void SetOptimizeControl(cfac_t *cfac, double tolerence, double stablizer,
+                        int maxiter, int iprint);
+void SetScreening(cfac_t *cfac, int n_screen, int *screened_n,
+                  double screened_harge, int kl);
 int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight);
 int RefineRadial(cfac_t *cfac, int maxfun, int msglvl);
 int ConfigEnergy(cfac_t *cfac, int m, int mr, int ng, int *kg);
@@ -84,15 +84,15 @@ double AverageEnergyConfig(cfac_t *cfac, CONFIG *cfg);
 /* routines for radial integral calculations */
 int IntegrateF(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     RadIntType type, double x[], int id);
-int IntegrateS(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2, 
+int IntegrateS(POTENTIAL *potential, const double *f, const ORBITAL *orb1, const ORBITAL *orb2,
     RadIntType type, double *r, int id);
-int IntegrateSubRegion(POTENTIAL *potential, int i0, int i1, 
-		       const double *f,
+int IntegrateSubRegion(POTENTIAL *potential, int i0, int i1,
+                       const double *f,
                        const ORBITAL *orb1, const ORBITAL *orb2,
-		       RadIntType type, double *r, int m, int last_only);
-int IntegrateSinCos(POTENTIAL *potential, int j, double *x, double *y, 
-		    double *phase, double *dphase, 
-		    int i0, double *r, int last_only);
+                       RadIntType type, double *r, int m, int last_only);
+int IntegrateSinCos(POTENTIAL *potential, int j, double *x, double *y,
+                    double *phase, double *dphase,
+                    int i0, double *r, int last_only);
 int SlaterTotal(cfac_t *cfac,
     double *sd, double *se, int *js, int *ks, int k, int mode);
 double Vinti(cfac_t *cfac, int k0, int k1);
@@ -103,7 +103,7 @@ double BreitC(cfac_t *cfac, int n, int m, int k, int k0, int k1, int k2, int k3)
 double BreitS(cfac_t *cfac, int k0, int k1, int k2, int k3, int k);
 double BreitI(cfac_t *cfac, int n, int k0, int k1, int k2, int k3, int m);
 double Breit(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
-	     int kl0, int kl1, int kl2, int kl3);
+             int kl0, int kl1, int kl2, int kl3);
 void SortSlaterKey(int *kd);
 int ResidualPotential(const cfac_t *cfac, double *s, int k0, int k1);
 double MeanPotential(cfac_t *cfac, int k0, int k1);
@@ -119,7 +119,7 @@ double *GeneralizedMoments(cfac_t *cfac, int k0, int k1, int m);
 void PrintGeneralizedMoments(cfac_t *cfac,
     char *fn, int m, int n0, int k0, int n1, int k1, double e1);
 int FreeOrbital(cfac_t *cfac, int i);
-int SaveAllContinua(cfac_t *cfac, int mode); 
+int SaveAllContinua(cfac_t *cfac, int mode);
 int SaveContinua(cfac_t *cfac, double e, int mode);
 int FreeAllContinua(cfac_t *cfac);
 int FreeContinua(cfac_t *cfac, double e);

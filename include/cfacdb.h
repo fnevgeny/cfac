@@ -1,16 +1,16 @@
-/* 
+/*
  * Copyright (C) 2013-2015 Evgeny Stambulchik
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -59,12 +59,12 @@ typedef enum {
 } cfacdb_temp_t;
 
 /*!
- * \brief The main cFACdb structure (used opaquely throughout the API). 
+ * \brief The main cFACdb structure (used opaquely throughout the API).
  */
 typedef struct _cfacdb_t cfacdb_t;
 
 /*!
- * \brief Per-session statistics. 
+ * \brief Per-session statistics.
  */
 typedef struct {
     unsigned long ndim;     /*!< Number of levels.                */
@@ -76,7 +76,7 @@ typedef struct {
 } cfacdb_stats_t;
 
 /*!
- * \brief Session basic info. 
+ * \brief Session basic info.
  */
 typedef struct {
     unsigned long int sid;  /*!< Session ID.                  */
@@ -89,7 +89,7 @@ typedef struct {
 } cfacdb_sessions_data_t;
 
 /*!
- * \brief Charge-state data. 
+ * \brief Charge-state data.
  */
 typedef struct {
     unsigned int nele;      /*!< Number of electrons.    */
@@ -98,13 +98,13 @@ typedef struct {
 } cfacdb_cstates_data_t;
 
 /*!
- * \brief Level data. 
+ * \brief Level data.
  */
 typedef struct {
     unsigned int i;     /*!< Level index.                            */
-    
+
     unsigned int ifac;  /*!< cFAC level index.                       */
-    
+
     double energy;      /*!< Level energy.                           */
     unsigned int nele;  /*!< Number of electrons.                    */
     unsigned int g;     /*!< Degeneracy (2J + 1 if non-UTA).         */
@@ -117,70 +117,70 @@ typedef struct {
 } cfacdb_levels_data_t;
 
 /*!
- * \brief Radiative transition data. 
+ * \brief Radiative transition data.
  */
 typedef struct {
     unsigned int ii;    /*!< Initial level ID.                      */
     unsigned int fi;    /*!< Final level ID (\f$E_f > E_i\f$).      */
-    
+
     int mpole;          /*!< Multipole type (-1 = E1, 1 = M1, etc). */
-    
+
     double de;          /*!< Transition energy.                     */
-    
+
     double gf;          /*!< Symmetrized oscillator strength.       */
-    
+
     double uta_de;      /*!< UTA shift.                             */
     double uta_sd;      /*!< UTA Gaussian width.                    */
 } cfacdb_rtrans_data_t;
 
 /*!
- * \brief Autoionization transition data. 
+ * \brief Autoionization transition data.
  */
 typedef struct {
     unsigned int ii;    /*!< Initial level ID.                */
     unsigned int fi;    /*!< Final level ID (\f$E_f > E_i\f$).*/
-    
+
     double rate;        /*!< AI rate.                         */
 } cfacdb_aitrans_data_t;
 
 /*!
- * \brief Collisional transition data. 
+ * \brief Collisional transition data.
  */
 typedef struct {
     unsigned int cid;   /*!< Collision transition ID.           */
     unsigned int ii;    /*!< Initial level ID.                  */
     unsigned int fi;    /*!< Final level ID (\f$E_f > E_i\f$).  */
-    
+
     unsigned int type;  /*!< Process type.                      */
-    
+
     double de;          /*!< Transition (threshold) energy.     */
     unsigned int kl;    /*!< Dominant L of the ionized shell.   */
     double ap0;         /*!< A fit/extrapolation parameter.     */
     double ap1;         /*!< A fit/extrapolation parameter.     */
     double ap2;         /*!< A fit/extrapolation parameter.     */
     double ap3;         /*!< A fit/extrapolation parameter.     */
-    
+
     unsigned int nd;    /*!< Number of collision-strength data. */
     double *e;          /*!< Energy mesh (in unis of de).       */
     double *d;          /*!< Collision-strength data.           */
 } cfacdb_ctrans_data_t;
 
 /*!
- * \brief Collisional rate data. 
+ * \brief Collisional rate data.
  */
 typedef struct {
     unsigned int ii;    /*!< Initial level ID.                  */
     unsigned int fi;    /*!< Final level ID (\f$E_f > E_i\f$).  */
-    
+
     unsigned int type;  /*!< Process type.                      */
-    
+
     double de;          /*!< Transition energy.                 */
-    
+
     double ratec;       /*!< Rate coefficient                   */
 } cfacdb_crates_data_t;
 
 /*!
- * \brief Interpolationa/extrapolation data structure. 
+ * \brief Interpolationa/extrapolation data structure.
  */
 typedef struct {
     unsigned int ndata; /*!< Number of data points.                   */
@@ -254,9 +254,9 @@ void cfacdb_close(cfacdb_t *cdb);
  * Select a specific session in the database, optionally choosing a subset
  * of the data according to a range of charge states.
  * \param cdb The cFACdb object.
- * \param sid Session ID. Use 0 to pick the last one. 
- * \param nele_min The minimal number of electrons. 
- * \param nele_max The maximal number of electrons. 
+ * \param sid Session ID. Use 0 to pick the last one.
+ * \param nele_min The minimal number of electrons.
+ * \param nele_max The maximal number of electrons.
  * \return \ref CFACDB_SUCCESS on success or \ref CFACDB_FAILURE otherwise.
  */
 int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max);

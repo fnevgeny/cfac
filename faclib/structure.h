@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -129,10 +129,10 @@ HAMILTON *ConstructHamiltonFrozen(cfac_t *cfac,
 double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj);
 double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj);
 double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj);
-double Hamilton2E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, 
-		  SHELL_STATE *sket,INTERACT_SHELL *s);
-double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, 
-		  SHELL_STATE *sket,INTERACT_SHELL *s);
+double Hamilton2E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra,
+                  SHELL_STATE *sket,INTERACT_SHELL *s);
+double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra,
+                  SHELL_STATE *sket,INTERACT_SHELL *s);
 int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h);
 int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg);
 
@@ -168,15 +168,15 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AngZSwapBraKet(cfac_t *cfac, int nz, ANGULAR_ZMIX *ang, int p);
 int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
 int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2);
-int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang, 
-		    int n_shells, int phase, SHELL_STATE *sbra, 
-		    SHELL_STATE *sket, INTERACT_SHELL *s, int m);
-int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang, 
-		       int k, int k0, int k1, int k2, int k3, double coeff);
+int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang,
+                    int n_shells, int phase, SHELL_STATE *sbra,
+                    SHELL_STATE *sket, INTERACT_SHELL *s, int m);
+int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang,
+                       int k, int k0, int k1, int k2, int k3, double coeff);
 int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
-		     int k, int k0, int k1, double coeff);
+                     int k, int k0, int k1, double coeff);
 int AddToAngularZFB(int *n, int *nz, ANGULAR_ZFB **ang,
-		    int kb, double coeff);
+                    int kb, double coeff);
 int AngularZxZFreeBound(cfac_t *cfac, ANGULAR_ZxZMIX **ang, int lower, int upper);
 int GetBasisTable(cfac_t *cfac, char *fn, int m);
 int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
@@ -198,11 +198,11 @@ int StructureEB(cfac_t *cfac, char *fn, int n, int *ilev);
 double HamiltonElementEB(const cfac_t *cfac, HAMILTON *h, int i0, int j0);
 
 int SlaterCoeff(cfac_t *cfac,
-    char *fn, int nlevs, int *ilevs, int na, SHELL *sa, 
-		int nb, SHELL *sb);
-void AddSlaterCoeff(const cfac_t *cfac, double *c, double a, int n_shells, 
-		    SHELL_STATE *sbra, SHELL_STATE *sket, 
-		    INTERACT_SHELL *s, int na, SHELL *sa, 
-		    int nb, SHELL *sb);
+    char *fn, int nlevs, int *ilevs, int na, SHELL *sa,
+                int nb, SHELL *sb);
+void AddSlaterCoeff(const cfac_t *cfac, double *c, double a, int n_shells,
+                    SHELL_STATE *sbra, SHELL_STATE *sket,
+                    INTERACT_SHELL *s, int na, SHELL *sa,
+                    int nb, SHELL *sb);
 
 #endif

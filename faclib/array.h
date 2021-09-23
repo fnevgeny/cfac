@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,51 +22,51 @@
 
 /*************************************************************
   Header of module "array"
-  
-  This module implements a variable length one- and 
+
+  This module implements a variable length one- and
   multi-dimensional array.
 
   Author: M. F. Gu, mfgu@stanford.edu
 **************************************************************/
 
-/* 
+/*
 <** The following format is used for documenting the source **>
 */
 
 /* documenting a struct */
 /*
-** STRUCT:      
-** PURPOSE:     
-** FIELDS:      
-** NOTE:        
+** STRUCT:
+** PURPOSE:
+** FIELDS:
+** NOTE:
 */
 
 /* documenting a function */
-/* 
-** FUNCTION:    
-** PURPOSE:     
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
+/*
+** FUNCTION:
+** PURPOSE:
+** INPUT:
+** RETURN:
+** SIDE EFFECT:
+** NOTE:
 */
 
 /* documenting a macro function */
-/* 
-** MACRO:       
-** PURPOSE:     
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
+/*
+** MACRO:
+** PURPOSE:
+** INPUT:
+** RETURN:
+** SIDE EFFECT:
+** NOTE:
 */
 
 /* documenting a global, static varialbe or a macro constant */
 /*
-** VARIABLE:    
-** TYPE:        
-** PURPOSE:     
-** NOTE:        
+** VARIABLE:
+** TYPE:
+** PURPOSE:
+** NOTE:
 */
 
 #define MultiInit NMultiInit
@@ -83,7 +83,7 @@
 **              pointer to a block of data.
 **              {DATA *next},
 **              pointer to the next block.
-** NOTE:        
+** NOTE:
 */
 typedef struct _DATA_ {
   void *dptr;
@@ -99,7 +99,7 @@ typedef struct _DATA_ {
 **              number of elements in each block.
 **              {int dim},
 **              the size of the array.
-** NOTE:        
+** NOTE:
 */
 
 typedef struct _ARRAY_ ARRAY;
@@ -113,7 +113,7 @@ struct _ARRAY_ {
   int bsize;
   int dim;
   DATA  *data;
-  
+
   ARRAY_ELEM_FREE FreeElem;
   ARRAY_DATA_INIT InitData;
 };
@@ -128,9 +128,9 @@ struct _ARRAY_ {
 **              {short *block},
 **              number of elements in each block for each dimension.
 **              {ARRAY *array},
-**              the multi-dimensional array is implemented as array 
-**              of arrays. 
-** NOTE:        
+**              the multi-dimensional array is implemented as array
+**              of arrays.
+** NOTE:
 */
 typedef struct _MULTI_ {
   int numelem, maxelem;

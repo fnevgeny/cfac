@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -22,7 +22,7 @@
 
 #include <math.h>
 
-/* 
+/*
 ** MACRO:       IsOdd, IsEven
 ** PURPOSE:     determin if an integer is Odd or Even.
 ** INPUT:       {int x},
@@ -30,13 +30,13 @@
 ** RETURN:      {int},
 **              0: false.
 **              1: true.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 #define IsOdd(x)  ((abs((x))&0x01)?1:0)
 #define IsEven(x) ((abs((x))&0x01)?0:1)
 
-/* 
+/*
 ** MACRO:       Max, Min
 ** PURPOSE:     the larger and lesser of two numbers.
 ** INPUT:       {generic a},
@@ -45,19 +45,19 @@
 **              number participating the comparison.
 ** RETURN:      {generic},
 **              the larger or lesser of a and b.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 #define Max(a, b) (((a)>(b))?(a):(b))
 #define Min(a, b) (((a)<(b))?(a):(b))
 
-#define IsNan(a)  (!((a)>0) && !((a)<=0)) 
+#define IsNan(a)  (!((a)>0) && !((a)<=0))
 
 /*
 ** VARIABLE:    EPS1, ..., EPS30.
 ** TYPE:        macro constants.
 ** PURPOSE:     some small numbers.
-** NOTE:        
+** NOTE:
 */
 #define EPS30 1E-30
 #define EPS16 1E-16
@@ -75,7 +75,7 @@
 ** VARIABLE:    TWO_PI
 ** TYPE:        macro constants, double
 ** PURPOSE:     2*PI
-** NOTE:        
+** NOTE:
 */
 #define TWO_PI     (2*M_PI)
 
@@ -83,7 +83,7 @@
 ** VARIABLE:    HARTREE_EV
 ** TYPE:        macro constant
 ** PURPOSE:     1 Hartree in eV.
-** NOTE:        
+** NOTE:
 */
 #define HARTREE_EV 27.2113862
 
@@ -91,7 +91,7 @@
 ** VARIABLE:    RATE_AU
 ** TYPE:        macro constants.
 ** PURPOSE:     atomic units of rate in 1/s
-** NOTE:        
+** NOTE:
 */
 #define RATE_AU    4.13413733E16
 
@@ -99,7 +99,7 @@
 ** VARIABLE:    AREA_AU20
 ** TYPE:        macro constants.
 ** PURPOSE:     atomic units of area in 10^-20 cm2
-** NOTE:        
+** NOTE:
 */
 #define AREA_AU20  2.800285206E3
 
@@ -107,7 +107,7 @@
 ** VARIABLE:    RBOHR
 ** TYPE:        macro constant.
 ** PURPOSE:     Bohr radius in cm.
-** NOTE:        
+** NOTE:
 */
 #define RBOHR      5.29177211e-9
 
@@ -115,7 +115,7 @@
 ** VARIABLE:    MBOHR
 ** TYPE:        macro constant.
 ** PURPOSE:     Bohr magneton in eV/Gauss.
-** NOTE:        
+** NOTE:
 */
 #define MBOHR      5.78838183E-9
 
@@ -123,7 +123,7 @@
 ** VARIABLE:    FINE_STRUCTURE_CONST, FINE_STRUCTURE_CONST2
 ** TYPE:        macro constants.
 ** PURPOSE:     fine structure constant and its square.
-** NOTE:        
+** NOTE:
 */
 #define FINE_STRUCTURE_CONST  7.29735257E-3
 #define FINE_STRUCTURE_CONST2 5.32513545E-5
@@ -188,7 +188,7 @@
 #define MIXCUT2            1.0
 #define NPRINCIPLE         2
 #define MAXDN              3
-#define MBCLOSE            8        
+#define MBCLOSE            8
 #define MAXLEVEB           1000000
 
 /* transition */

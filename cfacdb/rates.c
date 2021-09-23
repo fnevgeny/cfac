@@ -1,18 +1,18 @@
 /* Calculation of rate coefficients. Mostly copied from CRaC */
 
-/* 
+/*
  * Copyright (C) 2013-2015 Evgeny Stambulchik
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or (at
  * your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -44,7 +44,7 @@ double cfacdb_intext(const cfacdb_intext_t *intext, double x)
     double Omega = 0.0;
     unsigned int i, n;
     double *dx = intext->e, *dd = intext->d;
-    
+
     if (x < 1.0) {
         return 0.0;
     }
@@ -63,24 +63,24 @@ double cfacdb_intext(const cfacdb_intext_t *intext, double x)
                 double xavg = (x1 + x2)/2;
                 double y1 = dd[i], y2 = dd[i + 1];
                 double tang;
-                
+
                 if (intext->cube) {
                     y1 *= pow(x1, 3);
                     y2 *= pow(x2, 3);
                 }
-                
+
                 tang = (y2 - y1)/(x2 - x1);
-                
+
                 if (x < xavg) {
                     Omega = y1 + tang*(x - x1);
                 } else {
                     Omega = y2 - tang*(x2 - x);
                 }
-                
+
                 if (intext->cube) {
                     Omega /= pow(x, 3);
                 }
-                
+
                 break;
             }
         }
@@ -96,7 +96,7 @@ double cfacdb_intext(const cfacdb_intext_t *intext, double x)
             Omega = intext->f_asymptote(x, intext->ap)*pow(beta0, c);
         }
     }
-    
+
     return Omega;
 }
 
@@ -119,7 +119,7 @@ static double cfacdb_born_asymptote(double x1, const double *ap)
 static double cfacdb_ci_asymptote(double x1, const double *ap)
 {
     double y = 1.0 - 1.0/x1;
-    
+
     return ap[0]*log(x1) + ap[1]*y*y + y*(ap[2]/x1 + ap[3]/(x1*x1));
 }
 
@@ -133,12 +133,12 @@ static double cfacdb_rr_asymptote_v2(double x1, const double *ap)
 {
     int kl = (int) rint(ap[4]);
     double x, y, res;
-    
+
     x = (x1 - 1)/ap[3] + 1;
     y = (1 + ap[2])/(sqrt(x) + ap[2]);
-    
+
     res = x1/(x1 - 1 + ap[3])*ap[0]*pow(x, -3.5 - kl + 0.5*ap[1])*pow(y, ap[1]);
-    
+
     return res;
 }
 
@@ -168,13 +168,13 @@ int cfacdb_prepare_intext(const cfacdb_t *cdb,
             intext->d0  = 0.0;
         }
     }
-    
+
     if (cbdata->type == CFACDB_CS_PI) {
         intext->cube = 1;
     } else {
         intext->cube = 0;
     }
-    
+
     switch (cbdata->type) {
     case CFACDB_CS_CE:
         intext->f_asymptote = cfacdb_born_asymptote;
@@ -193,18 +193,18 @@ int cfacdb_prepare_intext(const cfacdb_t *cdb,
         return CFACDB_FAILURE;
         break;
     }
-    
+
     return CFACDB_SUCCESS;
 }
-    
+
 /* NB: rates include the degeneracy of the initial level!!! */
 static double rate_int_f(double e, void *params) {
     const rate_int_params_t *p = params;
-    
+
     double xs, Omega;
-    
+
     double x = e/p->de, x1, conv;
-    
+
     switch (p->type) {
     case CFACDB_CS_CE:
         x1 = x;
@@ -225,7 +225,7 @@ static double rate_int_f(double e, void *params) {
         return 0.0;
         break;
     }
-    
+
     Omega = cfacdb_intext(&p->intext, x1);
     xs = Omega*conv;
 
@@ -237,16 +237,16 @@ static int crates_sink(const cfacdb_t *cdb,
 {
     cfacdb_crates_data_t rcbdata;
     cfacdb_intext_t *intext;
-    
+
     int gsl_status;
     double low_limit, split_limit, result, error;
-    
+
     rate_int_params_t params;
 
     gsl_function F;
 
     double ratec = 0.0;
-    
+
     struct {
         double T;
         cfacdb_crates_sink_t sink;
@@ -254,17 +254,17 @@ static int crates_sink(const cfacdb_t *cdb,
         gsl_integration_workspace *w;
         sqlite3_stmt *stmt;
     } *rdata = udata;
-    
+
     params.T    = rdata->T;
     params.de   = cbdata->de;
     params.type = cbdata->type;
-    
+
     params.db_format = cdb->db_format;
-    
+
     intext = &params.intext;
-    
+
     cfacdb_prepare_intext(cdb, cbdata, intext);
-    
+
     F.function = &rate_int_f;
     F.params   = &params;
 
@@ -275,7 +275,7 @@ static int crates_sink(const cfacdb_t *cdb,
     }
 
     split_limit = 3*params.de;
-    
+
     gsl_status = gsl_integration_qags(&F, low_limit, split_limit,
         0, CFACDB_QAGI_EPS, 1000, rdata->w, &result, &error);
     if (gsl_status) {
@@ -284,7 +284,7 @@ static int crates_sink(const cfacdb_t *cdb,
         return CFACDB_FAILURE;
     }
     ratec = result;
-    
+
     gsl_status = gsl_integration_qagiu(&F, split_limit,
         0, CFACDB_QAGI_EPS, 1000, rdata->w, &result, &error);
     if (gsl_status) {
@@ -298,9 +298,9 @@ static int crates_sink(const cfacdb_t *cdb,
     rcbdata.de    = cbdata->de;
     rcbdata.ii    = cbdata->ii;
     rcbdata.fi    = cbdata->fi;
-    
+
     rcbdata.ratec = ratec;
-    
+
     if (rdata->sink(cdb, &rcbdata, rdata->udata) != CFACDB_SUCCESS) {
         return CFACDB_FAILURE;
     }
@@ -314,7 +314,7 @@ static int crates_sink(const cfacdb_t *cdb,
 
         sqlite3_reset(rdata->stmt);
     }
-    
+
     return CFACDB_SUCCESS;
 }
 
@@ -322,7 +322,7 @@ int cfacdb_crates(cfacdb_t *cdb, double T,
     cfacdb_crates_sink_t sink, void *udata)
 {
     int rc;
-    
+
     struct {
         double T;
         cfacdb_crates_sink_t sink;
@@ -330,13 +330,13 @@ int cfacdb_crates(cfacdb_t *cdb, double T,
         gsl_integration_workspace *w;
         sqlite3_stmt *stmt;
     } rdata;
-    
+
     if (cdb->cached) {
         const char *sql;
-        
+
         /* first, try to get previously calculated rates */
         cfacdb_crates_cached(cdb, T, sink, udata);
-        
+
         /* prepare for transaction */
         sqlite3_exec(cdb->cache_db, "BEGIN", NULL, NULL, NULL);
 
@@ -350,16 +350,16 @@ int cfacdb_crates(cfacdb_t *cdb, double T,
     rdata.sink  = sink;
     rdata.udata = udata;
     rdata.T = T;
-    
+
     rdata.w = gsl_integration_workspace_alloc(1000);
     if (!rdata.w) {
         return CFACDB_FAILURE;
     }
-    
+
     rc = cfacdb_ctrans(cdb, crates_sink, &rdata);
-    
+
     gsl_integration_workspace_free(rdata.w);
-    
+
     if (cdb->cached) {
         sqlite3_finalize(rdata.stmt);
 

@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -20,8 +20,8 @@
 /*************************************************************
   Implementation of module "config".
 
-  This module generates electron configuations and 
-  carries out the angular momentum coupling. 
+  This module generates electron configuations and
+  carries out the angular momentum coupling.
 
   Author: M. F. Gu, mfgu@space.mit.edu
 **************************************************************/
@@ -39,14 +39,14 @@
 ** VARIABLE:    spec_symbols
 ** TYPE:        string.
 ** PURPOSE:     a string orbital angular momentum symbols.
-** NOTE:        the last char "*" is not part of the symbol, 
+** NOTE:        the last char "*" is not part of the symbol,
 **              rather, it represents any of the previous symbols.
 */
-static char spec_symbols[MAX_SPEC_SYMBOLS+2] = "spdfghiklmnoqrtuvwxyz*"; 
+static char spec_symbols[MAX_SPEC_SYMBOLS+2] = "spdfghiklmnoqrtuvwxyz*";
 
 static int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg);
 
-/* 
+/*
 ** FUNCTION:    DistributeElectronsShell
 ** PURPOSE:     distribute nq electrons among the specified shells
 **              to construct all possible configurations.
@@ -60,17 +60,17 @@ static int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg);
 **              {int nq},
 **              number of electrons to be distributed.
 **              {int *maxq},
-**              maxq[i] is the maximum number of electrons allowed 
-**              in all the shells except the the i-th shell. 
+**              maxq[i] is the maximum number of electrons allowed
+**              in all the shells except the the i-th shell.
 **              this is to determine the minimum number of electrons
-**              allowed in the i-th shell, nq-maxq[i]. 
+**              allowed in the i-th shell, nq-maxq[i].
 ** RETURN:      {int},
 **              number of configurations.
-** SIDE EFFECT: 
+** SIDE EFFECT:
 ** NOTE:        This is a static function only used in module "config".
 */
-static int DistributeElectronsShell(CONFIG **cfg, int ns, SHELL *shell, 
-				int nq, int *maxq) {
+static int DistributeElectronsShell(CONFIG **cfg, int ns, SHELL *shell,
+                                int nq, int *maxq) {
   CONFIG **cfg1, **cfg2;
   int *ncfg2;
   int qmin, qmax, j, q, t, k, ncfg;
@@ -81,7 +81,7 @@ static int DistributeElectronsShell(CONFIG **cfg, int ns, SHELL *shell,
     *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ns);
     (*cfg)->n_shells = 0;
     return 1;
-  } 
+  }
 
   if (nq == 1){
     *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ns);
@@ -103,7 +103,7 @@ static int DistributeElectronsShell(CONFIG **cfg, int ns, SHELL *shell,
     (*cfg)->shells[0].kappa = shell[0].kappa;
     (*cfg)->shells[0].nq = nq;
     return 1;
-  } 
+  }
 
   j = GetJFromKappa(shell[0].kappa);
   qmax = j+1;
@@ -122,7 +122,7 @@ static int DistributeElectronsShell(CONFIG **cfg, int ns, SHELL *shell,
     ncfg += ncfg2[t];
     t++;
   }
-  
+
   *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ncfg);
   t = 0;
   k = 0;
@@ -131,11 +131,11 @@ static int DistributeElectronsShell(CONFIG **cfg, int ns, SHELL *shell,
       (*cfg)[k].n_shells = cfg1[t]->n_shells + cfg2[t][j].n_shells;
       (*cfg)[k].shells = (SHELL *) malloc(sizeof(SHELL)*(*cfg)[k].n_shells);
       if (cfg1[t]->n_shells > 0) {
-	memcpy((*cfg)[k].shells, cfg1[t]->shells, sizeof(SHELL));
+        memcpy((*cfg)[k].shells, cfg1[t]->shells, sizeof(SHELL));
       }
       if (cfg2[t][j].n_shells > 0) {
-	memcpy((*cfg)[k].shells+cfg1[t]->n_shells, cfg2[t][j].shells, 
-	       sizeof(SHELL)*(cfg2[t][j].n_shells));
+        memcpy((*cfg)[k].shells+cfg1[t]->n_shells, cfg2[t][j].shells,
+               sizeof(SHELL)*(cfg2[t][j].n_shells));
       }
       if (cfg2[t][j].n_shells > 0) free(cfg2[t][j].shells);
       k++;
@@ -148,23 +148,23 @@ static int DistributeElectronsShell(CONFIG **cfg, int ns, SHELL *shell,
   free(cfg1);
   free(cfg2);
   free(ncfg2);
-  
+
   return ncfg;
 }
 
-static int DistributeElectronsShellNR(CONFIG **cfg, int ns, SHELL *shell, 
-				      int nq, int *maxq) {
+static int DistributeElectronsShellNR(CONFIG **cfg, int ns, SHELL *shell,
+                                      int nq, int *maxq) {
   CONFIG **cfg1, **cfg2;
   int *ncfg2;
   int qmin, qmax, j, q, t, k, ncfg;
-  
+
   if (nq < 0) return 0;
 
   if (nq == 0) {
     *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ns);
     (*cfg)->n_shells = 0;
     return 1;
-  } 
+  }
 
   if (nq == 1){
     *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ns);
@@ -186,7 +186,7 @@ static int DistributeElectronsShellNR(CONFIG **cfg, int ns, SHELL *shell,
     (*cfg)->shells[0].kappa = shell[0].kappa;
     (*cfg)->shells[0].nq = nq;
     return 1;
-  } 
+  }
 
   j = shell[0].kappa;
   qmax = 2.0*(j+1);
@@ -205,7 +205,7 @@ static int DistributeElectronsShellNR(CONFIG **cfg, int ns, SHELL *shell,
     ncfg += ncfg2[t];
     t++;
   }
-  
+
   *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ncfg);
   t = 0;
   k = 0;
@@ -214,11 +214,11 @@ static int DistributeElectronsShellNR(CONFIG **cfg, int ns, SHELL *shell,
       (*cfg)[k].n_shells = cfg1[t]->n_shells + cfg2[t][j].n_shells;
       (*cfg)[k].shells = (SHELL *) malloc(sizeof(SHELL)*(*cfg)[k].n_shells);
       if (cfg1[t]->n_shells > 0) {
-	memcpy((*cfg)[k].shells, cfg1[t]->shells, sizeof(SHELL));
+        memcpy((*cfg)[k].shells, cfg1[t]->shells, sizeof(SHELL));
       }
       if (cfg2[t][j].n_shells > 0) {
-	memcpy((*cfg)[k].shells+cfg1[t]->n_shells, cfg2[t][j].shells, 
-	       sizeof(SHELL)*(cfg2[t][j].n_shells));
+        memcpy((*cfg)[k].shells+cfg1[t]->n_shells, cfg2[t][j].shells,
+               sizeof(SHELL)*(cfg2[t][j].n_shells));
       }
       if (cfg2[t][j].n_shells > 0) free(cfg2[t][j].shells);
       k++;
@@ -231,7 +231,7 @@ static int DistributeElectronsShellNR(CONFIG **cfg, int ns, SHELL *shell,
   free(cfg1);
   free(cfg2);
   free(ncfg2);
-  
+
   return ncfg;
 }
 
@@ -244,7 +244,7 @@ int ShellsFromString(const char *scfg, double *dnq, SHELL **shell) {
   int kappa[1024];
   int i, j, t, k, kl2, ns;
   char *s;
-    
+
   SetParserQuote("[", "]");
   SetParserBreak(spec_symbols);
   SetParserWhite("");
@@ -282,12 +282,12 @@ int ShellsFromString(const char *scfg, double *dnq, SHELL **shell) {
     kl[0] = brkpos;
     if (brkpos == MAX_SPEC_SYMBOLS) {
       if (n[nn-1] >= 512) {
-	printf("not all L-terms are allowed for n >= %d\n", 512);
-	return -1;
+        printf("not all L-terms are allowed for n >= %d\n", 512);
+        return -1;
       }
       nkl = n[nn-1];
       for (i = 0; i < nkl; i++) {
-	kl[i] = i;
+        kl[i] = i;
       }
     } else {
       nkl = 1;
@@ -297,7 +297,7 @@ int ShellsFromString(const char *scfg, double *dnq, SHELL **shell) {
     for (i = 0; i < nkl; i++) {
       kl2 = 2*kl[i];
       if (kl2 > 0) {
-	kappa[nkappa++] = GetKappaFromJL(kl2-1, kl2);
+        kappa[nkappa++] = GetKappaFromJL(kl2-1, kl2);
       }
       kappa[nkappa++] = GetKappaFromJL(kl2+1, kl2);
     }
@@ -320,10 +320,10 @@ int ShellsFromString(const char *scfg, double *dnq, SHELL **shell) {
       GetJLFromSymbol(s, &j, &kl[k]);
       kl2 = 2*kl[k];
       if (j != 1 && kl2 > 0) {
-	kappa[nkappa++] = GetKappaFromJL(kl2-1, kl2);
+        kappa[nkappa++] = GetKappaFromJL(kl2-1, kl2);
       }
       if (j != -1) {
-	kappa[nkappa++] = GetKappaFromJL(kl2+1, kl2);
+        kappa[nkappa++] = GetKappaFromJL(kl2+1, kl2);
       }
       while (*s) s++;
       s++;
@@ -351,7 +351,7 @@ int ShellsFromString(const char *scfg, double *dnq, SHELL **shell) {
     free(*shell);
     return -1;
   }
-  
+
   return ns;
 }
 
@@ -364,7 +364,7 @@ int ShellsFromStringNR(const char *scfg, double *dnq, SHELL **shell) {
   int kappa[1024];
   int i, j, t, k, kl2, ns;
   char *s;
-      
+
   SetParserQuote("[", "]");
   SetParserBreak(spec_symbols);
   SetParserWhite("");
@@ -402,12 +402,12 @@ int ShellsFromStringNR(const char *scfg, double *dnq, SHELL **shell) {
     kl[0] = brkpos;
     if (brkpos == MAX_SPEC_SYMBOLS) {
       if (n[nn-1] >= 512) {
-	printf("not all L-terms are allowed for n >= %d\n", 512);
+        printf("not all L-terms are allowed for n >= %d\n", 512);
         return -1;
       }
       nkl = n[nn-1];
       for (i = 0; i < nkl; i++) {
-	kl[i] = i;
+        kl[i] = i;
       }
     } else {
       nkl = 1;
@@ -455,7 +455,7 @@ int ShellsFromStringNR(const char *scfg, double *dnq, SHELL **shell) {
     }
   }
   ns = t;
-  
+
   if (ns == 0) {
     free(*shell);
     return -1;
@@ -479,8 +479,8 @@ int GetRestriction(const char *iscfg, SHELL_RESTRICTION **sr, int m) {
   } else {
     *sr = NULL;
   }
- 
-  for (i = 0; i < nc; i++) {     
+
+  for (i = 0; i < nc; i++) {
     while (*p) p++;
     p++;
     s = p;
@@ -488,22 +488,22 @@ int GetRestriction(const char *iscfg, SHELL_RESTRICTION **sr, int m) {
     while (*s) {
       switch (*s) {
       case '=':
-	(*sr)[i].op = 0;
-	*s = '\0';
-	(*sr)[i].nq = atoi(s+1);
-	break;
+        (*sr)[i].op = 0;
+        *s = '\0';
+        (*sr)[i].nq = atoi(s+1);
+        break;
       case '<':
-	(*sr)[i].op = -1;
-	*s = '\0';
-	(*sr)[i].nq = atoi(s+1);
-	break;
+        (*sr)[i].op = -1;
+        *s = '\0';
+        (*sr)[i].nq = atoi(s+1);
+        break;
       case '>':
-	(*sr)[i].op = 1;
-	*s = '\0';
-	(*sr)[i].nq = atoi(s+1);
-	break;
+        (*sr)[i].op = 1;
+        *s = '\0';
+        (*sr)[i].nq = atoi(s+1);
+        break;
       default:
-	break;
+        break;
       }
       s++;
     }
@@ -518,49 +518,49 @@ int GetRestriction(const char *iscfg, SHELL_RESTRICTION **sr, int m) {
     }
     p = s;
   }
-  
+
   free(scfg);
   return nc;
 }
 
 int ApplyRestriction(int ncfg, CONFIG *cfg, int nc, SHELL_RESTRICTION *sr) {
   int i, j, k, t, nq, c;
-  
+
   for (k = 0; k < nc; k++) {
     for (i = 0; i < ncfg; i++) {
       nq = 0;
       for (j = 0; j < cfg[i].n_shells; j++) {
-	for (t = 0; t < sr[k].ns; t++) {
-	  if (cfg[i].shells[j].n == sr[k].shells[t].n &&
-	      cfg[i].shells[j].kappa == sr[k].shells[t].kappa) {
-	    nq += cfg[i].shells[j].nq;
-	  }
-	}
+        for (t = 0; t < sr[k].ns; t++) {
+          if (cfg[i].shells[j].n == sr[k].shells[t].n &&
+              cfg[i].shells[j].kappa == sr[k].shells[t].kappa) {
+            nq += cfg[i].shells[j].nq;
+          }
+        }
       }
       switch (sr[k].op) {
       case -1:
-	c = (nq < sr[k].nq);
-	break;
+        c = (nq < sr[k].nq);
+        break;
       case 0:
-	c = (nq == sr[k].nq);
-	break;
+        c = (nq == sr[k].nq);
+        break;
       case 1:
-	c = (nq > sr[k].nq);
-	break;
+        c = (nq > sr[k].nq);
+        break;
       default:
-	c = 0;
-	break;
+        c = 0;
+        break;
       }
       if (c == 0) {
-	if (cfg[i].n_shells > 0) {
-	  cfg[i].n_shells = 0;
-	  free(cfg[i].shells);
-	  cfg[i].shells = NULL;
-	}
+        if (cfg[i].n_shells > 0) {
+          cfg[i].n_shells = 0;
+          free(cfg[i].shells);
+          cfg[i].shells = NULL;
+        }
       }
     }
   }
-  
+
   i = 0;
   j = 0;
   while (i < ncfg) {
@@ -576,32 +576,32 @@ int ApplyRestriction(int ncfg, CONFIG *cfg, int nc, SHELL_RESTRICTION *sr) {
 
   return j;
 }
-  
-/* 
+
+/*
 ** FUNCTION:    DistributeElectrons
 ** PURPOSE:     Decode a single string shell, distribute electrons
-**              among all physical shells if the configurations 
+**              among all physical shells if the configurations
 **              are not the average configurations, otherwise, the
-**              average configurations is constructed with all 
+**              average configurations is constructed with all
 **              shells present, and the number of electrons returned.
 ** INPUT:       {CONFIG **cfg},
-**              pointer to a pointer to CONFIG, which holds the 
+**              pointer to a pointer to CONFIG, which holds the
 **              resulting configurations or average configurations.
 **              {double *nq},
-**              pointer to double, which will hold the total number of 
-**              electrons for the average configuration. it should be 
+**              pointer to double, which will hold the total number of
+**              electrons for the average configuration. it should be
 **              passed in as NULL if the actual configurations to be
-**              constructed. 
+**              constructed.
 **              {char *},
-**              a single string shell. 
+**              a single string shell.
 ** RETURN:      {int},
 **              if actual configurations to be constructed (nq == NULL),
 **              return the number of configurations constructed.
 **              if average configuration is to be determined,
 **              return the number of shells in the average configuration.
-** SIDE EFFECT: 
-** NOTE:        
-*/    
+** SIDE EFFECT:
+** NOTE:
+*/
 int DistributeElectrons(CONFIG **cfg, double *nq, const char *scfg) {
   SHELL *shell;
   int ncfg, *maxq, ns, nc, i, j, inq;
@@ -609,12 +609,12 @@ int DistributeElectrons(CONFIG **cfg, double *nq, const char *scfg) {
   SHELL_RESTRICTION *sr;
 
   nc = GetRestriction(scfg, &sr, 0);
-  
+
   ns = ShellsFromString(scfg, &dnq, &shell);
   if (ns <= 0) {
     if (nc > 0) {
       for (i = 0; i < nc; i++) {
-	free(sr[i].shells);
+        free(sr[i].shells);
       }
       free(sr);
     }
@@ -662,9 +662,9 @@ int DistributeElectronsNR(CONFIG **cfg, const char *scfg) {
   SHELL_RESTRICTION *sr;
 
   nc = GetRestriction(scfg, &sr, 1);
-  
+
   ns = ShellsFromStringNR(scfg, &dnq, &shell);
-  
+
   maxq = (int *) malloc(sizeof(int)*ns);
   maxq[ns-1] = 0;
   for (i = ns-2; i >= 0; i--) {
@@ -688,31 +688,31 @@ int DistributeElectronsNR(CONFIG **cfg, const char *scfg) {
   return ncfg;
 }
 
-/* 
+/*
 ** FUNCTION:    GetConfigOrAverageFromString
 ** PURPOSE:     decode the string representation of configurations,
-**              construct all possible configurations or average 
+**              construct all possible configurations or average
 **              configuration.
 ** INPUT:       {CONFIG **cfg}
 **              holds the resuting configurations or average configuration.
-**              {double **nq}, 
+**              {double **nq},
 **              return fractional occupation numbers of each shell in the
-**              average configuration, if it is not NULL on input. 
+**              average configuration, if it is not NULL on input.
 **              {char *scfg},
 **              a string representation of configurations.
 ** RETURN:      {int},
-**              if nq == NULL, return the number of configurations 
+**              if nq == NULL, return the number of configurations
 **              constructed.
-**              if (nq != NULL, return the number of shells in the 
+**              if (nq != NULL, return the number of shells in the
 **              average configuration.
-** SIDE EFFECT: 
-** NOTE:        
-*/       
+** SIDE EFFECT:
+** NOTE:
+*/
 int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
   CONFIG **dcfg, **p1;
   double *dnq, *p2, a, b;
   char *s;
-  int *isp, ncfg, *dnc;  
+  int *isp, ncfg, *dnc;
   int size, size_old, tmp;
   int i, t, j, k, ns;
 
@@ -740,7 +740,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
   }
 
   s = scfg;
-  isp = (int *) malloc(sizeof(int)*ns);  
+  isp = (int *) malloc(sizeof(int)*ns);
   isp[0] = 0;
   for (i = 1; i < ns; i++) {
     isp[i] = isp[i-1];
@@ -765,7 +765,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
       t++;
       if (p2) p2++;
     } else {
-      free(*p1);      
+      free(*p1);
     }
   }
   free(isp);
@@ -788,29 +788,29 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
     *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ncfg);
     tmp = ncfg;
     p1 = dcfg + ns - 1;
-    for (i = ns-1; i >= 0; i--) {      
+    for (i = ns-1; i >= 0; i--) {
       tmp /= dnc[i];
       t = 0;
       while (t < ncfg) {
-	for (j = 0; j < dnc[i]; j++) {
-	  for (k = 0; k < tmp; k++) {
-	    if (i == ns-1) {
-	      (*cfg)[t].n_shells = (*p1)[j].n_shells;
-	      size = sizeof(SHELL)*(*p1)[j].n_shells;
-	      (*cfg)[t].shells = (SHELL *) malloc(size);
-	      memcpy((*cfg)[t].shells, (*p1)[j].shells, size);
-	    } else {
-	      size_old = sizeof(SHELL)*(*cfg)[t].n_shells;
-	      size = sizeof(SHELL)*(*p1)[j].n_shells;
-	      (*cfg)[t].shells = (SHELL *) realloc((*cfg)[t].shells, 
-						   size_old+size);
-	      memcpy((*cfg)[t].shells+(*cfg)[t].n_shells,
-		     (*p1)[j].shells, size);
-	      (*cfg)[t].n_shells += (*p1)[j].n_shells;
-	    }
-	    t++;
-	  }
-	}
+        for (j = 0; j < dnc[i]; j++) {
+          for (k = 0; k < tmp; k++) {
+            if (i == ns-1) {
+              (*cfg)[t].n_shells = (*p1)[j].n_shells;
+              size = sizeof(SHELL)*(*p1)[j].n_shells;
+              (*cfg)[t].shells = (SHELL *) malloc(size);
+              memcpy((*cfg)[t].shells, (*p1)[j].shells, size);
+            } else {
+              size_old = sizeof(SHELL)*(*cfg)[t].n_shells;
+              size = sizeof(SHELL)*(*p1)[j].n_shells;
+              (*cfg)[t].shells = (SHELL *) realloc((*cfg)[t].shells,
+                                                   size_old+size);
+              memcpy((*cfg)[t].shells+(*cfg)[t].n_shells,
+                     (*p1)[j].shells, size);
+              (*cfg)[t].n_shells += (*p1)[j].n_shells;
+            }
+            t++;
+          }
+        }
       }
       p1--;
     }
@@ -826,28 +826,28 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
     for (i = ns-1; i >= 0; i--) {
       a = 0.0;
       for (j = 0; j < dnc[i]; j++) {
-	a += GetJFromKappa((*p1)->shells[j].kappa) + 1.0;
+        a += GetJFromKappa((*p1)->shells[j].kappa) + 1.0;
       }
       for (j = 0; j < dnc[i]; j++) {
-	b = GetJFromKappa((*p1)->shells[j].kappa) + 1.0;
-	(*nq)[t] = dnq[i]*b/a;
-	memcpy((*cfg)->shells+t, (*p1)->shells+j, sizeof(SHELL));
-	t++;
+        b = GetJFromKappa((*p1)->shells[j].kappa) + 1.0;
+        (*nq)[t] = dnq[i]*b/a;
+        memcpy((*cfg)->shells+t, (*p1)->shells+j, sizeof(SHELL));
+        t++;
       }
       p1--;
     }
-  }    
-  
+  }
+
   for (i = 0; i < ns; i++) {
     if (!nq) {
       for (j = 0; j < dnc[i]; j++) {
-	if ((dcfg[i][j]).n_shells > 0) {
-	  free((dcfg[i][j]).shells);
-	}
-      } 
+        if ((dcfg[i][j]).n_shells > 0) {
+          free((dcfg[i][j]).shells);
+        }
+      }
     } else {
       if (dcfg[i][0].n_shells > 0) {
-	free((dcfg[i][0]).shells);
+        free((dcfg[i][0]).shells);
       }
     }
     free(dcfg[i]);
@@ -862,7 +862,7 @@ int GetConfigOrAverageFromString(CONFIG **cfg, double **nq, const char *iscfg) {
 int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
   CONFIG **dcfg, **p1;
   char *s;
-  int *isp, ncfg, *dnc;  
+  int *isp, ncfg, *dnc;
   int size, size_old, tmp;
   int i, t, j, k, ns;
 
@@ -882,7 +882,7 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
   dnc = (int *) malloc(sizeof(int)*ns);
 
   s = scfg;
-  isp = (int *) malloc(sizeof(int)*ns);  
+  isp = (int *) malloc(sizeof(int)*ns);
   isp[0] = 0;
   for (i = 1; i < ns; i++) {
     isp[i] = isp[i-1];
@@ -902,7 +902,7 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
       free(scfg);
       return -1;
     }
-    if (dnc[t] > 1 || (*p1)->n_shells > 0) {      
+    if (dnc[t] > 1 || (*p1)->n_shells > 0) {
       p1++;
       t++;
     } else {
@@ -929,28 +929,28 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
   *cfg = (CONFIG *) malloc(sizeof(CONFIG)*ncfg);
   tmp = ncfg;
   p1 = dcfg + ns - 1;
-  for (i = ns-1; i >= 0; i--) {      
+  for (i = ns-1; i >= 0; i--) {
     tmp /= dnc[i];
     t = 0;
     while (t < ncfg) {
       for (j = 0; j < dnc[i]; j++) {
-	for (k = 0; k < tmp; k++) {
-	  if (i == ns-1) {
-	    (*cfg)[t].n_shells = (*p1)[j].n_shells;
-	    size = sizeof(SHELL)*(*p1)[j].n_shells;
-	    (*cfg)[t].shells = (SHELL *) malloc(size);
-	    memcpy((*cfg)[t].shells, (*p1)[j].shells, size);
-	  } else {
-	    size_old = sizeof(SHELL)*(*cfg)[t].n_shells;
-	    size = sizeof(SHELL)*(*p1)[j].n_shells;
-	    (*cfg)[t].shells = (SHELL *) realloc((*cfg)[t].shells, 
-						 size_old+size);
-	    memcpy((*cfg)[t].shells+(*cfg)[t].n_shells,
-		   (*p1)[j].shells, size);
-	    (*cfg)[t].n_shells += (*p1)[j].n_shells;
-	  }
-	  t++;
-	}
+        for (k = 0; k < tmp; k++) {
+          if (i == ns-1) {
+            (*cfg)[t].n_shells = (*p1)[j].n_shells;
+            size = sizeof(SHELL)*(*p1)[j].n_shells;
+            (*cfg)[t].shells = (SHELL *) malloc(size);
+            memcpy((*cfg)[t].shells, (*p1)[j].shells, size);
+          } else {
+            size_old = sizeof(SHELL)*(*cfg)[t].n_shells;
+            size = sizeof(SHELL)*(*p1)[j].n_shells;
+            (*cfg)[t].shells = (SHELL *) realloc((*cfg)[t].shells,
+                                                 size_old+size);
+            memcpy((*cfg)[t].shells+(*cfg)[t].n_shells,
+                   (*p1)[j].shells, size);
+            (*cfg)[t].n_shells += (*p1)[j].n_shells;
+          }
+          t++;
+        }
       }
     }
     p1--;
@@ -959,7 +959,7 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
   for (i = 0; i < ns; i++) {
     for (j = 0; j < dnc[i]; j++) {
       if ((dcfg[i][j]).n_shells > 0) {
-	free((dcfg[i][j]).shells);
+        free((dcfg[i][j]).shells);
       }
     }
     free(dcfg[i]);
@@ -971,7 +971,7 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
   return ncfg;
 }
 
-/* 
+/*
 ** FUNCTION:    GetConfigFromString
 ** PURPOSE:     construct all possible cofigurations from string.
 ** INPUT:       {CONFIG **cfg},
@@ -980,29 +980,29 @@ int GetConfigFromStringNR(CONFIG **cfg, const char *iscfg) {
 **              string representation of the configuraitons.
 ** RETURN:      {int},
 **              number of the resulting configurations.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int GetConfigFromString(CONFIG **cfg, const char *scfg) {
   return GetConfigOrAverageFromString(cfg, NULL, scfg);
 }
 
-/* 
+/*
 ** FUNCTION:    GetAverageConfigFromString
 ** PURPOSE:     construct the average configuration from a string.
 ** INPUT:       {int **n, **kappa, double **nq},
-**              a list of principle quantum numbers, angular 
+**              a list of principle quantum numbers, angular
 **              quantum numbers, and the fractional occupation
 **              numbers of the resulting average configuration.
 **              {char *scfg},
 **              string representation of the average configuration.
 ** RETURN:      {int},
 **              number shells in the average configuration.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
-int GetAverageConfigFromString(int **n, int **kappa, 
-			       double **nq, const char *scfg) {
+int GetAverageConfigFromString(int **n, int **kappa,
+                               double **nq, const char *scfg) {
   CONFIG *cfg;
   int i, ns;
 
@@ -1011,7 +1011,7 @@ int GetAverageConfigFromString(int **n, int **kappa,
 
   *n = (int *) malloc(sizeof(int)*ns);
   *kappa = (int *) malloc(sizeof(int)*ns);
-  
+
   for (i = 0; i < ns; i++) {
     (*n)[i] = cfg->shells[i].n;
     (*kappa)[i] = cfg->shells[i].kappa;
@@ -1023,7 +1023,7 @@ int GetAverageConfigFromString(int **n, int **kappa,
   return ns;
 }
 
-/* 
+/*
 ** FUNCTION:    GetJLFromSymbol
 ** PURPOSE:     decode the spectroscopic symbol for a shell
 **              and retrieve the j and L values.
@@ -1038,9 +1038,9 @@ int GetAverageConfigFromString(int **n, int **kappa,
 ** RETURN:      {int},
 **               0: success.
 **              -1: the symobel unrecoginized.
-** SIDE EFFECT: 
-** NOTE:        if the "+/-" sign is not present in the symbol, 
-**              the j-value returned is 0, which indicates either 
+** SIDE EFFECT:
+** NOTE:        if the "+/-" sign is not present in the symbol,
+**              the j-value returned is 0, which indicates either
 **              value can be taken.
 */
 int GetJLFromSymbol(char *s, int *j, int *kl) {
@@ -1050,7 +1050,7 @@ int GetJLFromSymbol(char *s, int *j, int *kl) {
   strncpy(s0, s, 16);
   p = s0;
   while (*p) p++;
-  p--;  
+  p--;
   if ((*p) == '+') {
     if (j) *j = 1;
     *p = '\0';
@@ -1065,10 +1065,10 @@ int GetJLFromSymbol(char *s, int *j, int *kl) {
     if (isdigit(s0[0])) *kl = atoi(s0);
     else {
       for (i = 0; i < MAX_SPEC_SYMBOLS; i++) {
-	if (spec_symbols[i] == s0[0]) {
-	  *kl = i;
-	  return 0;
-	}
+        if (spec_symbols[i] == s0[0]) {
+          *kl = i;
+          return 0;
+        }
       }
       return -1;
     }
@@ -1076,9 +1076,9 @@ int GetJLFromSymbol(char *s, int *j, int *kl) {
   return 0;
 }
 
-/* 
+/*
 ** FUNCTION:    SpecSymbol
-** PURPOSE:     construct the spectroscopic symbol for the 
+** PURPOSE:     construct the spectroscopic symbol for the
 **              non-relativistic shell.
 ** INPUT:       {char *s},
 **              string holding the result.
@@ -1086,8 +1086,8 @@ int GetJLFromSymbol(char *s, int *j, int *kl) {
 **              orbital angular momentum of the shell.
 ** RETURN:      {int},
 **              always 0.
-** SIDE EFFECT: 
-** NOTE:        if kl >= MAX_SPEC_SYMBOLS, then the symbol is 
+** SIDE EFFECT:
+** NOTE:        if kl >= MAX_SPEC_SYMBOLS, then the symbol is
 **              returned as "[kl]".
 */
 int SpecSymbol(char *s, int kl) {
@@ -1104,7 +1104,7 @@ static int CompareShellInvert(const void *ts1, const void *ts2) {
   return -CompareShell(ts1, ts2);
 }
 
-/* 
+/*
 ** FUNCTION:    Couple
 ** PURPOSE:     recursively construct all possible states for a Config.
 ** INPUT:       {CONFIG *cfg},
@@ -1112,8 +1112,8 @@ static int CompareShellInvert(const void *ts1, const void *ts2) {
 ** RETURN:      {int},
 **               0: success.
 **              <0: error.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int Couple(CONFIG *cfg) {
   CONFIG outmost, inner;
@@ -1126,7 +1126,7 @@ int Couple(CONFIG *cfg) {
 
   if (cfg == NULL) {
     errcode = -2;
-    goto ERROR; 
+    goto ERROR;
   }
 
   /* make sure that the shells are sorted in inverse order */
@@ -1163,8 +1163,8 @@ int Couple(CONFIG *cfg) {
       errcode = -5;
       free(outmost.csfs);
       goto ERROR;
-    }  
-    
+    }
+
     if (CoupleOutmost(cfg, &outmost, &inner) < 0) {
       errcode = -5;
       free(outmost.csfs);
@@ -1183,9 +1183,9 @@ int Couple(CONFIG *cfg) {
   return errcode;
 }
 
-/* 
+/*
 ** FUNCTION:    CoupleOutmost
-** PURPOSE:     constructs all possible states by coupling 
+** PURPOSE:     constructs all possible states by coupling
 **              the outmost shell to the inner shells.
 ** INPUT:       {CONFIG *cfg},
 **              pointer to the resulting configuaration.
@@ -1195,8 +1195,8 @@ int Couple(CONFIG *cfg) {
 ** RETURN:      {int},
 **               0: success.
 **              -1: error.
-** SIDE EFFECT: 
-** NOTE:        both outmost shell and inner shells must 
+** SIDE EFFECT:
+** NOTE:        both outmost shell and inner shells must
 **              have been coupled.
 */
 int CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner) {
@@ -1222,7 +1222,7 @@ int CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner) {
   bytes_csf = bytes_csf_inner + bytes_csf_outmost;
 
   /*************************************************************************
-  First calculte the total # of possible states, and allocate memory for 
+  First calculte the total # of possible states, and allocate memory for
   cfg->csfs.
   *************************************************************************/
   csf_outmost = outmost->csfs;
@@ -1246,7 +1246,7 @@ int CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner) {
 
   /** Fill in the cfg->csfs array. **/
   csf_outmost = outmost->csfs;
-  for (i = 0; i < outmost->n_csfs; i++) { 
+  for (i = 0; i < outmost->n_csfs; i++) {
     j2_outmost = csf_outmost->totalJ;
     csf_inner = inner->csfs;
     for (j = 0; j < inner->n_csfs; j++) {
@@ -1254,37 +1254,37 @@ int CoupleOutmost(CONFIG *cfg, CONFIG *outmost, CONFIG *inner) {
       j2_min = abs(j2_outmost - j2_inner);
       j2_max = j2_outmost + j2_inner;
       for (k = j2_min; k <= j2_max; k += 2) {
-	memcpy(csf, csf_outmost, bytes_csf_outmost);
-	csf->totalJ = k; 
-	memcpy(csf + 1, csf_inner, bytes_csf_inner);
-	csf += cfg->n_shells;
+        memcpy(csf, csf_outmost, bytes_csf_outmost);
+        csf->totalJ = k;
+        memcpy(csf + 1, csf_inner, bytes_csf_inner);
+        csf += cfg->n_shells;
       }
       csf_inner += inner->n_shells;
     }
     csf_outmost++;
   }
-  
+
   cfg->n_electrons = outmost->n_electrons + inner->n_electrons;
 
   return 0;
-  
+
  ERROR:
   printf("****Error in CoupleOutmost****\n");
   return -1;
 }
 
-/* 
+/*
 ** FUNCTION:    GetSingleShell
 ** PURPOSE:     construct all possible states for a single shell.
 ** INPUT:       {CONFIG *cfg},
-**              pointer to the resulting configuration for the 
+**              pointer to the resulting configuration for the
 **              single shell.
 ** RETURN:      {int},
 **               0: success.
 **              -1: error.
-** SIDE EFFECT: 
-** NOTE:        for j > 9/2, no more than 2 electrons are allowed. 
-**              The data were taken from "Nuclear Shell Theory" by 
+** SIDE EFFECT:
+** NOTE:        for j > 9/2, no more than 2 electrons are allowed.
+**              The data were taken from "Nuclear Shell Theory" by
 **              AMOS de-SHALIT and IGAL TALMI.
 */
 int GetSingleShell(CONFIG *cfg) {
@@ -1317,14 +1317,14 @@ int GetSingleShell(CONFIG *cfg) {
   case 1: /** 1 electron **/
     cfg->n_csfs = 1;
     cfg->csfs = malloc(sizeof(SHELL_STATE));
-    if (cfg->csfs == NULL) goto ERROR;   
+    if (cfg->csfs == NULL) goto ERROR;
     PackShellState(cfg->csfs, j2, j2, 1, 0);
     break;
-    
+
   case 2: /** 2 equivelent electrons **/
     cfg->n_csfs = (j2 + 1) / 2;
     cfg->csfs = malloc(cfg->n_csfs * sizeof(SHELL_STATE));
-    if (cfg->csfs == NULL) goto ERROR; 
+    if (cfg->csfs == NULL) goto ERROR;
     csf = cfg->csfs;
     PackShellState(csf++, 0, 0, 0, 0);
     for (i = 2; i < j2; i += 2) {
@@ -1337,7 +1337,7 @@ int GetSingleShell(CONFIG *cfg) {
     case 5: /** j = 5/2 **/
       cfg->n_csfs = 3;
       cfg->csfs = malloc(cfg->n_csfs * sizeof(SHELL_STATE));
-      if (cfg->csfs == NULL) goto ERROR; 
+      if (cfg->csfs == NULL) goto ERROR;
       csf = cfg->csfs;
       PackShellState(csf++, 5, 5, 1, 0);
       PackShellState(csf++, 3, 3, 3, 0);
@@ -1346,7 +1346,7 @@ int GetSingleShell(CONFIG *cfg) {
     case 7: /** j = 7/2 **/
       cfg->n_csfs = 6;
       cfg->csfs = malloc(cfg->n_csfs * sizeof(SHELL_STATE));
-      if (cfg->csfs == NULL) goto ERROR; 
+      if (cfg->csfs == NULL) goto ERROR;
       csf = cfg->csfs;
       PackShellState(csf++, 7, 7, 1, 0);
       PackShellState(csf++, 3, 3, 3, 0);
@@ -1358,7 +1358,7 @@ int GetSingleShell(CONFIG *cfg) {
     case 9: /** j = 9/2 **/
       cfg->n_csfs = 10;
       cfg->csfs = malloc(cfg->n_csfs * sizeof(SHELL_STATE));
-      if (cfg->csfs == NULL) goto ERROR; 
+      if (cfg->csfs == NULL) goto ERROR;
       csf = cfg->csfs;
       PackShellState(csf++, 9, 9, 1, 0);
       PackShellState(csf++, 3, 3, 3, 0);
@@ -1381,7 +1381,7 @@ int GetSingleShell(CONFIG *cfg) {
     case 7: /** j = 7/2 **/
       cfg->n_csfs = 8;
       cfg->csfs = malloc(cfg->n_csfs * sizeof(SHELL_STATE));
-      if (cfg->csfs == NULL) goto ERROR; 
+      if (cfg->csfs == NULL) goto ERROR;
       csf = cfg->csfs;
       PackShellState(csf++, 0, 0, 0, 0);
       PackShellState(csf++, 4, 4, 2, 0);
@@ -1395,7 +1395,7 @@ int GetSingleShell(CONFIG *cfg) {
     case 9: /** j = 9/2 **/
       cfg->n_csfs = 18;
       cfg->csfs = malloc(cfg->n_csfs * sizeof(SHELL_STATE));
-      if (cfg->csfs == NULL) goto ERROR; 
+      if (cfg->csfs == NULL) goto ERROR;
       csf = cfg->csfs;
       PackShellState(csf++, 0, 0, 0, 0);
       PackShellState(csf++, 4, 4, 2, 0);
@@ -1421,12 +1421,12 @@ int GetSingleShell(CONFIG *cfg) {
     }
     break;
 
-  case 5:  
+  case 5:
     switch(j2) {
     case 9: /** only j = 9/2 is allowed **/
-      cfg->n_csfs = 20; 
+      cfg->n_csfs = 20;
       cfg->csfs = malloc(cfg->n_csfs * sizeof(SHELL_STATE));
-      if (cfg->csfs == NULL) goto ERROR; 
+      if (cfg->csfs == NULL) goto ERROR;
       csf = cfg->csfs;
       PackShellState(csf++, 9, 9, 1, 0);
       PackShellState(csf++, 3, 3, 3, 0);
@@ -1460,19 +1460,19 @@ int GetSingleShell(CONFIG *cfg) {
   }
 
   return 0;
-  
+
  ERROR:
   printf("****Error in GetSingleShell****\n");
   return -1;
 }
 
-/* 
+/*
 ** FUNCTION:    PackShell, UnpackShell
 ** PURPOSE:     pack and unpack the fields of SHELL.
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
+** INPUT:
+** RETURN:
+** SIDE EFFECT:
+** NOTE:
 */
 void UnpackShell(SHELL *s, int *n, int *kl, int *j, int *nq) {
   *n = s->n;
@@ -1497,13 +1497,13 @@ void PackNRShell(int *s, int n, int kl, int nq) {
   *s = (n<<16) | ((kl/2)<<8) | nq;
 }
 
-/* 
+/*
 ** FUNCTION:    GetNq, GetJ, GetL
 ** PURPOSE:     retrieve nq, j, and L of a shell.
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
+** INPUT:
+** RETURN:
+** SIDE EFFECT:
+** NOTE:
 */
 int GetNq(SHELL *s){
   return s->nq;
@@ -1517,15 +1517,15 @@ int GetL(SHELL *s){
   int j;
   j = 2*abs(s->kappa) - 1;
   return (s->kappa < 0)? (j - 1):(j + 1);
-} 
+}
 
-/* 
+/*
 ** FUNCTION:    ShellClosed
 ** PURPOSE:     determine if the shell is a closed one.
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
+** INPUT:
+** RETURN:
+** SIDE EFFECT:
+** NOTE:
 */
 int ShellClosed(SHELL *s) {
   int j;
@@ -1534,14 +1534,14 @@ int ShellClosed(SHELL *s) {
   return 1;
 }
 
-/* 
-** FUNCTION:    GetLFromKappa, GetJFromKappa, 
+/*
+** FUNCTION:    GetLFromKappa, GetJFromKappa,
 **              GetKappaFromJL, GetJLFromKappa
 ** PURPOSE:     convert between kappa and JL values.
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
+** INPUT:
+** RETURN:
+** SIDE EFFECT:
+** NOTE:
 */
 int GetLFromKappa(int kappa) {
   int j;
@@ -1563,13 +1563,13 @@ void GetJLFromKappa(int kappa, int *j, int *kl) {
   *kl = (kappa < 0)? (*j - 1):(*j + 1);
 }
 
-/* 
+/*
 ** FUNCTION:    PackShellState
 ** PURPOSE:     pack fields of SHELL_STATE to the structure.
-** INPUT:       
-** RETURN:      
-** SIDE EFFECT: 
-** NOTE:        
+** INPUT:
+** RETURN:
+** SIDE EFFECT:
+** NOTE:
 */
 void PackShellState(SHELL_STATE *s, int J, int j, int nu, int Nr){
   s->totalJ = J;
@@ -1578,7 +1578,7 @@ void PackShellState(SHELL_STATE *s, int J, int j, int nu, int Nr){
   s->Nr = Nr;
 }
 
-/* 
+/*
 ** FUNCTION:    GroupIndex
 ** PURPOSE:     find the index of the group by its name.
 ** INPUT:       {char *name},
@@ -1586,7 +1586,7 @@ void PackShellState(SHELL_STATE *s, int J, int j, int nu, int Nr){
 ** RETURN:      {int},
 **              the group index.
 ** SIDE EFFECT: if the group does not exist, a new one is created.
-** NOTE:        
+** NOTE:
 */
 int GroupIndex(cfac_t *cfac, const char *name) {
     int gid = cfac_get_config_gid(cfac, name);
@@ -1597,7 +1597,7 @@ int GroupIndex(cfac_t *cfac, const char *name) {
     return gid;
 }
 
-/* 
+/*
 ** FUNCTION:    GroupExists
 ** PURPOSE:     determine if a group exists.
 ** INPUT:       {char *name},
@@ -1605,28 +1605,28 @@ int GroupIndex(cfac_t *cfac, const char *name) {
 ** RETURN:      {int},
 **              >=0: the group index, if it exists.
 **               <0: the group does not exist.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int GroupExists(const cfac_t *cfac, const char *name) {
   int i;
 
   for (i = cfac->n_groups - 1; i >= 0; i--) {
-    if (strncmp(name, cfac->cfg_groups[i].name, GROUP_NAME_LEN) == 0) 
+    if (strncmp(name, cfac->cfg_groups[i].name, GROUP_NAME_LEN) == 0)
       break;
   }
   return i;
 }
 
-/* 
+/*
 ** FUNCTION:    AddGroup
 ** PURPOSE:     add a group to the group array.
 ** INPUT:       {char *name},
 **              the group name.
 ** RETURN:      {int},
 **              the index of the added group
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int AddGroup(cfac_t *cfac, const char *name) {
   if (name == NULL) return -1;
@@ -1639,43 +1639,43 @@ int AddGroup(cfac_t *cfac, const char *name) {
   return cfac->n_groups-1;
 }
 
-/* 
+/*
 ** FUNCTION:    GetGroup
 ** PURPOSE:     retrieve the pointer to the group by its index.
 ** INPUT:       {int k},
 **              the index of the group.
 ** RETURN:      {CONFIG_GROUP *},
 **              the pointer to the group.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 CONFIG_GROUP *GetGroup(const cfac_t *cfac, int k) {
   if (k < 0 || k >= cfac->n_groups) return NULL;
   return cfac->cfg_groups+k;
 }
 
-/* 
+/*
 ** FUNCTION:    GetNumGroups
 ** PURPOSE:     retrieve the number of groups in the array.
-** INPUT:       
+** INPUT:
 ** RETURN:      {int},
 **              the number of groups.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int GetNumGroups(const cfac_t *cfac) {
   return cfac->n_groups;
 }
 
-/* 
+/*
 ** FUNCTION:    GetConfig
 ** PURPOSE:     return a pointer to CONFIG, which a state belongs to.
 ** INPUT:       {STATE *s},
 **              pointer to a state.
 ** RETURN:      {CONFIG *},
 **              the configuration the state belongs to.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 CONFIG *GetConfig(const cfac_t *cfac, const STATE *s) {
   CONFIG *c;
@@ -1713,7 +1713,7 @@ CONFIG *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc) {
   }
 }
 
-/* 
+/*
 ** FUNCTION:    AddConfigToList
 ** PURPOSE:     add a configuration to the specified group,
 **              and add all states to the symmetry list.
@@ -1724,18 +1724,18 @@ CONFIG *GetConfigFromGroup(const cfac_t *cfac, int kg, int kc) {
 ** RETURN:      {int},
 **               0: success.
 **              -1: error.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
-  ARRAY *clist;  
+  ARRAY *clist;
   int n0, kl0, nq0, m, i, n, kl, j, nq, ig;
   CONFIG_GROUP *cfgr;
 
   if (k < 0 || k >= cfac->n_groups) return -1;
-  
+
   cfgr = &cfac->cfg_groups[k];
-  
+
   if (cfgr->n_cfgs == 0) {
     cfgr->n_electrons = cfg->n_electrons;
   } else if (cfgr->n_electrons != cfg->n_electrons) {
@@ -1759,8 +1759,8 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
       nq0 += nq;
     } else {
       if (nq0 > 0) {
-	PackNRShell(cfg->nrs+m, n0, kl0, nq0);
-	m++;
+        PackNRShell(cfg->nrs+m, n0, kl0, nq0);
+        m++;
       }
       n0 = n;
       kl0 = kl;
@@ -1797,7 +1797,7 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   }
 
   if (ArrayAppend(clist, cfg) == NULL) return -1;
-  if (cfg->n_csfs > 0) {    
+  if (cfg->n_csfs > 0) {
     if (AddConfigToSymmetry(cfac, k, cfgr->n_cfgs, cfg) != 0) {
       return -1;
     }
@@ -1807,7 +1807,7 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   return 0;
 }
 
-/* 
+/*
 ** FUNCTION:    AddStateToSymmetry
 ** PURPOSE:     add a state to the symmetry list.
 ** INPUT:       {int kg, kc, kstate},
@@ -1818,14 +1818,14 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
 ** RETURN:      {int},
 **               0: success.
 **              -1: error.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int AddStateToSymmetry(cfac_t *cfac, int kg, int kc, int kstate, int parity, int j) {
   int k;
   STATE s;
   ARRAY *st;
- 
+
   k = IsEven(parity)? 2*j : (2*j+1);
   if (k >= MAX_SYMMETRIES) {
     printf("Maximum symmetry reached: %d %d\n", MAX_SYMMETRIES, k);
@@ -1863,7 +1863,7 @@ void UnpackSymState(int st, int *s, int *k) {
   if (k) *k = st%100000;
 }
 
-/* 
+/*
 ** FUNCTION:    AddConfigToSymmetry
 ** PURPOSE:     add all states of a configuration to the symmetry list.
 ** INPUT:       {int kg, kc},
@@ -1872,8 +1872,8 @@ void UnpackSymState(int st, int *s, int *k) {
 ** RETURN:      {int},
 **               0: success.
 **              -1: error.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 static int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg) {
   int parity;
@@ -1904,15 +1904,15 @@ static int AddConfigToSymmetry(cfac_t *cfac, int kg, int kc, CONFIG *cfg) {
   return 0;
 }
 
-/* 
+/*
 ** FUNCTION:    DecodePJ
 ** PURPOSE:     get the parity and J value from the symmetry index.
 ** INPUT:       {int i},
 **              the symmetry index.
 **              {int *p, int *j},
 **              pointer holding the parity and J values.
-** RETURN:      
-** SIDE EFFECT: 
+** RETURN:
+** SIDE EFFECT:
 ** NOTE:        if p or j is not required, pass in a NULL pointer.
 */
 void DecodePJ(int i, int *p, int *j) {
@@ -1920,15 +1920,15 @@ void DecodePJ(int i, int *p, int *j) {
   if (j) *j = i/2;
 }
 
-/* 
+/*
 ** FUNCTION:    GetSymmetry
 ** PURPOSE:     return a pointer to the symmetry by its index.
 ** INPUT:       {int k},
 **              the symmetry index.
 ** RETURN:      {SYMMETRY *},
 **              pointer to the returned symmetry.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 SYMMETRY *GetSymmetry(const cfac_t *cfac, int k) {
   if (k < 0 || k >= MAX_SYMMETRIES) return NULL;
@@ -1949,13 +1949,13 @@ int ShellIndex(int n, int kappa, int ns, SHELL *s) {
   return -1;
 }
 
-int ShellToInt(int n, int kappa) {  
+int ShellToInt(int n, int kappa) {
   int k;
   k = (n-1)*(n-1) + 2*abs(kappa)- ((kappa>0)?1:2);
   return k;
 }
 
-void IntToShell(int i, int *n, int *kappa) {  
+void IntToShell(int i, int *n, int *kappa) {
   int k;
 
   *n = ((int) sqrt(i)) + 1 ;
@@ -1993,7 +1993,7 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
   CONFIG_GROUP *g;
   char a[2048];
   FILE *f;
-  
+
   if (fn == NULL || strcmp(fn, "-") == 0) f = stdout;
   else f = fopen(fn, "w");
 
@@ -2007,11 +2007,11 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
       m++;
     }
   }
-  
+
   if (f != stdout) fclose(f);
 }
 
-/* 
+/*
 ** FUNCTION:    MakeAverageConfig
 ** PURPOSE:     determine the average configuration based on given
 **              groups, the weight given to each group, and possible
@@ -2025,7 +2025,7 @@ void ListConfig(const cfac_t *cfac, const char *fn, int n, int *kg) {
 ** RETURN:      {int},
 **              >=0: success, the number of shells in the average config.
 **               -1: error.
-** SIDE EFFECT: 
+** SIDE EFFECT:
 ** NOTE:
 */
 int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
@@ -2047,16 +2047,16 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
     for (t = 0; t < cfac->cfg_groups[kg[i]].n_cfgs; t++) {
       CONFIG *cfg = ArrayGet(c, t);
       for (j = 0; j < cfg->n_shells; j++) {
-	n = cfg->shells[j].n;
-	kappa = cfg->shells[j].kappa;
-	k = ShellToInt(n, kappa);
-	if (k > kmax) {
+        n = cfg->shells[j].n;
+        kappa = cfg->shells[j].kappa;
+        k = ShellToInt(n, kappa);
+        if (k > kmax) {
           kmax = k;
         }
       }
     }
   }
-  
+
   tnq = calloc(kmax + 1, sizeof(double));
   if (!tnq) return -1;
 
@@ -2067,7 +2067,7 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
       return -1;
     }
   }
-  
+
   for (i = 0; i < ng; i++) {
     weight[i] = 1.0/ng;
   }
@@ -2079,10 +2079,10 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
     for (t = 0; t < cfac->cfg_groups[kg[i]].n_cfgs; t++) {
       CONFIG *cfg = ArrayGet(c, t);
       for (j = 0; j < cfg->n_shells; j++) {
-	n = cfg->shells[j].n;
-	kappa = cfg->shells[j].kappa;
-	k = ShellToInt(n, kappa);
-	tnq[k] += cfg->shells[j].nq*weight[i]*a;
+        n = cfg->shells[j].n;
+        kappa = cfg->shells[j].kappa;
+        k = ShellToInt(n, kappa);
+        tnq[k] += cfg->shells[j].nq*weight[i]*a;
       }
     }
     acfg->n_cfgs += cfac->cfg_groups[kg[i]].n_cfgs;
@@ -2101,12 +2101,12 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
     free(tnq);
     return 0;
   }
-  
+
   acfg->n_shells = j;
   acfg->n = malloc(sizeof(int)*j);
   acfg->kappa = malloc(sizeof(int)*j);
   acfg->nq = malloc(sizeof(double)*j);
-  
+
   if (!acfg->n || !acfg->kappa || !acfg->nq) {
     if (acfg->n) free(acfg->n);
     if (acfg->nq) free(acfg->nq);
@@ -2131,47 +2131,47 @@ int MakeAverageConfig(cfac_t *cfac, int ng, int *kg, double *weight) {
     screened_charge /= (double) n_screen;
     for (i = 0; i < n_screen; i++) {
       if (screened_kl < 0) {
-	t = 0;
-	kappa = -1;
+        t = 0;
+        kappa = -1;
       } else if (screened_kl == 0) {
-	t = screened_n[i];
-	kappa = GetKappaFromJL(t+1, t);
+        t = screened_n[i];
+        kappa = GetKappaFromJL(t+1, t);
       } else {
-	t = screened_n[i]*2-2;
-	kappa = GetKappaFromJL(t+1, t);
-      }    
-      for (j = 0; j < acfg->n_shells; j++) {
-	k = GetLFromKappa(acfg->kappa[j]);
-	if (acfg->n[j] < screened_n[i]) continue;
-	if (acfg->n[j] > screened_n[i]) break;
-	if (k > t) break;
-	if (acfg->kappa[j] == kappa) break;
+        t = screened_n[i]*2-2;
+        kappa = GetKappaFromJL(t+1, t);
       }
-      if (j < acfg->n_shells && 
-	  acfg->n[j] == screened_n[i] && 
-	  acfg->kappa[j] == kappa) {
-	acfg->nq[j] += screened_charge; 
+      for (j = 0; j < acfg->n_shells; j++) {
+        k = GetLFromKappa(acfg->kappa[j]);
+        if (acfg->n[j] < screened_n[i]) continue;
+        if (acfg->n[j] > screened_n[i]) break;
+        if (k > t) break;
+        if (acfg->kappa[j] == kappa) break;
+      }
+      if (j < acfg->n_shells &&
+          acfg->n[j] == screened_n[i] &&
+          acfg->kappa[j] == kappa) {
+        acfg->nq[j] += screened_charge;
       } else {
-	acfg->n_shells += 1;
-	acfg->n = realloc(acfg->n, sizeof(int)*acfg->n_shells);
-	acfg->kappa = realloc(acfg->kappa, sizeof(int)*acfg->n_shells);
-	acfg->nq = realloc(acfg->nq, sizeof(double)*acfg->n_shells);
-	for (k = acfg->n_shells-1; k > j; k--) {
-	  acfg->n[k] = acfg->n[k-1];
-	  acfg->kappa[k] = acfg->kappa[k-1];
-	  acfg->nq[k] = acfg->nq[k-1];
-	}
-	acfg->n[j] = screened_n[i];
-	acfg->kappa[j] = kappa;
-	acfg->nq[j] = screened_charge;
+        acfg->n_shells += 1;
+        acfg->n = realloc(acfg->n, sizeof(int)*acfg->n_shells);
+        acfg->kappa = realloc(acfg->kappa, sizeof(int)*acfg->n_shells);
+        acfg->nq = realloc(acfg->nq, sizeof(double)*acfg->n_shells);
+        for (k = acfg->n_shells-1; k > j; k--) {
+          acfg->n[k] = acfg->n[k-1];
+          acfg->kappa[k] = acfg->kappa[k-1];
+          acfg->nq[k] = acfg->nq[k-1];
+        }
+        acfg->n[j] = screened_n[i];
+        acfg->kappa[j] = kappa;
+        acfg->nq[j] = screened_charge;
       }
     }
   }
-	  
+
   if (weight_allocated) {
     free(weight);
   }
-  
+
   free(tnq);
 
   return j;
@@ -2189,13 +2189,13 @@ int IBisect(int b, int n, int *a) {
     else if (b < a[i]) i1 = i;
     else i0 = i;
   }
-  
+
   if (b == a[i0]) return i0;
   else if (b == a[i1]) return i1;
   else return -1;
 }
 
-/* 
+/*
 ** FUNCTION:    InGroups
 ** PURPOSE:     determine if a group is within a list of groups.
 ** INPUT:       {int kg},
@@ -2205,8 +2205,8 @@ int IBisect(int b, int n, int *a) {
 ** RETURN:      {int},
 **              0: group kg is not in the list.
 **              1: group kg is in the list.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int InGroups(int kg, int ng, const int *kgroup) {
   int i;
@@ -2222,7 +2222,7 @@ int InGroups(int kg, int ng, const int *kgroup) {
   return 0;
 }
 
-/* 
+/*
 ** FUNCTION:    CompareShell
 ** PURPOSE:     determine which of the two shells is the inner one.
 ** INPUT:       {const void *s1, *s2},
@@ -2231,8 +2231,8 @@ int InGroups(int kg, int ng, const int *kgroup) {
 **              -1: s1 is inside s2.
 **               0: s1 and s2 are the same.
 **              +1: s1 is outside s2.
-** SIDE EFFECT: 
-** NOTE:        
+** SIDE EFFECT:
+** NOTE:
 */
 int CompareShell(const void *ts1, const void *ts2) {
   SHELL *s1, *s2;
@@ -2250,8 +2250,8 @@ int CompareShell(const void *ts1, const void *ts2) {
       if (ak1 > ak2) return 1;
       else if (ak1 < ak2) return -1;
       else {
-	if (s1->kappa < s2->kappa) return -1;
-	else return 1;
+        if (s1->kappa < s2->kappa) return -1;
+        else return 1;
       }
     }
   }
@@ -2295,7 +2295,7 @@ int cfac_get_config_gid(const cfac_t *cfac, const char *cname) {
             return i;
         }
     }
-    
+
     return -1;
 }
 
@@ -2314,16 +2314,16 @@ int cfac_add_config(cfac_t *cfac,
     if (gidx < 0) {
         return -1;
     }
-    
+
     tmpstr = malloc((strlen(cfg_str) + 1)*sizeof(char));
     strcpy(tmpstr, cfg_str);
-    
+
     ncfgs = GetConfigFromString(&cfgs, tmpstr);
     free(tmpstr);
     for (j = 0; j < ncfgs; j++) {
         CONFIG *cfg = &cfgs[j];
         cfg->uta = uta;
-        
+
         if (Couple(cfg) < 0) {
             return -1;
         }
@@ -2331,7 +2331,7 @@ int cfac_add_config(cfac_t *cfac,
             return -1;
         }
     }
-    
+
     if (ncfgs > 0) {
         free(cfgs);
     }

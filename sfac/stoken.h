@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -72,8 +72,8 @@ int DecodeArgs(char *s, char *argv[], int argt[], ARRAY *variables);
 int GetLine(FILE *f, char *line, int *nlines);
 int GetValidLine(FILE *f, char *line, int *nlines);
 int MethodIndex(char *name, METHOD *methods);
-int TokenizeLine(int nline, char *line, METHOD *methods, 
-		 ARRAY *statements, ARRAY *variables);
+int TokenizeLine(int nline, char *line, METHOD *methods,
+                 ARRAY *statements, ARRAY *variables);
 int EvalFile(FILE *f, int exebyline, METHOD *methods);
 int EvalStatement(STATEMENT *st, METHOD *methods, ARRAY *variables);
 void ErrorOcurred(int ierr, int loc);

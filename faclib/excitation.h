@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -46,8 +46,8 @@ int SetCEEGrid(int n, double emin, double emax, double eth);
 int SetUsrCEEGridDetail(int n, double *x);
 int SetUsrCEEGrid(int n, double emin, double emax, double eth);
 
-int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k, 
-		   double te, double e1, double *qk, int m);
+int CERadialQkBorn(cfac_t *cfac, int k0, int k1, int k2, int k3, int k,
+                   double te, double e1, double *qk, int m);
 
 int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub, char *fn);
 int SaveExcitationEB(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn);

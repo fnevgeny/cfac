@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -56,10 +56,10 @@ void GetFields(const cfac_t *cfac, double *b, double *e, double *a) {
   *a = cfac->eb_angle;
 }
 
-/* 
+/*
 ** if the angle a > 0, the B is Z-axis, BxE is Y-axis. and E is in X-Z plane.
 ** if the angle a < 0, the E is Z-axis, ExB is Y-axis, and B is in X-Z plane.
-** angle a is always measured from E->B, 
+** angle a is always measured from E->B,
 */
 void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
   int i, q, i1, i2, q1, q2;
@@ -68,13 +68,13 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
   cfac->ef = e;
   cfac->bf = b;
   cfac->eb_angle = a;
-  
+
   a = fabs(a);
   a *= M_PI/180.0;
-  
+
   b *= MBOHR/HARTREE_EV;
   e *= RBOHR/HARTREE_EV;
-  
+
   if (cfac->eb_angle >= 0) {
     cfac->b1[0] = cfac->b1[2] = 0.0;
     cfac->b1[1] = b;
@@ -105,19 +105,19 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
       q1 = 2*(i1-1);
       if (cfac->b1[i1] == 0) continue;
       for (i2 = 0; i2 < 3; i2++) {
-	q2 = 2*(i2-1);
-	if (cfac->b1[i2] == 0) continue;
-	w = W3j(2, 2, 0, q1, q2, 0);
-	if (w) {
-	  cfac->b0 += w*cfac->b1[i1]*cfac->b1[i2];
-	}
-	for (i = 0; i < 5; i++) {
-	  q = 2*(i-2);
-	  w = W3j(2, 2, 4, q1, q2, q);
-	  if (w) {
-	    cfac->b2[i] += w*cfac->b1[i1]*cfac->b1[i2];
-	  }
-	}
+        q2 = 2*(i2-1);
+        if (cfac->b1[i2] == 0) continue;
+        w = W3j(2, 2, 0, q1, q2, 0);
+        if (w) {
+          cfac->b0 += w*cfac->b1[i1]*cfac->b1[i2];
+        }
+        for (i = 0; i < 5; i++) {
+          q = 2*(i-2);
+          w = W3j(2, 2, 4, q1, q2, q);
+          if (w) {
+            cfac->b2[i] += w*cfac->b1[i1]*cfac->b1[i2];
+          }
+        }
       }
     }
     cfac->b0 *= sqrt(3)*W6j(2, 2, 0, 2, 2, 2);
@@ -131,14 +131,14 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
   }
 
   /*
-  printf("EB: %10.3E %10.3E %10.3E %10.3E %10.3E %10.3E\n", 
-	 e1[0], e1[1], e1[2], b1[0], b1[1], b1[2]);
+  printf("EB: %10.3E %10.3E %10.3E %10.3E %10.3E %10.3E\n",
+         e1[0], e1[1], e1[2], b1[0], b1[1], b1[2]);
   */
 }
 
 static int CompareInt(const void *a1, const void *a2) {
   int *i1, *i2;
-  
+
   i1 = (int *) a1;
   i2 = (int *) a2;
   return (*i1 - *i2);
@@ -211,12 +211,12 @@ static void FlagClosed(cfac_t *cfac, SHAMILTON *hs) {
     }
     for (j = 0; j < c->n_shells; j++) {
       k = ShellToInt(c->shells[j].n, c->shells[j].kappa);
-      m1 = k/8;      
+      m1 = k/8;
       if (m1 >= MBCLOSE) continue;
       m2 = k%8;
       if (ShellClosed(c->shells+j)) {
-	t[m1] |= (1 << m2);
-      }      
+        t[m1] |= (1 << m2);
+      }
     }
     for (k = 0; k < MBCLOSE; k++) {
       if (i == 0) hs->closed[k] = t[k];
@@ -227,7 +227,7 @@ static void FlagClosed(cfac_t *cfac, SHAMILTON *hs) {
 
 static int IsClosedShell(const cfac_t *cfac, int ih, int k) {
   int i, j;
-  
+
   i = k/8;
   if (i >= MBCLOSE) return 0;
   j = k%8;
@@ -249,7 +249,7 @@ void cfac_hamiltonian_free(HAMILTON *h) {
 
         free(h);
     }
-}        
+}
 
 /* (Re)allocate Hamiltonian */
 static HAMILTON *AllocHamMem(int hdim, int nbasis) {
@@ -260,14 +260,14 @@ static HAMILTON *AllocHamMem(int hdim, int nbasis) {
     if (np < 0) {
         return NULL;
     }
-    
+
     /* allocate Hamiltonian structure */
     h = malloc(sizeof(HAMILTON));
     if (!h) {
         return NULL;
     }
     memset(h, 0, sizeof(HAMILTON));
-    
+
     /* start allocations */
     h->basis = malloc(sizeof(int)*nbasis);
     if (!h->basis) {
@@ -289,7 +289,7 @@ static HAMILTON *AllocHamMem(int hdim, int nbasis) {
     h->hsize = hsize;
 
     /* length of the mixings array */
-    msize = hdim*nbasis + hdim;  
+    msize = hdim*nbasis + hdim;
     h->mixing = malloc(sizeof(double)*msize);
     if (!h->mixing) {
         cfac_hamiltonian_free(h);
@@ -320,7 +320,7 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
     if (cfac->sym_njj > 0 && IBisect(j, cfac->sym_njj, cfac->sym_jj) < 0) {
         return NULL;
     }
-    
+
     if (k <= 0) {
         return NULL;
     }
@@ -329,12 +329,12 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
     if (sym == NULL) {
         return NULL;
     }
-    
+
     n = 0;
     np = 0;
     for (i = 0; i < sym->n_states; i++) {
         s = GetSymmetryState(sym, i);
-        
+
         cfg = GetConfig(cfac, s);
         if (cfg->uta) {
             continue;
@@ -356,17 +356,17 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
     } else {
         n_basis = n + np;
     }
-    
+
     h = AllocHamMem(n, n_basis);
     if (!h) {
         printf("ConstructHamilton allocation error\n");
         return NULL;
     }
-    
+
     h->pj = isym;
 
-    
-    n = 0;  
+
+    n = 0;
     for (i = 0; i < sym->n_states; i++) {
         s = GetSymmetryState(sym, i);
 
@@ -374,67 +374,67 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
         if (cfg->uta) {
             continue;
         }
-        
+
         if (InGroups(s->kgroup, k, kg)) {
             h->basis[n++] = i;
         }
     }
-    
+
     if (cfac->confint == -1) {
         /* Diagonal Hamiltonian */
         for (n = 0; n < h->dim; n++) {
             s = GetSymmetryState(sym, h->basis[n]);
-            
+
             cfg = GetConfig(cfac, s);
             if (cfg->uta) {
                 continue;
             }
-            
+
             r = HamiltonElement(cfac, isym, h->basis[n], h->basis[n]);
             h->hamilton[n] = r;
         }
     } else {
-        if (np > 0) {  
+        if (np > 0) {
             for (i = 0; i < sym->n_states; i++) {
-	        s = GetSymmetryState(sym, i);
-                
+                s = GetSymmetryState(sym, i);
+
                 cfg = GetConfig(cfac, s);
                 if (cfg->uta) {
                     continue;
                 }
-            
-	        if (kp > 0 && InGroups(s->kgroup, kp, kgp)) {
-	            h->basis[n++] = i;
-	        }
+
+                if (kp > 0 && InGroups(s->kgroup, kp, kgp)) {
+                    h->basis[n++] = i;
+                }
             }
         }
 
         for (n = 0; n < h->dim; n++) {
             int dim = n*(n+1)/2;
-            
+
             for (i = 0; i <= n; i++) {
-	        r = HamiltonElement(cfac, isym, h->basis[i], h->basis[n]);
-	        h->hamilton[i+dim] = r;
+                r = HamiltonElement(cfac, isym, h->basis[i], h->basis[n]);
+                h->hamilton[i+dim] = r;
             }
-        } 
+        }
 
         if (np > 0) {
             int dim = (h->dim+1)*(h->dim)/2;
-            
+
             for (i = 0; i < h->dim; i++) {
-	        for (n = h->dim; n < h->n_basis; n++) {
-	            r = HamiltonElement(cfac, isym, h->basis[i], h->basis[n]);
-	            h->hamilton[dim++] = r;
-	        }
-	        ReinitRecouple(cfac);
-	        ReinitRadial(cfac, 1);
+                for (n = h->dim; n < h->n_basis; n++) {
+                    r = HamiltonElement(cfac, isym, h->basis[i], h->basis[n]);
+                    h->hamilton[dim++] = r;
+                }
+                ReinitRecouple(cfac);
+                ReinitRadial(cfac, 1);
             }
-            
+
             for (n = h->dim; n < h->n_basis; n++) {
-	        r = HamiltonElement(cfac, isym, h->basis[n], h->basis[n]);
-	        h->hamilton[dim++] = r;
+                r = HamiltonElement(cfac, isym, h->basis[n], h->basis[n]);
+                h->hamilton[dim++] = r;
             }
-            
+
             ReinitRecouple(cfac);
             ReinitRadial(cfac, 1);
         }
@@ -444,21 +444,21 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
         printf("Number of Hamiltonians exceeded the maximum %d\n", MAX_HAMS);
         return NULL;
     }
-    
+
     hs = &cfac->hams[cfac->nhams];
     cfac->nhams++;
-    
+
     hs->pj = h->pj;
     hs->nlevs = h->dim;
     hs->nbasis = h->n_basis;
-    
+
     hs->basis = malloc(sizeof(STATE *)*hs->nbasis);
-    
+
     for (i = 0; i < h->n_basis; i++) {
         s = GetSymmetryState(sym, h->basis[i]);
         hs->basis[i] = s;
     }
-    
+
     FlagClosed(cfac, hs);
 
     return h;
@@ -466,7 +466,7 @@ HAMILTON *ConstructHamilton(cfac_t *cfac,
 
 int CodeBasisEB(int s, int m) {
   int k;
-  
+
   k = s + MAXLEVEB*abs(m);
   if (m < 0) k = -k;
 
@@ -491,7 +491,7 @@ HAMILTON *ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
 
   n_basis = 0;
   for (i = 0; i < n; i++) {
-    lev = GetLevel(cfac, ilev[i]);    
+    lev = GetLevel(cfac, ilev[i]);
     DecodePJ(lev->pj, &p, &j);
     n_basis += j+1;
   }
@@ -533,10 +533,10 @@ int ValidBasis(cfac_t *cfac, STATE *s, int k, int *kg, int n) {
   LEVEL *lev;
   STATE *sp;
   SYMMETRY *sym;
-  
+
   t = s->kgroup;
   if (t >= 0) return 0;
-  
+
   if (n > 0) {
     kb = s->kcfg;
     if (kb < 0) return 0;
@@ -589,38 +589,38 @@ HAMILTON *ConstructHamiltonFrozen(cfac_t *cfac,
   j = 0;
   ncs = 0;
   sym = GetSymmetry(cfac, isym);
-  for (t = 0; t < sym->n_states; t++) { 
+  for (t = 0; t < sym->n_states; t++) {
     s = GetSymmetryState(sym, t);
     if (ValidBasis(cfac, s, k, kg, n)) {
       j++;
     } else if (nc > 0) {
       if (ValidBasis(cfac, s, nc, kc, 0)) {
-	j++;
-	ncs++;
+        j++;
+        ncs++;
       }
     }
   }
-  
+
   if (j == ncs) return NULL;
 
   h = AllocHamMem(j, j);
   if (!h) {
     return NULL;
   }
-      
+
   h->pj = isym;
 
   j = 0;
   if (ncs > 0) {
-    for (t = 0; t < sym->n_states; t++) { 
+    for (t = 0; t < sym->n_states; t++) {
       s = GetSymmetryState(sym, t);
       if (ValidBasis(cfac, s, nc, kc, 0)) {
-	h->basis[j] = t;
-	j++;
+        h->basis[j] = t;
+        j++;
       }
     }
   }
-  for (t = 0; t < sym->n_states; t++) { 
+  for (t = 0; t < sym->n_states; t++) {
     s = GetSymmetryState(sym, t);
     if (ValidBasis(cfac, s, k, kg, n)) {
       h->basis[j] = t;
@@ -639,7 +639,7 @@ HAMILTON *ConstructHamiltonFrozen(cfac_t *cfac,
       if (delta < EPS16) h->hamilton[i+t] = 0.0;
     }
   }
-  
+
   for (j = 0; j < ncs; j++) {
     t = j*(j+1)/2;
     for (i = 0; i < j; i++) {
@@ -662,13 +662,13 @@ HAMILTON *ConstructHamiltonFrozen(cfac_t *cfac,
 
 void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs) {
   int i, j, kz;
-  
+
   cfac->ang_frozen.nts = nts;
   if (nts > 0) {
     cfac->ang_frozen.ts = malloc(sizeof(int)*nts);
     memcpy(cfac->ang_frozen.ts, ts, sizeof(int)*nts);
   }
-  cfac->ang_frozen.ncs = ncs;  
+  cfac->ang_frozen.ncs = ncs;
   if (ncs > 0) {
     cfac->ang_frozen.cs = malloc(sizeof(int)*ncs);
     memcpy(cfac->ang_frozen.cs, cs, sizeof(int)*ncs);
@@ -679,8 +679,8 @@ void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs) {
   for (i = 0; i < nts; i++) {
     for (j = 0; j < nts; j++) {
       kz = j*nts + i;
-      cfac->ang_frozen.nz[kz] = AngularZMix(cfac, &(cfac->ang_frozen.z[kz]), 
-				      ts[i], ts[j], -1, -1);
+      cfac->ang_frozen.nz[kz] = AngularZMix(cfac, &(cfac->ang_frozen.z[kz]),
+                                      ts[i], ts[j], -1, -1);
     }
   }
   if (ncs > 0) {
@@ -690,10 +690,10 @@ void AngularFrozen(cfac_t *cfac, int nts, int *ts, int ncs, int *cs) {
     cfac->ang_frozen.zxzfb = malloc(sizeof(ANGULAR_ZxZMIX *)*nts*ncs);
     for (i = 0; i < nts; i++) {
       for (j = 0; j < ncs; j++) {
-	kz = j*nts + i;
-	cfac->ang_frozen.nzfb[kz] = AngularZFreeBound(cfac,
+        kz = j*nts + i;
+        cfac->ang_frozen.nzfb[kz] = AngularZFreeBound(cfac,
             &(cfac->ang_frozen.zfb[kz]), ts[i], cs[j]);
-	cfac->ang_frozen.nzxzfb[kz] = AngularZxZFreeBound(cfac,
+        cfac->ang_frozen.nzxzfb[kz] = AngularZxZFreeBound(cfac,
             &(cfac->ang_frozen.zxzfb[kz]), ts[i], cs[j]);
       }
     }
@@ -708,7 +708,7 @@ double HamiltonElementEB(const cfac_t *cfac, HAMILTON *h, int i0, int j0) {
   ANGULAR_ZMIX *ang;
   LEVEL *levi, *levj;
   ORBITAL *orb0, *orb1;
-  
+
   ib = h->basis[i0];
   jb = h->basis[j0];
 
@@ -731,108 +731,108 @@ double HamiltonElementEB(const cfac_t *cfac, HAMILTON *h, int i0, int j0) {
   for (i = 0; i < nz; i++) {
     if (cfac->b1[0] || cfac->b1[1] || cfac->b1[2]) {
       if (ang[i].k == 2) {
-	orb0 = GetOrbital(cfac, ang[i].k0);
-	orb1 = GetOrbital(cfac, ang[i].k1);
-	GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
-	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
+        orb0 = GetOrbital(cfac, ang[i].k0);
+        orb1 = GetOrbital(cfac, ang[i].k1);
+        GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
+        GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
         if (orb0->n == orb1->n && korb0 == korb1) {
-	  for (m = 0; m < 3; m++) {
-	    if (cfac->b1[m] == 0) continue;
-	    
-            q = m-1;
-	    q2 = 2*q;	
-	    
-            a = W3j(ji, 2, jj, -mi, -q2, mj);
-	    if (a == 0.0) continue;
+          for (m = 0; m < 3; m++) {
+            if (cfac->b1[m] == 0) continue;
 
-	    /* radial parts of different j's are not completely orthogonal
+            q = m-1;
+            q2 = 2*q;
+
+            a = W3j(ji, 2, jj, -mi, -q2, mj);
+            if (a == 0.0) continue;
+
+            /* radial parts of different j's are not completely orthogonal
                for relativistic w.f. */
             if (ang[i].k0 != ang[i].k1) {
-	      a *= RadialMoments(cfac, 0, ang[i].k0, ang[i].k1);
-	    }
-	    
+              a *= RadialMoments(cfac, 0, ang[i].k0, ang[i].k1);
+            }
+
             a *= cfac->b1[m]*ang[i].coeff;
-	    if (IsOdd(abs(ji-mi+q2)/2)) a = -a;
-	    
+            if (IsOdd(abs(ji-mi+q2)/2)) a = -a;
+
             /* (j|J|j') = sqrt(j*(j + 1)*(2j + 1))*delta(j,j') */
             if (jorb0 == jorb1) {
               b = sqrt(jorb0*(jorb0+2.0)*(jorb0+1.0))/2;
             } else {
               b = 0.0;
             }
-            
+
             /* (s|S|s') = sqrt(3/2)*delta(s,s') */
             c = 1.0023192*sqrt((jorb0+1.0)*(jorb1+1.0))*
                           W6j(korb0, 1, jorb0, 2, jorb1, 1)*sqrt(1.5);
-	    if (IsEven((korb0+jorb0+1)/2)) c = -c;
-	    
+            if (IsEven((korb0+jorb0+1)/2)) c = -c;
+
             r += a*(b + c);
-	  }
+          }
         }
-      }      
+      }
     }
     if (cfac->e1[0] || cfac->e1[1] || cfac->e1[2]) {
       if (ang[i].k == 2) {
-	orb0 = GetOrbital(cfac, ang[i].k0);
-	orb1 = GetOrbital(cfac, ang[i].k1);
-	GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
-	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
-	if (IsOdd((korb0+korb1)/2)) {
-	  for (m = 0; m < 3; m++) {
-	    double rvme;
+        orb0 = GetOrbital(cfac, ang[i].k0);
+        orb1 = GetOrbital(cfac, ang[i].k1);
+        GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
+        GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
+        if (IsOdd((korb0+korb1)/2)) {
+          for (m = 0; m < 3; m++) {
+            double rvme;
             if (cfac->e1[m] == 0) continue;
-	    q = m-1;
-	    q2 = 2*q;
-	    a = W3j(ji, 2, jj, -mi, -q2, mj);
-	    if (a == 0.0) continue;
-	    a *= ang[i].coeff;
-	    if (IsOdd(abs(ji-mi+q2)/2)) a = -a;
-	    b = ReducedCL(jorb0, 2, jorb1);
-	    c = RadialMoments(cfac, 1, ang[i].k0, ang[i].k1);
-	    rvme = a*b*c;
+            q = m-1;
+            q2 = 2*q;
+            a = W3j(ji, 2, jj, -mi, -q2, mj);
+            if (a == 0.0) continue;
+            a *= ang[i].coeff;
+            if (IsOdd(abs(ji-mi+q2)/2)) a = -a;
+            b = ReducedCL(jorb0, 2, jorb1);
+            c = RadialMoments(cfac, 1, ang[i].k0, ang[i].k1);
+            rvme = a*b*c;
             r += cfac->e1[m]*rvme;
-	  }
-	}    
+          }
+        }
       }
     }
 
     if (cfac->b0 || cfac->b2[0] || cfac->b2[1] || cfac->b2[2] ||
         cfac->b2[3] || cfac->b2[4]) {
       if (ang[i].k == 0) {
-	a = W3j(ji, 0, jj, -mi, 0, mj);
-	if (a) {
-	  orb0 = GetOrbital(cfac, ang[i].k0);
-	  orb1 = GetOrbital(cfac, ang[i].k1);
-	  GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
-	  GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
-	  if (IsEven((korb0+korb1)/2)) {
-	    a *= cfac->b0*ang[i].coeff;
-	    b = ReducedCL(jorb0, 0, jorb1);
-	    c = RadialMoments(cfac, 2, ang[i].k0, ang[i].k1);
-	    if (IsOdd((ji-mi)/2)) a = -a;
-	    r += a*b*c;
-	  }
-	}
+        a = W3j(ji, 0, jj, -mi, 0, mj);
+        if (a) {
+          orb0 = GetOrbital(cfac, ang[i].k0);
+          orb1 = GetOrbital(cfac, ang[i].k1);
+          GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
+          GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
+          if (IsEven((korb0+korb1)/2)) {
+            a *= cfac->b0*ang[i].coeff;
+            b = ReducedCL(jorb0, 0, jorb1);
+            c = RadialMoments(cfac, 2, ang[i].k0, ang[i].k1);
+            if (IsOdd((ji-mi)/2)) a = -a;
+            r += a*b*c;
+          }
+        }
       }
-      if (ang[i].k == 4) {	
-	orb0 = GetOrbital(cfac, ang[i].k0);
-	orb1 = GetOrbital(cfac, ang[i].k1);
-	GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
-	GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
-	if (IsEven((korb0+korb1)/2)) {
-	  for (m = 0; m < 5; m++) {
-	    if (cfac->b2[m] == 0) continue;
-	    q = m-2;
-	    q2 = q*2;
-	    a = W3j(ji, 4, jj, -mi, -q2, mj);
-	    if (a == 0.0) continue;
-	    a *= cfac->b2[m]*ang[i].coeff;
-	    b = ReducedCL(jorb0, 4, jorb1);
-	    c = RadialMoments(cfac, 2, ang[i].k0, ang[i].k1);
-	    if (IsOdd((ji-mi)/2)) a = -a;
-	    r += a*b*c;
-	  }
-	}
+      if (ang[i].k == 4) {
+        orb0 = GetOrbital(cfac, ang[i].k0);
+        orb1 = GetOrbital(cfac, ang[i].k1);
+        GetJLFromKappa(orb0->kappa, &jorb0, &korb0);
+        GetJLFromKappa(orb1->kappa, &jorb1, &korb1);
+        if (IsEven((korb0+korb1)/2)) {
+          for (m = 0; m < 5; m++) {
+            if (cfac->b2[m] == 0) continue;
+            q = m-2;
+            q2 = q*2;
+            a = W3j(ji, 4, jj, -mi, -q2, mj);
+            if (a == 0.0) continue;
+            a *= cfac->b2[m]*ang[i].coeff;
+            b = ReducedCL(jorb0, 4, jorb1);
+            c = RadialMoments(cfac, 2, ang[i].k0, ang[i].k1);
+            if (IsOdd((ji-mi)/2)) a = -a;
+            r += a*b*c;
+          }
+        }
       }
     }
   }
@@ -913,7 +913,7 @@ double HamiltonElementFB(cfac_t *cfac, int isym, int isi, int isj) {
   if (nz2 > 0 && cfac->ang_frozen.nts == 0) free(a2);
 
   r /= sqrt(jj + 1.0);
-  
+
   return r;
 }
 
@@ -946,19 +946,19 @@ double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
   GetJLFromKappa(orbi->kappa, &ji2, &ki2);
   GetJLFromKappa(orbj->kappa, &jj2, &kj2);
   j = si->kstate;
-  if (si->kgroup == sj->kgroup) { 
+  if (si->kgroup == sj->kgroup) {
     if (ji2 == jj2 && ki2 == kj2) {
       ResidualPotential(cfac, &a, si->kcfg, sj->kcfg);
       r += a;
       r0 = QED1E(cfac, si->kcfg, sj->kcfg);
       r += r0;
-    } 
+    }
     if (si->kcfg == sj->kcfg) {
       r += lev1->energy;
       r += orbi->energy;
     }
   }
- 
+
   ks[1] = si->kcfg;
   ks[3] = sj->kcfg;
 
@@ -990,13 +990,13 @@ double HamiltonElementFrozen(cfac_t *cfac, int isym, int isi, int isj) {
 
   if (nz > 0 && cfac->ang_frozen.nts == 0) {
     free(ang);
-  } 
+  }
 
   return r;
-} 
+}
 
 static void HamiltonElement1E2E(cfac_t *cfac,
-  int isym, int isi, int isj, double *x1, double *x2) { 
+  int isym, int isi, int isj, double *x1, double *x2) {
   CONFIG *ci, *cj;
   int ki, kj;
   SYMMETRY *sym;
@@ -1013,12 +1013,12 @@ static void HamiltonElement1E2E(cfac_t *cfac,
   sym = GetSymmetry(cfac, isym);
   si = GetSymmetryState(sym, isi);
   sj = GetSymmetryState(sym, isj);
-  
+
   ci = GetConfig(cfac, si);
   if (ci->n_shells == 0) return;
   cj = GetConfig(cfac, sj);
   if (cj->n_shells == 0) return;
-  
+
   switch (cfac->confint) {
   case 1:
     /* only CI within the same relativistic configuration */
@@ -1040,15 +1040,15 @@ static void HamiltonElement1E2E(cfac_t *cfac,
     }
     break;
   }
-    
+
   ki = si->kstate;
   kj = sj->kstate;
 
   idatum = NULL;
-  n_shells = GetInteract(cfac, &idatum, &sbra, &sket, 
-			 si->kgroup, sj->kgroup,
-			 si->kcfg, sj->kcfg,
-			 ki, kj, 0);
+  n_shells = GetInteract(cfac, &idatum, &sbra, &sket,
+                         si->kgroup, sj->kgroup,
+                         si->kcfg, sj->kcfg,
+                         ki, kj, 0);
   if (n_shells <= 0) return;
   memcpy(s, idatum->s, sizeof(INTERACT_SHELL)*4);
   bra = idatum->bra;
@@ -1072,15 +1072,15 @@ static void HamiltonElement1E2E(cfac_t *cfac,
       s[3].kl = s[2].kl;
       s[2].nq_bra = GetNq(bra+i);
       if (s[2].index == s[0].index) {
-	s[2].nq_ket = s[2].nq_bra - 1;
+        s[2].nq_ket = s[2].nq_bra - 1;
       } else if (s[2].index == s[1].index) {
-	s[2].nq_ket = s[2].nq_bra + 1;
+        s[2].nq_ket = s[2].nq_bra + 1;
       } else {
-	s[2].nq_ket = s[2].nq_bra;
+        s[2].nq_ket = s[2].nq_bra;
       }
       if (s[2].nq_bra <= 0 || s[2].nq_ket <= 0 ||
-	  s[2].nq_bra > s[2].j+1 || s[2].nq_ket > s[2].j+1) {
-	continue;
+          s[2].nq_bra > s[2].j+1 || s[2].nq_ket > s[2].j+1) {
+        continue;
       }
       s[3].nq_bra = s[2].nq_bra;
       s[3].nq_ket = s[2].nq_ket;
@@ -1102,32 +1102,32 @@ static void HamiltonElement1E2E(cfac_t *cfac,
       s[0].nq_bra = GetNq(bra+i);
       s[0].nq_ket = s[0].nq_bra;
       s[1].nq_bra = s[0].nq_bra;
-      s[1].nq_ket = s[1].nq_bra;      
+      s[1].nq_ket = s[1].nq_bra;
       r = Hamilton1E(cfac, n_shells, sbra, sket, s);
-      *x1 += r;      
+      *x1 += r;
       for (j = 0; j <= i; j++) {
-	s[2].nq_bra = GetNq(bra+j);
-	if (j == i && s[2].nq_bra < 2) continue;
-	s[2].nq_ket = s[2].nq_bra;
-	s[3].nq_bra = s[2].nq_bra;
-	s[3].nq_ket = s[3].nq_bra;
-	s[2].index = n_shells - j - 1;
-	s[3].index = s[2].index;
-	s[2].n = bra[j].n;
-	s[3].n = s[2].n;
-	s[2].kappa = bra[j].kappa;
-	s[3].kappa = s[2].kappa;
-	s[2].j = GetJ(bra+j);
-	s[3].j = s[2].j;
-	s[2].kl = GetL(bra+j);
-	s[3].kl = s[2].kl;
-	r = Hamilton2E(cfac, n_shells, sbra, sket, s);
-	*x2 += r;
+        s[2].nq_bra = GetNq(bra+j);
+        if (j == i && s[2].nq_bra < 2) continue;
+        s[2].nq_ket = s[2].nq_bra;
+        s[3].nq_bra = s[2].nq_bra;
+        s[3].nq_ket = s[3].nq_bra;
+        s[2].index = n_shells - j - 1;
+        s[3].index = s[2].index;
+        s[2].n = bra[j].n;
+        s[3].n = s[2].n;
+        s[2].kappa = bra[j].kappa;
+        s[3].kappa = s[2].kappa;
+        s[2].j = GetJ(bra+j);
+        s[3].j = s[2].j;
+        s[2].kl = GetL(bra+j);
+        s[3].kl = s[2].kl;
+        r = Hamilton2E(cfac, n_shells, sbra, sket, s);
+        *x2 += r;
       }
     }
   }
 
-  /* the prefactor in the Wigner-Eckart theorem should be included in 
+  /* the prefactor in the Wigner-Eckart theorem should be included in
      the matrix element. for a scalar operator, this is [J]^{-1/2} */
   prefactor = 1/sqrt(sbra[0].totalJ + 1.0);
   if (IsOdd(idatum->phase)) prefactor *= -1;
@@ -1144,14 +1144,14 @@ static void HamiltonElement1E2E(cfac_t *cfac,
 
 double HamiltonElement(cfac_t *cfac, int isym, int isi, int isj) {
   double r1, r2;
-  
+
   HamiltonElement1E2E(cfac, isym, isi, isj, &r1, &r2);
-  
+
   return r1 + r2;
 }
 
-int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs, 
-		int na, SHELL *sa, int nb, SHELL *sb) {
+int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
+                int na, SHELL *sa, int nb, SHELL *sb) {
   FILE *f;
   int m, i, j, i0, i1, k0, k1, q0, q1;
   int na2, nb2, nab2, n_shells, vnl;
@@ -1162,14 +1162,14 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
   SHELL_STATE *sbra, *sket;
   SHELL *bra;
   INTERACT_DATUM *idatum;
-  INTERACT_SHELL s[4];  
+  INTERACT_SHELL s[4];
   char name[LEVEL_NAME_LEN];
   char sname[LEVEL_NAME_LEN];
   char nc[LEVEL_NAME_LEN];
-  
+
   f = fopen(fn, "w");
   if (f == NULL) return -1;
-  
+
   na2 = 2*na;
   nb2 = 2*nb;
   nab2 = na2*nb2;
@@ -1185,161 +1185,161 @@ int SlaterCoeff(cfac_t *cfac, char *fn, int nlevs, int *ilevs,
       s0 = GetSymmetryState(sym, lev->basis[i0]);
       k0 = s0->kstate;
       for (i1 = 0; i1 < lev->n_basis; i1++) {
-	a = lev->mixing[i0] * lev->mixing[i1];
-	if (fabs(a) < cfac->angz_cut) continue;
-	s1 = GetSymmetryState(sym, lev->basis[i1]);
-	k1 = s1->kstate;
-	idatum = NULL;
-	n_shells = GetInteract(cfac, &idatum, &sbra, &sket, s0->kgroup, s1->kgroup, 
-			       s0->kcfg, s1->kcfg, k0, k1, 0);
-	if (n_shells <= 0) continue;
-	memcpy(s, idatum->s, sizeof(INTERACT_SHELL)*4);
-	bra = idatum->bra;
-	if (IsOdd(idatum->phase)) a = -a;
-	if (s[0].index >= 0 && s[3].index >= 0) {
-	  AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
-	} else if (s[0].index >= 0) {
-	  q0 = ShellIndex(s[0].n, s[0].kappa, na, sa);
-	  if (q0 >= 0) {
-	    for (j = 0; j < nb; j++) {
-	      i = ShellIndex(sb[j].n, sb[j].kappa, n_shells, bra);
-	      if (i >= 0) {
-		s[2].index = n_shells - i - 1;
-		if (s[2].index == s[0].index) continue;
-		s[3].index = s[2].index;
-		s[2].n = bra[i].n;
-		s[3].n = s[2].n;
-		s[2].kappa = bra[i].kappa;
-		s[3].kappa = s[2].kappa;
-		s[2].j = GetJ(bra+i);
-		s[3].j = s[2].j;
-		s[2].kl = GetL(bra+i);
-		s[3].kl = s[2].kl;
-		s[2].nq_bra = GetNq(bra+i);
-		if (s[2].index == s[0].index) {
-		  s[2].nq_ket = s[2].nq_bra - 1;
-		} else if (s[2].index == s[1].index) {
-		  s[2].nq_ket = s[2].nq_bra + 1;
-		} else {
-		  s[2].nq_ket = s[2].nq_bra;
-		}
-		if (s[2].nq_bra < 0 || s[2].nq_ket < 0 ||
-		    s[2].nq_bra > s[2].j+1 || s[2].nq_ket > s[2].j+1) {
-		  continue;
-		}
-		s[3].nq_bra = s[2].nq_bra;
-		s[3].nq_ket = s[2].nq_ket;
-		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
-	      } else if (s[0].j == s[1].j) {
-		s[2].n = sb[j].n;
-		s[2].kappa = sb[j].kappa;
-		s[2].nq_bra = 0;
-		s[2].nq_ket = 0;
-		GetJLFromKappa(s[2].kappa, &(s[2].j), &(s[2].kl));
-		memcpy(s+3, s+2, sizeof(INTERACT_SHELL));
-		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
-	      }
-	    }
-	  }
-	} else {
-	  for (j = 0; j < na; j++) {
-	    i = ShellIndex(sa[j].n, sa[j].kappa, n_shells, bra);
-	    if (i < 0 || bra[i].nq == 0) continue;
-	    s[0].index = n_shells - i - 1;
-	    s[1].index = s[0].index;
-	    s[0].n = bra[i].n;
-	    s[1].n = s[0].n;
-	    s[0].kappa = bra[i].kappa;
-	    s[1].kappa = s[0].kappa;
-	    s[0].j = GetJ(bra+i);
-	    s[1].j = s[0].j;
-	    s[0].kl = GetL(bra+i);
-	    s[1].kl = s[0].kl;
-	    s[0].nq_bra = GetNq(bra+i);
-	    s[0].nq_ket = s[0].nq_bra;
-	    s[1].nq_bra = s[0].nq_bra;
-	    s[1].nq_ket = s[1].nq_bra; 	    
-	    for (q0 = 0; q0 < nb; q0++) {
-	      q1 = ShellIndex(sb[q0].n, sb[q0].kappa, n_shells, bra);
-	      if (q1 == i) continue;
-	      if (q1 >= 0) {
-		s[2].nq_bra = GetNq(bra+q1);
-		s[2].nq_ket = s[2].nq_bra;
-		s[3].nq_bra = s[2].nq_bra;
-		s[3].nq_ket = s[3].nq_bra;
-		s[2].index = n_shells - q1 - 1;
-		s[3].index = s[2].index;
-		s[2].n = bra[q1].n;
-		s[3].n = s[2].n;
-		s[2].kappa = bra[q1].kappa;
-		s[3].kappa = s[2].kappa;
-		s[2].j = GetJ(bra+q1);
-		s[3].j = s[2].j;
-		s[2].kl = GetL(bra+q1);
-		s[3].kl = s[2].kl;
-		s[2].nq_bra = GetNq(bra+q1);
-		s[3].nq_bra = s[2].nq_bra;
-		s[2].nq_ket = s[2].nq_bra;
-		s[3].nq_ket = s[2].nq_bra;
-		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
-	      } else {		
-		s[2].n = sb[q0].n;
-		s[2].kappa = sb[q0].kappa;
-		s[2].nq_bra = 0;
-		s[2].nq_ket = 0;
-		GetJLFromKappa(s[2].kappa, &(s[2].j), &(s[2].kl));
-		memcpy(s+3, s+2, sizeof(INTERACT_SHELL));
-		AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
-	      }
-	    }
-	  }
-	}
-	free(sbra);
-	free(sket);	
+        a = lev->mixing[i0] * lev->mixing[i1];
+        if (fabs(a) < cfac->angz_cut) continue;
+        s1 = GetSymmetryState(sym, lev->basis[i1]);
+        k1 = s1->kstate;
+        idatum = NULL;
+        n_shells = GetInteract(cfac, &idatum, &sbra, &sket, s0->kgroup, s1->kgroup,
+                               s0->kcfg, s1->kcfg, k0, k1, 0);
+        if (n_shells <= 0) continue;
+        memcpy(s, idatum->s, sizeof(INTERACT_SHELL)*4);
+        bra = idatum->bra;
+        if (IsOdd(idatum->phase)) a = -a;
+        if (s[0].index >= 0 && s[3].index >= 0) {
+          AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+        } else if (s[0].index >= 0) {
+          q0 = ShellIndex(s[0].n, s[0].kappa, na, sa);
+          if (q0 >= 0) {
+            for (j = 0; j < nb; j++) {
+              i = ShellIndex(sb[j].n, sb[j].kappa, n_shells, bra);
+              if (i >= 0) {
+                s[2].index = n_shells - i - 1;
+                if (s[2].index == s[0].index) continue;
+                s[3].index = s[2].index;
+                s[2].n = bra[i].n;
+                s[3].n = s[2].n;
+                s[2].kappa = bra[i].kappa;
+                s[3].kappa = s[2].kappa;
+                s[2].j = GetJ(bra+i);
+                s[3].j = s[2].j;
+                s[2].kl = GetL(bra+i);
+                s[3].kl = s[2].kl;
+                s[2].nq_bra = GetNq(bra+i);
+                if (s[2].index == s[0].index) {
+                  s[2].nq_ket = s[2].nq_bra - 1;
+                } else if (s[2].index == s[1].index) {
+                  s[2].nq_ket = s[2].nq_bra + 1;
+                } else {
+                  s[2].nq_ket = s[2].nq_bra;
+                }
+                if (s[2].nq_bra < 0 || s[2].nq_ket < 0 ||
+                    s[2].nq_bra > s[2].j+1 || s[2].nq_ket > s[2].j+1) {
+                  continue;
+                }
+                s[3].nq_bra = s[2].nq_bra;
+                s[3].nq_ket = s[2].nq_ket;
+                AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+              } else if (s[0].j == s[1].j) {
+                s[2].n = sb[j].n;
+                s[2].kappa = sb[j].kappa;
+                s[2].nq_bra = 0;
+                s[2].nq_ket = 0;
+                GetJLFromKappa(s[2].kappa, &(s[2].j), &(s[2].kl));
+                memcpy(s+3, s+2, sizeof(INTERACT_SHELL));
+                AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+              }
+            }
+          }
+        } else {
+          for (j = 0; j < na; j++) {
+            i = ShellIndex(sa[j].n, sa[j].kappa, n_shells, bra);
+            if (i < 0 || bra[i].nq == 0) continue;
+            s[0].index = n_shells - i - 1;
+            s[1].index = s[0].index;
+            s[0].n = bra[i].n;
+            s[1].n = s[0].n;
+            s[0].kappa = bra[i].kappa;
+            s[1].kappa = s[0].kappa;
+            s[0].j = GetJ(bra+i);
+            s[1].j = s[0].j;
+            s[0].kl = GetL(bra+i);
+            s[1].kl = s[0].kl;
+            s[0].nq_bra = GetNq(bra+i);
+            s[0].nq_ket = s[0].nq_bra;
+            s[1].nq_bra = s[0].nq_bra;
+            s[1].nq_ket = s[1].nq_bra;
+            for (q0 = 0; q0 < nb; q0++) {
+              q1 = ShellIndex(sb[q0].n, sb[q0].kappa, n_shells, bra);
+              if (q1 == i) continue;
+              if (q1 >= 0) {
+                s[2].nq_bra = GetNq(bra+q1);
+                s[2].nq_ket = s[2].nq_bra;
+                s[3].nq_bra = s[2].nq_bra;
+                s[3].nq_ket = s[3].nq_bra;
+                s[2].index = n_shells - q1 - 1;
+                s[3].index = s[2].index;
+                s[2].n = bra[q1].n;
+                s[3].n = s[2].n;
+                s[2].kappa = bra[q1].kappa;
+                s[3].kappa = s[2].kappa;
+                s[2].j = GetJ(bra+q1);
+                s[3].j = s[2].j;
+                s[2].kl = GetL(bra+q1);
+                s[3].kl = s[2].kl;
+                s[2].nq_bra = GetNq(bra+q1);
+                s[3].nq_bra = s[2].nq_bra;
+                s[2].nq_ket = s[2].nq_bra;
+                s[3].nq_ket = s[2].nq_bra;
+                AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+              } else {
+                s[2].n = sb[q0].n;
+                s[2].kappa = sb[q0].kappa;
+                s[2].nq_bra = 0;
+                s[2].nq_ket = 0;
+                GetJLFromKappa(s[2].kappa, &(s[2].j), &(s[2].kl));
+                memcpy(s+3, s+2, sizeof(INTERACT_SHELL));
+                AddSlaterCoeff(cfac, coeff, a, n_shells, sbra, sket, s, na, sa, nb, sb);
+              }
+            }
+          }
+        }
+        free(sbra);
+        free(sket);
       }
     }
-    
+
     DecodePJ(lev->pj, &i, &j);
     a = sqrt(j+1.0);
 
     s0 = GetSymmetryState(sym, lev->pb);
     ConstructLevelName(cfac, s0, name, sname, nc, &vnl);
     fprintf(f, "# %6d %1d %3d   %-s\n",
-	    ilevs[m], i, j, name);
+            ilevs[m], i, j, name);
     for (i0 = 0; i0 < na; i0++) {
       k0 = GetLFromKappa(sa[i0].kappa)/2;
       for (i1 = 0; i1 < nb; i1++) {
-	k1 = GetLFromKappa(sb[i1].kappa)/2;
-	for (q0 = 0; q0 < 2; q0++) {
-	  for (q1 = 0; q1 < 2; q1++) {
-	    i = (i0*2+q0)*nb2 + i1*2+q1;
-	    for (j = 0; j < 4; j++) {
-	      if (coeff[i+j*nab2] != 0) break;
-	    }
-	    if (j < 4) {
-	      fprintf(f, "  %6d %2d %2d %2d %d %2d %2d %2d %d",
-		      ilevs[m], sa[i0].n, sa[i0].kappa, k0, q0,
-		      sb[i1].n, sb[i1].kappa, k1, q1);
-	      for (j = 0; j < 4; j++) {
-		fprintf(f, " %12.5E", coeff[i+j*nab2]/a);
-	      }
-	      fprintf(f, "\n");
-	    }
-	  }
-	}
+        k1 = GetLFromKappa(sb[i1].kappa)/2;
+        for (q0 = 0; q0 < 2; q0++) {
+          for (q1 = 0; q1 < 2; q1++) {
+            i = (i0*2+q0)*nb2 + i1*2+q1;
+            for (j = 0; j < 4; j++) {
+              if (coeff[i+j*nab2] != 0) break;
+            }
+            if (j < 4) {
+              fprintf(f, "  %6d %2d %2d %2d %d %2d %2d %2d %d",
+                      ilevs[m], sa[i0].n, sa[i0].kappa, k0, q0,
+                      sb[i1].n, sb[i1].kappa, k1, q1);
+              for (j = 0; j < 4; j++) {
+                fprintf(f, " %12.5E", coeff[i+j*nab2]/a);
+              }
+              fprintf(f, "\n");
+            }
+          }
+        }
       }
     }
   }
 
   fclose(f);
   free(coeff);
-  
+
   return 0;
 }
-	  
-void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells, 
-		    SHELL_STATE *sbra, SHELL_STATE *sket, 
-		    INTERACT_SHELL *s, int na, SHELL *sa, int nb, SHELL *sb) {
+
+void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells,
+                    SHELL_STATE *sbra, SHELL_STATE *sket,
+                    INTERACT_SHELL *s, int na, SHELL *sa, int nb, SHELL *sb) {
   int t, nk, *kk, j, i0, i1, i, nk0, k, *kk0;
   int k0, k1, k2, k3, js[4], na2, nb2, nab2;
   double e, z0, *y, *ang;
@@ -1355,10 +1355,10 @@ void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells,
   k2 = ShellIndex(s[1].n, s[1].kappa, na, sa);
   k3 = ShellIndex(s[3].n, s[3].kappa, nb, sb);
   if (k0 < 0 || k1 < 0 || k2 < 0 || k3 < 0) return;
-  
+
   if (s[0].n == s[2].n && s[0].kl == s[2].kl) return;
   if (s[1].n == s[3].n && s[1].kl == s[3].kl) return;
-  
+
   js[0] = s[0].j;
   js[1] = s[2].j;
   js[2] = s[1].j;
@@ -1367,7 +1367,7 @@ void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells,
   i0 = k0*2;
   if (k2 != k0) i0++;
   i1 = k1*2;
-  if (k3 != k1) i1++;  
+  if (k3 != k1) i1++;
   na2 = 2*na;
   nb2 = 2*nb;
   nab2 = na2*nb2;
@@ -1375,19 +1375,19 @@ void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells,
 
   if (s[2].nq_bra > 0) {
     nk = AngularZxZ0(&ang, &kk, 0, n_shells, sbra, sket, s, kmax);
-    for (i = 0; i < nk; i++) {    
-      if (fabs(ang[i]) < EPS30) continue;    
+    for (i = 0; i < nk; i++) {
+      if (fabs(ang[i]) < EPS30) continue;
       for (t = 2; t <= 4; t += 2) {
-	e = W6j(js[0], js[2], kk[i], js[1], js[3], t);
-	if (fabs(e) < EPS30) continue;
-	e *= ReducedCL(js[0], t, js[3]); 
-	e *= ReducedCL(js[1], t, js[2]);
-	e *= (kk[i] + 1.0);
-	if (IsOdd((t+kk[i])/2)) e = -e;
-	if (fabs(e) < EPS30) continue;
-	e *= a*ang[i];
-	k = (t/2-1)*nab2;
-	coeff[j + k] += e;
+        e = W6j(js[0], js[2], kk[i], js[1], js[3], t);
+        if (fabs(e) < EPS30) continue;
+        e *= ReducedCL(js[0], t, js[3]);
+        e *= ReducedCL(js[1], t, js[2]);
+        e *= (kk[i] + 1.0);
+        if (IsOdd((t+kk[i])/2)) e = -e;
+        if (fabs(e) < EPS30) continue;
+        e *= a*ang[i];
+        k = (t/2-1)*nab2;
+        coeff[j + k] += e;
       }
     }
 
@@ -1400,7 +1400,7 @@ void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells,
   if (k1 == k3) {
     z0 = 0.0;
     nk0 = 1;
-    k = 0; 
+    k = 0;
     kk0 = &k;
     y = &z0;
     nk0 = AngularZ(&y, &kk0, nk0, n_shells, sbra, sket, s, s+1, kmax);
@@ -1408,17 +1408,17 @@ void AddSlaterCoeff(const cfac_t *cfac, double *coeff, double a, int n_shells,
       z0 /= sqrt(s[0].j + 1.0);
       if (IsOdd((s[0].j - s[2].j)/2)) z0 = -z0;
       for (t = 2; t <= 4; t += 2) {
-	e = ReducedCL(js[0], t, js[3]);
-	e *= ReducedCL(js[1], t, js[2]);
-	k = (t/2+1)*nab2;
-	coeff[j+k] += a*z0*e;
+        e = ReducedCL(js[0], t, js[3]);
+        e *= ReducedCL(js[1], t, js[2]);
+        k = (t/2+1)*nab2;
+        coeff[j+k] += a*z0*e;
       }
     }
   }
 }
 
 double Hamilton1E(cfac_t *cfac, int n_shells, SHELL_STATE *sbra, SHELL_STATE *sket,
-		  INTERACT_SHELL *s) {
+                  INTERACT_SHELL *s) {
   int nk0, k;
   int *k0;
   double *x, z0, r0;
@@ -1457,7 +1457,7 @@ double Hamilton2E(cfac_t *cfac,
   js[1] = 0;
   js[2] = 0;
   js[3] = 0;
-  
+
   ks[0] = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
   ks[1] = OrbitalIndex(cfac, s[2].n, s[2].kappa, 0.0);
   ks[2] = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
@@ -1478,7 +1478,7 @@ double Hamilton2E(cfac_t *cfac,
     }
   }
 
-  x = 0.0;    
+  x = 0.0;
   nk = AngularZxZ0(&ang, &kk, 0, n_shells, sbra, sket, s, kmax);
   for (i = 0; i < nk; i++) {
     sd = 0;
@@ -1513,8 +1513,8 @@ int TestHamilton(cfac_t *cfac) {
     sym = GetSymmetry(cfac, t);
     for (i = 0; i < sym->n_states; i++) {
       for (j = 0; j < sym->n_states; j++) {
-	r1 = HamiltonElement(cfac, t, i, j);
-	printf("HAM: %3d %d %d %10.3E\n", t, i, j, r1);
+        r1 = HamiltonElement(cfac, t, i, j);
+        printf("HAM: %3d %d %d %10.3E\n", t, i, j, r1);
       }
     }
   }
@@ -1536,16 +1536,16 @@ int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h) {
         h->n_basis, h->dim);
     return -2;
   }
-  
+
   if (cfac->confint == -1) {
     /* no configuration interaction at all */
     mixing = h->mixing + h->dim;
     for (i = 0; i < h->dim; i++) {
       h->mixing[i] = h->hamilton[i];
       for (j = 0; j < h->dim; j++) {
-	if (i == j) *mixing = 1.0;
-	else *mixing = 0.0;
-	mixing++;
+        if (i == j) *mixing = 1.0;
+        else *mixing = 0.0;
+        mixing++;
       }
     }
     return 0;
@@ -1580,7 +1580,7 @@ int DiagonalizeHamilton(const cfac_t *cfac, HAMILTON *h) {
       z[j*h->dim + i] = gsl_matrix_get(evec, i, j);
     }
   }
-  
+
   gsl_matrix_free(evec);
 
   if (info) {
@@ -1604,7 +1604,7 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
 {
   int i;
   LEVEL lev;
-  
+
   lev.uta = 1;
 
   lev.n_basis = 0;
@@ -1613,45 +1613,45 @@ static int AddToLevelsUTA(cfac_t *cfac, int ng, const int *kg)
   for (i = 0; i < ng; i++) {
     int j;
     CONFIG_GROUP *g;
-    
+
     lev.uta_cfg_g = kg[i];
     g = GetGroup(cfac, kg[i]);
-    
+
     for (j = 0; j < g->n_cfgs; j++) {
       int t, pj;
       CONFIG *c = GetConfigFromGroup(cfac, lev.uta_cfg_g, j);
-      
+
       if (!c->uta) {
         continue;
       }
 
       lev.uta_g_cfg = j;
-      
+
       pj = 0;
       lev.uta_g = 1;
-      
-      for (t = 0; t < c->n_shells; t++) {       
-	int d, l, k;
-        
+
+      for (t = 0; t < c->n_shells; t++) {
+        int d, l, k;
+
         GetJLFromKappa(c->shells[t].kappa, &d, &l);
-	k = l/2;
-	d = ShellDegeneracy(d+1, c->shells[t].nq);
-	if (d > 1) {
-	  lev.uta_g *= d;
-	}
-	
-	if (IsOdd(k) && IsOdd(c->shells[t].nq)) pj++;
+        k = l/2;
+        d = ShellDegeneracy(d+1, c->shells[t].nq);
+        if (d > 1) {
+          lev.uta_g *= d;
+        }
+
+        if (IsOdd(k) && IsOdd(c->shells[t].nq)) pj++;
       }
 
       lev.uta_p = IsOdd(pj);
-      
+
       if (c->energy == 0) {
-	c->energy = AverageEnergyConfig(cfac, c);
+        c->energy = AverageEnergyConfig(cfac, c);
       }
       lev.energy = c->energy;
       if (ArrayAppend(cfac->levels, &lev) == NULL) {
-	printf("Not enough memory for levels array\n");
-	return -1;
+        printf("Not enough memory for levels array\n");
+        return -1;
       }
 
       cfac->n_levels++;
@@ -1667,15 +1667,15 @@ static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
   double *mix;
 
   if (h->basis == NULL || h->mixing == NULL) return -1;
-  
+
   mix = h->mixing + h->dim;
-  
+
   for (i = 0; i < h->dim; i++) {
     LEVEL lev;
     int k, t;
-    
+
     k = GetPrincipleBasis(mix, h->dim, NULL);
-    
+
     lev.uta = 0;
     lev.energy = h->mixing[i];
     lev.pj = h->pj;
@@ -1690,7 +1690,7 @@ static int AddToLevelsEB(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
       return -1;
     }
     lev.n_basis = h->n_basis;
-    
+
     for (t = 0; t < h->n_basis; t++) {
       lev.ibasis[t] = t;
       lev.basis[t] = h->basis[t];
@@ -1723,13 +1723,13 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
   if (h->pj < 0) {
     return AddToLevelsEB(cfac, h, ng, kg);
   }
-  
+
   if (h->basis == NULL || h->mixing == NULL) return -1;
 
   mix = h->mixing + h->dim;
 
   j = cfac->n_levels;
-  sym = GetSymmetry(cfac, h->pj);  
+  sym = GetSymmetry(cfac, h->pj);
   for (i = 0; i < h->dim; i++) {
     LEVEL lev;
     STATE *s, *s1;
@@ -1737,42 +1737,42 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     int k, m, t;
     int ig = 0, p, jj;
     double a;
-    
+
     k = GetPrincipleBasis(mix, h->dim, NULL);
     s = GetSymmetryState(sym, h->basis[k]);
     cfg = GetConfig(cfac, s);
     if (cfg->uta) {
         continue;
     }
-            
+
     if (ng > 0) {
       if (!InGroups(s->kgroup, ng, kg)) {
-	m = 0;
-	if (cfac->mix_cut2 < 1.0) {
-	  a = fabs(cfac->mix_cut2*mix[k]);
-	  for (t = 0; t < h->n_basis; t++) {
-	    if (fabs(mix[t]) >= a && t != k) {
-	      s1 = GetSymmetryState(sym, h->basis[t]);
+        m = 0;
+        if (cfac->mix_cut2 < 1.0) {
+          a = fabs(cfac->mix_cut2*mix[k]);
+          for (t = 0; t < h->n_basis; t++) {
+            if (fabs(mix[t]) >= a && t != k) {
+              s1 = GetSymmetryState(sym, h->basis[t]);
 
-	      for (ig = 0; ig < ng; ig++) {
-		if (s1->kgroup == kg[ig]) {
-		  m = 1;
-		  break;
-		}
-	      }
-	    }
-	  }
-	}
-	if (m == 0) {
-	  mix += h->n_basis;
-	  continue;
-	}
+              for (ig = 0; ig < ng; ig++) {
+                if (s1->kgroup == kg[ig]) {
+                  m = 1;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if (m == 0) {
+          mix += h->n_basis;
+          continue;
+        }
       }
     }
-    
+
     lev.uta = 0;
     lev.ibase = -1;
-    
+
     lev.energy = h->mixing[i];
     lev.pj = h->pj;
     lev.iham = cfac->nhams-1;
@@ -1789,10 +1789,10 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
     a = fabs(cfac->mix_cut * mix[k]);
     for (t = 0, m = 0; t < h->n_basis; t++) {
       if (fabs(mix[t]) >= a) {
-	lev.ibasis[m] = t;
-	lev.basis[m] = h->basis[t];
-	lev.mixing[m] = mix[t];
-	m++;
+        lev.ibasis[m] = t;
+        lev.basis[m] = h->basis[t];
+        lev.mixing[m] = mix[t];
+        m++;
       }
     }
     lev.n_basis = m;
@@ -1808,10 +1808,10 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
       lev.ibase = -(s->kgroup + 1);
       lev.iham = -1;
     }
-    
+
     DecodePJ(lev.pj, &p, &jj);
-    lev.uta_g = jj + 1;   
-    lev.uta_p = p;   
+    lev.uta_g = jj + 1;
+    lev.uta_p = p;
     lev.uta_cfg_g = s->kgroup;
     lev.uta_g_cfg = s->kcfg;
 
@@ -1852,18 +1852,18 @@ void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c) {
       lev->n_basis = m;
       lev->ibasis = realloc(lev->ibasis, sizeof(short)*m);
       lev->basis = realloc(lev->basis, sizeof(int)*m);
-      lev->mixing = realloc(lev->mixing, sizeof(double)*m);      
+      lev->mixing = realloc(lev->mixing, sizeof(double)*m);
       SortMixing(0, m, lev, sym);
       GetPrincipleBasis(lev->mixing, m, lev->kpb);
     }
   }
 }
-  
+
 static int CompareBasis(double m1, double m2) {
   if (fabs(m1) > fabs(m2)) return 1;
   else if (fabs(m1) < fabs(m2)) return -1;
   else return 0;
-}  
+}
 
 int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
   short *ibasis;
@@ -1886,39 +1886,39 @@ int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
     b2 = basis + j;
     s1 = ibasis + i;
     s2 = ibasis + j;
-    mp = m2;    
+    mp = m2;
     bp = b2;
     sp = s2;
-    
+
     while (i < j) {
       while (i < j) {
-	if (CompareBasis(*m1, *mp) < 0) break;
-	i++;
-	m1 = mix + i;
-	b1 = basis + i;
-	s1 = ibasis + i;
+        if (CompareBasis(*m1, *mp) < 0) break;
+        i++;
+        m1 = mix + i;
+        b1 = basis + i;
+        s1 = ibasis + i;
       }
       while (i < j) {
-	if (CompareBasis(*mp, *m2) < 0) break;
-	j--;
-	m2 = mix + j;
-	b2 = basis + j;
-	s2 = ibasis + j;	
+        if (CompareBasis(*mp, *m2) < 0) break;
+        j--;
+        m2 = mix + j;
+        b2 = basis + j;
+        s2 = ibasis + j;
       }
       if (i < j) {
-	tmp = *m1;
-	*m1 = *m2;
-	*m2 = tmp;
-	t = *b1;
-	*b1 = *b2;
-	*b2 = t;
-	t = *s1;
-	*s1 = *s2;
-	*s2 = t;
-	i++;
-	m1 = mix + i;
-	b1 = basis + i;
-	s1 = ibasis + i;
+        tmp = *m1;
+        *m1 = *m2;
+        *m2 = tmp;
+        t = *b1;
+        *b1 = *b2;
+        *b2 = t;
+        t = *s1;
+        *s1 = *s2;
+        *s2 = t;
+        i++;
+        m1 = mix + i;
+        b1 = basis + i;
+        s1 = ibasis + i;
       }
     }
     if (CompareBasis(*m1, *mp)) {
@@ -1937,12 +1937,12 @@ int SortMixing(int start, int n, LEVEL *lev, SYMMETRY *sym) {
     j0 = n - i0 - 1;
     if (j0 < i0) {
       if (1 < j0) {
-	SortMixing(i+1, j0, lev, sym);
+        SortMixing(i+1, j0, lev, sym);
       }
       n = i0;
     } else {
       if (1 < i0) {
-	SortMixing(start, i0, lev, sym);
+        SortMixing(start, i0, lev, sym);
       }
       start = i+1;
       n = j0;
@@ -2017,24 +2017,24 @@ int GetPrincipleBasis(double *mix, int d, int *kpb) {
   if (kpb) {
     for (t = 0; t < NPRINCIPLE; t++) {
       if (d <= t) {
-	kpb[t] = kpb[t-1];
-	continue;
-      } 
+        kpb[t] = kpb[t-1];
+        continue;
+      }
       c = 0.0;
       for (i = 0; i < d; i++) {
-	iskpb = 0;
-	for (q = 0; q < t; q++) {
-	  if (i == kpb[q]) {
-	    iskpb = 1;
-	    break;
-	  }
-	}
-	if (iskpb) continue;
-	fm = fabs(mix[i]);
-	if (fm > c) {
-	  c = fm;
-	  kpb[t] = i;
-	}
+        iskpb = 0;
+        for (q = 0; q < t; q++) {
+          if (i == kpb[q]) {
+            iskpb = 1;
+            break;
+          }
+        }
+        if (iskpb) continue;
+        fm = fabs(mix[i]);
+        if (fm > c) {
+          c = fm;
+          kpb[t] = i;
+        }
       }
     }
     k = kpb[0];
@@ -2043,8 +2043,8 @@ int GetPrincipleBasis(double *mix, int d, int *kpb) {
     for (i = 0; i < d; i++) {
       fm = fabs(mix[i]);
       if (fm > c) {
-	c = fm;
-	k = i;
+        c = fm;
+        k = i;
       }
     }
   }
@@ -2083,13 +2083,13 @@ static int CompareLevels(cfac_t *cfac, LEVEL *lev1, LEVEL *lev2) {
   if (s1->kgroup < 0 && s2->kgroup < 0) {
     int p1, p2, j1, j2;
     ORBITAL *orb;
-    
+
     orb = GetOrbital(cfac, s1->kcfg);
     GetJLFromKappa(orb->kappa, &p1, &j1);
-    
+
     orb = GetOrbital(cfac, s2->kcfg);
     GetJLFromKappa(orb->kappa, &p2, &j2);
-    
+
     i1 = p1 - p2;
     if (i1) return i1;
     i1 = j1 - j2;
@@ -2131,24 +2131,24 @@ int SortLevels(cfac_t *cfac, int start, int n, int EB) {
     lev1 = get_a_level(cfac, i);
     lev2 = get_a_level(cfac, j);
     levp = lev2;
-    
+
     while (i < j) {
       while (i < j) {
-	if (CompareLevels(cfac, lev1, levp) > 0) break;
-	i++;
-	lev1 = get_a_level(cfac, i);
+        if (CompareLevels(cfac, lev1, levp) > 0) break;
+        i++;
+        lev1 = get_a_level(cfac, i);
       }
       while (i < j) {
-	if (CompareLevels(cfac, levp, lev2) > 0) break;
-	j--;
-	lev2 = get_a_level(cfac, j);
+        if (CompareLevels(cfac, levp, lev2) > 0) break;
+        j--;
+        lev2 = get_a_level(cfac, j);
       }
       if (i < j) {
-	memcpy(&tmp, lev1, sizeof(LEVEL));
-	memcpy(lev1, lev2, sizeof(LEVEL));
-	memcpy(lev2, &tmp, sizeof(LEVEL));
-	i++;
-	lev1 = get_a_level(cfac, i);
+        memcpy(&tmp, lev1, sizeof(LEVEL));
+        memcpy(lev1, lev2, sizeof(LEVEL));
+        memcpy(lev2, &tmp, sizeof(LEVEL));
+        i++;
+        lev1 = get_a_level(cfac, i);
       }
     }
     if (lev1 != levp) {
@@ -2161,12 +2161,12 @@ int SortLevels(cfac_t *cfac, int start, int n, int EB) {
     j0 = n - i0 - 1;
     if (j0 < i0) {
       if (1 < j0) {
-	SortLevels(cfac, i+1, j0, EB);
+        SortLevels(cfac, i+1, j0, EB);
       }
       n = i0;
     } else {
       if (1 < i0) {
-	SortLevels(cfac, start, i0, EB);
+        SortLevels(cfac, start, i0, EB);
       }
       start = i+1;
       n = j0;
@@ -2230,16 +2230,16 @@ int GetLevNumElectrons(const cfac_t *cfac, const LEVEL *lev) {
       nele = g->n_electrons;
     } else {
       nele = 1+GetNumElectrons(cfac, -(s->kgroup)-1);
-    }    
+    }
   }
-  
+
   return nele;
 }
 
 int GetNumElectrons(const cfac_t *cfac, int k)
 {
     LEVEL *lev = GetLevel(cfac, k);
-    
+
     if (!lev) {
         return -1;
     } else {
@@ -2284,9 +2284,9 @@ int SaveEBLevels(cfac_t *cfac, char *fn, int m, int n) {
   }
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);
-  
+
   return 0;
-}  
+}
 
 /* Apply energy corrections; return number of levels updated */
 static int cfac_apply_ecorrections(cfac_t *cfac, int start, int n) {
@@ -2311,7 +2311,7 @@ static int cfac_apply_ecorrections(cfac_t *cfac, int start, int n) {
         for (ilevel = start; ilevel < stop; ilevel++) {
             LEVEL *lev = GetLevel(cfac, ilevel);
             if (!strcmp(lev->name, ec->refname)) {
-	        ec->ref = lev;
+                ec->ref = lev;
                 break;
             }
         }
@@ -2327,10 +2327,10 @@ static int cfac_apply_ecorrections(cfac_t *cfac, int start, int n) {
             }
 
             if (!strcmp(lev->name, ec->name)) {
-	        lev->energy = ec->e + ec->ref->energy;
+                lev->energy = ec->e + ec->ref->energy;
                 ec->applied = 1;
-	        ncorr++;
-	        break;
+                ncorr++;
+                break;
             }
         }
     }
@@ -2368,9 +2368,9 @@ static int FinalizeLevels(cfac_t *cfac, int start, int n) {
     STATE *s;
     SYMMETRY *sym;
     int ib, dn, si, ms, mst;
-    
+
     LEVEL *lev = GetLevel(cfac, ilevel);
-    
+
     si = lev->pb;
     sym = GetSymmetry(cfac, lev->pj);
     s = ArrayGet(&(sym->states), si);
@@ -2382,71 +2382,71 @@ static int FinalizeLevels(cfac_t *cfac, int start, int n) {
     if (s->kgroup > 0) {
       CONFIG *cfg = GetConfig(cfac, s);
       int nk = nele - 1;
-      
+
       lev->ibase = -1;
-      
+
       if (cfac_get_ion_nlevels(cfac, nk) != 0 && cfg->shells[0].nq <= 1 &&
           cfg->n_shells > 1) {
         STATE *s1;
         CONFIG *cfg1;
-	double mix_norm = 0.0;
-	double md_min = 1E30, dE_min = 1E30;
-	SHELL_STATE *csf = cfg->csfs + s->kstate;
+        double mix_norm = 0.0;
+        double md_min = 1E30, dE_min = 1E30;
+        SHELL_STATE *csf = cfg->csfs + s->kstate;
 
         dn = cfg->shells[0].n - cfg->shells[1].n;
-	if (dn < MAXDN) {
-	  for (t = 0; t < lev->n_basis; t++) {
-	    s1 = ArrayGet(&(sym->states), lev->basis[t]);
-	    cfg1 = GetConfig(cfac, s1);
-	    if (cfg1->shells[0].n == cfg->shells[0].n &&
-		cfg1->shells[0].nq == 1) {
-	      mix_norm += (lev->mixing[t])*(lev->mixing[t]);
-	    }
-	  }
-	}
+        if (dn < MAXDN) {
+          for (t = 0; t < lev->n_basis; t++) {
+            s1 = ArrayGet(&(sym->states), lev->basis[t]);
+            cfg1 = GetConfig(cfac, s1);
+            if (cfg1->shells[0].n == cfg->shells[0].n &&
+                cfg1->shells[0].nq == 1) {
+              mix_norm += (lev->mixing[t])*(lev->mixing[t]);
+            }
+          }
+        }
 
-	for (ib = 0; ib < NPRINCIPLE && lev->ibase < 0; ib++) {
-	  for (t = 0; t < cfac_get_ion_nlevels(cfac, nk); t++) {
-	    int ilevel1;
+        for (ib = 0; ib < NPRINCIPLE && lev->ibase < 0; ib++) {
+          for (t = 0; t < cfac_get_ion_nlevels(cfac, nk); t++) {
+            int ilevel1;
             LEVEL_ION *gion1 = ArrayGet(cfac->levels_per_ion+nk, t);
-	    for (ilevel1 = gion1->imin; ilevel1 <= gion1->imax; ilevel1++) {
+            for (ilevel1 = gion1->imin; ilevel1 <= gion1->imax; ilevel1++) {
               SYMMETRY *sym1;
               SHELL_STATE *csf1;
-	      LEVEL *lev1 = GetLevel(cfac, ilevel1);
+              LEVEL *lev1 = GetLevel(cfac, ilevel1);
 
               if (lev1->uta) {
                 continue;
               }
 
-	      sym1 = GetSymmetry(cfac, lev1->pj);
-	      s1 = ArrayGet(&(sym1->states), lev1->basis[lev1->kpb[ib]]);
-	      cfg1 = GetConfig(cfac, s1);
-	      csf1 = cfg1->csfs + s1->kstate;
-	      mst = cfg1->n_shells*sizeof(SHELL_STATE);
-	      ms = cfg1->n_shells*sizeof(SHELL);
-	      if (cfg->n_shells == cfg1->n_shells+1 &&
-		  memcmp(cfg->shells+1, cfg1->shells, ms) == 0 &&
-		  memcmp(csf+1, csf1, mst) == 0) {
-		if (dn < MAXDN) {
-		  double md = fabs(fabs(lev->mixing[lev->kpb[0]]/mix_norm) -
-			         fabs(lev1->mixing[lev1->kpb[ib]]));
-		  if (md < md_min) {
-		    md_min = md;
-		    lev->ibase = ilevel1;
-		  }
-		} else {
+              sym1 = GetSymmetry(cfac, lev1->pj);
+              s1 = ArrayGet(&(sym1->states), lev1->basis[lev1->kpb[ib]]);
+              cfg1 = GetConfig(cfac, s1);
+              csf1 = cfg1->csfs + s1->kstate;
+              mst = cfg1->n_shells*sizeof(SHELL_STATE);
+              ms = cfg1->n_shells*sizeof(SHELL);
+              if (cfg->n_shells == cfg1->n_shells+1 &&
+                  memcmp(cfg->shells+1, cfg1->shells, ms) == 0 &&
+                  memcmp(csf+1, csf1, mst) == 0) {
+                if (dn < MAXDN) {
+                  double md = fabs(fabs(lev->mixing[lev->kpb[0]]/mix_norm) -
+                                 fabs(lev1->mixing[lev1->kpb[ib]]));
+                  if (md < md_min) {
+                    md_min = md;
+                    lev->ibase = ilevel1;
+                  }
+                } else {
                   int ik = OrbitalIndex(cfac, cfg->shells[0].n, cfg->shells[0].kappa, 0.0);
-		  ORBITAL *orb = GetOrbital(cfac, ik);
-		  double dE = fabs(lev1->energy - lev->energy + orb->energy);
-		  if (dE < dE_min) {
-		    dE_min = dE;
-		    lev->ibase = ilevel1;
-		  }
-		}
-	      }
-	    }
-	  }
-	}
+                  ORBITAL *orb = GetOrbital(cfac, ik);
+                  double dE = fabs(lev1->energy - lev->energy + orb->energy);
+                  if (dE < dE_min) {
+                    dE_min = dE;
+                    lev->ibase = ilevel1;
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     } else {
       lev->ibase = -(s->kgroup + 1);
@@ -2492,25 +2492,25 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
       ORBITAL *orb = GetOrbital(cfac, basis->kcfg);
       GetJLFromKappa(orb->kappa, &j, &kl);
       if (vnl) {
-	*vnl = (kl/2) + 100*(orb->n);
+        *vnl = (kl/2) + 100*(orb->n);
       }
       if (name) {
-	if (j < kl) jsym = '-';
-	else jsym = '+';
-	
-	kl /= 2;
-	SpecSymbol(symbol, kl);
-	sprintf(name, "%5d + %d%s%c1(%d)%d ", 
-		i, orb->n, symbol, jsym, j, basis->kstate);
+        if (j < kl) jsym = '-';
+        else jsym = '+';
+
+        kl /= 2;
+        SpecSymbol(symbol, kl);
+        sprintf(name, "%5d + %d%s%c1(%d)%d ",
+                i, orb->n, symbol, jsym, j, basis->kstate);
       }
       basis = GetSymmetryState(sym, si);
       nele = ConstructLevelName(cfac, basis, NULL, sname, nc, NULL);
       if (nc) {
-	if (nele == 0) {
-	  nc[0] = '\0';
-	}
-	sprintf(ashell, "%1d*1", orb->n);
-	strcat(nc, ashell);
+        if (nele == 0) {
+          nc[0] = '\0';
+        }
+        sprintf(ashell, "%1d*1", orb->n);
+        strcat(nc, ashell);
       }
       return nele+1;
     }
@@ -2534,35 +2534,35 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
     kl = kl/2;
     if (name) {
       if (((nq < j+1) && nq > 0) || (i == 0 && name[0] == '\0')) {
-	SpecSymbol(symbol, kl);
-	if (c->n_csfs > 0) {
+        SpecSymbol(symbol, kl);
+        if (c->n_csfs > 0) {
           SHELL_STATE *s = c->csfs + basis->kstate;
           sprintf(ashell, "%1d%s%c%1d(%1d)%1d ",
-		  n, symbol, jsym, nq, s[i].shellJ, s[i].totalJ); 
-	} else {
-	  sprintf(ashell, "%1d%s%c%1d ", n, symbol, jsym, nq);
-	}
-	len += strlen(ashell);
-	if (len >= LEVEL_NAME_LEN) return -1;
-	strcat(name, ashell);
+                  n, symbol, jsym, nq, s[i].shellJ, s[i].totalJ);
+        } else {
+          sprintf(ashell, "%1d%s%c%1d ", n, symbol, jsym, nq);
+        }
+        len += strlen(ashell);
+        if (len >= LEVEL_NAME_LEN) return -1;
+        strcat(name, ashell);
       }
     }
     if (sname) {
       if (n == n0 && kl == kl0) {
-	nq0 += nq;
+        nq0 += nq;
       } else {
-	if (nq0 > 0 && nq0 < 2*(2*kl0+1)) {
-	  SpecSymbol(symbol, kl0);
-	  sprintf(ashell, "%1d%s%1d ", n0, symbol, nq0);
-	  strcat(sname, ashell);
-	}
-	n0 = n;
-	kl0 = kl;
-	nq0 = nq;
+        if (nq0 > 0 && nq0 < 2*(2*kl0+1)) {
+          SpecSymbol(symbol, kl0);
+          sprintf(ashell, "%1d%s%1d ", n0, symbol, nq0);
+          strcat(sname, ashell);
+        }
+        n0 = n;
+        kl0 = kl;
+        nq0 = nq;
       }
     }
   }
-  
+
   if (sname && n0 > 0) {
     if ((nq0 > 0 && nq0 < 2*(2*kl0+1)) || sname[0] == '\0') {
       SpecSymbol(symbol, kl0);
@@ -2577,14 +2577,14 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
     for (i = c->n_shells-1; i >= 0; i--) {
       UnpackShell(c->shells+i, &n, &kl, &j, &nq);
       if (n == n0) {
-	nq0 += nq;
+        nq0 += nq;
       } else {
-	if (nq0 > 0) {
-	  sprintf(ashell, "%1d*%1d ", n0, nq0);
-	  strcat(nc, ashell);
-	}
-	n0 = n;
-	nq0 = nq;
+        if (nq0 > 0) {
+          sprintf(ashell, "%1d*%1d ", n0, nq0);
+          strcat(nc, ashell);
+        }
+        n0 = n;
+        nq0 = nq;
       }
     }
     if (n0 > 0 && (nq0 > 0 || nc[0] == '\0')) {
@@ -2602,10 +2602,10 @@ int ConstructLevelName(const cfac_t *cfac, const STATE *basis,
   string_trim(name);
   string_trim(sname);
   string_trim(nc);
-      
+
   return nele;
 }
-    
+
 int GetBasisTable(cfac_t *cfac, char *fn, int m) {
   FILE *f;
   int i, p, j, k, si, nsym;
@@ -2623,11 +2623,11 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
     for (i = 0; i < cfac->n_eblevels; i++) {
       lev = GetEBLevel(cfac, i);
       for (k = 0; k < lev->n_basis; k++) {
-	DecodeBasisEB(lev->basis[k], &p, &j);
-	fprintf(f, "%6d %6d %3d %15.8E\n", 
-		i, p, j, lev->mixing[k]);
+        DecodeBasisEB(lev->basis[k], &p, &j);
+        fprintf(f, "%6d %6d %3d %15.8E\n",
+                i, p, j, lev->mixing[k]);
       }
-    }    
+    }
   } else {
     nsym = MAX_SYMMETRIES;
     fprintf(f, "============Basis Table===========================\n");
@@ -2636,24 +2636,24 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
       DecodePJ(i, &p, &j);
       if (sym->n_states <= 0) continue;
       for (k = 0; k < sym->n_states; k++) {
-	s = GetSymmetryState(sym, k);
-	ConstructLevelName(cfac, s, name, sname, nc, NULL);
-	fprintf(f, "%6d   %2d %2d   %5d %3d %5d %5d   %-20s %-20s %-20s\n",
-		i, p, j, k, s->kgroup, s->kcfg, s->kstate, nc, sname, name);
+        s = GetSymmetryState(sym, k);
+        ConstructLevelName(cfac, s, name, sname, nc, NULL);
+        fprintf(f, "%6d   %2d %2d   %5d %3d %5d %5d   %-20s %-20s %-20s\n",
+                i, p, j, k, s->kgroup, s->kcfg, s->kstate, nc, sname, name);
       }
       fprintf(f, "\n");
     }
-    
+
     fprintf(f, "============Mixing Coefficients===================\n");
     for (i = 0; i < cfac->n_levels; i++) {
       lev = GetLevel(cfac, i);
       sym = GetSymmetry(cfac, lev->pj);
       DecodePJ(lev->pj, &p, &j);
       for (k = 0; k < lev->n_basis; k++) {
-	si = lev->basis[k];
-	s = GetSymmetryState(sym, si);
-	fprintf(f, "%6d   %2d %2d   %5d %3d %5d %5d   %15.8E\n", 
-		i, p, j, si, s->kgroup, s->kcfg, s->kstate, lev->mixing[k]);
+        si = lev->basis[k];
+        s = GetSymmetryState(sym, si);
+        fprintf(f, "%6d   %2d %2d   %5d %3d %5d %5d   %15.8E\n",
+                i, p, j, si, s->kgroup, s->kcfg, s->kstate, lev->mixing[k]);
       }
       fprintf(f, "\n");
     }
@@ -2664,13 +2664,13 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
 
 int StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
   int k;
-  
+
   HAMILTON *h = ConstructHamiltonEB(cfac, n, ilev);
 
   if (DiagonalizeHamilton(cfac, h) < 0) {
     return -1;
   }
-  
+
   k = cfac->n_eblevels;
   AddToLevelsEB(cfac, h, 0, NULL);
   SortLevels(cfac, k, -1, 1);
@@ -2707,7 +2707,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   if (ns < 0) {
     return -1;
   }
-  
+
   if (ns > 0) {
     return ns;
   }
@@ -2728,7 +2728,7 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
     s1 = cfac->hams[ih1].basis[i1];
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
-    ks1 = s1->kstate;    
+    ks1 = s1->kstate;
     c1 = GetConfigFromGroup(cfac, kg1, kc1);
     if (ih1 == ih2) {
       i2m = i1;
@@ -2739,30 +2739,30 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       s2 = cfac->hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
-      ks2 = s2->kstate;          
+      ks2 = s2->kstate;
       c2 = GetConfigFromGroup(cfac, kg2, kc2);
       if (ih1 == ih2) {
-	iz1 = i1*ns2 + i2;
-	iz2 = i2*ns1 + i1;
+        iz1 = i1*ns2 + i2;
+        iz2 = i2*ns1 + i1;
       }
       if (abs(c1->n_shells - c2->n_shells) > 1) {
-	if (ih1 != ih2) {
-	  a[iz] = NULL;
-	  pnz[iz] = 0;
-	  iz++;
-	} else {
-	  a[iz1] = NULL;
-	  pnz[iz1] = 0;
-	  a[iz2] = NULL;
-	  pnz[iz2] = 0;
-	}
-	continue;
+        if (ih1 != ih2) {
+          a[iz] = NULL;
+          pnz[iz] = 0;
+          iz++;
+        } else {
+          a[iz1] = NULL;
+          pnz[iz1] = 0;
+          a[iz2] = NULL;
+          pnz[iz2] = 0;
+        }
+        continue;
       }
 
-      idatum = NULL; 
-      n_shells = GetInteract(cfac, &idatum, &sbra, &sket, 
-			     kg1, kg2, kc1, kc2, 
-			     ks1, ks2, 0);
+      idatum = NULL;
+      n_shells = GetInteract(cfac, &idatum, &sbra, &sket,
+                             kg1, kg2, kc1, kc2,
+                             ks1, ks2, 0);
       n = 0;
       ang = NULL;
       if (n_shells <= 0) goto OUT;
@@ -2770,84 +2770,84 @@ int AngularZMixStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       phase = idatum->phase;
       bra = idatum->bra;
       if (s[2].index >= 0 && s[0].index >= 0) {
-	free(sbra);
-	free(sket);
-	goto OUT;
+        free(sbra);
+        free(sket);
+        goto OUT;
       }
 
       nz = ANGZ_BLOCK;
       ang = malloc(sizeof(ANGULAR_ZMIX)*nz);
       if (!ang) {
-	printf("failed allocating memory for ang %d %d\n", nz, ns);
-	return -1;
+        printf("failed allocating memory for ang %d %d\n", nz, ns);
+        return -1;
       }
       if (s[0].index >= 0) {
-	nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1, kmax);
-	if (nkk > 0) {
-	  orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
-	  orb1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
-	  for (p = 0; p < nkk; p++) {
-	    if (IsOdd(phase)) r[p] = -r[p];
-	    AddToAngularZMix(&n, &nz, &ang, k[p], orb0, orb1, r[p]);
-	  }
-	  free(r);
-	  free(k);
-	}
+        nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1, kmax);
+        if (nkk > 0) {
+          orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
+          orb1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
+          for (p = 0; p < nkk; p++) {
+            if (IsOdd(phase)) r[p] = -r[p];
+            AddToAngularZMix(&n, &nz, &ang, k[p], orb0, orb1, r[p]);
+          }
+          free(r);
+          free(k);
+        }
       } else {
-	for (q = 0; q < n_shells; q++) {	    
-	  p = ShellToInt(bra[q].n, bra[q].kappa);
-	  if (ih1 != ih2 || i1 != i2) {
-	    if (IsClosedShell(cfac, ih1, p) &&
+        for (q = 0; q < n_shells; q++) {
+          p = ShellToInt(bra[q].n, bra[q].kappa);
+          if (ih1 != ih2 || i1 != i2) {
+            if (IsClosedShell(cfac, ih1, p) &&
                 IsClosedShell(cfac, ih2, p)) continue;
-	  }
-	  s[0].index = n_shells - q - 1;      
-	  s[1].index = s[0].index;
-	  s[0].n = bra[q].n;
-	  s[1].n = s[0].n;
-	  s[0].kappa = bra[q].kappa;
-	  s[1].kappa = s[0].kappa;
-	  s[0].j = GetJ(bra+q);
-	  s[1].j = s[0].j;
-	  s[0].kl = GetL(bra+q);
-	  s[1].kl = s[0].kl;
-	  s[0].nq_bra = GetNq(bra+q);
-	  s[0].nq_ket = s[0].nq_bra;
-	  s[1].nq_bra = s[0].nq_bra;
-	  s[1].nq_ket = s[1].nq_bra;
-	  nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1, kmax);
-	  if (nkk > 0) {
-	    orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
-	    orb1 = orb0;
-	    for (p = 0; p < nkk; p++) {
-	      if (fabs(r[p]) < EPS30) continue;
-	      if (IsOdd(phase)) r[p] = -r[p];
-	      AddToAngularZMix(&n, &nz, &ang, k[p], orb0, orb1, r[p]);
-	    }	    
-	    free(r);
-	    free(k);
-	  }
-	}
+          }
+          s[0].index = n_shells - q - 1;
+          s[1].index = s[0].index;
+          s[0].n = bra[q].n;
+          s[1].n = s[0].n;
+          s[0].kappa = bra[q].kappa;
+          s[1].kappa = s[0].kappa;
+          s[0].j = GetJ(bra+q);
+          s[1].j = s[0].j;
+          s[0].kl = GetL(bra+q);
+          s[1].kl = s[0].kl;
+          s[0].nq_bra = GetNq(bra+q);
+          s[0].nq_ket = s[0].nq_bra;
+          s[1].nq_bra = s[0].nq_bra;
+          s[1].nq_ket = s[1].nq_bra;
+          nkk = AngularZ(&r, &k, 0, n_shells, sbra, sket, s, s+1, kmax);
+          if (nkk > 0) {
+            orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
+            orb1 = orb0;
+            for (p = 0; p < nkk; p++) {
+              if (fabs(r[p]) < EPS30) continue;
+              if (IsOdd(phase)) r[p] = -r[p];
+              AddToAngularZMix(&n, &nz, &ang, k[p], orb0, orb1, r[p]);
+            }
+            free(r);
+            free(k);
+          }
+        }
       }
       PackAngularZMix(&n, &ang, nz);
       free(sbra);
       free(sket);
     OUT:
       if (ih1 != ih2) {
-	a[iz] = ang;
-	pnz[iz] = n;
-	iz++;
+        a[iz] = ang;
+        pnz[iz] = n;
+        iz++;
       } else {
-	a[iz1] = ang;
-	pnz[iz1] = n;
-	if (iz2 != iz1) {
-	  if (n > 0) {
-	    ang = malloc(sizeof(ANGULAR_ZMIX)*n);
-	    memcpy(ang, a[iz1], sizeof(ANGULAR_ZMIX)*n);
-	    AngZSwapBraKet(cfac, n, ang, 0);
-	  }
-	  a[iz2] = ang;
-	  pnz[iz2] = n;
-	}
+        a[iz1] = ang;
+        pnz[iz1] = n;
+        if (iz2 != iz1) {
+          if (n > 0) {
+            ang = malloc(sizeof(ANGULAR_ZMIX)*n);
+            memcpy(ang, a[iz1], sizeof(ANGULAR_ZMIX)*n);
+            AngZSwapBraKet(cfac, n, ang, 0);
+          }
+          a[iz2] = ang;
+          pnz[iz2] = n;
+        }
       }
     }
   }
@@ -2871,7 +2871,7 @@ int AngZSwapBraKet(cfac_t *cfac, int nz, ANGULAR_ZMIX *ang, int p) {
   }
   return 0;
 }
-    
+
 int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   int kg1, kg2;
   int kc1, kc2;
@@ -2889,7 +2889,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   SHELL_STATE *sbra, *sket;
   CONFIG *c1, *c2;
   ANGULAR_ZFB *ang, **a;
-  
+
   iz = ih1*MAX_HAMS + ih2;
   *ad = &(cfac->angz_array[iz]);
   ns = (*ad)->ns;
@@ -2907,79 +2907,79 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
   (*ad)->nz = malloc(sizeof(int)*ns);
-  
+
   kmax = GetMaxRank(cfac);
 
   iz = 0;
   a = (ANGULAR_ZFB **) (*ad)->angz;
   pnz = (*ad)->nz;
-    
+
   for (i1 = 0; i1 < ns1; i1++) {
     s1 = cfac->hams[ih1].basis[i1];
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
-    ks1 = s1->kstate;    
+    ks1 = s1->kstate;
     c1 = GetConfigFromGroup(cfac, kg1, kc1);
     j1 = (c1->csfs[ks1]).totalJ;
     for (i2 = 0; i2 < ns2; i2++) {
       s2 = cfac->hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
-      ks2 = s2->kstate;          
+      ks2 = s2->kstate;
       c2 = GetConfigFromGroup(cfac, kg2, kc2);
-          
+
       if (abs(c1->n_shells+1 - c2->n_shells) > 1) {
-	a[iz] = NULL;
-	pnz[iz] = 0;
-	iz++;
-	continue;
-      }      
-      
+        a[iz] = NULL;
+        pnz[iz] = 0;
+        iz++;
+        continue;
+      }
+
       j2 = (c2->csfs[ks2]).totalJ;
       idatum = NULL;
       n_shells = GetInteract(cfac, &idatum, &sbra, &sket,
-			     kg1, kg2, kc1, kc2, 
-			     ks1, ks2, 1);
+                             kg1, kg2, kc1, kc2,
+                             ks1, ks2, 1);
       n = 0;
       ang = NULL;
       if (n_shells <= 0) goto END;
       memcpy(s, idatum->s, sizeof(INTERACT_SHELL)*4);
       phase = idatum->phase;
       if (s[0].index < 0 || (s[0].index >= 0 && s[2].index >= 0)) {
-	free(sbra);
-	free(sket);
-	goto END;
+        free(sbra);
+        free(sket);
+        goto END;
       }
-      
+
       tf = 0;
       for (k0 = 0; k0 <= kmax; k0 += 2) {
-	for (jf = abs(k0-s[1].j); jf <= k0+s[1].j; jf += 2) {
-	  for (jp = abs(jf-j1); jp <= jf+j1; jp += 2) {
-	    if (Triangle(jp, j2, k0) && Triangle(j1, j2, s[1].j)) {
-	      tf = 1;
-	      goto TF;
-	    }
-	  }
-	}
-      }	  
-    TF:	  
+        for (jf = abs(k0-s[1].j); jf <= k0+s[1].j; jf += 2) {
+          for (jp = abs(jf-j1); jp <= jf+j1; jp += 2) {
+            if (Triangle(jp, j2, k0) && Triangle(j1, j2, s[1].j)) {
+              tf = 1;
+              goto TF;
+            }
+          }
+        }
+      }
+    TF:
       if (tf == 1) {
-	s[0].j = jf;
-	s[0].kl = jf + 1;
-	s[0].kappa = GetKappaFromJL(s[0].j, s[0].kl);
-	sbra[0].shellJ = jf;
-	sbra[0].totalJ = jp; 
-	k = &k0;
-	r = &r0;
-	AngularZ(&r, &k, 1, n_shells, sbra, sket, s, s+1, kmax);
-	if (fabs(*r) < EPS30) goto END;
-	if (IsOdd(phase+(jp+j2-k0)/2)) *r = -(*r);
-	*r /= sqrt(jp+1.0)*W6j(j1, jf, jp, k0, j2, s[1].j);
-	kb = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
-	ang = malloc(sizeof(ANGULAR_ZFB));
-	ang->kb = kb;
-	ang->coeff = *r;
-	n = 1;
+        s[0].j = jf;
+        s[0].kl = jf + 1;
+        s[0].kappa = GetKappaFromJL(s[0].j, s[0].kl);
+        sbra[0].shellJ = jf;
+        sbra[0].totalJ = jp;
+        k = &k0;
+        r = &r0;
+        AngularZ(&r, &k, 1, n_shells, sbra, sket, s, s+1, kmax);
+        if (fabs(*r) < EPS30) goto END;
+        if (IsOdd(phase+(jp+j2-k0)/2)) *r = -(*r);
+        *r /= sqrt(jp+1.0)*W6j(j1, jf, jp, k0, j2, s[1].j);
+        kb = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
+        ang = malloc(sizeof(ANGULAR_ZFB));
+        ang->kb = kb;
+        ang->coeff = *r;
+        n = 1;
       }
       free(sbra);
       free(sket);
@@ -2989,7 +2989,7 @@ int AngularZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       iz++;
     }
   }
-  
+
   return (*ad)->ns;
 }
 
@@ -3000,7 +3000,7 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   int j1, j2, i, n, nz;
   int jmin, jmax, jf;
   int ns1, ns2, *pnz, iz;
-  int ns, ks1, ks2;  
+  int ns, ks1, ks2;
   INTERACT_SHELL s[4];
   SHELL *bra;
   SHELL_STATE *sbra, *sket;
@@ -3013,56 +3013,56 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
   *ad = &(cfac->angzxz_array[iz]);
   ns = (*ad)->ns;
 
-  if (ns < 0) { 
+  if (ns < 0) {
     return -1;
   }
-  
+
   if (ns > 0) {
     return ns;
   }
-  
+
   ns1 = cfac->hams[ih1].nbasis;
   ns2 = cfac->hams[ih2].nbasis;
   (*ad)->ns = ns1*ns2;
   ns = (*ad)->ns;
   (*ad)->angz = malloc(sizeof(ANGULAR_ZxZMIX *)*ns);
   (*ad)->nz = malloc(sizeof(int)*ns);
-  
+
   iz = 0;
   a = (ANGULAR_ZxZMIX **) (*ad)->angz;
-  pnz = (*ad)->nz;  
+  pnz = (*ad)->nz;
 
 
   for (i1 = 0; i1 < ns1; i1++) {
     s1 = cfac->hams[ih1].basis[i1];
     kg1 = s1->kgroup;
     kc1 = s1->kcfg;
-    ks1 = s1->kstate;    
+    ks1 = s1->kstate;
     c1 = GetConfigFromGroup(cfac, kg1, kc1);
     j1 = (c1->csfs[ks1]).totalJ;
     for (i2 = 0; i2 < ns2; i2++) {
       s2 = cfac->hams[ih2].basis[i2];
       kg2 = s2->kgroup;
       kc2 = s2->kcfg;
-      ks2 = s2->kstate;          
+      ks2 = s2->kstate;
       c2 = GetConfigFromGroup(cfac, kg2, kc2);
-      
+
       if (abs(c1->n_shells+1 - c2->n_shells) > 2) {
-	a[iz] = NULL;
-	pnz[iz] = 0;
-	iz++;
-	continue;
+        a[iz] = NULL;
+        pnz[iz] = 0;
+        iz++;
+        continue;
       }
-   
+
       j2 = (c2->csfs[ks2]).totalJ;
       idatum = NULL;
       n_shells = GetInteract(cfac, &idatum, &sbra, &sket,
-			     kg1, kg2, kc1, kc2, 
-			     ks1, ks2, 1);
+                             kg1, kg2, kc1, kc2,
+                             ks1, ks2, 1);
       n = 0;
       ang = NULL;
       if (n_shells <= 0) goto END;
-      
+
       nz = ANGZxZ_BLOCK;
       ang = malloc(sizeof(ANGULAR_ZxZMIX)*nz);
       phase = idatum->phase;
@@ -3071,51 +3071,51 @@ int AngularZxZFreeBoundStates(cfac_t *cfac, ANGZ_DATUM **ad, int ih1, int ih2) {
       jmin = abs(j2 - j1);
       jmax = j1 + j2;
       for (jf = jmin; jf <= jmax; jf += 2) {
-	memcpy(s, idatum->s+2, sizeof(INTERACT_SHELL)*2);
-	memcpy(s+2, idatum->s, sizeof(INTERACT_SHELL)*2);
-	s[2].j = jf;
-	s[2].kl = jf+1;
-	s[2].kappa = GetKappaFromJL(s[2].j, s[2].kl);
-	sbra[0].shellJ = s[2].j;
-	
-	if (s[0].index >= 0) {
-	  AddToAngularZxZ(cfac, &n, &nz, &ang, n_shells, phase, 
-			  sbra, sket, s, 1);
-	} else {
-	  for (i = 0; i < n_shells; i++) {
-	    s[0].index = n_shells - i - 1;
-	    if (s[0].index == s[2].index) continue;
-	    if (s[0].index == s[3].index && s[3].nq_ket < 2) continue;
-	    s[1].index = s[0].index;
-	    s[0].n = bra[i].n;
-	    s[1].n = s[0].n;
-	    s[0].kappa = bra[i].kappa;
-	    s[1].kappa = s[0].kappa;
-	    s[0].j = GetJ(bra+i);
-	    s[1].j = s[0].j;
-	    s[0].kl = GetL(bra+i);
-	    s[1].kl = s[0].kl;
-	    s[0].nq_bra = GetNq(bra+i);
-	    if (s[0].index == s[2].index) {
-	      s[0].nq_ket = s[0].nq_bra - 1;
-	    } else if (s[0].index == s[3].index) {
-	      s[0].nq_ket = s[0].nq_bra + 1;
-	    } else {
-	      s[0].nq_ket = s[0].nq_bra;
-	    }
-	    s[1].nq_bra = s[0].nq_bra;
-	    s[1].nq_ket = s[0].nq_ket;
-	    AddToAngularZxZ(cfac, &n, &nz, &ang, n_shells, phase, 
-			    sbra, sket, s, 1);
-	  }
-	}
+        memcpy(s, idatum->s+2, sizeof(INTERACT_SHELL)*2);
+        memcpy(s+2, idatum->s, sizeof(INTERACT_SHELL)*2);
+        s[2].j = jf;
+        s[2].kl = jf+1;
+        s[2].kappa = GetKappaFromJL(s[2].j, s[2].kl);
+        sbra[0].shellJ = s[2].j;
+
+        if (s[0].index >= 0) {
+          AddToAngularZxZ(cfac, &n, &nz, &ang, n_shells, phase,
+                          sbra, sket, s, 1);
+        } else {
+          for (i = 0; i < n_shells; i++) {
+            s[0].index = n_shells - i - 1;
+            if (s[0].index == s[2].index) continue;
+            if (s[0].index == s[3].index && s[3].nq_ket < 2) continue;
+            s[1].index = s[0].index;
+            s[0].n = bra[i].n;
+            s[1].n = s[0].n;
+            s[0].kappa = bra[i].kappa;
+            s[1].kappa = s[0].kappa;
+            s[0].j = GetJ(bra+i);
+            s[1].j = s[0].j;
+            s[0].kl = GetL(bra+i);
+            s[1].kl = s[0].kl;
+            s[0].nq_bra = GetNq(bra+i);
+            if (s[0].index == s[2].index) {
+              s[0].nq_ket = s[0].nq_bra - 1;
+            } else if (s[0].index == s[3].index) {
+              s[0].nq_ket = s[0].nq_bra + 1;
+            } else {
+              s[0].nq_ket = s[0].nq_bra;
+            }
+            s[1].nq_bra = s[0].nq_bra;
+            s[1].nq_ket = s[0].nq_ket;
+            AddToAngularZxZ(cfac, &n, &nz, &ang, n_shells, phase,
+                            sbra, sket, s, 1);
+          }
+        }
       }
-      
+
       PackAngularZxZMix(&n, &ang, nz);
       free(sbra);
       free(sket);
-      
-    END:	  
+
+    END:
       a[iz] = ang;
       pnz[iz] = n;
       iz++;
@@ -3132,7 +3132,7 @@ int PrepAngular(cfac_t *cfac, int n1, int *is1, int n2, int *is2) {
   STATE *s1, *s2;
   LEVEL *lev1, *lev2;
   ANGZ_DATUM *ad;
-  
+
   if (cfac->angmz_array == NULL) {
     cfac->angmz_array = malloc(sizeof(ANGZ_DATUM)*MAX_HAMS2);
     if (!cfac->angmz_array) {
@@ -3148,7 +3148,7 @@ int PrepAngular(cfac_t *cfac, int n1, int *is1, int n2, int *is2) {
     n2 = n1;
     is2 = is1;
   }
-  
+
   for (i1 = 0; i1 < n1; i1++) {
     lev1 = GetLevel(cfac, is1[i1]);
     ih1 = lev1->iham;
@@ -3168,51 +3168,51 @@ int PrepAngular(cfac_t *cfac, int n1, int *is1, int n2, int *is2) {
       ns2 = cfac->hams[ih2].nlevs;
       ns = ns1*ns2;
       if (ne1 == ne2) {
-	if (ih1 > ih2) {
-	  iz = ih2 * MAX_HAMS + ih1;
-	  is = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
-	} else {
-	  iz = ih1 * MAX_HAMS + ih2;
-	  is = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
-	}
+        if (ih1 > ih2) {
+          iz = ih2 * MAX_HAMS + ih1;
+          is = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
+        } else {
+          iz = ih1 * MAX_HAMS + ih2;
+          is = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
+        }
       } else {
-	if (ne1 > ne2) {
-	  iz = ih2 * MAX_HAMS + ih1;
-	  is = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
-	} else {
-	  iz = ih1 * MAX_HAMS + ih2;
-	  is = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
-	}
+        if (ne1 > ne2) {
+          iz = ih2 * MAX_HAMS + ih1;
+          is = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
+        } else {
+          iz = ih1 * MAX_HAMS + ih2;
+          is = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
+        }
       }
       ad = &(cfac->angmz_array[iz]);
       if (ad->ns == 0) {
-	if (ne1 == ne2) {
-	  ad->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
-	} else {
-	  ad->angz = malloc(sizeof(ANGULAR_ZFB *)*ns);
-	}
-	ad->nz = malloc(sizeof(int)*ns);
-	for (i = 0; i < ns; i++) (ad->nz)[i] = 0;
-	ad->ns = ns;
+        if (ne1 == ne2) {
+          ad->angz = malloc(sizeof(ANGULAR_ZMIX *)*ns);
+        } else {
+          ad->angz = malloc(sizeof(ANGULAR_ZFB *)*ns);
+        }
+        ad->nz = malloc(sizeof(int)*ns);
+        for (i = 0; i < ns; i++) (ad->nz)[i] = 0;
+        ad->ns = ns;
       }
       nz = (ad->nz)[is];
       if (nz != 0) continue;
       if (ne1 == ne2) {
-	if (ih1 > ih2) {
-	  nz = AngularZMix(cfac, (ANGULAR_ZMIX **)(&((ad->angz)[is])), 
-			   is2[i2], is1[i1], -1, -1);
-	} else {
-	  nz = AngularZMix(cfac, (ANGULAR_ZMIX **)(&((ad->angz)[is])), 
-			   is1[i1], is2[i2], -1, -1);
-	}
+        if (ih1 > ih2) {
+          nz = AngularZMix(cfac, (ANGULAR_ZMIX **)(&((ad->angz)[is])),
+                           is2[i2], is1[i1], -1, -1);
+        } else {
+          nz = AngularZMix(cfac, (ANGULAR_ZMIX **)(&((ad->angz)[is])),
+                           is1[i1], is2[i2], -1, -1);
+        }
       } else {
-	if (ne1 > ne2) {
-	  nz = AngularZFreeBound(cfac, (ANGULAR_ZFB **)(&((ad->angz)[is])), 
-				 is2[i2], is1[i1]);
-	} else {
-	  nz = AngularZFreeBound(cfac, (ANGULAR_ZFB **)(&((ad->angz)[is])), 
-				 is1[i1], is2[i2]);
-	}	
+        if (ne1 > ne2) {
+          nz = AngularZFreeBound(cfac, (ANGULAR_ZFB **)(&((ad->angz)[is])),
+                                 is2[i2], is1[i1]);
+        } else {
+          nz = AngularZFreeBound(cfac, (ANGULAR_ZFB **)(&((ad->angz)[is])),
+                                 is1[i1], is2[i2]);
+        }
       }
       if (nz == 0) nz = -1;
       (ad->nz)[is] = nz;
@@ -3223,7 +3223,7 @@ int PrepAngular(cfac_t *cfac, int n1, int *is1, int n2, int *is2) {
 }
 
 int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
-  int i, j, m; 
+  int i, j, m;
   int nz, n;
   double r0;
   int ih1, ih2;
@@ -3235,7 +3235,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
   ANGULAR_ZFB *ang_sub;
   double mix1, mix2, sqrt_j2;
   int kg, jf, kb, j1, j2;
-  
+
   lev1 = GetLevel(cfac, lower);
   lev2 = GetLevel(cfac, upper);
 
@@ -3247,12 +3247,12 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
       ad = &(cfac->angmz_array[isz]);
       nz = 0;
       if (ad->ns > 0) {
-	isz0 = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
-	nz = (ad->nz)[isz0];
-	if (nz > 0) {
-	  *ang = malloc(sizeof(ANGULAR_ZFB)*nz);
-	  memcpy(*ang, (ad->angz)[isz0], sizeof(ANGULAR_ZFB)*nz);
-	}
+        isz0 = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
+        nz = (ad->nz)[isz0];
+        if (nz > 0) {
+          *ang = malloc(sizeof(ANGULAR_ZFB)*nz);
+          memcpy(*ang, (ad->angz)[isz0], sizeof(ANGULAR_ZFB)*nz);
+        }
       }
       if (nz != 0) return nz;
     }
@@ -3263,7 +3263,7 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
   j2 = lev2->pj;
   DecodePJ(j1, NULL, &j1);
   DecodePJ(j2, NULL, &j2);
-  
+
   sup = GetSymmetryState(sym2, lev2->pb);
   if (sup->kgroup < 0) {
     sqrt_j2 = sqrt(j2 + 1.0);
@@ -3273,21 +3273,21 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
     for (j = 0; j < lev2->n_basis; j++) {
       mix2 = lev2->mixing[j];
       if (fabs(mix2) < cfac->angz_cut) {
-	break;
+        break;
       }
       sup = GetSymmetryState(sym2, lev2->basis[j]);
       kg = sup->kgroup;
       kg = -kg-1;
       if (kg == lower) {
-	kb = sup->kcfg;
-	jf = GetOrbital(cfac, kb)->kappa;
-	jf = GetJFromKappa(jf);
-	r0 = mix2*sqrt_j2;
-	if (fabs(r0) < cfac->angz_cut) continue;
-	if (IsEven((j2+jf-j1)/2)) r0 = -r0;
-	AddToAngularZFB(&n, &nz, ang, kb, r0);
+        kb = sup->kcfg;
+        jf = GetOrbital(cfac, kb)->kappa;
+        jf = GetJFromKappa(jf);
+        r0 = mix2*sqrt_j2;
+        if (fabs(r0) < cfac->angz_cut) continue;
+        if (IsEven((j2+jf-j1)/2)) r0 = -r0;
+        AddToAngularZFB(&n, &nz, ang, kb, r0);
       }
-    }    
+    }
   } else {
     n = 0;
     nz = ANGZ_BLOCK;
@@ -3299,24 +3299,24 @@ int AngularZFreeBound(cfac_t *cfac, ANGULAR_ZFB **ang, int lower, int upper) {
       ih1 = lev1->ibasis[i];
       isz0 = ih1 * cfac->hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
-	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < cfac->angz_cut) continue;
-	r0 = mix1*mix2;
-	if (fabs(r0) < cfac->angz_cut) continue;
-	ih2 = lev2->ibasis[j];
-	isz = isz0 + ih2;
-	m = (ad->nz)[isz];
-	if (m == 1) {
-	  ang_sub = (ad->angz)[isz];
-	  kb = ang_sub->kb;
-	  r0 *= ang_sub->coeff;
-	  if (fabs(r0) < cfac->angz_cut) continue;
-	  AddToAngularZFB(&n, &nz, ang, kb, r0);
-	}
+        mix2 = lev2->mixing[j];
+        if (fabs(mix2) < cfac->angz_cut) continue;
+        r0 = mix1*mix2;
+        if (fabs(r0) < cfac->angz_cut) continue;
+        ih2 = lev2->ibasis[j];
+        isz = isz0 + ih2;
+        m = (ad->nz)[isz];
+        if (m == 1) {
+          ang_sub = (ad->angz)[isz];
+          kb = ang_sub->kb;
+          r0 *= ang_sub->coeff;
+          if (fabs(r0) < cfac->angz_cut) continue;
+          AddToAngularZFB(&n, &nz, ang, kb, r0);
+        }
       }
     }
   }
-  
+
   PackAngularZFB(&n, ang, nz);
 
   return n;
@@ -3358,35 +3358,35 @@ int AngularZMix(cfac_t *cfac,
     ih2 = lev2->iham;
     if (ih1 >= 0 && ih2 >= 0) {
       if (ih1 > ih2) {
-	isz = ih2 * MAX_HAMS + ih1;
+        isz = ih2 * MAX_HAMS + ih1;
       } else {
-	isz = ih1 * MAX_HAMS + ih2;
+        isz = ih1 * MAX_HAMS + ih2;
       }
       ad = &(cfac->angmz_array[isz]);
       nz = 0;
       if (ad->ns > 0) {
-	if (ih1 > ih2) {
-	  isz0 = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
-	} else {
-	  isz0 = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
-	}
-	nz = (ad->nz)[isz0];
-	if (nz > 0) {
-	  *ang = malloc(sizeof(ANGULAR_ZMIX)*nz);
-	  memcpy(*ang, (ad->angz)[isz0], sizeof(ANGULAR_ZMIX)*nz);
-	}
-      }  
+        if (ih1 > ih2) {
+          isz0 = lev2->ilev * cfac->hams[ih1].nlevs + lev1->ilev;
+        } else {
+          isz0 = lev1->ilev * cfac->hams[ih2].nlevs + lev2->ilev;
+        }
+        nz = (ad->nz)[isz0];
+        if (nz > 0) {
+          *ang = malloc(sizeof(ANGULAR_ZMIX)*nz);
+          memcpy(*ang, (ad->angz)[isz0], sizeof(ANGULAR_ZMIX)*nz);
+        }
+      }
       if (nz != 0) {
-	if (nz > 0 && ih1 > ih2) {
-	  sym1 = GetSymmetry(cfac, lev1->pj);
-	  sym2 = GetSymmetry(cfac, lev2->pj);
-	  j1 = lev1->pj;
-	  j2 = lev2->pj;
-	  DecodePJ(j1, NULL, &j1);
-	  DecodePJ(j2, NULL, &j2);
-	  AngZSwapBraKet(cfac, nz, *ang, j1-j2);
-	}
-	return nz;
+        if (nz > 0 && ih1 > ih2) {
+          sym1 = GetSymmetry(cfac, lev1->pj);
+          sym2 = GetSymmetry(cfac, lev2->pj);
+          j1 = lev1->pj;
+          j2 = lev2->pj;
+          DecodePJ(j1, NULL, &j1);
+          DecodePJ(j2, NULL, &j2);
+          AngZSwapBraKet(cfac, nz, *ang, j1-j2);
+        }
+        return nz;
       }
     }
   }
@@ -3421,7 +3421,7 @@ int AngularZMix(cfac_t *cfac,
       kb2 = sup->kcfg;
       m = GetOrbital(cfac, kb2)->n;
       if (m == n) {
-	ignore_ryd = 1;
+        ignore_ryd = 1;
       }
     }
   } else if (kg2 < 0) {
@@ -3429,11 +3429,11 @@ int AngularZMix(cfac_t *cfac,
     n = GetOrbital(cfac, kb2)->n;
     if (cfac->angz_maxn > 0 && cfac->angz_maxn < n) ignore_ryd = 1;
   }
-  
+
   n = 0;
   nz = ANGZ_BLOCK;
-  (*ang) = malloc(sizeof(ANGULAR_ZMIX)*nz);  
-  if (kg1 < 0 && kg2 < 0) {      
+  (*ang) = malloc(sizeof(ANGULAR_ZMIX)*nz);
+  if (kg1 < 0 && kg2 < 0) {
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
@@ -3445,53 +3445,53 @@ int AngularZMix(cfac_t *cfac,
       jb1 = GetOrbital(cfac, kb1)->kappa;
       jb1 = GetJFromKappa(jb1);
       for (j = 0; j < lev2->n_basis; j++) {
-	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < cfac->angz_cut) continue;
-	a = mix1*mix2;
-	if (fabs(a) < cfac->angz_cut) continue;
-	sup = GetSymmetryState(sym2, lev2->basis[j]);
-	jup = GetBaseJ(cfac, sup);
-	kg2 = sup->kgroup;
-	kg2 = -kg2-1;
-	kb2 = sup->kcfg;
-	jb2 = GetOrbital(cfac, kb2)->kappa;
-	jb2 = GetJFromKappa(jb2);
+        mix2 = lev2->mixing[j];
+        if (fabs(mix2) < cfac->angz_cut) continue;
+        a = mix1*mix2;
+        if (fabs(a) < cfac->angz_cut) continue;
+        sup = GetSymmetryState(sym2, lev2->basis[j]);
+        jup = GetBaseJ(cfac, sup);
+        kg2 = sup->kgroup;
+        kg2 = -kg2-1;
+        kb2 = sup->kcfg;
+        jb2 = GetOrbital(cfac, kb2)->kappa;
+        jb2 = GetJFromKappa(jb2);
 
-	if (ignore_ryd && kb1 != kb2) {
-	  continue;
-	}
+        if (ignore_ryd && kb1 != kb2) {
+          continue;
+        }
 
-	if (kg1 == kg2) {
-	  for (ik = kmin; ik <= kmax; ik += 2) {
-	    r0 = W6j(jlow, jb1, j1, ik, j2, jb2);
-	    if (fabs(r0) < EPS30) continue;
-	    r0 *= a*sqrt_j12;
-	    if (fabs(r0) < cfac->angz_cut) continue;
-	    if (IsEven((j1+jb2-jlow-ik)/2+j2)) r0 = -r0;
-	    AddToAngularZMix(&n, &nz, ang, ik, kb1, kb2, r0);
-	  }
-	}
-	if (kb1 == kb2){	  
-	  nz_sub = AngularZMix(cfac, &ang_sub, kg1, kg2, kmin, kmax);
-	  if (nz_sub <= 0) {
-	    continue;
-	  }
-	  for (m = 0; m < nz_sub; m++) {
-	    r0 = W6j(jlow, jb1, j1, j2, ang_sub[m].k, jup);
-	    if (fabs(r0) < EPS30) continue;
-	    r0 *= a*ang_sub[m].coeff;
-	    if (fabs(r0) < cfac->angz_cut) continue;
-	    r0 *= sqrt_j12;
-	    if (IsOdd((jlow+jb1+j2+ang_sub[m].k)/2)) r0 = -r0;
-	    AddToAngularZMix(&n, &nz, ang, ang_sub[m].k, 
-				  ang_sub[m].k0, ang_sub[m].k1, r0);
-	  }
-	  if (nz_sub > 0) free(ang_sub);
-	}
+        if (kg1 == kg2) {
+          for (ik = kmin; ik <= kmax; ik += 2) {
+            r0 = W6j(jlow, jb1, j1, ik, j2, jb2);
+            if (fabs(r0) < EPS30) continue;
+            r0 *= a*sqrt_j12;
+            if (fabs(r0) < cfac->angz_cut) continue;
+            if (IsEven((j1+jb2-jlow-ik)/2+j2)) r0 = -r0;
+            AddToAngularZMix(&n, &nz, ang, ik, kb1, kb2, r0);
+          }
+        }
+        if (kb1 == kb2){
+          nz_sub = AngularZMix(cfac, &ang_sub, kg1, kg2, kmin, kmax);
+          if (nz_sub <= 0) {
+            continue;
+          }
+          for (m = 0; m < nz_sub; m++) {
+            r0 = W6j(jlow, jb1, j1, j2, ang_sub[m].k, jup);
+            if (fabs(r0) < EPS30) continue;
+            r0 *= a*ang_sub[m].coeff;
+            if (fabs(r0) < cfac->angz_cut) continue;
+            r0 *= sqrt_j12;
+            if (IsOdd((jlow+jb1+j2+ang_sub[m].k)/2)) r0 = -r0;
+            AddToAngularZMix(&n, &nz, ang, ang_sub[m].k,
+                                  ang_sub[m].k0, ang_sub[m].k1, r0);
+          }
+          if (nz_sub > 0) free(ang_sub);
+        }
       }
     }
     PackAngularZMix(&n, ang, nz);
-  } else if (kg1 < 0 && !ignore_ryd) {        
+  } else if (kg1 < 0 && !ignore_ryd) {
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
       if (fabs(mix1) < cfac->angz_cut) continue;
@@ -3504,16 +3504,16 @@ int AngularZMix(cfac_t *cfac,
       kg1 = -kg1-1;
       nfb = AngularZFreeBound(cfac, &afb, kg1, upper);
       for (m = 0; m < nfb; m++) {
-	jb2 = GetOrbital(cfac, afb[m].kb)->kappa;
-	jb2 = GetJFromKappa(jb2);
-	for (ik = kmin; ik <= kmax; ik += 2) {
-	  r0 = W6j(jlow, jb1, j1, ik, j2, jb2);
-	  if (fabs(r0) < EPS30) continue;
-	  r0 *= mix1*afb[m].coeff*sqrt(j1+1.0);
-	  if (fabs(r0) < cfac->angz_cut) continue;
-	  if (IsOdd((j1+j2-ik)/2)) r0 = -r0;
-	  AddToAngularZMix(&n, &nz, ang, ik, kb1, afb[m].kb, r0);
-	}
+        jb2 = GetOrbital(cfac, afb[m].kb)->kappa;
+        jb2 = GetJFromKappa(jb2);
+        for (ik = kmin; ik <= kmax; ik += 2) {
+          r0 = W6j(jlow, jb1, j1, ik, j2, jb2);
+          if (fabs(r0) < EPS30) continue;
+          r0 *= mix1*afb[m].coeff*sqrt(j1+1.0);
+          if (fabs(r0) < cfac->angz_cut) continue;
+          if (IsOdd((j1+j2-ik)/2)) r0 = -r0;
+          AddToAngularZMix(&n, &nz, ang, ik, kb1, afb[m].kb, r0);
+        }
       }
       if (nfb > 0) free(afb);
     }
@@ -3531,16 +3531,16 @@ int AngularZMix(cfac_t *cfac,
       kg2 = -kg2-1;
       nfb = AngularZFreeBound(cfac, &afb, kg2, lower);
       for (m = 0; m < nfb; m++) {
-	jb1 = GetOrbital(cfac, afb[m].kb)->kappa;
-	jb1 = GetJFromKappa(jb1);
-	for (ik = kmin; ik <= kmax; ik += 2) {
-	  r0 = W6j(jup, jb2, j2, ik, j1, jb1);
-	  if (fabs(r0) < EPS30) continue;
-	  r0 *= mix2*afb[m].coeff*sqrt(j2+1.0);
-	  if (fabs(r0) < cfac->angz_cut) continue;
-	  if (IsOdd((2*j1-ik+jb1-jb2)/2)) r0 = -r0;
-	  AddToAngularZMix(&n, &nz, ang, ik, afb[m].kb, kb2, r0);
-	}
+        jb1 = GetOrbital(cfac, afb[m].kb)->kappa;
+        jb1 = GetJFromKappa(jb1);
+        for (ik = kmin; ik <= kmax; ik += 2) {
+          r0 = W6j(jup, jb2, j2, ik, j1, jb1);
+          if (fabs(r0) < EPS30) continue;
+          r0 *= mix2*afb[m].coeff*sqrt(j2+1.0);
+          if (fabs(r0) < cfac->angz_cut) continue;
+          if (IsOdd((2*j1-ik+jb1-jb2)/2)) r0 = -r0;
+          AddToAngularZMix(&n, &nz, ang, ik, afb[m].kb, kb2, r0);
+        }
       }
       if (nfb > 0) free(afb);
     }
@@ -3562,23 +3562,23 @@ int AngularZMix(cfac_t *cfac,
       ih1 = lev1->ibasis[i];
       isz0 = ih1 * cfac->hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
-	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < cfac->angz_cut) continue;
-	a = mix1*mix2;
-	if (fabs(a) < cfac->angz_cut) continue;
-	ih2 = lev2->ibasis[j];
-	isz = isz0 + ih2;
-	nz_sub = (ad->nz)[isz];
-	if (nz_sub > 0) {
-	  ang_sub = (ad->angz)[isz];
-	  for (m = 0; m < nz_sub; m++) {
-	    if (ang_sub[m].k > kmax || ang_sub[m].k < kmin) continue;
-	    r0 = ang_sub[m].coeff*a;
-	    if (fabs(r0) < cfac->angz_cut) continue;
-	    AddToAngularZMix(&n, &nz, ang, ang_sub[m].k, 
-				  ang_sub[m].k0, ang_sub[m].k1, r0);
-	  }
-	}
+        mix2 = lev2->mixing[j];
+        if (fabs(mix2) < cfac->angz_cut) continue;
+        a = mix1*mix2;
+        if (fabs(a) < cfac->angz_cut) continue;
+        ih2 = lev2->ibasis[j];
+        isz = isz0 + ih2;
+        nz_sub = (ad->nz)[isz];
+        if (nz_sub > 0) {
+          ang_sub = (ad->angz)[isz];
+          for (m = 0; m < nz_sub; m++) {
+            if (ang_sub[m].k > kmax || ang_sub[m].k < kmin) continue;
+            r0 = ang_sub[m].coeff*a;
+            if (fabs(r0) < cfac->angz_cut) continue;
+            AddToAngularZMix(&n, &nz, ang, ang_sub[m].k,
+                                  ang_sub[m].k0, ang_sub[m].k1, r0);
+          }
+        }
       }
     }
     PackAngularZMix(&n, ang, nz);
@@ -3589,8 +3589,8 @@ int AngularZMix(cfac_t *cfac,
 
     /*
     for (i = 0; i < n; i++) {
-      printf("%2d %3d %2d %2d %2d %10.3E\n", lower, upper, 
-	     (*ang)[i].k, (*ang)[i].k0, (*ang)[i].k1, (*ang)[i].coeff);
+      printf("%2d %3d %2d %2d %2d %10.3E\n", lower, upper,
+             (*ang)[i].k, (*ang)[i].k0, (*ang)[i].k1, (*ang)[i].coeff);
     }
     */
   }
@@ -3629,9 +3629,9 @@ int AngularZxZFreeBound(cfac_t *cfac,
   n = 0;
   (*ang) = malloc(sizeof(ANGULAR_ZxZMIX)*nz);
   if (!(*ang)) return -1;
-    
+
   sup = GetSymmetryState(sym2, lev2->pb);
-  if (sup->kgroup < 0) {  
+  if (sup->kgroup < 0) {
     for (j = 0; j < lev2->n_basis; j++) {
       mix2 = lev2->mixing[j];
       if (fabs(mix2) < cfac->angz_cut) continue;
@@ -3644,25 +3644,25 @@ int AngularZxZFreeBound(cfac_t *cfac,
       kg = -kg-1;
       nz_sub = AngularZMix(cfac, &ang_z, lower, kg, -1, -1);
       if (nz_sub <= 0) {
-	continue;
+        continue;
       }
       for (i = 0; i < nz_sub; i++) {
-	r = ang_z[i].coeff*mix2*sqrt_j2;
-	orb0 = ang_z[i].k0;
-	orb1 = ang_z[i].k1;
-	jmin = abs(j1-j2);
-	jmin = Max(jmin, abs(jb-ang_z[i].k));
-	jmax = j1+j2;
-	jmax = Min(jmax, jb+ang_z[i].k);
-	for (jf = jmin; jf <= jmax; jf += 2) {
-	  r0 = W6j(j1, jf, j2, jb, jup, ang_z[i].k);
-	  if (fabs(r0) < EPS30) continue;
-	  if (IsOdd((jup+jf+j2)/2)) r0 = -r0;
-	  r0 *= r;
-	  if (fabs(r0) < cfac->angz_cut) continue;
-	  AddToAngularZxZMix(&n, &nz, ang, ang_z[i].k, 
-				  jf, kb, orb0, orb1, r0);
-	}
+        r = ang_z[i].coeff*mix2*sqrt_j2;
+        orb0 = ang_z[i].k0;
+        orb1 = ang_z[i].k1;
+        jmin = abs(j1-j2);
+        jmin = Max(jmin, abs(jb-ang_z[i].k));
+        jmax = j1+j2;
+        jmax = Min(jmax, jb+ang_z[i].k);
+        for (jf = jmin; jf <= jmax; jf += 2) {
+          r0 = W6j(j1, jf, j2, jb, jup, ang_z[i].k);
+          if (fabs(r0) < EPS30) continue;
+          if (IsOdd((jup+jf+j2)/2)) r0 = -r0;
+          r0 *= r;
+          if (fabs(r0) < cfac->angz_cut) continue;
+          AddToAngularZxZMix(&n, &nz, ang, ang_z[i].k,
+                                  jf, kb, orb0, orb1, r0);
+        }
       }
       free(ang_z);
     }
@@ -3670,28 +3670,28 @@ int AngularZxZFreeBound(cfac_t *cfac,
     AngularZxZFreeBoundStates(cfac, &ad, lev1->iham, lev2->iham);
     for (i = 0; i < lev1->n_basis; i++) {
       mix1 = lev1->mixing[i];
-      if (fabs(mix1) < cfac->angz_cut) continue;      
+      if (fabs(mix1) < cfac->angz_cut) continue;
       ih1 = lev1->ibasis[i];
       isz0 = ih1 * cfac->hams[lev2->iham].nbasis;
       for (j = 0; j < lev2->n_basis; j++) {
-	mix2 = lev2->mixing[j];
-	if (fabs(mix2) < cfac->angz_cut) continue;
-	r = mix1*mix2;
-	if (fabs(r) < cfac->angz_cut) continue;	
-	ih2 = lev2->ibasis[j];
-	isz = isz0 + ih2;
-	nz_sub = (ad->nz)[isz];
-	if (nz_sub > 0) {
-	  ang_sub = (ad->angz)[isz];
-	  for (m = 0; m < nz_sub; m++) {
-	    r0 = ang_sub[m].coeff*r;
-	    if (fabs(r0) < cfac->angz_cut) continue;
-	    AddToAngularZxZMix(&n, &nz, ang, 
-				    ang_sub[m].k, ang_sub[m].k0,
-				    ang_sub[m].k1, ang_sub[m].k2,
-				    ang_sub[m].k3, r0);
-	  }
-	}
+        mix2 = lev2->mixing[j];
+        if (fabs(mix2) < cfac->angz_cut) continue;
+        r = mix1*mix2;
+        if (fabs(r) < cfac->angz_cut) continue;
+        ih2 = lev2->ibasis[j];
+        isz = isz0 + ih2;
+        nz_sub = (ad->nz)[isz];
+        if (nz_sub > 0) {
+          ang_sub = (ad->angz)[isz];
+          for (m = 0; m < nz_sub; m++) {
+            r0 = ang_sub[m].coeff*r;
+            if (fabs(r0) < cfac->angz_cut) continue;
+            AddToAngularZxZMix(&n, &nz, ang,
+                                    ang_sub[m].k, ang_sub[m].k0,
+                                    ang_sub[m].k1, ang_sub[m].k2,
+                                    ang_sub[m].k3, r0);
+          }
+        }
       }
     }
   }
@@ -3700,13 +3700,13 @@ int AngularZxZFreeBound(cfac_t *cfac,
 
   return n;
 }
-  
+
 int CompareAngularZxZMix(const void *c1, const void *c2) {
   ANGULAR_ZxZMIX *a1, *a2;
 
   a1 = (ANGULAR_ZxZMIX *) c1;
   a2 = (ANGULAR_ZxZMIX *) c2;
-  
+
   if (a1->k > a2->k) return 1;
   else if (a1->k < a2->k) return -1;
   else {
@@ -3716,24 +3716,24 @@ int CompareAngularZxZMix(const void *c1, const void *c2) {
       if (a1->k1 > a2->k1) return 1;
       else if (a1->k1 < a2->k1) return -1;
       else {
-	if (a1->k2 > a2->k2) return 1;
-	else if (a1->k2 < a2->k2) return -1;
-	else {
-	  if (a1->k3 > a2->k3) return 1;
-	  else if (a1->k3 < a2->k3) return -1;
-	  else return 0;
-	}
+        if (a1->k2 > a2->k2) return 1;
+        else if (a1->k2 < a2->k2) return -1;
+        else {
+          if (a1->k3 > a2->k3) return 1;
+          else if (a1->k3 < a2->k3) return -1;
+          else return 0;
+        }
       }
     }
   }
 }
-  
+
 int CompareAngularZMix(const void *c1, const void *c2) {
   ANGULAR_ZMIX *a1, *a2;
 
   a1 = (ANGULAR_ZMIX *) c1;
   a2 = (ANGULAR_ZMIX *) c2;
-  
+
   if (a1->k > a2->k) return 1;
   else if (a1->k < a2->k) return -1;
   else {
@@ -3746,13 +3746,13 @@ int CompareAngularZMix(const void *c1, const void *c2) {
     }
   }
 }
-  
+
 int CompareAngularZFB(const void *c1, const void *c2) {
   ANGULAR_ZFB *a1, *a2;
 
   a1 = (ANGULAR_ZFB *) c1;
   a2 = (ANGULAR_ZFB *) c2;
-  
+
   if (a1->kb > a2->kb) return 1;
   else if (a1->kb < a2->kb) return -1;
   else return 0;
@@ -3761,7 +3761,7 @@ int CompareAngularZFB(const void *c1, const void *c2) {
 int PackAngularZxZMix(int *n, ANGULAR_ZxZMIX **ang, int nz) {
   int j, m;
   ANGULAR_ZxZMIX *p1, *p2;
-  
+
   m = *n;
   if (*n <= 1) goto OUT;
   if (*n > 2) {
@@ -3784,7 +3784,7 @@ int PackAngularZxZMix(int *n, ANGULAR_ZxZMIX **ang, int nz) {
     j++;
     p2++;
   }
-  
+
  OUT:
   if (*n <= 0) {
     if (nz > 0) free(*ang);
@@ -3824,7 +3824,7 @@ int PackAngularZMix(int *n, ANGULAR_ZMIX **ang, int nz) {
     j++;
     p2++;
   }
-  
+
  OUT:
   if (*n <= 0) {
     if (nz > 0) free(*ang);
@@ -3841,7 +3841,7 @@ int PackAngularZMix(int *n, ANGULAR_ZMIX **ang, int nz) {
 int PackAngularZFB(int *n, ANGULAR_ZFB **ang, int nz) {
   int j, m;
   ANGULAR_ZFB *p1, *p2;
-  
+
   m = *n;
   if (*n <= 1) goto OUT;
   if (*n > 2) {
@@ -3875,26 +3875,26 @@ int PackAngularZFB(int *n, ANGULAR_ZFB **ang, int nz) {
     }
   }
   return 0;
-}			    
+}
 
-int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang, 
-		    int n_shells, int phase, SHELL_STATE *sbra, 
-		    SHELL_STATE *sket, INTERACT_SHELL *s, int m) {
+int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang,
+                    int n_shells, int phase, SHELL_STATE *sbra,
+                    SHELL_STATE *sket, INTERACT_SHELL *s, int m) {
   int nkk, *k, p;
   double *r;
   int orb0, orb1;
   int kk0, kk1;
   int kmax = GetMaxRank(cfac);
-  
+
   nkk = AngularZxZ0(&r, &k, 0, n_shells, sbra, sket, s, kmax);
-  if (nkk > 0) {    
+  if (nkk > 0) {
     if (m == 0) {
       orb0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
       orb1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
       kk0 = OrbitalIndex(cfac, s[2].n, s[2].kappa, 0.0);
       kk1 = OrbitalIndex(cfac, s[3].n, s[3].kappa, 0.0);
     } else {
-      orb0 = s[2].j;      
+      orb0 = s[2].j;
       orb1 = OrbitalIndex(cfac, s[3].n, s[3].kappa, 0.0);
       kk0 = OrbitalIndex(cfac, s[0].n, s[0].kappa, 0.0);
       kk1 = OrbitalIndex(cfac, s[1].n, s[1].kappa, 0.0);
@@ -3902,18 +3902,18 @@ int AddToAngularZxZ(cfac_t *cfac, int *n, int *nz, ANGULAR_ZxZMIX **ang,
     for (p = 0; p < nkk; p++) {
       if (fabs(r[p]) < EPS30) continue;
       if (IsOdd(phase)) r[p] = -r[p];
-      AddToAngularZxZMix(n, nz, ang, k[p], 
-			      orb0, orb1, kk0, kk1, r[p]);
+      AddToAngularZxZMix(n, nz, ang, k[p],
+                              orb0, orb1, kk0, kk1, r[p]);
     }
     free(r);
     free(k);
   }
-  
+
   return 0;
 }
 
-int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang, 
-		       int k, int k0, int k1, int k2, int k3, double r) {
+int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang,
+                       int k, int k0, int k1, int k2, int k3, double r) {
   int im;
 
   im = *n;
@@ -3932,14 +3932,14 @@ int AddToAngularZxZMix(int *n, int *nz, ANGULAR_ZxZMIX **ang,
   (*ang)[im].k2 = k2;
   (*ang)[im].k3 = k3;
   (*ang)[im].coeff = r;
-  
+
   return 0;
 }
 
 int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
-		     int k, int k0, int k1, double coeff) {
+                     int k, int k0, int k1, double coeff) {
   int im;
-  
+
   im = *n;
   (*n)++;
   if (*n > *nz) {
@@ -3953,13 +3953,13 @@ int AddToAngularZMix(int *n, int *nz, ANGULAR_ZMIX **ang,
   (*ang)[im].k = k;
   (*ang)[im].k0 = k0;
   (*ang)[im].k1 = k1;
-  (*ang)[im].coeff = coeff;  
+  (*ang)[im].coeff = coeff;
 
   return 0;
 }
 
 int AddToAngularZFB(int *n, int *nz, ANGULAR_ZFB **ang,
-		    int kb, double coeff) {
+                    int kb, double coeff) {
   int im;
 
   im = *n;
@@ -3989,7 +3989,7 @@ void FreeAngZDatum(ANGZ_DATUM *ap) {
     free(ap->nz);
     if (ap->mk) {
       for (i = 0; i < ap->ns*2; i++) {
-	free(ap->mk[i]);
+        free(ap->mk[i]);
       }
       free(ap->mk);
     }
@@ -4069,7 +4069,7 @@ int cfac_calculate_structure(cfac_t *cfac,
     if (!ng || !gids) {
         return -1;
     }
-    
+
     /* Ensure all groups belong to the same ion */
     for (ig = 0; ig < ng; ig++) {
         CONFIG_GROUP *cg = GetGroup(cfac, gids[ig]);
@@ -4107,16 +4107,16 @@ int cfac_calculate_structure(cfac_t *cfac,
     }
 
     nlevels_old = cfac_get_num_levels(cfac);
-    
+
     /* AddToLevelsUTA(), AddToLevels(), and ConstructHamilton() know to filter
        UTA/non-UTA themselves, so we pass the same list of config groups to
        both branches, always assuming the mixed/hybrid mode */
-    
+
     /* UTA branch */
     if (AddToLevelsUTA(cfac, ng, gids) != 0) {
         return -1;
     }
-    
+
     /* non-UTA branch */
     for (isym = 0; isym < MAX_SYMMETRIES; isym++) {
         int res;
@@ -4144,14 +4144,14 @@ int cfac_calculate_structure(cfac_t *cfac,
 
         cfac_hamiltonian_free(h);
     }
-    
+
     if (int_gids != gids) {
         free(int_gids);
     }
 
     /* Sort by energy in the ascending order */
     SortLevels(cfac, nlevels_old, -1, 0);
-    
+
     /* Give level names */
     cfac_name_levels(cfac, nlevels_old, -1);
 

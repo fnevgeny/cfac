@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -52,7 +52,7 @@ struct _cfac_t {
     ARRAY *orbitals;          /* array of orbitals                           */
     int n_orbitals;           /* total number of orbitals                    */
     int n_continua;           /* number of continuum orbitals                */
- 
+
     AVERAGE_CONFIG acfg;      /* average config for potential optimization   */
 
 
@@ -70,11 +70,11 @@ struct _cfac_t {
     MULTI *vinti_array;
     MULTI *qed1e_array;
     MULTI *residual_array;
-    MULTI *multipole_array; 
+    MULTI *multipole_array;
     MULTI *moments_array;
     MULTI *gos_array;
     MULTI *yk_array;
-    
+
     int uta;                  /* UTA flag                                    */
 
     struct {
@@ -95,7 +95,7 @@ struct _cfac_t {
       int iprint;             /* printing information in each iteration.     */
       int iset;
     } optimize_control;
-    
+
     struct {
       int kl0;
       int kl1;
@@ -124,13 +124,13 @@ struct _cfac_t {
         int kl_h_max;
         ARRAY *dipole_array;
     } coulomb;
-    
+
     SHAMILTON *hams;          /* symmetry Hamiltonians                       */
     int nhams;                /* number of them in use                       */
 
     ARRAY *levels;            /* levels                                      */
     int n_levels;             /* number of levels                            */
-    
+
     ARRAY *eblevels;          /* levels when calculated with fields          */
     int n_eblevels;           /* number of eblevels                          */
 
@@ -142,11 +142,11 @@ struct _cfac_t {
     int angz_maxn;            /* max PQN above which angular mix between
                                  different bound configurations is ignored   */
     double angz_cut;          /* threshold of angular mixing                 */
-    
+
     double mix_cut;           /* threshold mixing (relative to the leading
                                  component); bases with weaker mixings are
                                  not recoupled                               */
-    
+
     double mix_cut2;          /* _lower_ threshold for recoupling between
                                  different configurations                    */
 

@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -39,8 +39,8 @@ static const double wave_zero = 1E-10;
 static int SetVEffective(int kl, POTENTIAL *pot);
 static int TurningPoints(int n, double e, const POTENTIAL *pot);
 static int CountNodes(double *p, int i1, int i2);
-static int IntegrateRadial(double *p, double e, const POTENTIAL *pot, 
-			   int i1, double p1, int i2, double p2, int q);
+static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
+                           int i1, double p1, int i2, double p2, int q);
 static double Amplitude(double *p, double e, int kl, POTENTIAL *pot, int i1);
 static int Phase(double *p, POTENTIAL *pot, int i1, double p0);
 static int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2);
@@ -48,26 +48,26 @@ static int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2);
 int GetNMax(const POTENTIAL *pot) {
   return pot->nmax;
 }
- 
+
 static double EnergyH(double z, double n, int ka)
 {
   double a, np;
   a = FINE_STRUCTURE_CONST*z;
-  
+
   np = n + sqrt(ka*ka - a*a) - abs(ka);
 
   return (1.0/sqrt(1.0 + a*a/(np*np)) - 1.0)/FINE_STRUCTURE_CONST2;
 }
-    
+
 double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
-			  double z, int n, int kappa) {
+                          double z, int n, int kappa) {
   int i, iordr1, iordr2, k, nr;
   double a, alfa, an1, an2, argr, b, bn, bign, bignmk, nrfac;
   double eps, fac, facn, fden, ff, fg, fk, f1, f2, gamma;
   double ovlfac, rgamm1, rgamm2, rho, rhon, twogp1, zalfa;
   double ta[MAXRP], tb[MAXRP];
   double energy, t;
-  
+
   alfa = FINE_STRUCTURE_CONST;
   nr = n - abs(kappa);
   fk = abs(kappa);
@@ -79,10 +79,10 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
   eps = 1.0/sqrt(1.0 + t*t);
 
   energy = -(1.0 - eps)/FINE_STRUCTURE_CONST2;
-  
+
   nrfac = 0.0;
   for (i = 1; i <= nr; i++) nrfac += log(i);
-  
+
   argr = twogp1 + nr;
   rgamm1 = gsl_sf_lngamma(argr);
   argr = twogp1;
@@ -98,7 +98,7 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
 
   fg = fac*sqrt(1.0 + eps);
   ff = fac*sqrt(1.0 - eps);
-  
+
   if (nr == 0) {
     iordr1 = 0;
     iordr2 = 0;
@@ -114,9 +114,9 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
   an2 = a;
   b = twogp1;
   bn = b;
-  
+
   k = 0;
-  
+
   while (1) {
     k = k + 1;
     fden = 1.0/(facn*bn);
@@ -148,7 +148,7 @@ double RadialDiracCoulomb(int npts, double *p, double *q, double *r,
     while (1) {
       k = k+1;
       if (k <= iordr1) {
-	f1 += ta[k]*rhon;
+        f1 += ta[k]*rhon;
       }
       if (k > iordr2) break;
       f2 += tb[k]*rhon;
@@ -174,25 +174,25 @@ int RadialSolver(const cfac_t *cfac, ORBITAL *orb) {
       ierr = RadialFreeInner(orb, pot);
     } else {
       if (pot->ib > 0 && orb->n > pot->nb) {
-	ierr = RadialBasis(orb, pot);
+        ierr = RadialBasis(orb, pot);
       } else {
-	GetHydrogenicNL(cfac, NULL, NULL, &nm, &km);
-	k = GetLFromKappa(orb->kappa);
-	k /= 2;
-	if (orb->n > nm || k > km) {
-	  double z = cfac_get_atomic_number(cfac);
-	  if (pot->Navg > 0) z -= pot->Navg - 1;
-	  orb->energy = EnergyH(z, (double)(orb->n), orb->kappa);
-	  orb->ilast = -1;
-	  if (orb->wfun) free(orb->wfun);
-	  orb->wfun = NULL;
-	  return 0;
-	}
-	if (orb->n < pot->nmax) {
-	  ierr = RadialBound(orb, pot);
-	} else {
-	  ierr = RadialRydberg(orb, pot);
-	}
+        GetHydrogenicNL(cfac, NULL, NULL, &nm, &km);
+        k = GetLFromKappa(orb->kappa);
+        k /= 2;
+        if (orb->n > nm || k > km) {
+          double z = cfac_get_atomic_number(cfac);
+          if (pot->Navg > 0) z -= pot->Navg - 1;
+          orb->energy = EnergyH(z, (double)(orb->n), orb->kappa);
+          orb->ilast = -1;
+          if (orb->wfun) free(orb->wfun);
+          orb->wfun = NULL;
+          return 0;
+        }
+        if (orb->n < pot->nmax) {
+          ierr = RadialBound(orb, pot);
+        } else {
+          ierr = RadialRydberg(orb, pot);
+        }
       }
     }
   } else if (orb->n == 0) {
@@ -210,7 +210,7 @@ int LastMaximum(double *p, int i1, int i2) {
   while (i2 > i1 && p[i2] == p[i2 - 1]) {
     i2--;
   }
-  
+
   if (p[i2] > p[i2-1]) {
     for (i = i2-1; i > i1; i--) {
       if (p[i-1] > p[i]) break;
@@ -222,11 +222,11 @@ int LastMaximum(double *p, int i1, int i2) {
   } else {
     i = i2;
   }
-  if (i == i1) {    
+  if (i == i1) {
     i = i2;
   }
   return i;
-} 
+}
 
 void Differential(double *p, double *dp, int i1, int i2) {
   double c = 1.0/24.0;
@@ -252,7 +252,7 @@ void Differential(double *p, double *dp, int i1, int i2) {
   b -= 72.0*p[i2-2];
   b += 32.0*p[i2-3];
   b -= 6.0 *p[i2-4];
-  dp[i2] = -b*c; 
+  dp[i2] = -b*c;
 
   b = -6.0*p[i2];
   b -= 20.0*p[i2-1];
@@ -266,12 +266,12 @@ void Differential(double *p, double *dp, int i1, int i2) {
     b += 16.0*(p[i+1] - p[i-1]);
     dp[i] = b*c;
   }
-}    
+}
 
 static double DpDr(int kappa, int i1, double e, const POTENTIAL *pot, double b) {
   double p[MAXRP], bqp, p1, p2 = 0.0;
   int k;
-  
+
   bqp = (b + kappa)*FINE_STRUCTURE_CONST;
   bqp /= (2.0*pot->rad[i1]);
   for (k = i1-1; k <= i1+1; k++) {
@@ -289,11 +289,11 @@ static double DpDr(int kappa, int i1, double e, const POTENTIAL *pot, double b) 
   p1 = 0.5*(pot->dr_drho2[i1+1] - pot->dr_drho2[i1-1]);
   p1 /= pot->dr_drho2[i1];
   bqp = p2 - p1;
-  
+
   return bqp;
 }
-  
-int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {  
+
+int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   double e, de, delta, emin, emax, dr, ke;
   double *p, p1, qo, qi, bqp, bqp1;
   int n, i, kl, nr, nodes, nnodes, niter;
@@ -306,18 +306,18 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   n = -orb->n;
   nr = n - kl - 1;
   if (kl < 0 || kl >= n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n", 
-	   kl, orb->n, orb->kappa);
+    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+           kl, orb->n, orb->kappa);
     return -1;
   }
-  
+
   p = malloc(sizeof(double)*2*pot->maxrp);
   if (!p) return -1;
-  
+
   ib0 = pot->ib-1;
   ib1 = pot->ib1+1;
   niter = 0;
-  
+
   SetPotentialW(pot, 0.0, orb->kappa);
   SetVEffective(kl, pot);
   emin = 1E30;
@@ -361,11 +361,11 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   }
   if (niter == max_iteration) {
     printf("Max iteration before finding correct nodes in RadialBasisOuter %d %d\n",
-	   nodes, nr);
+           nodes, nr);
     free(p);
     return -2;
   }
-  
+
   niter = 0;
   de = 0.25*ke*ke;
   while (de > ENEABSERR) {
@@ -385,8 +385,8 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
         return -1;
       }
       if (nodes > 1) {
-	i2 = LastMaximum(p, pot->ib+20, i2);
-	nodes = CountNodes(p, ib0, i2);
+        i2 = LastMaximum(p, pot->ib+20, i2);
+        nodes = CountNodes(p, ib0, i2);
       }
       nnodes = IntegrateRadial(p, e, pot, i2, 1.0, ib1, bqp1, 1);
       if (nnodes < 0) {
@@ -399,7 +399,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   }
   if (niter == max_iteration) {
     printf("Max iteration before finding solution in RadialBasisOuter %d %d\n",
-	   nodes, nr);
+           nodes, nr);
     free(p);
     return -3;
   }
@@ -411,23 +411,23 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
       de *= 0.25;
       if (niter == max_iteration) break;
       while (nodes == nr) {
-	niter++;
-	if (niter == max_iteration) break;
-	e -= de;
-	SetPotentialW(pot, e, orb->kappa);
-	SetVEffective(kl, pot);
-	bqp = DpDr(orb->kappa, pot->ib, e, pot, 0.0);
-	bqp1 = DpDr(orb->kappa, pot->ib1, e, pot, 0.0);
-	i2 = TurningPoints(orb->n, e, pot);
-	nodes = IntegrateRadial(p, e, pot, ib0, bqp, i2, 1.0, 2);
+        niter++;
+        if (niter == max_iteration) break;
+        e -= de;
+        SetPotentialW(pot, e, orb->kappa);
+        SetVEffective(kl, pot);
+        bqp = DpDr(orb->kappa, pot->ib, e, pot, 0.0);
+        bqp1 = DpDr(orb->kappa, pot->ib1, e, pot, 0.0);
+        i2 = TurningPoints(orb->n, e, pot);
+        nodes = IntegrateRadial(p, e, pot, ib0, bqp, i2, 1.0, 2);
         if (nodes < 0) {
           return -1;
         }
-	if (nodes > 1) {
-	  i2 = LastMaximum(p, pot->ib+20, i2);
-	  nodes = CountNodes(p, ib0, i2);
-	}
-	nnodes = IntegrateRadial(p, e, pot, i2, 1.0, ib1, bqp1, 1);
+        if (nodes > 1) {
+          i2 = LastMaximum(p, pot->ib+20, i2);
+          nodes = CountNodes(p, ib0, i2);
+        }
+        nnodes = IntegrateRadial(p, e, pot, i2, 1.0, ib1, bqp1, 1);
         if (nnodes < 0) {
           return -1;
         }
@@ -435,10 +435,10 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
       }
       e += de;
       nodes = nr;
-    }  
+    }
     if (niter == max_iteration) {
       printf("Max iteration before finding solution in RadialBasisOuter %d %d\n",
-	     nodes, nr);
+             nodes, nr);
       free(p);
       return -4;
     }
@@ -449,7 +449,7 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
   while (niter < max_iteration) {
     niter++;
     SetPotentialW(pot, e, orb->kappa);
-    SetVEffective(kl, pot); 
+    SetVEffective(kl, pot);
     bqp = DpDr(orb->kappa, pot->ib, e, pot, 0.0);
     bqp1 = DpDr(orb->kappa, pot->ib1, e, pot, 0.0);
     i2 = TurningPoints(orb->n, e, pot);
@@ -466,11 +466,11 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
     }
     i2m1 = i2 - 1;
     i2m2 = i2 - 2;
-    i2p1 = i2 + 1;    
+    i2p1 = i2 + 1;
     i2p2 = i2 + 2;
     p1 = p[i2m2]/pot->dr_drho2[i2m2];
     qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m1]
-	  + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
+          + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
     qo /= p[i2];
     if (IntegrateRadial(p, e, pot, i2m2, p1, ib1, bqp1, 1) < 0) {
       return -1;
@@ -479,12 +479,12 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
       p[i] *= pot->dr_drho2[i];
     }
     qi = (6.0*p[i2m2] - 60.0*p[i2m1] - 40.0*p[i2] + 120.0*p[i2p1]
-	  - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
+          - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
     qi /= p[i2];
     delta = qo - qi;
     /*
     printf("%3d %2d %2d %3d %15.8E %15.8E %15.8E %12.5E %12.5E %12.5E\n",
-	   niter, nodes, k, i2, e, emin, emax, qo, qi, delta);
+           niter, nodes, k, i2, e, emin, emax, qo, qi, delta);
     */
     if (delta < -EPS8) {
       emax = e;
@@ -496,14 +496,14 @@ int RadialBasisOuter(ORBITAL *orb, POTENTIAL *pot) {
       break;
     }
   }
-  
+
   if (niter == max_iteration) {
     printf("Max iteration before finding solution in RadialBasisOuter %d %d\n",
-	   nodes, nr);
+           nodes, nr);
     free(p);
     return -5;
   }
-  
+
   if (p[pot->ib] < 0) {
     for (i = ib0; i <= ib1; i++) {
       p[i] = -p[i];
@@ -525,16 +525,16 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   double *p, p1, p2 = 0.0, qo, qi, bqp;
   int i, k, kl, nr, nodes, niter;
   int i2, i2m1, i2m2, i2p1, i2p2, i1;
-  
+
   kl = orb->kappa;
   kl = (kl < 0)? (-kl-1):kl;
 
   if (kl < 0 || kl >= orb->n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n", 
-	   kl, orb->n, orb->kappa);
+    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+           kl, orb->n, orb->kappa);
     return -1;
   }
-  
+
   p = malloc(sizeof(double)*2*pot->maxrp);
   if (!p) return -1;
 
@@ -576,7 +576,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   }
   if (niter == max_iteration) {
     printf("Max iteration before finding correct nodes in RadialBasis %d %d\n",
-	   nodes, nr);
+           nodes, nr);
     free(p);
     return -2;
   }
@@ -584,16 +584,16 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
 
   if (kl == 0) {
     double emin0 = 5*EnergyH(z0, orb->n, orb->kappa);
-    e = emin;      
+    e = emin;
     while (niter < max_iteration) {
       niter++;
       SetPotentialW(pot, e, orb->kappa);
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-	nodes = -1;
+        nodes = -1;
       } else {
-	nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+        nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
         if (nodes < 0) {
           return -1;
         }
@@ -605,7 +605,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     emin = e;
     if (niter == max_iteration) {
       printf("Max iteration before finding correct nodes in RadialBasis %d %d\n",
-	     nodes, nr);
+             nodes, nr);
       free(p);
       return -3;
     }
@@ -630,7 +630,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   }
   if (niter == max_iteration) {
     printf("Max iteration before finding correct nodes in RadialBasis %d %d\n",
-	   nodes, nr);
+           nodes, nr);
     free(p);
     return -4;
   }
@@ -652,9 +652,9 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     nodes = nr;
   }
   niter = 0;
-  
+
   bqp = orb->kappa*FINE_STRUCTURE_CONST;
-  bqp /= (2.0*pot->rad[pot->ib]);    
+  bqp /= (2.0*pot->rad[pot->ib]);
   emax = e;
   de = emax - emin;
   while (de > ENEABSERR) {
@@ -665,8 +665,8 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-	nodes = -1;
-	break;
+        nodes = -1;
+        break;
       }
       nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
       if (nodes < 0) {
@@ -681,50 +681,50 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
   while (niter < max_iteration) {
     niter++;
     SetPotentialW(pot, e, orb->kappa);
-    SetVEffective(kl, pot); 
-    i2 = TurningPoints(orb->n, e, pot); 
+    SetVEffective(kl, pot);
+    i2 = TurningPoints(orb->n, e, pot);
     if (i2 == pot->ib) {
       i2m1 = i2 - 1;
       i2m2 = i2 - 2;
       i2p1 = i2 + 1;
-      i2p2 = i2 + 2;      
+      i2p2 = i2 + 2;
       nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
       if (nodes < 0) {
         return -1;
       }
       for (k = i2m2-1; k <= i2p2; k++) {
-	p[k] *= pot->dr_drho2[k];
-	p1 = e - pot->Vc[k] - pot->U[k];
-	p1 = sqrt(1.0 + FINE_STRUCTURE_CONST2*p1*0.5);
-	p[k] *= p1;
+        p[k] *= pot->dr_drho2[k];
+        p1 = e - pot->Vc[k] - pot->U[k];
+        p1 = sqrt(1.0 + FINE_STRUCTURE_CONST2*p1*0.5);
+        p[k] *= p1;
       }
       qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m1]
-	    + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
+            + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
       p2 = qo/(p[i2]*pot->dr_drho[i2]) + orb->kappa/pot->rad[i2];
       p1 = e - pot->Vc[i2] - pot->U[i2];
       p1 = 1.0 + 0.5*FINE_STRUCTURE_CONST2*p1;
       p2 *= 0.5*FINE_STRUCTURE_CONST/p1;
       qo = p2 - bqp;
       if (qo > EPS8) {
-	emin = e;
-	e = 0.5*(emax + e);
+        emin = e;
+        e = 0.5*(emax + e);
       } else if (qo < -EPS8) {
-	emax = e;
-	e = 0.5*(emin + e);
+        emax = e;
+        e = 0.5*(emin + e);
       } else {
-	break;
+        break;
       }
     } else {
       i1 = pot->ib;
       for (k = i1-1; k <= i1+1; k++) {
-	p[k] = 0.5*FINE_STRUCTURE_CONST2*(e - (pot->U[k]+pot->Vc[k]));
-	p[k] += 1.0;
-	if (k == i1) {
-	  p2 = 2.0*p[k]*bqp/FINE_STRUCTURE_CONST;
-	  p2 -= orb->kappa/pot->rad[i1];
-	  p2 *= pot->dr_drho[i1];
-	}
-	p[k] = sqrt(p[k]);
+        p[k] = 0.5*FINE_STRUCTURE_CONST2*(e - (pot->U[k]+pot->Vc[k]));
+        p[k] += 1.0;
+        if (k == i1) {
+          p2 = 2.0*p[k]*bqp/FINE_STRUCTURE_CONST;
+          p2 -= orb->kappa/pot->rad[i1];
+          p2 *= pot->dr_drho[i1];
+        }
+        p[k] = sqrt(p[k]);
       }
       p1 = 0.5*(p[i1+1] - p[i1-1])/p[i1];
       p2 -= p1;
@@ -737,11 +737,11 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
         return -1;
       }
       for (i = 0; i <= i2p2; i++) {
-	p[i] *= pot->dr_drho2[i];
+        p[i] *= pot->dr_drho2[i];
       }
       if (i2 > i1-10) {
-	i2 = i1 - 10;
-	i2 = LastMaximum(p, 0, i2);
+        i2 = i1 - 10;
+        i2 = LastMaximum(p, 0, i2);
       }
       i2m1 = i2 - 1;
       i2m2 = i2 - 2;
@@ -749,33 +749,33 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
       i2p2 = i2 + 2;
       p1 = p[i2m2]/pot->dr_drho2[i2m2];
       qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m1]
-	    + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
+            + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
       qo /= p[i2];
       if (IntegrateRadial(p, e, pot, i2m2, p1, i1+1, p2, 1) < 0) {
         return -1;
       }
       for (i = i2m2; i <= pot->ib+1; i++) {
-	p[i] *= pot->dr_drho2[i];
+        p[i] *= pot->dr_drho2[i];
       }
       qi = (6.0*p[i2m2] - 60.0*p[i2m1] - 40.0*p[i2] + 120.0*p[i2p1]
-	    - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
+            - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
       qi /= p[i2];
-      delta = qo - qi;      
+      delta = qo - qi;
       if (delta < -EPS8) {
-	emax = e;
-	e = 0.5*(emin + e);
+        emax = e;
+        e = 0.5*(emin + e);
       } else if (delta > EPS8) {
-	emin = e;
-	e = 0.5*(emax + e);
+        emin = e;
+        e = 0.5*(emax + e);
       } else {
-	break;
+        break;
       }
     }
   }
 
   if (niter == max_iteration) {
     printf("Max iteration before finding solution in RadialBasis %d %d\n",
-	   nodes, nr);
+           nodes, nr);
     free(p);
     return -7;
   }
@@ -787,7 +787,7 @@ int RadialBasis(ORBITAL *orb, POTENTIAL *pot) {
     }
     for (i = 0; i <= i2p2; i++) {
       p[i] = p[i] * pot->dr_drho2[i];
-    }      
+    }
   } else {
     i2p2 = pot->ib + 1;
   }
@@ -816,7 +816,7 @@ static double InnerProduct(int i1, int i2, const double *p1, const double *p2,
     for (k = i1; k <= i2; k++) {
         dwork[k] = p1[k]*p2[k]*pot->dr_drho[k];
     }
-    
+
     return Simpson(dwork, i1, i2);
 }
 
@@ -825,16 +825,16 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   double *p, norm2, fact, p1, p2, qo, qi;
   int i, kl, nr, nodes = 0, niter;
   int i2, i2m1, i2m2, i2p1, i2p2;
-  
+
   kl = orb->kappa;
   kl = (kl < 0)? (-kl-1):kl;
 
   if (kl < 0 || kl >= orb->n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n", 
-	   kl, orb->n, orb->kappa);
+    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+           kl, orb->n, orb->kappa);
     return -1;
   }
-  
+
   p = malloc(sizeof(double)*2*pot->maxrp);
   if (!p) return -1;
 
@@ -854,7 +854,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   } else {
     emin = EnergyH(z, orb->n, orb->kappa);
   }
-  
+
   e = 0.5*emin;
   niter = 0;
   while (niter < max_iteration) {
@@ -873,7 +873,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   }
   if (niter == max_iteration) {
     printf("Max iteration before finding correct nodes in RadialBound %d %d %d\n",
-	   nodes, nr, i2);
+           nodes, nr, i2);
     free(p);
     return -2;
   }
@@ -882,16 +882,16 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   niter = 0;
   if (kl == 0) {
     double emin0 = 1.2*EnergyH(z0, orb->n, orb->kappa);
-    e = emin;   
+    e = emin;
     while (niter < max_iteration) {
       niter++;
       SetPotentialW(pot, e, orb->kappa);
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-	nodes = -1;
+        nodes = -1;
       } else {
-	nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
+        nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2, 1.0, 0);
         if (nodes < 0) {
           return -1;
         }
@@ -903,12 +903,12 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     emin = e;
     if (niter == max_iteration) {
       printf("Max iteration before finding correct nodes in RadialBound %d %d\n",
-	     nodes, nr);
+             nodes, nr);
       free(p);
       return -3;
     }
   }
-  
+
   while (niter < max_iteration) {
     niter++;
     SetPotentialW(pot, e, orb->kappa);
@@ -933,11 +933,11 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   }
   if (niter == max_iteration) {
     printf("Max iteration before finding correct nodes in RadialBound %d %d\n",
-	   nodes, nr);
+           nodes, nr);
     free(p);
     return -4;
   }
-  
+
   de = 0.5*(emax - emin);
   while (de > ENEABSERR) {
     de *= 0.25;
@@ -976,9 +976,9 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     i2p1 = i2 + 1;
     i2p2 = i2 + 2;
     p1 = p[i2m2]/pot->dr_drho2[i2m2];
-    p2 = p[i2];    
+    p2 = p[i2];
     qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m1]
-	  + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
+          + 40.0*p[i2] + 60.0*p[i2p1] - 6.0*p[i2p2])/120.0;
     qo /= p2*pot->dr_drho[i2];
     norm2 = InnerProduct(0, i2, p, p, pot);
     if (IntegrateRadial(p, e, pot, i2m2, p1, pot->maxrp-1, 0.0, 0) < 0) {
@@ -988,7 +988,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
       p[i] = p[i] * pot->dr_drho2[i];
     }
     qi = (6.0*p[i2m2] - 60.0*p[i2m1] - 40.0*p[i2] + 120.0*p[i2p1]
-	  - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
+          - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
     qi /= p[i2]*pot->dr_drho[i2];
     fact = p2/p[i2];
     norm2 += fact*fact*InnerProduct(i2, pot->maxrp-1, p, p, pot);
@@ -1009,14 +1009,14 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   if (IsOdd(nodes)) {
     fact = -fact;
   }
- 
-  ep *= wave_zero;     
+
+  ep *= wave_zero;
   for (i = pot->maxrp-1; i >= 0; i--) {
     if (fabs(p[i]) > ep) break;
   }
   if (IsEven(i)) i++;
-  orb->ilast = i;       
-  for (i = 0; i < pot->maxrp; i++) {    
+  orb->ilast = i;
+  for (i = 0; i < pot->maxrp; i++) {
     p[i] *= fact;
   }
 
@@ -1029,9 +1029,9 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
     p2 = fabs(p[i]);
     if (p2 > wave_zero) {
       if ((p1 > 0 && p[i] < 0) ||
-	  (p1 < 0 && p[i] > 0)) {
-	nodes++;
-	p1 = p[i];
+          (p1 < 0 && p[i] > 0)) {
+        nodes++;
+        p1 = p[i];
       }
     }
   }
@@ -1048,7 +1048,7 @@ int RadialBound(ORBITAL *orb, POTENTIAL *pot) {
   if (pot->flag == -1) {
     DiracSmall(orb, pot, -1);
   }
- 
+
   return 0;
 }
 
@@ -1067,8 +1067,8 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   kl = orb->kappa;
   kl = (kl < 0)? (-kl-1):kl;
   if (kl < 0 || kl >= orb->n) {
-    printf("Invalid orbital angular momentum, L=%d, %d %d\n", 
-	   kl, orb->n, orb->kappa);
+    printf("Invalid orbital angular momentum, L=%d, %d %d\n",
+           kl, orb->n, orb->kappa);
     return -1;
   }
   e = EnergyH(z, orb->n, orb->kappa);
@@ -1088,8 +1088,8 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-	printf("The orbital angular momentum = %d too high\n", kl);
-	return -2;
+        printf("The orbital angular momentum = %d too high\n", kl);
+        return -2;
       }
       i2p2 = i2 + 2;
       nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
@@ -1097,9 +1097,9 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
         return -1;
       }
       if (nodes != nr) {
-	e += 0.5*(nr-nodes)*dn;
+        e += 0.5*(nr-nodes)*dn;
       } else {
-	break;
+        break;
       }
     }
     dn *= 0.01;
@@ -1109,8 +1109,8 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-	printf("The orbital angular momentum = %d too high\n", kl);
-	return -2;
+        printf("The orbital angular momentum = %d too high\n", kl);
+        return -2;
       }
       i2p2 = i2 + 2;
       nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
@@ -1125,8 +1125,8 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       SetVEffective(kl, pot);
       i2 = TurningPoints(orb->n, e, pot);
       if (i2 < 0) {
-	printf("The orbital angular momentum = %d too high\n", kl);
-	return -2;
+        printf("The orbital angular momentum = %d too high\n", kl);
+        return -2;
       }
       i2p2 = i2 + 2;
       nodes = IntegrateRadial(p, e, pot, 0, 0.0, i2p2, 1.0, 0);
@@ -1134,7 +1134,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
         return -1;
       }
       for (i = 0; i <= i2p2; i++) {
-	p[i] = p[i] * pot->dr_drho2[i];
+        p[i] = p[i] * pot->dr_drho2[i];
       }
       i2 = LastMaximum(p, 0, i2);
       i2p = i2 + 1;
@@ -1144,40 +1144,40 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       p1 = p[i2m2]/pot->dr_drho2[i2m2];
       p2 = p[i2];
       qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m]
-	    + 40.0*p[i2] + 60.0*p[i2p] - 6.0*p[i2p2])/120.0;
+            + 40.0*p[i2] + 60.0*p[i2p] - 6.0*p[i2p2])/120.0;
       qo /= p2*pot->dr_drho[i2];
       norm2 = InnerProduct(0, i2, p, p, pot);
-      
+
       if (IntegrateRadial(p, e, pot, i2m2, p1, pot->maxrp-1, 0.0, 0) < 0) {
         return -1;
       }
       for (i = i2m2; i < pot->maxrp; i++) {
-	p[i] = p[i] * pot->dr_drho2[i];
+        p[i] = p[i] * pot->dr_drho2[i];
       }
       qi = (6.0*p[i2m2] - 60.0*p[i2m] - 40.0*p[i2] + 120.0*p[i2p]
-	    - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
+            - 30.0*p[i2p2] + 4.0*p[i2p2+1])/120.0;
       qi /= p[i2]*pot->dr_drho[i2];
       fact = p2/p[i2];
       norm2 += fact*fact*InnerProduct(i2, pot->maxrp-1, p, p, pot);
-      
+
       delta = 0.5*p2*p2*(qo - qi)/norm2;
       e = e + delta;
       ep = fabs(e)*ENERELERR;
       if (ep > ENEABSERR) ep = ENEABSERR;
       if (fabs(delta) < ep) {
-	fact = 1.0/sqrt(norm2);
-	if (IsOdd(nodes)) fact = -fact;
-	for (i = 0; i < pot->maxrp; i++) {
-	  p[i] *= fact;
-	}
-	break;
+        fact = 1.0/sqrt(norm2);
+        if (IsOdd(nodes)) fact = -fact;
+        for (i = 0; i < pot->maxrp; i++) {
+          p[i] *= fact;
+        }
+        break;
       }
     }
     if (niter == max_iteration) {
       printf("Max iteration reached in RadialRydberg\n");
       free(p);
       return -3;
-    }    
+    }
     pp = 0.0;
   } else {
     if (pot->Navg <= 1) j = 3;
@@ -1189,7 +1189,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       printf("Consider enlarging radial grid\n");
       return -5;
     }
-    
+
     for (i2 = pot->r_core; i2 < i2p2; i2++) {
       if (pot->veff[i2+1] > pot->veff[i2]) break;
     }
@@ -1228,7 +1228,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
       }
       p2 = p[i2];
       qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m]
-	    + 40.0*p[i2] + 60.0*p[i2p] - 6.0*p[i2p2])/120.0;
+            + 40.0*p[i2] + 60.0*p[i2p] - 6.0*p[i2p2])/120.0;
       qo /= p2;
       x0 = pot->rad[i2];
       DCOUL(z, e, orb->kappa, x0, &pp, &qq, &ppi, &qqi, &ierr);
@@ -1282,7 +1282,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   orb->ilast = i;
   orb->energy = e;
   orb->wfun = p;
-  
+
   e0 = InnerProduct(0, pot->maxrp-1, p, p, pot);
   orb->qr_norm = 1.0/e0;
 
@@ -1291,8 +1291,8 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
     if (pp != 0) {
       fact = fabs(pp/p[i2]);
       for (i = 0; i < pot->maxrp-1; i++) {
-	orb->wfun[i] *= fact;
-	orb->wfun[i+pot->maxrp] *= fact;
+        orb->wfun[i] *= fact;
+        orb->wfun[i+pot->maxrp] *= fact;
       }
     }
   }
@@ -1300,7 +1300,7 @@ int RadialRydberg(ORBITAL *orb, POTENTIAL *pot) {
   return 0;
 #undef ME
 }
-  
+
 int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
   int i, kl;
   int i2;
@@ -1317,7 +1317,7 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
     return -2;
   }
   SetPotentialW(pot, e, kl);
-  kl = (kl < 0)? (-kl-1):kl;  
+  kl = (kl < 0)? (-kl-1):kl;
   p = malloc(2*pot->maxrp*sizeof(double));
   if (!p) return -1;
   SetVEffective(kl, pot);
@@ -1333,9 +1333,9 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
   orb->ilast = i2;
   orb->wfun = p;
   orb->phase = 0.0;
-  
+
   orb->qr_norm = 1.0;
-  
+
   if (pot->flag == -1) {
     DiracSmall(orb, pot, i2);
   }
@@ -1343,7 +1343,7 @@ int RadialFreeInner(ORBITAL *orb, POTENTIAL *pot) {
   return 0;
 }
 
-/* note that the free states are normalized to have asymptotic 
+/* note that the free states are normalized to have asymptotic
    amplitude of 1/sqrt(k), */
 int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
   int i, kl, nodes;
@@ -1352,7 +1352,7 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
   double dfact, da, cs, si, phase0;
 
   e = orb->energy;
-  if (e < 0.0) { 
+  if (e < 0.0) {
     printf("Energy < 0 in RadialFree\n");
     return -1;
   }
@@ -1362,11 +1362,11 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
     return -1;
   }
   SetPotentialW(pot, e, kl);
-  kl = (kl < 0)? (-kl-1):kl;  
+  kl = (kl < 0)? (-kl-1):kl;
   p = malloc(2*pot->maxrp*sizeof(double));
   if (!p) return -1;
   SetVEffective(kl, pot);
-  
+
   i2 = TurningPoints(0, e, pot);
   i2m = i2 - 1;
   i2p = i2 + 1;
@@ -1383,7 +1383,7 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
   }
   dfact = 1.0 / pot->dr_drho[i2];
   qo = (-4.0*p[i2m2-1] + 30.0*p[i2m2] - 120.0*p[i2m]
-	+ 40.0*p[i2] + 60.0*p[i2p] - 6.0*p[i2p2])/120.0;
+        + 40.0*p[i2] + 60.0*p[i2p] - 6.0*p[i2p2])/120.0;
   qo *= dfact;
   po = p[i2];
   po1 = p[i2p];
@@ -1398,25 +1398,25 @@ int RadialFree(ORBITAL *orb, POTENTIAL *pot) {
   dfact = 1.0/sqrt(dfact);
   phase0 = atan2(si, cs);
   if (phase0 < 0) phase0 += TWO_PI;
-    
+
   if (IsOdd(nodes)) {
     phase0 = (phase0 < M_PI)?(phase0 + M_PI):(phase0-M_PI);
     dfact = -dfact;
   }
   Phase(p, pot, i2, phase0);
-  
+
   p[i2] = po;
   p[i2p] = po1;
   for (i = 0; i < i2p2; i++) {
     p[i] *= dfact;
   }
-    
+
   orb->ilast = i2p;
   orb->wfun = p;
   orb->phase = 0.0;
 
   orb->qr_norm = 1.0;
-  
+
   if (pot->flag == -1) {
     DiracSmall(orb, pot, -1);
   }
@@ -1457,7 +1457,7 @@ int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2) {
     if (fabs(_dwork1[i]) < 1E-16) {
       p[i+pot->maxrp] = 0.0;
       continue;
-    } 
+    }
     if (i == i0) {
       b = -50.0*_dwork1[i0];
       b += 96.0*_dwork1[i0+1];
@@ -1476,7 +1476,7 @@ int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2) {
       b -= 72.0*_dwork1[i-2];
       b += 32.0*_dwork1[i-3];
       b -= 6.0 *_dwork1[i-4];
-      b = -b; 
+      b = -b;
     } else if (i == i2-1) {
       b = -6.0*_dwork1[i+1];
       b -= 20.0*_dwork1[i];
@@ -1525,7 +1525,7 @@ int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2) {
     }
     return 0;
   }
-  
+
   for (i = i1; i < pot->maxrp; i += 2) {
     xi = e - pot->Vc[i] - pot->U[i];
     xi = xi*FINE_STRUCTURE_CONST2*0.5;
@@ -1547,7 +1547,7 @@ int DiracSmall(ORBITAL *orb, POTENTIAL *pot, int i2) {
     b += _dwork1[i]*kappa/pot->rad[i];
     a = _dwork1[i]/(p[i]*p[i]);
     p[i] = _dwork1[i];
-    p[i+pot->maxrp] = FINE_STRUCTURE_CONST*a/(2.0*_dwork[i]); 
+    p[i+pot->maxrp] = FINE_STRUCTURE_CONST*a/(2.0*_dwork[i]);
     p[i+1+pot->maxrp] = FINE_STRUCTURE_CONST*b/(2.0*_dwork[i]);
   }
 
@@ -1569,10 +1569,10 @@ static int ode_func(double t, const double y[], double ydot[], void *params)
   ode_amp_params *p = params;
 
   double w = 2.0*(p->e - (p->w0 + (t - p->t0)*p->s)/t);
-  
+
   ydot[0] = y[1];
   ydot[1] = 1.0/(y[0]*y[0]*y[0]) - y[0]*w;
-  
+
   return GSL_SUCCESS;
 }
 
@@ -1580,14 +1580,14 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   int i, n, kl1;
   double a, b, xi, r2 = 0.0, r3 = 0.0;
   double z, dk, r0, r_o[MAXRP], v_o[MAXRP], w, v1;
-  
+
   double y[2], rtol = EPS4, atol = EPS12, h0 = -0.01;
 
   gsl_odeiv2_system ode_sys;
   gsl_odeiv2_driver *ode_drv;
   int gsl_status;
   ode_amp_params params;
-  
+
   ode_sys.function  = ode_func;
   ode_sys.jacobian  = NULL;
   ode_sys.dimension = 2;
@@ -1595,7 +1595,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
 
   ode_drv = gsl_odeiv2_driver_alloc_y_new(&ode_sys, gsl_odeiv2_step_rk8pd,
                                           h0, atol, rtol);
-  
+
   n = pot->maxrp - 1;
   z = pot->anum - (pot->Navg - 1);
   kl1 = ka*(ka+1);
@@ -1619,7 +1619,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
     w = (-2.0*v1/r_o[i] + 0.75*FINE_STRUCTURE_CONST2*v1*v1/xi - 2*ka*v1/r_o[i]);
     w /= 4.0*xi;
     v_o[i] = a + 0.5*kl1/r2 - 0.5*FINE_STRUCTURE_CONST2*(b - w);
-    
+
     a = z/r2;
     b = kl1/r3;
     if (a < dk && b < dk) {
@@ -1651,7 +1651,7 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
     }
   }
   p[n] = y[0];
-  
+
   /* integration over the inner region */
   for (i = n-1; i >= i0; i--) {
     double r = pot->rad[i];
@@ -1671,13 +1671,13 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   gsl_odeiv2_driver_free(ode_drv);
 
   return y[1];
-}    
+}
 
 int Phase(double *p, POTENTIAL *pot, int i1, double phase0) {
   int i;
   double fact;
   double _dwork[MAXRP];
-  
+
   fact = 1.0/3.0;
 
   for (i = i1; i < pot->maxrp; i++) {
@@ -1701,7 +1701,7 @@ static int SetVEffective(int kl, POTENTIAL *pot) {
     for (i = 0; i < pot->maxrp; i++) {
         double r = pot->rad[i];
         double r2 = r*r;
-        
+
         pot->veff[i] = pot->Vc[i] + pot->U[i] + pot->W[i] + kl1/r2;
     }
 
@@ -1731,7 +1731,7 @@ static int TurningPoints(int n, double e, const POTENTIAL *pot) {
     i2 = Min(i2, i);
     if (pot->ib && n > pot->nb) {
       if (i2 > pot->ib) {
-	i2 = pot->ib;
+        i2 = pot->ib;
       }
     }
   } else {
@@ -1744,7 +1744,7 @@ static int TurningPoints(int n, double e, const POTENTIAL *pot) {
     }
     i2 = i;
   }
-  
+
   return i2;
 }
 
@@ -1759,9 +1759,9 @@ static int CountNodes(double *p, int i1, int i2) {
     a = fabs(p[i]);
     if (a > wave_zero) {
       if ((p0 > 0 && p[i] < 0) ||
-	  (p0 < 0 && p[i] > 0)) {
-	n++;
-	p0 = p[i];
+          (p0 < 0 && p[i] > 0)) {
+        n++;
+        p0 = p[i];
       }
     }
   }
@@ -1791,23 +1791,23 @@ static double get_dirac_rhs(const POTENTIAL *pot, double e, unsigned int i)
    q = {0,1,2} determines the boundary conditions (value/derivative) for WF
    matching: both, left, or right */
 static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
-			   int i1, double p1, int i2, double p2, int q) {
+                           int i1, double p1, int i2, double p2, int q) {
 #define NN  4 /* stride of ABAND */
   double x, p0;
   int i, info, m, k, nodes;
   double ABAND[NN*MAXRP];
   gsl_vector_view bv;
   gsl_vector *xv, *dv, *supv, *subv;
-  
+
   m = i2 - i1 - 1;
   if (m < 0) return 0;
-  
+
   if (i2 >= pot->maxrp || i2 < 0) {
     printf("Radial index is outside of array bounds in IntegrateRadial(): %d\n",
         i2);
     return -1;
   }
-  
+
   if (m == 0) {
     if (q == 0) {
       p[i1] = p1;
@@ -1844,7 +1844,7 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
     p[i2] = p2;
     p[i2-1] += -(1 - x)*p2;
   }
-    
+
   x = get_dirac_rhs(pot, e, i1)/12;
   if (q == 2) {
     k = 2;
@@ -1861,7 +1861,7 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   dv   = gsl_vector_alloc(m);
   supv = gsl_vector_alloc(m - 1);
   subv = gsl_vector_alloc(m - 1);
-  
+
   for (i = 0; i < m; i++) {
     k = NN*(i + 1) - 2;
     gsl_vector_set(dv, i, ABAND[k]);
@@ -1872,7 +1872,7 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
       gsl_vector_set(supv, i, ABAND[k]);
     }
   }
-  
+
   info = gsl_linalg_solve_tridiag(dv, supv, subv, &bv.vector, xv);
 
   gsl_vector_free(dv);
@@ -1880,7 +1880,7 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   gsl_vector_free(subv);
 
   gsl_vector_memcpy(&bv.vector, xv);
-  
+
   gsl_vector_free(xv);
 
   if (info) {
@@ -1901,13 +1901,13 @@ static int IntegrateRadial(double *p, double e, const POTENTIAL *pot,
   for (i = i2; i >= i1; i--) {
     if (fabs(p[i]) > wave_zero) {
       if ((p0 > 0 && p[i] < 0) ||
-	  (p0 < 0 && p[i] > 0)) {
-	nodes++;
-	p0 = p[i];
+          (p0 < 0 && p[i] > 0)) {
+        nodes++;
+        p0 = p[i];
       }
     }
   }
-    
+
   return nodes;
 }
 #undef NN
@@ -1938,7 +1938,7 @@ static double GetRFromRho(double rho, double a, double b, double r0) {
 int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
   double ratio = cfac->rratio, asymp = cfac->rasymp;
   int maxrp = cfac->maxrp;
-  int i;  
+  int i;
   double rmin, z, d1, d2;
   double a = 0.0, b, c = 0.0, rmax = 0.0;
   double rho, drho;
@@ -1958,7 +1958,7 @@ int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
     pot->uehling  = realloc(pot->uehling,  maxrp*sizeof(double));
     pot->veff     = realloc(pot->veff,     maxrp*sizeof(double));
   }
-  
+
   if (!pot->rad      ||
       !pot->dr_drho  ||
       !pot->dr_drho2 ||
@@ -1977,18 +1977,18 @@ int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
   }
 
   pot->maxrp = maxrp;
-  
+
   pot->anum = cfac_get_atomic_number(cfac);
   pot->asymp = asymp;
-  
+
   rmin = cfac->rmin/pot->anum;
-  
+
   z = pot->anum;
   if (pot->Navg > 0) {
     z -= pot->Navg - 1;
   }
-  
-  if (pot->flag == 0) pot->flag = -1; 
+
+  if (pot->flag == 0) pot->flag = -1;
 
   if (asymp > 0 && ratio > 0) {
     a = asymp*sqrt(2*z)/M_PI;
@@ -2010,7 +2010,7 @@ int SetOrbitalRGrid(const cfac_t *cfac, POTENTIAL *pot) {
     rmax = -ratio;
     a = asymp*sqrt(2*z)/M_PI;
     c = (pot->maxrp - 15 + a*(sqrt(rmin) - sqrt(rmax)))/log(rmax/rmin);
-  }     
+  }
   pot->nmax = sqrt(rmax*z)/2.0;
 
   d1 = log(rmax/rmin);
@@ -2053,7 +2053,7 @@ int SetPotentialZ(cfac_t *cfac) {
     for (i = 0; i < pot->maxrp; i++) {
         pot->Vn[i] = cfac_get_nucleus_potential(cfac, pot->rad[i]);
     }
-    
+
     return 0;
 }
 
@@ -2061,18 +2061,18 @@ int SetPotentialZ(cfac_t *cfac) {
 int SetPotentialVc(POTENTIAL *pot) {
     int i;
     double ncore = pot->Navg - 1;
-    
+
     /* nucleus */
     for (i = 0; i < pot->maxrp; i++) {
         pot->Vc[i] = pot->Vn[i];
     }
-    
+
     /* screening core electrons */
     if (ncore > 0 && (pot->a > 0 || pot->lambda > 0)) {
         for (i = 0; i < pot->maxrp; i++) {
             double v;
             double r = pot->rad[i];
-        
+
             v = ncore/r*(1 - exp(-pot->lambda*r)/(1 + r*pot->a));
             pot->Vc[i] += v;
         }
@@ -2092,9 +2092,9 @@ int SetPotentialVc(POTENTIAL *pot) {
 
 int SetPotentialU(POTENTIAL *pot, int n) {
   int i;
-  
+
   if (n < 0) {
-    for (i = 0; i < pot->maxrp; i++) { 
+    for (i = 0; i < pot->maxrp; i++) {
       pot->U[i] = 0.0;
       pot->dU[i] = 0.0;
       pot->dU2[i] = 0.0;
@@ -2118,9 +2118,9 @@ int SetPotentialW(POTENTIAL *pot, double e, int kappa) {
 
     for (i = 0; i < pot->maxrp; i++) {
         double v, dv, dv2, xi, r, t, x, y;
-        
+
         r = pot->rad[i];
-        
+
         v   = pot->Vc[i]   + pot->U[i];
         dv  = pot->dVc[i]  + pot->dU[i];
         dv2 = pot->dVc2[i] + pot->dU2[i];
@@ -2129,7 +2129,7 @@ int SetPotentialW(POTENTIAL *pot, double e, int kappa) {
         t = 1 + 0.5*xi*FINE_STRUCTURE_CONST2;
         x = 0.75*dv*dv*FINE_STRUCTURE_CONST2/t;
         y = -2*kappa*dv/r;
-        
+
         pot->W[i] = -0.5*FINE_STRUCTURE_CONST2*(xi*xi - (x + y + dv2)/(4*t));
     }
 
@@ -2146,42 +2146,42 @@ static double Poly(double x, double n, double c[]) {
     r += c[i]*t;
     t *= x;
   }
-  
+
   return r;
 }
-  
+
 static double UehlingK0(double x) {
   double a[8] = {+0.88357293375,
-		 -0.28259817381,
-		 -0.58904879578,
-		 +0.12500133434,
-		 -0.032729913852,
-		 +0.0082888574511,
-		 -0.0000103277658,
-		 +0.0000636436689};
+                 -0.28259817381,
+                 -0.58904879578,
+                 +0.12500133434,
+                 -0.032729913852,
+                 +0.0082888574511,
+                 -0.0000103277658,
+                 +0.0000636436689};
   double b[3] = {-319.999594328,
-		 +2.53900995981,
-		 1.0};
+                 +2.53900995981,
+                 1.0};
   double c[3] = {-319.999594333,
-		 +2.53901020662,
-		 0.0};
+                 +2.53901020662,
+                 0.0};
   double d[5] = {5.018065179,
-		 71.51891262,
-		 211.6209929,
-		 31.40327478,
-		 -1.0};
+                 71.51891262,
+                 211.6209929,
+                 31.40327478,
+                 -1.0};
   double e[5] = {2.669207401,
-		 51.72549669,
-		 296.9809720,
-		 536.4324164,
-		 153.5335924};
+                 51.72549669,
+                 296.9809720,
+                 536.4324164,
+                 153.5335924};
 
   double r, x2;
 
   if (x <= 0.0) {
     return a[0];
   }
-  
+
   if (x <= 1.0) {
     r = Poly(x, 8, a);
     if (x) {
@@ -2199,35 +2199,35 @@ static double UehlingK0(double x) {
 
 static double UehlingK1(double x) {
   double a[8] = {-0.71740181754,
-		 1.1780972274,
-		 -0.37499963087,
-		 0.13089675530,
-		 -0.038258286439,
-		 -0.0000242972873,
-		 -0.0003592014867,
-		 -0.0000171700907};
+                 1.1780972274,
+                 -0.37499963087,
+                 0.13089675530,
+                 -0.038258286439,
+                 -0.0000242972873,
+                 -0.0003592014867,
+                 -0.0000171700907};
   double b[3] = {-64.0514843293,
-		 0.711722714285,
-		 1.0};
+                 0.711722714285,
+                 1.0};
   double c[3] = {64.0514843287,
-		 -0.711722686403,
-		 0.0008042207748};
+                 -0.711722686403,
+                 0.0008042207748};
   double d[5] = {217.2386409,
-		 1643.364528,
-		 2122.244512,
-		 1.0};
+                 1643.364528,
+                 2122.244512,
+                 1.0};
   double e[5] = {115.5589983,
-		 1292.191441,
-		 3831.198012,
-		 2904.410075,
-		 0.0};
+                 1292.191441,
+                 3831.198012,
+                 2904.410075,
+                 0.0};
 
   double r, x2;
 
   if (x <= 0.0) {
     return 0.0;
   }
-  
+
   if (x <= 1.0) {
     r = Poly(x, 8, a);
     x2 = x*x;
@@ -2243,23 +2243,23 @@ static double UehlingK1(double x) {
 
 double UehlingL0(double x) {
   double f[6] = {1.990159,
-		 -2.397605,
-		 1.046471,
-		 -0.367066,
-		 0.063740,
-		 -0.037058};
+                 -2.397605,
+                 1.046471,
+                 -0.367066,
+                 0.063740,
+                 -0.037058};
   double g[3] = {0.751198,
-		 0.128889,
-		 0.020886};
+                 0.128889,
+                 0.020886};
   double h[2] = {-0.444444,
-		 -0.003472};
-  
+                 -0.003472};
+
   double logx, x2, r;
-  
+
   if (x <= 0.0) {
     return f[0];
   }
-  
+
   if (x <= 2.0) {
     logx = log(x);
     r = Poly(x, 6, f);
@@ -2272,29 +2272,29 @@ double UehlingL0(double x) {
   } else {
     r = 0.0;
   }
-  
+
   return r;
 }
 
 double UehlingL1(double x) {
   double f[6] = {1.646407,
-		 -2.092942,
-		 0.962310,
-		 -0.254960,
-		 0.164404,
-		 0.0};
+                 -2.092942,
+                 0.962310,
+                 -0.254960,
+                 0.164404,
+                 0.0};
   double g[3] = {0.137691,
-		 -0.416667,
-		 -0.097486};
+                 -0.416667,
+                 -0.097486};
   double h[2] = {0.444444,
-		 0.017361};
-  
+                 0.017361};
+
   double logx, x2, r;
-  
+
   if (x <= 0.0) {
     return 0.0;
   }
-  
+
   if (x <= 2.0) {
     logx = log(x);
     r = Poly(x, 6, f);
@@ -2305,7 +2305,7 @@ double UehlingL1(double x) {
   } else {
     r = 0.0;
   }
-  
+
   return r;
 }
 
@@ -2317,13 +2317,13 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
   double _dwork[MAXRP];
 
   if (vp <= 0) return 0;
-  
+
   z = cfac_get_atomic_number(cfac);
 
   r0 = 3.86159E-11/RBOHR;
   a = -2.0*z*FINE_STRUCTURE_CONST/(3.0*M_PI);
   b = -z*FINE_STRUCTURE_CONST2/(M_PI*M_PI);
-  
+
   for (i = 0; i < pot->maxrp-1; i++) {
     r = pot->rad[i]*2.0/r0;
     pot->uehling[i] = a*UehlingK1(r);
@@ -2332,7 +2332,7 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
     }
     pot->uehling[i] /= pot->rad[i];
   }
-  
+
   rn = cfac_get_atomic_rn(cfac);
 
   if (rn) {
@@ -2347,15 +2347,15 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
     for (i = 0; i < pot->maxrp-1; i++) {
       r = pot->rad[i];
       for (j = 0; j < i1; j++) {
-	rp = r + pot->rad[j];
-	rp = 2.0*rp/r0;
-	rm = fabs(r - pot->rad[j]);
-	rm = 2.0*rm/r0;
-	_dwork[j] = a*(UehlingK0(rm) - UehlingK0(rp));
-	if (vp > 1) {
-	  _dwork[j] += b*(UehlingL0(rm) - UehlingL0(rp));
-	}
-	_dwork[j] *= pot->rad[j]*pot->dr_drho[j]*d;
+        rp = r + pot->rad[j];
+        rp = 2.0*rp/r0;
+        rm = fabs(r - pot->rad[j]);
+        rm = 2.0*rm/r0;
+        _dwork[j] = a*(UehlingK0(rm) - UehlingK0(rp));
+        if (vp > 1) {
+          _dwork[j] += b*(UehlingL0(rm) - UehlingL0(rp));
+        }
+        _dwork[j] *= pot->rad[j]*pot->dr_drho[j]*d;
       }
       j = i1 - 1;
       v = Simpson(_dwork, 0, j) / pot->rad[i];
@@ -2365,7 +2365,7 @@ int SetPotentialUehling(cfac_t *cfac, int vp) {
       rm = 2.0*rm/r0;
       _dwork[i1] = a*(UehlingK0(rm) - UehlingK0(rp));
       if (vp > 1) {
-	_dwork[i1] += b*(UehlingL0(rm) - UehlingL0(rp));
+        _dwork[i1] += b*(UehlingL0(rm) - UehlingL0(rp));
       }
       _dwork[i1] *= rn*d;
       _dwork[j] /= pot->dr_drho[j];

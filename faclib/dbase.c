@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -50,25 +50,25 @@ static int mem_enf_table_size = 0;
 static int iground;
 static int iuta = 0;
 
-#define _WSF0(sv, f) {					\
-    n = fwrite(&(sv), sizeof(sv), 1, f);		\
-    if (n != 1) return 0;				\
-    m += sizeof(sv);					\
+#define _WSF0(sv, f) {                                  \
+    n = fwrite(&(sv), sizeof(sv), 1, f);                \
+    if (n != 1) return 0;                               \
+    m += sizeof(sv);                                    \
   }while(0)
-#define _RSF0(sv, f) {					\
-    n = fread(&(sv), sizeof(sv), 1, f);			\
-    if (n != 1) return 0;				\
-    m += sizeof(sv);					\
+#define _RSF0(sv, f) {                                  \
+    n = fread(&(sv), sizeof(sv), 1, f);                 \
+    if (n != 1) return 0;                               \
+    m += sizeof(sv);                                    \
   }while(0)
-#define _WSF1(sv, s, k, f) {				\
-    n = fwrite(sv, s, k, f);				\
-    if ((n) != (k)) return 0;				\
-    m += (s)*(k);					\
+#define _WSF1(sv, s, k, f) {                            \
+    n = fwrite(sv, s, k, f);                            \
+    if ((n) != (k)) return 0;                           \
+    m += (s)*(k);                                       \
   }while(0)
-#define _RSF1(sv, s, k, f) {				\
-    n = fread(sv, s, k, f);				\
-    if ((n) != (k)) return 0;				\
-    m += (s)*(k);					\
+#define _RSF1(sv, s, k, f) {                            \
+    n = fread(sv, s, k, f);                             \
+    if ((n) != (k)) return 0;                           \
+    m += (s)*(k);                                       \
   }while(0)
 #define WSF0(sv) _WSF0(sv, f)
 #define WSF1(sv, s, k) _WSF1(sv, s, k, f)
@@ -88,13 +88,13 @@ int CheckEndian(F_HEADER *fh) {
       return (int) (fh->symbol[3]);
     }
   }
-       
+
   p = (char *) &t;
   p += sizeof(unsigned short)-1;
   if ((unsigned short) (*p) == 1) return 1;
   else return 0;
 }
- 
+
 void SwapEndian(char *p, int size) {
   int t1, t2;
   char tmp;
@@ -223,7 +223,7 @@ int SwapEndianCERecord(CE_RECORD *r) {
   }
   return 0;
 }
- 
+
 int SwapEndianCEFHeader(CEF_HEADER *h) {
   SwapEndian((char *) &(h->position), sizeof(long int));
   SwapEndian((char *) &(h->length), sizeof(long int));
@@ -258,7 +258,7 @@ int SwapEndianCEMFHeader(CEMF_HEADER *h) {
   SwapEndian((char *) &(h->n_tegrid), sizeof(int));
   SwapEndian((char *) &(h->n_egrid), sizeof(int));
   SwapEndian((char *) &(h->n_thetagrid), sizeof(int));
-  SwapEndian((char *) &(h->n_phigrid), sizeof(int));  
+  SwapEndian((char *) &(h->n_phigrid), sizeof(int));
   SwapEndian((char *) &(h->te0), sizeof(float));
   SwapEndian((char *) &(h->efield), sizeof(double));
   SwapEndian((char *) &(h->bfield), sizeof(double));
@@ -287,7 +287,7 @@ int SwapEndianRRHeader(RR_HEADER *h) {
   SwapEndian((char *) &(h->nparams), sizeof(int));
   return 0;
 }
-  
+
 int SwapEndianRRRecord(RR_RECORD *r) {
   SwapEndian((char *) &(r->b), sizeof(int));
   SwapEndian((char *) &(r->f), sizeof(int));
@@ -386,8 +386,8 @@ void CEMF2CEFHeader(CEMF_HEADER *mh, CEF_HEADER *h) {
   h->egrid = mh->egrid;
 }
 
-void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh, 
-		    int ith, int iph) {
+void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh,
+                    int ith, int iph) {
   int k;
 
   r->lower = mr->lower;
@@ -457,7 +457,7 @@ int ReadFHeader(FILE *f, F_HEADER *fh, int *swp) {
   RSF0(fh->atom);
   RSF1(fh->symbol, sizeof(char), 4);
   RSF0(fh->nblocks);
-  
+
   *swp = 0;
 
   if (CheckEndian(fh) != (int) (fheader[0].symbol[3])) {
@@ -505,7 +505,7 @@ int WriteTRHeader(FILE *f, TR_HEADER *h) {
   WSF0(h->gauge);
   WSF0(h->mode);
   WSF0(h->multipole);
-  
+
   return m;
 }
 
@@ -522,7 +522,7 @@ int WriteTRFHeader(FILE *f, TRF_HEADER *h) {
   WSF0(h->efield);
   WSF0(h->bfield);
   WSF0(h->fangle);
-  
+
   return m;
 }
 
@@ -545,7 +545,7 @@ int WriteCEHeader(FILE *f, CE_HEADER *h) {
   WSF1(h->tegrid, sizeof(double), h->n_tegrid);
   WSF1(h->egrid, sizeof(double), h->n_egrid);
   WSF1(h->usr_egrid, sizeof(double), h->n_usr);
-  
+
   return m;
 }
 
@@ -564,7 +564,7 @@ int WriteCEFHeader(FILE *f, CEF_HEADER *h) {
   WSF0(h->fangle);
   WSF1(h->tegrid, sizeof(double), h->n_tegrid);
   WSF1(h->egrid, sizeof(double), h->n_egrid);
-  
+
   return m;
 }
 
@@ -587,13 +587,13 @@ int WriteCEMFHeader(FILE *f, CEMF_HEADER *h) {
   WSF1(h->egrid, sizeof(double), h->n_egrid);
   WSF1(h->thetagrid, sizeof(double), h->n_thetagrid);
   WSF1(h->phigrid, sizeof(double), h->n_phigrid);
-  
+
   return m;
 }
 
 int WriteRRHeader(FILE *f, RR_HEADER *h) {
   int n, m = 0;
-  
+
   WSF0(h->position);
   WSF0(h->length);
   WSF0(h->nele);
@@ -615,7 +615,7 @@ int WriteRRHeader(FILE *f, RR_HEADER *h) {
 
 int WriteAIHeader(FILE *f, AI_HEADER *h) {
   int n, m = 0;
- 
+
   WSF0(h->position);
   WSF0(h->length);
   WSF0(h->nele);
@@ -623,13 +623,13 @@ int WriteAIHeader(FILE *f, AI_HEADER *h) {
   WSF0(h->emin);
   WSF0(h->n_egrid);
   WSF1(h->egrid, sizeof(double), h->n_egrid);
-  
+
   return m;
 }
 
 int WriteAIMHeader(FILE *f, AIM_HEADER *h) {
   int n, m = 0;
-    
+
   WSF0(h->position);
   WSF0(h->length);
   WSF0(h->nele);
@@ -637,7 +637,7 @@ int WriteAIMHeader(FILE *f, AIM_HEADER *h) {
   WSF0(h->emin);
   WSF0(h->n_egrid);
   WSF1(h->egrid, sizeof(double), h->n_egrid);
-  
+
   return m;
 }
 
@@ -659,13 +659,13 @@ int WriteCIHeader(FILE *f, CI_HEADER *h) {
   WSF1(h->tegrid, sizeof(double), h->n_tegrid);
   WSF1(h->egrid, sizeof(double), h->n_egrid);
   WSF1(h->usr_egrid, sizeof(double), h->n_usr);
-  
+
   return m;
 }
 
 int WriteCIMHeader(FILE *f, CIM_HEADER *h) {
   int n, m = 0;
-    
+
   WSF0(h->position);
   WSF0(h->length);
   WSF0(h->nele);
@@ -687,13 +687,13 @@ int WriteENRecord(FILE *f, EN_RECORD *r) {
     fheader[DB_EN-1].nblocks++;
     n = WriteENHeader(f, &en_header);
   }
-  
+
   WSF0(r->p);
   WSF0(r->j);
   WSF0(r->ilev);
   WSF0(r->ibase);
   WSF0(r->energy);
-  
+
   /* make sure the strings are zero-padded */
   len = strlen(r->ncomplex);
   memset(r->ncomplex + len, 0, LNCOMPLEX - len);
@@ -701,7 +701,7 @@ int WriteENRecord(FILE *f, EN_RECORD *r) {
   memset(r->sname + len, 0, LSNAME - len);
   len = strlen(r->name);
   memset(r->name + len, 0, LNAME - len);
-  
+
   WSF1(r->ncomplex, sizeof(char), LNCOMPLEX);
   WSF1(r->sname, sizeof(char), LSNAME);
   WSF1(r->name, sizeof(char), LNAME);
@@ -719,11 +719,11 @@ int WriteENFRecord(FILE *f, ENF_RECORD *r) {
     fheader[DB_ENF-1].nblocks++;
     n = WriteENFHeader(f, &enf_header);
   }
-  
+
   WSF0(r->ilev);
   WSF0(r->energy);
   WSF0(r->pbasis);
-  
+
   enf_header.nlevels += 1;
   enf_header.length += m;
 
@@ -737,7 +737,7 @@ int WriteTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx) {
     fheader[DB_TR-1].nblocks++;
     n = WriteTRHeader(f, &tr_header);
   }
-  
+
   WSF0(r->lower);
   WSF0(r->upper);
   WSF0(r->rme);
@@ -758,7 +758,7 @@ int WriteTRFRecord(FILE *f, TRF_RECORD *r) {
     fheader[DB_TRF-1].nblocks++;
     n = WriteTRFHeader(f, &trf_header);
   }
-  
+
   WSF0(r->lower);
   WSF0(r->upper);
   WSF1(r->strength, sizeof(float), 2*abs(trf_header.multipole)+1);
@@ -777,7 +777,7 @@ int WriteCERecord(FILE *f, CE_RECORD *r) {
     fheader[DB_CE-1].nblocks++;
     n = WriteCEHeader(f, &ce_header);
   }
-  
+
   WSF0(r->lower);
   WSF0(r->upper);
   WSF0(r->nsub);
@@ -807,7 +807,7 @@ int WriteCEFRecord(FILE *f, CEF_RECORD *r) {
     fheader[DB_CEF-1].nblocks++;
     n = WriteCEFHeader(f, &cef_header);
   }
-  
+
   WSF0(r->lower);
   WSF0(r->upper);
   WSF0(r->bethe);
@@ -815,7 +815,7 @@ int WriteCEFRecord(FILE *f, CEF_RECORD *r) {
 
   m0 = cef_header.n_egrid;
   WSF1(r->strength, sizeof(float), m0);
-  
+
   cef_header.ntransitions += 1;
   cef_header.length += m;
 
@@ -830,17 +830,17 @@ int WriteCEMFRecord(FILE *f, CEMF_RECORD *r) {
     fheader[DB_CEMF-1].nblocks++;
     n = WriteCEMFHeader(f, &cemf_header);
   }
-  
+
   WSF0(r->lower);
   WSF0(r->upper);
-  
+
   m0 = cemf_header.n_thetagrid * cemf_header.n_phigrid;
-  WSF1(r->bethe, sizeof(float), m0);  
+  WSF1(r->bethe, sizeof(float), m0);
   WSF1(r->born, sizeof(float), m0+1);
 
   m0 = cemf_header.n_egrid * m0;
   WSF1(r->strength, sizeof(float), m0);
-  
+
   cemf_header.ntransitions += 1;
   cemf_header.length += m;
 
@@ -880,7 +880,7 @@ int WriteAIRecord(FILE *f, AI_RECORD *r) {
     fheader[DB_AI-1].nblocks++;
     WriteAIHeader(f, &ai_header);
   }
-  
+
   WSF0(r->b);
   WSF0(r->f);
   WSF0(r->rate);
@@ -903,7 +903,7 @@ int WriteAIMRecord(FILE *f, AIM_RECORD *r) {
   WSF0(r->f);
   WSF0(r->nsub);
   WSF1(r->rate, sizeof(float), r->nsub);
-  
+
   aim_header.ntransitions += 1;
   aim_header.length += m;
 
@@ -947,7 +947,7 @@ int WriteCIMRecord(FILE *f, CIM_RECORD *r) {
   WSF0(r->nsub);
   m0 = r->nsub*cim_header.n_usr;
   WSF1(r->strength, sizeof(float), m0);
-  
+
   cim_header.ntransitions += 1;
   cim_header.length += m;
 
@@ -956,17 +956,17 @@ int WriteCIMRecord(FILE *f, CIM_RECORD *r) {
 
 int ReadENHeader(FILE *f, EN_HEADER *h, int swp) {
   int n, m = 0;
-  
+
   RSF0(h->position);
   RSF0(h->length);
   RSF0(h->nele);
   RSF0(h->nlevels);
 
   if (swp) SwapEndianENHeader(h);
-  
+
   return m;
 }
- 
+
 int ReadENFHeader(FILE *f, ENF_HEADER *h, int swp) {
   int n, m = 0;
 
@@ -977,7 +977,7 @@ int ReadENFHeader(FILE *f, ENF_HEADER *h, int swp) {
   RSF0(h->efield);
   RSF0(h->bfield);
   RSF0(h->fangle);
-  
+
   if (swp) SwapEndianENFHeader(h);
 
   return m;
@@ -996,7 +996,7 @@ int ReadENRecord(FILE *f, EN_RECORD *r, int swp) {
   RSF1(r->name, sizeof(char), LNAME);
 
   if (swp) SwapEndianENRecord(r);
-  
+
   return m;
 }
 
@@ -1006,7 +1006,7 @@ int ReadENFRecord(FILE *f, ENF_RECORD *r, int swp) {
   RSF0(r->ilev);
   RSF0(r->energy);
   RSF0(r->pbasis);
-  
+
   if (swp) SwapEndianENFRecord(r);
 
   return m;
@@ -1014,7 +1014,7 @@ int ReadENFRecord(FILE *f, ENF_RECORD *r, int swp) {
 
 int ReadTRHeader(FILE *f, TR_HEADER *h, int swp) {
   int n, m = 0;
-  
+
   RSF0(h->position);
   RSF0(h->length);
   RSF0(h->nele);
@@ -1036,7 +1036,7 @@ int ReadTRHeader(FILE *f, TR_HEADER *h, int swp) {
 
 int ReadTRFHeader(FILE *f, TRF_HEADER *h, int swp) {
   int n, m = 0;
-  
+
   RSF0(h->position);
   RSF0(h->length);
   RSF0(h->nele);
@@ -1054,7 +1054,7 @@ int ReadTRFHeader(FILE *f, TRF_HEADER *h, int swp) {
 
 int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp) {
   int n, m = 0;
-    
+
   RSF0(r->lower);
   RSF0(r->upper);
   RSF0(r->rme);
@@ -1071,7 +1071,7 @@ int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp) {
 
 int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, TRF_HEADER *h) {
   int n, m = 0, i, nq;
-    
+
   RSF0(r->lower);
   RSF0(r->upper);
   nq = 2*abs(h->multipole) + 1;
@@ -1104,12 +1104,12 @@ int ReadCEHeader(FILE *f, CE_HEADER *h, int swp) {
   RSF0(h->pw_type);
   RSF0(h->msub);
   RSF0(h->te0);
-  
+
   if (swp) SwapEndianCEHeader(h);
-  
+
   h->tegrid = (double *) malloc(sizeof(double)*h->n_tegrid);
   RSF1(h->tegrid, sizeof(double), h->n_tegrid);
- 
+
   h->egrid = (double *) malloc(sizeof(double)*h->n_egrid);
   RSF1(h->egrid, sizeof(double), h->n_egrid);
 
@@ -1140,16 +1140,16 @@ int ReadCEFHeader(FILE *f, CEF_HEADER *h, int swp) {
   RSF0(h->ntransitions);
   RSF0(h->n_tegrid);
   RSF0(h->n_egrid);
-  RSF0(h->te0);  
+  RSF0(h->te0);
   RSF0(h->efield);
   RSF0(h->bfield);
   RSF0(h->fangle);
 
   if (swp) SwapEndianCEFHeader(h);
-  
+
   h->tegrid = (double *) malloc(sizeof(double)*h->n_tegrid);
   RSF1(h->tegrid, sizeof(double), h->n_tegrid);
- 
+
   h->egrid = (double *) malloc(sizeof(double)*h->n_egrid);
   RSF1(h->egrid, sizeof(double), h->n_egrid);
 
@@ -1176,16 +1176,16 @@ int ReadCEMFHeader(FILE *f, CEMF_HEADER *h, int swp) {
   RSF0(h->n_egrid);
   RSF0(h->n_thetagrid);
   RSF0(h->n_phigrid);
-  RSF0(h->te0);  
+  RSF0(h->te0);
   RSF0(h->efield);
   RSF0(h->bfield);
   RSF0(h->fangle);
 
   if (swp) SwapEndianCEMFHeader(h);
-  
+
   h->tegrid = (double *) malloc(sizeof(double)*h->n_tegrid);
   RSF1(h->tegrid, sizeof(double), h->n_tegrid);
- 
+
   h->egrid = (double *) malloc(sizeof(double)*h->n_egrid);
   RSF1(h->egrid, sizeof(double), h->n_egrid);
 
@@ -1194,7 +1194,7 @@ int ReadCEMFHeader(FILE *f, CEMF_HEADER *h, int swp) {
 
   h->phigrid = (double *) malloc(sizeof(double)*h->n_phigrid);
   RSF1(h->phigrid, sizeof(double), h->n_phigrid);
-  
+
   if (swp) {
     for (i = 0; i < h->n_tegrid; i++) {
       SwapEndian((char *) &(h->tegrid[i]), sizeof(double));
@@ -1215,7 +1215,7 @@ int ReadCEMFHeader(FILE *f, CEMF_HEADER *h, int swp) {
 
 int ReadCERecord(FILE *f, CE_RECORD *r, int swp, CE_HEADER *h) {
   int i, n, m = 0, m0;
-  
+
   RSF0(r->lower);
   RSF0(r->upper);
   RSF0(r->nsub);
@@ -1223,7 +1223,7 @@ int ReadCERecord(FILE *f, CE_RECORD *r, int swp, CE_HEADER *h) {
   RSF1(r->born, sizeof(float), 2);
 
   if (swp) SwapEndianCERecord(r);
-  
+
   if (h->msub) {
     m0 = r->nsub;
   } else m0 = 0;
@@ -1233,11 +1233,11 @@ int ReadCERecord(FILE *f, CE_RECORD *r, int swp, CE_HEADER *h) {
     RSF1(r->params, sizeof(float), m0);
     if (swp) {
       for (i = 0; i < m0; i++) {
-	SwapEndian((char *) &(r->params[i]), sizeof(float));
+        SwapEndian((char *) &(r->params[i]), sizeof(float));
       }
     }
   }
-  
+
   m0 = h->n_usr * r->nsub;
   r->strength = (float *) malloc(sizeof(float)*m0);
   RSF1(r->strength, sizeof(float), m0);
@@ -1246,20 +1246,20 @@ int ReadCERecord(FILE *f, CE_RECORD *r, int swp, CE_HEADER *h) {
       SwapEndian((char *) &(r->strength[i]), sizeof(float));
     }
   }
-  
+
   return m;
 }
 
 int ReadCEFRecord(FILE *f, CEF_RECORD *r, int swp, CEF_HEADER *h) {
   int i, n, m = 0, m0;
-  
+
   RSF0(r->lower);
   RSF0(r->upper);
   RSF0(r->bethe);
   RSF1(r->born, sizeof(float), 2);
 
-  if (swp) SwapEndianCEFRecord(r);  
-  
+  if (swp) SwapEndianCEFRecord(r);
+
   m0 = h->n_egrid;
   r->strength = (float *) malloc(sizeof(float)*m0);
   RSF1(r->strength, sizeof(float), m0);
@@ -1268,16 +1268,16 @@ int ReadCEFRecord(FILE *f, CEF_RECORD *r, int swp, CEF_HEADER *h) {
       SwapEndian((char *) &(r->strength[i]), sizeof(float));
     }
   }
-  
+
   return m;
 }
 
 int ReadCEMFRecord(FILE *f, CEMF_RECORD *r, int swp, CEMF_HEADER *h) {
   int i, n, m = 0, m0;
-  
+
   RSF0(r->lower);
   RSF0(r->upper);
-  if (swp) SwapEndianCEMFRecord(r);  
+  if (swp) SwapEndianCEMFRecord(r);
 
   m0 = h->n_thetagrid * h->n_phigrid;
   r->bethe = (float *) malloc(sizeof(float)*m0);
@@ -1306,7 +1306,7 @@ int ReadCEMFRecord(FILE *f, CEMF_RECORD *r, int swp, CEMF_HEADER *h) {
 
 int ReadRRHeader(FILE *f, RR_HEADER *h, int swp) {
   int i, n, m = 0;
-  
+
   RSF0(h->position);
   RSF0(h->length);
   RSF0(h->nele);
@@ -1348,7 +1348,7 @@ int ReadRRHeader(FILE *f, RR_HEADER *h, int swp) {
 
 int ReadRRRecord(FILE *f, RR_RECORD *r, int swp, RR_HEADER *h) {
   int i, n, m = 0, m0;
-  
+
   RSF0(r->b);
   RSF0(r->f);
   RSF0(r->kl);
@@ -1361,7 +1361,7 @@ int ReadRRRecord(FILE *f, RR_RECORD *r, int swp, RR_HEADER *h) {
     RSF1(r->params, sizeof(float), m0);
     if (swp) {
       for (i = 0; i < m0; i++) {
-	SwapEndian((char *) &(r->params[i]), sizeof(float));
+        SwapEndian((char *) &(r->params[i]), sizeof(float));
       }
     }
   }
@@ -1388,16 +1388,16 @@ int ReadAIHeader(FILE *f, AI_HEADER *h, int swp) {
   RSF0(h->n_egrid);
 
   if (swp) SwapEndianAIHeader(h);
-  
+
   h->egrid = (double *) malloc(sizeof(double)*h->n_egrid);
   RSF1(h->egrid, sizeof(double), h->n_egrid);
-  
+
   if (swp) {
     for (i = 0; i < h->n_egrid; i++) {
       SwapEndian((char *) &(h->egrid[i]), sizeof(double));
     }
   }
-  
+
   return m;
 }
 
@@ -1412,16 +1412,16 @@ int ReadAIMHeader(FILE *f, AIM_HEADER *h, int swp) {
   RSF0(h->n_egrid);
 
   if (swp) SwapEndianAIMHeader(h);
-  
+
   h->egrid = (double *) malloc(sizeof(double)*h->n_egrid);
   RSF1(h->egrid, sizeof(double), h->n_egrid);
-  
+
   if (swp) {
     for (i = 0; i < h->n_egrid; i++) {
       SwapEndian((char *) &(h->egrid[i]), sizeof(double));
     }
   }
-  
+
   return m;
 }
 
@@ -1433,7 +1433,7 @@ int ReadAIRecord(FILE *f, AI_RECORD *r, int swp) {
   RSF0(r->rate);
 
   if (swp) SwapEndianAIRecord(r);
-  
+
   return m;
 }
 
@@ -1446,7 +1446,7 @@ int ReadAIMRecord(FILE *f, AIM_RECORD *r, int swp) {
   if (swp) {
     SwapEndianAIMRecord(r);
   }
-  
+
   r->rate = (float *) malloc(sizeof(float)*r->nsub);
   RSF1(r->rate, sizeof(float), r->nsub);
   if (swp) {
@@ -1472,18 +1472,18 @@ int ReadCIHeader(FILE *f, CI_HEADER *h, int swp) {
   RSF0(h->usr_egrid_type);
   RSF0(h->nparams);
   RSF0(h->pw_type);
-  
+
   if (swp) SwapEndianCIHeader(h);
-  
+
   h->tegrid = (double *) malloc(sizeof(double)*h->n_tegrid);
   RSF1(h->tegrid, sizeof(double), h->n_tegrid);
- 
+
   h->egrid = (double *) malloc(sizeof(double)*h->n_egrid);
   RSF1(h->egrid, sizeof(double), h->n_egrid);
 
   h->usr_egrid = (double *) malloc(sizeof(double)*h->n_usr);
   RSF1(h->usr_egrid, sizeof(double), h->n_usr);
- 
+
   if (swp) {
     for (i = 0; i < h->n_tegrid; i++) {
       SwapEndian((char *) &(h->tegrid[i]), sizeof(double));
@@ -1501,7 +1501,7 @@ int ReadCIHeader(FILE *f, CI_HEADER *h, int swp) {
 
 int ReadCIRecord(FILE *f, CI_RECORD *r, int swp, CI_HEADER *h) {
   int i, n, m = 0, m0;
-  
+
   RSF0(r->b);
   RSF0(r->f);
   RSF0(r->kl);
@@ -1540,15 +1540,15 @@ int ReadCIMHeader(FILE *f, CIM_HEADER *h, int swp) {
   RSF0(h->egrid_type);
   RSF0(h->n_usr);
   RSF0(h->usr_egrid_type);
-  
+
   if (swp) SwapEndianCIMHeader(h);
-  
+
   h->egrid = (double *) malloc(sizeof(double)*h->n_egrid);
   RSF1(h->egrid, sizeof(double), h->n_egrid);
 
   h->usr_egrid = (double *) malloc(sizeof(double)*h->n_usr);
   RSF1(h->usr_egrid, sizeof(double), h->n_usr);
- 
+
   if (swp) {
     for (i = 0; i < h->n_egrid; i++) {
       SwapEndian((char *) &(h->egrid[i]), sizeof(double));
@@ -1578,10 +1578,10 @@ int ReadCIMRecord(FILE *f, CIM_RECORD *r, int swp, CIM_HEADER *h) {
       SwapEndian((char *) &(r->strength[i]), sizeof(float));
     }
   }
-  
+
   return m;
-} 
-  
+}
+
 FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
   int ihdr;
   FILE *f;
@@ -1622,12 +1622,12 @@ FILE *OpenFile(const char *fn, F_HEADER *fhdr) {
 
 int CloseFile(FILE *f, F_HEADER *fhdr) {
   int ihdr;
- 
+
   ihdr = fhdr->type-1;
   fseek(f, 0, SEEK_SET);
   fheader[ihdr].type = fhdr->type;
   WriteFHeader(f, &(fheader[ihdr]));
-  
+
   fclose(f);
   return 0;
 }
@@ -1648,7 +1648,7 @@ int InitFile(FILE *f, F_HEADER *fhdr, void *rhdr) {
   long int p;
 
   if (f == NULL) return 0;
-  
+
   fseek(f, 0, SEEK_END);
   p = ftell(f);
 
@@ -1688,7 +1688,7 @@ int InitFile(FILE *f, F_HEADER *fhdr, void *rhdr) {
     ai_header.length = 0;
     ai_header.ntransitions = 0;
     break;
-  case DB_CI:    
+  case DB_CI:
     ci_hdr = (CI_HEADER *) rhdr;
     memcpy(&ci_header, ci_hdr, sizeof(CI_HEADER));
     ci_header.position = p;
@@ -1977,8 +1977,8 @@ int PrintTable(char *ifn, char *ofn, int v) {
   switch (fh.type) {
   case DB_EN:
     if (v) {
-      fprintf(f2, "E0\t= %-d, %15.8E\n", 
-	      iground, (mem_en_table[iground].energy * HARTREE_EV));
+      fprintf(f2, "E0\t= %-d, %15.8E\n",
+              iground, (mem_en_table[iground].energy * HARTREE_EV));
     }
     n = PrintENTable(f1, f2, v, swp);
     break;
@@ -2106,8 +2106,8 @@ int MemENTable(char *fn) {
       n = ReadENRecord(f, &r, swp);
       if (n == 0) break;
       if (r.energy < e0) {
-	e0 = r.energy;
-	iground = r.ilev;
+        e0 = r.energy;
+        iground = r.ilev;
       }
       mem_en_table[r.ilev].energy = r.energy;
       mem_en_table[r.ilev].p = r.p;
@@ -2118,7 +2118,7 @@ int MemENTable(char *fn) {
 
   fclose(f);
   return 0;
-}    
+}
 
 int PrintENTable(FILE *f1, FILE *f2, int v, int swp) {
   EN_HEADER h;
@@ -2141,24 +2141,24 @@ int PrintENTable(FILE *f1, FILE *f2, int v, int swp) {
       if (n == 0) break;
       e = r.energy;
       if (v) {
-	e -= mem_en_table[iground].energy;
-	e *= HARTREE_EV;
+        e -= mem_en_table[iground].energy;
+        e *= HARTREE_EV;
       }
       if (r.p < 0) {
-	p = 1;
-	vnl = -r.p;
+        p = 1;
+        vnl = -r.p;
       } else {
-	p = 0;
-	vnl = r.p;
+        p = 0;
+        vnl = r.p;
       }
       j = JFromENRecord(&r);
       ibase = IBaseFromENRecord(&r);
       fprintf(f2, "%6d %6d %15.8E %1d %5d %4d %-20s %-20s %-s\n",
-	      r.ilev, ibase, e, p, vnl, j, r.ncomplex, r.sname, r.name);
+              r.ilev, ibase, e, p, vnl, j, r.ncomplex, r.sname, r.name);
     }
     nb += 1;
   }
-  
+
   return nb;
 }
 
@@ -2168,7 +2168,7 @@ int PrintENFTable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i;
   int nb, ilev, mlev;
   double e;
-  
+
   nb = 0;
   while (1) {
     n = ReadENFHeader(f1, &h, swp);
@@ -2185,8 +2185,8 @@ int PrintENFTable(FILE *f1, FILE *f2, int v, int swp) {
       if (n == 0) break;
       e = r.energy;
       if (v) {
-	e -= mem_en_table[iground].energy;
-	e *= HARTREE_EV;
+        e -= mem_en_table[iground].energy;
+        e *= HARTREE_EV;
       }
       DecodeBasisEB(r.pbasis, &ilev, &mlev);
       fprintf(f2, "%6d %22.15E %6d %4d\n", r.ilev, e, ilev, mlev);
@@ -2196,7 +2196,7 @@ int PrintENFTable(FILE *f1, FILE *f2, int v, int swp) {
 
   return nb;
 }
-    
+
 int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
   TR_HEADER h;
   TR_RECORD r;
@@ -2206,11 +2206,11 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
   double e, a, gf;
 
   nb = 0;
-  
+
   while (1) {
     n = ReadTRHeader(f1, &h, swp);
     if (n == 0) break;
-    
+
     fprintf(f2, "\n");
     fprintf(f2, "NELE\t= %d\n", h.nele);
     fprintf(f2, "NTRANS\t= %d\n", h.ntransitions);
@@ -2222,20 +2222,20 @@ int PrintTRTable(FILE *f1, FILE *f2, int v, int swp) {
       n = ReadTRRecord(f1, &r, &rx, swp);
       if (n == 0) break;
       if (v) {
-	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
+        e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
         e += rx.de;
-	
+
         gf = OscillatorStrength(h.multipole, e, r.rme, &a);
-	a /= (mem_en_table[r.upper].j + 1.0);
-	  fprintf(f2, "%5d %4d %5d %4d %13.6E %11.4E %13.6E %13.6E %13.6E\n",
-		  r.upper, mem_en_table[r.upper].j,
-		  r.lower, mem_en_table[r.lower].j,
-		  (e*HARTREE_EV),
-		  (rx.sdev*HARTREE_EV), gf, a*RATE_AU, r.rme);
+        a /= (mem_en_table[r.upper].j + 1.0);
+          fprintf(f2, "%5d %4d %5d %4d %13.6E %11.4E %13.6E %13.6E %13.6E\n",
+                  r.upper, mem_en_table[r.upper].j,
+                  r.lower, mem_en_table[r.lower].j,
+                  (e*HARTREE_EV),
+                  (rx.sdev*HARTREE_EV), gf, a*RATE_AU, r.rme);
       } else {
-	e = rx.de;
-	fprintf(f2, "%5d %5d %13.6E %11.4E %13.6E\n",
-	      r.upper, r.lower, e, rx.sdev, r.rme);
+        e = rx.de;
+        fprintf(f2, "%5d %5d %13.6E %11.4E %13.6E\n",
+              r.upper, r.lower, e, rx.sdev, r.rme);
       }
     }
     nb += 1;
@@ -2252,7 +2252,7 @@ int PrintTRFTable(FILE *f1, FILE *f2, int v, int swp) {
   double e, a, gf, ta;
 
   nb = 0;
-  
+
   while (1) {
     n = ReadTRFHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2270,22 +2270,22 @@ int PrintTRFTable(FILE *f1, FILE *f2, int v, int swp) {
       n = ReadTRFRecord(f1, &r, swp, &h);
       if (n == 0) break;
       if (v) {
-	e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;
-	ta = 0.0;
-	for (j = 0; j < nq; j++) {
-	  gf = OscillatorStrength(h.multipole, e, (double)(r.strength[j]), &a);
-	  a *= RATE_AU;
-	  ta += a;
-	  fprintf(f2, "%6d %6d %3d %6d %6d %3d %2d %13.6E %13.6E %13.6E %13.6E %13.6E\n",
-		  r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
-		  r.lower, mem_enf_table[r.lower].p, mem_enf_table[r.lower].j,
-		  j-abs(h.multipole),(e*HARTREE_EV), gf, a, r.strength[j], ta);
-	}
+        e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;
+        ta = 0.0;
+        for (j = 0; j < nq; j++) {
+          gf = OscillatorStrength(h.multipole, e, (double)(r.strength[j]), &a);
+          a *= RATE_AU;
+          ta += a;
+          fprintf(f2, "%6d %6d %3d %6d %6d %3d %2d %13.6E %13.6E %13.6E %13.6E %13.6E\n",
+                  r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
+                  r.lower, mem_enf_table[r.lower].p, mem_enf_table[r.lower].j,
+                  j-abs(h.multipole),(e*HARTREE_EV), gf, a, r.strength[j], ta);
+        }
       } else {
-	for (j = 0; j < nq; j++) {
-	  fprintf(f2, "%6d %6d %13.6E\n", 
-		  r.upper, r.lower, r.strength[j]);
-	}
+        for (j = 0; j < nq; j++) {
+          fprintf(f2, "%6d %6d %13.6E\n",
+                  r.upper, r.lower, r.strength[j]);
+        }
       }
       free(r.strength);
     }
@@ -2318,9 +2318,9 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
 
     for (i = 0; i < h.n_tegrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
       }
     }
     fprintf(f2, "TE0\t= %15.8E\n", h.te0 * HARTREE_EV);
@@ -2328,64 +2328,64 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
     fprintf(f2, "UTYPE\t= %d\n", h.usr_egrid_type);
     fprintf(f2, "NUSR\t= %d\n", h.n_usr);
     for (i = 0; i < h.n_usr; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
       }
     }
-    
+
     for (i = 0; i < h.ntransitions; i++) {
       n = ReadCERecord(f1, &r, swp, &h);
       if (n == 0) break;
       if (v) {
-	e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
-	fprintf(f2, "%6d %2d %6d %2d %11.4E %d\n",
-		r.lower, mem_en_table[r.lower].j,
-		r.upper, mem_en_table[r.upper].j,
-		e*HARTREE_EV, r.nsub);
-	fprintf(f2, "%11.4E %11.4E %11.4E\n", 
-		r.bethe, r.born[0], r.born[1]*HARTREE_EV);
+        e = mem_en_table[r.upper].energy - mem_en_table[r.lower].energy;
+        fprintf(f2, "%6d %2d %6d %2d %11.4E %d\n",
+                r.lower, mem_en_table[r.lower].j,
+                r.upper, mem_en_table[r.upper].j,
+                e*HARTREE_EV, r.nsub);
+        fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                r.bethe, r.born[0], r.born[1]*HARTREE_EV);
       } else {
-	fprintf(f2, "%6d %6d %d\n", 
-		r.lower, r.upper, r.nsub);
-	fprintf(f2, "%11.4E %11.4E %11.4E\n", 
-		r.bethe, r.born[0], r.born[1]);
+        fprintf(f2, "%6d %6d %d\n",
+                r.lower, r.upper, r.nsub);
+        fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                r.bethe, r.born[0], r.born[1]);
       }
-      
+
       p2 = 0;
       for (k = 0; k < r.nsub; k++) {
-	if (h.msub) {
-	  fprintf(f2, "%11.4E\n", r.params[k]);
-	}
-	for (t = 0; t < h.n_usr; t++) {
-	  if (v) {
-	    a = h.usr_egrid[t];
-	    if (h.usr_egrid_type == 1) a += e;
-	    a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
-	    a = M_PI * AREA_AU20/a;
-	    if (!h.msub) a /= (mem_en_table[r.lower].j+1.0);
-	    a *= r.strength[p2];
-	    fprintf(f2, "%11.4E %11.4E %11.4E\n",
-		    h.usr_egrid[t]*HARTREE_EV,
-		    r.strength[p2], a);
-	  } else {
-	    fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[p2]);
-	  }
-	  p2++;
-	}
-	if (k < r.nsub-1) {
-	  fprintf(f2, "--------------------------------------------\n");
-	}
-      }      
+        if (h.msub) {
+          fprintf(f2, "%11.4E\n", r.params[k]);
+        }
+        for (t = 0; t < h.n_usr; t++) {
+          if (v) {
+            a = h.usr_egrid[t];
+            if (h.usr_egrid_type == 1) a += e;
+            a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
+            a = M_PI * AREA_AU20/a;
+            if (!h.msub) a /= (mem_en_table[r.lower].j+1.0);
+            a *= r.strength[p2];
+            fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                    h.usr_egrid[t]*HARTREE_EV,
+                    r.strength[p2], a);
+          } else {
+            fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[p2]);
+          }
+          p2++;
+        }
+        if (k < r.nsub-1) {
+          fprintf(f2, "--------------------------------------------\n");
+        }
+      }
       fflush(f2);
       if (h.msub) free(r.params);
       free(r.strength);
@@ -2398,7 +2398,7 @@ int PrintCETable(FILE *f1, FILE *f2, int v, int swp) {
 
   return nb;
 }
-  
+
 int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
   CEF_HEADER h;
   CEF_RECORD r;
@@ -2407,7 +2407,7 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
   float a, e = 0.0;
 
   nb = 0;
- 
+
   while (1) {
     n = ReadCEFHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2419,18 +2419,18 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
 
     for (i = 0; i < h.n_tegrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
       }
     }
     fprintf(f2, "TE0\t= %15.8E\n", h.te0 * HARTREE_EV);
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
 
@@ -2442,34 +2442,34 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
       n = ReadCEFRecord(f1, &r, swp, &h);
       if (n == 0) break;
       if (v) {
-	e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;
-	fprintf(f2, "%6d %6d %3d %6d %2d %3d %11.4E\n",
-		r.lower, mem_enf_table[r.lower].p, mem_enf_table[r.lower].j,
-		r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
-		e*HARTREE_EV);
-	fprintf(f2, "%11.4E %11.4E %11.4E\n", 
-		r.bethe, r.born[0], r.born[1]*HARTREE_EV);
+        e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;
+        fprintf(f2, "%6d %6d %3d %6d %2d %3d %11.4E\n",
+                r.lower, mem_enf_table[r.lower].p, mem_enf_table[r.lower].j,
+                r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
+                e*HARTREE_EV);
+        fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                r.bethe, r.born[0], r.born[1]*HARTREE_EV);
       } else {
-	fprintf(f2, "%6d %6d\n", 
-		r.lower, r.upper);
-	fprintf(f2, "%11.4E %11.4E %11.4E\n", 
-		r.bethe, r.born[0], r.born[1]);
+        fprintf(f2, "%6d %6d\n",
+                r.lower, r.upper);
+        fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                r.bethe, r.born[0], r.born[1]);
       }
-      
+
       for (t = 0; t < h.n_egrid; t++) {
-	if (v) {
-	  a = h.egrid[t];
-	  a += e;
-	  a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
-	  a = M_PI * AREA_AU20/a;
-	  a *= r.strength[t];
-	    fprintf(f2, "%11.4E %11.4E %11.4E\n",
-		    h.egrid[t]*HARTREE_EV,
-		    r.strength[t], a);
-	} else {
-	  fprintf(f2, "%11.4E %11.4E\n", h.egrid[t], r.strength[t]);
-	}
-      }      
+        if (v) {
+          a = h.egrid[t];
+          a += e;
+          a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
+          a = M_PI * AREA_AU20/a;
+          a *= r.strength[t];
+            fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                    h.egrid[t]*HARTREE_EV,
+                    r.strength[t], a);
+        } else {
+          fprintf(f2, "%11.4E %11.4E\n", h.egrid[t], r.strength[t]);
+        }
+      }
       free(r.strength);
     }
     free(h.tegrid);
@@ -2479,7 +2479,7 @@ int PrintCEFTable(FILE *f1, FILE *f2, int v, int swp) {
 
   return nb;
 }
-  
+
 int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
   CEMF_HEADER h;
   CEMF_RECORD r;
@@ -2489,7 +2489,7 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
   float a, e = 0.0;
 
   nb = 0;
- 
+
   while (1) {
     n = ReadCEMFHeader(f1, &h, swp);
     if (n == 0) break;
@@ -2501,21 +2501,21 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
 
     for (i = 0; i < h.n_tegrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
       }
     }
     fprintf(f2, "TE0\t= %15.8E\n", h.te0 * HARTREE_EV);
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
-    
+
     fprintf(f2, "NTHETA\t= %d\n", h.n_thetagrid);
     for (i = 0; i < h.n_thetagrid; i++) {
       fprintf(f2, "\t %15.8E\n", h.thetagrid[i]);
@@ -2524,7 +2524,7 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
     for (i = 0; i < h.n_phigrid; i++) {
       fprintf(f2, "\t %15.8E\n", h.phigrid[i]);
     }
-    
+
     fprintf(f2, "EFIELD\t= %15.8E\n", h.efield);
     fprintf(f2, "BFIELD\t= %15.8E\n", h.bfield);
     fprintf(f2, "FANGLE\t= %15.8E\n", h.fangle);
@@ -2535,39 +2535,39 @@ int PrintCEMFTable(FILE *f1, FILE *f2, int v, int swp) {
       if (n == 0) break;
       k = 0;
       for (ith = 0; ith < h.n_thetagrid; ith++) {
-	for (iph = 0; iph < h.n_phigrid; iph++) {	    
-	  if (v) {
-	    e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;
-	    fprintf(f2, "%6d %6d %3d %6d %2d %3d %11.4E\n",
-		    r.lower, mem_enf_table[r.lower].p, mem_enf_table[r.lower].j,
-		    r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
-		    e*HARTREE_EV);
-	    fprintf(f2, "%11.4E %11.4E %11.4E %11.4E %11.4E\n", 
-		    h.thetagrid[ith]*180.0/M_PI, h.phigrid[iph]*180.0/M_PI,
-		    r.bethe[k], r.born[k], r.born[na]*HARTREE_EV);
-	  } else {
-	    fprintf(f2, "%6d %6d\n", 
-		    r.lower, r.upper);
-	    fprintf(f2, "%11.4E %11.4E %11.4E\n", 
-		    r.bethe[k], r.born[k], r.born[na]);
-	  }      
-	  for (t = 0; t < h.n_egrid; t++) {
-	    if (v) {
-	      a = h.egrid[t];
-	      a += e;
-	      a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
-	      a = M_PI * AREA_AU20/a;
-	      a *= r.strength[t+h.n_egrid*k];
-	      fprintf(f2, "%11.4E %11.4E %11.4E\n",
-		      h.egrid[t]*HARTREE_EV,
-		      r.strength[t+h.n_egrid*k], a);
-	    } else {
-	      fprintf(f2, "%11.4E %11.4E\n", h.egrid[t], r.strength[t+h.n_egrid*k]);
-	    }
-	  }  
-	  k++;
-	}
-      }    
+        for (iph = 0; iph < h.n_phigrid; iph++) {
+          if (v) {
+            e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;
+            fprintf(f2, "%6d %6d %3d %6d %2d %3d %11.4E\n",
+                    r.lower, mem_enf_table[r.lower].p, mem_enf_table[r.lower].j,
+                    r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
+                    e*HARTREE_EV);
+            fprintf(f2, "%11.4E %11.4E %11.4E %11.4E %11.4E\n",
+                    h.thetagrid[ith]*180.0/M_PI, h.phigrid[iph]*180.0/M_PI,
+                    r.bethe[k], r.born[k], r.born[na]*HARTREE_EV);
+          } else {
+            fprintf(f2, "%6d %6d\n",
+                    r.lower, r.upper);
+            fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                    r.bethe[k], r.born[k], r.born[na]);
+          }
+          for (t = 0; t < h.n_egrid; t++) {
+            if (v) {
+              a = h.egrid[t];
+              a += e;
+              a *= 2.0*(1.0 + 0.5*FINE_STRUCTURE_CONST2 * a);
+              a = M_PI * AREA_AU20/a;
+              a *= r.strength[t+h.n_egrid*k];
+              fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                      h.egrid[t]*HARTREE_EV,
+                      r.strength[t+h.n_egrid*k], a);
+            } else {
+              fprintf(f2, "%11.4E %11.4E\n", h.egrid[t], r.strength[t+h.n_egrid*k]);
+            }
+          }
+          k++;
+        }
+      }
       free(r.strength);
       free(r.bethe);
       free(r.born);
@@ -2593,7 +2593,7 @@ int PrintRRTable(FILE *f1, FILE *f2, int v, int swp) {
   while (1) {
     n = ReadRRHeader(f1, &h, swp);
     if (n == 0) break;
-    
+
     fprintf(f2, "\n");
     fprintf(f2, "NELE\t= %d\n", h.nele);
     fprintf(f2, "NTRANS\t= %d\n", h.ntransitions);
@@ -2603,76 +2603,75 @@ int PrintRRTable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "NTEGRID\t= %d\n", h.n_tegrid);
     for (i = 0; i < h.n_tegrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
       }
     }
     fprintf(f2, "ETYPE\t= %d\n", h.egrid_type);
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
     fprintf(f2, "UTYPE\t= %d\n", h.usr_egrid_type);
     fprintf(f2, "NUSR\t= %d\n", h.n_usr);
     for (i = 0; i < h.n_usr; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
       }
     }
-    
+
     for (i = 0; i < h.ntransitions; i++) {
       n = ReadRRRecord(f1, &r, swp, &h);
       if (n == 0) break;
 
       if (v) {
-	e = mem_en_table[r.f].energy - mem_en_table[r.b].energy;
-	fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
-		r.b, mem_en_table[r.b].j, 
-		r.f, mem_en_table[r.f].j,
-		(e*HARTREE_EV), r.kl);
-	
+        e = mem_en_table[r.f].energy - mem_en_table[r.b].energy;
+        fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
+                r.b, mem_en_table[r.b].j,
+                r.f, mem_en_table[r.f].j,
+                (e*HARTREE_EV), r.kl);
       } else {
-	fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.kl);
+        fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.kl);
       }
-      
+
       if (h.qk_mode == QK_FIT) {
-	for (t = 0; t < h.nparams; t++) {
-	  if (v && t == h.nparams-1) {
-	    fprintf(f2, "%11.4E ", r.params[t]*HARTREE_EV);
-	  } else {
-	    fprintf(f2, "%11.4E ", r.params[t]);
-	  }
-	}
-	fprintf(f2, "\n");
+        for (t = 0; t < h.nparams; t++) {
+          if (v && t == h.nparams-1) {
+            fprintf(f2, "%11.4E ", r.params[t]*HARTREE_EV);
+          } else {
+            fprintf(f2, "%11.4E ", r.params[t]);
+          }
+        }
+        fprintf(f2, "\n");
       }
-      
+
       for (t = 0; t < h.n_usr; t++) {
-	if (v) {
-	  if (h.usr_egrid_type == 0) {
-	    eph = h.usr_egrid[t];
-	    ee = eph - e;
-	  } else {
-	    ee = h.usr_egrid[t];
-	    eph = ee + e;
-	  }
-	  phi = FINE_STRUCTURE_CONST2*ee;
-	  phi = 2.0*M_PI*FINE_STRUCTURE_CONST*r.strength[t]*AREA_AU20;
-	  rr = phi * pow(FINE_STRUCTURE_CONST*eph, 2) / (2.0*ee);
-	  rr /= 1.0+0.5*FINE_STRUCTURE_CONST2*ee;
-	  phi /= (mem_en_table[r.b].j + 1.0);
-	  rr /= (mem_en_table[r.f].j + 1.0);
-	  fprintf(f2, "%11.4E %11.4E %11.4E %11.4E\n",
-		  h.usr_egrid[t]*HARTREE_EV, rr, phi, r.strength[t]);
-	} else {
-	  fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[t]);
-	}
+        if (v) {
+          if (h.usr_egrid_type == 0) {
+            eph = h.usr_egrid[t];
+            ee = eph - e;
+          } else {
+            ee = h.usr_egrid[t];
+            eph = ee + e;
+          }
+          phi = FINE_STRUCTURE_CONST2*ee;
+          phi = 2.0*M_PI*FINE_STRUCTURE_CONST*r.strength[t]*AREA_AU20;
+          rr = phi * pow(FINE_STRUCTURE_CONST*eph, 2) / (2.0*ee);
+          rr /= 1.0+0.5*FINE_STRUCTURE_CONST2*ee;
+          phi /= (mem_en_table[r.b].j + 1.0);
+          rr /= (mem_en_table[r.f].j + 1.0);
+          fprintf(f2, "%11.4E %11.4E %11.4E %11.4E\n",
+                  h.usr_egrid[t]*HARTREE_EV, rr, phi, r.strength[t]);
+        } else {
+          fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[t]);
+        }
       }
       if (h.qk_mode == QK_FIT) free(r.params);
       free(r.strength);
@@ -2694,13 +2693,13 @@ int PrintAITable(FILE *f1, FILE *f2, int v, int swp) {
   int n, i;
   int nb;
   float e, sdr, er;
-  
+
   nb = 0;
-  
+
   while (1) {
     n = ReadAIHeader(f1, &h, swp);
     if (n == 0) break;
- 
+
     fprintf(f2, "\n");
     fprintf(f2, "NELE\t= %d\n", h.nele);
     fprintf(f2, "NTRANS\t= %d\n", h.ntransitions);
@@ -2708,31 +2707,31 @@ int PrintAITable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
-       
+
     for (i = 0; i < h.ntransitions; i++) {
       n = ReadAIRecord(f1, &r, swp);
       if (n == 0) break;
       if (v) {
-	e = mem_en_table[r.b].energy - mem_en_table[r.f].energy;
-	if (e < 0) er = e - h.emin;
-	else er = e;
-	sdr = 0.5*(mem_en_table[r.b].j + 1.0);
-	sdr *= M_PI*M_PI*r.rate/(er*(mem_en_table[r.f].j + 1.0));
-	sdr *= AREA_AU20*HARTREE_EV;
-	fprintf(f2, "%6d %2d %6d %2d %11.4E %11.4E %11.4E\n",
-		r.b, mem_en_table[r.b].j,
-		r.f, mem_en_table[r.f].j,
-		e*HARTREE_EV, (RATE_AU*r.rate), sdr);
+        e = mem_en_table[r.b].energy - mem_en_table[r.f].energy;
+        if (e < 0) er = e - h.emin;
+        else er = e;
+        sdr = 0.5*(mem_en_table[r.b].j + 1.0);
+        sdr *= M_PI*M_PI*r.rate/(er*(mem_en_table[r.f].j + 1.0));
+        sdr *= AREA_AU20*HARTREE_EV;
+        fprintf(f2, "%6d %2d %6d %2d %11.4E %11.4E %11.4E\n",
+                r.b, mem_en_table[r.b].j,
+                r.f, mem_en_table[r.f].j,
+                e*HARTREE_EV, (RATE_AU*r.rate), sdr);
       } else {
-	fprintf(f2, "%6d %6d %15.8E\n", r.b, r.f, r.rate);
+        fprintf(f2, "%6d %6d %15.8E\n", r.b, r.f, r.rate);
       }
     }
-    
+
     free(h.egrid);
     nb++;
   }
@@ -2747,44 +2746,44 @@ int PrintAIMTable(FILE *f1, FILE *f2, int v, int swp) {
   int nb;
   float e;
   double u = AREA_AU20*HARTREE_EV;
-  
+
   nb = 0;
   while (1) {
     n = ReadAIMHeader(f1, &h, swp);
     if (n == 0) break;
-    
+
     fprintf(f2, "\n");
     fprintf(f2, "NELE\t= %d\n", h.nele);
     fprintf(f2, "NTRANS\t= %d\n", h.ntransitions);
     fprintf(f2, "EMIN\t= %15.8E\n", h.emin*HARTREE_EV);
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
-    
+
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
-    
+
     for (i = 0; i < h.ntransitions; i++) {
       n = ReadAIMRecord(f1, &r, swp);
       if (n == 0) break;
       if (v) {
-	e = mem_en_table[r.b].energy - mem_en_table[r.f].energy;
-	fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
-		r.b, mem_en_table[r.b].j,
-		r.f, mem_en_table[r.f].j,
-		e*HARTREE_EV, r.nsub);
-	for (m = 0; m < r.nsub; m += 2) {
-	  fprintf(f2, "%11.4E %11.4E\n", 
-		  r.rate[m]*RATE_AU, r.rate[m+1]*u);
-	}
+        e = mem_en_table[r.b].energy - mem_en_table[r.f].energy;
+        fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
+                r.b, mem_en_table[r.b].j,
+                r.f, mem_en_table[r.f].j,
+                e*HARTREE_EV, r.nsub);
+        for (m = 0; m < r.nsub; m += 2) {
+          fprintf(f2, "%11.4E %11.4E\n",
+                  r.rate[m]*RATE_AU, r.rate[m+1]*u);
+        }
       } else {
-	fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.nsub);
-	for (m = 0; m < r.nsub; m += 2) {
-	  fprintf(f2, "%11.4E %11.4E\n", r.rate[m], r.rate[m+1]);
-	}
+        fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.nsub);
+        for (m = 0; m < r.nsub; m += 2) {
+          fprintf(f2, "%11.4E %11.4E\n", r.rate[m], r.rate[m+1]);
+        }
       }
       free(r.rate);
     }
@@ -2804,11 +2803,11 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
   float e = 0.0, a;
 
   nb = 0;
- 
+
   while (1) {
     n = ReadCIHeader(f1, &h, swp);
     if (n == 0) break;
-    
+
     fprintf(f2, "\n");
     fprintf(f2, "NELE\t= %d\n", h.nele);
     fprintf(f2, "NTRANS\t= %d\n", h.ntransitions);
@@ -2816,71 +2815,71 @@ int PrintCITable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "NPARAMS\t= %d\n", h.nparams);
     fprintf(f2, "PWTYPE\t= %d\n", h.pw_type);
     fprintf(f2, "NTEGRID\t= %d\n", h.n_tegrid);
-    for (i = 0; i < h.n_tegrid; i++) {      
+    for (i = 0; i < h.n_tegrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.tegrid[i]);
       }
     }
     fprintf(f2, "ETYPE\t= %d\n", h.egrid_type);
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
     fprintf(f2, "UTYPE\t= %d\n", h.usr_egrid_type);
     fprintf(f2, "NUSR\t= %d\n", h.n_usr);
     for (i = 0; i < h.n_usr; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
       }
     }
 
     for (i = 0; i < h.ntransitions; i++) {
       n = ReadCIRecord(f1, &r, swp, &h);
       if (n == 0) break;
-      
+
       if (v) {
-	e = mem_en_table[r.f].energy - mem_en_table[r.b].energy;
-	fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
-		r.b, mem_en_table[r.b].j,
-		r.f, mem_en_table[r.f].j,
-		e*HARTREE_EV, r.kl);
+        e = mem_en_table[r.f].energy - mem_en_table[r.b].energy;
+        fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
+                r.b, mem_en_table[r.b].j,
+                r.f, mem_en_table[r.f].j,
+                e*HARTREE_EV, r.kl);
       } else {
-	fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.kl);
+        fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.kl);
       }
-      
+
       for (t = 0; t < h.nparams; t++) {
-	fprintf(f2, "%11.4E ", r.params[t]);
+        fprintf(f2, "%11.4E ", r.params[t]);
       }
       fprintf(f2, "\n");
       for (t = 0; t < h.n_usr; t++) {
-	if (v) {
-	  a = h.usr_egrid[t];
-	  if (h.usr_egrid_type == 1) a += e;
-	  a *= 1.0 + 0.5*FINE_STRUCTURE_CONST2*a;
-	  a = AREA_AU20/(2.0*a*(mem_en_table[r.b].j + 1.0));
-	  a *= r.strength[t];
-	  fprintf(f2, "%11.4E %11.4E %11.4E\n",
-		  h.usr_egrid[t]*HARTREE_EV, r.strength[t], a);
-	} else {
-	  fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[t]);
-	}
+        if (v) {
+          a = h.usr_egrid[t];
+          if (h.usr_egrid_type == 1) a += e;
+          a *= 1.0 + 0.5*FINE_STRUCTURE_CONST2*a;
+          a = AREA_AU20/(2.0*a*(mem_en_table[r.b].j + 1.0));
+          a *= r.strength[t];
+          fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                  h.usr_egrid[t]*HARTREE_EV, r.strength[t], a);
+        } else {
+          fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[t]);
+        }
       }
-      free(r.params); 
+      free(r.params);
       free(r.strength);
     }
-    
+
     free(h.tegrid);
     free(h.egrid);
     free(h.usr_egrid);
-    
+
     nb++;
   }
 
@@ -2895,11 +2894,11 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
   float e, a;
 
   nb = 0;
- 
+
   while (1) {
     n = ReadCIMHeader(f1, &h, swp);
     if (n == 0) break;
-    
+
     fprintf(f2, "\n");
     fprintf(f2, "NELE\t= %d\n", h.nele);
     fprintf(f2, "NTRANS\t= %d\n", h.ntransitions);
@@ -2907,67 +2906,67 @@ int PrintCIMTable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "NEGRID\t= %d\n", h.n_egrid);
     for (i = 0; i < h.n_egrid; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.egrid[i]);
       }
     }
     fprintf(f2, "UTYPE\t= %d\n", h.usr_egrid_type);
     fprintf(f2, "NUSR\t= %d\n", h.n_usr);
     for (i = 0; i < h.n_usr; i++) {
       if (v) {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]*HARTREE_EV);
       } else {
-	fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
+        fprintf(f2, "\t %15.8E\n", h.usr_egrid[i]);
       }
     }
 
     for (i = 0; i < h.ntransitions; i++) {
       n = ReadCIMRecord(f1, &r, swp, &h);
       if (n == 0) break;
-      
+
       if (v) {
-	e = mem_en_table[r.f].energy - mem_en_table[r.b].energy;
-	fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
-		r.b, mem_en_table[r.b].j,
-		r.f, mem_en_table[r.f].j,
-		e*HARTREE_EV, r.nsub);
+        e = mem_en_table[r.f].energy - mem_en_table[r.b].energy;
+        fprintf(f2, "%6d %2d %6d %2d %11.4E %2d\n",
+                r.b, mem_en_table[r.b].j,
+                r.f, mem_en_table[r.f].j,
+                e*HARTREE_EV, r.nsub);
       } else {
-	fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.nsub);
+        fprintf(f2, "%6d %6d %2d\n", r.b, r.f, r.nsub);
       }
 
       if (v) {
-	q = 0;
-	for (k = 0; k < r.nsub; k ++) {
-	  for (t = 0; t < h.n_usr; t++) {
-	    a = h.usr_egrid[t];
-	    if (h.usr_egrid_type == 1) a += e;
-	    a *= 1.0 + 0.5*FINE_STRUCTURE_CONST2*a;
-	    a = AREA_AU20/(2.0*a);
-	    a *= r.strength[q];
-	    fprintf(f2, "%11.4E %11.4E %11.4E\n",
-		    h.usr_egrid[t]*HARTREE_EV, r.strength[q], a);
-	    q++;
-	  }
-	  if (k < r.nsub-1) {
-	    fprintf(f2, "--------------------------------------------\n");
-	  }
-	}
+        q = 0;
+        for (k = 0; k < r.nsub; k ++) {
+          for (t = 0; t < h.n_usr; t++) {
+            a = h.usr_egrid[t];
+            if (h.usr_egrid_type == 1) a += e;
+            a *= 1.0 + 0.5*FINE_STRUCTURE_CONST2*a;
+            a = AREA_AU20/(2.0*a);
+            a *= r.strength[q];
+            fprintf(f2, "%11.4E %11.4E %11.4E\n",
+                    h.usr_egrid[t]*HARTREE_EV, r.strength[q], a);
+            q++;
+          }
+          if (k < r.nsub-1) {
+            fprintf(f2, "--------------------------------------------\n");
+          }
+        }
       } else {
-	q = 0;
-	for (k = 0; k < r.nsub; k++) {
-	  for (t = 0; t < h.n_usr; t++) {
-	    fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[q]);
-	    q++;
-	  }
-	}
+        q = 0;
+        for (k = 0; k < r.nsub; k++) {
+          for (t = 0; t < h.n_usr; t++) {
+            fprintf(f2, "%11.4E %11.4E\n", h.usr_egrid[t], r.strength[q]);
+            q++;
+          }
+        }
       }
       free(r.strength);
     }
-    
+
     free(h.egrid);
     free(h.usr_egrid);
-    
+
     nb++;
   }
 
@@ -2978,7 +2977,7 @@ int AppendTable(char *fn) {
   F_HEADER fh;
   FILE *f;
   int n, swp;
-    
+
   f = fopen(fn, "rb");
   if (f == NULL) return -1;
   n = ReadFHeader(f, &fh, &swp);
@@ -2992,10 +2991,10 @@ int AppendTable(char *fn) {
   }
   memcpy(&(fheader[fh.type-1]), &fh, sizeof(F_HEADER));
   fclose(f);
-  
+
   return 0;
 }
-  
+
 int JoinTable(char *fn1, char *fn2, char *fn) {
   F_HEADER fh1, fh2;
   FILE *f1, *f2, *f;
@@ -3036,14 +3035,14 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
   f = fopen(fn, "w");
   if (f == NULL) return -1;
   fh1.nblocks += fh2.nblocks;
-  
+
   WriteFHeader(f, &fh1);
   while (1) {
     n = fread(buf, 1, NBUF, f1);
     if (n > 0) {
       if (n > fwrite(buf, 1, n, f)) {
-	printf("write error\n");
-	return -1;
+        printf("write error\n");
+        return -1;
       }
     }
     if (n < NBUF) break;
@@ -3052,8 +3051,8 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
     n = fread(buf, 1, NBUF, f2);
     if (n > 0) {
       if (n > fwrite(buf, 1, n, f)) {
-	printf("write error\n");
-	return -1;
+        printf("write error\n");
+        return -1;
       }
     }
     if (n < NBUF) break;
@@ -3062,7 +3061,7 @@ int JoinTable(char *fn1, char *fn2, char *fn) {
   fclose(f1);
   fclose(f2);
   fclose(f);
-  
+
   return 0;
 #undef NBUF
 }
@@ -3073,17 +3072,17 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
   FILE *f = NULL;
   int k;
   int nele0;
-  
+
   nele0 = -1;
-  
+
   if (n < 0) {
     n = cfac->n_levels - start;
   }
-  
+
   fhdr.type = DB_EN;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
-  
+
   f = OpenFile(fn, &fhdr);
   if (!f) {
     return -1;
@@ -3097,10 +3096,10 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     char sname[LEVEL_NAME_LEN];
     char nc[LEVEL_NAME_LEN];
     int size;
-    
+
     int i = start + k;
     lev = GetLevel(cfac, i);
-    
+
     if (lev->uta) {
       sp.kgroup = lev->uta_cfg_g;
       sp.kcfg = lev->uta_g_cfg;
@@ -3121,7 +3120,7 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
 
       ibase = lev->ibase;
     }
-    
+
     r.j = j;
     r.ilev = i;
     r.ibase = ibase;
@@ -3144,10 +3143,10 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
     r.name[LNAME-1] = '\0';
     r.sname[LSNAME-1] = '\0';
     r.ncomplex[LNCOMPLEX-1] = '\0';
-    
+
     if (nele != nele0) {
       if (nele0 >= 0) {
-	DeinitFile(f, &fhdr);
+        DeinitFile(f, &fhdr);
       }
       nele0 = nele;
       en_hdr.nele = nele;
@@ -3158,7 +3157,7 @@ int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n) {
 
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);
-  
+
   return 0;
 }
 
@@ -3174,14 +3173,14 @@ int ISearch(int i, int n, int *ia) {
   return -1;
 }
 
-  
+
 static int tr_sink(const cfac_t *cfac,
     const cfac_rtrans_data_t *rtdata, void *udata)
 {
     TR_RECORD r;
     TR_EXTRA rx;
     FILE *f = udata;
-    
+
     r.upper = rtdata->ii;
     r.lower = rtdata->fi;
     r.rme   = rtdata->rme;
@@ -3190,7 +3189,7 @@ static int tr_sink(const cfac_t *cfac,
     rx.sdev = rtdata->uta_sd;
 
     WriteTRRecord(f, &r, &rx);
-    
+
     return 0;
 }
 
@@ -3201,7 +3200,7 @@ int SaveTransition(cfac_t *cfac,
   TR_HEADER tr_hdr;
   F_HEADER fhdr;
   FILE *f;
-  
+
   if (nlow <= 0 || nup <= 0) {
     return -1;
   }
@@ -3211,24 +3210,24 @@ int SaveTransition(cfac_t *cfac,
   } else {
     mode = GetTransitionMode(cfac);
   }
-  
+
   fhdr.type = DB_TR;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
-  
+
   tr_hdr.nele = GetNumElectrons(cfac, low[0]);
   tr_hdr.multipole = mpole;
   tr_hdr.gauge = GetTransitionGauge(cfac);
   tr_hdr.mode = mode;
-  
+
   f = OpenFile(fn, &fhdr);
   if (!f) {
     return -1;
   }
   InitFile(f, &fhdr, &tr_hdr);
-  
+
   crac_calculate_rtrans(cfac, nlow, low, nup, up, mpole, mode, tr_sink, f);
-    
+
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);
 
@@ -3280,6 +3279,6 @@ int StoreTable(const cfac_t *cfac,
     }
 
     fclose(fp);
-    
+
     return retval;
 }

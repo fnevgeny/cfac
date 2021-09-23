@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -24,12 +24,12 @@
 #include "cfacP.h"
 #include "grid.h"
 
-static int AddPW(int *nkl0, double *kl, double *logkl, 
-	  int maxkl, int n, int step) {
+static int AddPW(int *nkl0, double *kl, double *logkl,
+          int maxkl, int n, int step) {
   int i;
   for (i = *nkl0; i < n+(*nkl0); i++) {
     if (i >= MAXNKL) {
-      printf("Maximum partial wave grid points reached: "); 
+      printf("Maximum partial wave grid points reached: ");
       printf("%d > %d in constructing grid\n",  i, MAXNKL);
       return CFAC_FAILURE;
     }
@@ -41,8 +41,8 @@ static int AddPW(int *nkl0, double *kl, double *logkl,
   return CFAC_SUCCESS;
 }
 
-int SetPWGrid(int *nkl0, double *kl, double *logkl, 
-	      int maxkl, int *ns, int *n, int *step) {
+int SetPWGrid(int *nkl0, double *kl, double *logkl,
+              int maxkl, int *ns, int *n, int *step) {
   int i, m, k, j;
 
   if ((*ns) > 0) {
@@ -61,7 +61,7 @@ int SetPWGrid(int *nkl0, double *kl, double *logkl,
     }
     k = 2;
     j = 2;
-  }   
+  }
 
   m = kl[(*nkl0)-1];
   while (m+k <= maxkl) {
@@ -78,7 +78,7 @@ int SetPWGrid(int *nkl0, double *kl, double *logkl,
 
 int SetTEGridDetail(double *te, double *logte, int n, double *x) {
   int i;
-  
+
   if (n > MAXNTE) {
     printf("Max # of grid points reached \n");
     return -1;
@@ -130,7 +130,7 @@ int SetTEGrid(double *te, double *logte, int n, double emin, double emax) {
     printf("emin must > 0 and emax < emin in SetTEGrid\n");
     return -1;
   }
-  
+
   del = emax - emin;
   del /= n-1.0;
   te[0] = emin;
@@ -139,13 +139,13 @@ int SetTEGrid(double *te, double *logte, int n, double emin, double emax) {
     te[i] = te[i-1] + del;
     if (logte) logte[i] = log(te[i]);
   }
-  
+
   return n;
 }
-  
+
 int SetEGridDetail(double *e, double *log_e, int n, double *xg) {
   int i;
-  
+
   for (i = 0; i < n; i++) {
     e[i] = xg[i];
     log_e[i] = log(e[i]);
@@ -168,13 +168,13 @@ double EFromX(double x, double b) {
     a = 1.0/e + b;
     e = e - d/a;
   }
-  printf("Newton iteration failed to converge in EFromX, %10.3E %10.3E %10.3E\n", 
-	 x, e, d);
+  printf("Newton iteration failed to converge in EFromX, %10.3E %10.3E %10.3E\n",
+         x, e, d);
   return e;
 }
 
-int SetEGrid(double *e, double *log_e, 
-	     int n, double emin, double emax, double eth) {
+int SetEGrid(double *e, double *log_e,
+             int n, double emin, double emax, double eth) {
   double del, et, b;
   int i;
 
@@ -193,10 +193,10 @@ int SetEGrid(double *e, double *log_e,
   }
 
   if (eth >= 0.0) {
-    et = eth;  
+    et = eth;
     emin += et;
     emax += et;
-  
+
     b = 0.2/FINE_STRUCTURE_CONST2;
     b = log(b)/b;
     e[0] = emin;
@@ -250,6 +250,6 @@ int SetLinearGrid(double *x, int n, double xmin, double xmax) {
   for (i = 1; i < n; i++) {
     x[i] = x[i-1] + d;
   }
-  
+
   return n;
 }

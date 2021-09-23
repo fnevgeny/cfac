@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -45,8 +45,8 @@ void SetTransitionMaxM(cfac_t *cfac, int m) {
   cfac->tr_opts.max_m = m;
 }
 
-void SetTransitionOptions(cfac_t *cfac, int gauge, int mode, 
-			  int max_e, int max_m) {
+void SetTransitionOptions(cfac_t *cfac, int gauge, int mode,
+                          int max_e, int max_m) {
   cfac->tr_opts.gauge = gauge;
   cfac->tr_opts.mode = mode;
   cfac->tr_opts.max_e = max_e;
@@ -62,40 +62,40 @@ int GetTransitionMode(const cfac_t *cfac) {
 }
 
 static int _TRMultipole(cfac_t *cfac, double *rme, double *energy,
-		int m, int lower, int upper) {
+                int m, int lower, int upper) {
   int m2;
   int p1, p2, j1, j2;
   LEVEL *lev1, *lev2;
   double s, r, aw;
   int nz, i;
   ANGULAR_ZMIX *ang;
-  
+
   *rme = 0.0;
 
   lev1 = GetLevel(cfac, lower);
   if (lev1 == NULL) return -1;
   lev2 = GetLevel(cfac, upper);
   if (lev2 == NULL) return -1;
-  
+
   if (GetNumElectrons(cfac, lower) != GetNumElectrons(cfac, upper)) {
     return -1;
   }
-  
+
   *energy = lev2->energy - lev1->energy;
   if (*energy < 0.0) {
     return -1;
   }
-    
+
   aw = FINE_STRUCTURE_CONST*fabs(*energy);
 
   DecodePJ(lev1->pj, &p1, &j1);
   DecodePJ(lev2->pj, &p2, &j2);
   if (j1 == 0 && j2 == 0) return 0;
 
-  m2 = 2*abs(m);    
+  m2 = 2*abs(m);
   if (!Triangle(j1, j2, m2)) return 0;
   if (m > 0 && IsEven(p1+p2+m)) return 0;
-  if (m < 0 && IsOdd(p1+p2-m)) return 0;    
+  if (m < 0 && IsOdd(p1+p2-m)) return 0;
 
   s = 0.0;
 
@@ -107,20 +107,20 @@ static int _TRMultipole(cfac_t *cfac, double *rme, double *energy,
   for (i = 0; i < nz; i++) {
     if (ang[i].k != m2) continue;
     if (cfac->tr_opts.mode == M_NR && m != 1) {
-      r = MultipoleRadialNR(cfac, m, ang[i].k0, ang[i].k1, 
-			    cfac->tr_opts.gauge);
+      r = MultipoleRadialNR(cfac, m, ang[i].k0, ang[i].k1,
+                            cfac->tr_opts.gauge);
     } else {
       r = MultipoleRadialFR(cfac, aw, m, ang[i].k0, ang[i].k1,
-			    cfac->tr_opts.gauge);
+                            cfac->tr_opts.gauge);
     }
     s += r * ang[i].coeff;
   }
   if (nz > 0) {
-    free(ang);	
-  }  
+    free(ang);
+  }
 
   *rme = s;
-  
+
   return 0;
 }
 
@@ -141,20 +141,20 @@ static TRM_CACHE_T *trm_cache = NULL;
 static TRM_CACHE_T *TRMultipole_cache_new(unsigned int dim)
 {
   TRM_CACHE_T *cache;
-  
+
   cache = calloc(1, sizeof(TRM_CACHE_T));
   if (!cache) {
     return NULL;
   }
-  
+
   cache->transitions = calloc(dim*dim, sizeof(TRANS_T));
   if (!cache->transitions) {
     free(cache);
     return NULL;
   }
-  
+
   cache->dim = dim;
-  
+
   return cache;
 }
 
@@ -163,23 +163,23 @@ static void TRMultipole_cache_free(TRM_CACHE_T *cache)
   if (!cache) {
     return;
   }
-  
+
   if (cache->transitions) {
     free(cache->transitions);
   }
-  
+
   free(cache);
 }
 
 /* If energy is not NULL, it is assigned trans. energy; */
 int TRMultipole(cfac_t *cfac, double *rme, double *energy,
-		int m, int lower, int upper) {
+                int m, int lower, int upper) {
   double dE = 0.0;
-  
+
   TRANS_T *trans = NULL;
-  
+
   int res;
-  
+
   if (trm_cache &&
       lower >= 0 && lower < trm_cache->dim &&
       upper >= 0 && upper < trm_cache->dim) {
@@ -189,25 +189,25 @@ int TRMultipole(cfac_t *cfac, double *rme, double *energy,
         *energy = trans->energy;
       }
       *rme = trans->rme;
-      
+
       return 0;
     }
   }
-  
+
   res = _TRMultipole(cfac, rme, &dE, m, lower, upper);
   if (energy) {
     *energy = dE;
   }
-  
+
   if (trans) {
     trans->m      = m;
     trans->energy = dE;
     trans->rme    = *rme;
     trans->valid  = 1;
   }
-  
+
   return res;
-}  
+}
 
 int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
     double *strength, double *energy, int m, int lower, int upper) {
@@ -218,12 +218,12 @@ int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
   if (lev1 == NULL) return -1;
   lev2 = GetEBLevel(cfac, upper);
   if (lev2 == NULL) return -1;
-  
+
   *energy = lev2->energy - lev1->energy;
   if (*energy <= 0.0) return -1;
-  
+
   m2 = 2*abs(m);
-  
+
   for (q = 0; q <= m2; q++) strength[q] = 0.0;
 
   for (i1 = 0; i1 < lev1->n_basis; i1++) {
@@ -236,7 +236,7 @@ int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
     DecodeBasisEB(lev1->basis[i1], &ilev1, &mlev1);
     plev1 = GetLevel(cfac, ilev1);
     DecodePJ(plev1->pj, &p1, &j1);
-    
+
     for (i2 = 0; i2 < lev2->n_basis; i2++) {
       LEVEL *plev2;
       int ilev2, mlev2, j2, p2;
@@ -252,11 +252,11 @@ int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
 
       plev2 = GetLevel(cfac, ilev2);
       DecodePJ(plev2->pj, &p2, &j2);
-      
+
       if (TRMultipole(cfac, &r, NULL, m, ilev1, ilev2) != 0 || r == 0) {
         continue;
       }
-      
+
       a = cfac_w3j_cacheable(w3j_cache, j1, m2, j2, -mlev1, mlev1-mlev2, mlev2);
       if (a == 0) {
         continue;
@@ -264,13 +264,13 @@ int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
       if (IsOdd((j1-mlev1)/2)) a = -a;
 
       c = lev1->mixing[i1]*lev2->mixing[i2];
-     
+
       q = (mlev1-mlev2 + m2)/2;
       strength[q] += c*r*a;
       /*
       printf("%d %d %d %d %2d %2d %2d %10.3E %10.3E %10.3E %10.3E %10.3E\n",
-	     lower, upper, ilev1, ilev2, mlev1, mlev2, q-1,c, a, r, c*a*r, 
-	     strength[q]);
+             lower, upper, ilev1, ilev2, mlev1, mlev2, q-1,c, a, r, c*a*r,
+             strength[q]);
       */
     }
   }
@@ -278,8 +278,8 @@ int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
   return 0;
 }
 
-int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up, 
-		      char *fn, int m) {
+int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
+                      char *fn, int m) {
   int k, i, j, nq;
   double emin, emax, e0, s[101], et;
   F_HEADER fhdr;
@@ -288,7 +288,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   LEVEL *lev1, *lev2;
   FILE *f;
   cfac_w3j_cache_t w3j_cache;
-  
+
   if (nlow <= 0 || nup <= 0) return -1;
   if (m == 1 || cfac->tr_opts.mode == M_FR) {
     k = 0;
@@ -297,22 +297,22 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     for (i = 0; i < nlow; i++) {
       lev1 = GetEBLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-	lev2 = GetEBLevel(cfac, up[j]);
-	e0 = lev2->energy - lev1->energy;
-	if (e0 > 0) k++;
-	if (e0 < emin && e0 > 0) emin = e0;
-	if (e0 > emax) emax = e0;
+        lev2 = GetEBLevel(cfac, up[j]);
+        e0 = lev2->energy - lev1->energy;
+        if (e0 > 0) k++;
+        if (e0 < emin && e0 > 0) emin = e0;
+        if (e0 > emax) emax = e0;
       }
     }
-      
+
     if (k == 0) {
       return 0;
     }
-    
+
     emin *= FINE_STRUCTURE_CONST;
     emax *= FINE_STRUCTURE_CONST;
     e0 = 2.0*(emax-emin)/(emin+emax);
-    
+
     FreeMultipoleArray(cfac);
     if (e0 < EPS3) {
       SetAWGrid(cfac, 1, emin, emax);
@@ -324,9 +324,9 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   }
   fhdr.type = DB_TRF;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
-  fhdr.atom = cfac_get_atomic_number(cfac);  
+  fhdr.atom = cfac_get_atomic_number(cfac);
   lev1 = GetEBLevel(cfac, low[0]);
-  DecodeBasisEB(lev1->pb, &i, &j);  
+  DecodeBasisEB(lev1->pb, &i, &j);
   tr_hdr.nele = GetNumElectrons(cfac, i);
   tr_hdr.multipole = m;
   tr_hdr.gauge = GetTransitionGauge(cfac);
@@ -338,7 +338,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
   nq = 2*abs(m) + 1;
   r.strength = (float *) malloc(sizeof(float)*nq);
   GetFields(cfac, &tr_hdr.bfield, &tr_hdr.efield, &tr_hdr.fangle);
-    
+
   f = OpenFile(fn, &fhdr);
   if (!f) {
     return -1;
@@ -353,8 +353,8 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       if (k != 0) continue;
       e0 = 0.0;
       for (k = 0; k < nq; k++) {
-	r.strength[k] = s[k];
-	if (s[k]) e0 = s[k];
+        r.strength[k] = s[k];
+        if (s[k]) e0 = s[k];
       }
       if (e0 == 0.0) continue;
       r.lower = low[i];
@@ -384,14 +384,14 @@ double OscillatorStrength(int m, double e, double s, double *ga) {
   }
   if (ga) {
     *ga = x*2.0*pow(aw,2)*FINE_STRUCTURE_CONST;
-  }  
+  }
 
   return x;
-}  
+}
 
 static int CompareInt(const void *a1, const void *a2) {
   int *i1, *i2;
-  
+
   i1 = (int *) a1;
   i2 = (int *) a2;
   return (*i1 - *i2);
@@ -415,7 +415,7 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
     qsort(up, nup, sizeof(int), CompareInt);
   }
   for (i = 0; i < nlow; i++) {
-    lowinup[i] = IBisect(low[i], nup, up);    
+    lowinup[i] = IBisect(low[i], nup, up);
     if (lowinup[i] >= 0) {
       upinlow[lowinup[i]] = i;
     }
@@ -443,7 +443,7 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
   for (i = 0; i < n; i++) {
     up[j++] = icom[i];
   }
-  
+
   free(lowinup);
   free(upinlow);
   free(icom);
@@ -451,7 +451,7 @@ int OverlapLowUp(int nlow, int *low, int nup, int *up) {
   return n;
 }
 
-/* 
+/*
  * Find complements and intersection of unsorted sets I and F:
  * K = I\F; L = F\I; M = I*F.
  * Return bool flag whether an allocation occured (and hence resultant
@@ -466,25 +466,25 @@ int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
     unsigned n_k = 0, n_l = 0, n_m = 0;
     char *s;
     int allocated = 0;
-    
+
     *nm = *nk = *nl = 0;
-    
+
     if (ni == 0 || nf == 0) {
         return allocated;
     }
-    
+
     if (ni == nf && i == f) {
         /* degenerate case I = F */
-        
+
         *nm = ni;
         *m  = i;
-        
+
         return allocated;
     }
-    
+
     i_min = i_max = i[0];
     f_min = f_max = f[0];
-    
+
     for (j = 1; j < ni; j++) {
         if (i[j] < i_min) {
             i_min = i[j];
@@ -493,7 +493,7 @@ int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
             i_max = i[j];
         }
     }
-    
+
     for (j = 1; j < nf; j++) {
         if (f[j] < f_min) {
             f_min = f[j];
@@ -502,30 +502,30 @@ int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
             f_max = f[j];
         }
     }
-    
+
     if (i_max < f_min || i_min > f_max) {
         /* no overlap */
-        
+
         *nk = ni;
         *k  = i;
         *nl = nf;
         *l  = f;
-        
+
         return allocated;
     }
-    
+
     sn_min = (i_min < f_min) ? i_min:f_min;
     sn_max = (i_max > f_max) ? i_max:f_max;
-    
+
     s = calloc(sn_max - sn_min + 1, 1);
-    
+
     for (j = 0; j < ni; j++) {
         s[i[j] - sn_min] |= 1;
     }
     for (j = 0; j < nf; j++) {
         s[f[j] - sn_min] |= 2;
     }
-    
+
     for (j = sn_min; j <= sn_max; j++) {
         switch (s[j - sn_min]) {
         case 1:
@@ -539,7 +539,7 @@ int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
             break;
         }
     }
-    
+
     *nk = n_k;
     *nl = n_l;
     *nm = n_m;
@@ -547,7 +547,7 @@ int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
     *k = malloc(sizeof(int)*(*nk));
     *l = malloc(sizeof(int)*(*nl));
     *m = malloc(sizeof(int)*(*nm));
-    
+
     allocated = 1;
 
     n_k = n_m = n_l = 0;
@@ -566,7 +566,7 @@ int cfac_overlap_if(unsigned ni, unsigned *i, unsigned nf, unsigned *f,
     }
 
     free(s);
-    
+
     return allocated;
 }
 
@@ -609,7 +609,7 @@ static int CompareTRDatum(const void *p1, const void *p2) {
 static double FKB(cfac_t *cfac, int ka, int kb, int k) {
   int ja, jb, ia, ib;
   double a, b;
-  
+
   GetJLFromKappa(GetOrbital(cfac, ka)->kappa, &ja, &ia);
   GetJLFromKappa(GetOrbital(cfac, kb)->kappa, &jb, &ib);
 
@@ -619,7 +619,7 @@ static double FKB(cfac_t *cfac, int ka, int kb, int k) {
   if (Slater(cfac, &b, ka, kb, ka, kb, k/2, 0) < 0) {
     return 0.0;
   }
-  
+
   b *= a*(ja+1.0)*(jb+1.0);
   if (IsEven((ja+jb)/2)) b = -b;
 
@@ -629,17 +629,17 @@ static double FKB(cfac_t *cfac, int ka, int kb, int k) {
 static double GKB(cfac_t *cfac, int ka, int kb, int k) {
   int ja, jb, ia, ib;
   double a, b;
-  
+
   GetJLFromKappa(GetOrbital(cfac, ka)->kappa, &ja, &ia);
   GetJLFromKappa(GetOrbital(cfac, kb)->kappa, &jb, &ib);
-  
+
   if (IsOdd((ia+k+ib)/2) || !Triangle(ia, k, ib)) return 0.0;
   a = W3j(ja, k, jb, 1, 0, -1);
   if (fabs(a) < EPS30) return 0.0;
   if (Slater(cfac, &b, ka, kb, kb, ka, k/2, 0) < 0) {
     return 0.0;
   }
-  
+
   b *= a*a*(ja+1.0)*(jb+1.0);
   if (IsEven((ja+jb)/2)) b = -b;
   return b;
@@ -664,10 +664,10 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     a = 1.0/(ja*(ja+1.0));
     for (k = k0; k <= k1; k += 4) {
       for (kp = k0; kp <= k1; kp += 4) {
-	b = -a + W6j(ja, ja, k, ja, ja, kp);
-	if (k == kp) b += 1.0/(k+1.0);
-	b *= a*FKB(cfac, ka, ka, k)*FKB(cfac, ka, ka, kp);
-	e += b;
+        b = -a + W6j(ja, ja, k, ja, ja, kp);
+        if (k == kp) b += 1.0/(k+1.0);
+        b *= a*FKB(cfac, ka, ka, k)*FKB(cfac, ka, ka, kp);
+        e += b;
       }
     }
     break;
@@ -680,12 +680,12 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     a = 1.0/(ja*(ja+1.0));
     for (k = k0; k <= k1; k += 4) {
       for (kp = kp0; kp <= kp1; kp += 4) {
-	b = a - W6j(ja, ja, kp, ja, ja, k);
-	if (k == kp) b -= 1.0/(k+1.0);
-	b *= W6j(ja, ja, kp, jb, jb, m2);
-	b /= 0.5*ja;
-	b *= FKB(cfac, ka, ka, k)*FKB(cfac, ka, kb, kp);
-	e += b;
+        b = a - W6j(ja, ja, kp, ja, ja, k);
+        if (k == kp) b -= 1.0/(k+1.0);
+        b *= W6j(ja, ja, kp, jb, jb, m2);
+        b /= 0.5*ja;
+        b *= FKB(cfac, ka, ka, k)*FKB(cfac, ka, kb, kp);
+        e += b;
       }
     }
     if (IsOdd((ja+jb+m2)/2)) e = -e;
@@ -698,19 +698,19 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     a = 1.0/(ja*(ja+1.0));
     for (k = k0; k <= k1; k += 4) {
       for (kp = kp0; kp <= kp1; kp += 2) {
-	b = W6j(k, kp, m2, jb, ja, ja);
-	b = -b*b;
-	d = W6j(jb, jb, k, ja, ja, m2)*W6j(jb, jb, k, ja, ja, kp);
-	if (IsOdd((m2+kp)/2)) b -= d;
-	else b += d;
-	if (m2 == kp) {
-	  b -= (1.0/(m2+1.0)-1.0/(jb+1.0))*a;
-	} else {
-	  b += a/(jb+1.0);
-	}
-	b /= 0.5*ja;
-	b *= FKB(cfac, ka, ka, k)*GKB(cfac, ka, kb, kp);
-	e += b;
+        b = W6j(k, kp, m2, jb, ja, ja);
+        b = -b*b;
+        d = W6j(jb, jb, k, ja, ja, m2)*W6j(jb, jb, k, ja, ja, kp);
+        if (IsOdd((m2+kp)/2)) b -= d;
+        else b += d;
+        if (m2 == kp) {
+          b -= (1.0/(m2+1.0)-1.0/(jb+1.0))*a;
+        } else {
+          b += a/(jb+1.0);
+        }
+        b /= 0.5*ja;
+        b *= FKB(cfac, ka, ka, k)*GKB(cfac, ka, kb, kp);
+        e += b;
       }
     }
     if (IsOdd((ja+jb)/2+1)) e = -e;
@@ -722,13 +722,13 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     k1 = Min(k, k1);
     for (k = k0; k <= k1; k += 4) {
       for (kp = k0; kp <= k1; kp += 4) {
-	b = 0.0;
-	if (k == kp) b += 1.0/((k+1.0)*(jb+1.0));
-	b -= W9j(ja, ja, k, ja, m2, jb, kp, jb, jb);
-	b -= W6j(ja, jb, m2, jb, ja, k)*W6j(ja, jb, m2, jb, ja, kp)/ja;
-	b /= ja;
-	b *= FKB(cfac, ka, kb, k)*FKB(cfac, ka, kb, kp);
-	e += b;
+        b = 0.0;
+        if (k == kp) b += 1.0/((k+1.0)*(jb+1.0));
+        b -= W9j(ja, ja, k, ja, m2, jb, kp, jb, jb);
+        b -= W6j(ja, jb, m2, jb, ja, k)*W6j(ja, jb, m2, jb, ja, kp)/ja;
+        b /= ja;
+        b *= FKB(cfac, ka, kb, k)*FKB(cfac, ka, kb, kp);
+        e += b;
       }
     }
     break;
@@ -737,21 +737,21 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     k1 = ja+jb;
     for (k = k0; k <= k1; k += 2) {
       for (kp = k0; kp <= k1; kp += 2) {
-	b = 0.0;
-	if (k == kp) b += 1.0/((k+1.0)*(jb+1.0));
-	b -= W9j(ja, jb, k, jb, m2, ja, kp, ja, jb);
-	c = -1.0/(jb+1.0);
-	d = c;
-	if (k == m2) {
-	  c += 1.0/(m2+1.0);
-	}
-	if (kp == m2) {
-	  d += 1.0/(m2+1.0);
-	}
-	b -= c*d/ja;
-	b /= ja;
-	b *= GKB(cfac, ka, kb, k)*GKB(cfac, ka, kb, kp);
-	e += b;
+        b = 0.0;
+        if (k == kp) b += 1.0/((k+1.0)*(jb+1.0));
+        b -= W9j(ja, jb, k, jb, m2, ja, kp, ja, jb);
+        c = -1.0/(jb+1.0);
+        d = c;
+        if (k == m2) {
+          c += 1.0/(m2+1.0);
+        }
+        if (kp == m2) {
+          d += 1.0/(m2+1.0);
+        }
+        b -= c*d/ja;
+        b /= ja;
+        b *= GKB(cfac, ka, kb, k)*GKB(cfac, ka, kb, kp);
+        e += b;
       }
     }
     break;
@@ -764,22 +764,22 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     kp1 = ja+jb;
     for (k = k0; k <= k1; k += 4) {
       for (kp = kp0; kp <= kp1; kp += 2) {
-      	b = W6j(jb, jb, k, ja, ja, kp)/(jb+1.0);
-      	if (IsOdd(kp/2)) b = -b;
-	c = W6j(k, kp, m2, ja, jb, jb)*W6j(k, kp, m2, jb, ja, ja);
-	if (IsOdd((ja+jb+kp+m2)/2)) b += c;
-	else b -= c;
-	c = -1.0/(jb+1.0);
-	if (kp == m2) c += 1.0/(m2+1.0);
-	c *= W6j(ja, jb, m2, jb, ja, k)/ja;
-	if (IsOdd(m2/2)) {
+        b = W6j(jb, jb, k, ja, ja, kp)/(jb+1.0);
+        if (IsOdd(kp/2)) b = -b;
+        c = W6j(k, kp, m2, ja, jb, jb)*W6j(k, kp, m2, jb, ja, ja);
+        if (IsOdd((ja+jb+kp+m2)/2)) b += c;
+        else b -= c;
+        c = -1.0/(jb+1.0);
+        if (kp == m2) c += 1.0/(m2+1.0);
+        c *= W6j(ja, jb, m2, jb, ja, k)/ja;
+        if (IsOdd(m2/2)) {
           b += c;
         } else {
           b -= c;
         }
-	b /= 0.5*ja;
-	b *= FKB(cfac, ka, kb, k)*GKB(cfac, ka, kb, kp);
-	e += b;
+        b /= 0.5*ja;
+        b *= FKB(cfac, ka, kb, k)*GKB(cfac, ka, kb, kp);
+        e += b;
       }
     }
     break;
@@ -802,14 +802,14 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     a = 1.0/((ja+1.0)*(jb+1.0));
     for (k = k0; k <= k1; k += 2) {
       for (kp = k0; kp <= k1; kp += 2) {
-	b = 0;
-	if (k == kp) {
-	  b += 1.0/(k+1.0);
-	}
-	b -= a;
-	c = GKB(cfac, ka, kb, k);
-	d = GKB(cfac, ka, kb, kp);
-	e += a*b*c*d;
+        b = 0;
+        if (k == kp) {
+          b += 1.0/(k+1.0);
+        }
+        b -= a;
+        c = GKB(cfac, ka, kb, k);
+        d = GKB(cfac, ka, kb, kp);
+        e += a*b*c*d;
       }
     }
     break;
@@ -823,13 +823,13 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
     a = 1.0/((ja+1.0)*(jb+1.0));
     for (k = k0; k <= k1; k += 4) {
       for (kp = kp0; kp <= kp1; kp += 2) {
-	b = W6j(jb, ja, kp, ja, jb, k);
-	if (fabs(b) < EPS30) continue;
-	b *= 2.0*a;
-	if (IsOdd(kp/2)) b = -b;
-	c = FKB(cfac, ka, kb, k);
-	d = GKB(cfac, ka, kb, kp);
-	e += b*c*d;
+        b = W6j(jb, ja, kp, ja, jb, k);
+        if (fabs(b) < EPS30) continue;
+        b *= 2.0*a;
+        if (IsOdd(kp/2)) b = -b;
+        c = FKB(cfac, ka, kb, k);
+        d = GKB(cfac, ka, kb, kp);
+        e += b*c*d;
       }
     }
     break;
@@ -839,10 +839,10 @@ static double ConfigEnergyVarianceParts0(cfac_t *cfac,
 }
 
 static double ConfigEnergyVarianceParts1(cfac_t *cfac, SHELL *bra, int i,
-					 int ia, int ib, int m2, int p) {
+                                         int ia, int ib, int m2, int p) {
   int js, ja, jb, k, kp, k0, k1, kp0, kp1, ka, kb, ks;
   double a, b, e;
-  
+
   js = GetJFromKappa(bra[i].kappa);
   ks = OrbitalIndex(cfac, bra[i].n, bra[i].kappa, 0);
   ja = GetJFromKappa(bra[ia].kappa);
@@ -876,12 +876,12 @@ static double ConfigEnergyVarianceParts1(cfac_t *cfac, SHELL *bra, int i,
     a = 1.0/((js+1.0)*(ja+1.0)*(jb+1.0));
     for (k = k0; k <= k1; k += 2) {
       for (kp = kp0; kp <= kp1; kp += 2) {
-	b = W6j(k, kp, m2, jb, ja, js);
-	b = -b*b + a;
-	b /= (js+1.0);
-	b *= 2.0*GKB(cfac, ks, ka, k)*GKB(cfac, ks, kb, kp);
-	if (IsOdd((ja+jb)/2+1)) b = -b;
-	e += b;
+        b = W6j(k, kp, m2, jb, ja, js);
+        b = -b*b + a;
+        b /= (js+1.0);
+        b *= 2.0*GKB(cfac, ks, ka, k)*GKB(cfac, ks, kb, kp);
+        if (IsOdd((ja+jb)/2+1)) b = -b;
+        e += b;
       }
     }
     break;
@@ -894,13 +894,13 @@ static double ConfigEnergyVarianceParts1(cfac_t *cfac, SHELL *bra, int i,
     kp1 = js+jb;
     for (k = k0; k <= k1; k += 4) {
       for (kp = kp0; kp <= kp1; kp += 2) {
-	b = W6j(jb, jb, k, ja, ja, m2);
-	b *= W6j(jb, jb, k, js, js, kp);
-	if (fabs(b) < EPS30) continue;
-	b /= (js+1.0);
-	if (IsEven((ja+jb+kp+m2)/2)) b = -b;
-	b *= 2.0*FKB(cfac, ks, ka, k)*GKB(cfac, ks, kb, kp);
-	e += b;
+        b = W6j(jb, jb, k, ja, ja, m2);
+        b *= W6j(jb, jb, k, js, js, kp);
+        if (fabs(b) < EPS30) continue;
+        b /= (js+1.0);
+        if (IsEven((ja+jb+kp+m2)/2)) b = -b;
+        b *= 2.0*FKB(cfac, ks, ka, k)*GKB(cfac, ks, kb, kp);
+        e += b;
       }
     }
     break;
@@ -913,7 +913,7 @@ double ConfigEnergyVariance(cfac_t *cfac,
     int ns, SHELL *bra, int ia, int ib, int m2) {
   int i, js, p;
   double e, a, b, c;
-  
+
   e = 0.0;
   for (i = 0; i < ns; i++) {
     js = GetJFromKappa(bra[i].kappa);
@@ -930,22 +930,22 @@ double ConfigEnergyVariance(cfac_t *cfac,
     b = 0.0;
     if (i == ia) {
       for (p = 0; p < 6; p++) {
-	c = ConfigEnergyVarianceParts0(cfac, bra, ia, ib, m2, p);
-	b += c;
+        c = ConfigEnergyVarianceParts0(cfac, bra, ia, ib, m2, p);
+        b += c;
       }
       b /= js-1.0;
     } else if (i == ib) {
       for (p = 0; p < 6; p++) {
-	c = ConfigEnergyVarianceParts0(cfac, bra, ib, ia, m2, p);
-	b += c;
+        c = ConfigEnergyVarianceParts0(cfac, bra, ib, ia, m2, p);
+        b += c;
       }
       b /= js-1.0;
     } else {
       for (p = 6; p < 9; p++) {
-	c = ConfigEnergyVarianceParts0(cfac, bra, i, ia, m2, p);
-	b += c;
-	c = ConfigEnergyVarianceParts0(cfac, bra, i, ib, m2, p);
-	b += c;
+        c = ConfigEnergyVarianceParts0(cfac, bra, i, ia, m2, p);
+        b += c;
+        c = ConfigEnergyVarianceParts0(cfac, bra, i, ib, m2, p);
+        b += c;
       }
       c = ConfigEnergyVarianceParts1(cfac, bra, i, ia, ib, m2, 0);
       b += c;
@@ -960,7 +960,7 @@ double ConfigEnergyVariance(cfac_t *cfac,
 
     e += a*b;
   }
-    
+
   if (e < 0.0) e = 0.0;
   return e;
 }
@@ -987,24 +987,24 @@ double ConfigEnergyShift(cfac_t *cfac,
       k0 = OrbitalIndex(cfac, bra[ia].n, bra[ia].kappa, 0);
       k1 = OrbitalIndex(cfac, bra[ib].n, bra[ib].kappa, 0);
       for (k = kmin; k <= kmax; k += 4) {
-	b = W6j(k, ja, ja, m2, jb, jb);
-	if (fabs(b) > EPS30) {
-	  a += b*FKB(cfac, k0, k1, k);
-	}
+        b = W6j(k, ja, ja, m2, jb, jb);
+        if (fabs(b) > EPS30) {
+          a += b*FKB(cfac, k0, k1, k);
+        }
       }
-      
+
       if(IsOdd(m2/2)) a=-a;
-      
+
       kmin = abs(ja-jb);
       kmax = ja + jb;
       c = 1.0/((ja+1.0)*(jb+1.0));
       for (k = kmin; k <= kmax; k += 2) {
-	if (k == m2) {
-	  b = 1.0/(m2+1.0)-c;
-	} else {
-	  b = -c;
-	}
-	a += b*GKB(cfac, k0, k1, k);
+        if (k == m2) {
+          b = 1.0/(m2+1.0)-c;
+        } else {
+          b = -c;
+        }
+        a += b*GKB(cfac, k0, k1, k);
       }
       if (IsEven((ja+jb)/2)) a = -a;
       e *= a;
@@ -1015,15 +1015,15 @@ double ConfigEnergyShift(cfac_t *cfac,
 }
 
 static int TRMultipoleUTA(cfac_t *cfac, double *rme, TR_EXTRA *rx,
-		   int mpole, int lower, int upper, int *ks) {
+                   int mpole, int lower, int upper, int *ks) {
   int m2, ns, k0, k1, q1, q2;
   int p1, p2, j1, j2, ia, ib;
   LEVEL *lev1, *lev2;
   double r, aw, e0;
   INTERACT_DATUM *idatum;
-  
+
   *ks = 0;
-  
+
   *rme = 0.0;
   lev1 = GetLevel(cfac, lower);
   if (lev1 == NULL) return -1;
@@ -1034,10 +1034,10 @@ static int TRMultipoleUTA(cfac_t *cfac, double *rme, TR_EXTRA *rx,
   p2 = lev2->uta_p;
   if (mpole > 0 && IsEven(p1 + p2 + mpole)) return -1;
   if (mpole < 0 && IsOdd(p1 + p2 + mpole)) return -1;
-  
+
   idatum = NULL;
   ns = GetInteract(cfac, &idatum, NULL, NULL, lev1->uta_cfg_g, lev2->uta_cfg_g,
-		   lev1->uta_g_cfg, lev2->uta_g_cfg, 0, 0, 0);
+                   lev1->uta_g_cfg, lev2->uta_g_cfg, 0, 0, 0);
   if (ns <= 0) return -1;
   if (idatum->s[0].index < 0 || idatum->s[3].index >= 0) {
     free(idatum->bra);
@@ -1081,23 +1081,23 @@ static int TRMultipoleUTA(cfac_t *cfac, double *rme, TR_EXTRA *rx,
   }
 
   e0 = lev2->energy - lev1->energy;
-  
+
   rx->de = ConfigEnergyShift(cfac, ns, idatum->bra, ia, ib, m2);
   rx->sdev = sqrt(ConfigEnergyVariance(cfac, ns, idatum->bra, ia, ib, m2));
-  
+
   /* for transitions between nearly degenerate levels, ignore the shift as
      largely meaningless */
   if (fabs(rx->de) > 0.5*fabs(e0)) {
     rx->de = 0.0;
   }
-  
+
   aw = FINE_STRUCTURE_CONST*(e0 + rx->de);
   if (aw < 0.0) {
     free(idatum->bra);
     free(idatum);
     return -1;
   }
-  
+
   if (cfac->tr_opts.mode == M_NR && mpole != 1) {
     r = MultipoleRadialNR(cfac, mpole, k0, k1, cfac->tr_opts.gauge);
   } else {
@@ -1105,10 +1105,10 @@ static int TRMultipoleUTA(cfac_t *cfac, double *rme, TR_EXTRA *rx,
   }
 
   *rme = sqrt(lev1->uta_g*q1*(j2+1.0-q2)/((j1+1.0)*(j2+1.0)))*r;
-  
+
   free(idatum->bra);
   free(idatum);
-  
+
   return 0;
 }
 
@@ -1143,7 +1143,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
         return -1;
       }
       dE = ulev->energy - llev->energy;
-      
+
       if (dE < 0) {
         continue;
       }
@@ -1156,7 +1156,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
       ntr++;
     }
   }
-  
+
   if (!ntr) {
     return 0;
   }
@@ -1176,7 +1176,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
         SetAWGrid(cfac, 3, emin, emax);
       }
   }
-  
+
   nc0 = malloc(sizeof(int)*nlow);
   ic0 = 0;
   for (i = 0; i < nlow; i++) {
@@ -1198,7 +1198,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
       ulev = GetLevel(cfac, up[i]);
       c1 = GetConfigFromGroup(cfac, ulev->uta_cfg_g, ulev->uta_g_cfg);
       if (i > 0 && CompareNRConfig(c1, c0) != 0) {
-	nc1[ic1++] = i;
+        nc1[ic1++] = i;
       }
       c0 = c1;
     }
@@ -1218,7 +1218,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
     c0 = GetConfigFromGroup(cfac, llev->uta_cfg_g, llev->uta_g_cfg);
     for (ic1 = 0; ic1 < nic1; ic1++) {
       TR_DATUM *rd;
-      
+
       ulev = GetLevel(cfac, up[jmin]);
       jmax = nc1[ic1];
       c1 = GetConfigFromGroup(cfac, ulev->uta_cfg_g, ulev->uta_g_cfg);
@@ -1226,7 +1226,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
       ntr = (jmax-jmin)*(imax-imin);
       rd = malloc(sizeof(TR_DATUM)*ntr);
       for (i = imin; i < imax; i++) {
-	for (j = jmin; j < jmax; j++) {
+        for (j = jmin; j < jmax; j++) {
           double rme;
           int k;
 
@@ -1240,37 +1240,37 @@ static int crac_save_rtrans0(cfac_t *cfac,
             SetAWGrid(cfac, 1, dE*FINE_STRUCTURE_CONST, dE*FINE_STRUCTURE_CONST);
           }
 
-	  if (llev->uta || ulev->uta) {
-	    k = TRMultipoleUTA(cfac,
+          if (llev->uta || ulev->uta) {
+            k = TRMultipoleUTA(cfac,
                 &rme, &(rd[ir].rx), mpole, low[i], up[j], rd[ir].ks);
-	  } else {
-	    k = TRMultipole(cfac, &rme, NULL, mpole, low[i], up[j]);
-	    rd[ir].rx.de = 0.0;
-	    rd[ir].rx.sdev = 0.0;
-	  }
+          } else {
+            k = TRMultipole(cfac, &rme, NULL, mpole, low[i], up[j]);
+            rd[ir].rx.de = 0.0;
+            rd[ir].rx.sdev = 0.0;
+          }
 
-	  if (k != 0) {
-	    rd[ir].r.lower = -1;
-	    rd[ir].r.upper = -1;
-	    ir++;
-	    continue;
-	  }
+          if (k != 0) {
+            rd[ir].r.lower = -1;
+            rd[ir].r.upper = -1;
+            ir++;
+            continue;
+          }
 
-	  rd[ir].r.lower = low[i];
-	  rd[ir].r.upper = up[j];
-	  rd[ir].r.rme = rme;
+          rd[ir].r.lower = low[i];
+          rd[ir].r.upper = up[j];
+          rd[ir].r.rme = rme;
 
-	  ir++;
-	}
+          ir++;
+        }
       }
 
       qsort(rd, ntr, sizeof(TR_DATUM), CompareTRDatum);
 
       for (ir = 0; ir < ntr; ir++) {
         cfac_rtrans_data_t rtdata;
-	if (rd[ir].r.lower < 0) {
-	  continue;
-	}
+        if (rd[ir].r.lower < 0) {
+          continue;
+        }
 
         rtdata.fi = rd[ir].r.lower;
         rtdata.ii = rd[ir].r.upper;
@@ -1300,7 +1300,7 @@ int crac_calculate_rtrans(cfac_t *cfac,
     unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
     int mpole, int mode,
     cfac_tr_sink_t sink, void *udata) {
-    
+
     unsigned int nk, nl, nm;
     unsigned int *k, *l, *m;
     int allocated, res;
@@ -1340,14 +1340,14 @@ int crac_calculate_rtrans(cfac_t *cfac,
         free(l);
         free(m);
     }
-    
+
     return 0;
 }
 
-int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up, 
-	       int nlow0, const int *low0, int nup0, const int *up0) {
+int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up,
+               int nlow0, const int *low0, int nup0, const int *up0) {
   int i, n;
- 
+
   n = GetNumEBLevels(cfac);
   if (n == 0) return -1;
 
@@ -1355,21 +1355,21 @@ int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up,
   *up = malloc(sizeof(int)*n);
   *nlow = 0;
   *nup = 0;
-  
+
   for (i = 0; i < n; i++) {
     int j, ilev, mlev;
     LEVEL *lev = GetEBLevel(cfac, i);
     DecodeBasisEB(lev->pb, &ilev, &mlev);
     for (j = 0; j < nlow0; j++) {
       if (low0[j] == ilev) {
-	(*low)[(*nlow)++] = i;	
-	break;
-      }      
+        (*low)[(*nlow)++] = i;
+        break;
+      }
     }
     for (j = 0; j < nup0; j++) {
       if (up0[j] == ilev) {
-	(*up)[(*nup)++] = i;	
-	break;
+        (*up)[(*nup)++] = i;
+        break;
       }
     }
   }
@@ -1378,12 +1378,12 @@ int GetLowUpEB(const cfac_t *cfac, int *nlow, int **low, int *nup, int **up,
 }
 
 int SaveTransitionEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0,
-		     char *fn, int m) {
+                     char *fn, int m) {
   int n, nlow, *low, nup, *up, nc;
 
   n = GetLowUpEB(cfac, &nlow, &low, &nup, &up, nlow0, low0, nup0, up0);
   if (n == -1) return 0;
-  
+
   trm_cache = TRMultipole_cache_new(cfac_get_num_levels(cfac));
 
   nc = OverlapLowUp(nlow, low, nup, up);
@@ -1396,7 +1396,7 @@ int SaveTransitionEB(cfac_t *cfac, int nlow0, int *low0, int nup0, int *up0,
   free(low);
   free(up);
   ReinitRadial(cfac, 1);
-  
+
   TRMultipole_cache_free(trm_cache);
   trm_cache = NULL;
 
@@ -1409,13 +1409,13 @@ int GetTransition(const cfac_t *cfac,
     if (!tr) {
         return -1;
     }
-    
+
     tr->llo = GetLevel(cfac, nlo);
     tr->lup = GetLevel(cfac, nup);
     if (!tr->llo || !tr->lup) {
         return -1;
     }
-    
+
     tr->e = tr->lup->energy - tr->llo->energy;
     if (tr->e < 0) {
         LEVEL *lbuf;
@@ -1423,17 +1423,17 @@ int GetTransition(const cfac_t *cfac,
         lbuf = tr->llo;
         tr->llo = tr->lup;
         tr->lup = lbuf;
-        
+
         tr->nup = nlo;
         tr->nlo = nup;
-        
+
         *swapped = 1;
     } else {
         tr->nup = nup;
         tr->nlo = nlo;
-        
+
         *swapped = 0;
     }
-    
+
     return 0;
 }

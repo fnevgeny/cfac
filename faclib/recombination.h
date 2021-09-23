@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -56,17 +56,17 @@ int RRRadialMultipoleTable(cfac_t *cfac, double *qr, int k0, int k1, int m);
 int RRRadialQkTable(cfac_t *cfac, double *qr, int k0, int k1, int m);
 int RRRadialMultipole(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m);
 int RRRadialQk(cfac_t *cfac, double *rqc, double te, int k0, int k1, int m);
-void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx, 
-		       double *y, double *dy, int ndy, void *extra);
+void RRRadialQkFromFit(int np, double *p, int n, double *x, double *logx,
+                       double *y, double *dy, int ndy, void *extra);
 void RRRadialQkHydrogenicParams(int np, double *p, double z, int n, int klb);
 int BoundFreeMultipole(cfac_t *cfac, FILE *fp, int rec, int f, int m);
-int BoundFreeOS(cfac_t *cfac, double *rqu, double *p, 
-		double *eb, int rec, int f, int m, int iuta);
+int BoundFreeOS(cfac_t *cfac, double *rqu, double *p,
+                double *eb, int rec, int f, int m, int iuta);
 int PrepRREGrids(double eth, double emax0);
 int SaveRRMultipole(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
 int SaveRecRR(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, int m);
-int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn, 
-	   int msub);
+int SaveAI(cfac_t *cfac, int nlow, int *low, int nup, int *up, char *fn,
+           int msub);
 int AIRadial1E(cfac_t *cfac, double *pk, int kb, int kappaf);
 int AIRadialPk(cfac_t *cfac, double **pk, int k0, int k1, int kb, int kappaf, int k);
 int AutoionizeRate(cfac_t *cfac, double *rate, double *e, int rec, int f, int msub);

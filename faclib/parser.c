@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -23,11 +23,11 @@
 #include "parser.h"
 
 /*
-** I found the original version of this string parser (the Parse() function) 
+** I found the original version of this string parser (the Parse() function)
 ** on the internet.
 ** I modified it so that it can handel quotes with different beginning and
 ** ending tokens, and added some utility functions.
-** I have since lost the track of where this code came from, although I believe 
+** I have since lost the track of where this code came from, although I believe
 ** that it was in the public domain. Please let me know if anyone knows otherwise.
 */
 
@@ -79,7 +79,7 @@ char StrTrim(char *s, char c) {
   char *p;
   int i;
   char r;
-  
+
   i = strspn(s, " \t");
   p = s+i;
   i = 0;
@@ -93,18 +93,18 @@ char StrTrim(char *s, char c) {
   } else {
     i--;
     r = p[i];
-    while (i >= 0 && (s[i] == ' '  || 
-		      s[i] == '\t' || 
-		      s[i] == '\n' || 
-		      s[i] == '\r' ||
-		      s[i] == EOF)) {
+    while (i >= 0 && (s[i] == ' '  ||
+                      s[i] == '\t' ||
+                      s[i] == '\n' ||
+                      s[i] == '\r' ||
+                      s[i] == EOF)) {
       i--;
     }
     s[i+1] = '\0';
   }
   return r;
 }
- 
+
 int QuotedStrSplit(char *s, char sep, char qb, char qe) {
   char *p;
   int ns, qopen;
@@ -121,8 +121,8 @@ int QuotedStrSplit(char *s, char sep, char qb, char qe) {
     else if (*p == qe) {
       qopen--;
       if (qopen < 0) {
-	printf("The quoted string %s does not have matched quotes\n", s);
-	return -1;
+        printf("The quoted string %s does not have matched quotes\n", s);
+        return -1;
       }
     }
     if (qopen > 0) {
@@ -133,15 +133,15 @@ int QuotedStrSplit(char *s, char sep, char qb, char qe) {
       ns++;
       *p = '\0';
       p++;
-      while (*p == sep) {	
-	*p = ' ';
-	p++;
+      while (*p == sep) {
+        *p = ' ';
+        p++;
       }
     } else {
       p++;
     }
   }
-  
+
   if (qopen != 0) {
     printf("The quoted string %s does not have matched quotes\n", s);
     return -1;
@@ -159,7 +159,7 @@ int QuotedStrSplit(char *s, char sep, char qb, char qe) {
 
   return ns;
 }
- 
+
 int StrSplit(char *s, char sep) {
   char *p;
   int ns;
@@ -176,8 +176,8 @@ int StrSplit(char *s, char sep) {
       *p = '\0';
       p++;
       while (*p == sep) {
-	*p = ' ';
-	p++;
+        *p = ' ';
+        p++;
       }
     } else {
       p++;
@@ -214,124 +214,124 @@ static void chstore(char *s, int max, char ch) {
 }
 
 int Parse(char *token, int tokmax, const char *line,
-	  int *next, int *brkpos, int *quotepos) {
+          int *next, int *brkpos, int *quotepos) {
   int qp;
   int i, c, nc;
 
   *brkpos = -1;
   *quotepos = -1;
   for (i = 0; i < NN; i++) quote_open[i] = 0;
-  
+
   if (!line[*next]) return 1;
 
   state = IN_WHITE;
-  
+
   for (tokpos = 0; (c = line[*next]); (*next)++) {
     if ((qp = sindex(c, delim)) >= 0) {
       switch(state) {
       case IN_WHITE:
       case IN_TOKEN:
       case IN_OZONE:
-	(*next)++;
-	*brkpos = qp;
-	goto OUT;
+        (*next)++;
+        *brkpos = qp;
+        goto OUT;
 
       case IN_QUOTE:
-	chstore(token, tokmax, c);
-	break;
+        chstore(token, tokmax, c);
+        break;
       }
     } else if ((qp = sindex(c, quote_begin)) >= 0) {
       switch (state) {
       case IN_WHITE:
-	state = IN_QUOTE;
-	*quotepos = qp;
-	quote_open[qp]++;
-	break;
+        state = IN_QUOTE;
+        *quotepos = qp;
+        quote_open[qp]++;
+        break;
 
       case IN_QUOTE:
-	if (qp == *quotepos) {
-	  if (c == quote_end[*quotepos]) {
-	    state = IN_OZONE;
-	    quote_open[qp]--;
-	  } else {
-	    quote_open[qp]++;
-	    chstore(token, tokmax, c);
-	  }
-	} else {
-	  chstore(token, tokmax, c);
-	}
-	break;
+        if (qp == *quotepos) {
+          if (c == quote_end[*quotepos]) {
+            state = IN_OZONE;
+            quote_open[qp]--;
+          } else {
+            quote_open[qp]++;
+            chstore(token, tokmax, c);
+          }
+        } else {
+          chstore(token, tokmax, c);
+        }
+        break;
       case IN_TOKEN:
       case IN_OZONE:
-	goto OUT;
+        goto OUT;
       }
     } else if ((qp = sindex(c, quote_end)) >= 0) {
       switch (state) {
       case IN_QUOTE:
-	if (quote_open[qp] > 1) {
-	  chstore(token, tokmax, c);
-	  quote_open[qp]--;
-	} else if (quote_open[qp] < 1) {
-	  chstore(token, tokmax, c);
-	} else {
-	  state = IN_OZONE;
-	  quote_open[qp]--;
-	}
-	break;
+        if (quote_open[qp] > 1) {
+          chstore(token, tokmax, c);
+          quote_open[qp]--;
+        } else if (quote_open[qp] < 1) {
+          chstore(token, tokmax, c);
+        } else {
+          state = IN_OZONE;
+          quote_open[qp]--;
+        }
+        break;
       default:
-	*quotepos = qp;
-	return -1;
+        *quotepos = qp;
+        return -1;
       }
     } else if ((qp = sindex(c, white)) >= 0) {
       switch (state) {
       case IN_WHITE:
       case IN_OZONE:
-	break;
+        break;
       case IN_TOKEN:
-	state = IN_OZONE;
-	break;
+        state = IN_OZONE;
+        break;
       case IN_QUOTE:
-	chstore(token, tokmax, c);
-	break;
+        chstore(token, tokmax, c);
+        break;
       }
     } else if (c == escape) {
       nc = line[(*next)+1];
       if (nc == '\0') {
-	chstore(token, tokmax, c);
-	(*next)++;
-	goto OUT;
+        chstore(token, tokmax, c);
+        (*next)++;
+        goto OUT;
       }
       switch(state) {
       case IN_WHITE:
-	(*next)--;
-	state = IN_TOKEN;
-	break;
+        (*next)--;
+        state = IN_TOKEN;
+        break;
       case IN_TOKEN:
       case IN_QUOTE:
-	(*next)++;
-	chstore(token, tokmax, nc);
-	break;
+        (*next)++;
+        chstore(token, tokmax, nc);
+        break;
       case IN_OZONE:
-	goto OUT;
+        goto OUT;
       }
     } else {
       if (state == IN_WHITE) {
-	state = IN_TOKEN;
+        state = IN_TOKEN;
       }
       switch (state) {
       case IN_TOKEN:
       case IN_QUOTE:
-	chstore(token, tokmax, c);
-	break;
+        chstore(token, tokmax, c);
+        break;
       case IN_OZONE:
-	goto OUT;
+        goto OUT;
       }
     }
   }
 
  OUT:
   token[tokpos] = '\0';
-  
+
   return 0;
 }
 

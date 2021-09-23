@@ -2,17 +2,17 @@
  *   FAC - Flexible Atomic Code
  *   Copyright (C) 2001-2015 Ming Feng Gu
  *   Portions Copyright (C) 2010-2015 Evgeny Stambulchik
- * 
+ *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
  *   the Free Software Foundation, either version 3 of the License, or
  *   (at your option) any later version.
- * 
+ *
  *   This program is distributed in the hope that it will be useful,
  *   but WITHOUT ANY WARRANTY; without even the implied warranty of
  *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  *   GNU General Public License for more details.
- * 
+ *
  *   You should have received a copy of the GNU General Public License
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,11 +28,11 @@ static int cfac_init_radial(cfac_t *cfac)
 
     cfac->n_awgrid = 1;
     cfac->awgrid[0]= EPS3;
-    
+
     cfac->optimize_control.stabilizer = OPTSTABLE;
     cfac->optimize_control.tolerance  = OPTTOL;
     cfac->optimize_control.maxiter    = OPTNITER;
-    cfac->optimize_control.screened_charge = 1.0; 
+    cfac->optimize_control.screened_charge = 1.0;
     cfac->optimize_control.screened_kl     = 1;
     cfac->optimize_control.iprint          = OPTPRINT;
 
@@ -43,7 +43,7 @@ static int cfac_init_radial(cfac_t *cfac)
     cfac->qed.nms = QEDNMS;
     cfac->qed.sms = QEDSMS;
     cfac->qed.br  = QEDBREIT;
-    
+
     cfac->orbitals = malloc(sizeof(ARRAY));
     if (!cfac->orbitals) {
         return 1;
@@ -66,10 +66,10 @@ static int cfac_init_radial(cfac_t *cfac)
         !cfac->breit_array     ||
         !cfac->residual_array  ||
         !cfac->vinti_array     ||
-        !cfac->qed1e_array     || 
+        !cfac->qed1e_array     ||
         !cfac->multipole_array ||
         !cfac->moments_array   ||
-        !cfac->gos_array       ||   
+        !cfac->gos_array       ||
         !cfac->yk_array) {
         return 1;
     }
@@ -123,38 +123,38 @@ static int cfac_init_radial(cfac_t *cfac)
 static void cfac_free_radial(cfac_t *cfac)
 {
     AVERAGE_CONFIG *acfg = &cfac->acfg;
-    
+
     ArrayFree(cfac->orbitals);
     free(cfac->orbitals);
-    
+
     MultiFree(cfac->slater_array);
     free(cfac->slater_array);
-    
+
     MultiFree(cfac->breit_array);
     free(cfac->breit_array);
-    
+
     MultiFree(cfac->residual_array);
     free(cfac->residual_array);
-    
+
     MultiFree(cfac->vinti_array);
     free(cfac->vinti_array);
-    
+
     MultiFree(cfac->qed1e_array);
     free(cfac->qed1e_array);
-    
+
     MultiFree(cfac->multipole_array);
     free(cfac->multipole_array);
-    
+
     MultiFree(cfac->moments_array);
     free(cfac->moments_array);
-    
+
     MultiFree(cfac->gos_array);
     free(cfac->gos_array);
-    
+
     MultiFree(cfac->yk_array);
     free(cfac->yk_array);
-    
-    if (acfg->n_shells > 0) {      
+
+    if (acfg->n_shells > 0) {
         free(acfg->n);
         free(acfg->kappa);
         free(acfg->nq);
@@ -165,7 +165,7 @@ cfac_t *cfac_new(void)
 {
     cfac_t *cfac;
     unsigned int i;
-    
+
     cfac = malloc(sizeof(cfac_t));
     if (!cfac) {
         return NULL;
@@ -173,7 +173,7 @@ cfac_t *cfac_new(void)
     memset(cfac, 0, sizeof(cfac_t));
 
     cfac->confint = 0;
-    
+
     cfac->angz_maxn = 0;
     cfac->angz_cut = ANGZCUT;
     cfac->mix_cut = MIXCUT;
@@ -209,7 +209,7 @@ cfac_t *cfac_new(void)
         ArrayInit(&(cfac->symmetry_list[i].states),
             sizeof(STATE), STATES_BLOCK, NULL, NULL);
     }
-    
+
     cfac->potential = malloc(sizeof(POTENTIAL));
     if (!cfac->potential) {
         cfac_free(cfac);
@@ -222,17 +222,17 @@ cfac_t *cfac_new(void)
         cfac_free(cfac);
         return NULL;
     }
-    
+
     if (cfac_init_recouple(cfac)) {
         cfac_free(cfac);
         return NULL;
     }
-    
+
     if (cfac_init_coulomb(cfac)) {
         cfac_free(cfac);
         return NULL;
     }
-    
+
     cfac->nhams = 0;
     cfac->hams = malloc(MAX_HAMS*sizeof(SHAMILTON));
     if (!cfac->hams) {
@@ -273,14 +273,14 @@ cfac_t *cfac_new(void)
         return NULL;
     }
     memset(cfac->angz_array, 0, sizeof(ANGZ_DATUM)*MAX_HAMS2);
-    
+
     cfac->angzxz_array = malloc(sizeof(ANGZ_DATUM)*MAX_HAMS2);
     if (!cfac->angzxz_array) {
         cfac_free(cfac);
         return NULL;
     }
     memset(cfac->angzxz_array, 0, sizeof(ANGZ_DATUM)*MAX_HAMS2);
-    
+
     cfac->tr_opts.gauge = DGAUGE;
     cfac->tr_opts.mode  = DMODE;
     cfac->tr_opts.max_e = ERANK;
@@ -334,11 +334,11 @@ void cfac_free(cfac_t *cfac)
             ArrayFree(&cfac->levels_per_ion[i]);
         }
         free(cfac->levels_per_ion);
-        
+
         cfac_potential_free(cfac->potential);
-        
+
         cfac_free_radial(cfac);
-        
+
         ArrayFree(cfac->levels);
         free(cfac->levels);
         ArrayFree(cfac->eblevels);
@@ -348,37 +348,37 @@ void cfac_free(cfac_t *cfac)
         free(cfac->ecorrections);
 
         cfac_free_recouple(cfac);
-        
+
         cfac_free_coulomb(cfac);
-        
+
         FreeHamsArray(cfac);
         free(cfac->hams);
-        
+
         if (cfac->angz_array) {
             for (i = 0; i < MAX_HAMS2; i++) {
                 FreeAngZDatum(&(cfac->angz_array[i]));
             }
             free(cfac->angz_array);
         }
-        
+
         if (cfac->angzxz_array) {
             for (i = 0; i < MAX_HAMS2; i++) {
                 FreeAngZDatum(&(cfac->angzxz_array[i]));
             }
             free(cfac->angzxz_array);
         }
-        
+
         if (cfac->angmz_array) {
             for (i = 0; i < MAX_HAMS2; i++) {
                 FreeAngZDatum(&(cfac->angmz_array[i]));
             }
             free(cfac->angmz_array);
         }
-        
+
         if (cfac->sym_jj) {
             free(cfac->sym_jj);
         }
-        
+
         free(cfac);
     }
 }

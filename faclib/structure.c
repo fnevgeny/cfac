@@ -2371,13 +2371,13 @@ static int FinalizeLevels(cfac_t *cfac, int start, int n) {
 
     LEVEL *lev = GetLevel(cfac, ilevel);
 
-    si = lev->pb;
-    sym = GetSymmetry(cfac, lev->pj);
-    s = ArrayGet(&(sym->states), si);
-
     if (lev->uta) {
       continue;
     }
+
+    si = lev->pb;
+    sym = GetSymmetry(cfac, lev->pj);
+    s = ArrayGet(&(sym->states), si);
 
     if (s->kgroup > 0) {
       CONFIG *cfg = GetConfig(cfac, s);

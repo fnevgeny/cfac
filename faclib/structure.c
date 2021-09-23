@@ -2385,14 +2385,15 @@ static int FinalizeLevels(cfac_t *cfac, int start, int n) {
       
       lev->ibase = -1;
       
-      if (cfac_get_ion_nlevels(cfac, nk) != 0 && cfg->shells[0].nq <= 1) {
+      if (cfac_get_ion_nlevels(cfac, nk) != 0 && cfg->shells[0].nq <= 1 &&
+          cfg->n_shells > 1) {
         STATE *s1;
         CONFIG *cfg1;
 	double mix_norm = 0.0;
 	double md_min = 1E30, dE_min = 1E30;
 	SHELL_STATE *csf = cfg->csfs + s->kstate;
 
-	dn = cfg->shells[0].n - cfg->shells[1].n;
+        dn = cfg->shells[0].n - cfg->shells[1].n;
 	if (dn < MAXDN) {
 	  for (t = 0; t < lev->n_basis; t++) {
 	    s1 = ArrayGet(&(sym->states), lev->basis[t]);

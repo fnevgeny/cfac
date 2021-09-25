@@ -432,11 +432,19 @@ int PrepCoulombBethe(const cfac_t *cfac, cfac_cbcache_t *cbcache,
     ee1 = e1[ie1];
     k1s = 2.0*ee1;
     k1 = sqrt(k1s);
+    if (fabs(z/k1) > 1000.0) {
+      /* this will fail in CMULTIP anyway */
+      return -1;
+    }
     for (ie2 = 0; ie2 < ne2; ie2++) {
       for (ite = 0; ite < nte; ite++) {
         ee0 = ee1 + e2[ie2] + te[ite];
         k0s = 2.0*ee0;
         k0 = sqrt(k0s);
+        if (fabs(z/k0) > 1000.0) {
+          /* this will fail in CMULTIP anyway */
+          return -1;
+        }
         a = ee1/ee0;
         b = -log(10.0)/log(a);
         q0 = 3.0*b;

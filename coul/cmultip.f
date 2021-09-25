@@ -346,9 +346,9 @@ C
   290 CONTINUE
   295 RETURN
 
- 9980 WRITE(0,9981)
- 9981 FORMAT(18H0NO CONV IN CLMINT)
-      IERR = 1
+ 9980 IERR = 1
+C      WRITE(0,9981)
+C 9981 FORMAT(18H0NO CONV IN CLMINT)
       RETURN
 C
 C **********************************************************************

@@ -476,7 +476,11 @@ int PrepCoulombBethe(const cfac_t *cfac, cfac_cbcache_t *cbcache,
                     r[i], &ierr);
           }
           if (ierr != 0) {
-            cfac_errmsg(cfac, "error in CMULTIP: %d\n", ierr);
+            if (ierr == 3) {
+                cfac_errmsg(cfac, "Convergence failed in CLMINT\n");
+            } else {
+                cfac_errmsg(cfac, "Error in CMULTIP: %d\n", ierr);
+            }
             return -1;
           }
           for (k = q0; k <= q1; k++) {

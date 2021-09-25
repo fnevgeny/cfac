@@ -19,6 +19,12 @@ standard chemical element symbol. The nuclear charge \var{z}, atomic mass
 are not set, the standard values are used.
 \end{fundesc}
 
+\begin{fundesc}{SetErrorOutput}{fn}
+Redirect error and warning messages to a file. Two special destinations are
+recognized, ``stderr'' and ``stdout''. Otherwise, \var{fn} is treated as a
+regular file. The default is ``stderr''.
+\end{fundesc}
+
 \begin{fundesc}{SetFields}{b, e, a\opt{, m}}
 Set the magnetic and electric fields. \var{b} is the magnetic fields in gauss,
 \var{e} is the electric fields in V/cm, and \var{a} is the angle (in degrees)

@@ -322,6 +322,32 @@ static int SelectNeleLevels(cfac_t *cfac, int nele, int **levels)
     return j;
 }
 
+static int PSetErrorOutput(int argc, char *argv[], int argt[], ARRAY *variables)
+{
+    char *fname;
+    FILE *fp;
+
+    if (argc != 1 || argt[0] != STRING) return -1;
+
+    fname = argv[0];
+
+    if (!strcmp(fname, "stdout")) {
+        fp = stdout;
+    } else
+    if (!strcmp(fname, "stderr")) {
+        fp = stderr;
+    } else {
+        fp = fopen(fname, "w");
+        if (!fp) {
+            fprintf(stderr, "Cannot open file '%s' for writing\n", fname);
+            return -1;
+        }
+    }
+
+    cfac_set_err_fp(cfac, fp);
+    return 0;
+}
+
 static int PAvgConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   int ns, *n, *kappa;
   double *nq;
@@ -2886,6 +2912,7 @@ static METHOD methods[] = {
   {"SetCILevel", PSetCILevel},
   {"SetCIPWGrid", PSetCIPWGrid},
   {"SetCIQkMode", PSetCIQkMode},
+  {"SetErrorOutput", PSetErrorOutput},
   {"SetFields", PSetFields},
   {"SetHydrogenicNL", PSetHydrogenicNL},
   {"SetIEGrid", PSetIEGrid},

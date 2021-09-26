@@ -36,8 +36,8 @@
 #include "stoken.h"
 
 static cfac_t *cfac = NULL;
-
 static int uta = 0;
+static FILE *err_fp = NULL;
 
 static void cfac_verinfo(void) {
   printf("cFAC-%d.%d.%d\n",
@@ -327,27 +327,26 @@ static int SelectNeleLevels(cfac_t *cfac, int nele, int **levels)
 static int PSetErrorOutput(int argc, char *argv[], int argt[], ARRAY *variables)
 {
     char *fname;
-    FILE *fp;
 
     if (argc != 1 || argt[0] != STRING) return -1;
 
     fname = argv[0];
 
     if (!strcmp(fname, "stdout")) {
-        fp = stdout;
+        err_fp = stdout;
     } else
     if (!strcmp(fname, "stderr")) {
-        fp = stderr;
+        err_fp = stderr;
     } else {
-        fp = fopen(fname, "w");
-        setlinebuf(fp);
-        if (!fp) {
+        err_fp = fopen(fname, "w");
+        setlinebuf(err_fp);
+        if (!err_fp) {
             cfac_errmsg(cfac, "Cannot open file '%s' for writing\n", fname);
             return -1;
         }
     }
 
-    cfac_set_err_fp(cfac, fp);
+    cfac_set_err_fp(cfac, err_fp);
     return 0;
 }
 
@@ -3079,6 +3078,13 @@ int main(int argc, const char *argv[]) {
     cfac_errmsg(cfac, "Warning: %d energy correction(s) have not been applied\n",
         cfac->ncorrections);
   }
+
+  if (err_fp != stderr && err_fp != stdout &&
+      err_fp != NULL && ftell(err_fp) > 0) {
+      fprintf(stderr,
+        "A number of non-fatal errors detected, check the log file\n");
+  }
+
   cfac_free(cfac);
 
   exit(0);

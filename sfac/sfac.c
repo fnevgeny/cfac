@@ -37,6 +37,8 @@
 
 static cfac_t *cfac = NULL;
 
+static int uta = 0;
+
 static void cfac_verinfo(void) {
   printf("cFAC-%d.%d.%d\n",
     CFAC_VERSION, CFAC_SUBVERSION, CFAC_SUBSUBVERSION);
@@ -458,47 +460,65 @@ static int PGetConfigNR(int argc, char *argv[], int argt[], ARRAY *variables) {
 static int PConfig(int argc, char *argv[], int argt[], ARRAY *variables) {
   CONFIG *cfg;
   static char gname[GROUP_NAME_LEN + 1] = "_all_";
-  int i, j, k, t, ncfg;
+  int i, j, t, ncfg, grp_idx = -1, uta_idx = -1;
   char scfg[MCHSHELL];
-  int iuta = cfac->uta;
+  int iuta = uta;
 
-  k = -2;
+  if (argc < 2) {
+    return -1;
+  }
+
   for (i = 0; i < argc; i++) {
     if (argt[i] == KEYWORD) {
-      if (strcmp(argv[i], "group") != 0) {
-        cfac_errmsg(cfac, "The keyword must be group=gname\n");
+      if (strcmp(argv[i], "group") == 0) {
+        if (argt[i+1] == STRING) {
+          grp_idx = i;
+          i++;
+          strncpy(gname, argv[i], GROUP_NAME_LEN);
+        } else {
+          return -1;
+        }
+      } else
+      if (strcmp(argv[i], "uta") == 0) {
+        if (argt[i+1] == NUMBER) {
+          uta_idx = i;
+          i++;
+          iuta = atoi(argv[i]);
+        } else {
+          return -1;
+        }
+      } else {
+        cfac_errmsg(cfac, "Unrecognized keyword %s\n", argv[i]);
         return -1;
       }
-      if (i > argc-2) return -1;
-      if (argt[i+1] != STRING) return -1;
-      k = i;
     }
   }
 
   i = 0;
-
-  if (k >= 0) {
-    strncpy(gname, argv[k+1], GROUP_NAME_LEN);
-  } else {
-    if (argc == 0) {
-      return -1;
-    }
-
+  if (uta_idx < 0) {
     if (argt[i] == NUMBER && argc >= 3) {
       iuta = atoi(argv[i]) ? 1:0;
       i++;
     }
+  }
 
+  if (grp_idx < 0) {
     if (argt[i] != STRING) {
       return -1;
     }
     strncpy(gname, argv[i], GROUP_NAME_LEN);
-
     i++;
   }
 
   for (; i < argc; i++) {
-    if (i == k || i == k+1) continue;
+    if (i == grp_idx) {
+      i++;
+      continue;
+    }
+    if (i == uta_idx) {
+      i++;
+      continue;
+    }
     if (argt[i] != STRING) return -1;
     strncpy(scfg, _closed_shells, MCHSHELL);
     strncat(scfg, argv[i], MCHSHELL - 1);
@@ -2379,6 +2399,8 @@ static int PSetUTA(int argc, char *argv[], int argt[],
                    ARRAY *variables) {
   int m;
 
+  cfac_errmsg(cfac, "SetUTA() is deprecated, set UTA explicitly in Config()\n");
+
   if (argc == 1) {
     if (argt[0] != NUMBER) return -1;
     m = atoi(argv[0]);
@@ -2386,7 +2408,7 @@ static int PSetUTA(int argc, char *argv[], int argt[],
     return -1;
   }
 
-  cfac_set_uta(cfac, m);
+  uta = m;
 
   return 0;
 }

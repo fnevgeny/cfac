@@ -63,8 +63,6 @@ int
 cfac_add_config(cfac_t *cfac, const char *gname, const char *cfg_str, int uta);
 int
 cfac_get_config_gid(const cfac_t *cfac, const char *cname);
-int
-cfac_set_uta(cfac_t *cfac, int uta);
 
 /* structure.c */
 int

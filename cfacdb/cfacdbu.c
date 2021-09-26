@@ -171,10 +171,9 @@ static int sessions_sink(const cfacdb_t *cdb,
     if (cdu->print_info) {
         printf("Session #%lu (sid = %ld):\n",
                   cdu->nsid, cbdata->sid);
-        printf("\t%s (Z = %d, mass = %.2f) nele = %d ... %d, UTA = %s \n",
+        printf("\t%s (Z = %d, mass = %.2f) nele = %d ... %d\n",
                   cbdata->sym, cbdata->anum, cbdata->mass,
-                  cbdata->nele_min, cbdata->nele_max,
-                  cbdata->uta ? "true":"false");
+                  cbdata->nele_min, cbdata->nele_max);
     }
 
     if (cdu->nele_min > cbdata->nele_max) {

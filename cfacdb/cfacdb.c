@@ -135,7 +135,7 @@ cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store)
         cdb->db_format = 1;
     }
 
-    if (cdb->db_format < 1 || cdb->db_format > 3) {
+    if (cdb->db_format < 1 || cdb->db_format > 4) {
         fprintf(stderr, "Unsupported database format %d\n", cdb->db_format);
         cfacdb_close(cdb);
         return NULL;
@@ -246,7 +246,7 @@ int cfacdb_sessions(const cfacdb_t *cdb,
               " FROM _sessions_v" \
               " ORDER BY sid";
     } else {
-        sql = "SELECT sid, symbol, anum, mass, nele_min, nele_max, uta" \
+        sql = "SELECT sid, symbol, anum, mass, nele_min, nele_max" \
               " FROM _sessions_v" \
               " ORDER BY sid";
     }
@@ -267,11 +267,6 @@ int cfacdb_sessions(const cfacdb_t *cdb,
             cbdata.mass     = sqlite3_column_double(stmt, 3);
             cbdata.nele_min = sqlite3_column_int   (stmt, 4);
             cbdata.nele_max = sqlite3_column_int   (stmt, 5);
-            if (cdb->db_format >= 3) {
-                cbdata.uta  = sqlite3_column_int   (stmt, 6);
-            } else {
-                cbdata.uta = CFACDB_FALSE;
-            }
 
             if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
                 sqlite3_finalize(stmt);

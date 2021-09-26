@@ -1,18 +1,16 @@
 # Calculate the autoionization rates for Ne-like Se
 # in the UTA mode.
 
-SetUTA(1)
-
 SetAtom('Se')
 
 Closed('1s')
 Closed('2s')
 
 # configurations for the F-like ion
-Config('2p5', group = 'n2')
+Config('2p5', group = 'n2', uta = 1)
 
 # configurations of doubly excited Ne-like ion
-Config('2p4 3s2', '2p4 3s1 3p1', group = 'n33')
+Config('2p4 3s2', '2p4 3s1 3p1', group = 'n33', uta = 1)
 
 ConfigEnergy(0)
 OptimizeRadial('n33')

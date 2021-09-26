@@ -85,7 +85,6 @@ typedef struct {
     double mass;            /*!< Atomic mass.                 */
     unsigned int nele_min;  /*!< Minimal number of electrons. */
     unsigned int nele_max;  /*!< Maximal number of electrons. */
-    int uta;                /*!< UTA flag (used by default).  */
 } cfacdb_sessions_data_t;
 
 /*!

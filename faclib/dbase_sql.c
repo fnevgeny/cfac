@@ -30,7 +30,7 @@
 
 #include "schema.i"
 
-#define CFACDB_FORMAT_VERSION   3
+#define CFACDB_FORMAT_VERSION   4
 
 #define SQLITE3_BIND_STR(stmt, id, txt) \
         sqlite3_bind_text(stmt, id, txt, -1, SQLITE_STATIC)
@@ -155,15 +155,14 @@ int StoreInit(const cfac_t *cfac,
     }
 
     sql = "INSERT INTO sessions" \
-          " (sid, version, uta, cmdline)" \
-          " VALUES (?, ?, ?, '')";
+          " (sid, version, cmdline)" \
+          " VALUES (?, ?, '')";
 
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
 
     sqlite3_bind_int(stmt, 1, *sid);
     sqlite3_bind_int(stmt, 2,
         10000*CFAC_VERSION + 100*CFAC_SUBVERSION + CFAC_SUBSUBVERSION);
-    sqlite3_bind_int(stmt, 3, cfac->uta ? 1:0);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {

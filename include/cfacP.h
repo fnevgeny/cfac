@@ -77,8 +77,6 @@ struct _cfac_t {
     MULTI *gos_array;
     MULTI *yk_array;
 
-    int uta;                  /* UTA flag                                    */
-
     struct {
       double stabilizer;
       double tolerance;       /* tolerance for self-consistency              */

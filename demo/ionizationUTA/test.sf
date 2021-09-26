@@ -1,18 +1,16 @@
 # Calculate the electron impact ionization cross sections
 # in the UTA mode.
 
-SetUTA(1)
-
 SetAtom('Fe')
 
 # 1s shell is closed
 Closed('1s')
 
 # Ne-like ground state
-Config('2*8', group='fe17')
+Config('2*8', group='fe17', uta = 1)
 
 # F-like configuations
-Config('2*7', group='fe18')
+Config('2*7', group='fe18', uta = 1)
 
 # Solve the structure problem
 ConfigEnergy(0)

@@ -2339,13 +2339,3 @@ int cfac_add_config(cfac_t *cfac,
 
     return gidx;
 }
-
-int cfac_set_uta(cfac_t *cfac, int uta)
-{
-    if (cfac) {
-        cfac->uta = uta;
-        return CFAC_SUCCESS;
-    } else {
-        return CFAC_FAILURE;
-    }
-}

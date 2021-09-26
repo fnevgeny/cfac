@@ -434,7 +434,7 @@ int PrepCoulombBethe(const cfac_t *cfac, cfac_cbcache_t *cbcache,
     k1 = sqrt(k1s);
     if (fabs(z/k1) > 1000.0) {
       /* this will fail in CMULTIP anyway */
-      return -1;
+      return -2;
     }
     for (ie2 = 0; ie2 < ne2; ie2++) {
       for (ite = 0; ite < nte; ite++) {
@@ -443,7 +443,7 @@ int PrepCoulombBethe(const cfac_t *cfac, cfac_cbcache_t *cbcache,
         k0 = sqrt(k0s);
         if (fabs(z/k0) > 1000.0) {
           /* this will fail in CMULTIP anyway */
-          return -1;
+          return -2;
         }
         a = ee1/ee0;
         b = -log(10.0)/log(a);
@@ -481,7 +481,7 @@ int PrepCoulombBethe(const cfac_t *cfac, cfac_cbcache_t *cbcache,
             } else {
                 cfac_errmsg(cfac, "Error in CMULTIP: %d\n", ierr);
             }
-            return -1;
+            return -3;
           }
           for (k = q0; k <= q1; k++) {
             ik = k - q0;

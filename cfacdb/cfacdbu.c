@@ -207,6 +207,7 @@ int main(int argc, char *const *argv)
     unsigned int i, nsessions;
 
     memset(&cdu, 0, sizeof(cdu));
+    cdu.sid = -1;
     cdu.nele_min = 0;
     cdu.nele_max = 100;
 
@@ -241,11 +242,6 @@ int main(int argc, char *const *argv)
     cdu.sids = malloc(nsessions*sizeof(unsigned long));
 
     cfacdb_sessions(cdb, sessions_sink, &cdu);
-
-    /* choose the latest session by default */
-    if (cdu.sid == 0) {
-        cdu.sid = cdu.sids[nsessions - 1];
-    }
 
     /* override sid array if user wants a specific session */
     if (cdu.sid >= 0) {

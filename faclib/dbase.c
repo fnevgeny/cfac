@@ -2027,12 +2027,17 @@ int PrintTable(const cfac_t *cfac, char *ifn, char *ofn, int v) {
   return n;
 }
 
-int JFromENRecord(EN_RECORD *r) {
+int UTAFromENRecord(const EN_RECORD *r) {
+  if (r->j < 0) return 1;
+  else return 0;
+}
+
+int JFromENRecord(const EN_RECORD *r) {
   if (r->j < 0) return r->ibase;
   else return r->j;
 }
 
-int IBaseFromENRecord(EN_RECORD *r) {
+int IBaseFromENRecord(const EN_RECORD *r) {
   if (r->j < 0) return -1;
   else return r->ibase;
 }

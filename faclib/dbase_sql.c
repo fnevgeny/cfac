@@ -226,8 +226,8 @@ int StoreENTable(const cfac_t *cfac,
     char *sql;
 
     sql = "INSERT INTO levels" \
-          " (sid, id, nele, name, e, g, vn, vl, p, ibase, ncomplex, sname)" \
-          " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+          " (sid, id, nele, name, e, g, vn, vl, p, ibase, ncomplex, sname, uta)" \
+          " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
@@ -248,7 +248,7 @@ int StoreENTable(const cfac_t *cfac,
 
         for (i = 0; i < h.nlevels; i++) {
             EN_RECORD r;
-            int p, vnl, vn, vl, g, ibase;
+            int p, vnl, vn, vl, g, ibase, iuta;
 
             n = ReadENRecord(fp, &r, swp);
             if (n == 0) {
@@ -262,6 +262,8 @@ int StoreENTable(const cfac_t *cfac,
               p = 0;
               vnl = r.p;
             }
+
+            iuta = UTAFromENRecord(&r);
 
             g = JFromENRecord(&r) + 1;
             vn = vnl/100;
@@ -283,6 +285,7 @@ int StoreENTable(const cfac_t *cfac,
             }
             SQLITE3_BIND_STR   (stmt, 11, r.ncomplex);
             SQLITE3_BIND_STR   (stmt, 12, r.sname);
+            sqlite3_bind_int   (stmt, 13, iuta);
 
             rc = sqlite3_step(stmt);
             if (rc != SQLITE_DONE) {

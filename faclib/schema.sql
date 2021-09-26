@@ -30,6 +30,7 @@ CREATE TABLE levels (
     ibase    INTEGER,
     ncomplex TEXT    NOT NULL,
     sname    TEXT    NOT NULL,
+    uta      BOOLEAN NOT NULL,
     PRIMARY KEY(sid, id),
     CONSTRAINT unique_name UNIQUE (sid, nele, name)
 );

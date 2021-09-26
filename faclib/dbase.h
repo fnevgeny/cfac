@@ -361,8 +361,9 @@ void CEMF2CEFRecord(CEMF_RECORD *mr, CEF_RECORD *r, CEMF_HEADER *mh,
  * UTA. The two functions here are wrappers to determine the 2j and ibase for
  * the level, depending on whether r.j < 0.
  */
-int JFromENRecord(EN_RECORD *r);
-int IBaseFromENRecord(EN_RECORD *r);
+int UTAFromENRecord(const EN_RECORD *r);
+int JFromENRecord(const EN_RECORD *r);
+int IBaseFromENRecord(const EN_RECORD *r);
 
 int SaveLevels(const cfac_t *cfac, const char *fn, int start, int n);
 

@@ -857,8 +857,9 @@ static int IonizeStrength(cfac_t *cfac, double *qku, double *qkc, double *te,
                  c*(1.0 - 1.0/x[i] - logx[i]/(1.0 + x[i]));
         qku[i] *= (x[i]/(es + x[i]));
 
-        if (qku[i] < 0.0) {
-            cfac_errmsg(cfac, "Warning: qku[%d] = %g < 0, setting to zero\n", i, qku[i]);
+        if (qku[i] < -EPS6) {
+            cfac_errmsg(cfac, "Warning: qku[%d] = %g < 0, setting to zero\n",
+                        i, qku[i]);
             qku[i] = 0.0;
         }
       }

@@ -297,7 +297,7 @@ int EvalFile(FILE *f, int exebyline, METHOD *methods, FILE *ferr) {
     i = TokenizeLine(nlines, buf, methods, &statements, &variables);
     if (i < 0) {
       ErrorOcurred(i, nlines, ferr);
-      if (!exebyline) exit(1);
+      if (!exebyline) return -1;
     }
     if (exebyline && i > 0) {
       st = (STATEMENT *) ArrayGet(&statements, statements.dim-1);
@@ -314,7 +314,7 @@ int EvalFile(FILE *f, int exebyline, METHOD *methods, FILE *ferr) {
       ierr = EvalStatement(st, methods, &variables);
       if (ierr < 0) {
         ErrorOcurred(ERR_EVAL, st->nline, ferr);
-        exit(1);
+        return -1;
       }
     }
   }

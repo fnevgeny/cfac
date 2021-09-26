@@ -3027,7 +3027,9 @@ int main(int argc, const char *argv[]) {
   }
 
   if (argc == 1) {
-    EvalFile(stdin, 1, methods, stderr);
+    if (EvalFile(stdin, 1, methods, stderr) != 0) {
+      exit(1);
+    }
   } else {
     for (i = 1; i < argc; i++) {
       if (!strcmp(argv[i], "-h")) {
@@ -3043,7 +3045,9 @@ int main(int argc, const char *argv[]) {
           cfac_errmsg(cfac, "Cannot open file '%s'\n", argv[i]);
           exit(1);
         }
-        EvalFile(f, 0, methods, stderr);
+        if (EvalFile(f, 0, methods, stderr) != 0) {
+          exit(1);
+        }
       }
     }
   }

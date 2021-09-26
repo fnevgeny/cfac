@@ -263,6 +263,8 @@ int main(int argc, char *const *argv)
         }
 
         if (cdu.print_info) {
+            char *smode = NULL;
+
             if (cfacdb_get_stats(cdb, &stats) != CFACDB_SUCCESS) {
                 fprintf(stderr,
                     "Failed getting statistics of DB \"%s\"\n", cdu.db_fname);
@@ -270,8 +272,28 @@ int main(int argc, char *const *argv)
                 exit(1);
             }
 
-            printf("Stats of session ID %ld with nele = %d ... %d:\n",
+            switch (stats.mode) {
+            case CFACDB_MODE_DETAILED:
+                smode = "detailed";
+                break;
+            case CFACDB_MODE_UTA:
+                smode = "uta";
+                break;
+            case CFACDB_MODE_MIXED:
+                smode = "mixed";
+                break;
+            default:
+                break;
+            }
+
+            printf("Stats of session ID %ld with nele = %d ... %d",
                 sid, cdu.nele_min, cdu.nele_max);
+
+            if (smode != NULL) {
+                printf(" (mode = %s)", smode);
+            }
+            puts(":");
+
             printf("\tLevels: %lu, RT: %lu, AI: %lu, CE: %lu, CI: %lu, RR: %lu\n",
                 stats.ndim, stats.rtdim, stats.aidim, stats.cedim, stats.cidim,
                 stats.pidim);

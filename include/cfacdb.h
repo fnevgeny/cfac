@@ -61,6 +61,16 @@ typedef enum {
 } cfacdb_temp_t;
 
 /*!
+ * \brief Calculation mode.
+ */
+typedef enum {
+    CFACDB_MODE_UNKNOWN = 0,    /*!< Could not be determined. */
+    CFACDB_MODE_DETAILED,       /*!< Detailed calculations.   */
+    CFACDB_MODE_UTA,            /*!< UTA calculations.        */
+    CFACDB_MODE_MIXED           /*!< Mixed mode.              */
+} cfacdb_mode_t;
+
+/*!
  * \brief The main cFACdb structure (used opaquely throughout the API).
  */
 typedef struct _cfacdb_t cfacdb_t;
@@ -75,6 +85,7 @@ typedef struct {
     unsigned long cedim;    /*!< Number of CE transitions.        */
     unsigned long cidim;    /*!< Number of CI transitions.        */
     unsigned long pidim;    /*!< Number of PI transitions.        */
+    cfacdb_mode_t mode;     /*!< Mode of calculations.            */
 } cfacdb_stats_t;
 
 /*!

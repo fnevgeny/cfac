@@ -338,8 +338,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
     }
 
     /* get dimension of the database subset */
-    sql = "SELECT SUM(nlevels) AS ndim" \
-          " FROM _cstates_v" \
+    sql = "SELECT COUNT(*) AS ndim" \
+          " FROM _levels_v" \
           " WHERE sid = ? AND nele <= ? AND nele >= ?";
 
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
@@ -362,6 +362,42 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
     }
 
     sqlite3_finalize(stmt);
+
+    if (cdb->db_format >= 4) {
+        int nuta;
+
+        /* get number of UTA levels */
+        sql = "SELECT COUNT(*) AS nuta" \
+              " FROM _levels_v" \
+              " WHERE sid = ? AND nele <= ? AND nele >= ? AND uta = TRUE";
+
+        sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
+        sqlite3_bind_int(stmt, 1, cdb->sid);
+        sqlite3_bind_int(stmt, 2, nele_max);
+        sqlite3_bind_int(stmt, 3, nele_min);
+
+        rc = sqlite3_step(stmt);
+        if (rc != SQLITE_ROW) {
+            fprintf(stderr, "SQL error: %s\n", sqlite3_errmsg(cdb->db));
+            sqlite3_finalize(stmt);
+            return CFACDB_FAILURE;
+        }
+
+        nuta = sqlite3_column_int64(stmt, 0);
+
+        sqlite3_finalize(stmt);
+
+        if (nuta == 0) {
+            cdb->stats.mode = CFACDB_MODE_DETAILED;
+        } else
+        if (nuta == cdb->stats.ndim) {
+            cdb->stats.mode = CFACDB_MODE_UTA;
+        } else {
+            cdb->stats.mode = CFACDB_MODE_MIXED;
+        }
+    } else {
+        cdb->stats.mode = CFACDB_MODE_UNKNOWN;
+    }
 
     sql = "SELECT COUNT(sid) AS rtdim" \
           " FROM _rtransitions_v" \

@@ -2128,7 +2128,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
     CE_HEADER ce_hdr;
     CE_RECORD r;
     double e0, e1, te0, ei, g_emin, g_emax;
-    double c, rmin, rmax;
+    double zeff, e_crit, rmin, rmax;
     int ie, nele;
 
     e0 = *((double *) ArrayGet(&subte, isub));
@@ -2193,6 +2193,17 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
     }
     if (m == 0) {
       continue;
+    }
+
+    zeff = GetResidualZ(cfac);
+
+    /* avoid too small wavevectors */
+    e_crit = zeff*zeff/2e4;
+    if (emin < e_crit) {
+        emin = e_crit;
+        if (emax < emin) {
+            emax = emin;
+        }
     }
 
     /* characteristic transition energy */
@@ -2265,11 +2276,10 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
     }
 
     nele = GetNumElectrons(cfac, low[0]);
-    c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
       ebuf = 0.0;
       if (PrepCoulombBethe(cfac, &cbcache,
-                       1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
+                       1, n_tegrid, n_egrid, zeff, &ebuf, tegrid, egrid,
                        pw_scratch.nkl, pw_scratch.kl, msub) != 0) {
         cfac_errmsg(cfac, "PrepCoulombBethe() failed\n" \
             " skipping nele = %d CE" \

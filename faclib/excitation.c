@@ -2129,7 +2129,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
     CE_RECORD r;
     double e0, e1, te0, ei, g_emin, g_emax;
     double c, rmin, rmax;
-    int ie;
+    int ie, nele;
 
     e0 = *((double *) ArrayGet(&subte, isub));
     e1 = *((double *) ArrayGet(&subte, isub + 1));
@@ -2264,20 +2264,22 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
       egrid[ie] = 2*egrid[ie-1];
     }
 
+    nele = GetNumElectrons(cfac, low[0]);
     c = GetResidualZ(cfac);
     if (xborn+1.0 != 1.0) {
       ebuf = 0.0;
       if (PrepCoulombBethe(cfac, &cbcache,
                        1, n_tegrid, n_egrid, c, &ebuf, tegrid, egrid,
                        pw_scratch.nkl, pw_scratch.kl, msub) != 0) {
-        cfac_errmsg(cfac, "PrepCoulombBethe() failed, skipping CE transitions" \
-               " in energy block %g - %g eV (ei = %g eV)\n",
+        cfac_errmsg(cfac, "PrepCoulombBethe() failed\n" \
+            " skipping nele = %d CE" \
+               " in energy block [%.4g - %.4g] eV (ei = %.4g eV)\n", nele,
                e0*HARTREE_EV, e1*HARTREE_EV, ei*HARTREE_EV);
         continue;
       }
     }
 
-    ce_hdr.nele = GetNumElectrons(cfac, low[0]);
+    ce_hdr.nele = nele;
     ce_hdr.nparams = 0;
 
     ce_hdr.te0 = te0;

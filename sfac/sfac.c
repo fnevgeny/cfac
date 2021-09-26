@@ -2965,13 +2965,13 @@ static METHOD methods[] = {
 
 static void usage(FILE *fp, const char *progname) {
     fprintf(fp, "Usage:\n");
-    fprintf(fp, "       %s            run in the interactive mode \n",
+    fprintf(fp, "  %s               run in the interactive mode \n",
         progname);
-    fprintf(fp, "       %s [FILE]...  execute commands in one or more files\n",
+    fprintf(fp, "  %s [FILE [...]]  execute commands in one or more files\n",
         progname);
-    fprintf(fp, "       %s -V         print version info and exit\n",
+    fprintf(fp, "  %s -V            print version info and exit\n",
         progname);
-    fprintf(fp, "       %s -h         display this help and exit\n",
+    fprintf(fp, "  %s -h            display this help and exit\n",
         progname);
 }
 
@@ -3002,7 +3002,6 @@ static int InitFac() {
 
 int main(int argc, const char *argv[]) {
   int i;
-  FILE *f;
   int cmdlen = 0;
 
 /* fix non-standard number of exponent digits in the MSVC runtime */
@@ -3039,7 +3038,7 @@ int main(int argc, const char *argv[]) {
         cfac_verinfo();
         exit(0);
       } else {
-        f = fopen(argv[i], "r");
+        FILE *f = fopen(argv[i], "r");
         if (!f) {
           cfac_errmsg(cfac, "Cannot open file '%s'\n", argv[i]);
           exit(1);

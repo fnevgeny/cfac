@@ -3041,8 +3041,8 @@ int main(int argc, const char *argv[]) {
       } else {
         f = fopen(argv[i], "r");
         if (!f) {
-          cfac_errmsg(cfac, "Cannot open file '%s', skipping\n", argv[i]);
-          continue;
+          cfac_errmsg(cfac, "Cannot open file '%s'\n", argv[i]);
+          exit(1);
         }
         EvalFile(f, 0, methods, stderr);
       }
@@ -3055,5 +3055,5 @@ int main(int argc, const char *argv[]) {
   }
   cfac_free(cfac);
 
-  return 0;
+  exit(0);
 }

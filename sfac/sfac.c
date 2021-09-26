@@ -340,6 +340,7 @@ static int PSetErrorOutput(int argc, char *argv[], int argt[], ARRAY *variables)
         fp = stderr;
     } else {
         fp = fopen(fname, "w");
+        setlinebuf(fp);
         if (!fp) {
             cfac_errmsg(cfac, "Cannot open file '%s' for writing\n", fname);
             return -1;

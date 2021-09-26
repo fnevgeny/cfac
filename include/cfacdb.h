@@ -116,6 +116,7 @@ typedef struct {
     const char *name;   /*!< Name in the jj notation.                */
     const char *ncmplx; /*!< Name of the complex.                    */
     const char *sname;  /*!< Non-relativistic notation.              */
+    int uta;            /*!< UTA flag.                               */
 } cfacdb_levels_data_t;
 
 /*!

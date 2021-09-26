@@ -36,6 +36,8 @@
 #include "cfac_schema.i"
 #include "cfac_schema_v1.i"
 #include "cfac_schema_v2.i"
+#include "cfac_schema_v3.i"
+#include "cfac_schema_v4.i"
 
 static int sid_cb(void *udata,
     int argc, char **argv, char **colNames)
@@ -89,7 +91,7 @@ cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store)
 
     unsigned int i, ns;
 
-    const char **schemas[2];
+    const char **schemas[3];
 
     cdb = malloc(sizeof(cfacdb_t));
     if (!cdb) {
@@ -142,14 +144,19 @@ cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store)
     }
 
     schemas[0] = cfac_schema;
-    if (cdb->db_format == 1) {
+    if (cdb->db_format < 2) {
         schemas[1] = cfac_schema_v1;
     } else {
         schemas[1] = cfac_schema_v2;
     }
+    if (cdb->db_format < 4) {
+        schemas[2] = cfac_schema_v3;
+    } else {
+        schemas[2] = cfac_schema_v4;
+    }
 
     /* create temporary views etc */
-    for (ns = 0; ns < 2; ns++) {
+    for (ns = 0; ns < 3; ns++) {
         const char **schema = schemas[ns];
         i = 0;
         while ((sql = schema[i])) {
@@ -615,7 +622,7 @@ int cfacdb_levels(cfacdb_t *cdb, cfacdb_levels_sink_t sink, void *udata)
         return CFACDB_FAILURE;
     }
 
-    sql = "SELECT id, name, nele, e, g, vn, vl, p, ncomplex, sname" \
+    sql = "SELECT id, name, nele, e, g, vn, vl, p, ncomplex, sname, uta" \
           " FROM _levels_v" \
           " WHERE sid = ? AND nele <= ? AND nele >= ?" \
           " ORDER BY zsp, e";
@@ -645,6 +652,7 @@ int cfacdb_levels(cfacdb_t *cdb, cfacdb_levels_sink_t sink, void *udata)
             cbdata.p      = sqlite3_column_int   (stmt, 7);
             cbdata.ncmplx = (char *) sqlite3_column_text  (stmt, 8);
             cbdata.sname  = (char *) sqlite3_column_text  (stmt, 9);
+            cbdata.uta    = sqlite3_column_int   (stmt, 10);
 
             if (sink(cdb, &cbdata, udata) != CFACDB_SUCCESS) {
                 sqlite3_finalize(stmt);

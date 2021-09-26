@@ -26,6 +26,8 @@
 extern "C" {
 #endif
 
+#include <time.h>
+
 #ifndef _CFACDB_H
 #define _CFACDB_H
 
@@ -85,6 +87,7 @@ typedef struct {
     double mass;            /*!< Atomic mass.                 */
     unsigned int nele_min;  /*!< Minimal number of electrons. */
     unsigned int nele_max;  /*!< Maximal number of electrons. */
+    time_t tstamp;          /*!< Time stamp.                  */
 } cfacdb_sessions_data_t;
 
 /*!

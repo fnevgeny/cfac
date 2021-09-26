@@ -4,8 +4,9 @@ CREATE TABLE cfacdb (
 );
 
 CREATE TABLE sessions (
-    sid     INTEGER PRIMARY KEY NOT NULL,
+    sid     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     version INTEGER NOT NULL,
+    tstamp  INTEGER NOT NULL,
     cmdline TEXT NOT NULL
 );
 

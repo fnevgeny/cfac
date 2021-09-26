@@ -49,6 +49,20 @@ static int format_cb(void *udata,
     return 0;
 }
 
+static int sid_cb(void *udata,
+    int argc, char **argv, char **colNames)
+{
+    unsigned long *sid = udata;
+
+    if (argc != 1 || !argv[0]) {
+        return -1;
+    }
+
+    *sid = atol(argv[0]);
+
+    return 0;
+}
+
 int StoreInit(const cfac_t *cfac,
     const char *fn, int reset, sqlite3 **db, unsigned long *sid)
 {
@@ -60,7 +74,7 @@ int StoreInit(const cfac_t *cfac,
     char *errmsg;
     int need_truncate = 0, need_init = 0;
 
-    *sid = (unsigned long) time(NULL);
+    time_t tstamp = time(NULL);
 
     if (reset) {
         need_truncate = 1;
@@ -155,22 +169,31 @@ int StoreInit(const cfac_t *cfac,
     }
 
     sql = "INSERT INTO sessions" \
-          " (sid, version, cmdline)" \
+          " (version, tstamp, cmdline)" \
           " VALUES (?, ?, '')";
 
     sqlite3_prepare_v2(*db, sql, -1, &stmt, NULL);
 
-    sqlite3_bind_int(stmt, 1, *sid);
-    sqlite3_bind_int(stmt, 2,
+    sqlite3_bind_int(stmt, 1,
         10000*CFAC_VERSION + 100*CFAC_SUBVERSION + CFAC_SUBSUBVERSION);
+    sqlite3_bind_int(stmt, 2, tstamp);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(*db));
         sqlite3_close(*db);
-        retval = -1;
+        return -1;
     }
     sqlite3_reset(stmt);
+
+    sql = "SELECT MAX(sid) FROM sessions";
+    rc = sqlite3_exec(*db, sql, sid_cb, sid, &errmsg);
+    if (rc != SQLITE_OK) {
+        cfac_errmsg(cfac, "SQL error: %s\n", errmsg);
+        sqlite3_free(errmsg);
+        sqlite3_close(*db);
+        return -1;
+    }
 
     sql = "INSERT INTO species (sid, symbol, anum, mass) VALUES (?, ?, ?, ?)";
 

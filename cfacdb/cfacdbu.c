@@ -169,8 +169,11 @@ static int sessions_sink(const cfacdb_t *cdb,
     cdu->nsid++;
 
     if (cdu->print_info) {
-        printf("Session #%lu (sid = %ld):\n",
-                  cdu->nsid, cbdata->sid);
+        char stime[100];
+        struct tm *tmp = localtime(&cbdata->tstamp);
+        strftime(stime, 100, "%c", tmp);
+        printf("Session #%lu (sid = %ld, tstamp = %s):\n",
+                  cdu->nsid, cbdata->sid, stime);
         printf("\t%s (Z = %d, mass = %.2f) nele = %d ... %d\n",
                   cbdata->sym, cbdata->anum, cbdata->mass,
                   cbdata->nele_min, cbdata->nele_max);

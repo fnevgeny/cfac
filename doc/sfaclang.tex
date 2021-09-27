@@ -36,11 +36,13 @@ Hamiltonian.
 
 \subsection{Electron Shell Configuration}
 
-\begin{fundesc}{Closed}{s, ...}
+\begin{fundesc}{Closed}{\opt{s\opt{, ...}}}
 Specify the closed shells in the electronic configurations. It takes a variable
-number of arguments, each of them is a non-relativistic or relativistic shell in
+number of arguments, each of them being a non-relativistic or relativistic shell in
 the spectroscopic notation. For example, \key{2s} for $2s$ shell, \key{2p-} for
-$2p_{1/2}$ shell, and \key{2p+} for $2p_{3/2}$ shell.
+$2p_{1/2}$ shell, and \key{2p+} for $2p_{3/2}$ shell. Each call to this function
+appends more configuration(s) to the previously defined one(s). To reset the
+list of closed shells, call it with no arguments.
 \end{fundesc}
 
 \begin{fundesc}{Config}{c\opt{, ...}, group=g \opt{, uta=m} $\mid$ g, c\opt{,

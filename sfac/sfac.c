@@ -966,6 +966,23 @@ static int POptimizeRadial(int argc, char *argv[], int argt[],
   return 0;
 }
 
+static int POptimizePotential(int argc, char *argv[], int argt[],
+                           ARRAY *variables) {
+  if (ConfigEnergy(cfac, 0, 0, 0, NULL) < 0) {
+    return -1;
+  }
+
+  if (POptimizeRadial(argc, argv, argt, variables) != 0) {
+    return -1;
+  }
+
+  if (ConfigEnergy(cfac, 1, 0, 0, NULL) < 0) {
+    return -1;
+  }
+
+  return 0;
+}
+
 static int PRefineRadial(int argc, char *argv[], int argt[],
                   ARRAY *variables) {
   int maxfun, msglvl;
@@ -2898,6 +2915,7 @@ static METHOD methods[] = {
   {"JoinTable", PJoinTable},
   {"ListConfig", PListConfig},
   {"MemENTable", PMemENTable},
+  {"OptimizePotential", POptimizePotential},
   {"OptimizeRadial", POptimizeRadial},
   {"Pause", PPause},
   {"PrepAngular", PPrepAngular},

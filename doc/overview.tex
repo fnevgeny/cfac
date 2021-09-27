@@ -94,57 +94,55 @@ complexes. The following is a duplication of that script.
 
 Line numbers are added for easy reference, they are not part of the script. 
 Empty lines are ignored. As is evident from the above listing, all functions
-have a naming convention of concatenated capitalized words.
-Line 3 set the atomic element to be iron. Line 5 is a comment, which starts
-with a \verb|#|. Lines 6--11 specify the electronic configurations to be
-included in the calculation. The closed shells specified by the function
-\verb|Closed| must be inactive in this calculation. In the \verb|Config|
-functions, \verb|2*8| stands for an $n = 2$ complexes with 8 electrons, while
-\verb|2*7 3*1| stands for all configurations resulting from excitation of one
-electron from $n = 2$ to $n = 3$. For more possibilities in the specification
-of electronic configurations, one is referred to Chapter \ref{cha:function}.
-Lines 14--21 carry out a Dirac-Fock-Slater self-consistent calculation to
-derive a local central potential which represents the electronic screening of
-the nuclear potential. In this calculation, the potential is optimized to the
-average electron clouds of configurations \verb|n2| and \verb|n3|, since in
-\cFAC, all atomic processes are treated with basis wavefunctions generated from
-a single potential. This
-results in the potential to be less optimized for \verb|n2| and \verb|n3|
-individually. Lines 14 and 21 are used to make a crude correction to the
-resulting energy levels due to this effect. The first call to
-\verb|ConfigEnergy(0)| will make individual optimization to all configuration
+have a naming convention of concatenated capitalized words. Line 3 sets the
+atomic element to be iron. Line 5 is a comment, which starts with a \verb|#|.
+Lines 6--11 specify the electronic configurations to be included in the
+calculation. The closed shells specified by the function \funcref{Closed} must
+be inactive in this calculation. In the \funcref{Config} functions, \verb|2*8|
+stands for an $n = 2$ complexes with 8 electrons, while \verb|2*7 3*1| stands
+for all configurations resulting from excitation of one electron from $n = 2$ to
+$n = 3$. For more possibilities in the specification of electronic
+configurations, one is referred to Chapter~\ref{cha:function}. Lines 14--21
+carry out a Dirac-Fock-Slater self-consistent calculation to derive a local
+central potential which represents the electronic screening of the nuclear
+potential. In this calculation, the potential is optimized to the average
+electron clouds of configurations \verb|n2| and \verb|n3|, since in \cFAC, all
+atomic processes are treated with basis wavefunctions generated from a single
+potential. This results in the potential to be less optimized for \verb|n2| and
+\verb|n3| individually. Lines 14 and 21 are used to make a crude correction to
+the resulting energy levels due to this effect. The first call to
+\funcref[0]{ConfigEnergy} will make individual optimization to all configuration
 groups. The average energy of each configuration group with these individually 
-optimized potential is then calculated and stored. The
-second call to \verb|ConfigEnergy(1)| will then recalculate the average energy
-of configuration groups under the potential taking into account all
-configuration groups. The difference between the two represents the effect of
-a less optimized potential, and are used to adjust the final energy levels. If
-this procedure is not needed, one can omit lines 14 and 21 in this script. Line
-23 sets up the Hamiltonian matrix for levels in $n = 2$ and $n = 3$ complexes,
-diagonalize it, and saves to the energy level information in the binary file
-\verb|lev.bin|. Line 24 builds an in-memory table of energy levels, which is
-used to convert the binary files to their ASCII counterparts in verbose mode,
-such as done in Line 25, which converts \verb|lev.bin| to \verb|lev.asc| (the
-last argument to \verb|PrintTable| indicates it be done in verbose mode). For
-the conversion in simple mode (the last argument is 0), the in-memory table is
-not needed, and Line 24 may be omitted. For the difference between the verbose
-and simple ASCII files, see Chapter \ref{cha:format}. Line 27 calculates the
-E1 oscillator strength and transition rates between configuration groups
-\verb|n2| and \verb|n3|, and saves the results in the binary file
-\verb|tr.asc|. The function \verb|TransitionTable| accepts an optional 4th
-integer argument specifying the transition type. A negative integer means
-electric multipole and a positive integer for magnetic multipole. The absolute
-value of the integer indicates the rank of the multipole. Therefore, $-1$ would
-be E1, $+1$ would be M1, etc. Without this argument, the default is E1, as is
-done here. Line 28 converts the binary output to an ASCII file in verbose
-mode. The exact formats of binary and ASCII files are explained in Chapter
-\ref{cha:format}. Here we list the two ASCII files \verb|lev.asc| and
-\verb|tr.asc| resulted from this calculation. 
+optimized potential is then calculated and stored. The second call to
+\funcref[1]{ConfigEnergy} will then recalculate the average energy of
+configuration groups under the potential taking into account all configuration
+groups. The difference between the two represents the effect of a less optimized
+potential, and are used to adjust the final energy levels. If this procedure is
+not needed, one can omit lines 14 and 21 in this script. Line 23 sets up the
+Hamiltonian matrix for levels in $n = 2$ and $n = 3$ complexes, diagonalize it,
+and saves to the energy level information in the binary file \verb|lev.bin|.
+Line 24 builds an in-memory table of energy levels, which is used to convert the
+binary files to their ASCII counterparts in verbose mode, such as done in Line
+25, which converts \verb|lev.bin| to \verb|lev.asc| (the last argument to
+\funcref{PrintTable} indicates it be done in verbose mode). For the conversion
+in simple mode (the last argument is 0), the in-memory table is not needed, and
+Line 24 may be omitted. For the difference between the verbose and simple ASCII
+files, see Chapter~\ref{cha:format}. Line 27 calculates the E1 oscillator
+strength and transition rates between configuration groups \verb|n2| and
+\verb|n3|, and saves the results in the binary file \verb|tr.asc|. The function
+\funcref{TransitionTable} accepts an optional 4th integer argument specifying
+the transition type. A negative integer means electric multipole and a positive
+integer for magnetic multipole. The absolute value of the integer indicates the
+rank of the multipole. Therefore, $-1$ would be E1, $+1$ would be M1, etc.
+Without this argument, the default is E1, as is done here. Line 28 converts the
+binary output to an ASCII file in verbose mode. The exact formats of binary and
+ASCII files are explained in Chapter~\ref{cha:format}. Here we list the two
+ASCII files \verb|lev.asc| and \verb|tr.asc| resulted from this calculation.
 
 \lstset{numbers=none,basicstyle=\scriptsize,caption=demo/structure/lev.asc}
 \includecode[]{../demo/structure/ref/lev.asc}
 
-\lstset{numbers=none,basicstyle=\normalsize,caption=demo/structure/tr.asc}
+\lstset{numbers=none,basicstyle=\scriptsize,caption=demo/structure/tr.asc}
 \includecode[]{../demo/structure/ref/tr.asc}
 
 In file \verb|lev.asc|, the energy, parity, $2J$ ($J$ is the total
@@ -154,20 +152,18 @@ values of these levels, the transition energy, $gf$-values, radiative
 decay rates, and the reduced multipole matrix elements are given.
 
 \section{Acknowledgments}
-Throughout the development of FAC, the discussion with Ehud Behar, Masao
-Sako, Peter Beiersdorfer, Ali Kinkhabwala and Steven Kahn has been very
+Throughout the development of FAC, discussions with Ehud Behar, Masao
+Sako, Peter Beiersdorfer, Ali Kinkhabwala and Steven Kahn have been very
 useful. Some Fortran 77 subroutines were retrieved from Computer Physics
-Communications Program Library at
-\url{http://www.cpc.cs.qub.ac.uk}.
+Communications Program Library at \url{http://www.cpc.cs.qub.ac.uk}.
 
-The original development of FAC (during Dec 2000 -- Aug 2003, or prior
-to version 1.0.2) was
-supported by NASA through Chandra Postdoctoral Fellowship Award Number
-PF01-10014 issued by the Chandra X-ray Observatory Center, which is operated
-by Smithsonian Astrophysical Observatory for and on behalf of NASA under
-contract NAS8-39073. 
+The original development of FAC (during Dec 2000 -- Aug 2003, or prior to
+version 1.0.2) was supported by NASA through Chandra Postdoctoral Fellowship
+Award Number PF01-10014 issued by the Chandra X-ray Observatory Center, which is
+operated by Smithsonian Astrophysical Observatory for and on behalf of NASA
+under contract NAS8-39073.
 
-Any opinions, findings and conclusions or
-recommendations expressed in this manual are those of the author and do not
-necessarily reflect the views of the National Aeronautics Space
-Administration and/or the Smithsonian Astrophysical Observatory.
+Any opinions, findings and conclusions or recommendations expressed in this
+manual are those of the author and do not necessarily reflect the views of the
+National Aeronautics Space Administration and/or the Smithsonian Astrophysical
+Observatory.

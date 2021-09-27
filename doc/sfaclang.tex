@@ -34,17 +34,6 @@ If the optional \var{m} is 1, then the diamagnetic effects are ignored in the
 Hamiltonian.
 \end{fundesc}
 
-\begin{fundesc}{SetUTA}{m}
-Set the flag for configuration average models. This function is deprecated.
-Instead of using it, set the \var{uta} flag in \funcref{Config} statements.
-If $m=1$, all calculations are carried out in the configuration average
-approximation. The radiative transition rates output contains three additional
-fields, the transition energy including the UTA shift, the Gaussian standard
-deviation, and the correction to the line strengths due to the configuration
-interaction within the same non-relativistic configurations. If $m=0$, which is
-the default, the usual detailed term accounting method is used.
-\end{fundesc}
-
 \subsection{Electron Shell Configuration}
 
 \begin{fundesc}{Closed}{s, ...}
@@ -89,7 +78,7 @@ invoking this function with the \var{uta} flag set to 1 or 0.
 \end{fundesc}
 
 \begin{fundesc}{GetConfigNR}{c, ...}
-This functions returns a list of non-relativistic configurations corresponding
+This function returns a list of non-relativistic configurations corresponding
 to the supplied configuration strings, which may contain wild casts as in the
 \funcref{Config} function. It is useful, e.g., when one wants to know the
 non-relativistic configurations of \key{1*2 2*2 3*1}.
@@ -101,6 +90,16 @@ given, then all configurations currently defined are printed. If \var{fn} is not
 given or if it is ``-'', the results are written to the stdout.
 \end{fundesc}
 
+\begin{fundesc}{SetUTA}{m}
+Set the flag for configuration average models. This function is deprecated.
+Instead of using it, set the \var{uta} flag in \funcref{Config} statements.
+If $m=1$, all calculations are carried out in the configuration average
+approximation. The radiative transition rates output contains three additional
+fields, the transition energy including the UTA shift, the Gaussian standard
+deviation, and the correction to the line strengths due to the configuration
+interaction within the same non-relativistic configurations. If $m=0$, which is
+the default, the usual detailed term accounting method is used.
+\end{fundesc}
 
 \subsection{Structure Calculations}
 

@@ -38,11 +38,11 @@ Hamiltonian.
 
 \begin{fundesc}{Closed}{\opt{s\opt{, ...}}}
 Specify the closed shells in the electronic configurations. It takes a variable
-number of arguments, each of them being a non-relativistic or relativistic shell in
-the spectroscopic notation. For example, \key{2s} for $2s$ shell, \key{2p-} for
-$2p_{1/2}$ shell, and \key{2p+} for $2p_{3/2}$ shell. Each call to this function
-appends more configuration(s) to the previously defined one(s). To reset the
-list of closed shells, call it with no arguments.
+number of arguments, each of them being a non-relativistic or relativistic shell
+in the spectroscopic notation. For example, \key{2s} for $2s$ shell, \key{2p-}
+for $2p_{1/2}$ shell, and \key{2p+} for $2p_{3/2}$ shell. Each call to this
+function appends more configuration(s) to the previously defined one(s). To
+reset the list of closed shells, call it with no arguments.
 \end{fundesc}
 
 \begin{fundesc}{Config}{c\opt{, ...}, group=g \opt{, uta=m} $\mid$ g, c\opt{,
@@ -95,12 +95,6 @@ given or if it is ``-'', the results are written to the stdout.
 \begin{fundesc}{SetUTA}{m}
 Set the flag for configuration average models. This function is deprecated.
 Instead of using it, set the \var{uta} flag in \funcref{Config} statements.
-If $m=1$, all calculations are carried out in the configuration average
-approximation. The radiative transition rates output contains three additional
-fields, the transition energy including the UTA shift, the Gaussian standard
-deviation, and the correction to the line strengths due to the configuration
-interaction within the same non-relativistic configurations. If $m=0$, which is
-the default, the usual detailed term accounting method is used.
 \end{fundesc}
 
 \subsection{Structure Calculations}

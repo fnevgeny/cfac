@@ -999,6 +999,46 @@ static int PRefineRadial(int argc, char *argv[], int argt[],
   return RefineRadial(cfac, maxfun, msglvl);
 }
 
+static int PRequireVersion(int argc, char *argv[], int argt[],
+                  ARRAY *variables) {
+    int v, vsub1, vsub2, nv_req, nv_cur;
+    char *s, *tok;
+    int strict = 0;
+
+    if (argc != 1 || argt[0] != STRING ) {
+        return -1;
+    }
+
+    s = argv[0];
+
+    tok = strtok(s, ".");
+    if (!tok) {
+        return -1;
+    }
+    v = atoi(tok);
+
+    tok = strtok(NULL, ".");
+    if (!tok) {
+        return -1;
+    }
+    vsub1 = atoi(tok);
+
+    tok = strtok(NULL, ".");
+    if (!tok) {
+        return -1;
+    }
+    vsub2 = atoi(tok);
+
+    nv_req = 10000*v + 100*vsub1 + vsub2;
+    nv_cur = 10000*CFAC_VERSION + 100*CFAC_SUBVERSION + CFAC_SUBSUBVERSION;
+
+    if (nv_req > nv_cur || (strict && nv_req != nv_cur)) {
+        return -1;
+    }
+
+    return 0;
+}
+
 static int PPause(int argc, char *argv[], int argt[],
                   ARRAY *variables) {
   char s[10];
@@ -2925,6 +2965,7 @@ static METHOD methods[] = {
   {"RRTable", PRRTable},
   {"RecStates", PRecStates},
   {"RefineRadial", PRefineRadial},
+  {"RequireVersion", PRequireVersion},
   {"SetAICut", PSetAICut},
   {"SetAngZCut", PSetAngZCut},
   {"SetAngZOptions", PSetAngZOptions},

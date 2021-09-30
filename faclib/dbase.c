@@ -3247,7 +3247,7 @@ int StoreTable(const cfac_t *cfac,
     F_HEADER fh;
     FILE *fp;
     int n, swp;
-    int retval = 0;
+    int retval = -1;
 
     fp = fopen(ifn, "rb");
     if (fp == NULL) {
@@ -3280,6 +3280,7 @@ int StoreTable(const cfac_t *cfac,
         retval = StoreCITable(cfac, db, sid, fp, swp);
         break;
     default:
+        cfac_errmsg(cfac, "Unsupported table type %d.\n", fh.type);
         break;
     }
 

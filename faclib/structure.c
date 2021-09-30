@@ -486,15 +486,19 @@ HAMILTON *ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
   int n_basis;
   HAMILTON *h;
 
-  ClearAngularFrozen(cfac);
-  AngularFrozen(cfac, n, ilev, 0, NULL);
-
   n_basis = 0;
   for (i = 0; i < n; i++) {
     lev = GetLevel(cfac, ilev[i]);
+    if (lev->uta) {
+      cfac_errmsg(cfac, "Cannot contruct EB Hamiltonian with UTA levels\n");
+      return NULL;
+    }
     DecodePJ(lev->pj, &p, &j);
     n_basis += j+1;
   }
+
+  ClearAngularFrozen(cfac);
+  AngularFrozen(cfac, n, ilev, 0, NULL);
 
   h = AllocHamMem(n_basis, n_basis);
   if (!h) {
@@ -2667,7 +2671,7 @@ int StructureEB(cfac_t *cfac, char *fn, int n, int *ilev) {
 
   HAMILTON *h = ConstructHamiltonEB(cfac, n, ilev);
 
-  if (DiagonalizeHamilton(cfac, h) < 0) {
+  if (!h || DiagonalizeHamilton(cfac, h) < 0) {
     return -1;
   }
 

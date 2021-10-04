@@ -922,7 +922,7 @@ int StoreTRFTable(const cfac_t *cfac, sqlite3 *db,
             TRF_RECORD r;
             int q;
 
-            n = ReadTRFRecord(fp, &r, swp, &h);
+            n = ReadTRFRecord(fp, &r, swp, mpole);
             if (n == 0) {
                 break;
             }

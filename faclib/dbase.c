@@ -1069,12 +1069,12 @@ int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp) {
   return m;
 }
 
-int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, TRF_HEADER *h) {
+int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, int mpole) {
   int n, m = 0, i, nq;
 
   RSF0(r->lower);
   RSF0(r->upper);
-  nq = 2*abs(h->multipole) + 1;
+  nq = 2*abs(mpole) + 1;
   r->rme = malloc(sizeof(float)*nq);
   RSF1(r->rme, sizeof(float), nq);
 
@@ -2272,7 +2272,7 @@ int PrintTRFTable(FILE *f1, FILE *f2, int v, int swp) {
     fprintf(f2, "FANGLE\t= %15.8E\n", h.fangle);
     nq = 2*abs(h.multipole)+1;
     for (i = 0; i < h.ntransitions; i++) {
-      n = ReadTRFRecord(f1, &r, swp, &h);
+      n = ReadTRFRecord(f1, &r, swp, h.multipole);
       if (n == 0) break;
       if (v) {
         e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;

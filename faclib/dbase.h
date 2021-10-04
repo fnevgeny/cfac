@@ -335,7 +335,7 @@ int ReadENFRecord(FILE *f, ENF_RECORD *r, int swp);
 int ReadTRHeader(FILE *f, TR_HEADER *h, int swp);
 int ReadTRRecord(FILE *f, TR_RECORD *r, TR_EXTRA *rx, int swp);
 int ReadTRFHeader(FILE *f, TRF_HEADER *h, int swp);
-int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, TRF_HEADER *h);
+int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, int mpole);
 int ReadCEHeader(FILE *f, CE_HEADER *h, int swp);
 int ReadCERecord(FILE *f, CE_RECORD *r, int swp, CE_HEADER *h);
 int ReadCEFHeader(FILE *f, CEF_HEADER *h, int swp);

@@ -270,27 +270,32 @@ int TRMultipoleEB(cfac_t *cfac, cfac_w3j_cache_t *w3j_cache,
 int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
                       char *fn, int m) {
   int k, i, j, nq;
-  double emin, emax, e0, s[101], et;
+  double s[101];
   F_HEADER fhdr;
   TRF_HEADER tr_hdr;
   TRF_RECORD r;
-  LEVEL *lev1, *lev2;
+  LEVEL *lev;
   FILE *f;
   cfac_w3j_cache_t w3j_cache;
 
-  if (nlow <= 0 || nup <= 0) return -1;
+  if (nlow <= 0 || nup <= 0) {
+    return -1;
+  }
+
   if (m == 1 || cfac->tr_opts.mode == M_FR) {
+    double emin = 1E10;
+    double emax = 1E-10;
+    double de_rel;
     k = 0;
-    emin = 1E10;
-    emax = 1E-10;
+
     for (i = 0; i < nlow; i++) {
-      lev1 = GetEBLevel(cfac, low[i]);
+      LEVEL *lev1 = GetEBLevel(cfac, low[i]);
       for (j = 0; j < nup; j++) {
-        lev2 = GetEBLevel(cfac, up[j]);
-        e0 = lev2->energy - lev1->energy;
-        if (e0 > 0) k++;
-        if (e0 < emin && e0 > 0) emin = e0;
-        if (e0 > emax) emax = e0;
+        LEVEL *lev2 = GetEBLevel(cfac, up[j]);
+        double e = lev2->energy - lev1->energy;
+        if (e > 0) k++;
+        if (e < emin && e > 0) emin = e;
+        if (e > emax) emax = e;
       }
     }
 
@@ -300,22 +305,23 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 
     emin *= FINE_STRUCTURE_CONST;
     emax *= FINE_STRUCTURE_CONST;
-    e0 = 2.0*(emax-emin)/(emin+emax);
+    de_rel = 2.0*(emax-emin)/(emin+emax);
 
     FreeMultipoleArray(cfac);
-    if (e0 < EPS3) {
+    if (de_rel < EPS3) {
       SetAWGrid(cfac, 1, emin, emax);
-    } else if (e0 < 1.0) {
+    } else if (de_rel < 1.0) {
       SetAWGrid(cfac, 2, emin, emax);
     } else {
       SetAWGrid(cfac, 3, emin, emax);
     }
   }
+
   fhdr.type = DB_TRF;
   strcpy(fhdr.symbol, cfac_get_atomic_symbol(cfac));
   fhdr.atom = cfac_get_atomic_number(cfac);
-  lev1 = GetEBLevel(cfac, low[0]);
-  DecodeBasisEB(lev1->pb, &i, &j);
+  lev = GetEBLevel(cfac, low[0]);
+  DecodeBasisEB(lev->pb, &i, &j);
   tr_hdr.nele = GetNumElectrons(cfac, i);
   tr_hdr.multipole = m;
   tr_hdr.gauge = GetTransitionGauge(cfac);
@@ -338,14 +344,23 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 
   for (j = 0; j < nup; j++) {
     for (i = 0; i < nlow; i++) {
+      double et, s_min = 0;
+
       k = TRMultipoleEB(cfac, &w3j_cache, s, &et, m, low[i], up[j]);
-      if (k != 0) continue;
-      e0 = 0.0;
+
+      if (k != 0) {
+        continue;
+      }
+
       for (k = 0; k < nq; k++) {
         r.strength[k] = s[k];
-        if (s[k]) e0 = s[k];
+        if (s[k] != 0) {
+          s_min = s[k];
+        }
       }
-      if (e0 == 0.0) continue;
+      if (s_min == 0.0) {
+        continue;
+      }
       r.lower = low[i];
       r.upper = up[j];
       WriteTRFRecord(f, &r);

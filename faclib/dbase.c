@@ -761,7 +761,7 @@ int WriteTRFRecord(FILE *f, TRF_RECORD *r) {
 
   WSF0(r->lower);
   WSF0(r->upper);
-  WSF1(r->strength, sizeof(float), 2*abs(trf_header.multipole)+1);
+  WSF1(r->rme, sizeof(float), 2*abs(trf_header.multipole)+1);
 
   trf_header.ntransitions += 1;
   trf_header.length += m;
@@ -1075,13 +1075,13 @@ int ReadTRFRecord(FILE *f, TRF_RECORD *r, int swp, TRF_HEADER *h) {
   RSF0(r->lower);
   RSF0(r->upper);
   nq = 2*abs(h->multipole) + 1;
-  r->strength = (float *) malloc(sizeof(float)*nq);
-  RSF1(r->strength, sizeof(float), nq);
+  r->rme = malloc(sizeof(float)*nq);
+  RSF1(r->rme, sizeof(float), nq);
 
   if (swp) {
     SwapEndianTRFRecord(r);
     for (i = 0; i < nq; i++) {
-      SwapEndian((char *) &(r->strength[i]), sizeof(float));
+      SwapEndian((char *) &(r->rme[i]), sizeof(float));
     }
   }
 
@@ -2278,21 +2278,20 @@ int PrintTRFTable(FILE *f1, FILE *f2, int v, int swp) {
         e = mem_enf_table[r.upper].energy - mem_enf_table[r.lower].energy;
         ta = 0.0;
         for (j = 0; j < nq; j++) {
-          gf = OscillatorStrength(h.multipole, e, (double)(r.strength[j]), &a);
+          gf = OscillatorStrength(h.multipole, e, (double) r.rme[j], &a);
           a *= RATE_AU;
           ta += a;
           fprintf(f2, "%6d %6d %3d %6d %6d %3d %2d %13.6E %13.6E %13.6E %13.6E %13.6E\n",
                   r.upper, mem_enf_table[r.upper].p, mem_enf_table[r.upper].j,
                   r.lower, mem_enf_table[r.lower].p, mem_enf_table[r.lower].j,
-                  j-abs(h.multipole),(e*HARTREE_EV), gf, a, r.strength[j], ta);
+                  j-abs(h.multipole),(e*HARTREE_EV), gf, a, r.rme[j], ta);
         }
       } else {
         for (j = 0; j < nq; j++) {
-          fprintf(f2, "%6d %6d %13.6E\n",
-                  r.upper, r.lower, r.strength[j]);
+          fprintf(f2, "%6d %6d %13.6E\n", r.upper, r.lower, r.rme[j]);
         }
       }
-      free(r.strength);
+      free(r.rme);
     }
     nb += 1;
   }

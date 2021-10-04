@@ -134,7 +134,7 @@ typedef struct _TR_EXTRA_ {
 typedef struct _TRF_RECORD_ {
   int lower;
   int upper;
-  float *strength;
+  float *rme;
 } TRF_RECORD;
 
 typedef struct _CE_HEADER_ {

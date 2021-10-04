@@ -932,7 +932,7 @@ int StoreTRFTable(const cfac_t *cfac, sqlite3 *db,
 
             for (q = -abs(mpole); q <= abs(mpole); q++) {
                 sqlite3_bind_int   (stmt, 6, q);
-                sqlite3_bind_double(stmt, 7, r.strength[abs(mpole) + q]);
+                sqlite3_bind_double(stmt, 7, r.rme[abs(mpole) + q]);
 
                 rc = sqlite3_step(stmt);
                 if (rc != SQLITE_DONE) {
@@ -943,7 +943,7 @@ int StoreTRFTable(const cfac_t *cfac, sqlite3 *db,
                 sqlite3_reset(stmt);
             }
 
-            free(r.strength);
+            free(r.rme);
         }
     }
 

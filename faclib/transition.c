@@ -331,7 +331,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
     tr_hdr.mode = GetTransitionMode(cfac);
   }
   nq = 2*abs(m) + 1;
-  r.strength = (float *) malloc(sizeof(float)*nq);
+  r.rme = malloc(sizeof(float)*nq);
   GetFields(cfac, &tr_hdr.bfield, &tr_hdr.efield, &tr_hdr.fangle);
 
   f = OpenFile(cfac, fn, &fhdr);
@@ -353,7 +353,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
       }
 
       for (k = 0; k < nq; k++) {
-        r.strength[k] = s[k];
+        r.rme[k] = s[k];
         if (s[k] != 0) {
           s_min = s[k];
         }
@@ -371,7 +371,7 @@ int SaveTransitionEB0(cfac_t *cfac, int nlow, int *low, int nup, int *up,
 
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);
-  free(r.strength);
+  free(r.rme);
 
   return 0;
 }

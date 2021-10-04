@@ -190,7 +190,7 @@ int SetCILevel(cfac_t *cfac, int m);
 int SetMixCut(cfac_t *cfac, double c, double c2);
 int TestHamilton(cfac_t *cfac);
 void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c);
-void SetFields(cfac_t *cfac, double b, double e, double a, int m);
+void SetFields(cfac_t *cfac, double b, double e, double a, int no_diamag);
 void GetFields(const cfac_t *cfac, double *b, double *e, double *a);
 int CodeBasisEB(int s, int m);
 void DecodeBasisEB(int k, int *s, int *m);

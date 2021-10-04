@@ -2774,19 +2774,19 @@ static int PJoinTable(int argc, char *argv[], int argt[],
 
 static int PSetFields(int argc, char *argv[], int argt[],
                       ARRAY *variables) {
-  int m;
+  int no_diamag = 0;
   double b, e, a;
 
   if (argc < 3 || argc > 4) return -1;
-  m = 0;
+
   b = atof(argv[0]);
   e = atof(argv[1]);
   a = atof(argv[2]);
   if (argc > 3) {
-    m = atoi(argv[3]);
+    no_diamag = atoi(argv[3]);
   }
 
-  SetFields(cfac, b, e, a, m);
+  SetFields(cfac, b, e, a, no_diamag);
 
   return 0;
 }

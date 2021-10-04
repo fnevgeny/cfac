@@ -61,7 +61,7 @@ void GetFields(const cfac_t *cfac, double *b, double *e, double *a) {
 ** if the angle a < 0, the E is Z-axis, ExB is Y-axis, and B is in X-Z plane.
 ** angle a is always measured from E->B,
 */
-void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
+void SetFields(cfac_t *cfac, double b, double e, double a, int no_diamag) {
   int i, q, i1, i2, q1, q2;
   double w, mass;
 
@@ -100,7 +100,7 @@ void SetFields(cfac_t *cfac, double b, double e, double a, int m) {
     cfac->b2[i] = 0.0;
   }
 
-  if (m == 0) {
+  if (!no_diamag) {
     for (i1 = 0; i1 < 3; i1++) {
       q1 = 2*(i1-1);
       if (cfac->b1[i1] == 0) continue;

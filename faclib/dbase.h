@@ -467,7 +467,11 @@ int StoreAITable(const cfac_t *cfac, sqlite3 *db,
     unsigned long int sid, FILE *fp, int swp);
 int StoreCITable(const cfac_t *cfac, sqlite3 *db,
     unsigned long int sid, FILE *fp, int swp);
+int StoreENFTable(const cfac_t *cfac,
+    sqlite3 *db, unsigned long int sid, FILE *fp, int swp);
 int StoreClose(const cfac_t *cfac, sqlite3 *db,
     unsigned long int sid, const char *cmdline);
+int StoreTRFTable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp);
 
 #endif

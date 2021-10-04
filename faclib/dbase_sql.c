@@ -118,7 +118,6 @@ int StoreInit(const cfac_t *cfac,
         return -1;
     }
 
-
     if (need_init) {
         int i = 0;
         while ((sql = schema_str[i])) {
@@ -734,6 +733,218 @@ int StoreRRTable(const cfac_t *cfac, sqlite3 *db,
         free(h.tegrid);
         free(h.egrid);
         free(h.usr_egrid);
+    }
+
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
+
+    sqlite3_finalize(stmt);
+
+    return retval;
+}
+
+static int insert_fields(const cfac_t *cfac, sqlite3 *db,
+    double efield, double bfield, double fangle)
+{
+    int rc, retval = CFAC_FAILURE;
+    sqlite3_stmt *stmt;
+    char *sql;
+
+    sql = "INSERT INTO fields (bf, ef, angle) VALUES (?, ?, ?)";
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+    sqlite3_bind_double(stmt, 1, bfield);
+    sqlite3_bind_double(stmt, 2, efield);
+    sqlite3_bind_double(stmt, 3, fangle);
+
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_DONE) {
+        retval = CFAC_SUCCESS;
+    } else {
+        cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
+    }
+
+    sqlite3_finalize(stmt);
+
+    return retval;
+}
+
+static int get_field_id(const cfac_t *cfac, sqlite3 *db,
+    double bfield, double efield, double fangle, unsigned int *fid)
+{
+    int rc, retval = CFAC_FAILURE;
+    sqlite3_stmt *stmt;
+    char *sql;
+
+    sql = "SELECT id FROM fields" \
+          " WHERE bf = ? AND ef = ? AND angle = ?";
+
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    sqlite3_bind_double(stmt, 1, bfield);
+    sqlite3_bind_double(stmt, 2, efield);
+    sqlite3_bind_double(stmt, 3, fangle);
+
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ROW) {
+        *fid = sqlite3_column_int64(stmt, 0);
+        retval = CFAC_SUCCESS;
+    } else
+    if (rc == SQLITE_DONE) {
+        if (insert_fields(cfac, db, efield, bfield, fangle) ==
+            CFAC_SUCCESS) {
+            /* Try again */
+            rc = sqlite3_step(stmt);
+            if (rc == SQLITE_ROW) {
+                *fid = sqlite3_column_int64(stmt, 0);
+                retval = CFAC_SUCCESS;
+            }
+        }
+    } else {
+        cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
+    }
+
+    sqlite3_finalize(stmt);
+    return retval;
+}
+
+int StoreENFTable(const cfac_t *cfac,
+    sqlite3 *db, unsigned long int sid, FILE *fp, int swp)
+{
+    int retval = 0;
+    int rc;
+    sqlite3_stmt *stmt;
+    unsigned int fid = 0;
+
+    char *sql;
+
+    sql = "INSERT INTO states" \
+          " (sid, fid, id, e, level_id, mj)" \
+          " VALUES (?, ?, ?, ?, ?, ?)";
+
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+    sqlite3_bind_int(stmt,  1, sid);
+
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
+
+    while (retval == 0) {
+        ENF_HEADER h;
+        int i, n;
+
+        n = ReadENFHeader(fp, &h, swp);
+        if (n == 0) {
+            break;
+        }
+
+        if (get_field_id(cfac, db, h.bfield, h.efield, h.fangle, &fid) !=
+            CFAC_SUCCESS) {
+            retval = -1;
+            break;
+        }
+
+        sqlite3_bind_int(stmt,  3, h.nele);
+
+        for (i = 0; i < h.nlevels; i++) {
+            ENF_RECORD r;
+            int level_id, mj;
+
+            n = ReadENFRecord(fp, &r, swp);
+            if (n == 0) {
+                break;
+            }
+
+            DecodeBasisEB(r.pbasis, &level_id, &mj);
+
+            sqlite3_bind_int   (stmt,  2, fid);
+
+            sqlite3_bind_int   (stmt,  3, r.ilev);
+            sqlite3_bind_double(stmt,  4, r.energy);
+            sqlite3_bind_int   (stmt,  5, level_id);
+            sqlite3_bind_int   (stmt,  6, mj);
+
+            rc = sqlite3_step(stmt);
+            if (rc != SQLITE_DONE) {
+                cfac_errmsg(cfac, "SQL error: %s\n", sqlite3_errmsg(db));
+                retval = -1;
+                break;
+            }
+            sqlite3_reset(stmt);
+        }
+    }
+
+    sqlite3_exec(db, "COMMIT", 0, 0, 0);
+
+    sqlite3_finalize(stmt);
+
+    return retval;
+}
+
+int StoreTRFTable(const cfac_t *cfac, sqlite3 *db,
+    unsigned long int sid, FILE *fp, int swp)
+{
+    int retval = 0;
+    int rc;
+    sqlite3_stmt *stmt;
+    unsigned int fid = 0;
+
+    char *sql;
+
+    sql = "INSERT INTO rtransitions_m" \
+          " (sid, fid, ini_id, fin_id, mpole, q, rme, mode)" \
+          " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+
+    sqlite3_bind_int(stmt, 1, sid);
+
+    sqlite3_exec(db, "BEGIN", 0, 0, 0);
+
+    while (retval == 0) {
+        TRF_HEADER h;
+        int n, i, mpole;
+
+        n = ReadTRFHeader(fp, &h, swp);
+        if (n == 0) {
+            break;
+        }
+        mpole = h.multipole;
+
+        if (get_field_id(cfac, db, h.bfield, h.efield, h.fangle, &fid) !=
+            CFAC_SUCCESS) {
+            retval = -1;
+            break;
+        }
+
+        sqlite3_bind_int(stmt, 2, fid);
+        sqlite3_bind_int(stmt, 5, mpole);
+        sqlite3_bind_int(stmt, 8, h.mode);
+
+        for (i = 0; i < h.ntransitions && retval == 0; i++) {
+            TRF_RECORD r;
+            int q;
+
+            n = ReadTRFRecord(fp, &r, swp, &h);
+            if (n == 0) {
+                break;
+            }
+
+            sqlite3_bind_int(stmt, 3, r.lower);
+            sqlite3_bind_int(stmt, 4, r.upper);
+
+            for (q = -abs(mpole); q <= abs(mpole); q++) {
+                sqlite3_bind_int   (stmt, 6, q);
+                sqlite3_bind_double(stmt, 7, r.strength[abs(mpole) + q]);
+
+                rc = sqlite3_step(stmt);
+                if (rc != SQLITE_DONE) {
+                    cfac_errmsg(cfac, "SQL error: %d %s\n", rc, sqlite3_errmsg(db));
+                    retval = -1;
+                    break;
+                }
+                sqlite3_reset(stmt);
+            }
+
+            free(r.strength);
+        }
     }
 
     sqlite3_exec(db, "COMMIT", 0, 0, 0);

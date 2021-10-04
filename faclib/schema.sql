@@ -3,6 +3,16 @@ CREATE TABLE cfacdb (
     value INTEGER NOT NULL
 );
 
+CREATE TABLE fields (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    bf      REAL NOT NULL,
+    ef      REAL NOT NULL,
+    angle   REAL NOT NULL,
+    CONSTRAINT unique_fields UNIQUE (bf, ef, angle)
+);
+
+INSERT INTO fields (id, bf, ef, angle) VALUES (0, 0.0, 0.0, 0.0);
+
 CREATE TABLE sessions (
     sid     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     version INTEGER NOT NULL,
@@ -77,4 +87,29 @@ CREATE TABLE cstrengths (
     cid      INTEGER NOT NULL REFERENCES ctransitions(cid) ON DELETE CASCADE,
     e        REAL    NOT NULL,
     strength REAL    NOT NULL
+);
+
+
+CREATE TABLE states (
+    sid      INTEGER NOT NULL REFERENCES sessions(sid) ON DELETE CASCADE,
+    fid      INTEGER NOT NULL REFERENCES fields(id) ON DELETE CASCADE,
+    id       INTEGER NOT NULL,
+    e        REAL    NOT NULL,
+    level_id INTEGER NOT NULL,
+    mj       INTEGER NOT NULL,
+    PRIMARY KEY(sid, fid, id),
+    FOREIGN KEY(sid, level_id) REFERENCES levels(sid, id) ON DELETE CASCADE
+);
+
+CREATE TABLE rtransitions_m (
+    sid    INTEGER NOT NULL REFERENCES sessions(sid) ON DELETE CASCADE,
+    fid    INTEGER NOT NULL REFERENCES fields(id) ON DELETE CASCADE,
+    ini_id INTEGER NOT NULL,
+    fin_id INTEGER NOT NULL,
+    mpole  INTEGER NOT NULL,
+    q      INTEGER NOT NULL,
+    rme    REAL    NOT NULL,
+    mode   INTEGER NOT NULL,
+    FOREIGN KEY(sid, fid, ini_id) REFERENCES states(sid, fid, id) ON DELETE CASCADE,
+    FOREIGN KEY(sid, fid, fin_id) REFERENCES states(sid, fid, id) ON DELETE CASCADE
 );

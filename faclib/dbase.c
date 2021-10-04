@@ -3279,6 +3279,12 @@ int StoreTable(const cfac_t *cfac,
     case DB_CI:
         retval = StoreCITable(cfac, db, sid, fp, swp);
         break;
+    case DB_ENF:
+        retval = StoreENFTable(cfac, db, sid, fp, swp);
+        break;
+    case DB_TRF:
+        retval = StoreTRFTable(cfac, db, sid, fp, swp);
+        break;
     default:
         cfac_errmsg(cfac, "Unsupported table type %d.\n", fh.type);
         break;

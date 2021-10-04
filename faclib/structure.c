@@ -490,7 +490,7 @@ HAMILTON *ConstructHamiltonEB(cfac_t *cfac, int n, int *ilev) {
   for (i = 0; i < n; i++) {
     lev = GetLevel(cfac, ilev[i]);
     if (lev->uta) {
-      cfac_errmsg(cfac, "Cannot contruct EB Hamiltonian with UTA levels\n");
+      cfac_errmsg(cfac, "Cannot construct EB Hamiltonian with UTA levels\n");
       return NULL;
     }
     DecodePJ(lev->pj, &p, &j);

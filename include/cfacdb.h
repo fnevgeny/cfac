@@ -212,6 +212,47 @@ typedef struct {
 } cfacdb_intext_t;
 
 /*!
+ * \brief Field configuration data.
+ */
+typedef struct {
+    unsigned int fid; /*!< Field configuration ID.            */
+
+    double ef;        /*!< Electric field (V/cm).             */
+    double bf;        /*!< Magnetic field (gauss).            */
+    double angle;     /*!< Angle between EF and MF (degrees). */
+} cfacdb_fields_data_t;
+
+/*!
+ * \brief State data.
+ */
+typedef struct {
+    unsigned int i;              /*!< State index.                           */
+
+    unsigned int ifac;           /*!< cFAC state index.                      */
+
+    cfacdb_levels_data_t *level; /* Parent level.                            */
+
+    double de;                   /* Energy difference from the parent level. */
+    int mj;                      /* Angular momentum projection (leading).   */
+} cfacdb_states_data_t;
+
+/*!
+ * \brief m-resolved radiative transition data.
+ */
+typedef struct {
+    unsigned int ii;    /*!< Initial state ID.                      */
+    unsigned int fi;    /*!< Final state ID (\f$E_f > E_i\f$).      */
+
+    int mpole;          /*!< Multipole type (-1 = E1, 1 = M1, etc). */
+
+    double de;          /*!< Transition energy.                     */
+
+    int q;              /*!< Multipole component.                   */
+
+    double gf;          /*!< Symmetrized oscillator strength.       */
+} cfacdb_rtrans_m_data_t;
+
+/*!
  * \brief Session data sink prototype
  */
 typedef int (*cfacdb_sessions_sink_t)(const cfacdb_t *cdb,
@@ -246,7 +287,21 @@ typedef int (*cfacdb_ctrans_sink_t)(const cfacdb_t *cdb,
  */
 typedef int (*cfacdb_crates_sink_t)(const cfacdb_t *cdb,
     cfacdb_crates_data_t *cbdata, void *udata);
-
+/*!
+ * \brief Field data sink prototype
+ */
+typedef int (*cfacdb_fields_sink_t)(const cfacdb_t *cdb,
+    cfacdb_fields_data_t *cbdata, void *udata);
+/*!
+ * \brief State data sink prototype
+ */
+typedef int (*cfacdb_states_sink_t)(const cfacdb_t *cdb,
+    cfacdb_states_data_t *cbdata, void *udata);
+/*!
+ * \brief m-resolved radiative transition data sink prototype
+ */
+typedef int (*cfacdb_rtrans_m_sink_t)(const cfacdb_t *cdb,
+    cfacdb_rtrans_m_data_t *cbdata, void *udata);
 
 /*!
  * \brief cFACdb constructor.
@@ -400,6 +455,22 @@ double cfacdb_intext(const cfacdb_intext_t *intext, double x);
  * \return \ref CFACDB_SUCCESS on success or \ref CFACDB_FAILURE otherwise.
  */
 int cfacdb_attach_cache(cfacdb_t *cdb, const char *fname);
+
+/*!
+ * \brief Get number of field configurations.
+ * \param cdb The cFACdb object.
+ * \return The number of field configurations in the connected database.
+ */
+unsigned int cfacdb_get_nfields(const cfacdb_t *cdb);
+
+
+int cfacdb_fields(const cfacdb_t *cdb, cfacdb_fields_sink_t sink, void *udata);
+
+int cfacdb_init_field(cfacdb_t *cdb, unsigned int fid);
+
+int cfacdb_states(const cfacdb_t *cdb, cfacdb_states_sink_t sink, void *udata);
+
+int cfacdb_rtrans_m(cfacdb_t *cdb, cfacdb_rtrans_m_sink_t sink, void *udata);
 
 #endif /* _CFACDB_H */
 

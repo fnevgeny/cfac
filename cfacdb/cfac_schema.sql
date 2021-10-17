@@ -50,3 +50,17 @@ CREATE TEMPORARY VIEW _crates_cached_v AS
          ini_nele, fin_nele, de, tt.rate
     FROM _ctransitions_v AS ct
     INNER JOIN _cache_temp AS tt ON (ct.cid = tt.cid);
+
+
+CREATE TEMPORARY VIEW _states_v AS
+  SELECT s.sid, s.fid, s.id, s.e, s.e - l.e AS de, s.mj,
+         l.nele, l.name, l.g, l.vn, l.vl, l.p, l.ncomplex, l.sname, l.uta
+    FROM states AS s
+      INNER JOIN _levels_v AS l ON (s.sid = l.sid AND s.level_id = l.id);
+
+CREATE TEMPORARY VIEW _rtransitions_m_v AS
+  SELECT rt.*,
+         si.nele, sf.e - si.e AS de
+    FROM rtransitions_m AS rt
+      INNER JOIN _states_v AS si ON (rt.sid = si.sid AND rt.fid = si.fid AND rt.ini_id = si.id)
+      INNER JOIN _states_v AS sf ON (rt.sid = sf.sid AND rt.fid = sf.fid AND rt.fin_id = sf.id);

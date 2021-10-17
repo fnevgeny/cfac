@@ -22,16 +22,25 @@
 #include "cfacdb.h"
 #include <sqlite3.h>
 
+typedef struct {
+    unsigned int id_min;
+    unsigned int id_max;
+
+    unsigned int *map;
+} cfacdb_map_t;
+
 struct _cfacdb_t {
     sqlite3 *db;
     int db_format;
 
     unsigned int nsessions;
+    unsigned int nfields;
 
     int nele_min;
     int nele_max;
 
     int initialized;
+    int initialized_fid;
 
     unsigned long int sid;
 
@@ -40,16 +49,21 @@ struct _cfacdb_t {
     unsigned int anum;
     double mass;
 
-    unsigned int id_min;
-    unsigned int id_max;
-
-    unsigned int *lmap;
+    cfacdb_map_t lmap;
+    cfacdb_map_t smap;
 
     int cached;
     sqlite3 *cache_db;
 
     void *udata;
 };
+
+int cfacdb_map_allocate(cfacdb_map_t *map,
+    unsigned int id_min, unsigned int id_max);
+
+void cfacdb_map_free(cfacdb_map_t *map);
+
+unsigned int cfacdb_map_get(const cfacdb_map_t *map, unsigned int id);
 
 int cfacdb_crates_cached(cfacdb_t *cdb,
     double T, cfacdb_crates_sink_t sink, void *udata);

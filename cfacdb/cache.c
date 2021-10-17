@@ -137,8 +137,8 @@ int cfacdb_crates_cached(cfacdb_t *cdb, double T,
 
             rate  = sqlite3_column_double(stmt, 4);
 
-            cbdata.ii = cdb->lmap[iufac - cdb->id_min];
-            cbdata.fi = cdb->lmap[ilfac - cdb->id_min];
+            cbdata.ii = cdb->lmap.map[iufac - cdb->lmap.id_min];
+            cbdata.fi = cdb->lmap.map[ilfac - cdb->lmap.id_min];
 
             cbdata.type = type;
             cbdata.de   = de;

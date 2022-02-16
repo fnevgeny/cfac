@@ -339,11 +339,11 @@ static int PSetErrorOutput(int argc, char *argv[], int argt[], ARRAY *variables)
         err_fp = stderr;
     } else {
         err_fp = fopen(fname, "w");
-        setlinebuf(err_fp);
         if (!err_fp) {
             cfac_errmsg(cfac, "Cannot open file '%s' for writing\n", fname);
             return -1;
         }
+        setvbuf(err_fp, NULL, _IOLBF, 0);
     }
 
     cfac_set_err_fp(cfac, err_fp);

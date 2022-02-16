@@ -1,7 +1,8 @@
 # Ignore objects and archives, anywhere in the tree.
 *.[oa]
-# Windows executables
+# Windows executables and dump files
 *.exe
+*.exe.stackdump
 
 # Ignore configure-generated stuff
 Make.conf

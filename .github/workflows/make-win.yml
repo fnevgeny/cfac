@@ -1,0 +1,40 @@
+name: Windows make CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: msys2 {0}
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: git mingw-w64-x86_64-cc
+
+    - name: requirements
+      run: |
+        pacman -S mingw-w64-x86_64-gsl mingw-w64-x86_64-doxygen mingw-w64-x86_64-texlive-core mingw-w64-x86_64-texlive-plain-generic mingw-w64-x86_64-texlive-latex-extra
+
+    - name: pre-configure
+      run: make ./configure || echo
+
+    - name: configure
+      run: echo yes | ./configure --with-cpc-modules
+
+    - name: make
+      run: make
+
+    - name: make check
+      run: make check

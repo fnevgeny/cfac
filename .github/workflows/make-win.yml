@@ -24,8 +24,14 @@ jobs:
         install: git mingw-w64-x86_64-cc
 
     - name: requirements
-      run: |
-        pacman -S --noconfirm mingw-w64-x86_64-gsl mingw-w64-x86_64-doxygen mingw-w64-x86_64-texlive-core mingw-w64-x86_64-texlive-plain-generic mingw-w64-x86_64-texlive-latex-extra
+      run: >
+        pacman -S --noconfirm
+          make autoconf
+          mingw-w64-x86_64-gsl
+          mingw-w64-x86_64-doxygen
+          mingw-w64-x86_64-texlive-core
+          mingw-w64-x86_64-texlive-plain-generic
+          mingw-w64-x86_64-texlive-latex-extra
 
     - name: pre-configure
       run: make ./configure || echo

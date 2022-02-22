@@ -13,12 +13,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get -y install doxygen texlive-latex-base texlive-latex-extra
+
     - name: pre-configure
       run: make ./configure || echo
+
     - name: configure
       run: ./configure
+
     - name: make
       run: make
+
     - name: make check
       run: make check
       

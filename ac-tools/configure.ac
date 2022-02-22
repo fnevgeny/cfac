@@ -90,7 +90,7 @@ then
     FFLAGS="$FFLAGS -Wno-compare-reals -Wno-unused-dummy-argument -Wno-unused-parameter"
 fi
 
-# use bundled T1lib  
+# use CPC-licensed code
 AC_ARG_WITH(cpc_modules,
 [  --with-cpc-modules      compile in CPC-licensed modules [[no]]],
 [case "${withval}" in

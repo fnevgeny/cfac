@@ -5,7 +5,7 @@ sqlfile=$1
 strname=`basename $1 .sql`
 
 echo "static const char *${strname}[] = {"
-cat $sqlfile | tr -d \\n | tr \; \\n |
+cat $sqlfile | tr -d \\n\\r | tr \; \\n |
 sed '
 s/\ \ */\ /g
 s/^/"/

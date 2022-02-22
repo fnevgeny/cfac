@@ -45,3 +45,8 @@ jobs:
 
     - name: make check
       run: make check
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: schema.i
+        path: faclib/schema.i

@@ -27,10 +27,12 @@ jobs:
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-gcc-fortran
           mingw-w64-x86_64-gsl
+          help2man
           mingw-w64-x86_64-doxygen
           mingw-w64-x86_64-texlive-core
           mingw-w64-x86_64-texlive-plain-generic
           mingw-w64-x86_64-texlive-latex-extra
+          mingw-w64-x86_64-texlive-fonts-recommended
 
     - name: pre-configure
       run: make ./configure || echo

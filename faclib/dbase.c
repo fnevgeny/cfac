@@ -50,26 +50,26 @@ static int mem_enf_table_size = 0;
 static int iground;
 static int iuta = 0;
 
-#define _WSF0(sv, f) {                                  \
-    n = fwrite(&(sv), sizeof(sv), 1, f);                \
-    if (n != 1) return 0;                               \
-    m += sizeof(sv);                                    \
-  }while(0)
-#define _RSF0(sv, f) {                                  \
-    n = fread(&(sv), sizeof(sv), 1, f);                 \
-    if (n != 1) return 0;                               \
-    m += sizeof(sv);                                    \
-  }while(0)
-#define _WSF1(sv, s, k, f) {                            \
-    n = fwrite(sv, s, k, f);                            \
-    if ((n) != (k)) return 0;                           \
-    m += (s)*(k);                                       \
-  }while(0)
-#define _RSF1(sv, s, k, f) {                            \
-    n = fread(sv, s, k, f);                             \
-    if ((n) != (k)) return 0;                           \
-    m += (s)*(k);                                       \
-  }while(0)
+#define _WSF0(sv, f) {                   \
+    n = fwrite(&(sv), sizeof(sv), 1, f); \
+    if (n != 1) return 0;                \
+    m += sizeof(sv);                     \
+}
+#define _RSF0(sv, f) {                   \
+    n = fread(&(sv), sizeof(sv), 1, f);  \
+    if (n != 1) return 0;                \
+    m += sizeof(sv);                     \
+}
+#define _WSF1(sv, s, k, f) {             \
+    n = fwrite(sv, s, k, f);             \
+    if ((n) != (k)) return 0;            \
+    m += (s)*(k);                        \
+}
+#define _RSF1(sv, s, k, f) {             \
+    n = fread(sv, s, k, f);              \
+    if ((n) != (k)) return 0;            \
+    m += (s)*(k);                        \
+}
 #define WSF0(sv) _WSF0(sv, f)
 #define WSF1(sv, s, k) _WSF1(sv, s, k, f)
 #define RSF0(sv) _RSF0(sv, f)

@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: pre-configure
+      run: make ./configure || echo
     - name: configure
       run: ./configure
     - name: make

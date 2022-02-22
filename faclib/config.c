@@ -1635,7 +1635,7 @@ int AddGroup(cfac_t *cfac, const char *name) {
     printf("Max # groups reached\n");
     return -1;
   }
-  strncpy(cfac->cfg_groups[cfac->n_groups].name, name, GROUP_NAME_LEN);
+  strncpy(cfac->cfg_groups[cfac->n_groups].name, name, GROUP_NAME_LEN - 1);
   cfac->n_groups++;
   return cfac->n_groups-1;
 }

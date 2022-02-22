@@ -21,11 +21,16 @@ jobs:
       with:
         msystem: MINGW64
         update: true
-        install: git mingw-w64-x86_64-cc
-
-    - name: requirements
-      run: |
-        pacman -S --noconfirm make autoconf mingw-w64-x86_64-gsl mingw-w64-x86_64-doxygen mingw-w64-x86_64-texlive-core mingw-w64-x86_64-texlive-plain-generic mingw-w64-x86_64-texlive-latex-extra
+        install: >-
+          make
+          autoconf
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-gcc-fortran
+          mingw-w64-x86_64-gsl
+          mingw-w64-x86_64-doxygen
+          mingw-w64-x86_64-texlive-core
+          mingw-w64-x86_64-texlive-plain-generic
+          mingw-w64-x86_64-texlive-latex-extra
 
     - name: pre-configure
       run: make ./configure || echo

@@ -1604,6 +1604,9 @@ double Amplitude(double *p, double e, int ka, POTENTIAL *pot, int i0) {
   dk = sqrt(2.0*e*(1.0+0.5*FINE_STRUCTURE_CONST2*e));
   dk = EPS5*e*dk;
 
+  memset(r_o, 0, MAXRP*sizeof(double));
+  memset(v_o, 0, MAXRP*sizeof(double));
+
   /* calculate (r & v) grids for the outer region */
   r_o[0] = pot->rad[n];
   v_o[0] = pot->veff[n];

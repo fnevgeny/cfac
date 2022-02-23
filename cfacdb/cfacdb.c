@@ -151,7 +151,7 @@ cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store)
         cdb->db_format = 1;
     }
 
-    if (cdb->db_format < 1 || cdb->db_format > 4) {
+    if (cdb->db_format < 1 || cdb->db_format > 5) {
         fprintf(stderr, "Unsupported database format %d\n", cdb->db_format);
         cfacdb_close(cdb);
         return NULL;
@@ -200,7 +200,7 @@ cfacdb_t *cfacdb_open(const char *fname, cfacdb_temp_t temp_store)
         return NULL;
     }
 
-    if (cdb->db_format >= 4) {
+    if (cdb->db_format > 4) {
         sql = "SELECT COUNT(id) FROM fields";
         rc = sqlite3_exec(cdb->db, sql, field_cb, cdb, &errmsg);
         if (rc != SQLITE_OK) {

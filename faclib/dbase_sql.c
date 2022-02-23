@@ -30,7 +30,7 @@
 
 #include "schema.i"
 
-#define CFACDB_FORMAT_VERSION   4
+#define CFACDB_FORMAT_VERSION   5
 
 #define SQLITE3_BIND_STR(stmt, id, txt) \
         sqlite3_bind_text(stmt, id, txt, -1, SQLITE_STATIC)

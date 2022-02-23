@@ -20,6 +20,9 @@ typedef struct {
     unsigned long *sids;
     unsigned long nsid;
 
+    unsigned long *fids;
+    unsigned long nfid;
+
     double T;
 } cfacdbu_t;
 
@@ -199,12 +202,25 @@ static int crates_sink(const cfacdb_t *cdb,
     return CFACDB_SUCCESS;
 }
 
+static int fields_sink(const cfacdb_t *cdb,
+    cfacdb_fields_data_t *cbdata, void *udata)
+{
+    cfacdbu_t *cdu = udata;
+
+    cdu->fids[cdu->nfid] = cbdata->fid;
+    cdu->nfid++;
+
+    printf("Field config ID %d: B = %g G, E = %g V/cm, angle = %g degrees\n",
+              cbdata->fid, cbdata->bf, cbdata->ef, cbdata->angle);
+    return CFACDB_SUCCESS;
+}
+
 int main(int argc, char *const *argv)
 {
     cfacdb_t *cdb;
     cfacdbu_t cdu;
     cfacdb_stats_t stats;
-    unsigned int i, nsessions;
+    unsigned int i, nsessions, nfields;
 
     memset(&cdu, 0, sizeof(cdu));
     cdu.sid = -1;
@@ -229,9 +245,12 @@ int main(int argc, char *const *argv)
     }
 
     nsessions = cfacdb_get_nsessions(cdb);
+    nfields = cfacdb_get_nfields(cdb);
+
     if (cdu.print_info) {
-        printf("%s: %d session%s\n",
-            cdu.db_fname, nsessions, nsessions == 1 ? "":"s");
+        printf("%s: %d session%s, %d field configuration%s\n",
+            cdu.db_fname, nsessions, nsessions == 1 ? "":"s",
+            nfields, nfields == 1 ? "":"s");
     }
 
     if (nsessions == 0) {
@@ -242,6 +261,11 @@ int main(int argc, char *const *argv)
     cdu.sids = malloc(nsessions*sizeof(unsigned long));
 
     cfacdb_sessions(cdb, sessions_sink, &cdu);
+
+    if (nfields > 0) {
+        cdu.fids = malloc(nfields*sizeof(unsigned long));
+        cfacdb_fields(cdb, fields_sink, &cdu);
+    }
 
     /* override sid array if user wants a specific session */
     if (cdu.sid >= 0) {
@@ -301,6 +325,9 @@ int main(int argc, char *const *argv)
     }
 
     free(cdu.sids);
+    if (cdu.nfid) {
+        free(cdu.fids);
+    }
 
     cfacdb_close(cdb);
 

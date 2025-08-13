@@ -2,43 +2,43 @@
 \section{General}
 \faq{What are the differences between \cFAC and FAC}{
 In \cFAC, only the SFAC interface is retained (the Python PFAC binding is no
-longer there). Also removed were the simple collisional-radiative-model
-(crm) and line-polarization (pol) executables. The SFAC interface
+longer there). The simple collisional-radiative-model
+(crm) and line-polarization (pol) executables were also removed. The SFAC interface
 (as provided by sfac) is mostly backward compatible, meaning that scripts
-that worked with FAC will likely continue to with \cFAC unmodifed.
+that worked with FAC will likely continue to work with \cFAC as is.
 
-\cFAC adds possibility to store the calculated results in an SQLite-based
+\cFAC adds the possibility to store the calculated results in an SQLite-based
 format, allowing for selecting subsets of data for various uses based on the
 powerful SQL query language. The cFACdb library, which is part of the \cFAC
 distribution, is provided to facilitate access to the SQLite \cFAC databases
 from third-party C and Fortran codes.}
 
 \faq{What operating systems does \cFAC run on}{
-\cFAC is written in a mixture of ANSI C and Fortran 77, all of them are in
-principle platform independent. However, the mixed language programming makes it
-more easily installed in modern UNIX-like systems than others. So far, it has
-been tested to work under Solaris, Linux, Mac OS X, and MS Windows with the UNIX
-API emulation provided by Cygwin.}
+\cFAC is written in a mixture of ANSI C and Fortran 77, all, in
+principle, platform independent. However, the mixed language programming makes it
+more easily installed in modern UNIX-like systems than in others. So far, it has
+been tested to work under Solaris, Linux, Mac OS X, and MS Windows (under the MSYS2
+platform).}
   
 \faq{How does \cFAC differ from other atomic codes}{
 The theoretical methods used in \cFAC are similar to some other distorted-wave
-atomic codes, such as HULLAC and differ from more elaborate programs based on
+atomic codes, such as HULLAC, but differ from more elaborate programs based on
 close-coupling approximations, such as the Belfast R-Matrix code. The biggest
-advantage of \cFAC is its ease of use and its scriptability.}
+advantage of \cFAC is its ease of use and scriptability.}
 
 \faq{Which atomic processes can or cannot be calculated with \cFAC}{
 \cFAC can calculate energy levels, radiative transition rates of arbitrary
 multipole type, collisional excitation and ionization cross sections by
-electron impact, photoionization and radiative recombination cross sections and
+electron impact, photoionization and radiative recombination cross sections, and
 autoionization rates. In the current form, \cFAC does not treat two-photon
 decays.}
 
 \faq{What is a typical accuracy of the atomic parameters calculated with
 \cFAC}{
-The ions other than H-like, the accuracy of energy levels are usually a few
+For ions other than H-like, the accuracy of energy levels is usually a few
 eV, which translates to 10--30 m{\AA} for the wavelength at $\sim$10{\AA}. For
 radiative transition rates and cross sections, the accuracy is
-$\sim$10--20\%. Data for near-neutral ions or atoms may have even larger
+$\sim$10--20\%. Data for near-neutral atoms may have even larger
 errors.}
 
 \faq{Can \cFAC be used to calculate atomic parameters for non-X-ray (UV,
@@ -46,7 +46,7 @@ optical, etc.) lines}{
 For multiply-charged ions, non-X-ray lines usually result from the transitions
 within the same complex, which usually have large relative uncertainties in
 the calculated wavelengths and transition rates. The accuracy for UV and
-optical lines from near-neutral ions is also very limited.}
+optical lines from near-neutral atoms is also very limited.}
 
 \faq{Are there standard references to FAC}{
 The first paper that used results of FAC is \cite{gu:2003a}. The code itself was
@@ -64,16 +64,16 @@ Please use the ``Issues'' tool of the \cFAC
 The bare ion is indicated by a call to \funcref['', group='b']{Config}, i.e.,
 the first argument of \funcref{Config} is an empty string.}
 
-\faq{Which configurations should be used as basis for the mean configuration
+\faq{Which configurations should be used as the basis for the mean configuration
 which optimizes the radial potential}{
 The function \funcref{OptimizeRadial} accepts a list of configurations, which form
-the basis for the construction of the mean configuration. Usually, only the
-lowest lying configurations should be used in \funcref{OptimizeRadial} for the
-construction of mean configuration. It has been found that using configurations
+the basis for constructing the mean configuration. Usually, only the
+lowest lying configurations should be used in \funcref{OptimizeRadial} for
+constructing the mean configuration. It has been found that using configurations
 corresponding to the ground complex is almost always a good idea. Sometimes, it
-maybe worthwhile to include the first excited configurations. However, it is
+may be worthwhile to include the first excited configurations. However, it is
 always a bad practice to include very highly excited configurations, especially
-those inner shell excited ones.}
+the inner-shell excited ones.}
 
 \faq{Can I use a specific mean configuration to be used in potential
 optimization}{
@@ -84,28 +84,28 @@ the potential optimization. In this case, the function
 \faq{How do I know what mean configuration is used in the potential
 optimization, if one is not given specifically by \funcref{AvgConfig}}{
 The function \funcref{GetPotential} may be called after \funcref{OptimizeRadial}
-to obtain the mean configuration used, and the resulting radial potential.}
+to obtain the mean configuration used and the resulting radial potential.}
 
 \faq{When calculating ionization or recombination processes, should I use the
 mean configuration for recombined (ionizing) or recombining (ionized) ion}{
 Usually, it does not matter for highly charged ions. However, for low-$Z$
-elements the difference of one more or one less electron, screening the nuclear
-charge, may be substantial. In this case, one may have to make a decision by
+elements, the difference of one more or one less electron, screening the nuclear
+charge, may be substantial. In this case, one may have to decide by
 comparing the results to experimental values or other theoretical works.}
 
 \faq{How do I determine which configurations should be interacting}{
-This depends on the computer resource available and the desired accuracy. The
-dimension of the Hamiltonian matrix increases very rapidly as the number of
+This depends on the computer resources available and the desired accuracy. The
+dimension of the Hamiltonian matrix increases rapidly as the number of
 interacting configurations grows. The convergence with respect to the
-configuration interaction is usually slow. For applications which \cFAC is
-primarily designed for, one typically includes only configurations within the
+configuration interaction is usually slow. For applications for which \cFAC is
+primarily designed, one typically includes only configurations within the
 same complex, except for some low-lying configurations.}
 
 \faq{What relativistic effects are included}{
-The standard Dirac-Coulomb Hamiltonian is used in \cFAC, which means that the
-spin--orbit interaction, mass-effect and other leading relativistic effects are
+The standard Dirac--Coulomb Hamiltonian is used in \cFAC, which means that the
+spin--orbit interaction, mass-effect, and other leading relativistic effects are
 fully treated. However, higher-order QED effects, such as retardation and
-recoil are only included in the Breit interaction with zero energy limit for
+recoil, are only included in the Breit interaction with a zero energy limit for
 the exchanged photon. Vacuum polarization and self-energy corrections are
 treated in the screened hydrogenic approximation.}
 
@@ -115,26 +115,26 @@ call of \funcref{CETable} sometimes}{
 Sometimes, the transition array corresponding to a given call to \funcref{CETable}
 include transitions with a wide range of excitation energies. This typically
 happens for transitions within a single complex or transitions between more
-than 2 complexes are mixed together in one call of \funcref{CETable} (which should
+than two complexes are mixed in one call of \funcref{CETable} (which should
 generally be avoided). Since the excitation radial integrals are only
-calculated on a few-point transition energy grid, it is undesirable to have a
-very wide range in the actual transition energies. \funcref{CETable} avoid this by
-subdivide the transitions in groups. Within each group, the transition
-energies does not vary by more than a factor of 5. A different transition
-energy grid and collision energy grid are used for different groups, and
-therefore, corresponding to different data blocks in the output.}
+calculated on a few-point transition energy grid, having an extensive range in the
+actual transition energies is undesirable. \funcref{CETable} avoids this by
+subdividing the transitions into groups. Within each group, the transition
+energies do not vary by more than a factor of 5. A different transition
+energy grid and collision energy grid are used for different groups, corresponding
+to different data blocks in the output.}
 
 \faq{Can I use a different collision energy grid}{
 A collision energy grid in terms of the energy of the scattered electron is
-automatically constructed if one is not specified prior to calling
+automatically constructed if one is not specified before calling
 \funcref{CETable}. One may use the function \funcref{SetCEGrid} to specify a
 different grid. Or one may use \funcref{SetUsrCEGrid} to have a user grid
 different from the grid on which the collision strengths are calculated.}
 
 \faq{Why are collision strengths at very high energies incorrect}{
-Due to a limited radial grid size, the collision strengths at energies much
-higher than the excitation energy (more than a few hundred times higher) are
-unlikely to be reliable. However, the high energy collision strengths should not
+Due to a limited radial grid size, the collision strengths at energies well
+above the excitation energy (more than a few hundred times higher) are
+unlikely to be reliable. However, the high-energy collision strengths should not
 be calculated directly. Instead, the Bethe and Born limit parameters in the
 output should be used to obtain them.}
 
@@ -147,8 +147,8 @@ to an empty orbital.}
 \faq{Why do the bound--free oscillator strengths differ from some other
 theoretical calculation by a constant factor}{
 The bound--free differential oscillator strengths calculated by \cFAC have units
-of hartree$^{-1}$. Also the values depend on the normalization of continuum
-orbitals. It is therefore possible that they differ from other theoretical
+of hartree$^{-1}$. Also, the values depend on the normalization of continuum
+orbitals. Therefore, they may differ from other theoretical
 calculations by a constant factor. One should always use the formula in this
 manual to convert them to photoionization or
 radiative recombination cross sections.}
@@ -157,12 +157,12 @@ radiative recombination cross sections.}
 values}{
 The fitting formula and the parameters given for the bound--free oscillator
 strengths are only valid at high energies (beyond the largest energy of the
-photo-electron energy grid). This means that the $gf$ values at energies
+photo-electron energy grid). This means the $gf$ values at energies
 within the photo-electron energy grid should be calculated by interpolation
 instead of the fitting formula. Often, however, this is only necessary for the
-ionization of valence shells of near neutral ions and atoms, since only in
-these cases, the near threshold behavior of the $gf$ values differ from the
-fitting formula significantly.}
+ionization of valence shells of near-neutral atoms, since only in
+these cases do the near-threshold behavior of the $gf$ values significantly differ
+from the fitting formula.}
 
 \section{Autoionization and Dielectronic Recombination}{
 \faq{How do I improve the energies of low-lying $\Delta n = 0$ resonances}{
@@ -170,8 +170,8 @@ The energies of low-lying $\Delta n = 0$ resonances can not be calculated
 accurately. This greatly reduces the reliability of the resulting dielectronic
 recombination rates. In \cFAC, there is a method to improve the accuracy of
 these energies by adjusting the core transition energies according to the
-experimental values. The function \funcref{CorrectEnergy} is used to modify the
-calculated energy levels by specified amount.}
+experimental values. The function \funcref{CorrectEnergy} is used to adjust the
+calculated energy levels.}
 
 \faq{Why is it advised to make separate calls to \funcref{AITable} for different
 bound or free state complexes}{
@@ -185,10 +185,9 @@ calculated with two separate calls to \funcref{AITable}.}
 \section{Collisional Ionization}
 \faq{Why is the \key{DW} mode so slow compared to the \key{BED} and \key{CB}
 modes}{
-In the \key{DW} mode, the ionization radial integrals are calculated by
-summing up partial wave contributions. This is a time consuming process as
-now there are two continuum electrons involved. The \key{CB} mode, in which the
-radial integrals are simply looked up in a table, is therefore the fastest
-method. In the \key{BED} mode, the radial integrals are calculated using the
-bound--free differential oscillator strengths, which can be computed much
-faster than the \key{DW} ionization radial integrals.}
+In the \key{DW} mode, the ionization radial integrals are calculated by summing up
+partial wave contributions. This is a time-consuming process, as two continuum
+electrons are now involved. Therefore, the fastest method is the \key{CB} mode, in
+which the radial integrals are looked up in a table. In the \key{BED} mode, the radial
+integrals are calculated using the bound--free differential oscillator strengths,
+which can be computed much faster than the \key{DW} ionization radial integrals.}

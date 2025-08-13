@@ -1732,6 +1732,12 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
   ARRAY *clist;
   int n0, kl0, nq0, m, i, n, kl, j, nq, ig;
   CONFIG_GROUP *cfgr;
+  double z = cfac_get_atomic_number(cfac);
+
+  if (cfg->n_electrons > z) {
+    printf("Error: negative ions are not supported\n");
+    return -1;
+  }
 
   if (k < 0 || k >= cfac->n_groups) return -1;
 

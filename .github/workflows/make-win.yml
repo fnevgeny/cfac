@@ -16,7 +16,7 @@ jobs:
         shell: msys2 {0}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: msys2/setup-msys2@v2
       with:
         msystem: MINGW64
@@ -27,6 +27,7 @@ jobs:
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-gcc-fortran
           mingw-w64-x86_64-gsl
+          mingw-w64-x86_64-sqlite3
           help2man
           mingw-w64-x86_64-doxygen
           mingw-w64-x86_64-texlive-core

@@ -12,11 +12,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: requirements
       run: |
-        sudo apt-get -y install doxygen texlive-latex-base texlive-latex-extra
+        sudo apt update
+        sudo apt -y install libgsl-dev libsqlite3-dev doxygen texlive-latex-base texlive-latex-extra
 
     - name: pre-configure
       run: make ./configure || echo

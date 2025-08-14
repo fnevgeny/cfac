@@ -1,0 +1,50 @@
+name: Build & Deploy Jekyll from /site
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1' # or whatever Jekyll needs
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          cd site
+          bundle install
+
+      - name: Build Jekyll site
+        run: |
+          cd site
+          bundle exec jekyll build -d _site  # builds into site/_site
+
+      - name: Upload build output
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/_site  # 👈 The built HTML folder
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

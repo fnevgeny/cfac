@@ -12,17 +12,17 @@ arguments are indicated by \var{key=arg} pair.
 
 \subsection{Basic Configuration}
 
+\begin{fundesc}{RequireVersion}{v}
+Ensure that \cFAC is {\em at least} of version \var{v}, with \var{v} in the
+``x.y.z'' format, e.g., ``1.7.0''. This call should be the first in a script to
+avoid unpleasant surprises.
+\end{fundesc}
+
 \begin{fundesc}{SetAtom}{asym\opt{, z\opt{, m\opt{,r}}}}
 This function sets the atomic element to \var{asym}, where \var{asym} is a
 standard chemical element symbol. The nuclear charge \var{z}, atomic mass
 \var{m}, and the nucleus radius of the element can be set optionally. If they
 are not set, the standard values are used.
-\end{fundesc}
-
-\begin{fundesc}{RequireVersion}{v}
-Ensure that \cFAC is {\em at least} of version \var{v}, with \var{v} in the
-``x.y.z'' format, e.g., ``1.7.0''. This call should be the first in a script to
-avoid unpleasant surprises.
 \end{fundesc}
 
 \begin{fundesc}{SetErrorOutput}{fn}

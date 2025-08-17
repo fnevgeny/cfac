@@ -2181,10 +2181,7 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
         }
 
         e = -(GetOrbital(cfac, k)->energy);
-        if (m == 0) {
-          ei = e;
-        } else
-        if (e < ei) {
+        if (m == 0 || e < ei) {
           ei = e;
         }
 

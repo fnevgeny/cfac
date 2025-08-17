@@ -2634,7 +2634,8 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
     }
   } else {
     nsym = MAX_SYMMETRIES;
-    fprintf(f, "============Basis Table===========================\n");
+    fprintf(f, "#==================Basis Table==========================\n");
+    fprintf(f, "#  SYM    P 2J  ISTATE GRP   CFG STATE\n");
     for (i = 0; i < nsym; i++) {
       sym = GetSymmetry(cfac, i);
       DecodePJ(i, &p, &j);
@@ -2648,7 +2649,8 @@ int GetBasisTable(cfac_t *cfac, char *fn, int m) {
       fprintf(f, "\n");
     }
 
-    fprintf(f, "============Mixing Coefficients===================\n");
+    fprintf(f, "#==================Mixing Coefficients==================\n");
+    fprintf(f, "# ILEV    P 2J   BASIS GRP   CFG STATE            MIXING\n");
     for (i = 0; i < cfac->n_levels; i++) {
       lev = GetLevel(cfac, i);
       sym = GetSymmetry(cfac, lev->pj);

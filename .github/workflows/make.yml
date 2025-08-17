@@ -3,8 +3,12 @@ name: Make CI
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - 'site/**'
   pull_request:
     branches: [ master ]
+    paths-ignore:
+      - 'site/**'
 
 jobs:
   build:

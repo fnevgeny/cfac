@@ -85,7 +85,7 @@ typedef int
     const cfac_rtrans_data_t *rtdata, void *udata);
 
 int
-crac_calculate_rtrans(cfac_t *cfac,
+cfac_calculate_rtrans(cfac_t *cfac,
     unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
     int mpole, int mode,
     cfac_tr_sink_t sink, void *udata);

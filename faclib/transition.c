@@ -1118,7 +1118,7 @@ static int TRMultipoleUTA(cfac_t *cfac, double *rme, TR_EXTRA *rx,
 
 
 /* save radiative transitions; low & up are assumed NOT overlapping */
-static int crac_save_rtrans0(cfac_t *cfac,
+static int cfac_save_rtrans0(cfac_t *cfac,
     unsigned nlow, const unsigned *low, unsigned nup, const unsigned *up,
     int mpole, int mode,
     cfac_tr_sink_t sink, void *udata) {
@@ -1300,7 +1300,7 @@ static int crac_save_rtrans0(cfac_t *cfac,
   return 0;
 }
 
-int crac_calculate_rtrans(cfac_t *cfac,
+int cfac_calculate_rtrans(cfac_t *cfac,
     unsigned nlow, unsigned *low, unsigned nup, unsigned *up,
     int mpole, int mode,
     cfac_tr_sink_t sink, void *udata) {
@@ -1316,25 +1316,25 @@ int crac_calculate_rtrans(cfac_t *cfac,
     allocated = cfac_overlap_if(nlow, low, nup, up, &nk, &k, &nl, &l, &nm, &m);
 
     /* K <-> F */
-    res = crac_save_rtrans0(cfac, nk, k, nup, up, mpole, mode, sink, udata);
+    res = cfac_save_rtrans0(cfac, nk, k, nup, up, mpole, mode, sink, udata);
     if (res != 0) {
         return -1;
     }
-    res = crac_save_rtrans0(cfac, nup, up, nk, k, mpole, mode, sink, udata);
+    res = cfac_save_rtrans0(cfac, nup, up, nk, k, mpole, mode, sink, udata);
     if (res != 0) {
         return -1;
     }
     /* M <-> M */
-    res = crac_save_rtrans0(cfac, nm, m, nm, m, mpole, mode, sink, udata);
+    res = cfac_save_rtrans0(cfac, nm, m, nm, m, mpole, mode, sink, udata);
     if (res != 0) {
         return -1;
     }
     /* M <-> L */
-    res = crac_save_rtrans0(cfac, nm, m, nl, l, mpole, mode, sink, udata);
+    res = cfac_save_rtrans0(cfac, nm, m, nl, l, mpole, mode, sink, udata);
     if (res != 0) {
         return -1;
     }
-    res = crac_save_rtrans0(cfac, nl, l, nm, m, mpole, mode, sink, udata);
+    res = cfac_save_rtrans0(cfac, nl, l, nm, m, mpole, mode, sink, udata);
     if (res != 0) {
         return -1;
     }

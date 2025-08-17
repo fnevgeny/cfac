@@ -3230,7 +3230,7 @@ int SaveTransition(cfac_t *cfac,
   }
   InitFile(f, &fhdr, &tr_hdr);
 
-  crac_calculate_rtrans(cfac, nlow, low, nup, up, mpole, mode, tr_sink, f);
+  cfac_calculate_rtrans(cfac, nlow, low, nup, up, mpole, mode, tr_sink, f);
 
   DeinitFile(f, &fhdr);
   CloseFile(f, &fhdr);

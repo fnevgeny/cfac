@@ -1,0 +1,13 @@
+baseurl: "/cfac"
+
+url: ""
+
+exclude:
+  - "*~"
+  - "~*"
+  - "*.swp"
+
+watch_exclude:
+  - "*~"
+  - "~*"
+  - "*.swp"

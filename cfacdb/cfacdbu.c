@@ -172,11 +172,22 @@ static int sessions_sink(const cfacdb_t *cdb,
     cdu->nsid++;
 
     if (cdu->print_info) {
-        char stime[100];
+        char stime[100], sver[64];
         struct tm *tmp = localtime(&cbdata->tstamp);
         strftime(stime, 100, "%c", tmp);
-        printf("Session #%lu (sid = %ld, tstamp = %s):\n",
-                  cdu->nsid, cbdata->sid, stime);
+
+        if (cbdata->version > 0) {
+            int vmax, vmin, vnano;
+            vmax = cbdata->version/10000;
+            vmin = (cbdata->version - 10000*vmax)/100;
+            vnano = cbdata->version - 10000*vmax - 100*vmin;
+            sprintf(sver, " version = %d.%d.%d,", vmax, vmin, vnano);
+        } else {
+            sver[0] = '\0';
+        }
+
+        printf("Session #%lu (sid = %ld,%s tstamp = %s):\n",
+                  cdu->nsid, cbdata->sid, sver, stime);
         printf("\t%s (Z = %d, mass = %.2f) nele = %d ... %d\n",
                   cbdata->sym, cbdata->anum, cbdata->mass,
                   cbdata->nele_min, cbdata->nele_max);

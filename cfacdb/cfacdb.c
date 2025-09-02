@@ -329,7 +329,7 @@ int cfacdb_sessions(const cfacdb_t *cdb,
               " FROM _sessions_v" \
               " ORDER BY sid";
     } else {
-        sql = "SELECT sid, symbol, anum, mass, nele_min, nele_max, tstamp" \
+        sql = "SELECT sid, symbol, anum, mass, nele_min, nele_max, version, tstamp" \
               " FROM _sessions_v" \
               " ORDER BY sid";
     }
@@ -351,8 +351,10 @@ int cfacdb_sessions(const cfacdb_t *cdb,
             cbdata.nele_min = sqlite3_column_int   (stmt, 4);
             cbdata.nele_max = sqlite3_column_int   (stmt, 5);
             if (cdb->db_format >= 4) {
-                cbdata.tstamp = sqlite3_column_int (stmt, 6);
+                cbdata.version = sqlite3_column_int(stmt, 6);
+                cbdata.tstamp  = sqlite3_column_int(stmt, 7);
             } else {
+                cbdata.version = 0;
                 cbdata.tstamp = cbdata.sid;
             }
 

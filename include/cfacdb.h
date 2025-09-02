@@ -98,6 +98,7 @@ typedef struct {
     double mass;            /*!< Atomic mass.                 */
     unsigned int nele_min;  /*!< Minimal number of electrons. */
     unsigned int nele_max;  /*!< Maximal number of electrons. */
+    unsigned int version;   /*!< cFAC version.                */
     time_t tstamp;          /*!< Time stamp.                  */
 } cfacdb_sessions_data_t;
 

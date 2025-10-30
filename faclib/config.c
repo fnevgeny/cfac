@@ -1781,7 +1781,12 @@ int AddConfigToList(cfac_t *cfac, int k, CONFIG *cfg) {
 
   cfg->nnrs = m;
   if (m < cfg->n_shells) {
-    cfg->nrs = realloc(cfg->nrs, sizeof(int)*m);
+    if (m > 0) {
+        cfg->nrs = realloc(cfg->nrs, sizeof(int)*m);
+    } else {
+        free(cfg->nrs);
+        cfg->nrs = NULL;
+    }
   }
 
   /* Make sure that all configs are unique */

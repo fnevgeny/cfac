@@ -219,7 +219,7 @@ int cfacdb_map_allocate(cfacdb_map_t *map,
 {
     unsigned int ntot;
 
-    if (id_min >= id_max) {
+    if (id_min > id_max) {
         return CFACDB_FAILURE;
     }
 

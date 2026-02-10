@@ -23,7 +23,7 @@ SQLS  = cfac_schema.sql cfac_schema_v1.sql cfac_schema_v2.sql \
 	cfac_schema_v3.sql cfac_schema_v4.sql cache_schema.sql
 
 CSRCS = cfacdbu.c
-CHDRS = cfacdb.h cfacdbP.h
+CHDRS = ../include/cfacdb.h ../include/cfacdbP.h
 FSRCS = fdemo.f
 
 LOBJS = ${LSRCS:.c=.o}

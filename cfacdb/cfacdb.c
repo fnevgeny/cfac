@@ -391,7 +391,11 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
     }
 
     cdb->nele_min = nele_min;
-    cdb->nele_max = nele_max;
+    if (nele_max >= 0) {
+        cdb->nele_max = nele_max;
+    } else {
+        cdb->nele_max = 200;
+    }
 
     /* free from possible previous invocation of cfacdb_init() */
     cfacdb_map_free(&cdb->lmap);
@@ -423,8 +427,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
-    sqlite3_bind_int(stmt, 2, nele_max);
-    sqlite3_bind_int(stmt, 3, nele_min);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
@@ -450,8 +454,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
         sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
         sqlite3_bind_int(stmt, 1, cdb->sid);
-        sqlite3_bind_int(stmt, 2, nele_max);
-        sqlite3_bind_int(stmt, 3, nele_min);
+        sqlite3_bind_int(stmt, 2, cdb->nele_max);
+        sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
         rc = sqlite3_step(stmt);
         if (rc != SQLITE_ROW) {
@@ -482,8 +486,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
-    sqlite3_bind_int(stmt, 2, nele_max);
-    sqlite3_bind_int(stmt, 3, nele_min);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
@@ -502,8 +506,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
-    sqlite3_bind_int(stmt, 2, nele_max);
-    sqlite3_bind_int(stmt, 3, nele_min);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
@@ -522,8 +526,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
-    sqlite3_bind_int(stmt, 2, nele_max);
-    sqlite3_bind_int(stmt, 3, nele_min);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
@@ -542,8 +546,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
-    sqlite3_bind_int(stmt, 2, nele_max);
-    sqlite3_bind_int(stmt, 3, nele_min);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {
@@ -562,8 +566,8 @@ int cfacdb_init(cfacdb_t *cdb, unsigned long sid, int nele_min, int nele_max)
 
     sqlite3_prepare_v2(cdb->db, sql, -1, &stmt, NULL);
     sqlite3_bind_int(stmt, 1, cdb->sid);
-    sqlite3_bind_int(stmt, 2, nele_max);
-    sqlite3_bind_int(stmt, 3, nele_min);
+    sqlite3_bind_int(stmt, 2, cdb->nele_max);
+    sqlite3_bind_int(stmt, 3, cdb->nele_min);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_ROW) {

@@ -45,7 +45,7 @@ static void usage(FILE *fp, const char *progname)
     fprintf(fp, "  -i, --info             print basic information about the DB\n");
     fprintf(fp, "  -s, --session ID       select session ID [none]\n");
     fprintf(fp, "      --nele-min N       min number of electrons in charge state [0]\n");
-    fprintf(fp, "      --nele-max N       max number of electrons in charge state [100]\n");
+    fprintf(fp, "      --nele-max N       max number of electrons in charge state [none]\n");
     fprintf(fp, "  -c, --cache FILE       create (if needed) and attach a cache DB [none]\n");
     fprintf(fp, "  -T, --temperature T    populate the cache DB with rate coefficients,\n" \
                 "                         calculated at temperature T (a.u.)\n");
@@ -154,7 +154,7 @@ static int parse_args(cfacdbu_t *u, unsigned int argc, char *const *argv)
         return CFACDB_FAILURE;
     }
 
-    if (u->nele_min > u->nele_max) {
+    if (u->nele_max >= 0 && u->nele_min > u->nele_max) {
         fprintf(stderr, "nele-min > nele-max: %d > %d!\n",
             u->nele_min, u->nele_max);
         return CFACDB_FAILURE;
@@ -236,7 +236,7 @@ int main(int argc, char *const *argv)
     memset(&cdu, 0, sizeof(cdu));
     cdu.sid = -1;
     cdu.nele_min = 0;
-    cdu.nele_max = 100;
+    cdu.nele_max = -1;
 
     if (parse_args(&cdu, argc, argv) != CFACDB_SUCCESS) {
         exit(1);
@@ -317,8 +317,11 @@ int main(int argc, char *const *argv)
                 break;
             }
 
-            printf("Stats of session ID %ld with nele = %d ... %d",
-                sid, cdu.nele_min, cdu.nele_max);
+            printf("Stats of session ID %ld with nele = %d ... ",
+                sid, cdu.nele_min);
+            if (cdu.nele_max >= 0) {
+                printf("%d", cdu.nele_max);
+            }
 
             if (smode != NULL) {
                 printf(" (mode = %s)", smode);

@@ -2055,7 +2055,11 @@ int SaveExcitation(cfac_t *cfac, int nlow, int *low, int nup, int *up, int msub,
         continue;
       }
 
-      if (tr.e > 0.0) m++;
+      if (tr.e == 0.0) {
+        continue;
+      }
+
+      m++;
       if (m == 1) {
         emin = tr.e;
         emax = tr.e;

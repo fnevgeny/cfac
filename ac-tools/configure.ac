@@ -22,7 +22,7 @@ AC_PROG_RANLIB
 
 AC_CHECK_PROG(AR, ar, ar, NONE)
 if test "$AR" = "NONE"; then
-  AC_MSG_ERROR(--> Can't find \`ar'!)
+  AC_MSG_ERROR(--> Can't find `ar'!)
   AC_CACHE_SAVE
   exit 1
 fi
@@ -34,7 +34,6 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_MEMCMP
-AC_HEADER_STDC
 
 #get optimization option for C and f77 compilers
 AC_ARG_ENABLE(copt,

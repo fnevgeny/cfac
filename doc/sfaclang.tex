@@ -154,9 +154,10 @@ ignored.
 \end{fundesc}
 
 \begin{fundesc}{CutMixing}{g0, g1\opt{, c}}
-For each levels in the group list \var{g0}, eliminate all mixing components
-that are not in the group list \var{g1} or the mixing coefficients less than
-\var{c}.
+For each level in the group list \var{g0}, eliminate all mixing components
+that are either not in the group list \var{g1} or their mixing coefficients
+are lesser (by the absolute value) than \var{c}. In the latter case, the group
+list \var{g1} may be empty.
 \end{fundesc}
 
 \begin{fundesc}{GetPotential}{fn}

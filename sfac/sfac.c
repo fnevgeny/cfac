@@ -2376,7 +2376,7 @@ static int PCutMixing(int argc, char *argv[], int argt[],
   nlev = SelectLevels(&ilev, argv[0], argt[0], variables);
   if (nlev <= 0) goto DONE;
   n = DecodeGroupArgs(&kg, 1, &(argv[1]), &(argt[1]), variables);
-  if (n <= 0) goto DONE;
+  if (n < 0) return -1;
   if (argc == 3) c = atof(argv[2]);
   else c = 0.0;
 

@@ -2367,26 +2367,36 @@ static int PSolveBound(int argc, char *argv[], int argt[],
 
 static int PCutMixing(int argc, char *argv[], int argt[],
                       ARRAY *variables) {
-  int nlev, n, *ilev, *kg;
-  double c;
+    int nlev, ngr, *ilev, *kg;
+    double c = 0.0;
 
-  nlev = 0;
-  n = 0;
-  if (argc < 2 || argc > 3) return -1;
-  nlev = SelectLevels(&ilev, argv[0], argt[0], variables);
-  if (nlev <= 0) goto DONE;
-  n = DecodeGroupArgs(&kg, 1, &(argv[1]), &(argt[1]), variables);
-  if (n < 0) return -1;
-  if (argc == 3) c = atof(argv[2]);
-  else c = 0.0;
+    if (argc < 2 || argc > 3) {
+        return -1;
+    }
 
-  CutMixing(cfac, nlev, ilev, n, kg, c);
+    nlev = SelectLevels(&ilev, argv[0], argt[0], variables);
+    if (nlev <= 0) {
+        return -1;
+    }
+    ngr = DecodeGroupArgs(&kg, 1, &(argv[1]), &(argt[1]), variables);
+    if (ngr < 0) {
+        free(ilev);
+        return -1;
+    }
+    if (argc == 3) {
+        c = atof(argv[2]);
+    }
 
- DONE:
-  if (nlev > 0) free(ilev);
-  if (n > 0) free(kg);
+    CutMixing(cfac, nlev, ilev, ngr, kg, c);
 
-  return 0;
+    if (nlev > 0) {
+        free(ilev);
+    }
+    if (ngr > 0) {
+        free(kg);
+    }
+
+    return 0;
 }
 
 static int PSetSymmetry(int argc, char *argv[], int argt[],

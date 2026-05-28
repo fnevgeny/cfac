@@ -1834,29 +1834,47 @@ int AddToLevels(cfac_t *cfac, HAMILTON *h, int ng, const int *kg) {
 }
 
 void CutMixing(cfac_t *cfac, int nlev, int *ilev, int n, int *kg, double c) {
-  int i, m, t;
-  SYMMETRY *sym;
-  STATE *s;
-  LEVEL *lev;
+  for (int i = 0; i < nlev; i++) {
+    LEVEL *lev = GetLevel(cfac, ilev[i]);
+    int m = 0;
+    SYMMETRY *sym = GetSymmetry(cfac, lev->pj);
 
-  for (i = 0; i < nlev; i++) {
-    lev = GetLevel(cfac, ilev[i]);
-    m = 0;
-    sym = GetSymmetry(cfac, lev->pj);
-    for (t = 0; t < lev->n_basis; t++) {
-      if (fabs(lev->mixing[t]) < c) continue;
-      s = GetSymmetryState(sym, lev->basis[t]);
-      if (n > 0 && !InGroups(s->kgroup, n, kg)) continue;
+    for (int t = 0; t < lev->n_basis; t++) {
+      /* eliminate weak couplings */
+      if (fabs(lev->mixing[t]) < c) {
+        continue;
+      }
+
+      /* eliminate couplings with the given group list */
+      if (n > 0) {
+        STATE *s = GetSymmetryState(sym, lev->basis[t]);
+        if (s && !InGroups(s->kgroup, n, kg)) {
+          continue;
+        }
+      }
+
+      /* remaining terms */
       lev->ibasis[m] = lev->ibasis[t];
-      lev->basis[m] = lev->basis[t];
+      lev->basis[m]  = lev->basis[t];
       lev->mixing[m] = lev->mixing[t];
+
       m++;
     }
+
+    if (m == 0) {
+        cfac_errmsg(cfac,
+            "No mixings left in level \"%s\", undoing CutMixing()\n",
+            lev->name);
+        continue;
+    }
+
+    /* reallocate basis arrays */
     if (m < lev->n_basis) {
       lev->n_basis = m;
       lev->ibasis = realloc(lev->ibasis, sizeof(short)*m);
-      lev->basis = realloc(lev->basis, sizeof(int)*m);
+      lev->basis  = realloc(lev->basis, sizeof(int)*m);
       lev->mixing = realloc(lev->mixing, sizeof(double)*m);
+
       SortMixing(0, m, lev, sym);
       GetPrincipleBasis(lev->mixing, m, lev->kpb);
     }

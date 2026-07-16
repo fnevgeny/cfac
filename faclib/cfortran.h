@@ -459,12 +459,7 @@ Apollo                                           : neg.   = TRUE, else FALSE.
 #define     LONG_cfVCF(A,B)
 #define    SHORT_cfVCF(A,B)
 
-/* 980416
-   Cast (void (*)(CF_NULL_PROTO)) causes SunOS CC 4.2 occasionally to barf,
-   while the following equivalent typedef is fine.
-   For consistency use the typedef on all machines.
- */
-typedef void (*cfCAST_FUNCTION)(CF_NULL_PROTO);
+typedef void (*cfCAST_FUNCTION)(void (*)CF_NULL_PROTO);
 
 #define VCF(TN,I)       _Icf4(4,V,TN,_(A,I),_(B,I),F)
 #define VVCF(TN,AI,BI)  _Icf4(4,V,TN,AI,BI,S)

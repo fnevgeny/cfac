@@ -1207,8 +1207,8 @@ double CompleteReducedW7(REDUCED_COEFF *w7_o, REDUCED_COEFF *w7_e,
   int no_a, no_b;
 
   coeff = 0.0;
-  if (no_bra < 11 && no_bra > 24) return coeff;
-  if (no_ket < 11 && no_ket > 24) return coeff;
+  if (no_bra < 11 || no_bra > 24) return coeff;
+  if (no_ket < 11 || no_ket > 24) return coeff;
 
   if (no_bra > no_ket) {
     no_a = no_ket;

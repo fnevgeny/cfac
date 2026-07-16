@@ -37,7 +37,7 @@ typedef struct _HAMILTON_ {
   double *hamilton;  /* matrix elements of H,
                         H1[dim*dim] &
                         H2[n_basis-dim] &
-                        B[dim*(n_basis-dim)], Eq. (29) in structure.pdf  */
+                        B[dim*(n_basis-dim)], Eq. (2.29) in manual.pdf   */
   double *mixing;    /* mixing coefficients                              */
 } HAMILTON;
 

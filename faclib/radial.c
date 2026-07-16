@@ -730,11 +730,9 @@ int OptimizeRadial(cfac_t *cfac, int ng, int *kg, double *weight) {
 static double AverageEnergyAvgConfig(cfac_t *cfac) {
   int i, j, n, kappa, np, kappap;
   int k, kp, kk, kl, klp, kkmin, kkmax, j2, j2p;
-  double x, y, t, q, a, b, r, nq, nqp, r0, r1;
+  double x, y, t, q, a, b, r, nq, nqp;
   AVERAGE_CONFIG *cfg = &cfac->acfg;
 
-  r0 = 0.0;
-  r1 = 0.0;
   x = 0.0;
   for (i = 0; i < cfg->n_shells; i++) {
     n = cfg->n[i];
@@ -787,8 +785,6 @@ static double AverageEnergyAvgConfig(cfac_t *cfac) {
     ResidualPotential(cfac, &y, k, k);
     a = GetOrbital(cfac, k)->energy;
     r = nq * (b + t + a + y);
-    r0 += nq*y;
-    r1 += nq*(b+t);
     x += r;
   }
 

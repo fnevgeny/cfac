@@ -3056,7 +3056,7 @@ static void usage(FILE *fp, const char *progname) {
         progname);
 }
 
-static int InitFac() {
+static int InitFac(void) {
   gsl_ieee_env_setup();
 
   cfac = cfac_new();

@@ -3096,7 +3096,7 @@ int main(int argc, const char *argv[]) {
   int cmdlen = 0;
 
 /* fix non-standard number of exponent digits in the MSVC runtime */
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_TWO_DIGIT_EXPONENT)
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 

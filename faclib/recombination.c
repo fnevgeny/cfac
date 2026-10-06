@@ -45,8 +45,6 @@ static int usr_egrid_type = -1;
 static int n_egrid = 0;
 static double egrid[MAXNE];
 static double log_egrid[MAXNE];
-static double xegrid[MAXNE];
-static double log_xegrid[MAXNE];
 static double egrid_min;
 static double egrid_max;
 static int egrid_limits_type = 0;
@@ -588,6 +586,7 @@ int RRRadialQkTable(cfac_t *cfac, double *qr, int k0, int k1, int m) {
   int ite, ie, i;
   double eb, aw, e, pref;
   int mode, gauge;
+  double xegrid[MAXNE], log_xegrid[MAXNE];
 
   orb = GetOrbital(cfac, k0);
   kappa0 = orb->kappa;
@@ -842,6 +841,8 @@ void BoundFreeOSFit(cfac_t *cfac,
 		    double eb, double eb0) {
   int ie;
   double a, b, d, z;
+  double rq0[MAXNE];
+  double xegrid[MAXNE], log_xegrid[MAXNE];
 
   z = GetResidualZ(cfac);
   RRRadialQkHydrogenicParams(NPARAMS, rqc, z, nq, nkl);
@@ -863,15 +864,14 @@ void BoundFreeOSFit(cfac_t *cfac,
       }
     }
   }
-  /* NB: in this call, rqu is essentially used as a local array */
   RRRadialQkFromFit(NPARAMS, rqc, n_egrid, xegrid, log_xegrid,
-                    rqu, NULL, 0, &nkl);
+                    rq0, NULL, 0, &nkl);
   ie++;
-  a = eb0*tq[ie]/rqu[ie];
+  a = eb0*tq[ie]/rq0[ie];
   rqc[0] *= a;
   rqc[3] = eb0;
   for (ie++; ie < n_egrid; ie++) {
-    tq[ie] = a*(rqu[ie]/eb0);
+    tq[ie] = a*(rq0[ie]/eb0);
   }
   for (ie = 0; ie < n_egrid; ie++) {
     a = eb + egrid[ie];

@@ -246,7 +246,4 @@
 #define RECLMAX            12
 #define AICUT              0.0
 
-/* polarization */
-#define MAXPOL             4 /* maximum multipol for polarization */
-
 #endif

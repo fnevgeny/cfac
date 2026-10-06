@@ -947,11 +947,13 @@ int BoundFreeOS(cfac_t *cfac, double *rqu, double *rqc, double *eb,
       b = xegrid[ie+1]/xegrid[ie];
       d = (sqrt(xegrid[ie]) + rqc[2])/(sqrt(xegrid[ie+1]) + rqc[2]);
       b = log(b);
-      d = log(d);
-      z = (a + (4.5+nkl)*b)/(0.5*b+d);
-      if (a < 0 && z > 0) {
-        rqc[1] = z;
-        break;
+      d = log(d) + 0.5*b;
+      if (d > 0.05) {
+        z = (a + (4.5+nkl)*b)/d;
+        if (a < 0 && z > 0) {
+	  rqc[1] = z;
+	  break;
+        }
       }
     }
     RRRadialQkFromFit(NPARAMS, rqc, n_egrid, xegrid, log_xegrid,
